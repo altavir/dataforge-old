@@ -81,4 +81,9 @@ public class BasicMaskLoader implements Loader {
     public boolean isEmpty() {
         return loader.isEmpty();
     }
+
+    @Override
+    public Meta targetDescription() {
+        return loader.targetDescription();
+    }
 }

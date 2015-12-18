@@ -82,7 +82,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
     @Override
     public Envelope respond(Envelope message) {
         try {
-            if(!checkTarget(message)){
+            if(!acceptEnvelope(message)){
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
             Meta annotation = message.meta();

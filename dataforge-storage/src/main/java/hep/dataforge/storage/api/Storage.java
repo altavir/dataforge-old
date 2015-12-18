@@ -23,6 +23,7 @@ import hep.dataforge.context.Confined;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Dispatcher;
 import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.envelopes.Target;
 import hep.dataforge.navigation.Provider;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ import java.util.Map;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Confined {
+public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Confined, Target {
 
     /**
      * Initialize this storage.

@@ -204,8 +204,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     protected String defaultChainTarget() {
         return "loader";
     }
-    
-    
 
     @Override
     public Meta meta() {
@@ -365,7 +363,8 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     /**
      * Read only storage produces only read only loaders
-     * @return 
+     *
+     * @return
      */
     public boolean isReadOnly() {
         return readOnly;
@@ -400,6 +399,31 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
             return responder.respond(message);
         }
     }
+
+    @Override
+    public boolean acceptEnvelope(Envelope envelope) {
+        if (envelope.meta().hasNode(ENVELOPE_TARGET_NODE)) {
+            Meta target = envelope.meta().getNode(ENVELOPE_TARGET_NODE);
+            String targetType = target.getString(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE);
+            if (targetType.equals(STORAGE_TARGET_TYPE)) {
+                String targetName = target.getString(TARGET_NAME_KEY);
+                return targetName.endsWith(getName());
+            } else {
+                return false;
+            }
+        } else {
+            LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
+            return true;
+        }
+    }
+    
+    @Override
+    public Meta targetDescription() {
+        return new MetaBuilder(ENVELOPE_TARGET_NODE)
+                .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
+                .putValue(TARGET_NAME_KEY, getName())
+                .build();
+    }    
 
     @Override
     @ValueDef(name = "name", info = "The name of storage or loader.")

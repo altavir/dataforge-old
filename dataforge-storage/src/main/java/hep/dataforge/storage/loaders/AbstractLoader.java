@@ -17,11 +17,11 @@ package hep.dataforge.storage.loaders;
 
 import hep.dataforge.exceptions.PushFailedException;
 import hep.dataforge.exceptions.StorageException;
-import static hep.dataforge.io.envelopes.Dispatcher.ENVELOPE_META_TARGET_NODE;
 import static hep.dataforge.io.envelopes.Dispatcher.TARGET_NAME_KEY;
 import static hep.dataforge.io.envelopes.Dispatcher.TARGET_TYPE_KEY;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
@@ -116,9 +116,10 @@ public abstract class AbstractLoader implements Loader {
      * @param envelope
      * @return
      */
-    protected boolean checkTarget(Envelope envelope) {
-        if (envelope.meta().hasNode(ENVELOPE_META_TARGET_NODE)) {
-            Meta target = envelope.meta().getNode(ENVELOPE_META_TARGET_NODE);
+    @Override
+    public boolean acceptEnvelope(Envelope envelope) {
+        if (envelope.meta().hasNode(ENVELOPE_TARGET_NODE)) {
+            Meta target = envelope.meta().getNode(ENVELOPE_TARGET_NODE);
             String targetType = target.getString(TARGET_TYPE_KEY, LOADER_TARGET_TYPE);
             if(targetType.equals(LOADER_TARGET_TYPE)){
                 String targetName = target.getString(TARGET_NAME_KEY);
@@ -131,6 +132,8 @@ public abstract class AbstractLoader implements Loader {
             return true;
         }
     }
+    
+    
 
 //    @Override
 //    public Envelope respond(Envelope message) {
@@ -140,4 +143,12 @@ public abstract class AbstractLoader implements Loader {
 //            return exceptionResponse(message, ex);
 //        }
 //    }
+
+    @Override
+    public Meta targetDescription() {
+        return new MetaBuilder(ENVELOPE_TARGET_NODE)
+                .putValue(TARGET_TYPE_KEY, LOADER_TARGET_TYPE)
+                .putValue(TARGET_NAME_KEY, getName())
+                .build();
+    }
 }
