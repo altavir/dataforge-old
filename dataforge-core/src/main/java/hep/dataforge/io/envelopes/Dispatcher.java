@@ -16,8 +16,6 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  */
 public interface Dispatcher {
-    public static final String TARGET_NAME_KEY = "name";
-    public static final String TARGET_TYPE_KEY = "type";
    
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     

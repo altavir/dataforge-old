@@ -15,6 +15,9 @@ import hep.dataforge.meta.Meta;
  */
 public interface Target {
 
+    public static final String TARGET_NAME_KEY = "name";
+    public static final String TARGET_TYPE_KEY = "type";
+
     public static final String ENVELOPE_TARGET_NODE = "target";
 
     /**
@@ -35,7 +38,7 @@ public interface Target {
      * @return
      */
     default boolean acceptEnvelope(Envelope env) {
-        return !env.meta().hasNode(ENVELOPE_TARGET_NODE) 
+        return !env.meta().hasNode(ENVELOPE_TARGET_NODE)
                 || env.meta().getNode(ENVELOPE_TARGET_NODE).equals(targetDescription());
     }
 }

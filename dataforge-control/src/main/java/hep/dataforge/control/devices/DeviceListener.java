@@ -15,7 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
@@ -47,19 +46,5 @@ public interface DeviceListener {
      */
     void notifyDeviceStateChanged(Device device, String name, Value oldState, Value newState);
 
-//    /**
-//     * Ask listener to send or display given message
-//     * @param device
-//     * @param priority
-//     * @param message 
-//     */
-//    void sendMessage(Device device, int priority, Meta message);
-//    
-//    /**
-//     * Notify listener that device received and accepted message.
-//     * @param device
-//     * @param message 
-//     */
-//    void notifyMessageRecieved(Device device, Meta message);
-    
+   
 }

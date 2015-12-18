@@ -17,8 +17,6 @@ package hep.dataforge.storage.loaders;
 
 import hep.dataforge.exceptions.PushFailedException;
 import hep.dataforge.exceptions.StorageException;
-import static hep.dataforge.io.envelopes.Dispatcher.TARGET_NAME_KEY;
-import static hep.dataforge.io.envelopes.Dispatcher.TARGET_TYPE_KEY;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
