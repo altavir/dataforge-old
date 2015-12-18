@@ -1,0 +1,63 @@
+allprojects{
+    ext{
+        ignore = false
+    }
+    apply plugin: 'base'
+    apply plugin: 'jacoco'
+    
+    tasks.withType(Javadoc){
+        options {
+            failOnError = false
+            encoding "UTF-8"    
+            docEncoding "UTF-8" 
+            charSet "UTF-8" 
+            linkSource true
+            header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"; 
+        }
+    }
+}
+
+subprojects {
+    apply from: rootProject.file('dataforge.gradle')
+}
+
+
+def toDeploy = [
+        ":dataforge-core",
+        ":dataforge-maths",
+        ":dataforge-fitting",
+        ":dataforge-fitting:dataforge-minuit",
+        ":dataforge-plots",
+        ":dataforge-storage",
+        ":dataforge-control"
+]
+
+def toDocument = [
+        ":dataforge-core",
+        ":dataforge-maths",
+        ":dataforge-fitting",
+        ":dataforge-plots",
+        ":dataforge-storage",
+]
+
+
+task dfBuild(type: JavaCompile){
+    description = 'Build and install all main DataForge components'
+    toDeploy.collect{project(it)}.each{
+        //        it.compileJava.options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+        dependsOn it.install
+    }
+}
+
+task dfDoc(type: Javadoc){
+    description = 'Build javadoc for all main DataForge components'
+    
+    def documentedProjects = toDocument.collect{project(it)}
+    source documentedProjects.collect { it.sourceSets.main.allJava }
+    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+    destinationDir = file("${buildDir}/docs/javadoc")
+}
+
+task setWrapper(type: Wrapper) {
+    gradleVersion = '2.9'
+}

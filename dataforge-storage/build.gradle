@@ -1,0 +1,12 @@
+description = 'dataforge-storage'
+
+
+
+dependencies {
+    // Adding dependencies here will add the dependencies to each subproject.
+    compile project(':dataforge-core')
+    compile 'org.glassfish:javax.json:1.0+'
+    compile 'commons-io:commons-io:2.+'
+    compile 'org.apache.commons:commons-vfs2:2.+'
+
+}

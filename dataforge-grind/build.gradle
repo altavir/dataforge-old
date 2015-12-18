@@ -1,0 +1,8 @@
+description = 'The grind plugin for dataforge framework'
+
+dependencies{
+    compile 'org.codehaus.groovy:groovy-all:2.4.+'
+    compile project(':dataforge-core')
+    compile project(':dataforge-maths')
+    compile project(':dataforge-plots')
+}

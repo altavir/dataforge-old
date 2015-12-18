@@ -1,0 +1,20 @@
+description = 'dataforge-storage-oak'
+
+ext{
+    ignore = true
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'hep.dataforge.storage.server.ServerDaemon'
+    }
+}
+
+dependencies{
+    compile project(':dataforge-storage')
+    compile 'org.apache.jackrabbit:jackrabbit-core:2.+'
+    compile 'commons-daemon:commons-daemon:1+'
+    compile 'org.apache.jackrabbit:oak-jcr:1.3.2'
+    compile 'javax.jcr:jcr:2.0'
+    compile 'commons-cli:commons-cli:1+'
+}

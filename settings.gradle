@@ -1,0 +1,15 @@
+rootProject.name = 'dataforge'
+include ':dataforge-core' // core classes and data structures
+include ':dataforge-plots' // plot library
+include ':dataforge-maths' // mathematical tools
+include ':dataforge-fx' // gui tools using JavaFx
+
+include ':dataforge-grind' // groovy wrapper
+
+include ':dataforge-fitting' // fitting tools
+include ':dataforge-fitting:dataforge-minuit' // MINUIT plugin for fitting
+
+include ':dataforge-control' // tools for measurement and control applications
+include ':dataforge-storage' // storage module
+include ':dataforge-storage:storage-servlet' // Storage web servlet
+include ':dataforge-storage:storage-oak'
