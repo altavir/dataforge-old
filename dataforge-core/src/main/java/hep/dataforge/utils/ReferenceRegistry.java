@@ -8,6 +8,7 @@ package hep.dataforge.utils;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.Set;
 import java.util.function.Consumer;
 
@@ -71,5 +72,4 @@ public class ReferenceRegistry<T> {
         weakRegistry.stream().filter(it -> it.get() != null).forEach(it -> action.accept(it.get()));
         strongRegistry.stream().filter(it -> it != null).forEach(it -> action.accept(it));
     }
-
 }

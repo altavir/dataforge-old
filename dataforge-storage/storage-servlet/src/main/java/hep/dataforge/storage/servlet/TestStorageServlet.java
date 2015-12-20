@@ -1,7 +1,7 @@
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * and read the template in the editor.
  */
 package hep.dataforge.storage.servlet;
 
@@ -30,7 +30,7 @@ public class TestStorageServlet {
         new StoragePlugin().startGlobal();
         String path = "/home/numass-storage";
 
-        FileStorage storage = FileStorage.open(new File(path), true);
+        FileStorage storage = FileStorage.read(new File(path), true);
 
         RatpackServer ratpack = RatpackServer.start((RatpackServerSpec server) -> server
                 .serverConfig((ServerConfigBuilder config) -> config.port(8337))

@@ -102,12 +102,12 @@ public class EnvelopeBuilder {
     }    
 
     public EnvelopeBuilder setMetaType(String metaType) {
-        Value metaTypeValue = MetaReaderLibrary.instance().findValue(metaType);
+        Value metaTypeValue = EnvelopeProperties.getType(metaType).getValue();
         return setProperty(META_TYPE_KEY, metaTypeValue);
     }
 
     public EnvelopeBuilder setMetaEncoding(String metaEncoding) {
-        Value metaEncodingValue = CharsetLibrary.instance().findValue(metaEncoding);
+        Value metaEncodingValue = EnvelopeProperties.getCharsetValue(metaEncoding);
         return setProperty(META_ENCODING_KEY, metaEncodingValue);
     }
 

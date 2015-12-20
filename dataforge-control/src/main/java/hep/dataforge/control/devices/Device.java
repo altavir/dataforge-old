@@ -15,18 +15,19 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.control.connections.Connection;
 import hep.dataforge.content.Named;
-import hep.dataforge.context.Confined;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
+import hep.dataforge.context.Encapsulated;
 
 /**
  *
  * @author Alexander Nozik
  */
-public interface Device extends Annotated, Confined, Named, Responder {
+public interface Device extends Annotated, Encapsulated, Named, Responder {
 
     /**
      * Get the device state with given name. Null if such state not found or
@@ -62,5 +63,27 @@ public interface Device extends Annotated, Confined, Named, Responder {
      * @param listener
      */
     void addDeviceListener(DeviceListener listener);
+    
+//    /**
+//     * Add connection to device
+//     * @param connection 
+//     */
+//    void connect(Connection connection);
+    
+    /**
+     * Get a named and type checked connection for this device.
+     * @param <T>
+     * @param name
+     * @param type
+     * @return 
+     */
+    <T extends Connection> T getConnection(String name, Class<T> type);
+    
+    /**
+     * Get a named connection for this device.
+     * @param name
+     * @return 
+     */
+    Connection getConnection(String name);
 
 }

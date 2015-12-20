@@ -17,10 +17,10 @@ package hep.dataforge.actions;
 
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.content.Named;
-import hep.dataforge.context.Confined;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.dependencies.DependencySet;
+import hep.dataforge.context.Encapsulated;
 
 /**
  * The action is an independent process that could be performed on one
@@ -31,7 +31,7 @@ import hep.dataforge.dependencies.DependencySet;
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
  */
-public interface Action<T, R> extends Named, Annotated, Confined {
+public interface Action<T, R> extends Named, Annotated, Encapsulated {
 
     @Override
     default Context getContext() {

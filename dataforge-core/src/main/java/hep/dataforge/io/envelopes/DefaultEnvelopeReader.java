@@ -110,10 +110,8 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             properties.putAll(overrideProperties);
         }
 
-        MetaStreamReader parser = MetaReaderLibrary.instance()
-                .get(properties.get(META_TYPE_KEY).stringValue());
-        Charset charset = CharsetLibrary.instance()
-                .get(properties.get(META_ENCODING_KEY).stringValue());
+        MetaStreamReader parser = EnvelopeProperties.getType(properties.get(META_TYPE_KEY)).getReader();
+        Charset charset = EnvelopeProperties.getCharset(properties.get(META_ENCODING_KEY));
         int metaLength = properties.get(META_LENGTH_KEY).intValue();
         Meta meta;
         if (metaLength == 0) {

@@ -26,7 +26,7 @@ import java.util.List;
  */
 public abstract class SimpleConfigurable implements Configurable, Annotated {
 
-    private final Configuration configuration;
+    private Configuration configuration;
 
     /**
      * Create new configurable object and register observer that notifies this object if configuration changes
@@ -36,7 +36,11 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
         if(an == null){
             an = Meta.buildEmpty("config");
         }
-        configuration = new Configuration(an);
+        setConfig(an);
+    }
+    
+    protected final void setConfig(Meta config){
+        configuration = new Configuration(config);
         configuration.addObserver(new ConfigChangeListener() {
 
             @Override
@@ -119,7 +123,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * Applies changes from given config to this one
      * @param config 
      */
-    public void updateConfig(Meta config){
+    public void configure(Meta config){
         this.configuration.update(config);
     }
 }

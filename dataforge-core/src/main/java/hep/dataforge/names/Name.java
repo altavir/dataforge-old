@@ -41,13 +41,6 @@ public interface Name {
     
     public static final String NAMESPACE_SEPARATOR = "#";
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param str a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.names.Name} object.
-     */
     public static Name of(String str) {
         String namespace;
         String name;
@@ -59,7 +52,7 @@ public interface Name {
             namespace = "";
             name = str;
         }
-        String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса
+        String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса ([^\[\]\.]+(?:\[[^\]]*\])?)*
         if (tokens.length == 1) {
             return new NameToken(namespace, name);
         } else {
@@ -89,13 +82,6 @@ public interface Name {
         return new NamePath(list);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param tokens a {@link java.lang.Iterable} object.
-     * @return a {@link hep.dataforge.names.Name} object.
-     */
     public static Name of(Iterable<String> tokens) {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String token : tokens) {

@@ -17,11 +17,11 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.content.Named;
-import hep.dataforge.context.Confined;
 import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
+import hep.dataforge.context.Encapsulated;
 
 /**
  * A place to store tasks and their results
@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Workspace extends Annotated, Named, Confined {
+public interface Workspace extends Annotated, Named, Encapsulated {
 
     /**
      * Check task dependencies and run it with given configuration

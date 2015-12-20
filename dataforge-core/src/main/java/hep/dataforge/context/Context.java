@@ -272,15 +272,11 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     }
 
     public final void loadPlugin(Plugin plugin) {
-        if (!this.pluginManager().addPlugin(plugin, true)) {
-            throw new RuntimeException("Can't load plugin " + plugin.name());
-        }
+        this.pluginManager().loadPlugin(plugin);
     }
 
     public final void loadPlugin(String tag) {
-        if (!this.pluginManager().addPluginFromLibrary(VersionTag.fromString(tag))) {
-            throw new RuntimeException("Can't load plugin " + tag);
-        }
+        this.pluginManager().loadPlugin(tag);
     }
 
     public Map<String, Value> getProperties() {

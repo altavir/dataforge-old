@@ -18,7 +18,6 @@ package hep.dataforge.datafitter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
-import hep.dataforge.context.Confined;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
@@ -26,6 +25,9 @@ import hep.dataforge.datafitter.models.XYModel;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.io.PrintNamed;
 import java.io.PrintWriter;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import hep.dataforge.context.Encapsulated;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 
@@ -36,7 +38,7 @@ import static hep.dataforge.io.PrintNamed.printResiduals;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class FitManager implements Confined {
+public class FitManager implements Encapsulated {
 
     /**
      * <p>

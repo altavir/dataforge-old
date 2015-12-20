@@ -6,7 +6,6 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Confined;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
@@ -18,13 +17,14 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.context.Encapsulated;
 
 /**
  *
  * @author Alexander Nozik
  */
 @PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
-public class ActionManager extends BasicPlugin implements Confined {
+public class ActionManager extends BasicPlugin implements Encapsulated {
 
     public static ActionManager buildFrom(Context context) {
         return (ActionManager) context.pluginManager().getPlugin("actions");

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.io.envelopes;
 
-import static hep.dataforge.io.envelopes.CharsetLibrary.ASCII_CHARSET;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
 import hep.dataforge.values.Value;
 import java.nio.ByteBuffer;
 import java.time.Instant;
@@ -318,8 +318,8 @@ public class Tag {
         Map<String, Value> res = new HashMap<>();
         res.put(TYPE_KEY, Value.of(type));
         res.put(OPT_KEY, Value.of(Instant.ofEpochMilli(time)));
-        res.put(META_ENCODING_KEY, CharsetLibrary.instance().findValue(metaEncoding));
-        res.put(META_TYPE_KEY, MetaReaderLibrary.instance().findValue(metaType));
+        res.put(META_ENCODING_KEY, EnvelopeProperties.getCharsetValue(metaEncoding));
+        res.put(META_TYPE_KEY, EnvelopeProperties.getType(metaType).getValue());
         res.put(META_LENGTH_KEY, Value.of(metaLength));
         res.put(DATA_TYPE_KEY, Value.of(dataType));
         res.put(DATA_LENGTH_KEY, Value.of(dataLength));

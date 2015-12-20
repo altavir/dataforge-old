@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.content.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 
@@ -24,7 +25,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Annotated {
+public interface Plugin extends Annotated, Named {
 
     /**
      * Plugin dependencies which are required to apply this plugin. Plugin
@@ -38,6 +39,7 @@ public interface Plugin extends Annotated {
     /**
      * Start this plugin and apply registration info to the context. This method
      * should be called only via PluginManager to avoid dependency issues.
+     *
      * @param context
      */
     void apply(Context context);
@@ -46,26 +48,36 @@ public interface Plugin extends Annotated {
      * Stop this plugin and remove registration info from context and other
      * plugins. This method should be called only via PluginManager to avoid
      * dependency issues.
+     *
      * @param context
      */
     void clean(Context context);
 
     /**
      * Get tag for this plugin
-     * @return 
+     *
+     * @return
      */
     VersionTag getTag();
-    
+
+    /**
+     * The name of this plugin ignoring version and group
+     * @return 
+     */
+    @Override
+    public default String getName() {
+        return getTag().name();
+    }
+
     /**
      * Set config for this plugin and apply changes
-     * @param config 
+     *
+     * @param config
      */
     void configure(Meta config);
 
     public default String name() {
         return getTag().getFullName();
     }
-    
-    
 
 }

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.control.connections.Connection;
 import ch.qos.logback.classic.Logger;
 import hep.dataforge.context.Context;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
@@ -42,6 +43,7 @@ public class AbstractDevice implements Device {
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
     protected ScheduledExecutorService executor;
     protected final Map<String, Value> stateMap = new ConcurrentHashMap<>();
+    private Map<String, Connection> connections;
 
     public AbstractDevice(String name, Context context, Meta annotation) {
         if (name == null || name.isEmpty()) {
@@ -117,7 +119,6 @@ public class AbstractDevice implements Device {
 //    protected void sendMessage(int priority, Meta message) {
 //        listeners.forEach(it -> it.sendMessage(this, priority, message));
 //    }
-
     @Override
     public void addDeviceListener(DeviceListener listener) {
         this.listeners.add(listener);
@@ -125,6 +126,29 @@ public class AbstractDevice implements Device {
 
     public Logger getLogger() {
         return logger;
+    }
+
+    @Override
+    public <T extends Connection> T getConnection(String name, Class<T> type) {
+        Connection con = getConnection(name);
+        if (type.isInstance(con) || con == null) {
+            return (T) con;
+        } else {
+            throw new IllegalStateException("Wron");
+        }
+    }
+
+    @Override
+    public Connection getConnection(String name) {
+        return connections.get(name);
+    }
+
+    protected void connect(Connection connection) {
+        this.connections.put(connection.getName(), connection);
+    }
+    
+    protected void disconnect(String name){
+        this.connections.remove(name);
     }
 
 }

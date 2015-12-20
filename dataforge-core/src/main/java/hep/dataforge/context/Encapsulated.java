@@ -13,29 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.envelopes;
-
-import hep.dataforge.io.MetaStreamReader;
-import hep.dataforge.io.XMLMetaReader;
+package hep.dataforge.context;
 
 /**
+ * The interface for something that encapsulated in context
  *
  * @author Alexander Nozik
+ * @version $Id: $Id
  */
-public class MetaReaderLibrary extends PropertyLib<MetaStreamReader> {
+public interface Encapsulated {
 
-    private static final MetaReaderLibrary instance = new MetaReaderLibrary();
-
-    public static MetaReaderLibrary instance(){
-        return instance;
-    }
-
-    @Override
-    public MetaStreamReader getDefault() {
-        return new XMLMetaReader();
-    }
-    
-    private MetaReaderLibrary() {
-        putComposite(0, "XML", new XMLMetaReader());
-    }
+    /**
+     * the context
+     *
+     * @return a {@link hep.dataforge.context.Context} object.
+     */
+    Context getContext();
 }

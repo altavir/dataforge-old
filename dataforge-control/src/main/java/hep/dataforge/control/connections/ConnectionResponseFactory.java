@@ -3,14 +3,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.control.devices;
+package hep.dataforge.control.connections;
 
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.storage.commons.MessageFactory;
 
 /**
- * The connection between devices or other control objects
+ *
  * @author Alexander Nozik
  */
-public interface Connection extends Responder{
-    boolean isActive();
+public class ConnectionResponseFactory extends MessageFactory {
+
 }

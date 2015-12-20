@@ -87,7 +87,7 @@ public class DynamicPlottableSet implements Iterable<DynamicPlottable> {
      */
     public void applyEachConfig(Meta config) {
         for (DynamicPlottable pl : map.values()) {
-            pl.updateConfig(config);
+            pl.configure(config);
         }
     }
 
@@ -120,7 +120,7 @@ public class DynamicPlottableSet implements Iterable<DynamicPlottable> {
         for (DynamicPlottable pl : map.values()) {
             Meta m = MetaUtils.findNodeByValue(config, "plot", "name", pl.getName());
             if (m != null) {
-                pl.updateConfig(m);
+                pl.configure(m);
             }
         }
     }

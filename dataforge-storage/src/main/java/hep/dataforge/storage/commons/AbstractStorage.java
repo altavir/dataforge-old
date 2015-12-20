@@ -98,6 +98,13 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     }
 
+    @Override
+    public boolean isOpen() {
+        return true;
+    }
+    
+    
+
     /**
      * Close the storage
      *

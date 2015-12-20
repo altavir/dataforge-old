@@ -113,7 +113,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
      * @return
      * @throws StorageException
      */
-    public static FileStorage open(FileObject remoteDir, boolean readOnly) throws StorageException {
+    public static FileStorage read(FileObject remoteDir, boolean readOnly) throws StorageException {
         try {
             if (!remoteDir.exists() || !remoteDir.getType().equals(FOLDER)) {
                 throw new StorageException("Can't open storage. Target should be existing directory.");
@@ -127,10 +127,10 @@ public class FileStorage extends AbstractStorage implements FileListener {
         return res;
     }
 
-    public static FileStorage open(File directory, boolean readOnly) throws StorageException {
+    public static FileStorage read(File directory, boolean readOnly) throws StorageException {
         try {
             FileObject localRoot = VFSUtils.getLocalFile(directory);
-            return open(localRoot, readOnly);
+            return FileStorage.read(localRoot, readOnly);
 
         } catch (FileSystemException ex) {
             throw new StorageException(ex);

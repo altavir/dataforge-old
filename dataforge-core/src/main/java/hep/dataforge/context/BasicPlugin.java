@@ -15,34 +15,19 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.meta.MergeRule;
+import hep.dataforge.meta.SimpleConfigurable;
 
 /**
  * A base for plugin implementation
  *
  * @author Alexander Nozik
  */
-public abstract class BasicPlugin implements Plugin, Annotated {
+public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
-    private Meta config;
-//    private VersionTag tag;
-//    private VersionTag[] dependsOn;
-//    private String description;
-
-    public BasicPlugin(Meta an) {
-        this.config = MergeRule.replace(getDefinition(), an);
-    }
-    
     public BasicPlugin() {
-        this.config = getDefinition();
-    }    
-
-    @Override
-    public Meta meta() {
-        return config;
+        setConfig(getDefinition());
     }
 
     private Meta getDefinition() {
@@ -61,9 +46,14 @@ public abstract class BasicPlugin implements Plugin, Annotated {
     }
 
     @Override
+    protected void applyConfig(Meta config) {
+
+    }
+    
+    @Override
     public VersionTag[] dependsOn() {
-        if (config.hasValue("dependsOn")) {
-            String[] strDeps = config.getStringArray("dependsOn");
+        if (meta().hasValue("dependsOn")) {
+            String[] strDeps = meta().getStringArray("dependsOn");
             VersionTag[] deps = new VersionTag[strDeps.length];
             for (int i = 0; i < strDeps.length; i++) {
                 deps[i] = VersionTag.fromString(strDeps[i]);
@@ -81,26 +71,20 @@ public abstract class BasicPlugin implements Plugin, Annotated {
      */
     @Override
     public VersionTag getTag() {
-        return new VersionTag(config.getString("group", VersionTag.DEFAULT_GROUP),
-                config.getString("name", getClass().getSimpleName()),
-                config.getString("version", VersionTag.UNVERSIONED));
+        return new VersionTag(meta().getString("group", VersionTag.DEFAULT_GROUP),
+                meta().getString("name", getClass().getSimpleName()),
+                meta().getString("version", VersionTag.UNVERSIONED));
     }
 
     public String getDescription() {
-        return config.getString("description", "");
+        return meta().getString("description", "");
     }
 
     /**
      * Load this plugin to the GlobalContext without annotation
      */
     public void startGlobal() {
-        GlobalContext.instance().pluginManager().addPlugin(this, true);
+        GlobalContext.instance().loadPlugin(this);
     }
 
-    @Override
-    public void configure(Meta config) {
-        this.config = config;
-    }
-    
-    
 }

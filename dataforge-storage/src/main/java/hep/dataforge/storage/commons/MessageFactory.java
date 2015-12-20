@@ -18,7 +18,6 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.io.envelopes.Envelope;
 import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.Tag;
 import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_MESSAGE_ENVELOPE_CODE;
 
 /**

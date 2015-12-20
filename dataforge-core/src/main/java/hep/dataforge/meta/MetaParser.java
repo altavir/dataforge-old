@@ -15,11 +15,11 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.context.Confined;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import hep.dataforge.context.Encapsulated;
 
 /**
  * An interface which allows conversion from Meta to string and vise versa
@@ -27,7 +27,7 @@ import java.text.ParseException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface MetaParser extends Confined {
+public interface MetaParser extends Encapsulated {
     
     /**
      * Convert Annotation to String

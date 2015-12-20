@@ -16,7 +16,6 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.Loader;

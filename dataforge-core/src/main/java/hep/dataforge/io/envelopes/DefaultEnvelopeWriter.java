@@ -61,8 +61,8 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         Map<String, Value> newProperties = new HashMap<>(defaultProperties);
         newProperties.putAll(envelope.getProperties());
 
-        MetaStreamWriter writer = MetaWriterLibrary.instance().get(newProperties.get(META_TYPE_KEY));
-        Charset charset = CharsetLibrary.instance().get(newProperties.get(META_ENCODING_KEY));
+        MetaStreamWriter writer = EnvelopeProperties.getType(newProperties.get(META_TYPE_KEY)).getWriter();
+        Charset charset = EnvelopeProperties.getCharset(newProperties.get(META_ENCODING_KEY));
         byte[] meta;
         int metaSize;
         if (envelope.meta().isEmpty()) {
