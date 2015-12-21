@@ -54,7 +54,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     protected Storage parent;
     private final String name;
     protected Meta storageConfig;
-    private boolean readOnly = false;
 
     protected final Map<String, Loader> loaders = new HashMap<>();
 
@@ -67,15 +66,11 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     public AbstractStorage(String name, Meta annotation) {
-        this.name = name;
-        this.storageConfig = annotation;
-        this.parent = null;
+        this(null, name, annotation);
     }
 
     public AbstractStorage(String name) {
-        this.name = name;
-        this.storageConfig = Meta.buildEmpty("storage");
-        this.parent = null;
+        this(null, name,Meta.buildEmpty("storage") );
     }
 
     /**
@@ -102,8 +97,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     public boolean isOpen() {
         return true;
     }
-    
-    
 
     /**
      * Close the storage
@@ -374,11 +367,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
      * @return
      */
     public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    protected void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+        return meta().getBoolean("readOnly", false);
     }
 
     @Override
@@ -423,14 +412,14 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
             return true;
         }
     }
-    
+
     @Override
     public Meta targetDescription() {
         return new MetaBuilder(ENVELOPE_TARGET_NODE)
                 .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
                 .putValue(TARGET_NAME_KEY, getName())
                 .build();
-    }    
+    }
 
     @Override
     @ValueDef(name = "name", info = "The name of storage or loader.")

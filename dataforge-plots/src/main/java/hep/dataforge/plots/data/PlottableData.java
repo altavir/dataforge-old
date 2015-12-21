@@ -15,16 +15,15 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  *
@@ -33,8 +32,13 @@ import java.util.stream.Collectors;
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 
-    private List<DataPoint> data;
+    protected List<DataPoint> data;
 
+    protected PlottableData(String name, Meta meta){
+        super(name, meta);
+        data = new ArrayList<>();
+    }
+    
     public PlottableData(String name, double[] x, double[] y) {
         this(name, x, y, null, null);
     }
@@ -61,7 +65,6 @@ public class PlottableData extends XYPlottable {
             data.add(point);
 
         }
-
     }
 
     public PlottableData(String name, Meta annotation, Iterable<DataPoint> data) {
@@ -99,7 +102,7 @@ public class PlottableData extends XYPlottable {
         }
     }
 
-    private void fillData(Iterable<DataPoint> it) {
+    protected void fillData(Iterable<DataPoint> it) {
         this.data = new ArrayList<>();
         for (DataPoint dp : it) {
             data.add(dp);

@@ -95,19 +95,19 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
      */
     public static JFrame deserialize(ObjectInputStream stream) throws IOException, ClassNotFoundException {
         JFreeChart jfc = (JFreeChart) stream.readObject();
-        
+
         JFrame frame = new JFrame("DataForge visualisator");
         frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         SwingUtilities.invokeLater(() -> {
             JPanel panel = new JPanel(new BorderLayout());
             panel.setPreferredSize(new Dimension(800, 600));
             frame.setContentPane(panel);
-            
+
             panel.removeAll();
             panel.add(new ChartPanel(jfc));
             panel.revalidate();
             panel.repaint();
-            
+
             frame.pack();
             frame.setVisible(true);
         });
@@ -118,7 +118,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
      * Index mapping names to datasets
      */
     List<String> index = new ArrayList<>();
-    
+
     private JFreeChart chart;
     private XYPlot plot;
 
@@ -135,27 +135,27 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         JPanel panel = new JPanel(new BorderLayout());
         panel.setPreferredSize(new Dimension(800, 600));
         frame.setContentPane(panel);
-        
+
         SwingUtilities.invokeLater(() -> {
             frame.pack();
             frame.setVisible(true);
         });
         return new JFreeChartFrame(name, annotation, panel);
     }
-    
+
     public JFreeChartFrame(String name, Meta annotation, Container panel) {
         this(name, annotation, (JFreeChart t) -> {
             panel.removeAll();
             ChartPanel cp = new ChartPanel(t);
-            
+
             cp.getPopupMenu().add(new JMenuItem(exportAction(t)));
-            
+
             panel.add(cp);
             panel.revalidate();
             panel.repaint();
         });
     }
-    
+
     private static Action exportAction(JFreeChart t) {
         return new AbstractAction("Export JFC") {
             @Override
@@ -164,19 +164,19 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 JFileChooser fc = new JFileChooser();
                 FileFilter filter = new FileNameExtensionFilter("JFC files", "jfc");
                 fc.setFileFilter(filter);
-                
+
                 int returnVal = fc.showSaveDialog(frame);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     ObjectOutputStream stream = null;
                     try {
                         File file = fc.getSelectedFile();
-                        
+
                         String fileName = file.toString();
                         if (!fileName.endsWith(".jfc")) {
                             fileName += ".jfc";
                             file = new File(fileName);
                         }
-                        
+
                         stream = new ObjectOutputStream(new FileOutputStream(file));
                         stream.writeObject(t);
                         frame.dispose();
@@ -211,29 +211,32 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             SwingNode viewer = new SwingNode();
             JPanel panel = new JPanel(new BorderLayout(), true);
             panel.removeAll();
-            panel.add(new ChartPanel(t));
+
+            ChartPanel cp = new ChartPanel(t);
+            cp.getPopupMenu().add(new JMenuItem(exportAction(t)));
+            panel.add(cp);
             panel.revalidate();
             panel.repaint();
             viewer.setContent(panel);
-            
+
             parent.getChildren().add(viewer);
             AnchorPane.setBottomAnchor(viewer, 0d);
             AnchorPane.setTopAnchor(viewer, 0d);
             AnchorPane.setLeftAnchor(viewer, 0d);
             AnchorPane.setRightAnchor(viewer, 0d);
-            
+
             parent.widthProperty().addListener(
                     (ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
                         panel.repaint();
                     });
-            
+
             parent.heightProperty().addListener(
                     (ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) -> {
                         panel.repaint();
                     });
         });
     }
-    
+
     private JFreeChartFrame(String name, Meta meta, Consumer<JFreeChart> container) {
         super(name, meta);
         if (meta == null) {
@@ -242,39 +245,39 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         ValueAxis xaxis = getNumberAxis(meta.getNode("xAxis", Meta.buildEmpty("xAxis")));
         ValueAxis yaxis = getNumberAxis(meta.getNode("yAxis", Meta.buildEmpty("YAxis")));
         plot = new XYPlot(new XYIntervalSeriesCollection(), xaxis, yaxis, new XYErrorRenderer());
-        
+
         String title = meta.getString("frameTitle", name);
-        
+
         if (title.equals("default")) {
             title = "";
         }
-        
+
         chart = new JFreeChart(title, plot);
         applyConfig(meta);
         container.accept(chart);
     }
-    
+
     protected void attachTo(Consumer<JFreeChart> consumer) {
         consumer.accept(chart);
     }
-    
+
     public JFreeChart getChart() {
         return chart;
     }
-    
+
     private ValueAxis getNumberAxis(Meta annotation) {
         NumberAxis axis = new NumberAxis();
         axis.setAutoRangeIncludesZero(false);
         axis.setAutoRangeStickyZero(false);
         return axis;
     }
-    
+
     private DateAxis getDateAxis(Meta annotation) {
         DateAxis axis = new DateAxis();
         axis.setTimeZone(TimeZone.getTimeZone("UTC"));
         return axis;
     }
-    
+
     private ValueAxis getLogAxis(Meta annotation) {
         LogarithmicAxis logAxis = new LogarithmicAxis("");
         logAxis.setMinorTickCount(10);
@@ -287,7 +290,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 //        logAxis.setSmallestValue(1e-20);
         return logAxis;
     }
-    
+
     @Override
     protected synchronized void updateAxis(String axisName, Meta annotation) {
         SwingUtilities.invokeLater(() -> {
@@ -302,7 +305,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                     axis = plot.getDomainAxis();
                     break;
                 case "y":
-                    
+
                     if (annotation.getBoolean("logAxis", false)) {
                         plot.setRangeAxis(getLogAxis(annotation));
                     }
@@ -311,7 +314,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 default:
                     throw new NameNotFoundException(axisName, "No such axis in this plot");
             }
-            
+
             if (annotation.hasValue("axisTitle")) {
                 String label = annotation.getString("axisTitle");
                 if (annotation.hasValue("axisUnits")) {
@@ -321,7 +324,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             }
         });
     }
-    
+
     @Override
     protected synchronized void updateFrame(Meta annotation) {
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
@@ -329,7 +332,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 //            return p.getConfig().getString("title", p.getName());
 //        });
     }
-    
+
     protected Double convertValue(Value v) {
         try {
             Double res = v.doubleValue();
@@ -342,11 +345,11 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             return null;
         }
     }
-    
+
     @Override
     protected void updatePlotData(String name) {
         XYPlottable plottable = get(name);
-        
+
         XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
         XYDataAdapter adapter = plottable.adapter();
         for (DataPoint point : plottable.plotData()) {
@@ -360,19 +363,19 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 ser.add(null, true);
             }
         }
-        
+
         final XYIntervalSeriesCollection data = new XYIntervalSeriesCollection();
         data.addSeries(ser);
-        
+
         if (!index.contains(plottable.getName())) {
             index.add(plottable.getName());
         }
-        
+
         SwingUtilities.invokeLater(() -> {
             plot.setDataset(index.indexOf(name), data);
         });
     }
-    
+
     @Override
     protected void updatePlotConfig(String name) {
         final Plottable plottable = get(name);
@@ -380,10 +383,10 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             index.add(plottable.getName());
         }
         int num = index.indexOf(name);
-        
+
         Meta meta = new Laminate(plottable.getConfig(), meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
         SwingUtilities.invokeLater(() -> {
-            
+
             XYLineAndShapeRenderer render;
             boolean showLines = meta.getBoolean("showLine", false);
             boolean showSymbols = meta.getBoolean("showSymbol", true);
@@ -416,32 +419,32 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             if (thickness > 0) {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
             }
-            
+
             Color color = PlotUtils.getColor(meta);
             if (color != null) {
                 render.setSeriesPaint(0, color);
             }
-            
+
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-            
+
             plot.setRenderer(num, render);
         });
-        
+
     }
-    
+
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
-        
+
         private final Map<String, String> titleMap;
-        
+
         public LabelGenerator(Map<String, String> titleMap) {
             this.titleMap = titleMap;
         }
-        
+
         @Override
         public String generateLabel(XYDataset dataset, int series) {
             return titleMap.get(dataset.getSeriesKey(series).toString());
         }
-        
+
     }
 
     /**

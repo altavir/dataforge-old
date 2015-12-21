@@ -17,14 +17,12 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.io.XMLMetaReader;
-import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.Tag;
-import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.BinaryLoader;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
@@ -43,8 +41,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.ParseException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileObject;
@@ -100,7 +96,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     public static FileStorage in(FileObject remoteDir, Meta def) throws StorageException {
         FileStorage res = new FileStorage(remoteDir, def);
-        res.loadConfig(def);
+//        res.loadConfig(def);
         res.updateDirectoryLoaders();
         return res;
     }
@@ -121,8 +117,13 @@ public class FileStorage extends AbstractStorage implements FileListener {
         } catch (FileSystemException ex) {
             throw new StorageException("Can't open storage.");
         }
-        FileStorage res = new FileStorage(remoteDir, null);
-        res.setReadOnly(readOnly);
+
+        Meta meta = new MetaBuilder("storage")
+                .setValue("type", "file")
+                .setValue("readOnly", readOnly)
+                .setValue("monitor", false);
+
+        FileStorage res = new FileStorage(remoteDir, meta);
         res.refresh();
         return res;
     }
@@ -138,7 +139,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private final FileObject dataDir;
-    DefaultFileMonitor monitor;
+    private DefaultFileMonitor monitor;
 
     /**
      * Create a root storage in directory
@@ -149,25 +150,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
      */
     protected FileStorage(FileObject dir, Meta config) throws StorageException {
         super("root", config);
+        this.dataDir = dir;
         try {
-            this.dataDir = dir;
-
-            if (!dataDir.exists()) {
-                dataDir.createFolder();
-            }
-
-            if (dataDir.getType() != FOLDER) {
-                throw new StorageException("File Storage should be based on directory.");
-            }
-            if (config != null) {
-                saveConfig();
-            }
-
-            //starting direcotry monitoring
-            monitor = new DefaultFileMonitor(this);
-            monitor.setRecursive(false);
-            monitor.addFile(dataDir);
-            monitor.start();
+            startup();
         } catch (FileSystemException ex) {
             throw new StorageException(ex);
         }
@@ -186,54 +171,39 @@ public class FileStorage extends AbstractStorage implements FileListener {
         try {
             //replacing points with path separators we build directory structure
             dataDir = parent.dataDir.resolveFile(dirName.replace(".", File.separator));
-
-            if (!dataDir.exists()) {
-                dataDir.createFolder();
-            }
-
-            if (dataDir.getType() != FOLDER) {
-                throw new StorageException("File Storage should be based on directory.");
-            }
-
-            if (config != null) {
-                saveConfig();
-            }
-
-            monitor = new DefaultFileMonitor(this);
-            monitor.setRecursive(false);
-            monitor.addFile(dataDir);
-            monitor.start();
+            startup();
         } catch (FileSystemException ex) {
             throw new StorageException(ex);
         }
     }
-    
-    private FileObject getCfgFile() throws FileSystemException {
-        return getDataDir().resolveFile(STORAGE_CONFIGURATION_FILE);
+
+    private void startup() throws FileSystemException, StorageException {
+
+        if (!isReadOnly()) {
+            if (!dataDir.exists()) {
+                dataDir.createFolder();
+            }
+        }
+        if (!dataDir.exists() || dataDir.getType() != FOLDER) {
+            throw new StorageException("File Storage should be based on directory.");
+        }
+
+        //starting direcotry monitoring
+        startMonitor();
     }
 
-    private void loadConfig(Meta def) {
-        try {
-            FileObject cfgFile = getCfgFile();
-            if (cfgFile.exists()) {
-                this.storageConfig = MergeRule.getDefault()
-                        .merge(new XMLMetaReader().read(cfgFile.getContent().getInputStream(), -1, null), def);
-            }
-        } catch (IOException | ParseException ex) {
-            LoggerFactory.getLogger(getClass()).error("Can't load storage confgiuration from config.xml", ex);
+    private void startMonitor() {
+        if (meta().getBoolean("monitor", true)) {
+            monitor = new DefaultFileMonitor(this);
+            monitor.setRecursive(false);
+            monitor.addFile(dataDir);
+            monitor.start();
         }
     }
 
-    private void saveConfig() {
-        try {
-            FileObject cfg = getCfgFile();
-            if (!cfg.exists() && meta() != null && !meta().isEmpty()) {
-                new XMLMetaWriter().write(cfg.getContent().getOutputStream(), meta(), null);
-            }
-        } catch (FileSystemException ex) {
-            LoggerFactory.getLogger(getClass()).error("Can't save storage annotation", ex);
-        }
-    }
+//    private FileObject getCfgFile() throws FileSystemException {
+//        return getDataDir().resolveFile(STORAGE_CONFIGURATION_FILE);
+//    }
 
     protected synchronized void updateDirectoryLoaders() {
         try {
@@ -258,8 +228,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
         if (file.getType() == FOLDER) {
             try {
                 String dirName = file.getName().getBaseName();
-                FileStorage shelf = new FileStorage(this, dirName, null);
-                shelf.setReadOnly(isReadOnly());
+                FileStorage shelf = new FileStorage(this, dirName, meta());
+//                shelf.setReadOnly(isReadOnly());
                 shelf.refresh();
                 shelves.putIfAbsent(dirName, shelf);
             } catch (StorageException ex) {
@@ -279,6 +249,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 LoggerFactory.getLogger(getClass())
                         .error("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
                 throw new RuntimeException(ex);
+            } finally {
+                file.close();
             }
         }
     }
@@ -312,7 +284,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void close() throws Exception {
-        monitor.stop();
+        if (monitor != null) {
+            monitor.stop();
+        }
         dataDir.close();
     }
 
@@ -384,8 +358,6 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void refresh() throws StorageException {
-        //TODO read annotation from storage.xml
-        loadConfig(Meta.buildEmpty("fileStorage"));
         updateDirectoryLoaders();
     }
 

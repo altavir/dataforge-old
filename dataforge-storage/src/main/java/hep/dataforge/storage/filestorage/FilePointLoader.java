@@ -68,8 +68,8 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
                 && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
     }
 
-    FileEnvelope helper;
-    NavigableMap<Value, Integer> index = Collections.synchronizedNavigableMap(new TreeMap<>());
+    private FileEnvelope helper;
+    private NavigableMap<Value, Integer> index = Collections.synchronizedNavigableMap(new TreeMap<>());
     private DataFormat format;
 
     public FilePointLoader(FileEnvelope helper, Storage storage, String name, Meta annotation) throws IOException, StorageException {
