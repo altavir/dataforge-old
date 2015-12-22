@@ -25,7 +25,6 @@ import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.loaders.MaskPointLoader;
 import java.util.Arrays;
 
 /**
@@ -140,7 +139,8 @@ public class LoaderFactory {
             if (loader instanceof PointLoader) {
                 return (PointLoader) loader;
             } else {
-                return new MaskPointLoader(loader);
+                throw new LoaderNotFoundException();
+                //return new MaskPointLoader(loader);
             }
         } else {
             throw new LoaderNotFoundException();

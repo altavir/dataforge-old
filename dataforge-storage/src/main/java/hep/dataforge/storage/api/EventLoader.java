@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  * @author darksnake
  * @param <T>
  */
-public interface EventLoader<T extends Event> extends Loader {
+public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
 
     public static final String EVENT_LOADER_TYPE = "event";
 

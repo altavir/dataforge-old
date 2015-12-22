@@ -28,6 +28,7 @@ import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -335,6 +336,9 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     protected Double convertValue(Value v) {
         try {
+            if(v.valueType()==ValueType.NULL){
+                return null;
+            }
             Double res = v.doubleValue();
             if (Double.isNaN(res)) {
                 return null;

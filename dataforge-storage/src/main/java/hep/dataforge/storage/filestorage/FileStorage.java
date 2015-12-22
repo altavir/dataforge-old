@@ -40,7 +40,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.text.ParseException;
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileObject;
@@ -109,7 +108,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
      * @return
      * @throws StorageException
      */
-    public static FileStorage read(FileObject remoteDir, boolean readOnly) throws StorageException {
+    public static FileStorage connect(FileObject remoteDir, boolean readOnly, boolean monitor) throws StorageException {
         try {
             if (!remoteDir.exists() || !remoteDir.getType().equals(FOLDER)) {
                 throw new StorageException("Can't open storage. Target should be existing directory.");
@@ -121,17 +120,17 @@ public class FileStorage extends AbstractStorage implements FileListener {
         Meta meta = new MetaBuilder("storage")
                 .setValue("type", "file")
                 .setValue("readOnly", readOnly)
-                .setValue("monitor", false);
+                .setValue("monitor", monitor);
 
         FileStorage res = new FileStorage(remoteDir, meta);
         res.refresh();
         return res;
     }
 
-    public static FileStorage read(File directory, boolean readOnly) throws StorageException {
+    public static FileStorage connect(File directory, boolean readOnly, boolean monitor) throws StorageException {
         try {
             FileObject localRoot = VFSUtils.getLocalFile(directory);
-            return FileStorage.read(localRoot, readOnly);
+            return FileStorage.connect(localRoot, readOnly, monitor);
 
         } catch (FileSystemException ex) {
             throw new StorageException(ex);
@@ -204,7 +203,6 @@ public class FileStorage extends AbstractStorage implements FileListener {
 //    private FileObject getCfgFile() throws FileSystemException {
 //        return getDataDir().resolveFile(STORAGE_CONFIGURATION_FILE);
 //    }
-
     protected synchronized void updateDirectoryLoaders() {
         try {
             this.shelves.clear();
@@ -242,10 +240,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 Tag stamp = readFileTag(file);
                 if (stamp != null && stamp.getType() == DATAFORGE_STORAGE_ENVELOPE_CODE) {
                     Loader loader = buildLoader(file, stamp);
-                    loader.open();
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
-            } catch (IOException | ParseException | StorageException ex) {
+            } catch (Exception ex) {
                 LoggerFactory.getLogger(getClass())
                         .error("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
                 throw new RuntimeException(ex);
@@ -266,7 +263,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    protected Loader buildLoader(FileObject file, Tag stamp) throws IOException, ParseException, StorageException {
+    protected Loader buildLoader(FileObject file, Tag stamp) throws Exception {
         switch (stamp.getDataType()) {
             case POINT_LOADER_TYPE_CODE:
                 return FilePointLoader.fromFile(this, file, isReadOnly());

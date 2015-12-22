@@ -15,10 +15,10 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Tag;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.io.IOException;
 import java.io.InputStream;
@@ -37,7 +37,7 @@ import org.apache.commons.vfs2.util.RandomAccessMode;
  * @author Alexander Nozik
  */
 //TODO add reentrantlock to ensure read/write synchronization
-public class FileEnvelope implements Envelope {
+public class FileEnvelope implements Envelope, AutoCloseable {
 
     public static final long INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1);
     private static final long DATA_SIZE_PROPERTY_OFFSET = 22;
@@ -62,9 +62,11 @@ public class FileEnvelope implements Envelope {
         }
     }
 
-//    public FileEnvelope(FileObject file) throws IOException, ParseException {
-//        this(file, true);
-//    }
+    @Override
+    public void close() throws Exception {
+        content.close();
+    }
+
 
     @Override
     public ByteBuffer getData() {
@@ -169,9 +171,6 @@ public class FileEnvelope implements Envelope {
         properties.put(DATA_LENGTH_KEY, Value.of(size));//update property
     }
 
-//    synchronized private void updateMetaSize() {
-//        throw new UnsupportedOperationException();
-//    }
     private void readHeader(FileObject file) throws IOException, ParseException {
         try (InputStream stream = file.getContent().getInputStream()) {
             Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);

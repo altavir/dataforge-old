@@ -15,40 +15,41 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.exceptions.StorageException;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
+import static hep.dataforge.storage.filestorage.FilePointLoader.isValidFilePointLoaderEnvelope;
 import hep.dataforge.storage.loaders.AbstractStateLoader;
 import hep.dataforge.values.Value;
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider;
+import org.apache.commons.vfs2.VFS;
 
 /**
  * A file implementation of state loader
+ *
  * @author Alexander Nozik
  */
 public class FileStateLoader extends AbstractStateLoader {
 
-    public static FileStateLoader fromLocalFile(Storage storage, File file, boolean readOnly) throws IOException, ParseException, StorageException {
-        return fromFile(storage, new DefaultLocalFileProvider().findLocalFile(file),readOnly);
-    }
-
-    public static FileStateLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws IOException, ParseException, StorageException {
-        FileEnvelope envelope = new FileEnvelope(file,readOnly);
-        if (isValidFileStateLoaderEnvelope(envelope)) {
-            return new FileStateLoader(envelope, storage, FilenameUtils.getBaseName(file.getName().getBaseName()), envelope.meta());
-        } else {
-            throw new StorageException("Is not a valid point loader file");
+    public static FileStateLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file, readOnly)) {
+            if (isValidFilePointLoaderEnvelope(envelope)) {
+                FileStateLoader res = new FileStateLoader(file.getURL().toString(),
+                        storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
+                        envelope.meta());
+                res.setReadOnly(readOnly);
+                return res;
+            } else {
+                throw new StorageException("Is not a valid point loader file");
+            }
         }
     }
 
@@ -57,19 +58,41 @@ public class FileStateLoader extends AbstractStateLoader {
                 && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.STATE_LOADER_TYPE_CODE;
     }
 
-    private final FileEnvelope envelope;
+    private final String filePath;
+    private FileEnvelope file;
 
-    public FileStateLoader(FileEnvelope envelope, Storage storage, String name, Meta annotation) throws IOException, StorageException {
+    public FileStateLoader(String filePath, Storage storage, String name, Meta annotation) throws IOException, StorageException {
         super(storage, name, annotation);
-        this.envelope = envelope;
+        this.filePath = filePath;
+    }
+
+    @Override
+    public void open() throws Exception {
+        if (!isOpen()) {
+            super.open();
+            FileObject fileObject = VFS.getManager().resolveFile(filePath);
+            file = new FileEnvelope(fileObject, isReadOnly());
+        }
+    }
+
+    @Override
+    public boolean isOpen() {
+        return file != null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        file.close();
+        file = null;
+        super.close();
     }
 
     @Override
     protected void commit() throws StorageException {
         try {
-            envelope.clearData();
+            file.clearData();
             for (Map.Entry<String, Value> entry : states.entrySet()) {
-                envelope.append(String.format("%s=%s;\r\n", entry.getKey(), entry.getValue().stringValue()).getBytes(Charset.forName("UTF-8")));
+                file.append(String.format("%s=%s;\r\n", entry.getKey(), entry.getValue().stringValue()).getBytes(Charset.forName("UTF-8")));
             }
         } catch (IOException ex) {
             throw new StorageException(ex);
@@ -79,13 +102,13 @@ public class FileStateLoader extends AbstractStateLoader {
     @Override
     protected synchronized void update() throws StorageException {
         try {
-            envelope.resetPos();
+            file.resetPos();
             states.clear();
-            while (envelope.readerPos() < envelope.eofPos()) {
-                String line = envelope.readLine().trim();
+            while (file.readerPos() < file.eofPos()) {
+                String line = file.readLine().trim();
                 if (!line.isEmpty()) {
                     Matcher match = Pattern.compile("(?<key>[^=]*)\\s*=\\s*(?<value>.*);").matcher(line);
-                    if(match.matches()){
+                    if (match.matches()) {
                         String key = match.group("key");
                         Value value = Value.of(match.group("value"));
                         states.put(key, value);

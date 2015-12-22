@@ -53,8 +53,10 @@ public interface Loader extends Annotated, AutoCloseable, Named, Responder, Targ
     String getType();
 
     boolean isReadOnly();
+    
+    boolean isOpen();
 
-    void open();
+    void open() throws Exception;
 
     boolean isEmpty();
 

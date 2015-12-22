@@ -246,7 +246,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     @Override
     public Loader getLoader(String name) throws StorageException {
-        refresh();
+//        refresh();
         if (loaders.containsKey(name)) {
             return loaders.get(name);
         } else {

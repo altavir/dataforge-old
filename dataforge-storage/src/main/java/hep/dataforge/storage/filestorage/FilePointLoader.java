@@ -29,9 +29,8 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
 import hep.dataforge.values.Value;
-import java.io.File;
 import java.io.IOException;
-import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
@@ -40,7 +39,7 @@ import java.util.TreeMap;
 import java.util.stream.Collectors;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider;
+import org.apache.commons.vfs2.VFS;
 
 /**
  * Text file point loader
@@ -50,16 +49,17 @@ import org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider;
 //TODO add FileMonitor for read only loaders
 public class FilePointLoader extends AbstractPointLoader implements Iterable<DataPoint> {
 
-    public static FilePointLoader fromLocalFile(Storage storage, File file, boolean readOnly) throws IOException, ParseException, StorageException {
-        return fromFile(storage, new DefaultLocalFileProvider().findLocalFile(file), readOnly);
-    }
-
-    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws IOException, ParseException, StorageException {
-        FileEnvelope envelope = new FileEnvelope(file, readOnly);
-        if (isValidFilePointLoaderEnvelope(envelope)) {
-            return new FilePointLoader(envelope, storage, FilenameUtils.getBaseName(file.getName().getBaseName()), envelope.meta());
-        } else {
-            throw new StorageException("Is not a valid point loader file");
+    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file, readOnly)) {
+            if (isValidFilePointLoaderEnvelope(envelope)) {
+                FilePointLoader res = new FilePointLoader(file.getURL().toString(),
+                        storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
+                        envelope.meta());
+                res.setReadOnly(readOnly);
+                return res;
+            } else {
+                throw new StorageException("Is not a valid point loader file");
+            }
         }
     }
 
@@ -68,13 +68,42 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
                 && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
     }
 
-    private FileEnvelope helper;
+    private final String filePath;
+    private FileEnvelope file;
     private NavigableMap<Value, Integer> index = Collections.synchronizedNavigableMap(new TreeMap<>());
     private DataFormat format;
 
-    public FilePointLoader(FileEnvelope helper, Storage storage, String name, Meta annotation) throws IOException, StorageException {
-        super(storage, name, annotation);
-        this.helper = helper;
+    public FilePointLoader(String filePath, Storage storage, String name, Meta meta) throws IOException, StorageException {
+        super(storage, name, meta);
+        this.filePath = filePath;
+    }
+
+    @Override
+    public void open() throws Exception {
+        if (!isOpen()) {
+            super.open();
+            FileObject fileObject = VFS.getManager().resolveFile(filePath);
+            file = new FileEnvelope(fileObject, isReadOnly());
+        }
+    }
+
+    @Override
+    public boolean isOpen() {
+        return file != null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        file.close();
+        file = null;
+        index.clear();
+        format = null;
+        super.close();
+    }
+
+    private FileEnvelope buildFile(boolean readOnly) throws Exception {
+        FileObject fileObject = VFS.getManager().resolveFile(filePath);
+        return new FileEnvelope(fileObject, isReadOnly());
     }
 
     /**
@@ -85,9 +114,9 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
      */
     private synchronized void updateIndex() throws IOException, StorageException {
         if (index.isEmpty()) {
-            helper.resetPos();
+            file.resetPos();
         } else {
-            helper.seek(Collections.max(index.values()));
+            file.seek(Collections.max(index.values()));
         }
 
         DataParser parser = null;
@@ -96,10 +125,10 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
             parser = new SimpleDataParser(format);
         }
 
-        while (helper.readerPos() < helper.eofPos()) {
+        while (file.readerPos() < file.eofPos()) {
             //Remember the position of line start
-            int curPos = (int) helper.readerPos();
-            String line = helper.readLine().trim();
+            int curPos = (int) file.readerPos();
+            String line = file.readLine().trim();
             if (!line.startsWith("#") && !line.isEmpty()) {
                 if (parser == null) {
                     throw new StorageException("The data format is not defined");
@@ -113,7 +142,7 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
 
                 if (indexField().equals(DEFAULT_INDEX_FIELD)) {
                     if (index.isEmpty()) {
-                        index.put(Value.of(0), (int) helper.readerPos());
+                        index.put(Value.of(0), (int) file.readerPos());
                     } else {
                         index.put(Value.of(index.lastKey().intValue() + 1), curPos);
                     }
@@ -133,7 +162,7 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
      */
     private synchronized void checkIndex() throws StorageException {
         try {
-            if (helper.readerPos() != helper.eofPos()) {
+            if (file.readerPos() != file.eofPos()) {
                 updateIndex();
             }
         } catch (IOException ex) {
@@ -185,7 +214,7 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
 
     public DataPoint readAtPos(int pos) {
         try {
-            return new SimpleDataParser(buildFormat()).parse(helper.readLine(pos));
+            return new SimpleDataParser(buildFormat()).parse(file.readLine(pos));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -201,11 +230,11 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
 
         try {
             if (index.isEmpty()) {
-                helper.append(("#?" + buildFormat().formatCaption() + "\r\n").getBytes());
+                file.append(("#?" + buildFormat().formatCaption() + "\r\n").getBytes());
             }
 
             String indexField = indexField();
-            int pos = (int) helper.eofPos();
+            int pos = (int) file.eofPos();
             if (indexField.equals(DEFAULT_INDEX_FIELD)) {
                 if (index.isEmpty()) {
                     index.put(Value.of(0), pos);
@@ -218,12 +247,12 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
                     throw new StorageException("The point with given index is already present in the loader");
                 }
 
-                index.put(indexValue, (int) helper.eofPos());
+                index.put(indexValue, (int) file.eofPos());
             } else {
                 throw new StorageException("Index field is not present in data point");
             }
 
-            helper.append(("  " + buildFormat().format(dp) + "\r\n").getBytes());
+            file.append(("  " + buildFormat().format(dp) + "\r\n").getBytes());
         } catch (IOException ex) {
             throw new StorageException("IOexception during push", ex);
         }
@@ -236,8 +265,42 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
     }
 
     @Override
-    public DataSet asDataSet() throws StorageException {
-        return new ListDataSet(getName(), meta(), this, buildFormat());
+    public synchronized DataSet asDataSet() throws StorageException {
+        //Avoiding rebuilding index if it is not already generated
+        if (index == null || index.isEmpty()) {
+            try {
+                file.resetPos();
+
+                DataParser parser = null;
+                buildFormat();
+                if (format != null) {
+                    parser = new SimpleDataParser(format);
+                }
+                List<DataPoint> points = new ArrayList<>();
+
+                while (file.readerPos() < file.eofPos()) {
+                    //Remember the position of line start
+                    int curPos = (int) file.readerPos();
+                    String line = file.readLine().trim();
+                    if (!line.startsWith("#") && !line.isEmpty()) {
+                        if (parser == null) {
+                            throw new StorageException("The data format is not defined");
+                        }
+                        DataPoint point = parser.parse(line);
+                        points.add(point);
+
+                    } else if (line.startsWith("#f")) {
+                        //Format string starts with #f
+                        parser = new SimpleDataParser(line.substring(2));
+                    }
+                }
+                return new ListDataSet(getName(), meta(), points, format);
+            } catch (IOException ex) {
+                throw new StorageException(ex);
+            }
+        } else {
+            return new ListDataSet(getName(), meta(), this, buildFormat());
+        }
     }
 
     @Override
@@ -271,5 +334,4 @@ public class FilePointLoader extends AbstractPointLoader implements Iterable<Dat
         }
         return index.isEmpty();
     }
-
 }

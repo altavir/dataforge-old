@@ -95,7 +95,7 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public void open() {
+    public void open() throws Exception {
         primaryLoader.open();
         secondaryLoader.open();
     }

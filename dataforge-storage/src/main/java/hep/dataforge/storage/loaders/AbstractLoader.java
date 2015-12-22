@@ -75,8 +75,13 @@ public abstract class AbstractLoader implements Loader {
     }
 
     @Override
-    public void open() {
+    public void open() throws Exception{
 
+    }
+
+    @Override
+    public boolean isOpen() {
+        return true;
     }
 
     protected void setReadOnly(boolean readOnly) {
