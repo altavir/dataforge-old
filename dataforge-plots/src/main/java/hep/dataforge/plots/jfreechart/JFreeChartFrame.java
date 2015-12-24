@@ -75,6 +75,7 @@ import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.renderer.xy.XYStepRenderer;
+import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
@@ -327,7 +328,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     }
 
     @Override
-    protected synchronized void updateFrame(Meta annotation) {
+    protected synchronized void updateFrame(Meta meta) {
+        if(meta.getBoolean("legend.show", true)){
+            if(chart.getLegend()== null){
+                chart.addLegend(new LegendTitle(plot));
+            }
+        } else {
+            chart.removeLegend();
+        }
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
 //            Plottable p = get(dataset.getSeriesKey(series).toString());
 //            return p.getConfig().getString("title", p.getName());
@@ -359,7 +367,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         for (DataPoint point : plottable.plotData()) {
             Double x = convertValue(adapter.getX(point));
             if (x != null) {
-                double y = convertValue(adapter.getY(point));
+                Double y = convertValue(adapter.getY(point));
                 double xErr = convertValue(adapter.getXerr(point));
                 double yErr = convertValue(adapter.getYerr(point));
                 ser.add(x, x - xErr, x + xErr, y, y - yErr, y + yErr);

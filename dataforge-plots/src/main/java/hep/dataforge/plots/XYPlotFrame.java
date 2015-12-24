@@ -27,6 +27,7 @@ import hep.dataforge.meta.Meta;
  */
 @NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
 @NodeDef(name = "yAxis", info = "The description of Y axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
+@NodeDef(name = "legend", info = "The configuration for plot legend")
 public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
     public XYPlotFrame(String name, Meta annotation) {
