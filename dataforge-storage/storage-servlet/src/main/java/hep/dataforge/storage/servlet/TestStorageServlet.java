@@ -30,7 +30,7 @@ public class TestStorageServlet {
         new StoragePlugin().startGlobal();
         String path = "/home/numass-storage";
 
-        FileStorage storage = FileStorage.read(new File(path), true);
+        FileStorage storage = FileStorage.connect(new File(path), true, false);
 
         RatpackServer ratpack = RatpackServer.start((RatpackServerSpec server) -> server
                 .serverConfig((ServerConfigBuilder config) -> config.port(8337))

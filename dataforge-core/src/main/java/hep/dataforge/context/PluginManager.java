@@ -16,15 +16,8 @@
 package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Meta;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-import org.slf4j.LoggerFactory;
 
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.

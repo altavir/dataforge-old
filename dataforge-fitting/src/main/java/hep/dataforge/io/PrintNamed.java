@@ -43,6 +43,8 @@ import java.util.ArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * <p>

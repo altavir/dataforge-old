@@ -109,7 +109,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 
     /**
      * Add new value to the value item with the given name. Create new one if it
-     * does not exist.
+     * does not exist. null arguments are ignored (Value.NULL is still could be used)
      *
      * @param name a {@link java.lang.String} object.
      * @param value a {@link hep.dataforge.values.Value} object.
@@ -119,19 +119,21 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
             throw new NamingException(String.format("\"%s\" is not a valid element name in the meta", name));
         }
 
-        if (hasValue(name)) {
-            Value oldValue = getValue(name);
+        if (value != null) {
+            if (hasValue(name)) {
+                Value oldValue = getValue(name);
 
-            List<Value> list = new ArrayList(this.getValueItem(name).listValue());
-            list.add(value);
+                List<Value> list = new ArrayList(this.getValueItem(name).listValue());
+                list.add(value);
 
-            Value newValue = Value.of(list);
+                Value newValue = Value.of(list);
 
-            this.values.put(name, newValue);
+                this.values.put(name, newValue);
 
-            notifyValueChanged(name, oldValue, newValue);
-        } else {
-            this.values.put(name, value);
+                notifyValueChanged(name, oldValue, newValue);
+            } else {
+                this.values.put(name, value);
+            }
         }
         return currentState();
     }

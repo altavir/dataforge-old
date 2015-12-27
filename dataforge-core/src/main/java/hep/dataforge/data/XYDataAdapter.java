@@ -15,13 +15,10 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Laminate;
-import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 
 /**
@@ -30,145 +27,81 @@ import hep.dataforge.values.Value;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@ValueDef(name = "xName", def = "x", info = "X value name")
-@ValueDef(name = "yName", def = "y", info = "Y value name")
-@ValueDef(name = "xErrName", def = "xErr", info = "X error value name")
-@ValueDef(name = "yErrName", def = "yErr", info = "Y error value name")
-public class XYDataAdapter implements DataAdapter {
+@ValueDef(name = "x", def = "x", info = "X value name")
+@ValueDef(name = "y", def = "y", info = "Y value name")
+@ValueDef(name = "xErr", def = "xErr", info = "X error value name")
+@ValueDef(name = "yErr", def = "yErr", info = "Y error value name")
+public class XYDataAdapter extends AbstractDataAdapter {
 
-    protected String xErrName = "xErr";
-    protected String xName = "x";
-    protected String yErrName = "yErr";
-    protected String yName = "y";
+    public static final String X_NAME = "x";
+    public static final String Y_NAME = "y";
+    public static final String X_ERR_NAME = "xErr";
+    public static final String Y_ERR_NAME = "yErr";
 
-    /**
-     * <p>
-     * Constructor for XYDataAdapter.</p>
-     */
     public XYDataAdapter() {
     }
 
-    /**
-     * <p>
-     * Constructor for XYDataAdapter.</p>
-     *
-     * @param adapterAnnotation a {@link hep.dataforge.meta.Meta}
-     * object.
-     */
-    public XYDataAdapter(Meta adapterAnnotation) {
-        Meta meta =  new Laminate(adapterAnnotation).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
-        this.xName = meta.getString("xName");
-        this.yName = meta.getString("yName");
-        this.xErrName = meta.getString("xErrName");
-        this.yErrName = meta.getString("yErrName");
+    public XYDataAdapter(Meta meta) {
+        super(meta);
     }
 
-    /**
-     * <p>
-     * Constructor for XYDataAdapter.</p>
-     *
-     * @param xName a {@link java.lang.String} object.
-     * @param xErrName a {@link java.lang.String} object.
-     * @param yName a {@link java.lang.String} object.
-     * @param yErrName a {@link java.lang.String} object.
-     */
     public XYDataAdapter(String xName, String xErrName, String yName, String yErrName) {
-        this.xName = xName;
-        this.yName = yName;
-        this.xErrName = xErrName;
-        this.yErrName = yErrName;
+        super(new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
+                .putValue(X_NAME, xName)
+                .putValue(Y_NAME, yName)
+                .putValue(X_ERR_NAME, xErrName)
+                .putValue(Y_ERR_NAME, yErrName)
+                .build()
+        );
     }
 
-    /**
-     * <p>
-     * Constructor for XYDataAdapter.</p>
-     *
-     * @param xName a {@link java.lang.String} object.
-     * @param yName a {@link java.lang.String} object.
-     * @param yErrName a {@link java.lang.String} object.
-     */
     public XYDataAdapter(String xName, String yName, String yErrName) {
-        this.xName = xName;
-        this.yName = yName;
-        this.yErrName = yErrName;
+        this(xName, null, yName, yErrName);
     }
 
-    /**
-     * <p>
-     * Constructor for XYDataAdapter.</p>
-     *
-     * @param xName a {@link java.lang.String} object.
-     * @param yName a {@link java.lang.String} object.
-     */
     public XYDataAdapter(String xName, String yName) {
-        this.xName = xName;
-        this.yName = yName;
+        this(xName, null, yName, null);
     }
 
-    /**
-     * <p>
-     * buildXYDataPoint.</p>
-     *
-     * @param x a double.
-     * @param y a double.
-     * @param yErr a double.
-     * @return a {@link hep.dataforge.data.DataPoint} object.
-     */
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapDataPoint(getNames().asArray(), x, y, yErr);
+        return new MapDataPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME),getValueName(Y_ERR_NAME)},
+                x, y, yErr);
     }
 
-    /**
-     * <p>
-     * getX.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public Value getX(DataPoint point) {
-        return point.getValue(xName);
+        return getFrom(point, X_NAME);
     }
 
-    /**
-     * <p>
-     * getXerr.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public Value getXerr(DataPoint point) {
-        if (point.names().contains(xErrName)) {
-            return point.getValue(xErrName);
-        } else {
-            return Value.of(0);
-        }
+        return getFrom(point, X_ERR_NAME, 0d);
     }
 
-    /**
-     * <p>
-     * getY.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public Value getY(DataPoint point) {
-        return point.getValue(yName);
+        return getFrom(point, Y_NAME);
+    }
+
+    public Value getYerr(DataPoint point) throws NameNotFoundException {
+        return getFrom(point, Y_ERR_NAME, 0d);
     }
 
     /**
-     * <p>
-     * getYerr.</p>
+     * Upper 1-sigma bound on y value
      *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
+     * @param point
+     * @return
      */
-    public Value getYerr(DataPoint point) throws NameNotFoundException {
-        if (point.names().contains(yErrName)) {
-            return point.getValue(yErrName);
-        } else {
-            return Value.of(0);
-        }
+    public double getYUpper(DataPoint point) {
+        return point.getDouble(getValueName("yUp"), getY(point).doubleValue() + getYerr(point).doubleValue());
+    }
+
+    /**
+     * Lower 1-sigma bound on y value
+     *
+     * @param point
+     * @return
+     */
+    public double getYLower(DataPoint point) {
+        return point.getDouble(getValueName("yLo"), getY(point).doubleValue() - getYerr(point).doubleValue());
     }
 
     /**
@@ -177,7 +110,6 @@ public class XYDataAdapter implements DataAdapter {
      * @param point
      * @return
      */
-    @Override
     public double getWeight(DataPoint point) throws NameNotFoundException {
         if (point.names().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
@@ -188,11 +120,11 @@ public class XYDataAdapter implements DataAdapter {
     }
 
     public boolean providesXError(DataPoint point) {
-        return point.hasValue(xErrName);
+        return point.hasValue(getValueName(X_ERR_NAME));
     }
 
     public boolean providesYError(DataPoint point) {
-        return point.hasValue(yErrName);
+        return point.hasValue(getValueName(Y_ERR_NAME));
     }
 
     public DataPoint mapTo(DataPoint point, String xName, String yName, String xErrName, String yErrName) {
@@ -209,27 +141,17 @@ public class XYDataAdapter implements DataAdapter {
     }
 
     public DataPoint mapToDefault(DataPoint point) {
-        return mapTo(point, "x", "y", "xErr", "yErr");
+        return mapTo(point, X_NAME, Y_NAME, X_ERR_NAME, Y_ERR_NAME);
     }
 
     /**
-     * {@inheritDoc}
+     * Return a default DataFormat corresponding to this adapter
+     * @return 
      */
-    @Override
-    public Names getNames() {
-        return Names.of(xName, yName, xErrName, yErrName);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Meta buildAnnotation() {
-        return new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
-                .putValue("xName", xName)
-                .putValue("yName", yName)
-                .putValue("xErrName", xErrName)
-                .putValue("xErrName", yErrName)
+    public DataFormat getFormat(){
+        return new DataFormatBuilder()
+                .addNumber(X_NAME)
+                .addNumber(Y_NAME)
                 .build();
     }
 

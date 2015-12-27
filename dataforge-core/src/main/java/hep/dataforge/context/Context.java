@@ -45,12 +45,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Context extends AbstractProvider implements ValueProvider, Logable, Named {
 
-    final Log rootLog;
-    final Context parent;
-    final String name;
-    final Map<String, Value> properties = new ConcurrentHashMap<>();
-    final PluginManager pm;
-    IOManager io = null;
+    private final Log rootLog;
+    private final Context parent;
+    private final String name;
+    protected final Map<String, Value> properties = new ConcurrentHashMap<>();
+    private final PluginManager pm;
+    protected ProcessManager processManager = null;
+    protected IOManager io = null;
 
     /**
      * Build context from metadata
@@ -170,6 +171,18 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     public final PluginManager pluginManager() {
         return this.pm;
     }
+    
+    public ProcessManager processManager(){
+        if(this.processManager == null){
+            if(getParent()!= null){
+                return getParent().processManager();
+            } else {
+                return GlobalContext.instance().processManager();
+            }
+        } else {
+            return processManager;
+        }
+    } 
 
     /**
      * {@inheritDoc}
@@ -228,13 +241,6 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         properties.put(name, value);
     }
 
-    /**
-     * <p>
-     * putValue.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param value a {@link java.lang.Object} object.
-     */
     public void putValue(String name, Object value) {
         properties.put(name, Value.of(value));
     }

@@ -33,16 +33,16 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alexander Nozik
  */
-public class MetaEditorComponent extends AnchorPane implements Initializable, Annotated {
+public class MetaEditor extends AnchorPane implements Initializable, Annotated {
 
-    public static MetaEditorComponent build(Configuration configuration, NodeDescriptor descriptor) {
-        MetaEditorComponent component = new MetaEditorComponent();
+    public static MetaEditor build(Configuration configuration, NodeDescriptor descriptor) {
+        MetaEditor component = new MetaEditor();
         component.setRoot(configuration, descriptor);
         return component;
     }
 
-    public MetaEditorComponent() {
-        FXMLLoader loader = new FXMLLoader(MetaEditorComponent.class.getResource("/fxml/MetaEditor.fxml"));
+    public MetaEditor() {
+        FXMLLoader loader = new FXMLLoader(MetaEditor.class.getResource("/fxml/MetaEditor.fxml"));
         loader.setRoot(this);
         loader.setController(this);
 

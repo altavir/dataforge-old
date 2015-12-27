@@ -68,7 +68,7 @@ public class MetaEditorTest extends Application {
             }
         });
 
-        Scene scene = new Scene(MetaEditorComponent.build(config, descriptor), 400, 400);
+        Scene scene = new Scene(MetaEditor.build(config, descriptor), 400, 400);
 
         primaryStage.setTitle("Meta editor test");
         primaryStage.setScene(scene);

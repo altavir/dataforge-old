@@ -94,7 +94,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     public ListDataSet sample(double pos, double w, double amp, double a, double b, int number) {
         XYDataAdapter factory = new XYDataAdapter();
-        ListDataSet data = factory.buildEmptyDataSet("");
+        ListDataSet data = new ListDataSet();
         double[] v = new double[3];
         v[0] = w;
         v[1] = pos;

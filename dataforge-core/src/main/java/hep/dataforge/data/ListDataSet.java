@@ -48,58 +48,26 @@ public class ListDataSet extends AbstractContent implements DataSet {
      */
     private final DataFormat format;
 
-    /**
-     * <p>
-     * Constructor for ListDataSet.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param format a {@link hep.dataforge.data.DataFormat} object.
-     */
     public ListDataSet(String name, DataFormat format) {
         super(name);
         this.format = format;
     }
 
-    /**
-     * <p>
-     * Constructor for ListDataSet.</p>
-     *
-     * @param format a {@link hep.dataforge.data.DataFormat} object.
-     */
     public ListDataSet(DataFormat format) {
         super();
         this.format = format;
     }
 
-    /**
-     * <p>
-     * Constructor for ListDataSet.</p>
-     *
-     * @param format a {@link java.lang.String} object.
-     */
     public ListDataSet(String... format) {
         super();
         this.format =  DataFormat.forNames(format);
     }
 
-    /**
-     * <p>
-     * Constructor for ListDataSet.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param format an array forPoint {@link java.lang.String} objects.
-     */
     public ListDataSet(String name, String[] format) {
         super(name);
         this.format =  DataFormat.forNames(format);
     }
 
-    /**
-     * <p>
-     * Constructor for ListDataSet.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     */
     public ListDataSet(String name) {
         super(name);
         this.format = new DataFormat();
@@ -113,16 +81,6 @@ public class ListDataSet extends AbstractContent implements DataSet {
         this.format = new DataFormat();
     }
 
-//    /**
-//     * Проверяет, что все точки соответствуют формату
-//     *
-//     * @param format
-//     * @param points
-//     */
-//    public ListDataSet(Iterable<DataPoint> points, DataFormat format) {
-//        this.format = format;
-//        addAll(points);
-//    }
     /**
      * Проверяет, что все точки соответствуют формату
      *
@@ -169,12 +127,6 @@ public class ListDataSet extends AbstractContent implements DataSet {
         }
     }
 
-    /**
-     * <p>
-     * addAll.</p>
-     *
-     * @param points a {@link java.lang.Iterable} object.
-     */
     public final void addAll(Iterable<? extends DataPoint> points) {
         for (DataPoint dp : points) {
             add(dp);

@@ -46,7 +46,7 @@ public class DynamicPlottable extends XYPlottable {
 
     public static DynamicPlottable build(String name, String xName, String yName, String color, double thickness) {
         Meta meta = new MetaBuilder("plottable")
-                .setValue("adapter.yName", yName)
+                .setValue("adapter.y", yName)
                 .setValue("color", color)
                 .setValue("thickness", thickness)
                 .build();
@@ -55,8 +55,8 @@ public class DynamicPlottable extends XYPlottable {
 
     public DynamicPlottable(String name, Meta annotation) {
         super(name, annotation);
-        getConfig().setValue("adapter.xName", "timestamp");
-        this.yName = getConfig().getString("adapter.yName", "y");
+        getConfig().setValue("adapter.x", "timestamp");
+        this.yName = getConfig().getString("adapter.y", "y");
     }
 
     /**
@@ -69,8 +69,8 @@ public class DynamicPlottable extends XYPlottable {
      */
     public DynamicPlottable(String name, Meta annotation, String yName) {
         super(name, annotation);
-        getConfig().setValue("adapter.xName", "timestamp");
-        getConfig().setValue("adapter.yName", yName);
+        getConfig().setValue("adapter.x", "timestamp");
+        getConfig().setValue("adapter.y", yName);
         this.yName = yName;
     }
 

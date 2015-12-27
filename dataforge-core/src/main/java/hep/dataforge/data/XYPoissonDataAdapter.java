@@ -40,8 +40,8 @@ public class XYPoissonDataAdapter extends XYDataAdapter {
 
     @Override
     public Value getYerr(DataPoint point) throws NameNotFoundException {
-        if(point.hasValue(yErrName)){
-            return point.getValue(yErrName);
+        if(super.providesYError(point)){
+            return super.getYerr(point);
         } else {
             double y = getY(point).doubleValue();
             if(y>0){

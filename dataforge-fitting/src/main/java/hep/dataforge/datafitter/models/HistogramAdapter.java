@@ -15,11 +15,11 @@
  */
 package hep.dataforge.datafitter.models;
 
+import hep.dataforge.data.AbstractDataAdapter;
 import hep.dataforge.data.DataAdapter;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.names.Names;
+import hep.dataforge.values.Value;
 
 /**
  * TODO сделать адаптер для гистограммы с фиксированными бинами
@@ -27,64 +27,24 @@ import hep.dataforge.names.Names;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistogramAdapter implements DataAdapter {
+public class HistogramAdapter extends AbstractDataAdapter {
 
-    private static final String ANNOTATION_BIN_BEGIN_NAME = "binBeginName";
-    private static final String ANNOTATION_BIN_END_NAME = "binEndName";
-    private static final String ANNOTATION_COUNT_NAME = "countName";
+    public static final String BIN_BEGIN_NAME = "binBegin";
+    public static final String BIN_END_NAME = "binEnd";
+    public static final String BIN_CENTER_NAME = "binCenter";
+    public static final String COUNT_NAME = "count";
 
-    private String binBeginName = "binBegin";
-    private String binEndName = "binEnd";
-    private String countName = "count";
-
-    /**
-     * <p>
-     * Constructor for HistogramAdapter.</p>
-     */
     public HistogramAdapter() {
     }
-
-    /**
-     * <p>
-     * Constructor for HistogramAdapter.</p>
-     *
-     * @param binBeginName a {@link java.lang.String} object.
-     * @param binEndName a {@link java.lang.String} object.
-     * @param countName a {@link java.lang.String} object.
-     */
+    
     public HistogramAdapter(String binBeginName, String binEndName, String countName) {
-        this.binBeginName = binBeginName;
-        this.binEndName = binEndName;
-        this.countName = countName;
+        super(new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
+                .putValue(BIN_BEGIN_NAME, binBeginName)
+                .putValue(BIN_END_NAME, binEndName)
+                .putValue(COUNT_NAME, countName)
+                .build());
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Meta buildAnnotation() {
-        return new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
-                .putValue(ANNOTATION_BIN_BEGIN_NAME, binBeginName)
-                .putValue(ANNOTATION_BIN_END_NAME, binEndName)
-                .putValue(ANNOTATION_COUNT_NAME, countName)
-                .build();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Names getNames() {
-        return Names.of(binBeginName, binEndName, countName);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param point
-     * @return
-     */
-    @Override
     public double getWeight(DataPoint point) {
         if (point.names().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
@@ -93,59 +53,23 @@ public class HistogramAdapter implements DataAdapter {
         }
     }
 
-    /**
-     * <p>
-     * getBinBegin.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public double getBinBegin(DataPoint point) {
-        return point.getValue(binBeginName).doubleValue();
+        return this.getFrom(point, BIN_BEGIN_NAME).doubleValue();
     }
 
-    /**
-     * <p>
-     * getBinEnd.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public double getBinEnd(DataPoint point) {
-        return point.getValue(binEndName).doubleValue();
+        return this.getFrom(point, BIN_END_NAME).doubleValue();
     }
 
-    /**
-     * <p>
-     * getCount.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a long.
-     */
     public long getCount(DataPoint point) {
-        return point.getValue(countName).intValue();
+        return this.getFrom(point, COUNT_NAME).longValue();
     }
 
-    /**
-     * <p>
-     * getBinSize.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public double getBinSize(DataPoint point) {
         return getBinEnd(point) - getBinBegin(point);
     }
 
-    /**
-     * <p>
-     * getBinCenter.</p>
-     *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a double.
-     */
     public double getBinCenter(DataPoint point) {
         return (getBinEnd(point) + getBinBegin(point)) / 2;
     }
-
 }

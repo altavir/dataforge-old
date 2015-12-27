@@ -82,23 +82,23 @@ public class PlottableData extends XYPlottable {
 
     public PlottableData(String name, Meta meta, Iterable<DataPoint> data, String xName, String yName) {
         this(name, meta, data);
-        getConfig().setValue("adapter.xName", xName);
-        getConfig().setValue("adapter.yName", yName);
+        getConfig().setValue("adapter.x", xName);
+        getConfig().setValue("adapter.y", yName);
         getConfig().setValue("showErrors", false);
     }
 
     public PlottableData(String name, Meta meta, Iterable<DataPoint> data, String xName, String yName, String xErrName, String yErrName) {
         this(name, meta, data);
-        getConfig().setValue("adapter.xName", xName);
-        getConfig().setValue("adapter.yName", yName);
+        getConfig().setValue("adapter.x", xName);
+        getConfig().setValue("adapter.y", yName);
         getConfig().setValue("showErrors", false);
 
         if (xErrName != null) {
-            getConfig().setValue("adapter.xErrName", xErrName);
+            getConfig().setValue("adapter.xErr", xErrName);
         }
 
         if (yErrName != null) {
-            getConfig().setValue("adapter.yErrName", yErrName);
+            getConfig().setValue("adapter.yErr", yErrName);
         }
     }
 

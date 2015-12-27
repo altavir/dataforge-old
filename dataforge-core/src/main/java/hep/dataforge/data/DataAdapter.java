@@ -15,37 +15,48 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.Value;
 
 /**
  * An adapter to interpret datapoint
  * @author Alexander Nozik
  */
-public interface DataAdapter {
+public interface DataAdapter extends Annotated {
     
     public static final String WEIGHT = "@weight";    
 
     public static final String DATA_ADAPTER_ANNOTATION_NAME = "adapter";
 
-    public double getWeight(DataPoint point);
+//    public double getWeight(DataPoint point);
 
     /**
      * Аннотация, описывающая данный тип адаптера
      * @return 
      */
-    public Meta buildAnnotation();
+    @Override
+    Meta meta();
 
+//    /**
+//     * минимальный набор имен в DataPoint
+//     * @return 
+//     */
+//    Names getNames();    
+    
     /**
-     * минимальный набор имен в DataPoint
+     * Get a value with specific designation from given DataPoint
+     * @param point
+     * @param component
      * @return 
      */
-    Names getNames();    
+    Value getFrom(DataPoint point, String component);
     
-    default public ListDataSet buildEmptyDataSet(String name) {
-        ListDataSet res = new ListDataSet(DataFormat.forNames(0, getNames()));
-        res.configure(new MetaBuilder(name).putNode(buildAnnotation()).build());
-        return res;
-    }
+//    default public ListDataSet buildEmptyDataSet(String name) {
+//        ListDataSet res = new ListDataSet(DataFormat.forNames(0, getNames()));
+//        res.configure(new MetaBuilder(name).putNode(meta()).build());
+//        return res;
+//    }
 }
