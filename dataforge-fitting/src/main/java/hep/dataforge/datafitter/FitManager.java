@@ -25,10 +25,7 @@ import hep.dataforge.datafitter.models.XYModel;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.io.PrintNamed;
 import java.io.PrintWriter;
-import static hep.dataforge.io.PrintNamed.printResiduals;
-import static hep.dataforge.io.PrintNamed.printResiduals;
 import hep.dataforge.context.Encapsulated;
-import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 
 /**
@@ -40,15 +37,6 @@ import static hep.dataforge.io.PrintNamed.printResiduals;
  */
 public class FitManager implements Encapsulated {
 
-    /**
-     * <p>
-     * buildState.</p>
-     *
-     * @param data a {@link hep.dataforge.data.DataSet} object.
-     * @param model a {@link hep.dataforge.datafitter.models.Model} object.
-     * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public static FitState buildState(DataSet data, Model model, ParamSet pars) {
         String name;
         if (data.isAnonimous()) {
@@ -61,54 +49,23 @@ public class FitManager implements Encapsulated {
 
     private final Context context;
 
-    /**
-     *
-     */
     protected final ModelManager modelManager;
 
-    /**
-     * <p>
-     * Constructor for FitManager.</p>
-     */
     public FitManager() {
         this.context = GlobalContext.instance();
         modelManager = new ModelManager();
     }
 
-    /**
-     * <p>
-     * Constructor for FitManager.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     */
     public FitManager(Context context) {
         this.context = context;
         modelManager = new ModelManager();
     }
 
-    /**
-     * <p>
-     * Constructor for FitManager.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param modelManager a
-     * {@link hep.dataforge.datafitter.models.ModelManager} object.
-     */
     public FitManager(Context context, ModelManager modelManager) {
         this.context = context;
         this.modelManager = modelManager;
     }
 
-//    public void addModel(String name, ParametricFactory<Model> mf) {
-//        getModelManager().addModel(name, mf);
-//    }
-    /**
-     * <p>
-     * buildEngine.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.datafitter.FitEngine} object.
-     */
     public FitEngine buildEngine(String name) {
         if (name == null || name.isEmpty()) {
             getContext().log("The fitting engine name is not defined. Using QOW engine by default");
@@ -124,51 +81,19 @@ public class FitManager implements Encapsulated {
         }
     }
 
-    /**
-     * <p>
-     * buildModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.datafitter.models.Model} object.
-     */
     public Model buildModel(String name) {
         return getModelManager().buildModel(getContext(), name);
     }
 
-    /**
-     * <p>
-     * buildModel.</p>
-     *
-     * @param modelAnnotation a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.datafitter.models.Model} object.
-     */
     public Model buildModel(Meta modelAnnotation) {
         return getModelManager().buildModel(getContext(), modelAnnotation);
     }
 
-    /**
-     * <p>
-     * buildState.</p>
-     *
-     * @param data a {@link hep.dataforge.data.DataSet} object.
-     * @param modelName a {@link java.lang.String} object.
-     * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitState buildState(DataSet data, String modelName, ParamSet pars) {
         Model model = getModelManager().buildModel(getContext(), modelName);
         return buildState(data, model, pars);
     }
 
-    /**
-     * <p>
-     * buildState.</p>
-     *
-     * @param data a {@link hep.dataforge.data.DataSet} object.
-     * @param modelAnnotation a {@link hep.dataforge.meta.Meta} object.
-     * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitState buildState(DataSet data, Meta modelAnnotation, ParamSet pars) {
         Model model = getModelManager().buildModel(getContext(), modelAnnotation);
         return buildState(data, model, pars);
@@ -179,26 +104,10 @@ public class FitManager implements Encapsulated {
         return context;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>modelManager</code>.</p>
-     *
-     * @return the modelManager
-     */
     public ModelManager getModelManager() {
         return modelManager;
     }
 
-    /**
-     * <p>
-     * runDefaultEngineTask.</p>
-     *
-     * @param state a {@link hep.dataforge.datafitter.FitState} object.
-     * @param taskName a {@link java.lang.String} object.
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param freePars a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Logable log, String... freePars) {
         FitTask task = new FitTask(QOWFitEngine.QOW_ENGINE_NAME, taskName, freePars);
         return runTask(state, task, log);
@@ -218,43 +127,14 @@ public class FitManager implements Encapsulated {
         return runTask(state, task, log);
     }
 
-    /**
-     * <p>
-     * runTask.</p>
-     *
-     * @param state a {@link hep.dataforge.datafitter.FitState} object.
-     * @param engineName a {@link java.lang.String} object.
-     * @param taskName a {@link java.lang.String} object.
-     * @param freePars a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitTaskResult runTask(FitState state, String engineName, String taskName, String... freePars) {
         return runTask(state, engineName, taskName, getContext(), freePars);
     }
 
-    /**
-     * <p>
-     * runTask.</p>
-     *
-     * @param state a {@link hep.dataforge.datafitter.FitState} object.
-     * @param task a {@link hep.dataforge.datafitter.FitTask} object.
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitTaskResult runTask(FitState state, FitTask task, Logable log) {
         return runTask(state, task, GlobalContext.out(), log);
     }
 
-    /**
-     * <p>
-     * runTask.</p>
-     *
-     * @param state a {@link hep.dataforge.datafitter.FitState} object.
-     * @param task a {@link hep.dataforge.datafitter.FitTask} object.
-     * @param writer a {@link java.io.PrintWriter} object.
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @return a {@link hep.dataforge.datafitter.FitState} object.
-     */
     public FitTaskResult runTask(FitState state, FitTask task, PrintWriter writer, Logable log) {
         if(log == null){
             log = getContext();

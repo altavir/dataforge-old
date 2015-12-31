@@ -27,9 +27,9 @@ public class MetaTreeBranch implements MetaTree {
 
     @Override
     public String getName() {
-        if(node != null){
+        if (node != null) {
             return node.getName();
-        } else if(descriptor!= null){
+        } else if (descriptor != null) {
             return descriptor.getName();
         } else {
             return "";
@@ -65,7 +65,7 @@ public class MetaTreeBranch implements MetaTree {
      * Build new node from default if it was not existing before
      */
     void buildNode() {
-        if (isDefault()) {
+        if (isDefault() && parent != null) {
             //building node if empty
             parent.buildNode();
             //creating new configuration node
@@ -80,6 +80,7 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     public Configuration getNode() {
+        buildNode();
         return node;
     }
 

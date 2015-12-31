@@ -44,7 +44,7 @@ public class PlottableData extends XYPlottable {
     }
 
     public PlottableData(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
-        super(name, null);
+        super(name);
 
         if (x.length != y.length) {
             throw new IllegalArgumentException("Arrays size mismatch");

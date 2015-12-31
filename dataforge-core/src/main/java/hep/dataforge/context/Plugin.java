@@ -18,6 +18,8 @@ package hep.dataforge.context;
 import hep.dataforge.content.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The interface to define a Context plugin. A plugin could be loaded into the
@@ -62,7 +64,8 @@ public interface Plugin extends Annotated, Named {
 
     /**
      * The name of this plugin ignoring version and group
-     * @return 
+     *
+     * @return
      */
     @Override
     public default String getName() {
@@ -78,6 +81,21 @@ public interface Plugin extends Annotated, Named {
 
     public default String name() {
         return getTag().getFullName();
+    }
+
+    /**
+     * Return new blank instance of this plugin. This method is used only to
+     * avoid separate factory class;
+     *
+     * @return
+     */
+    default Plugin instance() {
+        //FIXME a bad solution
+        try {
+            return getClass().getDeclaredConstructor().newInstance();
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to create instance of the plugin", ex);
+        }
     }
 
 }

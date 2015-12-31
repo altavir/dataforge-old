@@ -18,6 +18,7 @@ package hep.dataforge.plots.fx;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import java.util.function.Function;
@@ -111,5 +112,16 @@ public class FXLineChartFrame extends XYPlotFrame {
     protected void updatePlotConfig(String name) {
 
     }
+
+    @Override
+    protected void updateLegend(Meta legendMeta) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    @Override
+    public PlotFrame<XYPlottable> display(AnchorPane container) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
 
 }

@@ -40,7 +40,9 @@ public class DescriptorUtils {
     public static Meta buildDefaultNode(NodeDescriptor descriptor) {
         MetaBuilder builder = new MetaBuilder(descriptor.getName());
         descriptor.valueDescriptors().values().stream().filter((vd) -> (vd.hasDefault())).forEach((vd) -> {
-            builder.setValue(vd.getName(), vd.defaultValue());
+            if (vd.hasDefault()) {
+                builder.setValue(vd.getName(), vd.defaultValue());
+            }
         });
 
         descriptor.childrenDescriptors().values().stream().forEach((NodeDescriptor nd) -> {

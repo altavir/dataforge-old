@@ -17,9 +17,8 @@ package hep.dataforge.plots;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -28,7 +27,7 @@ import java.util.Map;
  */
 public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfigurable implements PlotFrame<T> {
 
-    protected Map<String, T> plottables = new LinkedHashMap<>();
+    protected ObservableList<T> plottables = FXCollections.observableArrayList();
     private final String name;
 
     public AbstractPlotFrame(String name, Meta annotation) {
@@ -36,26 +35,30 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
         this.name = name;
     }
 
-    @Override
-    public T get(String name) {
-        return plottables.get(name);
+    public AbstractPlotFrame(String name) {
+        this.name = name;
     }
 
     @Override
-    public Collection<? extends T> getAll() {
-        return plottables.values();
+    public T get(String name) {
+        return plottables.stream().filter(pl->name.equals(pl.getName())).findFirst().orElse(null);
+    }
+
+    @Override
+    public ObservableList<T> getAll() {
+        return FXCollections.unmodifiableObservableList(plottables);
     }
 
     @Override
     public void remove(String plotName) {
-        plottables.get(plotName).removeListener(this);
+        get(plotName).removeListener(this);
         plottables.remove(plotName);
     }
 
     @Override
     public void add(T plottable) {
         String pName = plottable.getName();
-        plottables.put(pName, plottable);
+        plottables.add(plottable);
         plottable.addListener(this);
         updatePlotData(pName);
         updatePlotConfig(pName);

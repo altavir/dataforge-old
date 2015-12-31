@@ -82,7 +82,7 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
         if(!context.provides("plots")){
             context.loadPlugin(new PlotsPlugin());
         }
-        holder = (PlotsPlugin) context.pluginManager().getPlugin("hep.dataforge:plots");
+        holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
     }
 
     private Meta findFrameDescription(Meta meta, String name) {

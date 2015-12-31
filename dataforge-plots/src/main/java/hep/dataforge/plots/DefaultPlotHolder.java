@@ -46,7 +46,7 @@ public class DefaultPlotHolder implements PlotHolder {
             frame.pack();
             frame.setVisible(true);
         });
-        return new JFreeChartFrame(name, annotation, panel);
+        return new JFreeChartFrame(name, annotation).display(panel);
     }
 
     @Override

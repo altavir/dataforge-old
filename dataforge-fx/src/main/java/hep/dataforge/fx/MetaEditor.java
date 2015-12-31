@@ -99,6 +99,7 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
         );
 
         valueColumn.setCellFactory((TreeTableColumn<MetaTree, Value> column) -> {
+            //TODO set external factory to build different views basing on Descriptor property
 
             StringConverter<Value> converter = new StringConverter<Value>() {
                 @Override

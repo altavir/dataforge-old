@@ -20,28 +20,30 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.ListDataSet;
 import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.plots.fx.FXPlotUtils;
+import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import java.util.ArrayList;
 import java.util.List;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class JFreeFXTest extends Application {
+public class PlotContainerTest {
 
-    @Override
-    public void start(Stage primaryStage) {
-        AnchorPane root = new AnchorPane();
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
 
-        JFreeChartFrame frame = new JFreeChartFrame("my plot", null).display(root);
+        JFreeChartFrame frame = new JFreeChartFrame("my plot", null);
+        
+        container.setPlot(frame);
 
         UnivariateFunction func = (double x1) -> x1 * x1;
 
@@ -59,22 +61,9 @@ public class JFreeFXTest extends Application {
 
         PlottableData dataPlot = new PlottableData(ds, "myX", "myY", "myXErr", "myYErr");
 
-        frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
+        frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("type", "log"));
 
         frame.add(dataPlot);
-
-        Scene scene = new Scene(root, 800, 600);
-
-        primaryStage.setTitle("my plot");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
     }
 
 }

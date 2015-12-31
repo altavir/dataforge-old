@@ -37,6 +37,11 @@ public abstract class AbstractPlottable extends SimpleConfigurable implements Pl
         super(config);
         this.name = name;
     }
+    
+    public AbstractPlottable(String name) {
+        super();
+        this.name = name;
+    }    
 
     @Override
     public void addListener(PlotStateListener listener) {

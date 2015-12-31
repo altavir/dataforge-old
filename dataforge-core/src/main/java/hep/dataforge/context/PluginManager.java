@@ -31,7 +31,7 @@ public class PluginManager implements Encapsulated {
      */
     private PluginResolver pluginResolver = new ClassPathPluginResolver();
 
-    private Map<String, Plugin> plugins = new HashMap<>();
+    private final Map<String, Plugin> plugins = new HashMap<>();
 
     /**
      * A context for this plugin manager
@@ -111,6 +111,7 @@ public class PluginManager implements Encapsulated {
         }
 
         plugin.apply(getContext());
+        plugins.put(plugin.getName(), plugin);
         return plugin;
     }
 

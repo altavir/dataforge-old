@@ -68,16 +68,16 @@ public class FitAction extends OneToOneAction<DataSet, FitState> {
      * <p>
      * Constructor for FitAction.</p>
      *
-     * @param parentContext a {@link hep.dataforge.context.Context} object.
+     * @param context a {@link hep.dataforge.context.Context} object.
      * @param an a {@link hep.dataforge.meta.Meta} object.
      */
-    public FitAction(Context parentContext, Meta an) {
-        super(parentContext, an);
+    public FitAction(Context context, Meta an) {
+        super(context, an);
 
-        if (parentContext.provides("hep.dataforge:fitting")) {
-            this.fm = parentContext.provide("hep.dataforge:fitting",FitPlugin.class).getFitManager();
+        if (context.provides("fitting")) {
+            this.fm = context.provide("fitting", FitPlugin.class).getFitManager();
         } else {
-            this.fm = new FitManager(parentContext);
+            this.fm = new FitManager(context);
         }
 
     }

@@ -21,7 +21,7 @@ public class ClassPathPluginResolver implements PluginResolver {
     public Plugin getPlugin(VersionTag tag) {
         for(Plugin plugin: loader){
             if(tag.matches(plugin.getTag())){
-                return plugin;
+                return plugin.instance();
             }
         }
         return null;

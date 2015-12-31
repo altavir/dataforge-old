@@ -29,6 +29,7 @@ import java.util.Collection;
  */
 @ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name.")
 @ValueDef(name = "preferedPlotter", def = "jFreeChart", info = "A prefered plotting library. It is used if supported by destination PlotFrame.")
+@ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
 public interface Plottable extends Named, Configurable{
 

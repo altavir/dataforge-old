@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.test;
 
 import hep.dataforge.description.DescriptorBuilder;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.fx.MetaEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
@@ -15,8 +16,6 @@ import hep.dataforge.values.Value;
 import java.io.IOException;
 import java.util.List;
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;

@@ -4,7 +4,6 @@ if (!hasProperty('mainClass')) {
 
 dependencies {
     compile project(':dataforge-core')
-    compile project(':dataforge-plots')
     compile 'org.controlsfx:controlsfx:8.40.10'
     compile 'de.jensd:shichimifx:1.+'
 }

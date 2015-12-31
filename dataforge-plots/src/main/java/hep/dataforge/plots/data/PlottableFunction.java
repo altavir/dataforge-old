@@ -36,8 +36,8 @@ public class PlottableFunction extends XYPlottable {
     private final UnivariateFunction function;
     //TODO Сделать построение графика по заданной решетке
 
-    public PlottableFunction(String name, Meta annotation, UnivariateFunction function, double from, double to, int numPoints) {
-        super(name, null);
+    public PlottableFunction(String name, Meta meta, UnivariateFunction function, double from, double to, int numPoints) {
+        super(name, meta);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
@@ -51,14 +51,15 @@ public class PlottableFunction extends XYPlottable {
 
     /**
      * Build function calculated in given data nodes
+     *
      * @param name
-     * @param annotation
+     * @param meta
      * @param function
      * @param data
-     * @param xName 
+     * @param xName
      */
-    public PlottableFunction(String name, Meta annotation, UnivariateFunction function, Iterable<DataPoint> data, String xName) {
-        super(name, null);
+    public PlottableFunction(String name, Meta meta, UnivariateFunction function, Iterable<DataPoint> data, String xName) {
+        super(name, meta);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;

@@ -27,7 +27,7 @@ import hep.dataforge.meta.SimpleConfigurable;
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     public BasicPlugin() {
-        setConfig(getDefinition());
+        super.configure(getDefinition());
     }
 
     private Meta getDefinition() {

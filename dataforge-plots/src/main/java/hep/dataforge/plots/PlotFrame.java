@@ -20,6 +20,8 @@ import hep.dataforge.content.Named;
 
 import hep.dataforge.description.ValueDef;
 import java.util.Collection;
+import javafx.collections.ObservableList;
+import javafx.scene.layout.AnchorPane;
 
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
@@ -69,7 +71,13 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      *
      * @return
      */
-    Collection<? extends T> getAll();
+    ObservableList<? extends T> getAll();
 
-    //TODO make override annotation for all plottables
+    
+    /**
+     * Display plot in JavaFx container
+     * @param container 
+     */
+    PlotFrame<T> display(AnchorPane container);
+    
 }

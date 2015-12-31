@@ -15,12 +15,11 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -31,8 +30,7 @@ import java.util.stream.Collectors;
  */
 public class Configuration extends MuttableMetaNode<Configuration> {
 
-    protected final Set<ConfigChangeListener> observers = new HashSet<>();
-    //TODO replace by registry
+    protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
     public Configuration(String name, Configuration parent) {
         super(name, parent);
@@ -40,7 +38,8 @@ public class Configuration extends MuttableMetaNode<Configuration> {
 
     /**
      * Create empty configuration
-     * @param name 
+     *
+     * @param name
      */
     public Configuration(String name) {
         super(name);
@@ -99,7 +98,7 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * @param observer
      */
     public void addObserver(ConfigChangeListener observer) {
-        this.observers.add(observer);
+        this.observers.add(observer, true);
     }
 
     /**
@@ -152,6 +151,5 @@ public class Configuration extends MuttableMetaNode<Configuration> {
     protected Configuration cloneNode(Meta node) {
         return new Configuration(node);
     }
-    
-    
+
 }
