@@ -73,9 +73,9 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 
     }
 
-    protected MetaBuilder(String name, MetaBuilder parent) {
-        super(name, parent);
-    }
+//    protected MetaBuilder(String name, MetaBuilder parent) {
+//        super(name, parent);
+//    }
 
     /**
      * return an immutable annotation base on this builder
@@ -291,7 +291,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      */
     @Override
     protected MetaBuilder createChildNode(String name) {
-        return new MetaBuilder(name, this);
+        return new MetaBuilder(name);
     }
 
     @Override

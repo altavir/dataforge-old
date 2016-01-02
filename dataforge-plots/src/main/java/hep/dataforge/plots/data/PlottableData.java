@@ -29,6 +29,8 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 

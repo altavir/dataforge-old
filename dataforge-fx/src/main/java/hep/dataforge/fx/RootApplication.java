@@ -43,6 +43,10 @@ public class RootApplication extends Application {
         new Thread(() -> launch()).start();
     }
 
+    /**
+     * Show new Stage in a separate window. Supplier should not show window, only construct stage.
+     * @param sup 
+     */
     public static void show(Supplier<Stage> sup) {
         Stage primaStage = primaryStage();
         Platform.runLater(() -> {

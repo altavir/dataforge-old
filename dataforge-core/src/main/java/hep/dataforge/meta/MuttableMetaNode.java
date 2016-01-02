@@ -16,7 +16,6 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
@@ -35,10 +34,10 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 
     protected T parent;
 
-    public MuttableMetaNode(String name, T parent) {
-        super(name);
-        this.parent = parent;
-    }
+//    public MuttableMetaNode(String name, T parent) {
+//        super(name);
+//        this.parent = parent;
+//    }
 
     public MuttableMetaNode(String name) {
         super(name);
@@ -378,7 +377,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     }
 
     /**
-     * Create but do not add new child node
+     * Create but do not attach new child node
      *
      * @param name
      * @return

@@ -33,7 +33,6 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -57,7 +56,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
@@ -121,32 +119,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     private final JFreeChart chart;
     private final XYPlot plot;
 
-    /**
-     * Draw new JFrame containing this plot. Use this method only for test
-     * purposes. In other cases use PlotHolder.
-     *
-     * @deprecated use FXPlotUtils instead
-     * @param name
-     * @param annotation
-     * @return
-     */
-    @Deprecated
-    public static JFreeChartFrame drawFrame(String name, Meta annotation) {
-        JFrame frame = new JFrame(name);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(800, 600));
-        frame.setContentPane(panel);
-
-        SwingUtilities.invokeLater(() -> {
-            frame.pack();
-            frame.setVisible(true);
-        });
-        JFreeChartFrame jfcFrame = new JFreeChartFrame(name, annotation);
-        jfcFrame.display(panel);
-        return jfcFrame;
-    }
-
     private static Action exportAction(JFreeChart t) {
         return new AbstractAction("Export JFC") {
             @Override
@@ -194,9 +166,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         if (meta == null) {
             meta = Meta.buildEmpty("plot");
         }
-//        ValueAxis xaxis = getNumberAxis(meta.getNode("xAxis", Meta.buildEmpty("xAxis")));
-//        ValueAxis yaxis = getNumberAxis(meta.getNode("yAxis", Meta.buildEmpty("YAxis")));
-//        plot = new XYPlot(new XYIntervalSeriesCollection(), xaxis, yaxis, new XYErrorRenderer());
         plot = new XYPlot();
 
         String title = meta.getString("frameTitle", name);
@@ -207,7 +176,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
         chart = new JFreeChart(title, plot);
         super.configure(meta);
-//        applyConfig(meta);
     }
 
     @Override
@@ -424,7 +392,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
             }
 
-            Color color = PlotUtils.getColor(meta);
+            Color color = PlotUtils.getAWTColor(meta);
             if (color != null) {
                 render.setSeriesPaint(0, color);
             }

@@ -52,7 +52,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public void remove(String plotName) {
         get(plotName).removeListener(this);
-        plottables.remove(plotName);
+        plottables.removeIf(pl->pl.getName().equals(plotName));
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public String getName() {
         if (name == null || name.isEmpty()) {
-            return meta().getString("frame_name");
+            return meta().getString("frameName","default");
         } else {
             return name;
         }

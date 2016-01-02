@@ -32,12 +32,11 @@ public class Configuration extends MuttableMetaNode<Configuration> {
 
     protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
-    public Configuration(String name, Configuration parent) {
-        super(name, parent);
-    }
-
+//    private Configuration(String name, Configuration parent) {
+//        super(name, parent);
+//    }
     /**
-     * Create empty configuration
+     * Create empty root configuration
      *
      * @param name
      */
@@ -46,20 +45,20 @@ public class Configuration extends MuttableMetaNode<Configuration> {
     }
 
     /**
-     * A deep copy constructor
+     * Create a root configuration populated by given meta
      *
-     * @param annotation
+     * @param meta
      */
-    public Configuration(Meta annotation) {
-        super(annotation.getName());
-        Collection<String> valueNames = annotation.getValueNames();
+    public Configuration(Meta meta) {
+        super(meta.getName());
+        Collection<String> valueNames = meta.getValueNames();
         for (String valueName : valueNames) {
-            setValueItem(valueName, annotation.getValue(valueName));
+            setValueItem(valueName, meta.getValue(valueName));
         }
 
-        Collection<String> elementNames = annotation.getNodeNames();
+        Collection<String> elementNames = meta.getNodeNames();
         for (String elementName : elementNames) {
-            List<Configuration> item = annotation.getNodes(elementName).stream()
+            List<Configuration> item = meta.getNodes(elementName).stream()
                     .<Configuration>map((an) -> new Configuration(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
@@ -88,7 +87,8 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      */
     @Override
     protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
-        observers.stream().forEach((ConfigChangeListener obs) -> obs.notifyValueChanged(name, oldItem, newItem));
+        observers.stream().forEach((ConfigChangeListener obs)
+                -> obs.notifyValueChanged(name, oldItem, newItem));
         super.notifyValueChanged(name, oldItem, newItem);
     }
 
@@ -142,9 +142,26 @@ public class Configuration extends MuttableMetaNode<Configuration> {
         return currentState();
     }
 
+    /**
+     * Return existing node if it exists, otherwise build and attach empty child
+     * node
+     *
+     * @param name
+     * @return
+     */
+    public Configuration requestNode(String name) {
+        if (hasNode(name)) {
+            return getNode(name);
+        } else {
+            Configuration child = createChildNode(name);
+            super.attachNode(child);
+            return child;
+        }
+    }
+
     @Override
     protected Configuration createChildNode(String name) {
-        return new Configuration(name, this);
+        return new Configuration(name);
     }
 
     @Override

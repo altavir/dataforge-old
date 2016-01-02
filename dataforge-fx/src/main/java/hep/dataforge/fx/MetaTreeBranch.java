@@ -65,13 +65,10 @@ public class MetaTreeBranch implements MetaTree {
      * Build new node from default if it was not existing before
      */
     void buildNode() {
-        if (isDefault() && parent != null) {
-            //building node if empty
-            parent.buildNode();
-            //creating new configuration node
-            this.node = new Configuration(getName(), parent.node);
-            //adding this node to parent
-            parent.node.putNode(node);
+        if (node == null && parent != null) {
+            //building node
+            this.node = new Configuration(getName());
+            parent.getNode().attachNode(node);
         }
     }
 
@@ -80,7 +77,9 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     public Configuration getNode() {
-        buildNode();
+        if (node == null) {
+            buildNode();
+        }
         return node;
     }
 

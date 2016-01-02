@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import java.awt.Color;
 
@@ -24,13 +25,26 @@ import java.awt.Color;
  */
 public class PlotUtils {
 
-    public static Color getColor(Meta reader) {
+    public static Color getAWTColor(Meta reader) {
         if (reader.hasValue("color")) {
             javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.valueOf(reader.getString("color"));
             return new Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue());
         } else {
             return null;
         }
+    }
+
+    public static void setAWTColor(Configuration config, Color color) {
+        javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.rgb(
+                color.getRed(),
+                color.getGreen(),
+                color.getBlue(),
+                color.getTransparency()
+        );
+        config.setValue("color", String.format("#%02X%02X%02X",
+                (int) (color.getRed() * 255),
+                (int) (color.getGreen() * 255),
+                (int) (color.getBlue() * 255)));
     }
 
     public static double getThickness(Meta reader) {

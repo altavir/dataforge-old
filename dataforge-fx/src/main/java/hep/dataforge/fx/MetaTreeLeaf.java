@@ -42,10 +42,7 @@ public class MetaTreeLeaf implements MetaTree {
 
     @Override
     public void setValue(Value value) {
-        if (parent.isDefault()) {
-            parent.buildNode();
-        }
-        parent.node.setValue(name, value);
+        parent.getNode().setValue(name, value);
     }
 
     @Override

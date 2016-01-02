@@ -147,7 +147,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param config
      */
     public void configure(Meta config) {
-        if (configuration == null) {
+        if (this.configuration == null) {
             setConfig(config);
         } else {
             this.configuration.update(config);

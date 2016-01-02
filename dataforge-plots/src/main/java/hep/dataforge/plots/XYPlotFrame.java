@@ -62,16 +62,15 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
     protected abstract void updateFrame(Meta annotation);
 
     public Configuration getXAxisConfig() {
-        //TODO add requestNode method to Confgiuration which does the same thing
-        return getConfig().getNode("xAxis", new Configuration("xAxis", getConfig()));
+        return getConfig().requestNode("xAxis");
     }
 
     public Configuration getYAxisConfig() {
-        return getConfig().getNode("yAxis", new Configuration("yAxis", getConfig()));
+        return getConfig().requestNode("yAxis");
     }
 
     public Configuration getLegendConfig() {
-        return getConfig().getNode("legend", new Configuration("legend", getConfig()));
+        return getConfig().requestNode("legend");
     }
 
     /**

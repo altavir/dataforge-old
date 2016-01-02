@@ -32,7 +32,6 @@ public class MetaEditorTest extends Application {
     @Override
     public void start(Stage primaryStage) throws IOException {
 
-
         Configuration config = new Configuration("test")
                 .setValue("testValue", "[1,2,3]")
                 .setValue("anotherTestValue", 15)
@@ -53,6 +52,8 @@ public class MetaEditorTest extends Application {
                 .addNode(new DescriptorBuilder("childNode")
                         .setInfo("A child Node")
                         .addValue("childValue", "BOOLEAN", "A child boolean node"))
+                .addNode(new DescriptorBuilder("descriptedNode")
+                        .setInfo("A descripted node"))
                 .build();
 
         config.addObserver(new ConfigChangeListener() {

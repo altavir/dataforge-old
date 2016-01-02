@@ -61,7 +61,7 @@ public class PlotContainerTest {
 
         PlottableData dataPlot = new PlottableData(ds, "myX", "myY", "myXErr", "myYErr");
 
-        frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("type", "log"));
+        frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 
         frame.add(dataPlot);
     }

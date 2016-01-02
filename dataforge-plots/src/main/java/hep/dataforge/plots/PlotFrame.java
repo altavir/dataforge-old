@@ -19,7 +19,6 @@ import hep.dataforge.meta.Configurable;
 import hep.dataforge.content.Named;
 
 import hep.dataforge.description.ValueDef;
-import java.util.Collection;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.AnchorPane;
 
