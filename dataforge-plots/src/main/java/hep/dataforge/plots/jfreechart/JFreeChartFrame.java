@@ -33,6 +33,7 @@ import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -183,7 +184,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         Runnable run = () -> {
             SwingNode viewer = new SwingNode();
             JPanel panel = new JPanel(new BorderLayout(), true);
-            panel.removeAll();
 
             display(panel);
             viewer.setContent(panel);
@@ -194,8 +194,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             AnchorPane.setLeftAnchor(viewer, 0d);
             AnchorPane.setRightAnchor(viewer, 0d);
         };
-        
-        if(Platform.isFxApplicationThread()){
+
+        if (Platform.isFxApplicationThread()) {
             run.run();
         } else {
             Platform.runLater(run);
@@ -205,9 +205,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     }
 
     public JFreeChartFrame display(Container panel) {
-//        panel.removeAll();
         ChartPanel cp = new ChartPanel(getChart());
-
         cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
 
         panel.add(cp);
@@ -240,9 +238,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         logAxis.setMinorTickMarksVisible(true);
         logAxis.setAutoRange(true);
         logAxis.setAllowNegativesFlag(false);
-//        logAxis.setAutoTickUnitSelection(false);
-//        logAxis.setNumberFormatOverride(new DecimalFormat("0E0"));
-//        logAxis.setSmallestValue(1e-20);
         return logAxis;
     }
 
@@ -356,7 +351,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         }
         int num = index.indexOf(name);
 
-        Meta meta = new Laminate(plottable.getConfig(), meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
+        Meta meta = new Laminate(plottable.getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
         SwingUtilities.invokeLater(() -> {
 
             XYLineAndShapeRenderer render;
@@ -365,7 +360,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             if (meta.getBoolean("showErrors", false)) {
                 render = new XYErrorRenderer();
             } else {
-                switch (meta.getString("connectionType", "default")) {
+                switch (meta.getString("lineType", "default")) {
                     case "step":
                         render = new XYStepRenderer();
                         break;
@@ -392,14 +387,18 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
             }
 
+            plot.setRenderer(num, render);
+
             Color color = PlotUtils.getAWTColor(meta);
             if (color != null) {
                 render.setSeriesPaint(0, color);
+            } else {
+                Paint paint = render.lookupSeriesPaint(0);
+                if (paint instanceof Color) {
+                    plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+                }
             }
-
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-
-            plot.setRenderer(num, render);
         });
 
     }

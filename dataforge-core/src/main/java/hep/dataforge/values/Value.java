@@ -113,57 +113,22 @@ public interface Value extends Comparable<Value>, Serializable {
         return new BooleanValue(b);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param d a double.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(double d) {
         return new NumberValue(d);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param i a int.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(int i) {
         return new NumberValue(i);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param l a long.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(long l) {
         return new NumberValue(l);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param bd a {@link java.math.BigDecimal} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(BigDecimal bd) {
         return new NumberValue(bd);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param t a {@link java.time.Instant} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(LocalDateTime t) {
         return new TimeValue(LocalDateTime.from(t));
     }
@@ -195,12 +160,6 @@ public interface Value extends Comparable<Value>, Serializable {
         }
     }
 
-    /**
-     * <p>
-     * getNull.</p>
-     *
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value getNull() {
         return NULL;
     }

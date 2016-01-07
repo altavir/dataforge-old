@@ -19,10 +19,9 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.PointListener;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.exceptions.StorageQueryException;
-import hep.dataforge.values.Value;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import java.util.Collection;
 
 /**
@@ -33,8 +32,8 @@ import java.util.Collection;
  * @author Darksnake
  */
 @NodeDef(name = "format", required = true, info = "data point format for this loader")
-@ValueDef(name = "index", def = "", info = "The name of index field for this loader")
-public interface PointLoader extends Loader {
+//@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
+public interface PointLoader extends Loader, Iterable<DataPoint> {
 
     public static final String POINT_LOADER_TYPE = "point";
     public static final String DEFAULT_INDEX_FIELD = "";
@@ -50,42 +49,24 @@ public interface PointLoader extends Loader {
     DataSet asDataSet() throws StorageException;
 
     /**
-     * Search for the index field value closest to provided one. Specific search
-     * mechanism could differ for different loaders.
+     * Build a custom index. In case it is a map index it could be stored
+     * somewhere.
      *
-     * @param value
+     * @param indexMeta
      * @return
-     * @throws hep.dataforge.exceptions.StorageException
      */
-    DataPoint pull(Value value) throws StorageException;
+    Index<DataPoint> buildIndex(Meta indexMeta);
 
     /**
-     * Возвращает список точек, ключ которых лежит строго в пределах от from до
-     * to. Работает только для сравнимых значений (для строк может выдавать
-     * ерунду)
+     * Get index for given value name. If name is null or empty, default point
+     * number index is returned. This operation chooses the fastest existing
+     * index or creates new one (if index is created than it is optimized for
+     * single operation performance).
      *
-     * @param from
-     * @param to
+     * @param name
      * @return
-     * @throws hep.dataforge.exceptions.StorageException
      */
-    default DataSet pull(Value from, Value to) throws StorageException {
-        return pull(from, to, Integer.MAX_VALUE);
-    }
-
-    /**
-     * Возвращает список точек, ключ которых лежит строго в пределах от from до
-     * to. В случае если число точек в диапазоне превышает {@code maxItems},
-     * выкидывает не все точки, а точки с некоторым шагом. Методика фильтрации
-     * специфична за загрузчика.
-     *
-     * @param from
-     * @param to
-     * @param maxItems
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    DataSet pull(Value from, Value to, int maxItems) throws StorageException;
+    Index<DataPoint> getIndex(String name);
 
     /**
      * Push the DataPoint to the loader.
@@ -105,32 +86,15 @@ public interface PointLoader extends Loader {
     void push(Collection<DataPoint> dps) throws StorageException;
 
     /**
-     * Pull a number of points according to given Query. If query is supported
-     * but no matching results found, empty list is returned. The results are
-     * supposed to be ordered, but it is not guaranteed.
-     *
-     * @param query
-     * @return
-     * @throws StorageQueryException
-     */
-    DataSet pull(Query query) throws StorageException;
-
-    /**
-     * The name of main index field
-     * @return 
-     */
-    default String indexField() {
-        return meta().getString("index", DEFAULT_INDEX_FIELD);
-    }
-    
-    /**
      * Set a PointListener which is called on each push operations
-     * @param listener 
+     *
+     * @param listener
      */
     void addPointListener(PointListener listener);
-    
+
     /**
-     * Remove current PointLostener. If no PointListener is registered, do nothing.
+     * Remove current PointLostener. If no PointListener is registered, do
+     * nothing.
      */
     void removePointListener(PointListener listener);
 

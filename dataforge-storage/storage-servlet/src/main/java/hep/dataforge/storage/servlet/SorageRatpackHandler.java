@@ -138,12 +138,14 @@ public class SorageRatpackHandler implements Handler {
 
             Map data = new HashMap(2);
 
+            
+            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName","timestamp");
             String from = ctx.getRequest().getQueryParams().get("from");
             String to = ctx.getRequest().getQueryParams().get("to");
             String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
 
             data.put("loaderName", loader.getName());
-            data.put("data", loader.pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
+            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 
             StringWriter writer = new StringWriter();
             template.process(data, writer);

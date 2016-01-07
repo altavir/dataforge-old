@@ -19,6 +19,7 @@ import hep.dataforge.actions.ActionResult;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataSet;
+import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.description.TypedActionDef;
@@ -46,14 +47,6 @@ import org.slf4j.LoggerFactory;
  */
 @TypedActionDef(name = "plotData",
         description = "Scatter plot of given DataSet", inputType = DataSet.class, outputType = DataSet.class)
-@ValueDef(name = "xName", def = "x",
-        info = "The name of X Value in the DataSet")
-@ValueDef(name = "yName", def = "y",
-        info = "The name of Y Value in the DataSet")
-@ValueDef(name = "xErrName", def = "xErr",
-        info = "The name of X error Value in the DataSet (currently not working)")
-@ValueDef(name = "yErrName", def = "yErr",
-        info = "The name of Y error Value in the DataSet (currently not working)")
 @ValueDef(name = "plotFrameName", def = "default",
         info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
 @ValueDef(name = "plotTitle", def = "",
@@ -70,6 +63,7 @@ import org.slf4j.LoggerFactory;
         info = "Save plot shapshots to file with default parameters")
 @ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
         info = "Serialize plot to file with default parameters")
+@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.data.XYDataAdapter")
 
 public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
 
@@ -114,12 +108,9 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
         } else {
             frame = holder.buildPlotFrame(frame_name, findFrameDescription(finder, frame_name));
         }
-
-        frame.add(new PlottableData(input,
-                finder.getString("xName"),
-                finder.getString("yName"),
-                finder.getString("xErrName"),
-                finder.getString("yErrName")));
+        XYDataAdapter adapter = new XYDataAdapter(finder.getNode("adapter",Meta.buildEmpty("adapter")));
+        
+        frame.add(PlottableData.plot(input,adapter));
 
         if (finder.hasNode("snapshot")) {
             snapshot(log, frame, finder.getNode("snapshot"));

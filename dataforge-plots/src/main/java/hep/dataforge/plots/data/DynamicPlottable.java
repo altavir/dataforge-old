@@ -144,11 +144,11 @@ public class DynamicPlottable extends XYPlottable {
 
         @Override
         protected boolean removeEldestEntry(Entry<Instant, DataPoint> eldest) {
-            int maxItems = getInt("maxItems", -1);
+            int maxItems = meta().getInt("maxItems", -1);
             if (maxItems > 0 && size() > maxItems) {
                 return true;
             }
-            int maxAge = getInt("maxAge", -1);
+            int maxAge = meta().getInt("maxAge", -1);
             if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(),lastUpdate).toMillis() > maxAge) {
                 return true;
             }

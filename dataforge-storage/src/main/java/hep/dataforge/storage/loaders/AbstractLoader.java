@@ -34,24 +34,29 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractLoader implements Loader {
 
     private final String name;
-    private final Meta annotation;
+    protected Meta meta;
     protected boolean readOnly = false;
     private final Storage storage;
 
     public AbstractLoader(Storage storage, String name, Meta annotation) {
         this.name = name;
-        this.annotation = annotation;
+        this.meta = annotation;
+        this.storage = storage;
+    }
+
+    public AbstractLoader(Storage storage, String name) {
+        this.name = name;
         this.storage = storage;
     }
 
     @Override
     public void close() throws Exception {
-
+        meta = null;
     }
 
     @Override
     public Meta meta() {
-        return annotation;
+        return meta;
     }
 
     @Override
@@ -74,14 +79,17 @@ public abstract class AbstractLoader implements Loader {
         return this.readOnly || meta().getBoolean("readonly", false);
     }
 
+    /**
+     * Loader meta must be set here if it is not set by constructor
+     *
+     * @throws Exception
+     */
     @Override
-    public void open() throws Exception{
-
-    }
+    public abstract void open() throws Exception;
 
     @Override
     public boolean isOpen() {
-        return true;
+        return meta != null;
     }
 
     protected void setReadOnly(boolean readOnly) {
@@ -124,7 +132,7 @@ public abstract class AbstractLoader implements Loader {
         if (envelope.meta().hasNode(ENVELOPE_TARGET_NODE)) {
             Meta target = envelope.meta().getNode(ENVELOPE_TARGET_NODE);
             String targetType = target.getString(TARGET_TYPE_KEY, LOADER_TARGET_TYPE);
-            if(targetType.equals(LOADER_TARGET_TYPE)){
+            if (targetType.equals(LOADER_TARGET_TYPE)) {
                 String targetName = target.getString(TARGET_NAME_KEY);
                 return targetName.endsWith(getName());
             } else {
@@ -135,17 +143,6 @@ public abstract class AbstractLoader implements Loader {
             return true;
         }
     }
-    
-    
-
-//    @Override
-//    public Envelope respond(Envelope message) {
-//        try {
-//            return StorageMessageUtils.evaluateRequest(this, message);
-//        } catch (StorageException ex) {
-//            return exceptionResponse(message, ex);
-//        }
-//    }
 
     @Override
     public Meta targetDescription() {
@@ -153,5 +150,15 @@ public abstract class AbstractLoader implements Loader {
                 .putValue(TARGET_TYPE_KEY, LOADER_TARGET_TYPE)
                 .putValue(TARGET_NAME_KEY, getName())
                 .build();
+    }
+
+    protected void checkOpen() {
+        if (!isOpen()) {
+            try {
+                open();
+            } catch (Exception ex) {
+                throw new RuntimeException("Can't open loader", ex);
+            }
+        }
     }
 }

@@ -74,7 +74,11 @@ public class DescriptorUtils {
     }
 
     public static NodeDescriptor buildDescriptor(Object obj) {
-        return buildDescriptor(obj.getClass());
+        if (obj instanceof Described) {
+            return ((Described) obj).getDescriptor();
+        } else {
+            return buildDescriptor(obj.getClass());
+        }
     }
 
     public static NodeDescriptor buildDescriptor(AnnotatedElement element) {

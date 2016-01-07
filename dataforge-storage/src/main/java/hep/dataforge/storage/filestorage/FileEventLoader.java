@@ -21,15 +21,12 @@ import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
-import static hep.dataforge.storage.filestorage.FilePointLoader.isValidFilePointLoaderEnvelope;
 import hep.dataforge.storage.loaders.AbstractEventLoader;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Iterator;
 import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.VFS;
 
 /**
  *
@@ -41,8 +38,8 @@ public class FileEventLoader extends AbstractEventLoader {
     private static final byte[] NEWLINE = {'\r', '\n'};
 
     public static FileEventLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file, readOnly)) {
-            if (isValidFilePointLoaderEnvelope(envelope)) {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+            if (isValidFileEventLoaderEnvelope(envelope)) {
                 FileEventLoader res = new FileEventLoader(file.getURL().toString(),
                         storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
                         envelope.meta());
@@ -67,13 +64,15 @@ public class FileEventLoader extends AbstractEventLoader {
         super(storage, name, annotation);
         this.filePath = filePath;
     }
+    
 
     @Override
     public void open() throws Exception {
+        if(this.meta == null){
+            this.meta = getFile().meta();
+        }
         if (!isOpen()) {
-            super.open();
-            FileObject fileObject = VFS.getManager().resolveFile(filePath);
-            file = new FileEnvelope(fileObject, isReadOnly());
+            file = new FileEnvelope(filePath, isReadOnly());
         }
     }
 
@@ -84,7 +83,7 @@ public class FileEventLoader extends AbstractEventLoader {
 
     @Override
     public void close() throws Exception {
-        file.close();
+        getFile().close();
         file = null;
         super.close();
     }
@@ -108,26 +107,36 @@ public class FileEventLoader extends AbstractEventLoader {
     protected void pushDirect(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
-                file.append(event.toString().getBytes(CHARSET));
-                file.append(NEWLINE);
-            } catch (IOException ex) {
+                getFile().append(event.toString().getBytes(CHARSET));
+                getFile().append(NEWLINE);
+            } catch (Exception ex) {
                 throw new StorageException(ex);
             }
         }
     }
 
-    /**
-     * Get the whole log as a String
-     *
-     * @return
-     */
-    public String getLog() {
-        return new String(file.getData().array(), CHARSET);
-    }
+//    /**
+//     * Get the whole log as a String
+//     *
+//     * @return
+//     */
+//    public String getLog() {
+//        return new String(getFile().getData().array(), CHARSET);
+//    }
 
     @Override
     public Iterator iterator() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
+    /**
+     * @return the file
+     */
+    private FileEnvelope getFile() throws Exception {
+        if(file == null){
+            open();
+        }
+        return file;
     }
 
 }

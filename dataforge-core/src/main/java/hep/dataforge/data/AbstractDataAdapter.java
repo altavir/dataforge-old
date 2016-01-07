@@ -17,22 +17,26 @@ public abstract class AbstractDataAdapter implements DataAdapter {
     public AbstractDataAdapter() {
         meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
     }
-    
+
     public AbstractDataAdapter(Meta meta) {
-        this.meta = meta;
+        if (meta == null) {
+            this.meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
+        } else {
+            this.meta = meta;
+        }
     }
-    
+
     /**
-     * 
-     * @param map 
+     *
+     * @param map
      */
-    public AbstractDataAdapter(Map<String,String> map) {
+    public AbstractDataAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_ANNOTATION_NAME);
         map.entrySet().stream().forEach((entry) -> {
             mb.setValue(entry.getKey(), entry.getValue());
         });
         this.meta = mb.build();
-    }    
+    }
 
     @Override
     public Meta meta() {
@@ -59,5 +63,5 @@ public abstract class AbstractDataAdapter implements DataAdapter {
         //One could add name caching here to avoid multiple meta request
         return meta().getString(valueName, valueName);
     }
-    
+
 }

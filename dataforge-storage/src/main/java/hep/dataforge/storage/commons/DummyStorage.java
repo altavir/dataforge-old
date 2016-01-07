@@ -24,7 +24,7 @@ import hep.dataforge.storage.loaders.AbstractLoader;
 
 /**
  * Пустой сервер. Вместо записи в файл, кидает на консоль
- *  
+ *
  * @author Darksnake
  */
 public class DummyStorage extends AbstractStorage {
@@ -33,20 +33,18 @@ public class DummyStorage extends AbstractStorage {
         super(name);
     }
 
-
     public DummyStorage() {
         super(null);
     }
 
-    
     @Override
     public Loader buildLoader(Meta loaderConfig) throws StorageException {
         return new DummyLoader(this);
     }
-    
+
     @Override
     public void close() throws Exception {
-        
+
     }
 
     @Override
@@ -54,7 +52,7 @@ public class DummyStorage extends AbstractStorage {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
-    private static class DummyLoader extends AbstractLoader{
+    private static class DummyLoader extends AbstractLoader {
 
         public DummyLoader(Storage storage) {
             super(storage, "dummy", null);
@@ -64,14 +62,16 @@ public class DummyStorage extends AbstractStorage {
         public Envelope respond(Envelope message) {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
         }
-        
 
         @Override
         public boolean isEmpty() {
             return true;
         }
-        
-        
+
+        @Override
+        public void open() throws Exception {
+
+        }
     }
-    
+
 }

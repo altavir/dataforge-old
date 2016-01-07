@@ -19,12 +19,16 @@ import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
+import javafx.scene.control.Control;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.TreeSortMode;
+import javafx.scene.control.TreeTableCell;
 import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
+import javafx.scene.text.Text;
 import javafx.util.StringConverter;
 import org.slf4j.LoggerFactory;
 
@@ -83,6 +87,8 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+//        metaEditorTable.setShowRoot(false);
+        metaEditorTable.setSortMode(TreeSortMode.ALL_DESCENDANTS);
         nameColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<MetaTree, String> param)
                 -> param.getValue().getValue().nameProperty());
@@ -171,6 +177,17 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             };
 
         });
+        
+        descriptionColumn.setCellFactory((TreeTableColumn<MetaTree, String> param) -> {
+            TreeTableCell<MetaTree, String> cell = new TreeTableCell<>();
+            Text text = new Text();
+            cell.setGraphic(text);
+            cell.setPrefHeight(Control.USE_COMPUTED_SIZE);
+            text.wrappingWidthProperty().bind(param.widthProperty());
+            text.textProperty().bind(cell.itemProperty());
+            return cell;
+        });
+
     }
 
     public final void setRoot(MetaTreeItem rootItem) {

@@ -15,10 +15,10 @@
  */
 package hep.dataforge.content;
 
+import hep.dataforge.description.Described;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.description.DescriptorUtils;
-import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.navigation.ValueProvider;
 import hep.dataforge.values.Value;
 import java.io.Serializable;
@@ -29,7 +29,7 @@ import java.io.Serializable;
  *
  * @author Alexander Nozik
  */
-public interface Content extends Serializable, Named, Annotated, ValueProvider {
+public interface Content extends Serializable, Named, Annotated, ValueProvider, Described {
 
     /**
      * An unique name of the content
@@ -49,10 +49,6 @@ public interface Content extends Serializable, Named, Annotated, ValueProvider {
      * @return
      */
     Content configure(Meta a);
-
-    default NodeDescriptor getDescriptor() {
-        return DescriptorUtils.buildDescriptor(this.getClass());
-    }
 
     @Override
     Meta meta();

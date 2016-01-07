@@ -38,7 +38,6 @@ public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
      */
     void push(T event) throws StorageException;
 
-//    List<T> pull(LocalDateTime from, LocalDateTime to) throws StorageException;
     /**
      * Add named listener for specific events
      *

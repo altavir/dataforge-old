@@ -20,6 +20,7 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.ListDataSet;
 import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.data.PlottableData;
@@ -59,7 +60,7 @@ public class PlotContainerTest {
         data.add(new MapDataPoint(names, 3d, 7d, 0, 0.5));
         DataSet ds = new ListDataSet("data", null, data);
 
-        PlottableData dataPlot = new PlottableData(ds, "myX", "myY", "myXErr", "myYErr");
+        PlottableData dataPlot = PlottableData.plot(ds, new XYDataAdapter("myX", "myY", "myXErr", "myYErr"));
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 

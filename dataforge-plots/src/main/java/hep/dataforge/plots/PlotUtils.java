@@ -34,17 +34,17 @@ public class PlotUtils {
         }
     }
 
-    public static void setAWTColor(Configuration config, Color color) {
+    public static String awtColorToString(Color color) {
         javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.rgb(
                 color.getRed(),
                 color.getGreen(),
                 color.getBlue(),
                 color.getTransparency()
         );
-        config.setValue("color", String.format("#%02X%02X%02X",
-                (int) (color.getRed() * 255),
-                (int) (color.getGreen() * 255),
-                (int) (color.getBlue() * 255)));
+        return String.format("#%02X%02X%02X",
+                (int) (fxColor.getRed() * 255),
+                (int) (fxColor.getGreen() * 255),
+                (int) (fxColor.getBlue() * 255));
     }
 
     public static double getThickness(Meta reader) {

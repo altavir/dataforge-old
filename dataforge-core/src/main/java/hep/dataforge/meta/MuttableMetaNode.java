@@ -38,7 +38,6 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 //        super(name);
 //        this.parent = parent;
 //    }
-
     public MuttableMetaNode(String name) {
         super(name);
         this.parent = null;
@@ -82,8 +81,9 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * it does not exist.
      *
      * @param element
+     * @param notify notify listeners
      */
-    public T putNode(Meta element) {
+    public T putNode(Meta element, boolean notify) {
         if (element.isAnonimous()) {
             throw new AnonymousNotAlowedException();
         }
@@ -102,20 +102,34 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         } else {
             list.add(transformNode(element));
         }
-        notifyNodeChanged(element.getName(), oldList, list);
+        if (notify) {
+            notifyNodeChanged(element.getName(), oldList, list);
+        }
         return currentState();
     }
 
     /**
-     * Add new value to the value item with the given name. Create new one if it
-     * does not exist. null arguments are ignored (Value.NULL is still could be used)
+     * putNode(element,true)
      *
-     * @param name a {@link java.lang.String} object.
-     * @param value a {@link hep.dataforge.values.Value} object.
+     * @param element
+     * @return
      */
-    public T putValue(String name, Value value) {
+    public T putNode(Meta element) {
+        return putNode(element, true);
+    }
+
+    /**
+     * Add new value to the value item with the given name. Create new one if it
+     * does not exist. null arguments are ignored (Value.NULL is still could be
+     * used)
+     *
+     * @param name
+     * @param value
+     * @param notify notify listeners
+     */
+    public T putValue(String name, Value value, boolean notify) {
         if (!isValidElementName(name)) {
-            throw new NamingException(String.format("\"%s\" is not a valid element name in the meta", name));
+            throw new NamingException(String.format("'%s' is not a valid element name in the meta", name));
         }
 
         if (value != null) {
@@ -129,12 +143,25 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 
                 this.values.put(name, newValue);
 
-                notifyValueChanged(name, oldValue, newValue);
+                if (notify) {
+                    notifyValueChanged(name, oldValue, newValue);
+                }
             } else {
                 this.values.put(name, value);
             }
         }
         return currentState();
+    }
+
+    /**
+     * putValue(name, value, true)
+     *
+     * @param name
+     * @param value
+     * @return
+     */
+    public T putValue(String name, Value value) {
+        return putValue(name, value, true);
     }
 
     /**
@@ -156,7 +183,15 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         return currentState();
     }
 
-    public T setNode(String name, List<? extends Meta> elements) {
+    /**
+     * Set or replace current node or node list with this name
+     *
+     * @param name
+     * @param elements
+     * @param notify
+     * @return
+     */
+    public T setNode(String name, List<? extends Meta> elements, boolean notify) {
         if (elements != null && !elements.isEmpty()) {
             List<T> oldNodeItem;
             if (hasNode(name)) {
@@ -165,11 +200,24 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
                 oldNodeItem = null;
             }
             setNodeItem(name, elements);
-            notifyNodeChanged(name, oldNodeItem, getNodeItem(name));
+            if (notify) {
+                notifyNodeChanged(name, oldNodeItem, getNodeItem(name));
+            }
         } else {
             removeNode(name);
         }
         return currentState();
+    }
+
+    /**
+     * setNode(name,elements,true)
+     *
+     * @param name
+     * @param elements
+     * @return
+     */
+    public T setNode(String name, List<? extends Meta> elements) {
+        return setNode(name, elements, true);
     }
 
     /**
@@ -190,7 +238,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * @param name
      * @param value
      */
-    public T setValue(String name, Value value) {
+    public T setValue(String name, Value value, boolean notify) {
         if (value == null || value.isNull()) {
             removeValue(name);
         } else {
@@ -201,9 +249,21 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
                 oldValueItem = null;
             }
             setValueItem(name, value);
-            notifyValueChanged(name, oldValueItem, value);
+            if (notify) {
+                notifyValueChanged(name, oldValueItem, value);
+            }
         }
         return currentState();
+    }
+    
+    /**
+     * setValue(name, value, true)
+     * @param name
+     * @param value
+     * @return 
+     */
+    public T setValue(String name, Value value) {
+        return setValue(name, value, true);
     }
 
     public T setValue(String name, Object object) {

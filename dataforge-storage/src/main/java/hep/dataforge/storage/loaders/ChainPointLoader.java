@@ -19,11 +19,11 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;
-import hep.dataforge.storage.api.Query;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
-import hep.dataforge.values.Value;
+import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -45,7 +45,7 @@ public class ChainPointLoader extends AbstractPointLoader {
      * @throws StorageException 
      */
     public static ChainPointLoader build(Meta loaderMeta, Storage primaryStorage, Storage secondaryStorage) throws StorageException{
-        if(!StorageUtils.loaderType(loaderMeta).equals(PointLoader.POINT_LOADER_TYPE)){
+        if(!StorageUtils.loaderType(loaderMeta).startsWith(PointLoader.POINT_LOADER_TYPE)){
             throw new RuntimeException("ChainPointLoader requires point loader meta");
         }
         
@@ -69,14 +69,18 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public DataPoint pull(Value value) throws StorageException {
-        return primaryLoader.pull(value);
-        //TODO make pull from secondary loader if point not found in the main one
+    public Index<DataPoint> getIndex(String name) {
+        return primaryLoader.getIndex(name);
     }
 
     @Override
-    public DataSet pull(Value from, Value to, int maxItems) throws StorageException {
-        return primaryLoader.pull(from, to, maxItems);
+    public Index<DataPoint> buildIndex(Meta indexMeta) {
+        return primaryLoader.buildIndex(indexMeta);
+    }
+
+    @Override
+    public Iterator<DataPoint> iterator() {
+        return primaryLoader.iterator();
     }
 
     @Override
@@ -87,11 +91,6 @@ public class ChainPointLoader extends AbstractPointLoader {
         } catch (Exception ex) {
             LoggerFactory.getLogger(getClass()).error("Can't write point to the backup storage", ex);
         }
-    }
-
-    @Override
-    public DataSet pull(Query query) throws StorageException {
-        return primaryLoader.pull(query);
     }
 
     @Override

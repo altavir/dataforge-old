@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.data.XYDataAdapter")
 public abstract class XYPlottable extends AbstractPlottable implements Plottable {
-
+    
     public XYPlottable(String name, Meta annotation) {
         super(name, annotation);
     }

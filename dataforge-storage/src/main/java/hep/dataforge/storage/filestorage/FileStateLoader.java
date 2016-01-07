@@ -20,7 +20,6 @@ import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
-import static hep.dataforge.storage.filestorage.FilePointLoader.isValidFilePointLoaderEnvelope;
 import hep.dataforge.storage.loaders.AbstractStateLoader;
 import hep.dataforge.values.Value;
 import java.io.IOException;
@@ -30,7 +29,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.VFS;
 
 /**
  * A file implementation of state loader
@@ -40,8 +38,8 @@ import org.apache.commons.vfs2.VFS;
 public class FileStateLoader extends AbstractStateLoader {
 
     public static FileStateLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file, readOnly)) {
-            if (isValidFilePointLoaderEnvelope(envelope)) {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+            if (isValidFileStateLoaderEnvelope(envelope)) {
                 FileStateLoader res = new FileStateLoader(file.getURL().toString(),
                         storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
                         envelope.meta());
@@ -68,10 +66,11 @@ public class FileStateLoader extends AbstractStateLoader {
 
     @Override
     public void open() throws Exception {
+        if (this.meta == null) {
+            this.meta = getFile().meta();
+        }
         if (!isOpen()) {
-            super.open();
-            FileObject fileObject = VFS.getManager().resolveFile(filePath);
-            file = new FileEnvelope(fileObject, isReadOnly());
+            file = new FileEnvelope(filePath, isReadOnly());
         }
     }
 
@@ -82,7 +81,7 @@ public class FileStateLoader extends AbstractStateLoader {
 
     @Override
     public void close() throws Exception {
-        file.close();
+        getFile().close();
         file = null;
         super.close();
     }
@@ -90,11 +89,11 @@ public class FileStateLoader extends AbstractStateLoader {
     @Override
     protected void commit() throws StorageException {
         try {
-            file.clearData();
+            getFile().clearData();
             for (Map.Entry<String, Value> entry : states.entrySet()) {
-                file.append(String.format("%s=%s;\r\n", entry.getKey(), entry.getValue().stringValue()).getBytes(Charset.forName("UTF-8")));
+                getFile().append(String.format("%s=%s;\r\n", entry.getKey(), entry.getValue().stringValue()).getBytes(Charset.forName("UTF-8")));
             }
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new StorageException(ex);
         }
     }
@@ -102,10 +101,10 @@ public class FileStateLoader extends AbstractStateLoader {
     @Override
     protected synchronized void update() throws StorageException {
         try {
-            file.resetPos();
+            getFile().resetPos();
             states.clear();
-            while (file.readerPos() < file.eofPos()) {
-                String line = file.readLine().trim();
+            while (getFile().readerPos() < getFile().eofPos()) {
+                String line = getFile().readLine().trim();
                 if (!line.isEmpty()) {
                     Matcher match = Pattern.compile("(?<key>[^=]*)\\s*=\\s*(?<value>.*);").matcher(line);
                     if (match.matches()) {
@@ -116,8 +115,18 @@ public class FileStateLoader extends AbstractStateLoader {
                 }
             }
             upToDate = true;
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             throw new StorageException(ex);
         }
+    }
+
+    /**
+     * @return the file
+     */
+    private FileEnvelope getFile() throws Exception {
+        if(file == null){
+            open();
+        }
+        return file;
     }
 }

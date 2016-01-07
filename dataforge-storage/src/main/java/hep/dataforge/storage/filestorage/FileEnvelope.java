@@ -20,6 +20,7 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Tag;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,53 +30,57 @@ import java.text.ParseException;
 import java.util.Map;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.RandomAccessContent;
+import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.util.RandomAccessMode;
+import org.slf4j.LoggerFactory;
 
 /**
  * A specific envelope to handle file storage format.
  *
  * @author Alexander Nozik
  */
-//TODO add reentrantlock to ensure read/write synchronization
 public class FileEnvelope implements Envelope, AutoCloseable {
 
     public static final long INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1);
     private static final long DATA_SIZE_PROPERTY_OFFSET = 22;
+    private static final String NEWLINE = "\r\n";
 
     private final boolean readOnly;
-    private final FileObject file;
+    private final String uri;
+    private FileObject file;
     private Meta meta;
-    private final RandomAccessContent content;
+    private RandomAccessContent content;
     private Map<String, Value> properties;
     private long dataOffset;
     private long dataSize;
 
-    public FileEnvelope(FileObject file, boolean readOnly) throws IOException, ParseException {
-        this.file = file;
-        readHeader(file);
-        if (readOnly || !file.isWriteable()) {
-            this.readOnly = true;
-            content = file.getContent().getRandomAccessContent(RandomAccessMode.READ);
-        } else {
-            this.readOnly = false;
-            content = file.getContent().getRandomAccessContent(RandomAccessMode.READWRITE);
-        }
+    public FileEnvelope(String uri, boolean readOnly) throws IOException, ParseException {
+        this.uri = uri;
+        this.readOnly = readOnly;
     }
 
     @Override
-    public void close() throws Exception {
-        content.close();
+    public synchronized void close() throws Exception {
+        if (content != null) {
+            LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope content " + uri);
+            content.close();
+            content = null;
+        }
+        if (file != null) {
+            LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope FileObject " + uri);
+            file.close();
+            file = null;
+        }
     }
-
 
     @Override
     public ByteBuffer getData() {
         try {
             if (dataSize == INFINITE_DATA_SIZE) {
-                dataSize = content.length() - dataOffset;
+                dataSize = getContent().length() - dataOffset;
             }
 
-            content.seek(dataOffset);
+            getContent().seek(dataOffset);
 
             return readBlock((int) dataOffset, (int) dataSize);
         } catch (IOException ex) {
@@ -90,20 +95,34 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public Map<String, Value> getProperties() {
+        if (properties == null) {
+            try {
+                getFile();
+            } catch (IOException | ParseException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
         return properties;
+
     }
 
     public String readLine(int offset) throws IOException {
-        content.seek(offset);
+        getContent().seek(offset);
         return readLine();
     }
 
+    /**
+     * Read the line in current position unescaping new line symbols
+     *
+     * @return
+     * @throws IOException
+     */
     public String readLine() throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        byte nextChar = content.readByte();
-        while (content.getFilePointer() < content.length() && nextChar != '\r') {
+        byte nextChar = getContent().readByte();
+        while (getContent().getFilePointer() < getContent().length() && nextChar != '\r') {
             buffer.put(nextChar);
-            nextChar = content.readByte();
+            nextChar = getContent().readByte();
 
             if (!buffer.hasRemaining()) {
                 ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + 1024);
@@ -111,14 +130,18 @@ public class FileEnvelope implements Envelope, AutoCloseable {
                 buffer = newBuffer;
             }
         }
-        return new String(buffer.array(), Charset.forName("UTF-8"));
+        return new String(buffer.array(), Charset.forName("UTF-8")).replace("\\n", NEWLINE);
+    }
+
+    public void seek(long pos) throws IOException {
+        getContent().seek(pos);
     }
 
     public ByteBuffer readBlock(int offset, int length) throws IOException {
-        content.seek(offset);
+        getContent().seek(offset);
         ByteBuffer block = ByteBuffer.allocate(length);
         while (block.hasRemaining()) {
-            block.put(content.readByte());
+            block.put(getContent().readByte());
         }
 //        content.getChannel().read(block);
         return block;
@@ -130,7 +153,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @return
      * @throws IOException
      */
-    public ByteBuffer getHeader() throws IOException {
+    private ByteBuffer getHeader() throws IOException {
         return readBlock(0, (int) dataOffset);
     }
 
@@ -141,64 +164,133 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      */
     public synchronized void clearData() throws IOException {
         ByteBuffer header = getHeader();
-        try (OutputStream stream = file.getContent().getOutputStream(false)) {
+        try (OutputStream stream = getFile().getContent().getOutputStream(false)) {
             stream.write(header.array());
             setDataSize(0);
+        } catch (ParseException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
     public long readerPos() throws IOException {
-        return content.getFilePointer();
+        return getContent().getFilePointer();
     }
 
     /**
      * Reset file pointer to data start
-     * @throws IOException 
+     *
+     * @throws IOException
      */
     public void resetPos() throws IOException {
-        content.seek(dataOffset);
-    }
-    
-    public void seek(long pos) throws IOException{
-        content.seek(pos);
+        getContent().seek(dataOffset);
     }
 
     synchronized protected void setDataSize(int size) throws IOException {
-        long offset = content.getFilePointer();
-        content.seek(DATA_SIZE_PROPERTY_OFFSET);//seeking binary 
-        content.writeInt(size); // write 4 bytes
-        content.seek(offset);//return to the initial position
+        long offset = getContent().getFilePointer();
+        getContent().seek(DATA_SIZE_PROPERTY_OFFSET);//seeking binary 
+        getContent().writeInt(size); // write 4 bytes
+        getContent().seek(offset);//return to the initial position
         properties.put(DATA_LENGTH_KEY, Value.of(size));//update property
     }
 
-    private void readHeader(FileObject file) throws IOException, ParseException {
-        try (InputStream stream = file.getContent().getInputStream()) {
-            Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
-            this.properties = header.getProperties();
-            meta = header.meta();
-            dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
-            dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
+    /**
+     * Append byte array to the end of file without escaping and update data
+     * size envelope property
+     *
+     * @param bytes
+     * @throws IOException
+     */
+    synchronized public void append(byte[] bytes) throws IOException {
+        if (isReadOnly()) {
+            throw new IOException("Trying to write to readonly file " + uri);
+        } else {
+            getContent().seek(eofPos());
+            getContent().write(bytes);
+            dataSize += bytes.length;
+            setDataSize((int) (eofPos() - getContent().getFilePointer()));
         }
     }
 
-    synchronized public void append(byte[] bytes) throws IOException {
-        if (isReadOnly()) {
-            throw new IOException("Trying to write to readonly file");
-        } else {
-            content.seek(eofPos());
-            content.write(bytes);
-            dataSize += bytes.length;
-            setDataSize((int) (eofPos() - content.getFilePointer()));
-        }
-
+    /**
+     * Append a new line with escaped new line characters
+     *
+     * @param line
+     * @throws IOException
+     */
+    public void appendLine(String line) throws IOException {
+        append((line.replace("\n", "\\n") + NEWLINE).getBytes());
     }
 
     public long eofPos() throws IOException {
-        return content.length();
+        return getContent().length();
     }
 
     public boolean isReadOnly() {
         return readOnly;
     }
 
+    public String getFilePath() {
+        return uri;
+    }
+
+    public boolean isEof() {
+        try {
+            return readerPos() == eofPos();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public boolean hasData() {
+        try {
+            return this.dataOffset == this.eofPos();
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
+    public BufferedInputStream getDataStream() throws IOException {
+        BufferedInputStream stream = new BufferedInputStream(getContent().getInputStream());
+        stream.skip(dataOffset);
+        return stream;
+    }
+
+    /**
+     * @return the content
+     */
+    private synchronized RandomAccessContent getContent() {
+        try {
+            if (!getFile().getContent().isOpen()) {
+                content = null;
+            }
+            if (content == null) {
+                if (isReadOnly()) {
+                    content = getFile().getContent().getRandomAccessContent(RandomAccessMode.READ);
+                } else {
+                    content = getFile().getContent().getRandomAccessContent(RandomAccessMode.READWRITE);
+                }
+            }
+        } catch (IOException | ParseException ex) {
+            throw new RuntimeException(ex);
+        }
+        return content;
+    }
+
+    /**
+     * @return the file
+     */
+    private synchronized FileObject getFile() throws IOException, ParseException {
+        if (this.file == null) {
+            this.file = VFS.getManager().resolveFile(uri);
+            try (InputStream stream = file.getContent().getInputStream()) {
+                LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
+                Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
+                this.properties = header.getProperties();
+                meta = header.meta();
+                dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
+                dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
+            }
+        }
+        return this.file;
+    }
 }

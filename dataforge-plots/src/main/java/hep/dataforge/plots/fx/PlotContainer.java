@@ -8,14 +8,20 @@ package hep.dataforge.plots.fx;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.fx.MetaEditor;
+import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.Plottable;
+import hep.dataforge.values.Value;
 import java.net.URL;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -31,7 +37,7 @@ import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
-import javafx.scene.paint.Paint;
+import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.LoggerFactory;
@@ -62,7 +68,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
     @FXML
     private ListView<Plottable> plottableslList;
     @FXML
-    private Button optinosPannelButton;
+    private Button optionsPannelButton;
     @FXML
     private Button frameOptionsButton;
     @FXML
@@ -71,6 +77,10 @@ public class PlotContainer extends AnchorPane implements Initializable {
     private PlotFrame plot;
 
     private Map<Configuration, Stage> configWindows = new HashMap<>();
+
+    private BooleanProperty optionsVisibleProperty = new SimpleBooleanProperty(true);
+
+    private double lastDividerPosition = -1;
 
     public PlotContainer() {
         FXMLLoader loader = new FXMLLoader(MetaEditor.class.getResource("/fxml/PlotContainer.fxml"));
@@ -92,6 +102,31 @@ public class PlotContainer extends AnchorPane implements Initializable {
     public void initialize(URL url, ResourceBundle rb) {
         plottableslList.setCellFactory((ListView<Plottable> param) -> new PlottableListCell());
         setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        split.getDividers().get(0).positionProperty().addListener(
+                (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
+                    optionsVisibleProperty.set(newValue.doubleValue() < 0.99);
+                    if (newValue.doubleValue() < 0.98) {
+                        lastDividerPosition = newValue.doubleValue();
+                    }
+                });
+
+        optionsVisibleProperty.addListener(
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    if (newValue) {
+                        optionsPannelButton.setText(">>");
+                    } else {
+                        optionsPannelButton.setText("<<");
+                    }
+                });
+        optionsPannelButton.setOnAction((ActionEvent event) -> {
+            if (optionsVisibleProperty.get()) {
+                split.setDividerPosition(0, 1d);
+            } else if (lastDividerPosition > 0) {
+                split.setDividerPosition(0, lastDividerPosition);
+            } else {
+                split.setDividerPosition(0, 0.8);
+            }
+        });
 
     }
 
@@ -112,7 +147,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
 
     public void setPlot(PlotFrame plot) {
         this.plot = plot;
-        plotPane.getChildren().retainAll(optinosPannelButton);
+        plotPane.getChildren().retainAll(optionsPannelButton);
         this.plot.display(plotPane);
         plottableslList.setItems(plot.getAll());
     }
@@ -156,7 +191,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
         }
     }
 
-    private class PlottableListCell extends ListCell<Plottable> {
+    private class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
 
         private HBox content;
         private CheckBox title;
@@ -179,7 +214,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
 
         private void setContent(Plottable item) {
             setText(null);
-            
+
             title = new CheckBox();
             title.setSelected(true);
             configButton = new Button("...");
@@ -188,8 +223,9 @@ public class PlotContainer extends AnchorPane implements Initializable {
             HBox.setHgrow(space, Priority.ALWAYS);
             content = new HBox(title, space, configButton);
             HBox.setHgrow(content, Priority.ALWAYS);
-            content.setMaxWidth(Double.MAX_VALUE);            
+            content.setMaxWidth(Double.MAX_VALUE);
             Configuration config = item.getConfig();
+            config.addObserver(this, true);
 
             title.setText(config.getString("title", item.getName()));
             title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
@@ -197,14 +233,33 @@ public class PlotContainer extends AnchorPane implements Initializable {
             });
 
             if (config.hasValue("color")) {
-                title.setTextFill(Paint.valueOf(config.getString("color")));
+                title.setTextFill(Color.valueOf(config.getString("color")));
             }
 
             configButton.setOnAction((ActionEvent event) -> {
                 displayConfigurator(item.getName() + " configuration", config, DescriptorUtils.buildDescriptor(item));
             });
-            Platform.runLater(() -> setGraphic(content));
 
+            Platform.runLater(() -> setGraphic(content));
+        }
+
+        @Override
+        public void notifyValueChanged(String name, Value oldItem, Value newItem) {
+            if (name.equals("title")) {
+                title.setText(newItem.stringValue());
+            } else if (name.equals("color")) {
+                title.setTextFill(Color.valueOf(newItem.stringValue()));
+            }
+//            else if (name.equals("visible")) {
+//                if (!newItem.booleanValue()) {
+//                    title.setTextFill(Color.valueOf("gray"));
+//                }
+//            }
+        }
+
+        @Override
+        public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+            //ignore
         }
 
     }

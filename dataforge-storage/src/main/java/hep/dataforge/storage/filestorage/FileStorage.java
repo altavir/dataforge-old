@@ -338,6 +338,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
                 }
             }
+            refresh();
             return getLoader(name);
         } catch (IOException ex) {
             throw new StorageException(ex);

@@ -16,11 +16,7 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.SimpleConfigurable;
-import hep.dataforge.description.DescriptorUtils;
-import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.navigation.ValueProvider;
-import hep.dataforge.values.Value;
+import hep.dataforge.meta.BaseConfigurable;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -28,7 +24,7 @@ import java.util.Set;
  *
  * @author darksnake
  */
-public abstract class AbstractPlottable extends SimpleConfigurable implements Plottable, ValueProvider {
+public abstract class AbstractPlottable extends BaseConfigurable implements Plottable{
 
     private final String name;
     private final Set<PlotStateListener> listeners = new HashSet<>();
@@ -39,7 +35,7 @@ public abstract class AbstractPlottable extends SimpleConfigurable implements Pl
     }
     
     public AbstractPlottable(String name) {
-        super();
+        super(Meta.buildEmpty("plot"));
         this.name = name;
     }    
 
@@ -75,20 +71,9 @@ public abstract class AbstractPlottable extends SimpleConfigurable implements Pl
         listeners.forEach((l) -> l.notifyDataChanged(getName()));
     }
 
-    @Override
-    public boolean hasValue(String path) {
-        return meta().hasValue(path);
-    }
-
     public String getTitle() {
-        return getString("title", getName());
+        return meta().getString("title", getName());
     }
 
-    @Override
-    public Value getValue(String path) {
-        //TODO use descriptor here
-        NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(getClass());
-        return  DescriptorUtils.extractValue(path, meta(), descriptor);
-    }
 
 }

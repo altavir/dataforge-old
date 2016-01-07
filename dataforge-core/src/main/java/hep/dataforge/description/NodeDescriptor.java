@@ -12,7 +12,8 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * descriptor for meta node
+ * Descriptor for meta node. Could contain additional information for viewing
+ * and editing.
  *
  * @author Alexander Nozik
  */

@@ -15,9 +15,8 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.content.AbstractContent;
+import hep.dataforge.content.Named;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  * Content value
@@ -25,28 +24,21 @@ import java.time.LocalDateTime;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedValue extends AbstractContent implements Value {
+public class NamedValue implements Named, Value {
 
     private final Value value;
+    private final String name;
 
-    /**
-     * <p>
-     * Constructor for NamedValue.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param value a {@link hep.dataforge.values.Value} object.
-     */
     public NamedValue(String name, Value value) {
-        super(name);
+        this.name = name;
         this.value = value;
     }
 
-    /**
-     * <p>
-     * getSourceValue.</p>
-     *
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
+    @Override
+    public String getName() {
+        return name;
+    }
+
     public Value getSourceValue() {
         return value;
     }

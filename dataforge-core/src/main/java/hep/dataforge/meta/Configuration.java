@@ -96,9 +96,19 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * Add new observer for this configuration
      *
      * @param observer
+     * @param strongReference if true, then configuration prevents observer from
+     * being recycled by GC
+     */
+    public void addObserver(ConfigChangeListener observer, boolean strongReference) {
+        this.observers.add(observer, strongReference);
+    }
+    
+    /**
+     * addObserver(observer, true)
+     * @param observer 
      */
     public void addObserver(ConfigChangeListener observer) {
-        this.observers.add(observer, true);
+        addObserver(observer, true);
     }
 
     /**

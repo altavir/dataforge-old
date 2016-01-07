@@ -34,5 +34,5 @@ public interface Event {
     @Override
     String toString();
     
-    //TODO make annotation representation of events
+    //TODO make annotation or ValueProvider representation of events
 }
