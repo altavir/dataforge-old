@@ -21,6 +21,7 @@ import static hep.dataforge.data.DataFiltering.getValueCondition;
 import hep.dataforge.values.Value;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.meta.Meta;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -76,56 +77,17 @@ public interface DataSet extends Iterable<DataPoint>, Content {
     DataPoint get(int i);
     Column getColumn(String name) throws NameNotFoundException;
 
-    /**
-     * <p>
-     * getDataFormat.</p>
-     *
-     * @return a {@link hep.dataforge.data.DataFormat} object.
-     */
     DataFormat getDataFormat();
 
-    /**
-     * <p>
-     * getValue.</p>
-     *
-     * @param index a int.
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
     Value getValue(int index, String name) throws NameNotFoundException;
 
-    /**
-     * <p>
-     * size.</p>
-     *
-     * @return a int.
-     */
     int size();
 
-    /**
-     * sorts dataset and returns sorted one
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param ascending a boolean.
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
     DataSet sort(String name, boolean ascending);
 
-    /**
-     * <p>
-     * sort.</p>
-     *
-     * @param comparator a {@link java.util.Comparator} object.
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
     DataSet sort(Comparator<DataPoint> comparator);
     
-    /**
-     * <p>stream.</p>
-     *
-     * @return a {@link java.util.stream.Stream} object.
-     */
     Stream<DataPoint> stream();
 
+    void setMeta(Meta meta);
 }

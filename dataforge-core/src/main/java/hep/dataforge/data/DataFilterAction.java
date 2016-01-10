@@ -64,7 +64,7 @@ public class DataFilterAction extends OneToOneAction<DataSet, DataSet> {
         if (res.size() == 0) {
             throw new ContentException("The resulting DataSet is empty");
         }
-        res.configure(input.meta());
+        res.setMeta(input.meta());
         return res;
     }
 

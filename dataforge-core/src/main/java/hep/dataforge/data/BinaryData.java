@@ -15,7 +15,8 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.Content;
+import hep.dataforge.content.Named;
+import hep.dataforge.meta.Annotated;
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -25,12 +26,6 @@ import java.io.InputStream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface BinaryData extends Content {
-    /**
-     * <p>getInputStream.</p>
-     *
-     * @return a {@link java.io.InputStream} object.
-     * @throws java.io.IOException if any.
-     */
+public interface BinaryData extends Named, Annotated {
     InputStream getInputStream() throws IOException;
 }

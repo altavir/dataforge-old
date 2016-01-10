@@ -18,7 +18,6 @@ package hep.dataforge.content;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Laminate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,18 +31,20 @@ import java.util.Map;
 public class GroupBuilder {
 
     /**
-     * Create grouping rule that creates groups for different values of value field with name {@code tag}
+     * Create grouping rule that creates groups for different values of value
+     * field with name {@code tag}
+     *
      * @param tag
      * @param defaultTagValue
-     * @return 
+     * @return
      */
     public static GroupRule byValue(final String tag, String defaultTagValue) {
         return new GroupRule() {
             @Override
-            public <T extends Content> List<NamedGroup<T>> group(Iterable<T> content) {
+            public <T> List<NamedGroup<T>> group(Iterable<T> content) {
                 Map<String, List<T>> map = new HashMap<>();
                 for (T c : content) {
-                    String tagValue = DescriptorUtils.buildDefaultNode(c.getDescriptor())
+                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(c))
                             .getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
                         map.put(tagValue, new ArrayList<>());
@@ -58,19 +59,19 @@ public class GroupBuilder {
             }
         };
     }
-    
+
     @ValueDef(name = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
     @ValueDef(name = "defaultValue", def = "default", info = "Default value which should be used for content "
             + "in which the grouping value is not presented")
-    public static GroupRule byAnnotation(Meta groupingAnnotation){
+    public static GroupRule byAnnotation(Meta groupingAnnotation) {
         return byValue(groupingAnnotation.getString("byValue"), groupingAnnotation.getString("defaultValue", "default"));
     }
 
     public interface GroupRule {
 
-        <T extends Content> List<NamedGroup<T>> group(Iterable<T> content);
-        
-        default <T extends Content> List<NamedGroup<T>> group(NamedGroup<T> content){
+        <T> List<NamedGroup<T>> group(Iterable<T> content);
+
+        default <T> List<NamedGroup<T>> group(NamedGroup<T> content) {
             return group(content.asList());
         }
     }

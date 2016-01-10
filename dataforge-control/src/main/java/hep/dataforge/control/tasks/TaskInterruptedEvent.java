@@ -15,56 +15,28 @@
  */
 package hep.dataforge.control.tasks;
 
-import hep.dataforge.events.Event;
+import hep.dataforge.events.BasicEvent;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class TaskInterruptedEvent implements Event {
+public class TaskInterruptedEvent extends BasicEvent {
 
-    private final String tag;
-    private final Instant time;
     private final Throwable exception;
 
-    public TaskInterruptedEvent(String tag, Instant time, Throwable exception) {
-        this.tag = tag;
-        this.time = time;
+    public TaskInterruptedEvent(String source, Instant time, Throwable exception) {
+        super("control.task.interrupted", source, 0, time, null);        
         this.exception = exception;
     }
     
-    public TaskInterruptedEvent(String tag, Instant time) {
-        this.tag = tag;
-        this.time = time;
-        this.exception = null;
+    public TaskInterruptedEvent(String source, Instant time) {
+        this(source, time, null);
     }
 
-    public TaskInterruptedEvent(String tag) {
-        this.tag = tag;
-        time = Instant.now();
-        this.exception = null;        
-    }
-
-    @Override
-    public int priority() {
-        return 1;
-    }
-
-    @Override
-    public String source() {
-        return tag;
-    }
-
-    @Override
-    public Instant time() {
-        return time;
-    }
-
-    @Override
-    public String type() {
-        return getClass().getSimpleName();
+    public TaskInterruptedEvent(String source) {
+        this(source, null, null);       
     }
 
     public Throwable getException() {

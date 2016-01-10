@@ -16,13 +16,13 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.data.DataAdapter;
-import hep.dataforge.content.AbstractContent;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.AbstractNamedFunction;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.names.NamedSet;
 import hep.dataforge.names.Names;
 
@@ -33,7 +33,7 @@ import hep.dataforge.names.Names;
  * @author Alexander Nozik
  * @param <T>
  */
-public abstract class AbstractModel<T extends DataAdapter> extends AbstractContent implements Model {
+public abstract class AbstractModel<T extends DataAdapter> extends NamedMetaHolder implements Model {
 //TODO add default parameters to model
     private final Names names;
 

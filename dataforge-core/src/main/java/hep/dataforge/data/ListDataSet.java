@@ -15,11 +15,11 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.AbstractContent;
 import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListDataSet extends AbstractContent implements DataSet {
+public class ListDataSet extends NamedMetaHolder implements DataSet {
 
     private final ArrayList<DataPoint> data = new ArrayList<>();
 
@@ -80,7 +80,7 @@ public class ListDataSet extends AbstractContent implements DataSet {
     public ListDataSet() {
         this.format = new DataFormat();
     }
-
+    
     /**
      * Проверяет, что все точки соответствуют формату
      *
@@ -227,7 +227,7 @@ public class ListDataSet extends AbstractContent implements DataSet {
                 return -o1.getValue(name).compareTo(o2.getValue(name));
             }
         });
-        res.configure(meta());
+        res.setMeta(meta());
         return res;
     }
 
@@ -239,7 +239,7 @@ public class ListDataSet extends AbstractContent implements DataSet {
         ListDataSet res = new ListDataSet(getName(), this.getDataFormat());
         res.addAll(this);
         res.data.sort(comparator);
-        res.configure(meta());
+        res.setMeta(meta());
         return res;
     }
 

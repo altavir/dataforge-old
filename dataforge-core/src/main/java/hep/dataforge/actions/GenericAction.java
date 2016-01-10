@@ -16,7 +16,6 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.content.AbstractContent;
 import hep.dataforge.content.Content;
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Context;
@@ -30,6 +29,7 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
+import hep.dataforge.content.NamedMetaHolder;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -43,7 +43,7 @@ import java.util.List;
  * @param <T>
  * @param <R>
  */
-public abstract class GenericAction<T extends Named, R extends Named> extends AbstractContent implements Action<T, R> {
+public abstract class GenericAction<T extends Named, R extends Named> extends NamedMetaHolder implements Action<T, R> {
 
     public static final String ACTION_DEPENDENCY_LOG_KEY = "log";
     public static final String ACTION_DEPENDENCY_META_KEY = "meta";
@@ -283,15 +283,17 @@ public abstract class GenericAction<T extends Named, R extends Named> extends Ab
      * @param content a {@link hep.dataforge.content.Content} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(Content content) {
+    public OutputStream buildActionOutput(Named content) {
         return getContext().io().out(getName(), content.getName());
     }
     
+    @Override
     public void addListener(ActionStateListener listener){
         listeners.add(listener);
     }
 
     
+    @Override
     public void removeListener(ActionStateListener listener){
         listeners.remove(listener);
     }

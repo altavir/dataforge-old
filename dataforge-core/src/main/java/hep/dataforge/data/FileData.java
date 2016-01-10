@@ -15,11 +15,11 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.AbstractContent;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import static hep.dataforge.io.IOUtils.readFileMask;
+import hep.dataforge.content.NamedMetaHolder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -33,20 +33,13 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class FileData extends AbstractContent implements BinaryData {
-
-    /** Constant <code>FILE_META="meta"</code> */
-    public static final String FILE_META = "meta";
+public class FileData extends NamedMetaHolder implements BinaryData {
 
     /**
-     * <p>
-     * buildFromAnnotation.</p>
-     *
-     * @param parent a {@link java.io.File} object.
-     * @param an a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.data.FileData} object.
-     * @throws java.io.FileNotFoundException if any.
+     * Constant <code>FILE_META="meta"</code>
      */
+    public static final String FILE_META = "meta";
+
     public static FileData build(File parent, Meta an) throws FileNotFoundException {
         File file = new File(parent, getPath(an));
         FileData res;
@@ -55,19 +48,10 @@ public class FileData extends AbstractContent implements BinaryData {
         } else {
             res = new FileData(file);
         }
-        res.configure(an.getNode(FILE_META, an));
+        res.setMeta(an.getNode(FILE_META, an));
         return res;
     }
 
-    /**
-     * <p>
-     * getFileDataSourcesByMask.</p>
-     *
-     * @param parent a {@link java.io.File} object.
-     * @param an a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link java.util.List} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     @NodeDef(name = "meta", info = "Any metadata for this file or list of files")
     @ValueDef(name = "path", info = "Path to the file or file mask")
     public static List<FileData> buildByMask(File parent, Meta an) throws FileNotFoundException {
@@ -79,26 +63,17 @@ public class FileData extends AbstractContent implements BinaryData {
         for (File file : maskfiles) {
             if (file.exists() && (!file.isDirectory())) {
                 FileData fds = new FileData(file);
-                fds.configure(an.getNode(FILE_META, an));
+                fds.setMeta(an.getNode(FILE_META, an));
                 res.add(fds);
             }
         }
         return res;
     }
 
-    /**
-     * <p>
-     * getFileDataSourcesByMask.</p>
-     *
-     * @param parent a {@link java.io.File} object.
-     * @param mask a {@link java.lang.String} object.
-     * @return a {@link java.util.List} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public static List<FileData> buildFromString(File parent, String mask) throws FileNotFoundException {
         List<FileData> res = new ArrayList<>();
         File[] maskfiles = readFileMask(parent, mask);
-        if(maskfiles.length == 0){
+        if (maskfiles.length == 0) {
             LoggerFactory.getLogger(FileData.class).warn("The mask '{}' has no matches.", mask);
         }
         for (File file : maskfiles) {
@@ -121,25 +96,10 @@ public class FileData extends AbstractContent implements BinaryData {
     private File inputFile;
     private final String inputFileType;
 
-    /**
-     * <p>
-     * Constructor for FileData.</p>
-     *
-     * @param parent a {@link java.io.File} object.
-     * @param path a {@link java.lang.String} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public FileData(File parent, String path) throws FileNotFoundException {
         this(new File(parent, path));
     }
 
-    /**
-     * <p>
-     * Constructor for FileData.</p>
-     *
-     * @param input a {@link java.io.File} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public FileData(File input) throws FileNotFoundException {
         this(input.getName().replaceFirst("[.][^.]+$", ""), input);
     }
@@ -153,12 +113,6 @@ public class FileData extends AbstractContent implements BinaryData {
         }
     }
 
-    /**
-     * <p>
-     * getExtension.</p>
-     *
-     * @return the inputFileType
-     */
     public String getExtension() {
         return inputFileType;
     }
@@ -173,18 +127,15 @@ public class FileData extends AbstractContent implements BinaryData {
         return extension.toLowerCase();
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>inputFile</code>.</p>
-     *
-     * @return a {@link java.io.File} object.
-     */
     public File getInputFile() {
         return inputFile;
     }
 
-    /** {@inheritDoc}
-     * @throws java.io.FileNotFoundException */
+    /**
+     * {@inheritDoc}
+     *
+     * @throws java.io.FileNotFoundException
+     */
     @Override
     public FileInputStream getInputStream() throws FileNotFoundException {
         return new FileInputStream(inputFile);

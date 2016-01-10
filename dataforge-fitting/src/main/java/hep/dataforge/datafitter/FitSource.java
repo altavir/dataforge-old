@@ -16,20 +16,20 @@
 package hep.dataforge.datafitter;
 
 import hep.dataforge.datafitter.models.Model;
-import hep.dataforge.content.AbstractContent;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.functions.DerivativeCalculator;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
+import hep.dataforge.content.NamedMetaHolder;
 
 /**
  * <p>FitSource class.</p>
  *
  * @author Alexander Nozik
  */
-public class FitSource extends AbstractContent {
+public class FitSource extends NamedMetaHolder {
 
     /**
      *
@@ -46,15 +46,7 @@ public class FitSource extends AbstractContent {
      */
     protected final NamedFunction prior;
 
-    /**
-     * <p>Constructor for FitSource.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param dataSet a {@link hep.dataforge.data.DataSet} object.
-     * @param model a {@link hep.dataforge.datafitter.models.Model} object.
-     * @param prior a {@link hep.dataforge.functions.NamedFunction} object.
-     */
+
     public FitSource(String name, Meta annotation, DataSet dataSet, Model model, NamedFunction prior) {
         super(name, annotation);
         this.dataSet = dataSet;
@@ -62,12 +54,7 @@ public class FitSource extends AbstractContent {
         this.prior = prior;
     }
 
-    /**
-     * <p>Constructor for FitSource.</p>
-     *
-     * @param dataSet a {@link hep.dataforge.data.DataSet} object.
-     * @param model a {@link hep.dataforge.datafitter.models.Model} object.
-     */
+
     public FitSource(DataSet dataSet, Model model) {
         this(null, null, dataSet, model, null);
     }
@@ -194,14 +181,6 @@ public class FitSource extends AbstractContent {
         return res;
     }
 
-    /**
-     * <p>
-     * providesValidAnalyticalDerivs.</p>
-     *
-     * @param set a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @param names a {@link java.lang.String} object.
-     * @return a boolean.
-     */
     public boolean providesValidAnalyticalDerivs(ParamSet set, String... names) {
         if (names.length == 0) {
             throw new IllegalArgumentException();
@@ -229,72 +208,30 @@ public class FitSource extends AbstractContent {
         return this.model.providesDeriv(name);
     }
 
-    /**
-     * <p>
-     * getLogLike.</p>
-     *
-     * @return a {@link hep.dataforge.likelihood.LogLikelihood} object.
-     */
     public LogLikelihood getLogLike() {
         return new LogLikelihood(this);
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>prior</code>.</p>
-     *
-     * @return the prior
-     */
     public NamedFunction getPrior() {
         return prior;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>model</code>.</p>
-     *
-     * @return
-     */
     public Model getModel() {
         return model;
     }
 
-    /**
-     * <p>
-     * getModelDim.</p>
-     *
-     * @return a int.
-     */
     public int getModelDim() {
         return model.getDimension();
     }
 
-    /**
-     * <p>
-     * getModelName.</p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
     public String getModelName() {
         return this.model.getName();
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>dataSet</code>.</p>
-     *
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
     public DataSet getDataSet() {
         return dataSet;
     }
 
-    /**
-     * <p>
-     * getDataNum.</p>
-     *
-     * @return a int.
-     */
     public int getDataSize() {
         return dataSet.size();
     }

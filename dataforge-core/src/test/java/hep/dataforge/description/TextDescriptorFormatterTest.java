@@ -15,9 +15,7 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.content.Content;
-import hep.dataforge.meta.Meta;
-import javax.management.Descriptor;
+import hep.dataforge.content.Named;
 import org.junit.Test;
 
 /**
@@ -59,23 +57,12 @@ public class TextDescriptorFormatterTest {
     @ValueDef(name = "firstpar", required = true, type = "NUMBER", info = "The description for my first parameter")
     @ValueDef(name = "secondpar", multiple = true, info = "The description for my second parameter")
     @ValueDef(name = "thirdpar", def = "test", info = "The description for my third parameter")    
-    public static class TestContent implements Content{
+    public static class TestContent implements Named{
 
         @Override
         public String getName() {
             return "myTestName";
         }
-
-        @Override
-        public Content configure(Meta a) {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-
-        @Override
-        public Meta meta() {
-            throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-        }
-        
     }
     
 }

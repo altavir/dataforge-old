@@ -29,18 +29,11 @@ import java.util.List;
  * @param <T>
  * @version $Id: $Id
  */
-public class ContentList<T extends Content> extends AbstractContent implements NamedGroup<T> {
+public class ContentList<T extends Named> extends NamedMetaHolder implements NamedGroup<T> {
 
     private final List<T> list;
     private Class<T> elementType;
 
-    /**
-     * <p>Constructor for SimpleContentList.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param elementType a {@link java.lang.Class} object.
-     * @param sources a {@link java.lang.Iterable} object.
-     */
     public ContentList(String name, Class<T> elementType, Iterable<T> sources) {
         super(name);
         this.list = new ArrayList<>();
@@ -48,46 +41,29 @@ public class ContentList<T extends Content> extends AbstractContent implements N
         sources.forEach((s) -> add(s));
     }
 
-    /**
-     * <p>Constructor for SimpleContentList.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param elementType a {@link java.lang.Class} object.
-     * @param sources a T object.
-     */
     public ContentList(String name, Class<T> elementType, T... sources) {
         this(name, elementType, Arrays.asList(sources));
     }
 
-    /**
-     * <p>Constructor for SimpleContentList.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param sources a {@link java.lang.Iterable} object.
-     */
     public ContentList(String name, Iterable<T> sources) {
         super(name);
         this.list = new ArrayList<>();
         this.elementType = null;
         sources.forEach((T s) -> {
-            if(elementType == null){
+            if (elementType == null) {
                 elementType = (Class<T>) s.getClass();
             }
             add(s);
         });
     }
 
-    /**
-     * <p>Constructor for SimpleContentList.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param sources a T object.
-     */
     public ContentList(String name, T... sources) {
         this(name, Arrays.asList(sources));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<T> asList() {
         return new ArrayList(list);
@@ -101,7 +77,9 @@ public class ContentList<T extends Content> extends AbstractContent implements N
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public T get(String name) throws NameNotFoundException {
         for (T child : list) {
@@ -114,19 +92,23 @@ public class ContentList<T extends Content> extends AbstractContent implements N
         throw new NameNotFoundException(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Class type() {
         if (elementType != null) {
             return elementType;
-        } else if(list.size()>0) {
+        } else if (list.size() > 0) {
             return list.get(0).getClass();
         } else {
             throw new IllegalStateException("Can't infere content type for the content list");
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean has(String name) {
         try {
@@ -137,13 +119,17 @@ public class ContentList<T extends Content> extends AbstractContent implements N
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean isEmpty() {
         return list.isEmpty();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<T> iterator() {
         return list.iterator();

@@ -25,7 +25,6 @@ import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
-import hep.dataforge.meta.Laminate;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -101,7 +100,7 @@ public abstract class ManyToOneAction<T extends Content, R extends Content> exte
         Meta individualMeta = readMeta(input.meta());
         R res = execute(log, individualMeta, input);
         afterGroup(log, res);
-        res.configure(MergeRule.getDefault().merge(res.meta(), input.meta()));
+        res.setMeta(MergeRule.getDefault().merge(res.meta(), input.meta()));
         return res;
     }
 

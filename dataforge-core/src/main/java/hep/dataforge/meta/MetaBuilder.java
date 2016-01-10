@@ -208,14 +208,6 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return new CustomMergeRule(valueMerger, elementMerger).merge(annotation, this);
     }
 
-    /**
-     * <p>
-     * update.</p>
-     *
-     * @param annotation a {@link hep.dataforge.meta.MetaBuilder}
-     * object.
-     * @return a {@link hep.dataforge.meta.MetaBuilder} object.
-     */
     public MetaBuilder update(MetaBuilder annotation) {
         return MergeRule.replace(annotation, this);
     }

@@ -118,7 +118,7 @@ public class DataManager implements Encapsulated {
                     //FIXME сделать тут добавление группового тэга во всевложенные аннотации
                     if (an.hasNode(FILE_META)) {
                         Meta fileMeta = an.getNode(FILE_META);
-                        d.annotate(MergeRule.replace(d.meta(), fileMeta));
+                        d.setMeta(MergeRule.replace(d.meta(), fileMeta));
                     }
                     res.add(d);
                 }

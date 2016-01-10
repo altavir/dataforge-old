@@ -77,7 +77,7 @@ public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
             if (meta().hasValue("columnNames")) {
                 String[] names = meta().getStringArray("columnNames");
                 dpReader = new DataPointStringIterator(iterator, names);
-                fileData = new ListDataSet(dataSetName, names);
+                fileData = new ListDataSet(dataSetName,  names);
             } else {
                 dpReader = new DataPointStringIterator(iterator, iterator.next());
                 fileData = new ListDataSet(dataSetName);
@@ -95,7 +95,7 @@ public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
         } catch (IOException ex) {
             throw new ContentException("Can't open data source");
         }
-        fileData.configure(source.meta());
+        fileData.setMeta(source.meta());
         return fileData;
     }
 

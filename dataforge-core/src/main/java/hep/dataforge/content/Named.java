@@ -24,12 +24,6 @@ package hep.dataforge.content;
  */
 public interface Named {
 
-    /**
-     * <p>
-     * getName.</p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
     String getName();
 
     /**

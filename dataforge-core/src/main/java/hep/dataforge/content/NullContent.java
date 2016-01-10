@@ -15,8 +15,10 @@
  */
 package hep.dataforge.content;
 
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.values.Value;
 
 /**
  * Null-контент не может быть аннотирован или наследован. Служит исключительно в
@@ -29,8 +31,8 @@ public final class NullContent implements Content {
 
     /** {@inheritDoc} */
     @Override
-    public Content configure(Meta a) {
-        return this;
+    public void setMeta(Meta a) {
+
     }
 
     /** {@inheritDoc} */
@@ -44,6 +46,16 @@ public final class NullContent implements Content {
     @Override
     public String getName() {
         return null;
+    }
+
+    @Override
+    public boolean hasValue(String path) {
+        return false;
+    }
+
+    @Override
+    public Value getValue(String path) {
+        throw new NameNotFoundException(path);
     }
 
 }

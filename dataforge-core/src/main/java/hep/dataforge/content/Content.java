@@ -18,9 +18,7 @@ package hep.dataforge.content;
 import hep.dataforge.description.Described;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.navigation.ValueProvider;
-import hep.dataforge.values.Value;
 import java.io.Serializable;
 
 /**
@@ -32,39 +30,13 @@ import java.io.Serializable;
 public interface Content extends Serializable, Named, Annotated, ValueProvider, Described {
 
     /**
-     * An unique name of the content
-     *
-     * @return
-     */
-    @Override
-    String getName();
-
-    /**
      * Replaces annotation of current Content or creates a copy of the Content
      * with modified annotation. The resulting annotation does not depend on the
      * former annotation of the Content. So in order to save data in the old
-     * annotation use {@code content.configure(content.meta().merge(a))}
+     * annotation use {@code content.setMeta(content.meta().merge(a))}
      *
      * @param a
      * @return
      */
-    Content configure(Meta a);
-
-    @Override
-    Meta meta();
-
-    @Override
-    public default Value getValue(String name) {
-        if(meta().hasValue(name)){
-            return meta().getValue(name);
-        } else {
-            return DescriptorUtils.buildDefaultNode(getDescriptor()).getValue(name);
-        }
-    }
-
-    @Override
-    public default boolean hasValue(String name) {
-        return meta().hasValue(name) || DescriptorUtils.buildDefaultNode(getDescriptor()).hasValue(name);
-    }
-
+    void setMeta(Meta a);
 }

@@ -20,46 +20,22 @@ import hep.dataforge.exceptions.ContentException;
 import java.util.List;
 
 /**
- * A named group of objects of the same type. Can store additional group data in the annotation.
+ * A named group of objects of the same type. Can store additional group data in
+ * the annotation.
  *
  * @author Alexander Nozik
  * @param <T>
  * @version $Id: $Id
  */
 public interface NamedGroup<T> extends Named, Annotated, Iterable<T> {
-    
-    /**
-     * <p>getElement.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a T object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
+
     T get(String name) throws ContentException;
-    /**
-     * <p>hasElement.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a boolean.
-     */
+
     boolean has(String name);
-    /**
-     * <p>getElementType.</p>
-     *
-     * @return a {@link java.lang.Class} object.
-     */
-    Class<T> type();        
-    
-    /**
-     * <p>isEmpty.</p>
-     *
-     * @return a boolean.
-     */
+
+    Class<T> type();
+
     boolean isEmpty();
-    /**
-     * <p>getList.</p>
-     *
-     * @return a {@link java.util.List} object.
-     */
+
     List<T> asList();
 }

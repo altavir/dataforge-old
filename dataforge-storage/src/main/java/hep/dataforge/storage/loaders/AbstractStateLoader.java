@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.loaders;
 
+import hep.dataforge.events.BasicEvent;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
@@ -202,7 +203,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
         return states.keySet();
     }
 
-    private class BasicStateChangedEvent implements StateChangedEvent {
+    private class BasicStateChangedEvent implements StateChangedEvent extends BasicEvent {
 
         private final String name;
         private final Value oldState;

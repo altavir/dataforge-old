@@ -15,59 +15,35 @@
  */
 package hep.dataforge.control.tasks;
 
-import hep.dataforge.events.Event;
+import hep.dataforge.events.BasicEvent;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 /**
  *
  * @author Alexander Nozik
  * @param <T>
  */
-public class TaskCompleteEvent<T> implements Event {
+public class TaskCompleteEvent<T> extends BasicEvent {
 
-    private Instant time;
     private T value;
     private Class valueType;
-    private String tag;
 
     public TaskCompleteEvent(String tag, T value) {
         this(tag, Instant.now(), value);
     }
 
-    public TaskCompleteEvent(String tag, Instant time, T value) {
-        this.time = time;
+    public TaskCompleteEvent(String source, Instant time, T value) {
+        super("control.task.complete", source, 0, time, null);
         this.value = value;
         valueType = value.getClass();
-        this.tag = tag;
     }
 
     public Class getValueType() {
         return valueType;
     }
 
-    @Override
-    public int priority() {
-        return 0;
-    }
-
-    @Override
-    public String source() {
-        return tag;
-    }
-
     public T value() {
         return value;
-    }
-
-    @Override
-    public String type() {
-        return getClass().getSimpleName();
-    }
-
-    @Override
-    public Instant time() {
-        return time;
     }
 
 }
