@@ -7,14 +7,26 @@ package hep.dataforge.events;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import java.lang.ref.WeakReference;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public class BasicEvent implements Event {
 
     private final Meta meta;
+    private final Map<String, WeakReference> referenceMap = new HashMap<>();
 
     public BasicEvent(Meta meta) {
         this.meta = meta;
+    }
+
+    public BasicEvent(Meta meta, Map<String, Object> objects) {
+        this.meta = meta;
+        objects.forEach((key, value) -> {
+            referenceMap.put(key, new WeakReference(value));
+        });
     }
 
     /**
@@ -32,9 +44,9 @@ public class BasicEvent implements Event {
         if (additionalMeta != null) {
             builder.update(additionalMeta.getBuilder());
         }
-        
+
         builder.setValue(EVENT_TYPE_KEY, type);
-        
+
         if (time == null) {
             time = Instant.now();
         }
@@ -46,6 +58,11 @@ public class BasicEvent implements Event {
             builder.setValue(EVENT_PRIORITY_KEY, priority);
         }
         this.meta = builder.build();
+    }
+
+    @Override
+    public Optional getReference(String tag) {
+        return Optional.ofNullable(referenceMap.get(tag));
     }
 
     @Override

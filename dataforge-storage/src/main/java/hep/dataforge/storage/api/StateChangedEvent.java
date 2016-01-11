@@ -15,7 +15,9 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.events.Event;
+import hep.dataforge.events.BasicEvent;
+import hep.dataforge.events.EventBuilder;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
@@ -23,32 +25,57 @@ import hep.dataforge.values.Value;
  *
  * @author Alexander Nozik
  */
-public interface StateChangedEvent extends Event {
+public class StateChangedEvent extends BasicEvent {
+
+    public static final String STATE_NAME_KEY = "stateName";
+    public static final String OLD_STATE_KEY = "oldState";
+    public static final String NEW_STATE_KEY = "newState";
+
+    //TODO add source declaration here
+    public static StateChangedEvent build(String stateName, Value oldState, Value newState) {
+        return new StateChangedEvent(builder(stateName, oldState, newState).buildEventMeta());
+    }
+
+    public static EventBuilder builder(String stateName, Value oldState, Value newState) {
+        return new EventBuilder("storage.stateChange")
+                .setMetaValue(STATE_NAME_KEY, stateName)
+                .setMetaValue(OLD_STATE_KEY, oldState)
+                .setMetaValue(NEW_STATE_KEY, newState);
+    }
+
+    public StateChangedEvent(Meta meta) {
+        super(meta);
+    }
 
     /**
-     * The loader that generated this event
+     * The name or path of the changed state
      *
      * @return
      */
-    StateLoader loader();
-    
-    /**
-     * The name or path of the changed state
-     * @return 
-     */
-    String stateName();
+    public String stateName() {
+        return meta().getString(STATE_NAME_KEY);
+    }
 
     /**
      * The value before change
      *
      * @return
      */
-    Value oldState();
+    public Value oldState() {
+        return meta().getValue(OLD_STATE_KEY);
+    }
 
     /**
      * The value after change
-     * @return 
+     *
+     * @return
      */
-    Value newState();
-    
+    public Value newState() {
+        return meta().getValue(NEW_STATE_KEY);
+    }
+
+    @Override
+    public String toString() {
+        return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), sourceTag(), stateName(), oldState().stringValue(), newState().stringValue());
+    }
 }

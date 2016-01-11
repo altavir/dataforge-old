@@ -11,9 +11,16 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.values.Value;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.function.Supplier;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -21,13 +28,22 @@ import java.util.function.Supplier;
  */
 public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Serializable, Encapsulated {
 
-    private transient Context context;
-    private Supplier<FileEnvelope> envelopeProvider;
+    private final transient Context context;
+    private final Supplier<FileEnvelope> envelopeProvider;
     private long lastIndexedPosition = -1;
+    private long lastSavedPosition = -1;
+
+    public FileMapIndex(Context context, Supplier<FileEnvelope> envelopeProvider) {
+        this.context = context;
+        this.envelopeProvider = envelopeProvider;
+    }
 
     @Override
     protected synchronized void update() throws StorageException {
         try {
+            if (map.isEmpty()) {
+                loadIndex();
+            }
             FileEnvelope env = getEnvelope();
             if (!isUpToDate(env)) {
                 if (lastIndexedPosition >= 0) {
@@ -35,7 +51,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 } else {
                     env.resetPos();
                 }
-                while(!env.isEof()){
+                while (!env.isEof()) {
                     long pos = env.readerPos();
                     String str = env.readLine();
                     T entry = readEntry(str);
@@ -44,19 +60,28 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 }
                 lastIndexedPosition = env.eofPos();
             }
+            if (needsSave()) {
+                saveIndex();
+            }
         } catch (IOException ex) {
             throw new StorageException(ex);
         }
     }
+    
+    protected abstract String indexFileName();
 
     protected abstract T readEntry(String str);
+    
+    protected boolean needsSave(){
+        return lastIndexedPosition - lastSavedPosition >= 200;
+    }
 
     @Override
     protected T transform(Integer key) {
         try {
             return readEntry(getEnvelope().readLine(key));
-        } catch (StorageException |IOException ex) {
-            throw new RuntimeException("Can't read entry for key "+key, ex);
+        } catch (IOException ex) {
+            throw new RuntimeException("Can't read entry for key " + key, ex);
         }
     }
 
@@ -66,7 +91,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 
     @Override
     public void invalidate() throws StorageException {
-        File indexFile = getIndexFile(getEnvelope());
+        File indexFile = getIndexFile();
         if (indexFile.exists()) {
             indexFile.delete();
         }
@@ -74,7 +99,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         super.invalidate();
     }
 
-    private FileEnvelope getEnvelope() throws StorageException {
+    private FileEnvelope getEnvelope(){
         return envelopeProvider.get();
     }
 
@@ -82,8 +107,9 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         return new File(context.io().getTmpDirectory(), "storage/fileindex");
     }
 
-    private File getIndexFile(FileEnvelope env) {
-        return new File(getIndexFileDirectory(), "index_" + env.getFilePath().hashCode());
+    private File getIndexFile() throws StorageException {
+        FileEnvelope env = getEnvelope();
+        return new File(getIndexFileDirectory(), indexFileName());
     }
 
     @Override
@@ -91,16 +117,49 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         return context;
     }
 
-    protected void setContext(Context context) {
-        this.context = context;
-    }
-    
-    private void loadIndex(){
+//    private void setContext(Context context) {
+//        this.context = context;
+//    }
 
+    /**
+     * Load index content from external file
+     */
+    private synchronized void loadIndex() throws StorageException {
+        File indexFile = getIndexFile();
+        if (indexFile.exists()) {
+            LoggerFactory.getLogger(getClass()).info("Loading index from file...");
+            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(indexFile))) {
+                long position = ois.readLong();
+                TreeMap<Value, List<Integer>> newMap = (TreeMap<Value, List<Integer>>) ois.readObject();
+                if (position > 0 && position >= this.lastIndexedPosition && newMap != null) {
+                    this.map = newMap;
+                    this.lastIndexedPosition = position;
+                }
+            } catch (IOException | ClassNotFoundException ex) {
+                LoggerFactory.getLogger(getClass()).error("Failed to read index file. Removing index file", ex);
+                indexFile.delete();
+            }
+        } else {
+            LoggerFactory.getLogger(getClass()).debug("Index file not found");
+        }
     }
-    
-    private void saveIndex(){
-        
+
+    private synchronized void saveIndex() throws StorageException {
+        File indexFile = getIndexFile();
+        try {
+            LoggerFactory.getLogger(getClass()).info("Saving index to file...");
+            if (!indexFile.exists()) {
+                indexFile.createNewFile();
+            }
+            try (ObjectOutputStream ous = new ObjectOutputStream(new FileOutputStream(indexFile))) {
+                ous.writeLong(lastIndexedPosition);
+                ous.writeObject(map);
+            }
+            lastSavedPosition = lastIndexedPosition;
+        } catch (IOException ex) {
+            LoggerFactory.getLogger(getClass()).error("Failed to write index file. Removing index file.", ex);
+            indexFile.delete();
+        }
     }
 
 }

@@ -20,8 +20,6 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.data.PointListener;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import java.util.Collection;
 
 /**
@@ -48,14 +46,14 @@ public interface PointLoader extends Loader, Iterable<DataPoint> {
      */
     DataSet asDataSet() throws StorageException;
 
-    /**
-     * Build a custom index. In case it is a map index it could be stored
-     * somewhere.
-     *
-     * @param indexMeta
-     * @return
-     */
-    Index<DataPoint> buildIndex(Meta indexMeta);
+//    /**
+//     * Build a custom index. In case it is a map index it could be stored
+//     * somewhere.
+//     *
+//     * @param indexMeta
+//     * @return
+//     */
+//    Index<DataPoint> buildIndex(Meta indexMeta);
 
     /**
      * Get index for given value name. If name is null or empty, default point

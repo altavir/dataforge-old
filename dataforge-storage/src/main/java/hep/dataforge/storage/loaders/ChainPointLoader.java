@@ -73,10 +73,10 @@ public class ChainPointLoader extends AbstractPointLoader {
         return primaryLoader.getIndex(name);
     }
 
-    @Override
-    public Index<DataPoint> buildIndex(Meta indexMeta) {
-        return primaryLoader.buildIndex(indexMeta);
-    }
+//    @Override
+//    public Index<DataPoint> buildIndex(Meta indexMeta) {
+//        return primaryLoader.buildIndex(indexMeta);
+//    }
 
     @Override
     public Iterator<DataPoint> iterator() {

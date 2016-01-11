@@ -19,6 +19,7 @@ import hep.dataforge.description.ValueDef;
 import static hep.dataforge.events.Event.*;
 import hep.dataforge.meta.Annotated;
 import java.time.Instant;
+import java.util.Optional;
 
 /**
  * Генеральный класс для событий всех возможных типов
@@ -26,16 +27,17 @@ import java.time.Instant;
  * @author Alexander Nozik
  */
 @ValueDef(name = EVENT_TYPE_KEY, required = true, info = "The type of the ivent in standard dot notation")
-@ValueDef(name = EVENT_PRIORITY_KEY, type = "NUMBER",def = "0", info = "Priority of the event. 0 is default priority")
+@ValueDef(name = EVENT_PRIORITY_KEY, type = "NUMBER", def = "0", info = "Priority of the event. 0 is default priority")
 @ValueDef(name = EVENT_SOURCE_KEY, def = "", info = "The source or the tag of the event. By default is empty")
 @ValueDef(name = EVENT_TIME_KEY, required = true, info = "Time of the event")
 public interface Event extends Annotated {
 
     public static final String EVENT_PRIORITY_KEY = "priority";
     public static final String EVENT_TYPE_KEY = "type";
-    public static final String EVENT_SOURCE_KEY = "source";
-    public static final String EVENT_TIME_KEY = "source";    
+    public static final String EVENT_SOURCE_KEY = "sourceTag";
+    public static final String EVENT_TIME_KEY = "time";
 
+    //PENDING allow weak references to objects in events?
     default int priority() {
         return meta().getInt(EVENT_PRIORITY_KEY, 0);
     }
@@ -44,13 +46,22 @@ public interface Event extends Annotated {
         return meta().getString(EVENT_TYPE_KEY);
     }
 
-    default String source() {
-        return meta().getString(EVENT_SOURCE_KEY,"");
+    default String sourceTag() {
+        return meta().getString(EVENT_SOURCE_KEY, "");
     }
 
-    default Instant time(){
+    default Instant time() {
         return meta().getValue(EVENT_TIME_KEY).timeValue();
     }
+
+    /**
+     * Get an object reference. By default, all objects inside events are stored
+     * as weak references, so the could be GC-ed before events is evaluated.
+     *
+     * @param tag
+     * @return
+     */
+    public Optional getReference(String tag);
 
     /**
      * get event string representation (header) to write in logs

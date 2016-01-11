@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  */
 public abstract class MapIndex<T, K> implements Index<T> {
 
-    private final TreeMap<Value, List<K>> map = new TreeMap<>();
+    protected TreeMap<Value, List<K>> map = new TreeMap<>();
 
     /**
      * Store index entry
@@ -49,13 +49,13 @@ public abstract class MapIndex<T, K> implements Index<T> {
 
     protected abstract Value getIndexedValue(T entry);
     
-    /**
-     * Get index for specified entry
-     *
-     * @param key
-     * @return
-     */
-    protected abstract Value getIndex(K key);
+//    /**
+//     * Get index for specified entry
+//     *
+//     * @param key
+//     * @return
+//     */
+//    protected abstract Value getIndex(K key);
 
     /**
      * Update index to match source

@@ -5,6 +5,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataFormat;
 import hep.dataforge.data.DataParser;
 import hep.dataforge.data.DataPoint;
@@ -23,9 +24,11 @@ import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.commons.ValueProviderIndex;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
+import hep.dataforge.values.Value;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Iterator;
+import java.util.function.Supplier;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
@@ -49,12 +52,11 @@ public class FilePointLoader extends AbstractPointLoader {
             }
         }
     }
-    
+
     public static boolean isValidFilePointLoaderEnvelope(FileEnvelope envelope) {
         return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
                 && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
     }
-    
 
     private final String uri;
     private DataFormat format;
@@ -77,8 +79,8 @@ public class FilePointLoader extends AbstractPointLoader {
 
     @Override
     public void open() throws Exception {
-        if(this.meta == null){
-            this.meta =  buildEnvelope(true).meta();
+        if (this.meta == null) {
+            this.meta = buildEnvelope(true).meta();
         }
         // read format from first line if it is not defined in meta
         if (getFormat() == null) {
@@ -195,25 +197,52 @@ public class FilePointLoader extends AbstractPointLoader {
         return getParser().parse(line);
     }
 
-    @Override
-    public Index<DataPoint> buildIndex(Meta indexMeta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
-
-    private Index<DataPoint> getMapIndex(String name) {
-        return null;
+//    @Override
+//    public Index<DataPoint> buildIndex(Meta indexMeta) {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
+    public Index<DataPoint> getMapIndex(String name) {
+        return new FilePointIndex(name, getStorage().getContext(), () -> {
+            try {
+                return getEnvelope();
+            } catch (StorageException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     @Override
     public Index<DataPoint> getIndex(String name) {
-        Index<DataPoint> mapIndex = getMapIndex(name);
-        if (mapIndex != null) {
-            return mapIndex;
-        } else if (name == null || name.isEmpty()) {
+        if (name == null || name.isEmpty()) {
             return new DefaultIndex<>(this);
         } else {
             return new ValueProviderIndex<>(this, name);
         }
     }
 
+    private class FilePointIndex extends FileMapIndex<DataPoint> {
+
+        private final String valueName;
+
+        public FilePointIndex(String valueName, Context context, Supplier<FileEnvelope> sup) {
+            super(context, sup);
+            this.valueName = valueName;
+        }
+
+        @Override
+        protected Value getIndexedValue(DataPoint entry) {
+            return entry.getValue(valueName);
+        }
+
+        @Override
+        protected String indexFileName() {
+            return getStorage().getName() + "/index_" + getName() + "_" + valueName;
+        }
+
+        @Override
+        protected DataPoint readEntry(String str) {
+            return FilePointLoader.this.transform(str);
+        }
+
+    }
 }
