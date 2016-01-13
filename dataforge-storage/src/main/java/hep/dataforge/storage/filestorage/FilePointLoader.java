@@ -98,8 +98,10 @@ public class FilePointLoader extends AbstractPointLoader {
     public void close() throws Exception {
         parser = null;
         format = null;
-        envelope.close();
-        envelope = null;
+        if (envelope != null) {
+            envelope.close();
+            envelope = null;
+        }
         super.close();
     }
 

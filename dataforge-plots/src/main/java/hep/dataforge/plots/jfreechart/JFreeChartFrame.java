@@ -238,6 +238,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         logAxis.setMinorTickMarksVisible(true);
         logAxis.setAutoRange(true);
         logAxis.setAllowNegativesFlag(false);
+        logAxis.setAutoRangeNextLogFlag(true);
+        logAxis.setStrictValuesFlag(false); // Ommit negatives but do not throw exception
         return logAxis;
     }
 

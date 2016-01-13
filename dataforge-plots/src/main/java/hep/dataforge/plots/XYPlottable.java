@@ -15,11 +15,11 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -34,7 +34,7 @@ import java.util.stream.Collectors;
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "false", info = "Show symbols for data point.")
 @ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 @ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
-@ValueDef(name = "lineType", info = "The type of the line.")
+@ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", info = "The type of conncetion between points.")
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.data.XYDataAdapter")

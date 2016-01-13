@@ -53,22 +53,19 @@ public class Laminate extends Meta {
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
         this.layers = new ArrayList(layers);
+        this.layers.removeIf((meta) -> meta == null);
     }
 
     public Laminate(List<Meta> layers) {
-        //TODO check input for nulls
-        this.name = layers.isEmpty() ? "" : layers.get(0).getName();
-        this.layers = new ArrayList(layers);
+        this(layers.isEmpty() ? "" : layers.get(0).getName(),layers);
     }
 
     public Laminate(Meta... layers) {
-        this.name = layers.length == 0 ? "" : layers[0].getName();
-        this.layers = new ArrayList(Arrays.asList(layers));
+        this(Arrays.asList(layers));
     }
 
     public Laminate(String name, Meta... layers) {
-        this.name = name;
-        this.layers = new ArrayList(Arrays.asList(layers));
+        this(name, Arrays.asList(layers));
     }
 
     public ValueProvider getDefaultValueProvider() {
@@ -129,13 +126,11 @@ public class Laminate extends Meta {
             laminate.setDefaultValueProvider(getDefaultValueProvider());
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNode(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
@@ -153,13 +148,11 @@ public class Laminate extends Meta {
             }
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNodes(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
@@ -175,14 +168,16 @@ public class Laminate extends Meta {
     @Override
     public Collection<String> getNodeNames() {
         Set<String> names = new HashSet<>();
-        for (Meta m : layers) {
-            names.addAll(m.getNodeNames());
+        if (layers != null) {
+            for (Meta m : layers) {
+                names.addAll(m.getNodeNames());
+            }
         }
-        
+
         if (descriptorLayer != null) {
             names.addAll(descriptorLayer.getNodeNames());
         }
-        
+
         return names;
     }
 
@@ -197,7 +192,7 @@ public class Laminate extends Meta {
         for (Meta m : layers) {
             names.addAll(m.getValueNames());
         }
-        
+
         if (descriptorLayer != null) {
             names.addAll(descriptorLayer.getValueNames());
         }

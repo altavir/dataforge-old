@@ -15,16 +15,16 @@
  */
 package hep.dataforge.plots.tests;
 
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.ListDataSet;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.data.XYDataAdapter;
-import hep.dataforge.plots.fx.FXPlotUtils;
-import hep.dataforge.plots.fx.PlotContainer;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
+import hep.dataforge.plots.fx.FXPlotUtils;
+import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import java.util.ArrayList;
 import java.util.List;
@@ -60,7 +60,7 @@ public class PlotContainerTest {
         data.add(new MapDataPoint(names, 3d, 7d, 0, 0.5));
         DataSet ds = new ListDataSet("data", null, data);
 
-        PlottableData dataPlot = PlottableData.plot(ds, new XYDataAdapter("myX", "myY", "myXErr", "myYErr"));
+        PlottableData dataPlot = PlottableData.plot(ds, new XYDataAdapter("myX", "myXErr", "myY", "myYErr"));
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 
