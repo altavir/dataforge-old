@@ -56,7 +56,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     }
 
     @Override
-    public void add(T plottable) {
+    public synchronized void add(T plottable) {
         String pName = plottable.getName();
         plottables.add(plottable);
         plottable.addListener(this);

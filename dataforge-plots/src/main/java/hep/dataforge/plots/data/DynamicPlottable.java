@@ -15,10 +15,10 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
@@ -56,7 +56,7 @@ public class DynamicPlottable extends XYPlottable {
     public DynamicPlottable(String name, Meta annotation) {
         super(name, annotation);
         getConfig().setValue("adapter.x", "timestamp");
-        this.yName = getConfig().getString("adapter.y", "y");
+        this.yName = getConfig().getString("adapter.y", name);
     }
 
     /**

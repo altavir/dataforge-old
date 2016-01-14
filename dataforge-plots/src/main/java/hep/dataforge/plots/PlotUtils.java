@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import java.awt.Color;
 
 /**
@@ -58,5 +58,21 @@ public class PlotUtils {
      */
     public static String getTitle(Meta reader) {
         return reader.getString("title", null);
+    }
+
+    public static void setXAxis(XYPlotFrame frame, String title, String units, String type) {
+        MetaBuilder builder = new MetaBuilder("xAxis")
+                .setValue("axisTitle", title)
+                .setValue("axisUnits", units)
+                .setValue("type", type);
+        frame.getConfig().setNode(builder);
+    }
+
+    public static void setYAxis(XYPlotFrame frame, String title, String units, String type) {
+        MetaBuilder builder = new MetaBuilder("yAxis")
+                .setValue("axisTitle", title)
+                .setValue("axisUnits", units)
+                .setValue("type", type);
+        frame.getConfig().setNode(builder);
     }
 }

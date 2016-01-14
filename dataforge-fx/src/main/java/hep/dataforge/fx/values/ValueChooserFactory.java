@@ -5,8 +5,6 @@
  */
 package hep.dataforge.fx.values;
 
-import hep.dataforge.description.ValueDescriptor;
-
 /**
  *
  * @author Alexander Nozik <altavir@gmail.com>
@@ -25,7 +23,7 @@ public class ValueChooserFactory {
         private static final ValueChooserFactory INSTANCE = new ValueChooserFactory();
     }
     
-    public ValueChooser build(ValueDescriptor descriptor){
-        
-    }
+//    public ValueChooser build(ValueDescriptor descriptor){
+//        
+//    }
 }

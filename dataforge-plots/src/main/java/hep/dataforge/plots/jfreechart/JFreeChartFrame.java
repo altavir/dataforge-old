@@ -73,6 +73,7 @@ import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.title.LegendTitle;
+import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
@@ -169,12 +170,11 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         }
         plot = new XYPlot();
 
-        String title = meta.getString("frameTitle", name);
+        String title = meta.getString("frameTitle", "");
 
-        if (title.equals("default")) {
-            title = "";
-        }
-
+//        if (title.equals("default")) {
+//            title = "";
+//        }
         chart = new JFreeChart(title, plot);
         super.configure(meta);
     }
@@ -231,16 +231,25 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         return axis;
     }
 
-    private ValueAxis getLogAxis(Meta annotation) {
+    private ValueAxis getLogAxis(Meta meta) {
+        //FIXME autorange with negative values
         LogarithmicAxis logAxis = new LogarithmicAxis("");
         logAxis.setMinorTickCount(10);
         logAxis.setExpTickLabelsFlag(true);
         logAxis.setMinorTickMarksVisible(true);
-        logAxis.setAutoRange(true);
+        if (meta.hasNode("range")) {
+            logAxis.setRange(getRange(meta.getNode("range")));
+        } else {
+            logAxis.setAutoRange(meta.getBoolean("autoRange", true));
+        }
         logAxis.setAllowNegativesFlag(false);
         logAxis.setAutoRangeNextLogFlag(true);
         logAxis.setStrictValuesFlag(false); // Ommit negatives but do not throw exception
         return logAxis;
+    }
+
+    private Range getRange(Meta meta) {
+        return new Range(meta.getDouble("lower", Double.NEGATIVE_INFINITY), meta.getDouble("upper", Double.POSITIVE_INFINITY));
     }
 
     private ValueAxis getAxis(Meta axisMeta) {
@@ -299,19 +308,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 //        });
     }
 
-    protected Double convertValue(Value v) {
+    protected double convertValue(Value v) {
         try {
             if (v.valueType() == ValueType.NULL) {
-                return null;
+                return Double.NaN;
             }
-            Double res = v.doubleValue();
-            if (Double.isNaN(res)) {
-                return null;
-            } else {
-                return v.doubleValue();
-            }
+            return v.doubleValue();
         } catch (ValueConversionException ex) {
-            return null;
+            return Double.NaN;
         }
     }
 
@@ -322,14 +326,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
         XYDataAdapter adapter = plottable.adapter();
         for (DataPoint point : plottable.plotData()) {
-            Double x = convertValue(adapter.getX(point));
-            if (x != null) {
-                Double y = convertValue(adapter.getY(point));
+            double x = convertValue(adapter.getX(point));
+            double y = convertValue(adapter.getY(point));
+            if (Double.isNaN(x) || Double.isNaN(y)) {
+//                ser.add(null, true);
+            } else {
                 double xErr = convertValue(adapter.getXerr(point));
                 double yErr = convertValue(adapter.getYerr(point));
                 ser.add(x, x - xErr, x + xErr, y, y - yErr, y + yErr);
-            } else {
-                ser.add(null, true);
             }
         }
 
@@ -362,7 +366,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             if (meta.getBoolean("showErrors", false)) {
                 render = new XYErrorRenderer();
             } else {
-                switch (meta.getString("lineType", "default")) {
+                switch (meta.getString("connectionType", "default")) {
                     case "step":
                         render = new XYStepRenderer();
                         break;

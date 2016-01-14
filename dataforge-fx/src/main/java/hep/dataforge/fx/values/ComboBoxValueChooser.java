@@ -24,7 +24,6 @@ public class ComboBoxValueChooser implements ValueChooser {
     public Node getNode() {
         if (node == null) {
             node = new ComboBox<>(FXCollections.observableArrayList(allowedValues));
-            node.set
             node.setEditable(false);
             applyCallback();
         }
@@ -51,7 +50,7 @@ public class ComboBoxValueChooser implements ValueChooser {
 
     @Override
     public void updateValue(Value value) {
-        node.set
+        node.getSelectionModel().select(value);
     }
 
 }

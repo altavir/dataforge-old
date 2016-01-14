@@ -27,4 +27,6 @@ public interface Configurable {
      * @return
      */
     Configuration getConfig();
+    
+    public void configure(Meta config);
 }
