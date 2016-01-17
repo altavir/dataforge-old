@@ -33,10 +33,10 @@ public class ValueDescriptor extends DescriptorBase implements Named {
         if (!val.required()) {
             builder.setValue("required", val.required());
         }
-        
+
         if (!val.multiple()) {
             builder.setValue("multiple", val.multiple());
-        }        
+        }
 
         if (!val.info().isEmpty()) {
             builder.setValue("info", val.info());
@@ -117,7 +117,7 @@ public class ValueDescriptor extends DescriptorBase implements Named {
      * @return
      */
     public boolean isValueAllowed(Value value) {
-        return (type().isEmpty() || type().contains(value.valueType()))
+        return (type().isEmpty() || type().contains(ValueType.STRING) || type().contains(value.valueType()))
                 && (allowedValues().isEmpty() || allowedValues().containsKey(value));
     }
 
@@ -151,11 +151,13 @@ public class ValueDescriptor extends DescriptorBase implements Named {
             for (Meta allowed : meta().getNodes("allowedValue")) {
                 map.put(allowed.getValue("value"), allowed.getString("description", ""));
             }
-        }
-        if (meta().hasValue("allowedValues")) {
+        } else if (meta().hasValue("allowedValues")) {
             for (Value val : meta().getValue("allowedValues").listValue()) {
                 map.put(val, "");
             }
+        } else if(type().size() == 1 && type().get(0) == ValueType.BOOLEAN){
+            map.put(Value.of(true), "");
+            map.put(Value.of(false), "");
         }
 
         return map;

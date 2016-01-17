@@ -5,7 +5,10 @@
  */
 package hep.dataforge.fx.values;
 
+import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.values.Value;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.ObjectProperty;
 import javafx.scene.Node;
 
 /**
@@ -16,10 +19,55 @@ import javafx.scene.Node;
  */
 public interface ValueChooser {
 
+    //TODO replace by fx bindings
     void setValueCallback(ValueCallback callback);
+    
+    ValueCallback getValueCallback();
 
-    void updateValue(Value value);
+    ObjectProperty<Value> valueProperty();
+    
+    /**
+     * The descriptor property for this value. Could be null
+     * @return 
+     */
+    ObjectProperty<ValueDescriptor> descriptorProperty();
+    
+    /**
+     * If showDefault, than default Value from descriptor is shown (if found)
+     * @return 
+     */
+    BooleanProperty showDefaultProperty();
+    
+    /**
+     * Set display value but do not notify listeners
+     * @param value 
+     */
+    void setDisplayValue(Value value);
 
+    /**
+     * Set value and notify callback if it is present
+     * @param value 
+     */
+    default void setValue(Value value){
+        valueProperty().set(value);
+    }
+    
+    default void setDescriptor(ValueDescriptor desc){
+        descriptorProperty().set(desc);
+    }
+    
+    default void setShowDefault(boolean showDefault){
+        showDefaultProperty().set(showDefault);
+    }
+    
+    default void setDisabled(boolean disabled){
+        
+    }
+    
+    default ValueDescriptor getDescriptor(){
+        return descriptorProperty().get();
+    }
+    
     /**
      * Get or create a Node that could be later inserted into some parent
      * object.

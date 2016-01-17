@@ -21,17 +21,29 @@ import javax.json.JsonWriterFactory;
 
 /**
  * A converter from Meta object to JSON character stream
+ *
  * @author Alexander Nozik
  */
 public class JSONMetaWriter implements MetaStreamWriter {
 
+    boolean prettify = true;
+
+    public JSONMetaWriter() {
+    }
+    
+    public JSONMetaWriter(boolean prettify) {
+        this.prettify = prettify;
+    }
+
     @Override
     public void write(OutputStream stream, Meta meta, Charset charset) {
-        if(charset == null){
+        if (charset == null) {
             charset = Charset.forName("UTF-8");
         }
         Map<String, Object> properties = new HashMap<>();
-        properties.put("javax.json.stream.JsonGenerator.prettyPrinting", true);
+        if (prettify) {
+            properties.put("javax.json.stream.JsonGenerator.prettyPrinting", true);
+        }
         JsonWriterFactory writerFactory = Json.createWriterFactory(properties);
         writerFactory.createWriter(stream, charset)
                 .write(fromMeta(meta));

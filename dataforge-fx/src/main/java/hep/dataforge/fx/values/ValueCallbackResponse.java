@@ -24,4 +24,12 @@ public class ValueCallbackResponse {
      * Message on unsuccessful change
      */
     String message;
+
+    public ValueCallbackResponse(boolean success, Value value, String message) {
+        this.success = success;
+        this.value = value;
+        this.message = message;
+    }
+    
+    
 }

@@ -6,6 +6,9 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.description.ValueDescriptor;
+import hep.dataforge.fx.values.ValueChooser;
+import hep.dataforge.fx.values.ValueChooserFactory;
+import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
 
 public class MetaTreeLeaf implements MetaTree {
@@ -93,6 +96,21 @@ public class MetaTreeLeaf implements MetaTree {
 
     public void setFrozen(boolean frozen) {
         this.frozen = frozen;
+    }
+    
+    public Configuration getParentNode(){
+        return parent.getNode();
+    }
+    
+    public ValueChooser valueChooser(){
+        ValueChooser chooser;
+        if(hasDescriptor()){
+            chooser = ValueChooserFactory.getInstance().build(getDescriptor(), getParentNode(), name);
+        } else {
+            chooser = ValueChooserFactory.getInstance().build(getParentNode(), name);
+        }
+        chooser.setDisabled(isFrozen());
+        return chooser;
     }
 
     

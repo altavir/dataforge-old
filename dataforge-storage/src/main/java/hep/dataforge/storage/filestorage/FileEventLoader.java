@@ -21,6 +21,7 @@ import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
+import hep.dataforge.storage.commons.JSONMetaWriter;
 import hep.dataforge.storage.loaders.AbstractEventLoader;
 import java.nio.charset.Charset;
 import java.util.Iterator;
@@ -107,7 +108,8 @@ public class FileEventLoader extends AbstractEventLoader {
     protected void pushDirect(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
-                getFile().append(event.toString().getBytes(CHARSET));
+                String eventString = new JSONMetaWriter(false).writeString(event.meta(),CHARSET);
+                getFile().append(eventString.getBytes(CHARSET));
                 getFile().append(NEWLINE);
             } catch (Exception ex) {
                 throw new StorageException(ex);

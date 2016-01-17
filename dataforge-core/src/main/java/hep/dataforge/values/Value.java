@@ -82,7 +82,7 @@ public interface Value extends Comparable<Value>, Serializable {
         }
 
         if ("true".equals(str) || "false".equals(str)) {
-            return new BooleanValue(str);
+            return BooleanValue.ofBoolean(str);
         }
 
         if (str.startsWith("[") && str.endsWith("]")) {
@@ -110,7 +110,7 @@ public interface Value extends Comparable<Value>, Serializable {
      * @return a {@link hep.dataforge.values.Value} object.
      */
     public static Value of(boolean b) {
-        return new BooleanValue(b);
+        return BooleanValue.ofBoolean(b);
     }
 
     public static Value of(double d) {
@@ -182,7 +182,7 @@ public interface Value extends Comparable<Value>, Serializable {
         } else if (obj instanceof LocalDateTime) {
             return new TimeValue((LocalDateTime) obj);
         } else if (obj instanceof Boolean) {
-            return new BooleanValue((boolean) obj);
+            return BooleanValue.ofBoolean((boolean) obj);
         } else if (obj instanceof Value) {
             //это можно делать так как Value неизменяемый
             return (Value) obj;
