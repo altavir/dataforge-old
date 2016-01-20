@@ -98,82 +98,12 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
 
         valueColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<MetaTree, Value> param) -> {
-                    return param.getValue().getValue().valueProperty();
+                    return param.getValue().getValue().value();
                 }
         );
 
         valueColumn.setCellFactory((TreeTableColumn<MetaTree, Value> column) -> {
-            //TODO set external factory to build different views basing on Descriptor property
             return new ValueChooserCell();
-//            StringConverter<Value> converter = new StringConverter<Value>() {
-//                @Override
-//                public String toString(Value object) {
-//                    return object == null ? null : object.stringValue();
-//                }
-//
-//                @Override
-//                public Value fromString(String string) {
-//                    return Value.of(string);
-//                }
-//            };
-//
-//            return new TextFieldTreeTableCell<MetaTree, Value>(converter);// {
-//
-//                @Override
-//                public void updateItem(Value item, boolean empty) {
-//                    super.updateItem(item, empty);
-//
-//                    if (item != null) {
-//                        switch (item.valueType()) {
-//                            case BOOLEAN:
-//                                if (item.booleanValue()) {
-//                                    setTextFill(Color.BLUE);
-//                                } else {
-//                                    setTextFill(Color.RED);
-//                                }
-//                                break;
-//                            case STRING:
-//                                setTextFill(Color.BROWN);
-//                                break;
-//                            default:
-//                                setTextFill(Color.BLACK);
-//                        }
-//                        //TODO bold instead of underline
-//                        setUnderline(item.isList());
-//                    }
-//
-//                    MetaTree rowData = getRowData();
-//                    if (rowData != null) {
-//                        setEditable(!rowData.isNode() && !rowData.isFrozen());
-//                        if (rowData.isDefault()) {
-//                            //TODO add italic here
-//                            setTextFill(Color.GRAY);
-//                        }
-//                    }
-//                }
-//
-//                @Override
-//                public void commitEdit(Value newValue) {
-//                    MetaTree rowData = getRowData();
-//                    ValueDescriptor descriptor = null;
-//                    if (rowData != null) {
-//                        descriptor = ((MetaTreeLeaf) rowData).getDescriptor();
-//                    }
-//
-//                    if (descriptor != null && !descriptor.isValueAllowed(newValue)) {
-//                        //TODO add error message here
-//                        cancelEdit();
-//                    } else {
-//                        super.commitEdit(newValue);
-//                    }
-//                }
-//
-//                private MetaTree getRowData() {
-//                    return getTreeTableRow().getItem();
-//                }
-//
-//            };
-
         });
 
         descriptionColumn.setCellFactory((TreeTableColumn<MetaTree, String> param) -> {
@@ -284,7 +214,8 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
                 MetaTree row = getRowData();
                 if (row != null) {
                     if (row.isNode()) {
-                        setText(row.getStringValue());
+                        setText(row.stringValueProperty().getValue());
+//                        textProperty().bind(row.stringValueProperty());
                         setGraphic(null);
                         setEditable(false);
                     } else {

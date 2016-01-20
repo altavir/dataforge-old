@@ -6,11 +6,8 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.values.Value;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.value.ObservableValue;
 
 /**
  * Tree item for meta nodes and values
@@ -26,35 +23,12 @@ public interface MetaTree {
      */
     String getName();
 
-//    /**
-//     * setter for name. Used only for new nodes
-//     */
-//    void setName();
     /**
      * getter for meta value.
      *
      * @return
      */
-    Value getValue();
-
-    /**
-     * setter for value
-     *
-     * @param value
-     */
-    void setValue(Value value);
-
-    default void setStringValue(String value) {
-        setValue(Value.of(value));
-    }
-
-    default String getStringValue() {
-        if (getValue() == null) {
-            return "";
-        } else {
-            return getValue().stringValue();
-        }
-    }
+    ObservableValue<Value> value();
 
     /**
      * getter for description
@@ -76,40 +50,56 @@ public interface MetaTree {
      * @return
      */
     boolean isDefault();
-    
+
     /**
      * true if there is a descriptor for this element
-     * @return 
+     *
+     * @return
      */
     boolean hasDescriptor();
-    
-    default StringProperty nameProperty() {
+
+    default ObservableValue<String> nameProperty() {
         //return new ReadOnlyStringWrapper(getName());
-        return new ReadOnlyStringWrapper(this, "name", getName());
+        return new StringBinding() {
+            @Override
+            protected String computeValue() {
+                return getName();
+            }
+        };
     }
 
-    default StringProperty descriptionProperty() {
-        //return new ReadOnlyStringWrapper(getDescription());
-        return new ReadOnlyStringWrapper(this, "description", getDescription());
+    default ObservableValue<String> descriptionProperty() {
+        return new StringBinding() {
+            @Override
+            protected String computeValue() {
+                return getDescription();
+            }
+        };
     }
 
-    default StringProperty stringValueProperty() {
-        return new SimpleStringProperty(this, "stringValue", getStringValue());
+    default ObservableValue<String> stringValueProperty() {
+        return new StringBinding() {
+            @Override
+            protected String computeValue() {
+                if (value() == null) {
+                    return "";
+                } else {
+                    return value().getValue().stringValue();
+                }
+            }
+        };
     }
 
-    default ObjectProperty<Value> valueProperty() {
-        try {
-            return new JavaBeanObjectPropertyBuilder<>().bean(this).name("value").build();
-        } catch (NoSuchMethodException ex) {
-            throw new Error(ex);
-        }
-    }
-    
     /**
      * True if this node is frozen and could not be edited
+     *
+     * @return
+     */
+    boolean isFrozen();
+    
+    /**
+     * Shows if node is visible in configurator
      * @return 
      */
-    default boolean isFrozen(){
-        return false;
-    }    
+    boolean isVisible();
 }

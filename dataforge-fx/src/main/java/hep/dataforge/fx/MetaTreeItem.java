@@ -37,7 +37,6 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
     }
 
     private Function<Configuration, NodeDescriptor> descriptorProvider;
-    private BiFunction<Configuration, String, Boolean> frozenValuePredicate;
 
     private boolean invalid = true;
 
@@ -89,10 +88,6 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
                 // adding values with descriptors if available
                 for (String valueName : config.getValueNames()) {
                     MetaTreeLeaf valueLeaf = new MetaTreeLeaf(branch, valueName);
-                    //aplying frozen status if predicate is available
-                    if(frozenValuePredicate!= null && frozenValuePredicate.apply(config, valueName)){
-                        valueLeaf.setFrozen(true);
-                    }
                     children.add(new MetaTreeItem(valueLeaf));
                 }
             }
@@ -200,11 +195,6 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
     public void setDescriptorProvider(Function<Configuration, NodeDescriptor> descriptorProvider) {
         this.descriptorProvider = descriptorProvider;
-        invalidate();
-    }
-
-    public void setFrozenValuePredicate(BiFunction<Configuration, String, Boolean> frozenValuePredicate) {
-        this.frozenValuePredicate = frozenValuePredicate;
         invalidate();
     }
 

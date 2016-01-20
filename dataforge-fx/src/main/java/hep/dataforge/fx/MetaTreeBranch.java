@@ -8,6 +8,7 @@ package hep.dataforge.fx;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
+import javafx.beans.value.ObservableValue;
 
 public class MetaTreeBranch implements MetaTree {
 
@@ -37,13 +38,8 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     @Override
-    public Value getValue() {
+    public ObservableValue<Value> value() {
         return null;
-    }
-
-    @Override
-    public void setValue(Value value) {
-
     }
 
     @Override
@@ -90,5 +86,15 @@ public class MetaTreeBranch implements MetaTree {
     @Override
     public boolean hasDescriptor() {
         return descriptor != null;
+    }
+
+    @Override
+    public boolean isFrozen() {
+        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.frozen", false);
+    }
+
+    @Override
+    public boolean isVisible() {
+        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.visible", true);
     }
 }
