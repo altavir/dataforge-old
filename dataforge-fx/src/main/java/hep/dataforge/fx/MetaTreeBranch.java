@@ -7,14 +7,21 @@ package hep.dataforge.fx;
 
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
-import hep.dataforge.values.Value;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableBooleanValue;
 
-public class MetaTreeBranch implements MetaTree {
+public class MetaTreeBranch extends MetaTree {
 
     MetaTreeBranch parent;
     Configuration node;
     NodeDescriptor descriptor;
+    
+    private final ObservableBooleanValue isDefaultValue = new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return (node == null || node.isEmpty()) && descriptor != null;
+            }
+        };
 
     public MetaTreeBranch(MetaTreeBranch parent, Configuration node, NodeDescriptor descriptor) {
         this.parent = parent;
@@ -38,11 +45,6 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     @Override
-    public ObservableValue<Value> value() {
-        return null;
-    }
-
-    @Override
     public String getDescription() {
         return descriptor == null ? null : descriptor.info();
     }
@@ -53,8 +55,8 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     @Override
-    public boolean isDefault() {
-        return (node == null || node.isEmpty()) && descriptor != null;
+    public ObservableBooleanValue isDefault() {
+        return isDefaultValue;
     }
 
     /**
@@ -86,15 +88,5 @@ public class MetaTreeBranch implements MetaTree {
     @Override
     public boolean hasDescriptor() {
         return descriptor != null;
-    }
-
-    @Override
-    public boolean isFrozen() {
-        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.frozen", false);
-    }
-
-    @Override
-    public boolean isVisible() {
-        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.visible", true);
     }
 }

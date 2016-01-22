@@ -32,9 +32,6 @@ public class Configuration extends MuttableMetaNode<Configuration> {
 
     protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
-//    private Configuration(String name, Configuration parent) {
-//        super(name, parent);
-//    }
     /**
      * Create empty root configuration
      *
@@ -110,6 +107,8 @@ public class Configuration extends MuttableMetaNode<Configuration> {
     public void addObserver(ConfigChangeListener observer) {
         addObserver(observer, true);
     }
+    
+    //PENDING add value observers inheriting value class by wrapper
 
     /**
      * Remove an observer from this configuration

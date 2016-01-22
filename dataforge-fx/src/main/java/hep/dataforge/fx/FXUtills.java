@@ -5,6 +5,11 @@
  */
 package hep.dataforge.fx;
 
+import hep.dataforge.meta.Configuration;
+import javafx.beans.InvalidationListener;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableObjectValue;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -39,4 +44,5 @@ public class FXUtills {
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
     }
+    
 }

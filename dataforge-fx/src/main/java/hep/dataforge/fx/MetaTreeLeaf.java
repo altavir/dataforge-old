@@ -10,13 +10,15 @@ import hep.dataforge.fx.values.ValueChooser;
 import hep.dataforge.fx.values.ValueChooserFactory;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
+import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
 
-public class MetaTreeLeaf implements MetaTree {
+public class MetaTreeLeaf extends MetaTree {
 
     MetaTreeBranch parent;
-    
+
     String valueName;
 
     public MetaTreeLeaf(MetaTreeBranch parent, String name) {
@@ -44,7 +46,6 @@ public class MetaTreeLeaf implements MetaTree {
         }
     }
 
-    @Override
     public ObservableValue<Value> value() {
         return new ObjectBinding<Value>() {
             @Override
@@ -82,8 +83,14 @@ public class MetaTreeLeaf implements MetaTree {
     }
 
     @Override
-    public boolean isDefault() {
-        return (parent.isDefault()) || !parent.node.hasValue(valueName);
+    public ObservableBooleanValue isDefault() {
+        return new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return parent.isDefault().get() || !parent.node.hasValue(valueName);
+            }
+        };
+
     }
 
     @Override
@@ -102,18 +109,7 @@ public class MetaTreeLeaf implements MetaTree {
         } else {
             chooser = ValueChooserFactory.getInstance().build(getParentNode(), valueName);
         }
-        chooser.setDisabled(isFrozen());
+        chooser.setDisabled(!protectedProperty().get());
         return chooser;
     }
-    
-    @Override
-    public boolean isFrozen() {
-        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.frozen", false);
-    }
-
-    @Override
-    public boolean isVisible() {
-        return !hasDescriptor() || getDescriptor().meta().getBoolean("editor.visible", true);
-    }    
-
 }

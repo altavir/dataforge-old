@@ -14,6 +14,10 @@ import hep.dataforge.values.Value;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
+import javafx.beans.value.ChangeListener;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -27,7 +31,10 @@ import javafx.scene.control.TreeTableColumn;
 import javafx.scene.control.TreeTableView;
 import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.AnchorPane;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.util.Callback;
+import javafx.util.StringConverter;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -36,18 +43,18 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 public class MetaEditor extends AnchorPane implements Initializable, Annotated {
-
+    
     public static MetaEditor build(Configuration configuration, NodeDescriptor descriptor) {
         MetaEditor component = new MetaEditor();
         component.setRoot(configuration, descriptor);
         return component;
     }
-
+    
     public MetaEditor() {
         FXMLLoader loader = new FXMLLoader(MetaEditor.class.getResource("/fxml/MetaEditor.fxml"));
         loader.setRoot(this);
         loader.setController(this);
-
+        
         try {
             loader.load();
         } catch (Exception ex) {
@@ -60,9 +67,9 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
      * Link to configuration being edited
      */
     private Configuration configuration;
-
+    
     private MetaTreeItem root;
-
+    
     @FXML
     private TreeTableView<MetaTree> metaEditorTable;
     @FXML
@@ -89,23 +96,55 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
         metaEditorTable.setSortMode(TreeSortMode.ALL_DESCENDANTS);
         nameColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<MetaTree, String> param)
-                -> param.getValue().getValue().nameProperty());
-
+                -> param.getValue().getValue().nameValue()
+        );
+        
+        nameColumn.setCellFactory((TreeTableColumn<MetaTree, String> param) -> {
+            return new TextFieldTreeTableCell<MetaTree, String>() {
+                @Override
+                public void updateItem(String item, boolean empty) {
+                    super.updateItem(item, empty);
+                    setNameColor();
+                    if (getTreeTableRow().getItem() != null) {
+                        getTreeTableRow().getItem().isDefault()
+                                .addListener((Observable observable) -> {
+                            setNameColor();
+                        });
+                    }
+                }
+                
+                private void setNameColor() {
+                    if (getTreeTableRow().getItem() != null) {
+                        if (getTreeTableRow().getItem().isDefault().get()) {
+                            setTextFill(Color.GRAY);
+                        } else {
+                            setTextFill(Color.BLACK);
+                        }
+                    }
+                }
+            };
+        });
+        
         descriptionColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<MetaTree, String> param)
-                -> param.getValue().getValue().descriptionProperty()
+                -> param.getValue().getValue().descriptionValue()
         );
-
+        
         valueColumn.setCellValueFactory(
                 (TreeTableColumn.CellDataFeatures<MetaTree, Value> param) -> {
-                    return param.getValue().getValue().value();
+                    MetaTree tree = param.getValue().getValue();
+                    if (tree.isNode()) {
+                        return null;
+                    } else {
+                        return ((MetaTreeLeaf) tree).value();
+                    }
                 }
         );
-
+        
         valueColumn.setCellFactory((TreeTableColumn<MetaTree, Value> column) -> {
             return new ValueChooserCell();
         });
-
+        
         descriptionColumn.setCellFactory((TreeTableColumn<MetaTree, String> param) -> {
             TreeTableCell<MetaTree, String> cell = new TreeTableCell<>();
             Text text = new Text();
@@ -115,9 +154,9 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             text.textProperty().bind(cell.itemProperty());
             return cell;
         });
-
+        
     }
-
+    
     public final void setRoot(MetaTreeItem rootItem) {
         root = rootItem;
         root.setExpanded(true);
@@ -128,27 +167,27 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             throw new RuntimeException("Can't assign leaf as a root");
         }
     }
-
+    
     public final void setRoot(Configuration configuration, NodeDescriptor descriptor) {
         root = new MetaTreeItem(configuration, descriptor);
         root.setExpanded(true);
         metaEditorTable.setRoot(root);
         this.configuration = configuration;
     }
-
+    
     public void addNode(MetaTreeItem parent, Meta node, NodeDescriptor descriptor) {
         parent.addBranch(node, descriptor);
     }
-
+    
     public void addValue(MetaTreeItem parent, String valueName) {
         parent.addLeaf(valueName);
     }
-
+    
     @Override
     public Configuration meta() {
         return configuration;
     }
-
+    
     private MetaTreeItem getSelectedItem() {
         if (metaEditorTable.getSelectionModel().isEmpty()) {
             return null;
@@ -156,7 +195,7 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             return (MetaTreeItem) this.metaEditorTable.getSelectionModel().getSelectedItem();
         }
     }
-
+    
     private String showNameDialog(boolean forNode) {
         TextInputDialog dialog = new TextInputDialog();
         if (forNode) {
@@ -167,11 +206,11 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             dialog.setContentText("Enter a name for new value: ");
         }
         dialog.setHeaderText(null);
-
+        
         Optional<String> result = dialog.showAndWait();
         return result.orElse(null);
     }
-
+    
     @FXML
     private void onValueAddClick(ActionEvent event) {
         MetaTreeItem selected = getSelectedItem();
@@ -182,7 +221,7 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             }
         }
     }
-
+    
     @FXML
     private void onNodeAddClick(ActionEvent event) {
         MetaTreeItem selected = getSelectedItem();
@@ -193,7 +232,7 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             }
         }
     }
-
+    
     @FXML
     private void onRemoveClick(ActionEvent event) {
         MetaTreeItem selected = getSelectedItem();
@@ -201,20 +240,20 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
             selected.remove();
         }
     }
-
+    
     public TreeTableView<MetaTree> geTable() {
         return metaEditorTable;
     }
-
+    
     private class ValueChooserCell extends TreeTableCell<MetaTree, Value> {
-
+        
         @Override
         public void updateItem(Value item, boolean empty) {
             if (!empty) {
                 MetaTree row = getRowData();
                 if (row != null) {
                     if (row.isNode()) {
-                        setText(row.stringValueProperty().getValue());
+                        setText(null);
 //                        textProperty().bind(row.stringValueProperty());
                         setGraphic(null);
                         setEditable(false);
@@ -230,7 +269,7 @@ public class MetaEditor extends AnchorPane implements Initializable, Annotated {
                 setGraphic(null);
             }
         }
-
+        
         private MetaTree getRowData() {
             return getTreeTableRow().getItem();
         }

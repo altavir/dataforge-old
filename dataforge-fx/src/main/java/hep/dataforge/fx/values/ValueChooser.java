@@ -61,7 +61,7 @@ public interface ValueChooser {
     }
     
     default void setDisabled(boolean disabled){
-        
+        //TODO replace by property
     }
     
     default ValueDescriptor getDescriptor(){

@@ -5,101 +5,96 @@
  */
 package hep.dataforge.fx;
 
-import hep.dataforge.values.Value;
+import java.util.Observable;
 import javafx.beans.binding.StringBinding;
-import javafx.beans.value.ObservableValue;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableStringValue;
 
 /**
  * Tree item for meta nodes and values
  *
  * @author Alexander Nozik
  */
-public interface MetaTree {
+public abstract class MetaTree extends Observable {
+
+    private final StringBinding nameValue = new StringBinding() {
+        @Override
+        protected String computeValue() {
+            return MetaTree.this.getName();
+        }
+    };
+
+    private final StringBinding descriptionValue = new StringBinding() {
+        @Override
+        protected String computeValue() {
+            return MetaTree.this.getDescription();
+        }
+    };
+
+    private final BooleanProperty protectedProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty visibleProperty = new SimpleBooleanProperty(true);
+
+    public BooleanProperty protectedProperty(){
+        return protectedProperty;
+    }
+    
+    public BooleanProperty visibleProperty(){
+        return visibleProperty;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public ObservableStringValue nameValue() {
+        return nameValue;
+    }
 
     /**
      * getter for name property
      *
      * @return
      */
-    String getName();
+    public abstract String getName();
 
-    /**
-     * getter for meta value.
-     *
-     * @return
-     */
-    ObservableValue<Value> value();
+    public ObservableStringValue descriptionValue() {
+        return descriptionValue;
+    }
 
     /**
      * getter for description
      *
      * @return
      */
-    String getDescription();
+    public abstract String getDescription();
 
     /**
      * is MetaNode tree item
      *
      * @return
      */
-    boolean isNode();
+    protected abstract boolean isNode();
 
     /**
      * is default value from descriptor
      *
      * @return
      */
-    boolean isDefault();
+    public abstract ObservableBooleanValue isDefault();
+
 
     /**
      * true if there is a descriptor for this element
      *
      * @return
      */
-    boolean hasDescriptor();
-
-    default ObservableValue<String> nameProperty() {
-        //return new ReadOnlyStringWrapper(getName());
-        return new StringBinding() {
-            @Override
-            protected String computeValue() {
-                return getName();
-            }
-        };
-    }
-
-    default ObservableValue<String> descriptionProperty() {
-        return new StringBinding() {
-            @Override
-            protected String computeValue() {
-                return getDescription();
-            }
-        };
-    }
-
-    default ObservableValue<String> stringValueProperty() {
-        return new StringBinding() {
-            @Override
-            protected String computeValue() {
-                if (value() == null) {
-                    return "";
-                } else {
-                    return value().getValue().stringValue();
-                }
-            }
-        };
-    }
-
-    /**
-     * True if this node is frozen and could not be edited
-     *
-     * @return
-     */
-    boolean isFrozen();
+    protected abstract boolean hasDescriptor();
     
-    /**
-     * Shows if node is visible in configurator
-     * @return 
-     */
-    boolean isVisible();
+    public void invalidate(){
+        nameValue.invalidate();
+        descriptionValue.invalidate();
+    }
+
 }

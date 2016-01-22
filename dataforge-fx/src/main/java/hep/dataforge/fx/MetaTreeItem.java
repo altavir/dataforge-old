@@ -9,7 +9,6 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -159,7 +158,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
     public void remove() {
         if (this.isRoot()) {
             LoggerFactory.getLogger(getClass()).error("Can't remove root node");
-        } else if (getValue().isDefault()) {
+        } else if (getValue().isDefault().get()) {
             LoggerFactory.getLogger(getClass()).error("Can't remove default node");
         } else {
             if (isLeaf()) {
