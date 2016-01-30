@@ -5,14 +5,13 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.content.Named;
-import hep.dataforge.io.envelopes.Responder;
-
 /**
  * The connection between devices or other control objects
  * @author Alexander Nozik
  */
-public interface Connection extends Named, Responder, AutoCloseable{
+public interface Connection extends AutoCloseable{
+    String type();
+    
     boolean isOpen();
     
     void open() throws Exception;

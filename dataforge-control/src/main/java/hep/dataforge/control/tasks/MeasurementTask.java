@@ -19,7 +19,6 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.exceptions.MeasurementException;
 import java.time.Duration;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;

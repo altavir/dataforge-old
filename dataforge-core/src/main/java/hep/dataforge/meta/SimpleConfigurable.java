@@ -17,7 +17,6 @@ package hep.dataforge.meta;
 
 import hep.dataforge.values.Value;
 import java.util.List;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple implementation of configurable that applies observer to
@@ -27,51 +26,23 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class SimpleConfigurable implements Configurable, Annotated {
 
-    private Configuration configuration;
+    private Configuration configuration = null;
 
-    /**
-     * Create new configurable object and register observer that notifies this
-     * object if configuration changes
-     *
-     * @param an
-     */
-    public SimpleConfigurable(Meta an) {
-        if (an == null) {
-            an = Meta.buildEmpty("config");
-        }
-        setConfig(an);
-    }
-    
-    public SimpleConfigurable() {
-        this(null);
-    }    
-
-    /**
-     * Set the configuration and register listeners, but do not apply it.
-     *
-     * @param config
-     */
-    protected final void setConfig(Meta config) {
-        if (configuration == null) {
-            configuration = new Configuration(config);
-            configuration.addObserver(new ConfigChangeListener() {
-
-                @Override
-                public void notifyValueChanged(String name, Value oldItem, Value newItem) {
-                    applyValueChange(name, oldItem, newItem);
-                }
-
-                @Override
-                public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-                    applyElementChange(name, oldItem, newItem);
-                }
-            });
-        } else {
-            LoggerFactory.getLogger(getClass()).warn("Trying to replace existing configuration. Using 'configure' instead");
-            configure(config);
-        }
-    }
-
+//    /**
+//     * Create new configurable object and register observer that notifies this
+//     * object if configuration changes
+//     *
+//     * @param an
+//     */
+//    public SimpleConfigurable(Meta an) {
+//        if (an == null) {
+//            an = Meta.buildEmpty("config");
+//        }
+//        configure(an);
+//    }
+//    public SimpleConfigurable() {
+//        this(null);
+//    }    
     /**
      * {@inheritDoc }
      *
@@ -142,13 +113,39 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
     }
 
     /**
+     * validate incoming configuration changes and return correct version (all
+     * invalid values are excluded). By default just returns unchanged configuration.
+     *
+     * @param config
+     * @return
+     */
+    protected Meta validate(Meta config) {
+        return config;
+    }
+
+    /**
      * Applies changes from given config to this one
      *
      * @param config
      */
+    @Override
     public void configure(Meta config) {
+        //Check and correct input configuration
+        config = validate(config);
         if (this.configuration == null) {
-            setConfig(config);
+            configuration = new Configuration(config);
+            configuration.addObserver(new ConfigChangeListener() {
+
+                @Override
+                public void notifyValueChanged(String name, Value oldItem, Value newItem) {
+                    applyValueChange(name, oldItem, newItem);
+                }
+
+                @Override
+                public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+                    applyElementChange(name, oldItem, newItem);
+                }
+            });
         } else {
             this.configuration.update(config);
         }

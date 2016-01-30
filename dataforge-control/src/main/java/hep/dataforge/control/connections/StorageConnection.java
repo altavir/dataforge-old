@@ -9,6 +9,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.NotConnectedException;
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
@@ -19,7 +20,7 @@ import hep.dataforge.storage.commons.StoragePlugin;
  *
  * @author Alexander Nozik
  */
-public class StorageConnection implements Connection, Annotated, Encapsulated {
+public class StorageConnection implements Connection, Annotated, Encapsulated, Responder {
 
     private final Meta meta;
     private Storage storage;
@@ -51,11 +52,6 @@ public class StorageConnection implements Connection, Annotated, Encapsulated {
     }
 
     @Override
-    public String getName() {
-        return meta().getString("name", "");
-    }
-
-    @Override
     public Envelope respond(Envelope message) {
         if (isOpen()) {
             return storage.respond(message);
@@ -79,6 +75,11 @@ public class StorageConnection implements Connection, Annotated, Encapsulated {
     @Override
     public Context getContext() {
         return context;
+    }
+
+    @Override
+    public String type() {
+        return "storage";
     }
 
 }

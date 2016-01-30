@@ -19,19 +19,58 @@ import hep.dataforge.control.connections.Connection;
 import hep.dataforge.content.Named;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Meta;
 
 /**
+ * The Device is general abstract representation of any physical or virtual
+ * apparatus that can interface with data acquisition and control system.
+ * <p>
+ * The device has following important features:
+ * </p>
+ * <ul>
+ * <li>
+ * <strong>States:</strong> each device has a number of states that could be
+ * accessed by {@code getState} method. States could be either stored as some
+ * internal variables or calculated on demand. States calculation is
+ * synchronous!
+ * </li>
+ * <li>
+ * <strong>Listeners:</strong> some external class which listens device state
+ * changes and events. By default listeners are represented by weak references
+ * so they could be finalized any time if not used.
+ * </li>
+ * <li>
+ * <strong>Connections:</strong> any external device connectors which are used
+ * by device. The difference between listener and connection is that device is
+ * obligated to notify all registered listeners about all changes, but
+ * connection is used by device at its own discretion. Also usually only one
+ * connection is used for each single purpose.
+ * </li>
+ * <li>
+ * <strong>Commands:</strong> commands could be issued to device with or without
+ * additional meta. Commands are accepted and executed asynchronously.
+ * </li>
+ * </ul>
  *
  * @author Alexander Nozik
  */
-public interface Device extends Annotated, Encapsulated, Named, Responder {
+public interface Device extends Configurable, Encapsulated, Named, Responder {
 
+    //TODO add device states annotations
+    /**
+     * Device type
+     * @return 
+     */
+    String type();
+    
     /**
      * Get the device state with given name. Null if such state not found or
-     * undefined;
+     * undefined. This operation is synchronous so use it with care. In general,
+     * it is recommended to use asynchronous state change listeners instead of
+     * this method.
      *
      * @param name
      * @return
@@ -39,9 +78,10 @@ public interface Device extends Annotated, Encapsulated, Named, Responder {
     Value getState(String name);
 
     /**
-     * Initialize device and check connection but do not start it. Init method
-     * could be called only once per MeasurementDevice object. On second call it
-     * throws exception or does nothing.
+     * Initialize device and check if it is working but do not start any
+     * measurements or issue commands. Init method could be called only once per
+     * MeasurementDevice object. On second call it throws exception or does
+     * nothing.
      *
      * @throws ControlException
      */
@@ -63,27 +103,55 @@ public interface Device extends Annotated, Encapsulated, Named, Responder {
      * @param listener
      */
     void addDeviceListener(DeviceListener listener);
-    
-//    /**
-//     * Add connection to device
-//     * @param connection 
-//     */
-//    void connect(Connection connection);
+
+    /**
+     * Add a device listener with strong reference
+     *
+     * @param listener
+     */
+    void addStrongDeviceListener(DeviceListener listener);
     
     /**
-     * Get a named and type checked connection for this device.
-     * @param <T>
-     * @param name
-     * @param type
-     * @return 
+     * remove a listener
+     * @param listenrer 
      */
-    <T extends Connection> T getConnection(String name, Class<T> type);
-    
+    void removeDeviceListener(DeviceListener listenrer);
+
     /**
      * Get a named connection for this device.
+     *
      * @param name
-     * @return 
+     * @return
      */
     Connection getConnection(String name);
+
+    /**
+     * Send command to the device. This method does not ensure that command is
+     * accepted. Command is not necessarily is executed immediately, it could be
+     * posted to the command queue according to its priority.
+     *
+     * @param comand
+     */
+    void command(String command, Meta commandMeta) throws ControlException;
+
+    /**
+     * Send command without additional meta or using default meta for this
+     * command
+     *
+     * @param command
+     */
+    default void command(String command) throws ControlException {
+        command(command, null);
+    }
+
+    /**
+     * Send command using 'command' value from meta as a name. If command name
+     * is not provided, than empty name is used.
+     *
+     * @param commandMeta
+     */
+    default void command(Meta commandMeta) throws ControlException {
+        command(commandMeta.getString("command", ""), commandMeta);
+    }
 
 }

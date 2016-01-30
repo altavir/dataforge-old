@@ -15,23 +15,30 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.events.Event;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
  * A listener that listens to device state change initialization and shut down
+ *
  * @author Alexander Nozik
  */
 public interface DeviceListener {
 
     /**
-     * The device is initialized. No measurement or control procedure performed here
-     * @param device 
+     * The device is initialized. No measurement or control procedure performed
+     * here
+     *
+     * @param device
      */
     void notifyDeviceInitialized(Device device);
 
     /**
-     * The device is shut down. No 
-     * @param device 
+     * The device is shut down. No measurement or control procedure performed
+     * here
+     *
+     * @param device
      */
     void notifyDeviceShutdown(Device device);
 
@@ -41,10 +48,37 @@ public interface DeviceListener {
      *
      * @param device
      * @param name the name of the state
-     * @param oldState
-     * @param newState
+     * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value oldState, Value newState);
+    void notifyDeviceStateChanged(Device device, String name, Value state);
 
-   
+    /**
+     * Notify that device configuration has changed. By default is ignored.
+     *
+     * @param device
+     */
+    default void notifyDeviceConfigChanged(Device device) {
+
+    }
+
+    /**
+     * Notify that command is accepted. By default is ignored.
+     *
+     * @param device
+     * @param command
+     * @param commandMeta
+     */
+    default void notifyDeviceCommandAccepted(Device device, String command, Meta commandMeta) {
+
+    }
+
+    /**
+     * Evaluate device event
+     *
+     * @param device
+     * @param status
+     */
+    void evaluateDeviceEvent(Event event);
+
+    void evaluateDeviceException(Device device, String message, Throwable exception);
 }

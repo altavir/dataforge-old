@@ -26,7 +26,7 @@ public class NotConnectedException extends Exception {
 
     @Override
     public String getMessage() {
-        return String.format("The connection '%s' is not open", connection.getName());
+        return "The connection is not open";
     }
 
 }

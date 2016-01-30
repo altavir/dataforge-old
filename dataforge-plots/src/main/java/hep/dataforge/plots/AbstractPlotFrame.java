@@ -31,8 +31,8 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     private final String name;
 
     public AbstractPlotFrame(String name, Meta annotation) {
-        super(annotation);
         this.name = name;
+        super.configure(annotation);
     }
 
     public AbstractPlotFrame(String name) {
@@ -41,7 +41,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
 
     @Override
     public T get(String name) {
-        return plottables.stream().filter(pl->name.equals(pl.getName())).findFirst().orElse(null);
+        return plottables.stream().filter(pl -> name.equals(pl.getName())).findFirst().orElse(null);
     }
 
     @Override
@@ -52,7 +52,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public void remove(String plotName) {
         get(plotName).removeListener(this);
-        plottables.removeIf(pl->pl.getName().equals(plotName));
+        plottables.removeIf(pl -> pl.getName().equals(plotName));
     }
 
     @Override
@@ -81,7 +81,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public String getName() {
         if (name == null || name.isEmpty()) {
-            return meta().getString("frameName","default");
+            return meta().getString("frameName", "default");
         } else {
             return name;
         }
