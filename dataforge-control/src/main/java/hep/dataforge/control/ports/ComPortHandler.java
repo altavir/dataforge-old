@@ -75,7 +75,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
      * @param portName
      * @throws SerialPortException
      */
-    public ComPortHandler(String portName) throws SerialPortException {
+    public ComPortHandler(String portName){
         this(portName, BAUDRATE_9600, DATABITS_8, STOPBITS_1, PARITY_NONE);
     }
 

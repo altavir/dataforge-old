@@ -27,12 +27,15 @@ import hep.dataforge.values.Value;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Function;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
+ * <p>
+ * State have two components: physical and logical. If logical state does not
+ * coincide with physical, it should be invalidated and automatically updated on
+ * next request.
+ * </p>
  *
  * @author Alexander Nozik
  */
@@ -145,7 +148,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     /**
-     * Notify state changed internally
+     * Update logical state and notify listeners.
      *
      * @param stateName
      * @param stateValue
@@ -153,6 +156,22 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     protected final void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(name, stateValue);
         listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
+    }
+
+    /**
+     * Post a value to the state and notify state changed if needed. Does not
+     * change physical configuration
+     *
+     * @param stateName
+     * @param stateValue
+     */
+    protected void updateState(String stateName, Object stateValue) {
+        Value oldState = this.states.get(stateName);
+        Value newState = Value.of(stateValue);
+        //Notify only if state realy changed
+        if (!newState.equals(oldState)) {
+            notifyStateChanged(stateName, newState);
+        }
     }
 
     protected final void notifyError(String message, Throwable error) {
@@ -167,6 +186,36 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     protected final void invalidateState(String stateName) {
         this.states.remove(name);
 //        listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, null));
+    }
+
+    /**
+     * Set state of the device changing its physical configuration if needed
+     *
+     * @param stateName
+     * @param stateValue
+     */
+    public void setState(String stateName, Object stateValue) {
+        try {
+            Value val = Value.of(stateValue);
+            if (applyState(stateName, val)) {
+                notifyStateChanged(stateName, val);
+            } else {
+                getLogger().warn("State {} not changed", stateName);
+            }
+        } catch (ControlException ex) {
+            notifyError("Can't change state " + stateName, ex);
+        }
+    }
+
+    /**
+     * Apply state to device
+     *
+     * @param stateName
+     * @param stateValue
+     * @return
+     */
+    protected boolean applyState(String stateName, Value stateValue) throws ControlException {
+        throw new ControlException("State " + stateName + " is not defined or read only");
     }
 
     protected abstract Object calculateState(String stateName) throws ControlException;
