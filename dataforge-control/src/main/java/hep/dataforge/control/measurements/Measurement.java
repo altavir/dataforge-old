@@ -7,11 +7,10 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
 import java.time.Instant;
-import javafx.util.Pair;
 
 /**
  * A general representation of ongoing or completed measurement. Could be
- * regular.
+ * regular. 
  *
  * @author Alexander Nozik
  */
@@ -38,8 +37,6 @@ public interface Measurement<T> {
      * @return
      */
     boolean isFinished();
-
-    Pair<T, Instant> get() throws MeasurementException;
 
     /**
      * Get the time of the last measurement

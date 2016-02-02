@@ -57,7 +57,7 @@ public class Laminate extends Meta {
     }
 
     public Laminate(List<Meta> layers) {
-        this(layers.isEmpty() ? "" : layers.get(0).getName(),layers);
+        this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(),layers);
     }
 
     public Laminate(Meta... layers) {

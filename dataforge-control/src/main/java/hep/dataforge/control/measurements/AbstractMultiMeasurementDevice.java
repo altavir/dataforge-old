@@ -24,11 +24,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 @AnonimousNotAlowed
-public abstract class AbstractMeasurementDevice<T> extends AbstractDevice implements MeasurementDevice {
+public abstract class AbstractMultiMeasurementDevice<T> extends AbstractDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();
 
-    public AbstractMeasurementDevice(String name, Context context, Meta meta) {
+    public AbstractMultiMeasurementDevice(String name, Context context, Meta meta) {
         super(name, context, meta);
     }
 
@@ -74,60 +74,4 @@ public abstract class AbstractMeasurementDevice<T> extends AbstractDevice implem
         }
     }
 
-//    private final ReferenceRegistry<MeasurementListener<T>> measurementListeners = new ReferenceRegistry<>();
-//
-//    public AbstractMeasurementDevice(String name, Context context, Meta annotation) {
-//        super(name, context, annotation);
-//    }
-//
-//    protected Meta getDefaultMeasurement() {
-//        return Meta.buildEmpty("measurement");
-//    }
-//
-//    /**
-//     * Build a laminate using provided measurement meta and device configuration
-//     * as well as context values.
-//     *
-//     * @param measurement
-//     * @return
-//     */
-//    protected Meta buildMeasurementLaminate(Meta measurement) {
-//        return new Laminate("measurement", measurement, meta()).setDefaultValueProvider(context);
-//    }
-//
-//    @Override
-//    public void start() throws ControlException {
-//        start(getDefaultMeasurement());
-//    }
-//
-//    @Override
-//    public final void start(Meta measurement) throws ControlException {
-//        doStart(measurement);
-//        measurementListeners.forEach(it -> it.notifyMeasurementStarted(this, measurement));
-//    }
-//
-//    protected abstract void doStart(Meta measurement) throws ControlException;
-//
-//    @Override
-//    public final void stop() throws ControlException {
-//        doStop();
-//        measurementListeners.forEach(it -> it.notifyMeasurementStopped(this));
-//    }
-//
-//    protected abstract void doStop() throws ControlException;
-//
-//    @Override
-//    public void addMeasurementListener(MeasurementListener<T> listener) {
-//        measurementListeners.add(listener);
-//    }
-//
-//    protected final void measurementResult(Meta measurement, T measurementResult) {
-//        getLogger().debug("Notify measurement complete");
-//        measurementListeners.forEach(it -> it.notifyMeasurementResult(this, measurement, measurementResult));
-//    }
-//
-//    @Override
-//    public void removeMeasurementListener(MeasurementListener<T> listener) {
-//        measurementListeners.remove(listener);
-//    }
 }

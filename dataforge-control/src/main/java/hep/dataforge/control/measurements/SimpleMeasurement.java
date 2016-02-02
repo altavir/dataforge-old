@@ -5,8 +5,6 @@
  */
 package hep.dataforge.control.measurements;
 
-import hep.dataforge.exceptions.MeasurementException;
-import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -15,28 +13,38 @@ import java.util.concurrent.FutureTask;
 import javafx.util.Pair;
 
 /**
+ * A measurement wrapper for simple single run
  *
- * @author Alexander Nozik
+ * @author Alexander Nozik <altavir@gmail.com>
  */
-public abstract class RegularMeasurement<T> extends AbstractMeasurement<T> {
+public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
 
-//    private final ScheduledExecutorService executor = new ScheduledThreadPoolExecutor(1);
-//    private Future<?> process;
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
     private volatile Future<Pair<T, Instant>> measurementTask;
-    private volatile boolean stopFlag = false;
+
+    @Override
+    public boolean isFinished() {
+        return this.measurementTask.isDone() || this.measurementTask.isCancelled();
+    }
+
+    protected Future<Pair<T, Instant>> getTask() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    @Override
+    protected Pair<T, Instant> doGet() throws Exception {
+        return getTask().get();
+    }    
 
     @Override
     public void start() {
         if (measurementTask == null || measurementTask.isDone()) {
-            stopFlag = false;
             measurementTask = buildTask();
             executor.submit(buildTask());
         }
         notifyStarted();
     }
 
-    //TODO move to abstractMeasurement
     @Override
     public boolean stop(boolean force) {
         if (force) {
@@ -49,50 +57,17 @@ public abstract class RegularMeasurement<T> extends AbstractMeasurement<T> {
                 return false;
             }
         } else {
-            stopFlag = true;
             notifyStopped();
             return true;
         }
     }
 
-    private T performMeasurement() {
-        try {
-            return doMeasurement();
-        } catch (Exception ex) {
-            fail(ex);
-            if (stopOnError()) {
-                stop(true);
-            }
-            return null;
-        }
-    }
-
-    protected Future<Pair<T, Instant>> getTask() {
-        return this.measurementTask;
-    }
-
-    @Override
-    protected Pair<T, Instant> doGet() throws Exception {
-        return getTask().get();
-    }
-    
-    @Override
-    public boolean isFinished() {
-        return this.stopFlag == true;
-    }
-
     private FutureTask<Pair<T, Instant>> buildTask() {
         return new FutureTask<>(() -> {
-            //delayed measurement
-            Thread.sleep(getDelay().toMillis());
             T result = performMeasurement();
             Instant now = Instant.now();
             if (result != null) {
                 result(result, now);
-                if (!stopFlag) {
-                    measurementTask = buildTask();
-                    executor.submit(buildTask());
-                }
                 return new Pair<>(result, now);
             } else {
                 return null;
@@ -100,17 +75,19 @@ public abstract class RegularMeasurement<T> extends AbstractMeasurement<T> {
         });
     }
 
+    private T performMeasurement() {
+        try {
+            return doMeasurement();
+        } catch (Exception ex) {
+            fail(ex);
+            return null;
+        }
+    }
+
     /**
-     * Do measurement and return its result
+     * Do measurement 
      *
      * @throws MeasurementException
      */
     protected abstract T doMeasurement() throws Exception;
-
-    protected boolean stopOnError() {
-        return true;
-    }
-
-    protected abstract Duration getDelay();
-
 }

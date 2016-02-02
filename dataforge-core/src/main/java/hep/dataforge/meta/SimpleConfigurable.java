@@ -28,21 +28,6 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
 
     private Configuration configuration = null;
 
-//    /**
-//     * Create new configurable object and register observer that notifies this
-//     * object if configuration changes
-//     *
-//     * @param an
-//     */
-//    public SimpleConfigurable(Meta an) {
-//        if (an == null) {
-//            an = Meta.buildEmpty("config");
-//        }
-//        configure(an);
-//    }
-//    public SimpleConfigurable() {
-//        this(null);
-//    }    
     /**
      * {@inheritDoc }
      *
@@ -50,6 +35,9 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      */
     @Override
     public final Configuration getConfig() {
+        if (configuration == null) {
+            initConfig();
+        }
         return configuration;
     }
 
@@ -60,7 +48,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      */
     @Override
     public Meta meta() {
-        return configuration;
+        return getConfig();
     }
 
     /**
@@ -79,7 +67,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param newItem
      */
     protected void applyValueChange(String name, Value oldItem, Value newItem) {
-        applyConfig(configuration);
+        applyConfig(getConfig());
     }
 
     /**
@@ -91,7 +79,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param newItem
      */
     protected void applyElementChange(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-        applyConfig(configuration);
+        applyConfig(getConfig());
     }
 
     /**
@@ -100,7 +88,7 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param observer
      */
     public void addConfigObserver(ConfigChangeListener observer) {
-        this.configuration.addObserver(observer);
+        this.getConfig().addObserver(observer);
     }
 
     /**
@@ -109,18 +97,37 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param observer
      */
     public void removeConfigObserver(ConfigChangeListener observer) {
-        this.configuration.addObserver(observer);
+        this.getConfig().addObserver(observer);
     }
 
     /**
      * validate incoming configuration changes and return correct version (all
-     * invalid values are excluded). By default just returns unchanged configuration.
+     * invalid values are excluded). By default just returns unchanged
+     * configuration.
      *
      * @param config
      * @return
      */
     protected Meta validate(Meta config) {
         return config;
+    }
+
+    private void initConfig() {
+        if (configuration == null) {
+            configuration = new Configuration("");
+        }
+        configuration.addObserver(new ConfigChangeListener() {
+
+            @Override
+            public void notifyValueChanged(String name, Value oldItem, Value newItem) {
+                applyValueChange(name, oldItem, newItem);
+            }
+
+            @Override
+            public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+                applyElementChange(name, oldItem, newItem);
+            }
+        });
     }
 
     /**
@@ -132,23 +139,12 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
     public void configure(Meta config) {
         //Check and correct input configuration
         config = validate(config);
-        if (this.configuration == null) {
+        if (this.configuration == null || this.configuration.isEmpty()) {
             configuration = new Configuration(config);
-            configuration.addObserver(new ConfigChangeListener() {
-
-                @Override
-                public void notifyValueChanged(String name, Value oldItem, Value newItem) {
-                    applyValueChange(name, oldItem, newItem);
-                }
-
-                @Override
-                public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-                    applyElementChange(name, oldItem, newItem);
-                }
-            });
+            initConfig();
         } else {
             this.configuration.update(config);
         }
-        applyConfig(this.configuration);
+        applyConfig(getConfig());
     }
 }

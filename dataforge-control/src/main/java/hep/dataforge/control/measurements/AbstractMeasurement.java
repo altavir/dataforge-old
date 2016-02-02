@@ -9,7 +9,7 @@ import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.ReferenceRegistry;
 import java.time.Instant;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import javafx.util.Pair;
 
 /**
@@ -21,7 +21,9 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     private final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
     private Pair<T, Instant> lastResult;
     private Throwable exception;
+    protected volatile boolean isFinished = false;
 
+    private FutureTask<Pair<T, Instant>> task;
 
     /**
      * Call after measurement started
@@ -47,7 +49,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     protected synchronized void result(T result, Instant time) {
-        this.lastResult = new Pair<>(result,time);
+        this.lastResult = new Pair<>(result, time);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(AbstractMeasurement.this, result, time));
     }
 
@@ -84,21 +86,80 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         return this.exception;
     }
 
-    @Override
-    public Pair<T, Instant> get() throws MeasurementException {
-        if(this.lastResult != null){
+    private Pair<T, Instant> get() throws MeasurementException {
+        if (this.lastResult != null) {
             return this.lastResult;
         } else {
             try {
-                return measurementTask().get();
+                return getTask().get();
             } catch (InterruptedException | ExecutionException ex) {
                 throw new MeasurementException(exception);
             }
         }
     }
 
-    
-    protected abstract Future<Pair<T, Instant>> measurementTask();
+    @Override
+    public boolean isFinished() {
+        return isFinished;
+    }
 
+    protected FutureTask<Pair<T, Instant>> buildTask() {
+        return new FutureTask<>(() -> {
+            T res = doMeasure();
+            Instant time = Instant.now();
+            result(res, time);
+            reset();
+            clearTask();
+            return new Pair<>(res, time);
+        });
+
+    }
+
+    /**
+     * invalidate current task. New task will be created on next getTask call.
+     * This method does not guarantee that task is finished when it is cleared
+     */
+    protected final void clearTask() {
+        task = null;
+    }
+
+    /**
+     * Perform synchronous measurement
+     *
+     * @return
+     * @throws Exception
+     */
+    protected abstract T doMeasure() throws Exception;
+
+    @Override
+    public void start() {
+        getTask().run();
+        notifyStarted();
+    }
+
+    @Override
+    public boolean stop(boolean force) {
+        if (getTask().cancel(force)) {
+            notifyStopped();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Reset task after single measurement is complete. This method should be
+     * used to restart task for recurrent measurements.
+     */
+    protected void reset() {
+        isFinished = true;
+    }
+
+    protected FutureTask<Pair<T, Instant>> getTask() {
+        if (task == null) {
+            task = buildTask();
+        }
+        return task;
+    }
 
 }

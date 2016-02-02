@@ -15,10 +15,11 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -58,14 +59,14 @@ public class PlottableFunction extends XYPlottable {
      * @param data
      * @param xName
      */
-    public PlottableFunction(String name, Meta meta, UnivariateFunction function, Iterable<DataPoint> data, String xName) {
+    public PlottableFunction(String name, Meta meta, UnivariateFunction function, Iterable<DataPoint> data, XYDataAdapter adapter) {
         super(name, meta);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
 
         List<Double> tempGrid = new ArrayList<>();
-        data.forEach((dp) -> tempGrid.add(dp.getDouble(xName)));
+        data.forEach((dp) -> tempGrid.add(adapter.getX(dp).doubleValue()));
         Collections.sort(tempGrid);
 
         grid = new ArrayList<>();

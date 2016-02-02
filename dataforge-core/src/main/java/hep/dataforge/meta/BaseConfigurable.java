@@ -24,14 +24,18 @@ public abstract class BaseConfigurable extends SimpleConfigurable implements Ann
     private final Meta meta;
     private final Laminate laminate;
 
-    public BaseConfigurable(Meta meta) {
-        this.meta = meta;
-        laminate = new Laminate(getConfig(), meta).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
+    public BaseConfigurable(Meta metaBase) {
+        this.meta = metaBase;
+        if (metaBase == null) {
+            laminate = new Laminate(getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
+        } else {
+            laminate = new Laminate(getConfig(), metaBase).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
+        }
     }
 
-    public BaseConfigurable(Meta meta, ValueProvider context) {
-        this.meta = meta;
-        laminate = new Laminate(getConfig(), meta)
+    public BaseConfigurable(Meta metaBase, ValueProvider context) {
+        this.meta = metaBase;
+        laminate = new Laminate(getConfig(), metaBase)
                 .setDefaultValueProvider(context)
                 .setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }

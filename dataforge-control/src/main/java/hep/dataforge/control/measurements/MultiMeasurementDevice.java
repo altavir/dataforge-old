@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author darksnake
  */
-public interface MeasurementDevice extends Device {
+public interface MultiMeasurementDevice extends Device {
     
     Measurement createMeasurement(String name, Meta meta) throws ControlException;
     
