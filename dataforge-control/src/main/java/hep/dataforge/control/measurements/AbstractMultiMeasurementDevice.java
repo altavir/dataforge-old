@@ -23,8 +23,13 @@ import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * The device that allows multiple different measurements simultaneously
+ *
+ * @author Alexander Nozik
+ */
 @AnonimousNotAlowed
-public abstract class AbstractMultiMeasurementDevice<T> extends AbstractDevice implements MultiMeasurementDevice {
+public abstract class AbstractMultiMeasurementDevice extends AbstractDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();
 
@@ -34,14 +39,14 @@ public abstract class AbstractMultiMeasurementDevice<T> extends AbstractDevice i
 
     @Override
     public Measurement createMeasurement(String name, Meta meta) throws ControlException {
-        if(meta == null){
+        if (meta == null) {
             meta = getMetaForMeasurement(name);
         }
         Measurement m = doCreateMeasurement(name, meta);
         measurements.put(name, m);
         return m;
     }
-    
+
     protected abstract Measurement doCreateMeasurement(String name, Meta meta);
 
     public Measurement createMeasurement(String name) throws ControlException {
@@ -49,7 +54,7 @@ public abstract class AbstractMultiMeasurementDevice<T> extends AbstractDevice i
     }
 
     @Override
-    public  Measurement getMeasurement(String name) {
+    public Measurement getMeasurement(String name) {
         return this.measurements.get(name);
     }
 

@@ -8,57 +8,56 @@ package hep.dataforge.control.measurements;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.ReferenceRegistry;
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.FutureTask;
 import javafx.util.Pair;
 
 /**
+ * A boilerplate code for measurements
  *
  * @author Alexander Nozik
  */
 public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
-    private final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
-    private Pair<T, Instant> lastResult;
-    private Throwable exception;
+    protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
+    protected Pair<T, Instant> lastResult;
+    protected Throwable exception;
     protected volatile boolean isFinished = false;
-
-    private FutureTask<Pair<T, Instant>> task;
 
     /**
      * Call after measurement started
      */
-    protected void notifyStarted() {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(AbstractMeasurement.this));
+    protected void onStart() {
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
     }
 
     /**
      * Call after measurement stopped
      */
-    protected void notifyStopped() {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStopped(AbstractMeasurement.this));
+    protected void onStop() {
+        isFinished = true;
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStopped(this));
     }
 
-    protected void fail(Throwable error) {
+    protected void onError(Throwable error) {
         this.exception = error;
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(AbstractMeasurement.this, error));
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
     }
 
-    protected void result(T result) {
+    protected void onResult(T result) {
         result(result, Instant.now());
     }
 
     protected synchronized void result(T result, Instant time) {
         this.lastResult = new Pair<>(result, time);
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(AbstractMeasurement.this, result, time));
+        notify();
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(this, result, time));
     }
 
-    protected void progressUpdate(double progress) {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(AbstractMeasurement.this, progress));
+    protected void onProgressUpdate(double progress) {
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, progress));
     }
 
-    protected void progressUpdate(String message) {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(AbstractMeasurement.this, message));
+    protected void onProgressUpdate(String message) {
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, message));
     }
 
     @Override
@@ -72,6 +71,28 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     @Override
+    public boolean isFinished() {
+        return isFinished;
+    }
+
+    @Override
+    public Throwable getError() {
+        return this.exception;
+    }
+    
+    protected synchronized Pair<T, Instant> get() throws MeasurementException {
+        while (this.lastResult == null) {
+            try {
+                //Wait for onResult could cause deadlock if called in main thread
+                wait();
+            } catch (InterruptedException ex) {
+                throw new MeasurementException(exception);
+            }
+        }
+        return this.lastResult;
+    }
+
+    @Override
     public Instant getTime() throws MeasurementException {
         return get().getValue();
     }
@@ -79,87 +100,6 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     @Override
     public T getResult() throws MeasurementException {
         return get().getKey();
-    }
-
-    @Override
-    public Throwable getError() {
-        return this.exception;
-    }
-
-    private Pair<T, Instant> get() throws MeasurementException {
-        if (this.lastResult != null) {
-            return this.lastResult;
-        } else {
-            try {
-                return getTask().get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new MeasurementException(exception);
-            }
-        }
-    }
-
-    @Override
-    public boolean isFinished() {
-        return isFinished;
-    }
-
-    protected FutureTask<Pair<T, Instant>> buildTask() {
-        return new FutureTask<>(() -> {
-            T res = doMeasure();
-            Instant time = Instant.now();
-            result(res, time);
-            reset();
-            clearTask();
-            return new Pair<>(res, time);
-        });
-
-    }
-
-    /**
-     * invalidate current task. New task will be created on next getTask call.
-     * This method does not guarantee that task is finished when it is cleared
-     */
-    protected final void clearTask() {
-        task = null;
-    }
-
-    /**
-     * Perform synchronous measurement
-     *
-     * @return
-     * @throws Exception
-     */
-    protected abstract T doMeasure() throws Exception;
-
-    @Override
-    public void start() {
-        getTask().run();
-        notifyStarted();
-    }
-
-    @Override
-    public boolean stop(boolean force) {
-        if (getTask().cancel(force)) {
-            notifyStopped();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    /**
-     * Reset task after single measurement is complete. This method should be
-     * used to restart task for recurrent measurements.
-     */
-    protected void reset() {
-        isFinished = true;
-    }
-
-    protected FutureTask<Pair<T, Instant>> getTask() {
-        if (task == null) {
-            task = buildTask();
-        }
-        return task;
     }
 
 }

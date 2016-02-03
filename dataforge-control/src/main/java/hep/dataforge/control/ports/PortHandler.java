@@ -33,6 +33,8 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
 
     private volatile String lastResponse = null;
     protected PortController controller;
+    
+    //PENDING add additional port listeners?
 
     /**
      * The default end phrase condition
@@ -136,7 +138,8 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
 
     /**
      * Send the string and wait for a specific answer. All other answers are
-     * passed to the controller but only this one is returned
+     * passed to the controller but only this one is returned. This method
+     * ignores holder lock.
      *
      * @param message
      * @param responseCondition
@@ -152,11 +155,13 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
     }
 
     /**
-     * Send message and wait for the fist reply.
+     * Send message and wait for the fist reply. This method ignores holder
+     * lock.
+     *
      * @param message
      * @param timeout
      * @return
-     * @throws PortException 
+     * @throws PortException
      */
     public final synchronized String sendAndWait(String message, int timeout) throws PortException {
         return sendAndWait(message, null, timeout);
