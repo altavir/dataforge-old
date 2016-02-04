@@ -6,7 +6,6 @@
 package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.ControlException;
-import jssc.SerialPortException;
 
 /**
  *
@@ -32,11 +31,7 @@ public class PortFactory {
 
         switch (protocol) {
             case "com":
-                try {
-                    return new ComPortHandler(addres);
-                } catch (SerialPortException ex) {
-                    throw new ControlException("Can't bind com port",ex);
-                }
+                return new ComPortHandler(addres);
             case "tcp":
                 if (addres.contains(":")) {
                     String[] split = addres.split(":");

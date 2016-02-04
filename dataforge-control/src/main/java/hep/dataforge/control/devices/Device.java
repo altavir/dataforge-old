@@ -15,14 +15,13 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.control.connections.Connection;
 import hep.dataforge.content.Named;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
-import hep.dataforge.values.Value;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.values.Value;
 
 /**
  * The Device is general abstract representation of any physical or virtual
@@ -42,14 +41,6 @@ import hep.dataforge.meta.Meta;
  * changes and events. By default listeners are represented by weak references
  * so they could be finalized any time if not used.
  * </li>
- * <li>
- * <strong>Connections:</strong> any external device connectors which are used
- * by device. The difference between listener and connection is that device is
- * obligated to notify all registered listeners about all changes, but
- * connection is used by device at its own discretion. Also usually only one
- * connection is used for each single purpose.
- * </li>
- * <li>
  * <strong>Commands:</strong> commands could be issued to device with or without
  * additional meta. Commands are accepted and executed asynchronously.
  * </li>
@@ -117,14 +108,14 @@ public interface Device extends Configurable, Encapsulated, Named, Responder {
      */
     void removeDeviceListener(DeviceListener listenrer);
 
-    /**
-     * Get a named connection for this device.
-     *
-     * @param name
-     * @return
-     */
-    Connection getConnection(String name);
-
+//    /**
+//     * Get a named connection for this device.
+//     *
+//     * @param name
+//     * @return
+//     */
+//    Connection getConnection(String name);
+    
     /**
      * Send command to the device. This method does not ensure that command is
      * accepted. Command is not necessarily is executed immediately, it could be

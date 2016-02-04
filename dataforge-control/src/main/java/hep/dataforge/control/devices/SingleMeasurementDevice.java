@@ -8,6 +8,7 @@ package hep.dataforge.control.devices;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -47,7 +48,7 @@ public abstract class SingleMeasurementDevice extends AbstractDevice {
      * Stop current measurement
      * @param force if true than current measurement will be interrupted even if running
      */
-    public void stopMeasurement(boolean force) {
+    public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished() ) {
             this.measurement.stop(force);
         }

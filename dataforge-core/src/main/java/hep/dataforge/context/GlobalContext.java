@@ -70,12 +70,12 @@ public class GlobalContext extends Context {
         super.attachIoManager(io);
         //redirect all logging output to new ioManager
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        
+
         //redirect output to given outputstream
         root.detachAndStopAllAppenders();
         OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setOutputStream(io.out());
         appender.setContext(root.getLoggerContext());
+        appender.setOutputStream(io.out());
         appender.start();
         root.addAppender(appender);
     }

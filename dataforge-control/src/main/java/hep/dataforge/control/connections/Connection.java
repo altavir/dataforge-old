@@ -5,11 +5,13 @@
  */
 package hep.dataforge.control.connections;
 
+import hep.dataforge.content.Named;
+
 /**
  * The connection between devices or other control objects
  * @author Alexander Nozik
  */
-public interface Connection extends AutoCloseable{
+public interface Connection extends AutoCloseable, Named{
     String type();
     
     boolean isOpen();

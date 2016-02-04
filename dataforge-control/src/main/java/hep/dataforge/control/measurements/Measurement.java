@@ -29,7 +29,7 @@ public interface Measurement<T> {
      * @param force force stop if measurement in progress
      * @throws MeasurementException
      */
-    boolean stop(boolean force);
+    boolean stop(boolean force)throws MeasurementException;
 
     /**
      * Measurement is complete or stopped

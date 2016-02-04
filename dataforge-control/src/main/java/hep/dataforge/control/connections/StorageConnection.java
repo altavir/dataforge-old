@@ -5,6 +5,7 @@
  */
 package hep.dataforge.control.connections;
 
+import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.NotConnectedException;
@@ -20,18 +21,26 @@ import hep.dataforge.storage.commons.StoragePlugin;
  *
  * @author Alexander Nozik
  */
+@AnonimousNotAlowed
 public class StorageConnection implements Connection, Annotated, Encapsulated, Responder {
 
     private final Meta meta;
     private Storage storage;
     private final Context context;
+    private final String name;
 
-    public StorageConnection(Context context, Meta meta) {
+    public StorageConnection(String name, Context context, Meta meta) {
+        this.name = name;
         this.context = context;
         this.meta = meta;
         if(! context.provides("storage")){
             context.loadPlugin("storage");
         }
+    }
+
+    @Override
+    public String getName() {
+        return name;
     }
 
     @Override
@@ -65,6 +74,10 @@ public class StorageConnection implements Connection, Annotated, Encapsulated, R
         if (isOpen()) {
             storage.close();
         }
+    }
+
+    public Storage getStorage() {
+        return storage;
     }
 
     @Override

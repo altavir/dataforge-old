@@ -15,9 +15,9 @@
  */
 package hep.dataforge.control.ports;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.exceptions.PortLockException;
+import hep.dataforge.meta.Annotated;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
@@ -33,9 +33,8 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
 
     private volatile String lastResponse = null;
     protected PortController controller;
-    
-    //PENDING add additional port listeners?
 
+    //PENDING add additional port listeners?
     /**
      * The default end phrase condition
      */
@@ -149,6 +148,10 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
      */
     public final synchronized String sendAndWait(String message, Predicate<String> responseCondition, int timeout)
             throws PortException {
+        if (!isOpen()) {
+            open();
+        }
+        
         send(message);
         waitForPhrase(responseCondition, Duration.ofMillis(timeout));
         return lastResponse;

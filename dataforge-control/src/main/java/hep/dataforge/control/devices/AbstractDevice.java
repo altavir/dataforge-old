@@ -19,14 +19,20 @@ import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -36,6 +42,12 @@ import org.slf4j.LoggerFactory;
  * coincide with physical, it should be invalidated and automatically updated on
  * next request.
  * </p>
+ * <strong>Connections:</strong> any external device connectors which are used
+ * by device. The difference between listener and connection is that device is
+ * obligated to notify all registered listeners about all changes, but
+ * connection is used by device at its own discretion. Also usually only one
+ * connection is used for each single purpose.
+ *
  *
  * @author Alexander Nozik
  */
@@ -45,7 +57,11 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     private final Context context;
     private final String name;
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    private final Map<String, Connection> connections = new HashMap<>();
+    /**
+     * Map
+     */
+    private final Map<Connection, List<String>> connections = new HashMap<>();
+    //private final Map<String, Connection> connections = new HashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
     private Logger logger;
 
@@ -94,11 +110,10 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         listeners.remove(listenrer);
     }
 
-    @Override
-    public Connection getConnection(String name) {
-        return connections.get(name);
-    }
-
+//    @Override
+//    public Connection getConnection(String name) {
+//        return connections.get(name);
+//    }
     @Override
     public void command(String command, Meta commandMeta) throws ControlException {
         if (logger != null) {
@@ -154,7 +169,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param stateValue
      */
     protected final void notifyStateChanged(String stateName, Value stateValue) {
-        this.states.put(name, stateValue);
+        this.states.put(stateName, stateValue);
         listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
     }
 
@@ -240,8 +255,71 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @return
      * @throws Exception
      */
-    public synchronized void connect(String name, Connection connection) throws Exception {
-        this.connections.put(name, connection);
+    public synchronized void connect(Connection connection, String... roles) throws Exception {
+        this.connections.put(connection, Arrays.asList(roles));
+    }
+
+    /**
+     * Perform some action for each connection with given role and/or connection
+     * predicate. Both role and predicate could be empty
+     *
+     * @param role
+     * @param action
+     */
+    public void forEachConnection(String role, Predicate<Connection> predicate, Consumer<Connection> action) {
+        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
+
+        if (role != null && !role.isEmpty()) {
+            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
+        }
+
+        if (predicate != null) {
+            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> predicate.test(entry.getKey()));
+        }
+
+        stream.forEach((Map.Entry<Connection, List<String>> entry) -> action.accept(entry.getKey()));
+    }
+
+    /**
+     * For each connection with given role
+     *
+     * @param role
+     * @param action
+     */
+    public void forEachConnection(String role, Consumer<Connection> action) {
+        AbstractDevice.this.forEachConnection(role, null, action);
+    }
+
+    /**
+     * For each connection of given class and role. Role may be empty.
+     *
+     * @param type
+     * @param action
+     */
+    public <T extends Connection> void forEachTypedConnection(String role, Class<T> type, Consumer<T> action) {
+        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
+
+        if (role != null && !role.isEmpty()) {
+            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
+        }
+
+        stream.filter((entry) -> type.isInstance(entry.getKey())).<T>map((entry) -> (T) entry.getKey())
+                .forEach((con) -> action.accept(con));
+    }
+
+    /**
+     * Find connection with given name and perform action on it. If connection
+     * not found, throw NameNotFound exception
+     *
+     * @param connectionName
+     * @param action
+     */
+    public void forConnection(String connectionName, Consumer<Connection> action) {
+        action.accept(connections.keySet().stream()
+                .filter((con) -> con.getName().equals(connectionName))
+                .findAny()
+                .orElseThrow(() -> new NameNotFoundException(connectionName))
+        );
     }
 
     @Override
