@@ -10,8 +10,11 @@ import java.lang.ref.WeakReference;
 import java.util.AbstractCollection;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A registry of listener references. References could be weak to allow GC to
@@ -99,4 +102,17 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
         return weakRegistry.size();
     }
 
+    public Optional<T> findFirst(Predicate<T> predicate) {
+        return this.weakRegistry.stream()
+                .map(ref -> ref.get())
+                .filter((t) -> t != null && predicate.test(t))
+                .findFirst();
+    }
+
+    public List<T> findAll(Predicate<T> predicate) {
+        return this.weakRegistry.stream()
+                .map(ref -> ref.get())
+                .filter((t) -> t != null && predicate.test(t))
+                .collect(Collectors.toList());
+    }
 }

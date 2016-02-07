@@ -18,7 +18,7 @@ package hep.dataforge.storage.filestorage;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
-import hep.dataforge.storage.commons.StoragePlugin;
+import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +49,7 @@ public class FileStateLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StoragePlugin().startGlobal();
+        new StorageManager().startGlobal();
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 

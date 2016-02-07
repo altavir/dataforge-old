@@ -23,18 +23,17 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.filestorage.FileStorage;
-import hep.dataforge.utils.ReferenceRegistry;
 
 /**
  *
  * @author darksnake
  */
 @PluginDef(name = "storage", group = "hep.dataforge", description = "Basic DataForge storage plugin")
-public class StoragePlugin extends BasicPlugin implements Encapsulated {
+public class StorageManager extends BasicPlugin implements Encapsulated {
     
     private Context context;
 
-    private ReferenceRegistry<Storage> storageCache = new ReferenceRegistry<>();
+//    private final ReferenceRegistry<Storage> storageCache = new ReferenceRegistry<>();
  
     @Override
     public void apply(Context context) {
@@ -61,7 +60,7 @@ public class StoragePlugin extends BasicPlugin implements Encapsulated {
     
     public Storage buildStorage(Meta config){
         Storage res = StorageFactory.buildStorage(getContext(), config);
-        storageCache.add(res);
+//        storageCache.add(res);
         return res;
     }
 //    

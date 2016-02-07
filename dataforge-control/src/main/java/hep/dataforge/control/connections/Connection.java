@@ -6,15 +6,18 @@
 package hep.dataforge.control.connections;
 
 import hep.dataforge.content.Named;
+import hep.dataforge.context.Encapsulated;
+import hep.dataforge.meta.Annotated;
 
 /**
  * The connection between devices or other control objects
+ *
  * @author Alexander Nozik
  */
-public interface Connection extends AutoCloseable, Named{
+public interface Connection<T> extends AutoCloseable, Named, Annotated, Encapsulated {
     String type();
-    
+
     boolean isOpen();
-    
-    void open() throws Exception;
+
+    void open(T object) throws Exception;
 }

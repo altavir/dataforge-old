@@ -42,12 +42,6 @@ import org.slf4j.LoggerFactory;
  * coincide with physical, it should be invalidated and automatically updated on
  * next request.
  * </p>
- * <strong>Connections:</strong> any external device connectors which are used
- * by device. The difference between listener and connection is that device is
- * obligated to notify all registered listeners about all changes, but
- * connection is used by device at its own discretion. Also usually only one
- * connection is used for each single purpose.
- *
  *
  * @author Alexander Nozik
  */
@@ -255,7 +249,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @return
      * @throws Exception
      */
-    public synchronized void connect(Connection connection, String... roles) throws Exception {
+    @Override
+    public synchronized void connect(Connection connection, String... roles) {
         this.connections.put(connection, Arrays.asList(roles));
     }
 

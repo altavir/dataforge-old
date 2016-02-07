@@ -6,7 +6,7 @@
 package hep.dataforge.storage.servlet;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.commons.StoragePlugin;
+import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.storage.filestorage.FileStorage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,7 +27,7 @@ public class TestStorageServlet {
      * @throws hep.dataforge.exceptions.StorageException
      */
     public static void main(String[] args) throws StorageException, Exception {
-        new StoragePlugin().startGlobal();
+        new StorageManager().startGlobal();
         String path = "/home/numass-storage";
 
         FileStorage storage = FileStorage.connect(new File(path), true, false);

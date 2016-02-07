@@ -5,10 +5,12 @@
  */
 package hep.dataforge.control.connections;
 
+import hep.dataforge.control.measurements.MeasurementListener;
+
 /**
  *
  * @author Alexander Nozik
  */
-public interface Connectable<C extends Connection<T>,T> {
-    C connectTo(T target);
+public interface MeasurementListenerFactory {
+    public abstract <T> MeasurementListener<T> getListener(String name, Class<T> resultType);
 }

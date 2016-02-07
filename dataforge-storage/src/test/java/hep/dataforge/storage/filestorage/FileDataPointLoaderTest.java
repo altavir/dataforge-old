@@ -22,7 +22,7 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
-import hep.dataforge.storage.commons.StoragePlugin;
+import hep.dataforge.storage.commons.StorageManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -56,7 +56,7 @@ public class FileDataPointLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StoragePlugin().startGlobal();
+        new StorageManager().startGlobal();
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 

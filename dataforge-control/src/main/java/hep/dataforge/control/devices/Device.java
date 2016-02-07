@@ -17,8 +17,11 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.control.connections.Connectable;
+import hep.dataforge.control.connections.Connection;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
@@ -44,19 +47,27 @@ import hep.dataforge.values.Value;
  * <strong>Commands:</strong> commands could be issued to device with or without
  * additional meta. Commands are accepted and executed asynchronously.
  * </li>
+ * <li>
+ * <strong>Connections:</strong> any external device connectors which are used
+ * by device. The difference between listener and connection is that device is
+ * obligated to notify all registered listeners about all changes, but
+ * connection is used by device at its own discretion. Also usually only one
+ * connection is used for each single purpose.
+ * </li>
  * </ul>
  *
  * @author Alexander Nozik
  */
-public interface Device extends Configurable, Encapsulated, Named, Responder {
+public interface Device extends Configurable, Annotated, Encapsulated, Named, Responder {
 
     //TODO add device states annotations
     /**
      * Device type
-     * @return 
+     *
+     * @return
      */
     String type();
-    
+
     /**
      * Get the device state with given name. Null if such state not found or
      * undefined. This operation is synchronous so use it with care. In general,
@@ -101,21 +112,20 @@ public interface Device extends Configurable, Encapsulated, Named, Responder {
      * @param listener
      */
     void addStrongDeviceListener(DeviceListener listener);
-    
+
     /**
      * remove a listener
-     * @param listenrer 
+     *
+     * @param listenrer
      */
     void removeDeviceListener(DeviceListener listenrer);
 
-//    /**
-//     * Get a named connection for this device.
-//     *
-//     * @param name
-//     * @return
-//     */
-//    Connection getConnection(String name);
-    
+    void connect(Connection<? super Device> connection, String... roles);
+
+    default void connect(Connectable<?, ? super Device> connectable, String... roles) {
+        connect(connectable.connectTo(this), roles);
+    }
+
     /**
      * Send command to the device. This method does not ensure that command is
      * accepted. Command is not necessarily is executed immediately, it could be
