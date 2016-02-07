@@ -25,10 +25,10 @@ public abstract class SingleMeasurementDevice extends AbstractDevice {
         super(name, context, meta);
     }
 
-    @Override
-    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     public Measurement getMeasurement() {
         return measurement;

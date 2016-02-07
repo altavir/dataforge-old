@@ -120,39 +120,39 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      */
     void removeDeviceListener(DeviceListener listenrer);
 
-    void connect(Connection<? super Device> connection, String... roles);
+    void connect(Connection<Device> connection, String... roles);
 
-    default void connect(Connectable<?, ? super Device> connectable, String... roles) {
-        connect(connectable.connectTo(this), roles);
-    }
+//    default void connect(Connectable<?, ? super Device> connectable, String... roles) {
+//        connect(connectable.connectTo(this), roles);
+//    }
 
-    /**
-     * Send command to the device. This method does not ensure that command is
-     * accepted. Command is not necessarily is executed immediately, it could be
-     * posted to the command queue according to its priority.
-     *
-     * @param comand
-     */
-    void command(String command, Meta commandMeta) throws ControlException;
-
-    /**
-     * Send command without additional meta or using default meta for this
-     * command
-     *
-     * @param command
-     */
-    default void command(String command) throws ControlException {
-        command(command, null);
-    }
-
-    /**
-     * Send command using 'command' value from meta as a name. If command name
-     * is not provided, than empty name is used.
-     *
-     * @param commandMeta
-     */
-    default void command(Meta commandMeta) throws ControlException {
-        command(commandMeta.getString("command", ""), commandMeta);
-    }
+//    /**
+//     * Send command to the device. This method does not ensure that command is
+//     * accepted. Command is not necessarily is executed immediately, it could be
+//     * posted to the command queue according to its priority.
+//     *
+//     * @param comand
+//     */
+//    void command(String command, Meta commandMeta) throws ControlException;
+//
+//    /**
+//     * Send command without additional meta or using default meta for this
+//     * command
+//     *
+//     * @param command
+//     */
+//    default void command(String command) throws ControlException {
+//        command(command, null);
+//    }
+//
+//    /**
+//     * Send command using 'command' value from meta as a name. If command name
+//     * is not provided, than empty name is used.
+//     *
+//     * @param commandMeta
+//     */
+//    default void command(Meta commandMeta) throws ControlException {
+//        command(commandMeta.getString("command", ""), commandMeta);
+//    }
 
 }

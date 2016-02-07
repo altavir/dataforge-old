@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.control.measurements;
+package hep.dataforge.control.devices;
 
 import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
-import hep.dataforge.control.devices.AbstractDevice;
+import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;

@@ -18,6 +18,7 @@ package hep.dataforge.control.devices;
 import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.connections.Connection;
+import hep.dataforge.control.connections.Roles;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
@@ -32,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,27 +110,27 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 //    public Connection getConnection(String name) {
 //        return connections.get(name);
 //    }
-    @Override
-    public void command(String command, Meta commandMeta) throws ControlException {
-        if (logger != null) {
-            logger.debug("Recieved command {}", command);
-        }
-        if (checkCommand(command, commandMeta)) {
-            listeners.forEach(it -> it.notifyDeviceCommandAccepted(this, command, commandMeta));
-            evalCommand(command, commandMeta);
-        } else {
-            logger.error("Command {} rejected", command);
-        }
-    }
+//    @Override
+//    public void command(String command, Meta commandMeta) throws ControlException {
+//        if (logger != null) {
+//            logger.debug("Recieved command {}", command);
+//        }
+//        if (checkCommand(command, commandMeta)) {
+//            listeners.forEach(it -> it.notifyDeviceCommandAccepted(this, command, commandMeta));
+//            evalCommand(command, commandMeta);
+//        } else {
+//            logger.error("Command {} rejected", command);
+//        }
+//    }
 
-    /**
-     * Do evaluate command
-     *
-     * @param command
-     * @param commandMeta
-     * @throws ControlException
-     */
-    protected abstract void evalCommand(String command, Meta commandMeta) throws ControlException;
+//    /**
+//     * Do evaluate command
+//     *
+//     * @param command
+//     * @param commandMeta
+//     * @throws ControlException
+//     */
+//    protected abstract void evalCommand(String command, Meta commandMeta) throws ControlException;
 
     /**
      * Check if command could be evaluated by this device
@@ -250,8 +252,13 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @throws Exception
      */
     @Override
-    public synchronized void connect(Connection connection, String... roles) {
+    public synchronized void connect(Connection<Device> connection, String... roles) {
         this.connections.put(connection, Arrays.asList(roles));
+        try {
+            connection.open(this);
+        } catch (Exception ex) {
+            throw new Error(ex);
+        }
     }
 
     /**

@@ -22,10 +22,10 @@ public abstract class Sensor<T> extends AbstractDevice {
         super(name, context, meta);
     }
 
-    @Override
-    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
+//    @Override
+//    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
+//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+//    }
 
     public Measurement<T> getMeasurement(){
         if(this.measurement == null || this.measurement.isFinished()){
