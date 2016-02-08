@@ -16,7 +16,6 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.events.Event;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
@@ -32,7 +31,9 @@ public interface DeviceListener {
      *
      * @param device
      */
-    void notifyDeviceInitialized(Device device);
+    default void notifyDeviceInitialized(Device device){
+        
+    }
 
     /**
      * The device is shut down. No measurement or control procedure performed
@@ -40,7 +41,9 @@ public interface DeviceListener {
      *
      * @param device
      */
-    void notifyDeviceShutdown(Device device);
+    default void notifyDeviceShutdown(Device device){
+        
+    }
 
     /**
      * Notify that state of device is changed. either oldState or newState could
@@ -61,16 +64,16 @@ public interface DeviceListener {
 
     }
 
-    /**
-     * Notify that command is accepted. By default is ignored.
-     *
-     * @param device
-     * @param command
-     * @param commandMeta
-     */
-    default void notifyDeviceCommandAccepted(Device device, String command, Meta commandMeta) {
-
-    }
+//    /**
+//     * Notify that command is accepted. By default is ignored.
+//     *
+//     * @param device
+//     * @param command
+//     * @param commandMeta
+//     */
+//    default void notifyDeviceCommandAccepted(Device device, String command, Meta commandMeta) {
+//
+//    }
 
     /**
      * Evaluate device event
@@ -78,7 +81,9 @@ public interface DeviceListener {
      * @param device
      * @param status
      */
-    void evaluateDeviceEvent(Event event);
+    default void evaluateDeviceEvent(Event event){
+        
+    }
 
     void evaluateDeviceException(Device device, String message, Throwable exception);
 }

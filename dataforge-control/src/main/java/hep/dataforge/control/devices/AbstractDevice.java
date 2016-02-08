@@ -18,9 +18,7 @@ package hep.dataforge.control.devices;
 import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.connections.Connection;
-import hep.dataforge.control.connections.Roles;
 import hep.dataforge.exceptions.ControlException;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
@@ -33,7 +31,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -105,32 +102,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     public void removeDeviceListener(DeviceListener listenrer) {
         listeners.remove(listenrer);
     }
-
-//    @Override
-//    public Connection getConnection(String name) {
-//        return connections.get(name);
-//    }
-//    @Override
-//    public void command(String command, Meta commandMeta) throws ControlException {
-//        if (logger != null) {
-//            logger.debug("Recieved command {}", command);
-//        }
-//        if (checkCommand(command, commandMeta)) {
-//            listeners.forEach(it -> it.notifyDeviceCommandAccepted(this, command, commandMeta));
-//            evalCommand(command, commandMeta);
-//        } else {
-//            logger.error("Command {} rejected", command);
-//        }
-//    }
-
-//    /**
-//     * Do evaluate command
-//     *
-//     * @param command
-//     * @param commandMeta
-//     * @throws ControlException
-//     */
-//    protected abstract void evalCommand(String command, Meta commandMeta) throws ControlException;
 
     /**
      * Check if command could be evaluated by this device
@@ -205,6 +176,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param stateName
      * @param stateValue
      */
+    @Override
     public void setState(String stateName, Object stateValue) {
         try {
             Value val = Value.of(stateValue);
@@ -293,12 +265,12 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     /**
-     * For each connection of given class and role. Role may be empty.
+     * For each connection of given class and role. Role may be empty, but type is mandatory
      *
      * @param type
      * @param action
      */
-    public <T extends Connection> void forEachTypedConnection(String role, Class<T> type, Consumer<T> action) {
+    public <T> void forEachTypedConnection(String role, Class<T> type, Consumer<T> action) {
         Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
 
         if (role != null && !role.isEmpty()) {
@@ -307,21 +279,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
         stream.filter((entry) -> type.isInstance(entry.getKey())).<T>map((entry) -> (T) entry.getKey())
                 .forEach((con) -> action.accept(con));
-    }
-
-    /**
-     * Find connection with given name and perform action on it. If connection
-     * not found, throw NameNotFound exception
-     *
-     * @param connectionName
-     * @param action
-     */
-    public void forConnection(String connectionName, Consumer<Connection> action) {
-        action.accept(connections.keySet().stream()
-                .filter((con) -> con.getName().equals(connectionName))
-                .findAny()
-                .orElseThrow(() -> new NameNotFoundException(connectionName))
-        );
     }
 
     @Override

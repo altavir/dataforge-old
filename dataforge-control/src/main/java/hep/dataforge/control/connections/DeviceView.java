@@ -13,12 +13,7 @@ import javafx.scene.Node;
  *
  * @author Alexander Nozik
  */
-public abstract class DeviceView extends DeviceConnection implements DeviceListener, MeasurementListenerFactory {
+public abstract class DeviceView extends DeviceConnection implements DeviceListener, MeasurementConsumer {
 
     public abstract Node getComponent();
-
-    @Override
-    public String type() {
-        return "view";
-    }
 }

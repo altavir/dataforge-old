@@ -29,7 +29,7 @@ import java.util.Map;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public abstract class AbstractMultiMeasurementDevice extends AbstractDevice implements MultiMeasurementDevice {
+public abstract class AbstractMultiMeasurementDevice extends AbstractMeasurementDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();
 
@@ -43,6 +43,7 @@ public abstract class AbstractMultiMeasurementDevice extends AbstractDevice impl
             meta = getMetaForMeasurement(name);
         }
         Measurement m = doCreateMeasurement(name, meta);
+        onCreateMeasurement(m);
         measurements.put(name, m);
         return m;
     }
@@ -59,24 +60,14 @@ public abstract class AbstractMultiMeasurementDevice extends AbstractDevice impl
     }
 
     /**
-     * Compute default meta for measurement
-     *
-     * @param name
-     * @return
-     */
-    protected Meta getMetaForMeasurement(String name) {
-        return Meta.buildEmpty("measurement");
-    }
-
-    /**
      * Clean up old measurements
      */
     protected void cleanup() {
-        for (Map.Entry<String, Measurement> entry : measurements.entrySet()) {
-            if (entry.getValue().isFinished()) {
-                measurements.remove(entry.getKey());
-            }
-        }
+        measurements.entrySet().stream()
+                .filter((entry) -> (entry.getValue().isFinished()))
+                .forEach((entry) -> {
+                    measurements.remove(entry.getKey());
+                });
     }
 
 }

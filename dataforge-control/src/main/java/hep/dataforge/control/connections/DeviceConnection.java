@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.control.devices.Device;
 
 public abstract class DeviceConnection implements Connection<Device> {
@@ -21,11 +20,6 @@ public abstract class DeviceConnection implements Connection<Device> {
     }
 
     @Override
-    public String type() {
-        return meta().getString("type", "");
-    }
-
-    @Override
     public boolean isOpen() {
         return this.device != null;
     }
@@ -38,16 +32,6 @@ public abstract class DeviceConnection implements Connection<Device> {
     @Override
     public void close() throws Exception {
         this.device = null;
-    }
-
-    @Override
-    public String getName() {
-        return meta().getString("name", "");
-    }
-
-    @Override
-    public Context getContext() {
-        return getDevice().getContext();
     }
 
 }

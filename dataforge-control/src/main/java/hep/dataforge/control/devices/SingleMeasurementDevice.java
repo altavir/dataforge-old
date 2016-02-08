@@ -17,7 +17,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public abstract class SingleMeasurementDevice extends AbstractDevice {
+public abstract class SingleMeasurementDevice extends AbstractMeasurementDevice {
 
     private Measurement measurement;
 
@@ -29,7 +29,6 @@ public abstract class SingleMeasurementDevice extends AbstractDevice {
 //    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }
-
     public Measurement getMeasurement() {
         return measurement;
     }
@@ -37,32 +36,26 @@ public abstract class SingleMeasurementDevice extends AbstractDevice {
     public Measurement startMeasurement(String type) throws ControlException {
         return startMeasurement(getMetaForMeasurement(type));
     }
-    
+
     public Measurement startMeasurement(Meta meta) throws ControlException {
         this.measurement = createMeasurement(meta);
+        onCreateMeasurement(measurement);
         this.measurement.start();
         return this.measurement;
     }
 
     /**
      * Stop current measurement
-     * @param force if true than current measurement will be interrupted even if running
+     *
+     * @param force if true than current measurement will be interrupted even if
+     * running
      */
     public void stopMeasurement(boolean force) throws MeasurementException {
-        if (this.measurement != null && !this.measurement.isFinished() ) {
+        if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
         }
     }
 
     protected abstract Measurement createMeasurement(Meta meta) throws ControlException;
 
-    /**
-     * Compute default meta for measurement
-     *
-     * @param name
-     * @return
-     */
-    protected Meta getMetaForMeasurement(String name) {
-        return Meta.buildEmpty("measurement");
-    }
 }

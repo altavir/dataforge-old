@@ -17,13 +17,11 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.control.connections.Connectable;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
@@ -43,10 +41,6 @@ import hep.dataforge.values.Value;
  * <strong>Listeners:</strong> some external class which listens device state
  * changes and events. By default listeners are represented by weak references
  * so they could be finalized any time if not used.
- * </li>
- * <strong>Commands:</strong> commands could be issued to device with or without
- * additional meta. Commands are accepted and executed asynchronously.
- * </li>
  * <li>
  * <strong>Connections:</strong> any external device connectors which are used
  * by device. The difference between listener and connection is that device is
@@ -78,6 +72,8 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      * @return
      */
     Value getState(String name);
+
+    void setState(String stateName, Object stateValue);
 
     /**
      * Initialize device and check if it is working but do not start any
@@ -121,38 +117,5 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
     void removeDeviceListener(DeviceListener listenrer);
 
     void connect(Connection<Device> connection, String... roles);
-
-//    default void connect(Connectable<?, ? super Device> connectable, String... roles) {
-//        connect(connectable.connectTo(this), roles);
-//    }
-
-//    /**
-//     * Send command to the device. This method does not ensure that command is
-//     * accepted. Command is not necessarily is executed immediately, it could be
-//     * posted to the command queue according to its priority.
-//     *
-//     * @param comand
-//     */
-//    void command(String command, Meta commandMeta) throws ControlException;
-//
-//    /**
-//     * Send command without additional meta or using default meta for this
-//     * command
-//     *
-//     * @param command
-//     */
-//    default void command(String command) throws ControlException {
-//        command(command, null);
-//    }
-//
-//    /**
-//     * Send command using 'command' value from meta as a name. If command name
-//     * is not provided, than empty name is used.
-//     *
-//     * @param commandMeta
-//     */
-//    default void command(Meta commandMeta) throws ControlException {
-//        command(commandMeta.getString("command", ""), commandMeta);
-//    }
 
 }
