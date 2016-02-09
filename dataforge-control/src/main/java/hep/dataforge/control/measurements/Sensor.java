@@ -7,7 +7,6 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.control.devices.AbstractDevice;
-import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 
@@ -40,6 +39,11 @@ public abstract class Sensor<T> extends AbstractDevice {
      */
     public T read() throws MeasurementException{
         return getMeasurement().getResult();
+    }
+    
+    public Measurement<T> startMeasurement(){
+        getMeasurement().start();
+        return measurement;
     }
     
     protected abstract Measurement<T> createMeasurement();

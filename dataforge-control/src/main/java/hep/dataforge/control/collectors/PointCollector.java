@@ -78,16 +78,14 @@ public class PointCollector implements ValueCollector {
         MapDataPoint point = new MapDataPoint();
 
         point.putValue("timestamp", time);
-        for (Map.Entry<String, Value> entry : valueMap.entrySet()) {
+        valueMap.entrySet().stream().forEach((entry) -> {
             point.putValue(entry.getKey(), entry.getValue());
-        }
+        });
 
         // filling all missing values with nulls
-        for (String name : names) {
-            if (!point.hasValue(name)) {
-                point.putValue(name, Value.getNull());
-            }
-        }
+        names.stream().filter((name) -> (!point.hasValue(name))).forEach((name) -> {
+            point.putValue(name, Value.getNull());
+        });
 
         consumer.accept(point);
         valueMap.clear();

@@ -19,6 +19,7 @@ import java.util.Map;
  */
 public class PlottableSet<T extends Plottable> implements  Iterable<T> {
 
+    //TODO replace by obsevable collection
     protected final Map<String, T> map = new LinkedHashMap<>();
 
     public PlottableSet() {

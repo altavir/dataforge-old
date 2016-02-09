@@ -229,6 +229,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         try {
             connection.open(this);
         } catch (Exception ex) {
+            //FIXME evaluate error here
             throw new Error(ex);
         }
     }
