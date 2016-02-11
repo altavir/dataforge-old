@@ -21,18 +21,18 @@ public abstract class SimpletMeasurement<T> extends AbstractMeasurement<T> {
 
     private FutureTask<Pair<T, Instant>> task;
 
-    @Override
-    protected Pair<T, Instant> get() throws MeasurementException {
-        if (this.lastResult != null) {
-            return this.lastResult;
-        } else {
-            try {
-                return getTask().get();
-            } catch (InterruptedException | ExecutionException ex) {
-                throw new MeasurementException(exception);
-            }
-        }
-    }
+//    @Override
+//    protected Pair<T, Instant> get() throws MeasurementException {
+//        if (this.lastResult != null) {
+//            return this.lastResult;
+//        } else {
+//            try {
+//                return getTask().get();
+//            } catch (InterruptedException | ExecutionException ex) {
+//                throw new MeasurementException(exception);
+//            }
+//        }
+//    }
 
     protected FutureTask<Pair<T, Instant>> buildTask() {
         return new FutureTask<>(() -> {

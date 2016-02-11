@@ -6,46 +6,64 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.control.devices.AbstractDevice;
+import hep.dataforge.control.devices.AbstractMeasurementDevice;
+import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.values.Value;
 
 /**
  * A device with single one-time or periodic measurement
+ *
  * @author Alexander Nozik
  */
-public abstract class Sensor<T> extends AbstractDevice {
+public abstract class Sensor<T> extends AbstractMeasurementDevice {
+    
     private Measurement<T> measurement;
-
+    
     public Sensor(String name, Context context, Meta meta) {
         super(name, context, meta);
     }
 
-//    @Override
-//    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-
-    public Measurement<T> getMeasurement(){
-        if(this.measurement == null || this.measurement.isFinished()){
-            this.measurement = createMeasurement();
-        } 
-        return measurement;
-    }
-    
     /**
      * Read sensor data synchronously
-     * @return 
+     *
+     * @return
      */
-    public T read() throws MeasurementException{
-        return getMeasurement().getResult();
+    public T read() throws MeasurementException {
+        return startMeasurement().getResult();
     }
     
-    public Measurement<T> startMeasurement(){
-        getMeasurement().start();
-        return measurement;
+    public Measurement<T> startMeasurement() throws MeasurementException {
+        if (this.measurement == null || this.measurement.isFinished()) {
+            this.measurement = createMeasurement();
+            onCreateMeasurement(measurement);
+            this.measurement.start();
+        } else {
+            getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
+        }
+        return this.measurement;
+    }
+
+    /**
+     * Stop current measurement
+     *
+     * @param force if true than current measurement will be interrupted even if
+     * running
+     */
+    public void stopMeasurement(boolean force) throws MeasurementException {
+        if (this.measurement != null && !this.measurement.isFinished()) {
+            this.measurement.stop(force);
+        }
+    }
+
+    @Override
+    protected Object calculateState(String stateName) throws ControlException {
+        return Value.NULL;
     }
     
-    protected abstract Measurement<T> createMeasurement();
+    
+    
+    protected abstract Measurement<T> createMeasurement() throws MeasurementException;
     
 }

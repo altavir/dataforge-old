@@ -17,27 +17,23 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public abstract class SingleMeasurementDevice extends AbstractMeasurementDevice {
+public abstract class SingleMeasurementDevice<T extends Measurement> extends AbstractMeasurementDevice {
 
-    private Measurement measurement;
+    private T measurement;
 
     public SingleMeasurementDevice(String name, Context context, Meta meta) {
         super(name, context, meta);
     }
 
-//    @Override
-//    protected void evalCommand(String command, Meta commandMeta) throws ControlException {
-//        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-//    }
-    public Measurement getMeasurement() {
+    public T getMeasurement() {
         return measurement;
     }
 
-    public Measurement startMeasurement(String type) throws ControlException {
+    public T startMeasurement(String type) throws ControlException {
         return startMeasurement(getMetaForMeasurement(type));
     }
 
-    public Measurement startMeasurement(Meta meta) throws ControlException {
+    public T startMeasurement(Meta meta) throws ControlException {
         this.measurement = createMeasurement(meta);
         onCreateMeasurement(measurement);
         this.measurement.start();
@@ -56,6 +52,6 @@ public abstract class SingleMeasurementDevice extends AbstractMeasurementDevice 
         }
     }
 
-    protected abstract Measurement createMeasurement(Meta meta) throws ControlException;
+    protected abstract T createMeasurement(Meta meta) throws ControlException;
 
 }

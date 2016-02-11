@@ -32,6 +32,12 @@ public interface Measurement<T> {
     boolean stop(boolean force)throws MeasurementException;
 
     /**
+     * Measurement is started
+     * @return 
+     */
+    public boolean isIsStarted();
+    
+    /**
      * Measurement is complete or stopped
      *
      * @return

@@ -21,11 +21,14 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     protected Pair<T, Instant> lastResult;
     protected Throwable exception;
     protected volatile boolean isFinished = false;
+    protected volatile boolean isStarted = false;
 
     /**
      * Call after measurement started
      */
     protected void onStart() {
+        isStarted = true;
+        isFinished = false;
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
     }
 
@@ -34,6 +37,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      */
     protected void onStop() {
         isFinished = true;
+        isStarted = false;
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStopped(this));
     }
 
@@ -76,11 +80,19 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     @Override
+    public boolean isIsStarted() {
+        return isStarted;
+    }
+
+    @Override
     public Throwable getError() {
         return this.exception;
     }
-    
+
     protected synchronized Pair<T, Instant> get() throws MeasurementException {
+        if (!isStarted) {
+            start();
+        }
         while (this.lastResult == null) {
             try {
                 //Wait for onResult could cause deadlock if called in main thread
