@@ -14,18 +14,13 @@ import javafx.util.Pair;
  *
  * @author Alexander Nozik
  */
-public abstract class RegularMeasurement<T> extends SimpletMeasurement<T> {
+public abstract class RegularMeasurement<T> extends SimpleMeasurement<T> {
 
-    @Override
-    protected void onError(Throwable error) {
-        super.onError(error);
-        if (stopOnError()) {
-            isFinished = true;
-        }
-    }
+    private boolean stopFlag = false;
 
     @Override
     protected FutureTask<Pair<T, Instant>> buildTask() {
+        //FIXME refactor using FutureTask runAndReset
         return new FutureTask<>(() -> {
             try {
                 Thread.sleep(getDelay().toMillis());
@@ -38,10 +33,11 @@ public abstract class RegularMeasurement<T> extends SimpletMeasurement<T> {
                 return null;
             } finally {
                 clearTask();
-                if (isFinished) {
-                    onStop();
+                if (stopFlag || (stopOnError() && getState() == MeasurementState.FAILED)) {
+                    onFinish();
                 } else {
-                    runTask();
+                    //Task is null so it is reset automaically
+                    getTask().run();
                 }
             }
         });
@@ -54,7 +50,7 @@ public abstract class RegularMeasurement<T> extends SimpletMeasurement<T> {
         } else if (force) {
             return getTask().cancel(force);
         } else {
-            isFinished = true;
+            stopFlag = true;
             return true;
         }
     }

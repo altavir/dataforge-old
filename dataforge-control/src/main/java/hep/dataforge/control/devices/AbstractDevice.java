@@ -70,6 +70,10 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     public Logger getLogger() {
+        if(logger == null){
+            logger = setupLogger();
+            logger.error("Logger is not initialized. Call init() before working with device.");
+        }
         return logger;
     }
 
@@ -290,4 +294,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         listeners.forEach((DeviceListener it) -> it.notifyDeviceConfigChanged(AbstractDevice.this));
     }
 
+    @Override
+    public String type() {
+        return "unknown";
+    }
 }

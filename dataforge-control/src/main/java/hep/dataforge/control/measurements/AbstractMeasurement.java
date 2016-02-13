@@ -9,6 +9,7 @@ import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.ReferenceRegistry;
 import java.time.Instant;
 import javafx.util.Pair;
+import org.slf4j.LoggerFactory;
 
 /**
  * A boilerplate code for measurements
@@ -17,31 +18,45 @@ import javafx.util.Pair;
  */
 public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
+    protected enum MeasurementState {
+        INIT, //Measurement not started
+        PENDING, // Measurement in process
+        OK, // Last measurement complete, the same as FINISHED for one-time measurements
+        FAILED, // Last measurement failed 
+        FINISHED, // Measurement finished or stopped
+    }
+
+    private MeasurementState state;
     protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
     protected Pair<T, Instant> lastResult;
     protected Throwable exception;
-    protected volatile boolean isFinished = false;
-    protected volatile boolean isStarted = false;
+
+    protected MeasurementState getState() {
+        return state;
+    }
+
+    protected void setState(MeasurementState state) {
+        this.state = state;
+    }
 
     /**
      * Call after measurement started
      */
     protected void onStart() {
-        isStarted = true;
-        isFinished = false;
+        setState(MeasurementState.PENDING);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
     }
 
     /**
      * Call after measurement stopped
      */
-    protected void onStop() {
-        isFinished = true;
-        isStarted = false;
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStopped(this));
+    protected void onFinish() {
+        setState(MeasurementState.FINISHED);
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
     }
 
     protected void onError(Throwable error) {
+        setState(MeasurementState.FAILED);
         this.exception = error;
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
     }
@@ -52,6 +67,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     protected synchronized void result(T result, Instant time) {
         this.lastResult = new Pair<>(result, time);
+        setState(MeasurementState.OK);
         notify();
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(this, result, time));
     }
@@ -76,12 +92,12 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     @Override
     public boolean isFinished() {
-        return isFinished;
+        return state == MeasurementState.FINISHED;
     }
 
     @Override
-    public boolean isIsStarted() {
-        return isStarted;
+    public boolean isStarted() {
+        return state == MeasurementState.PENDING || state == MeasurementState.OK;
     }
 
     @Override
@@ -90,8 +106,9 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     protected synchronized Pair<T, Instant> get() throws MeasurementException {
-        if (!isStarted) {
+        if (getState()== MeasurementState.INIT) {
             start();
+            LoggerFactory.getLogger(getClass()).debug("Measurement not started. Starting");
         }
         while (this.lastResult == null) {
             try {

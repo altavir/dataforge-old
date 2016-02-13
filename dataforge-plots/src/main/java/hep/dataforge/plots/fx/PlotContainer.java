@@ -120,6 +120,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
                         optionsPannelButton.setText("<<");
                     }
                 });
+        
         optionsPannelButton.setOnAction((ActionEvent event) -> {
             if (optionsVisibleProperty.get()) {
                 split.setDividerPosition(0, 1d);
@@ -129,7 +130,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
                 split.setDividerPosition(0, 0.8);
             }
         });
-
+        split.setDividerPositions(1.0);
     }
 
     /**

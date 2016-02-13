@@ -5,34 +5,19 @@
  */
 package hep.dataforge.control.measurements;
 
-import hep.dataforge.exceptions.MeasurementException;
-import hep.dataforge.utils.ReferenceRegistry;
 import java.time.Instant;
-import java.util.concurrent.ExecutionException;
 import java.util.concurrent.FutureTask;
 import javafx.util.Pair;
+import org.slf4j.LoggerFactory;
 
 /**
- * A measurement wrapping a FutureTask. Could be restarted if needed
+ * A simple one-time measurement wrapping FutureTask. Could be restarted
  *
  * @author Alexander Nozik
  */
-public abstract class SimpletMeasurement<T> extends AbstractMeasurement<T> {
+public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
 
     private FutureTask<Pair<T, Instant>> task;
-
-//    @Override
-//    protected Pair<T, Instant> get() throws MeasurementException {
-//        if (this.lastResult != null) {
-//            return this.lastResult;
-//        } else {
-//            try {
-//                return getTask().get();
-//            } catch (InterruptedException | ExecutionException ex) {
-//                throw new MeasurementException(exception);
-//            }
-//        }
-//    }
 
     protected FutureTask<Pair<T, Instant>> buildTask() {
         return new FutureTask<>(() -> {
@@ -45,8 +30,7 @@ public abstract class SimpletMeasurement<T> extends AbstractMeasurement<T> {
                 onError(ex);
                 return null;
             } finally {
-                clearTask();
-                onStop();
+                onFinish();
             }
         });
     }
@@ -68,21 +52,22 @@ public abstract class SimpletMeasurement<T> extends AbstractMeasurement<T> {
     protected abstract T doMeasure() throws Exception;
 
     @Override
-    public void start() {
+    public synchronized void start() {
         //PENDING do we need executor here?
         //Executors.newSingleThreadExecutor().submit(getTask());
-        runTask();
-        onStart();
-    }
-
-    protected void runTask() {
-        getTask().run();
+        if (!isStarted()) {
+            onStart();
+            getTask().run();
+        } else {
+            LoggerFactory.getLogger(getClass()).warn("Alredy started");
+        }
     }
 
     @Override
-    public boolean stop(boolean force) {
-        if (getTask().cancel(force)) {
-            return true;
+    public synchronized boolean stop(boolean force) {
+        if (isStarted()) {
+            onFinish();
+            return getTask().cancel(force);
         } else {
             return false;
         }

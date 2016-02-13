@@ -37,7 +37,7 @@ public interface MeasurementListener<T> {
      * Measurement stopped. Ignored by default
      * @param measurement 
      */
-    default void onMeasurementStopped(Measurement measurement){
+    default void onMeasurementFinished(Measurement measurement){
         
     }
 

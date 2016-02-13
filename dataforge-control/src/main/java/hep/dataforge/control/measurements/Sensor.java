@@ -11,6 +11,7 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import java.util.concurrent.Callable;
 
 /**
  * A device with single one-time or periodic measurement
@@ -18,9 +19,31 @@ import hep.dataforge.values.Value;
  * @author Alexander Nozik
  */
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
-    
+
+    /**
+     * Create simple unconfigurable sensor with simple one-time measurement
+     *
+     * @param name
+     * @param context
+     * @param proc
+     * @return
+     */
+    public Sensor<T> simpleSensor(String name, Context context, Callable<T> proc) {
+        return new Sensor<T>(name, context, null) {
+            @Override
+            protected Measurement<T> createMeasurement() throws MeasurementException {
+                return new SimpleMeasurement<T>() {
+                    @Override
+                    protected T doMeasure() throws Exception {
+                        return proc.call();
+                    }
+                };
+            }
+        };
+    }
+
     private Measurement<T> measurement;
-    
+
     public Sensor(String name, Context context, Meta meta) {
         super(name, context, meta);
     }
@@ -30,10 +53,10 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      *
      * @return
      */
-    public T read() throws MeasurementException {
+    public synchronized T read() throws MeasurementException {
         return startMeasurement().getResult();
     }
-    
+
     public Measurement<T> startMeasurement() throws MeasurementException {
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
@@ -61,9 +84,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
     protected Object calculateState(String stateName) throws ControlException {
         return Value.NULL;
     }
-    
-    
-    
+
     protected abstract Measurement<T> createMeasurement() throws MeasurementException;
-    
+
 }

@@ -35,7 +35,7 @@ public interface Measurement<T> {
      * Measurement is started
      * @return 
      */
-    public boolean isIsStarted();
+    public boolean isStarted();
     
     /**
      * Measurement is complete or stopped

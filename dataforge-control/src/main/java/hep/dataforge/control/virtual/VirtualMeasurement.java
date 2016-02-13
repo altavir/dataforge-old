@@ -5,7 +5,7 @@
  */
 package hep.dataforge.control.virtual;
 
-import hep.dataforge.control.measurements.SimpletMeasurement;
+import hep.dataforge.control.measurements.SimpleMeasurement;
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
@@ -13,12 +13,12 @@ import java.util.concurrent.Callable;
  *
  * @author Alexander Nozik
  */
-public class DelegateMeasurement<T> extends SimpletMeasurement<T> {
+public class VirtualMeasurement<T> extends SimpleMeasurement<T> {
     
     Duration delay;
     Callable<T> result;
 
-    public DelegateMeasurement(Duration delay, Callable<T> result) {
+    public VirtualMeasurement(Duration delay, Callable<T> result) {
         this.delay = delay;
         this.result = result;
     }
