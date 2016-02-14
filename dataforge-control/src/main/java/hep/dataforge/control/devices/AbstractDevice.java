@@ -18,6 +18,7 @@ package hep.dataforge.control.devices;
 import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.connections.Connection;
+import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
@@ -70,7 +71,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     public Logger getLogger() {
-        if(logger == null){
+        if (logger == null) {
             logger = setupLogger();
             logger.error("Logger is not initialized. Call init() before working with device.");
         }
@@ -229,6 +230,18 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      */
     @Override
     public synchronized void connect(Connection<Device> connection, String... roles) {
+        //Checking if connection could serve given roles
+        for (String role : roles) {
+            if (!hasRole(role)) {
+                getLogger().warn("The device {} does not support role {}", getName(), role);
+            } else {
+                RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().get();
+                if(!rd.objectType().isInstance(connection)){
+                    getLogger().error("Connection does not meet type requirement for role {}. Must be {}.", 
+                            role,rd.objectType().getName());
+                }
+            }
+        }
         this.connections.put(connection, Arrays.asList(roles));
         try {
             connection.open(this);
@@ -270,7 +283,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     /**
-     * For each connection of given class and role. Role may be empty, but type is mandatory
+     * For each connection of given class and role. Role may be empty, but type
+     * is mandatory
      *
      * @param type
      * @param action

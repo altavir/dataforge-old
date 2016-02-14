@@ -18,11 +18,15 @@ package hep.dataforge.control.devices;
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.control.connections.Connection;
+import hep.dataforge.control.devices.annotations.RoleDef;
+import hep.dataforge.control.devices.annotations.StateDef;
+import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.values.Value;
+import java.util.List;
 
 /**
  * The Device is general abstract representation of any physical or virtual
@@ -117,5 +121,59 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
     void removeDeviceListener(DeviceListener listenrer);
 
     void connect(Connection<Device> connection, String... roles);
+
+    /**
+     * A list of all available states
+     *
+     * @return
+     */
+    default List<StateDef> stateDefs() {
+        return DescriptorUtils.listAnnotations(this.getClass(), StateDef.class, true);
+    }
+
+    /**
+     * A list of all available roles
+     *
+     * @return
+     */
+    default List<RoleDef> roleDefs() {
+        return DescriptorUtils.listAnnotations(this.getClass(), RoleDef.class, true);
+    }
+
+    /**
+     * A quick way to find if device has a state with given name
+     * @param name
+     * @return 
+     */
+    default boolean hasState(String name) {
+        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findAny().isPresent();
+    }
+    
+    /**
+     * Find a state definition for given name. Null if not found.
+     * @param name
+     * @return 
+     */
+    default StateDef getStateDef(String name){
+        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst().orElse(null);
+    }
+
+    /**
+     * A quick way to find if device accepts connection with given role
+     * @param name
+     * @return 
+     */
+    default boolean hasRole(String name) {
+        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().isPresent();
+    }
+    
+    /**
+     * Find a role definition for given name. Null if not found.
+     * @param name
+     * @return 
+     */
+    default RoleDef getRoleDef(String name){
+        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findFirst().orElse(null);
+    }    
 
 }

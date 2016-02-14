@@ -28,7 +28,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      * @param proc
      * @return
      */
-    public Sensor<T> simpleSensor(String name, Context context, Callable<T> proc) {
+    public static <T> Sensor<T> simpleSensor(String name, Context context, Callable<T> proc) {
         return new Sensor<T>(name, context, null) {
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {

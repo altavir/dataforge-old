@@ -121,7 +121,7 @@ public class DescriptorUtils {
             }
         }
 
-        //FIXME forbit non-unique values and Nodes
+        //FIXME forbid non-unique values and Nodes
         for (ValueDef valueDef : listAnnotations(element, ValueDef.class, true)) {
             boolean exists = res.hasNode("value") && res.getNodes("value").stream()
                     .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
@@ -201,7 +201,7 @@ public class DescriptorUtils {
         }
     }
 
-    private static <T extends Annotation> List<T> listAnnotations(AnnotatedElement source, Class<T> type, boolean searchSuper) {
+    public static <T extends Annotation> List<T> listAnnotations(AnnotatedElement source, Class<T> type, boolean searchSuper) {
         List<T> res = new ArrayList<>();
         if (source instanceof Class) {
             T[] array = source.getDeclaredAnnotationsByType(type);

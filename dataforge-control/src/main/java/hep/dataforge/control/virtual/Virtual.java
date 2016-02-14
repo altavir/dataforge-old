@@ -7,15 +7,16 @@ package hep.dataforge.control.virtual;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
+import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import java.time.Duration;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import java.util.function.Function;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Helper methods to create virtual devices and measurements
@@ -51,6 +52,26 @@ public class Virtual {
         });
     }
 
+    public static <T> Sensor<T> virtualSensor(String name, Context context, Meta meta,
+            Function<Meta, Measurement<T>> factory, StateDef... states) {
+        return new Sensor<T>(name, context, meta) {
+            @Override
+            protected Measurement<T> createMeasurement() {
+                return factory.apply(meta());
+            }
+
+            @Override
+            public String type() {
+                return "Virtual sensor";
+            }
+
+            @Override
+            public List<StateDef> stateDefs() {
+                return Arrays.asList(states);
+            }
+        };
+    }
+
     public static <T> Sensor<T> virtualSensor(String name, Context context, Meta meta, Function<Meta, Measurement<T>> factory) {
         return new Sensor<T>(name, context, meta) {
             @Override
@@ -63,6 +84,10 @@ public class Virtual {
                 return "Virtual sensor";
             }
         };
+    }
+
+    public static <T> Sensor<T> virtualSensor(String name, Meta meta, Function<Meta, Measurement<T>> factory) {
+        return virtualSensor(name, GlobalContext.instance(), meta, factory);
     }
 
     public static Sensor<Double> randomDoubleSensor(String name, Context context, Meta meta, Duration delay, double mean, double sigma) {
