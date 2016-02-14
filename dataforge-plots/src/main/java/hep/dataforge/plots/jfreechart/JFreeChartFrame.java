@@ -357,7 +357,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         }
         int num = index.indexOf(name);
 
-        Meta meta = new Laminate(plottable.getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
+        Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
         SwingUtilities.invokeLater(() -> {
 
             XYLineAndShapeRenderer render;

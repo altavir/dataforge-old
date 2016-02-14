@@ -9,7 +9,6 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.control.connections.Connection;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.NamedMetaFactory;
 import hep.dataforge.utils.ReferenceRegistry;

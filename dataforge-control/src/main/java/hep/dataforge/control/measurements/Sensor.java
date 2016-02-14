@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
 
     /**
-     * Create simple unconfigurable sensor with simple one-time measurement
+     * Create simple sensor with simple one-time measurement
      *
      * @param name
      * @param context
@@ -79,6 +79,16 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
             this.measurement.stop(force);
         }
     }
+
+    @Override
+    public void shutdown() throws ControlException {
+        if(measurement != null){
+            measurement.stop(true);
+        }
+        super.shutdown();
+    }
+    
+    
 
     @Override
     protected Object calculateState(String stateName) throws ControlException {
