@@ -28,8 +28,8 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      * @param proc
      * @return
      */
-    public static <T> Sensor<T> simpleSensor(String name, Context context, Callable<T> proc) {
-        return new Sensor<T>(name, context, null) {
+    public static <T> Sensor<T> simpleSensor(Callable<T> proc) {
+        return new Sensor<T>() {
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {
                 return new SimpleMeasurement<T>() {
@@ -44,9 +44,9 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
 
     private Measurement<T> measurement;
 
-    public Sensor(String name, Context context, Meta meta) {
-        super(name, context, meta);
-    }
+//    public Sensor(String name, Context context, Meta meta) {
+//        super(name, context, meta);
+//    }
 
     /**
      * Read sensor data synchronously

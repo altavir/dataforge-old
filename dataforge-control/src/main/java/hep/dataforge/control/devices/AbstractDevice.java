@@ -17,6 +17,7 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.content.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.GlobalContext;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.exceptions.ControlException;
@@ -48,22 +49,36 @@ import org.slf4j.LoggerFactory;
 @AnonimousNotAlowed
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
 
-    private final Context context;
-    private final String name;
+    private Context context;
+    private String name;
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    /**
-     * Map
-     */
     private final Map<Connection, List<String>> connections = new HashMap<>();
     //private final Map<String, Connection> connections = new HashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
     private Logger logger;
 
-    public AbstractDevice(String name, Context context, Meta meta) {
-        setValueContext(context);
-        setMetaBase(meta);
-        this.name = name;
+//    public AbstractDevice(String name, Context context, Meta meta) {
+//        setValueContext(context);
+//        setMetaBase(meta);
+//        this.name = name;
+//        this.context = context;
+//    }
+    public void setContext(Context context) {
         this.context = context;
+        setValueContext(context);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    /**
+     * Set fallback meta default for this device
+     *
+     * @param meta
+     */
+    public void setMeta(Meta meta) {
+        setMetaBase(meta);
     }
 
     protected Logger setupLogger() {
@@ -122,12 +137,20 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public Context getContext() {
-        return this.context;
+        if (context == null) {
+            return GlobalContext.instance();
+        } else {
+            return this.context;
+        }
     }
 
     @Override
     public String getName() {
-        return this.name;
+        if (name == null) {
+            return "";
+        } else {
+            return this.name;
+        }
     }
 
     @Override
@@ -237,9 +260,9 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
                 getLogger().warn("The device {} does not support role {}", getName(), role);
             } else {
                 RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().get();
-                if(!rd.objectType().isInstance(connection)){
-                    getLogger().error("Connection does not meet type requirement for role {}. Must be {}.", 
-                            role,rd.objectType().getName());
+                if (!rd.objectType().isInstance(connection)) {
+                    getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
+                            role, rd.objectType().getName());
                 }
             }
         }

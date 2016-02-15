@@ -128,7 +128,7 @@ public class SensorFactory<T> {
     }
 
     public Sensor<T> build() {
-        Sensor<T> sensor = new Sensor<T>(name, context, meta) {
+        Sensor<T> sensor = new Sensor<T>() {
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {
                 return new VirtualMeasurement<>(delayFactory.apply(this), () -> valueFactory.apply(this));
@@ -150,6 +150,10 @@ public class SensorFactory<T> {
             }
 
         };
+        
+        sensor.setName(name);
+        sensor.setMeta(meta);
+        sensor.setContext(context);
         try {
             sensor.init();
         } catch (ControlException ex) {

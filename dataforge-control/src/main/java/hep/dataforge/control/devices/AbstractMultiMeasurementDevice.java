@@ -33,9 +33,9 @@ public abstract class AbstractMultiMeasurementDevice extends AbstractMeasurement
 
     private final Map<String, Measurement> measurements = new HashMap<>();
 
-    public AbstractMultiMeasurementDevice(String name, Context context, Meta meta) {
-        super(name, context, meta);
-    }
+//    public AbstractMultiMeasurementDevice(String name, Context context, Meta meta) {
+//        super(name, context, meta);
+//    }
 
     @Override
     public Measurement createMeasurement(String name, Meta meta) throws ControlException {

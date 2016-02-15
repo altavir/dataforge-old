@@ -99,17 +99,17 @@ public class Configuration extends MuttableMetaNode<Configuration> {
     public void addObserver(ConfigChangeListener observer, boolean strongReference) {
         this.observers.add(observer, strongReference);
     }
-    
+
     /**
      * addObserver(observer, true)
-     * @param observer 
+     *
+     * @param observer
      */
     public void addObserver(ConfigChangeListener observer) {
         addObserver(observer, true);
     }
-    
-    //PENDING add value observers inheriting value class by wrapper
 
+    //PENDING add value observers inheriting value class by wrapper
     /**
      * Remove an observer from this configuration
      *
@@ -125,11 +125,11 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * @param annotation
      */
     public void update(Meta annotation) {
-        for (String valueName : annotation.getValueNames()) {
+        annotation.getValueNames().stream().forEach((valueName) -> {
             setValue(valueName, annotation.getValue(valueName));
-        }
+        });
 
-        for (String elementName : annotation.getNodeNames()) {
+        annotation.getNodeNames().stream().forEach((elementName) -> {
             setNode(elementName,
                     annotation
                     .getNodes(elementName)
@@ -137,7 +137,7 @@ public class Configuration extends MuttableMetaNode<Configuration> {
                     .<Configuration>map((el) -> new Configuration(el))
                     .collect(Collectors.toList())
             );
-        }
+        });
     }
 
     @Override

@@ -138,13 +138,8 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
     @Override
     public void configure(Meta config) {
         //Check and correct input configuration
-        config = validate(config);
-        if (this.configuration == null || this.configuration.isEmpty()) {
-            configuration = new Configuration(config);
-            initConfig();
-        } else {
-            this.configuration.update(config);
-        }
+        getConfig().update(config);
+
         applyConfig(getConfig());
     }
 }

@@ -52,9 +52,8 @@ public class Virtual {
         });
     }
 
-    public static <T> Sensor<T> virtualSensor(String name, Context context, Meta meta,
-            Function<Meta, Measurement<T>> factory, StateDef... states) {
-        return new Sensor<T>(name, context, meta) {
+    public static <T> Sensor<T> virtualSensor(Function<Meta, Measurement<T>> factory, StateDef... states) {
+        return new Sensor<T>() {
             @Override
             protected Measurement<T> createMeasurement() {
                 return factory.apply(meta());
@@ -72,8 +71,8 @@ public class Virtual {
         };
     }
 
-    public static <T> Sensor<T> virtualSensor(String name, Context context, Meta meta, Function<Meta, Measurement<T>> factory) {
-        return new Sensor<T>(name, context, meta) {
+    public static <T> Sensor<T> virtualSensor(Function<Meta, Measurement<T>> factory) {
+        return new Sensor<T>() {
             @Override
             protected Measurement<T> createMeasurement() {
                 return factory.apply(meta());
@@ -86,12 +85,8 @@ public class Virtual {
         };
     }
 
-    public static <T> Sensor<T> virtualSensor(String name, Meta meta, Function<Meta, Measurement<T>> factory) {
-        return virtualSensor(name, GlobalContext.instance(), meta, factory);
-    }
-
-    public static Sensor<Double> randomDoubleSensor(String name, Context context, Meta meta, Duration delay, double mean, double sigma) {
-        Sensor<Double> sensor = new Sensor<Double>(name, context, meta) {
+    public static Sensor<Double> randomDoubleSensor(String name, Duration delay, double mean, double sigma) {
+        Sensor<Double> sensor = new Sensor<Double>() {
             @Override
             protected Measurement<Double> createMeasurement() {
                 return randomDoubleMeasurement(delay, mean, sigma);
@@ -107,10 +102,8 @@ public class Virtual {
         } catch (ControlException ex) {
             throw new Error(ex);
         }
+        sensor.setName(name);
         return sensor;
     }
 
-    public static Sensor<Double> randomDoubleSensor(String name, Duration delay, double mean, double sigma) {
-        return randomDoubleSensor(name, GlobalContext.instance(), null, delay, mean, sigma);
-    }
 }

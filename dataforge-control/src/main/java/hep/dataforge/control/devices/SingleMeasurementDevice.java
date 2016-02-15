@@ -21,9 +21,9 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
 
     private T measurement;
 
-    public SingleMeasurementDevice(String name, Context context, Meta meta) {
-        super(name, context, meta);
-    }
+//    public SingleMeasurementDevice(String name, Context context, Meta meta) {
+//        super(name, context, meta);
+//    }
 
     public T getMeasurement() {
         return measurement;

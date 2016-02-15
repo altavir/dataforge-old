@@ -14,9 +14,9 @@ import hep.dataforge.meta.MetaUtils;
 
 public abstract class AbstractMeasurementDevice extends AbstractDevice {
 
-    public AbstractMeasurementDevice(String name, Context context, Meta meta) {
-        super(name, context, meta);
-    }
+//    public AbstractMeasurementDevice(String name, Context context, Meta meta) {
+//        super(name, context, meta);
+//    }
 
     /**
      * The method that must be called after measurement is started
