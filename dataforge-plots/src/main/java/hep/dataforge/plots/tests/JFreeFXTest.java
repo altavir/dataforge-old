@@ -15,12 +15,12 @@
  */
 package hep.dataforge.plots.tests;
 
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.ListDataSet;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
@@ -46,7 +46,7 @@ public class JFreeFXTest extends Application {
 
         UnivariateFunction func = (double x1) -> x1 * x1;
 
-        PlottableFunction funcPlot = new PlottableFunction("func", null, func, 0.1, 4, 200);
+        PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 

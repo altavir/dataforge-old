@@ -60,7 +60,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     private Logger logger;
 
     public AbstractDevice(String name, Context context, Meta meta) {
-        super(meta, context);
+        setValueContext(context);
+        setMetaBase(meta);
         this.name = name;
         this.context = context;
     }

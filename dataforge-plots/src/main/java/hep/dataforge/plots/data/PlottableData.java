@@ -20,7 +20,6 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
@@ -37,7 +36,7 @@ import java.util.List;
 public class PlottableData extends XYPlottable {
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
-        PlottableData plot = new PlottableData(name, null);
+        PlottableData plot = new PlottableData(name);
 
         if (x.length != y.length) {
             throw new IllegalArgumentException("Arrays size mismatch");
@@ -69,7 +68,8 @@ public class PlottableData extends XYPlottable {
         MetaBuilder builder = new MetaBuilder("dataPlot")
                 .setNode("adapter", adapter.meta());
         builder.setValue("showErrors", showErrors);
-        PlottableData plot = new PlottableData(name, builder.build());
+        PlottableData plot = new PlottableData(name);
+        plot.setMetaBase(builder.build());
         return plot;
     }
 
@@ -90,8 +90,8 @@ public class PlottableData extends XYPlottable {
 
     protected List<DataPoint> data;
 
-    protected PlottableData(String name, Meta meta) {
-        super(name, meta);
+    protected PlottableData(String name) {
+        super(name);
         data = new ArrayList<>();
     }
 

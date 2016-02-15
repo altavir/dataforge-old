@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.BaseConfigurable;
+import hep.dataforge.meta.Meta;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -24,20 +24,24 @@ import java.util.Set;
  *
  * @author darksnake
  */
-public abstract class AbstractPlottable extends BaseConfigurable implements Plottable{
+public abstract class AbstractPlottable extends BaseConfigurable implements Plottable {
 
     private final String name;
     private final Set<PlotStateListener> listeners = new HashSet<>();
 
-    public AbstractPlottable(String name, Meta config) {
-        super(config);
+    public AbstractPlottable(String name, Meta metaBase, Meta config) {
+        this.name = name;
+        if (metaBase != null) {
+            super.setMetaBase(metaBase);
+        }
+        if (config != null) {
+            super.configure(config);
+        }
+    }
+
+    public AbstractPlottable(String name) {
         this.name = name;
     }
-    
-    public AbstractPlottable(String name) {
-        super(Meta.buildEmpty("plot"));
-        this.name = name;
-    }    
 
     @Override
     public void addListener(PlotStateListener listener) {
@@ -74,6 +78,5 @@ public abstract class AbstractPlottable extends BaseConfigurable implements Plot
     public String getTitle() {
         return meta().getString("title", getName());
     }
-
 
 }

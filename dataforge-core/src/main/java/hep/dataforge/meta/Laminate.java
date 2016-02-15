@@ -39,11 +39,11 @@ import org.slf4j.LoggerFactory;
  */
 public class Laminate extends Meta {
 
-    String name;
-    List<Meta> layers;
-    NodeDescriptor descriptor;
-    Meta descriptorLayer;
-    ValueProvider defaultValueProvider;
+    private String name;
+    private List<Meta> layers;
+    private NodeDescriptor descriptor;
+    private Meta descriptorLayer;
+    private ValueProvider defaultValueProvider;
 
     public Laminate(String name) {
         this.name = name;
@@ -57,7 +57,7 @@ public class Laminate extends Meta {
     }
 
     public Laminate(List<Meta> layers) {
-        this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(),layers);
+        this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(), layers);
     }
 
     public Laminate(Meta... layers) {
@@ -99,8 +99,37 @@ public class Laminate extends Meta {
         return this;
     }
 
+    /**
+     * Add primary (first layer)
+     * @param layer
+     * @return 
+     */
+    public Laminate addFirstLayer(Meta layer) {
+        this.layers.add(0, layer);
+        return this;
+    }
+
+    /**
+     * Add layer to stack
+     * @param layer
+     * @return 
+     */
     public Laminate addLayer(Meta layer) {
         this.layers.add(layer);
+        return this;
+    }
+
+    public Laminate setLayers(Meta... layers) {
+        this.layers.clear();
+        this.layers.addAll(Arrays.asList(layers));
+        this.layers.removeIf((meta) -> meta == null);
+        return this;
+    }
+
+    public Laminate setLayers(Collection<Meta> layers) {
+        this.layers.clear();
+        this.layers.addAll(layers);
+        this.layers.removeIf((meta) -> meta == null);
         return this;
     }
 
@@ -111,12 +140,10 @@ public class Laminate extends Meta {
     @Override
     public Meta getNode(String path) {
         List<Meta> childLayers = new ArrayList<>();
-        for (Meta m : layers) {
-            if (m.hasNode(path)) {
-                //FIXME child elements are not chained!
-                childLayers.add(m.getNode(path));
-            }
-        }
+        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
+            //FIXME child elements are not chained!
+            childLayers.add(m.getNode(path));
+        });
         if (!childLayers.isEmpty()) {
             Laminate laminate = new Laminate(childLayers);
             //adding child node descriptor to the child laminate
@@ -136,11 +163,9 @@ public class Laminate extends Meta {
     @Override
     public List<? extends Meta> getNodes(String path) {
         List<List<? extends Meta>> childLayers = new ArrayList<>();
-        for (Meta m : layers) {
-            if (m.hasNode(path)) {
-                childLayers.add(m.getNodes(path));
-            }
-        }
+        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
+            childLayers.add(m.getNodes(path));
+        });
         if (!childLayers.isEmpty()) {
             if (childLayers.size() > 1) {
                 LoggerFactory.getLogger(getClass())
@@ -169,9 +194,9 @@ public class Laminate extends Meta {
     public Collection<String> getNodeNames() {
         Set<String> names = new HashSet<>();
         if (layers != null) {
-            for (Meta m : layers) {
+            layers.stream().forEach((m) -> {
                 names.addAll(m.getNodeNames());
-            }
+            });
         }
 
         if (descriptorLayer != null) {
@@ -189,9 +214,9 @@ public class Laminate extends Meta {
     @Override
     public Collection<String> getValueNames() {
         Set<String> names = new HashSet<>();
-        for (Meta m : layers) {
+        layers.stream().forEach((m) -> {
             names.addAll(m.getValueNames());
-        }
+        });
 
         if (descriptorLayer != null) {
             names.addAll(descriptorLayer.getValueNames());

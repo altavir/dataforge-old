@@ -18,7 +18,6 @@ package hep.dataforge.plots.data;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
@@ -44,18 +43,19 @@ public class DynamicPlottable extends XYPlottable {
     private final String yName;
     private Instant lastUpdate;
 
-    public static DynamicPlottable build(String name, String xName, String yName, String color, double thickness) {
-        Meta meta = new MetaBuilder("plottable")
-                .setValue("adapter.y", yName)
+    public static DynamicPlottable build(String name, String yName, String color, double thickness) {
+        DynamicPlottable res = new DynamicPlottable(name, yName);
+        res.getConfig()
                 .setValue("color", color)
-                .setValue("thickness", thickness)
-                .build();
-        return new DynamicPlottable(name, meta);
+                .setValue("thickness", thickness);
+        return res;
     }
 
-    public DynamicPlottable(String name, Meta annotation) {
-        super(name, annotation);
-        getConfig().setValue("adapter.x", "timestamp");
+    public DynamicPlottable(String name) {
+        super(name);
+        MetaBuilder builder = new MetaBuilder("plottable")
+                .setValue("adapter.x", "timestamp");
+        setMetaBase(builder.build());
         this.yName = getConfig().getString("adapter.y", name);
     }
 
@@ -67,10 +67,12 @@ public class DynamicPlottable extends XYPlottable {
      * @param annotation
      * @param yName
      */
-    public DynamicPlottable(String name, Meta annotation, String yName) {
-        super(name, annotation);
-        getConfig().setValue("adapter.x", "timestamp");
-        getConfig().setValue("adapter.y", yName);
+    public DynamicPlottable(String name, String yName) {
+        super(name);
+        MetaBuilder builder = new MetaBuilder("plottable")
+                .setValue("adapter.x", "timestamp")
+                .setValue("adapter.y", yName);
+        setMetaBase(builder.build());
         this.yName = yName;
     }
 
@@ -127,19 +129,19 @@ public class DynamicPlottable extends XYPlottable {
     public Instant getLastUpdateTime() {
         return lastUpdate;
     }
-    
-    public void setMaxItems(int maxItems){
+
+    public void setMaxItems(int maxItems) {
         getConfig().setValue("maxItems", maxItems);
     }
-    
-    public void setMaxAge(Duration age){
+
+    public void setMaxAge(Duration age) {
         getConfig().setValue("maxAge", age.toMillis());
     }
 
-    public int size(){
+    public int size() {
         return map.size();
     }
-    
+
     private class DataMap extends LinkedHashMap<Instant, DataPoint> {
 
         @Override
@@ -149,7 +151,7 @@ public class DynamicPlottable extends XYPlottable {
                 return true;
             }
             int maxAge = meta().getInt("maxAge", -1);
-            if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(),lastUpdate).toMillis() > maxAge) {
+            if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(), lastUpdate).toMillis() > maxAge) {
                 return true;
             }
             return false;

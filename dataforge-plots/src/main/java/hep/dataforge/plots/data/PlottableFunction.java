@@ -19,7 +19,6 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -37,8 +36,8 @@ public class PlottableFunction extends XYPlottable {
     private final UnivariateFunction function;
     //TODO Сделать построение графика по заданной решетке
 
-    public PlottableFunction(String name, Meta meta, UnivariateFunction function, double from, double to, int numPoints) {
-        super(name, meta);
+    public PlottableFunction(String name, UnivariateFunction function, double from, double to, int numPoints) {
+        super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
@@ -59,8 +58,8 @@ public class PlottableFunction extends XYPlottable {
      * @param data
      * @param xName
      */
-    public PlottableFunction(String name, Meta meta, UnivariateFunction function, Iterable<DataPoint> data, XYDataAdapter adapter) {
-        super(name, meta);
+    public PlottableFunction(String name, UnivariateFunction function, Iterable<DataPoint> data, XYDataAdapter adapter) {
+        super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;

@@ -19,7 +19,6 @@ import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -39,10 +38,6 @@ import java.util.stream.Collectors;
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.data.XYDataAdapter")
 public abstract class XYPlottable extends AbstractPlottable implements Plottable {
-    
-    public XYPlottable(String name, Meta annotation) {
-        super(name, annotation);
-    }
     
     public XYPlottable(String name) {
         super(name);

@@ -6,13 +6,12 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.meta.Meta;
 
 
 public class ChangeablePlottableData extends PlottableData {
 
-    public ChangeablePlottableData(String name, Meta meta) {
-        super(name, meta);
+    public ChangeablePlottableData(String name) {
+        super(name);
     }
     
     @Override

@@ -48,7 +48,7 @@ public class PlotContainerTest {
 
         UnivariateFunction func = (double x1) -> x1 * x1;
 
-        PlottableFunction funcPlot = new PlottableFunction("func", null, func, 0.1, 4, 200);
+        PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 

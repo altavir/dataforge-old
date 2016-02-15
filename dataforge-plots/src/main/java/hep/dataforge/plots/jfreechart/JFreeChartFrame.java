@@ -85,34 +85,6 @@ import org.slf4j.LoggerFactory;
  */
 public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
-//    /**
-//     * Десериализует график из файла и прицепляет его к новой формочке
-//     *
-//     * @param stream
-//     * @return
-//     * @throws IOException
-//     * @throws ClassNotFoundException
-//     */
-//    public static JFrame deserialize(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-//        JFreeChart jfc = (JFreeChart) stream.readObject();
-//
-//        JFrame frame = new JFrame("DataForge visualisator");
-//        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-//        SwingUtilities.invokeLater(() -> {
-//            JPanel panel = new JPanel(new BorderLayout());
-//            panel.setPreferredSize(new Dimension(800, 600));
-//            frame.setContentPane(panel);
-//
-//            panel.removeAll();
-//            panel.add(new ChartPanel(jfc));
-//            panel.revalidate();
-//            panel.repaint();
-//
-//            frame.pack();
-//            frame.setVisible(true);
-//        });
-//        return frame;
-//    }
     /**
      * Index mapping names to datasets
      */
