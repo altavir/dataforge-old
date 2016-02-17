@@ -5,11 +5,10 @@
  */
 package hep.dataforge.control.measurements;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.control.devices.AbstractMeasurementDevice;
+import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.util.concurrent.Callable;
 
@@ -18,6 +17,7 @@ import java.util.concurrent.Callable;
  *
  * @author Alexander Nozik
  */
+@StateDef(name = "measuring", readOnly = true, info = "Shows if this sensor is actively measuring")
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
 
     /**
@@ -44,10 +44,6 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
 
     private Measurement<T> measurement;
 
-//    public Sensor(String name, Context context, Meta meta) {
-//        super(name, context, meta);
-//    }
-
     /**
      * Read sensor data synchronously
      *
@@ -68,6 +64,10 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         return this.measurement;
     }
 
+    public Measurement<T> getMeasurement() {
+        return measurement;
+    }
+
     /**
      * Stop current measurement
      *
@@ -80,15 +80,35 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         }
     }
 
+//    @Override
+//    protected <T> void onFinishMeasurement(Measurement<T> measurement) {
+//        measurement = null;
+//    }
+
     @Override
     public void shutdown() throws ControlException {
-        if(measurement != null){
+        if (measurement != null) {
             measurement.stop(true);
         }
         super.shutdown();
     }
     
-    
+    /**
+     * Shows if there is ongoing measurement
+     * @return 
+     */
+    public boolean isMeasuring(){
+        return measurement != null && !measurement.isFinished();
+    }
+
+    @Override
+    public Value getState(String stateName) {
+        if ("measuring".equals(stateName)) {
+            return Value.of(isMeasuring());
+        } else {
+            return super.getState(stateName);
+        }
+    }
 
     @Override
     protected Object calculateState(String stateName) throws ControlException {

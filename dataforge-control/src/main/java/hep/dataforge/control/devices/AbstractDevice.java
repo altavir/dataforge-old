@@ -53,16 +53,9 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     private String name;
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
     private final Map<Connection, List<String>> connections = new HashMap<>();
-    //private final Map<String, Connection> connections = new HashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
     private Logger logger;
 
-//    public AbstractDevice(String name, Context context, Meta meta) {
-//        setValueContext(context);
-//        setMetaBase(meta);
-//        this.name = name;
-//        this.context = context;
-//    }
     public void setContext(Context context) {
         this.context = context;
         setValueContext(context);
@@ -103,7 +96,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public void shutdown() throws ControlException {
-        logger.info("Shutting down device '{}'...", getName());
+        getLogger().info("Shutting down device '{}'...", getName());
         listeners.forEach(it -> it.notifyDeviceShutdown(this));
         //TODO close connections and close listeners
         logger = null;
@@ -166,6 +159,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      */
     protected final void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(stateName, stateValue);
+        getLogger().info("State {} changed to {}", stateName, stateValue);
         listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
     }
 
@@ -186,6 +180,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     protected final void notifyError(String message, Throwable error) {
+        getLogger().error(message, error);
         listeners.forEach((DeviceListener it) -> it.evaluateDeviceException(AbstractDevice.this, message, error));
     }
 
@@ -254,6 +249,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      */
     @Override
     public synchronized void connect(Connection<Device> connection, String... roles) {
+        getLogger().info("Attaching connection with roles {}", String.join(", ", roles));
         //Checking if connection could serve given roles
         for (String role : roles) {
             if (!hasRole(role)) {
@@ -268,6 +264,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
         this.connections.put(connection, Arrays.asList(roles));
         try {
+            getLogger().debug("Opening connection...");
             connection.open(this);
         } catch (Exception ex) {
             //FIXME evaluate error here
@@ -326,9 +323,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     protected void applyConfig(Meta config) {
-        if (logger != null) {
-            logger.debug("Applying configuration change");
-        }
+        getLogger().debug("Applying configuration change");
         listeners.forEach((DeviceListener it) -> it.notifyDeviceConfigChanged(AbstractDevice.this));
     }
 

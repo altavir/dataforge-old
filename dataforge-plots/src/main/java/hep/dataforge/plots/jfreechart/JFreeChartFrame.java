@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -75,6 +76,7 @@ import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
+import org.jfree.data.xy.XYIntervalDataItem;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
 import org.slf4j.LoggerFactory;
@@ -295,13 +297,16 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     protected void updatePlotData(String name) {
         XYPlottable plottable = get(name);
 
-        XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
         XYDataAdapter adapter = plottable.adapter();
+
+        XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
         for (DataPoint point : plottable.plotData()) {
             double x = convertValue(adapter.getX(point));
             double y = convertValue(adapter.getY(point));
-            if (Double.isNaN(x) || Double.isNaN(y)) {
-//                ser.add(null, true);
+            if (Double.isNaN(x)) {
+                LoggerFactory.getLogger(getClass()).warn("Missing x value!");
+            } else if (Double.isNaN(y)) {
+                ser.add(x, NaN, NaN, NaN, NaN, NaN);
             } else {
                 double xErr = convertValue(adapter.getXerr(point));
                 double yErr = convertValue(adapter.getYerr(point));

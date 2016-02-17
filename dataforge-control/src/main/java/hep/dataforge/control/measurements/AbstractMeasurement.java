@@ -55,9 +55,11 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
     }
 
-    protected void onError(Throwable error) {
+    protected synchronized void onError(Throwable error) {
+        LoggerFactory.getLogger(getClass()).error("Measurement failed with error", error);
         setState(MeasurementState.FAILED);
         this.exception = error;
+        notify();
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
     }
 
@@ -106,19 +108,25 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     protected synchronized Pair<T, Instant> get() throws MeasurementException {
-        if (getState()== MeasurementState.INIT) {
+        if (getState() == MeasurementState.INIT) {
             start();
             LoggerFactory.getLogger(getClass()).debug("Measurement not started. Starting");
         }
-        while (this.lastResult == null) {
+        while (state == MeasurementState.PENDING) {
             try {
                 //Wait for onResult could cause deadlock if called in main thread
                 wait();
             } catch (InterruptedException ex) {
-                throw new MeasurementException(exception);
+                throw new MeasurementException(ex);
             }
         }
-        return this.lastResult;
+        if(this.lastResult != null){
+            return this.lastResult;
+        } else if(state == MeasurementState.FAILED) {
+            throw new MeasurementException(getError());
+        } else {
+            throw new MeasurementException("Measurement failed for unknown reason");
+        }
     }
 
     @Override

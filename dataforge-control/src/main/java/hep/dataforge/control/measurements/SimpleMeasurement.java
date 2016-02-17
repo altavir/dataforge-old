@@ -5,8 +5,11 @@
  */
 package hep.dataforge.control.measurements;
 
+import hep.dataforge.exceptions.MeasurementException;
+import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.FutureTask;
+import java.util.concurrent.TimeUnit;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
@@ -19,27 +22,11 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
 
     private FutureTask<Pair<T, Instant>> task;
 
-    protected FutureTask<Pair<T, Instant>> buildTask() {
-        return new FutureTask<>(() -> {
-            try {
-                T res = doMeasure();
-                Instant time = Instant.now();
-                result(res, time);
-                return new Pair<>(res, time);
-            } catch (Exception ex) {
-                onError(ex);
-                return null;
-            } finally {
-                onFinish();
-            }
-        });
-    }
-
     /**
      * invalidate current task. New task will be created on next getTask call.
      * This method does not guarantee that task is finished when it is cleared
      */
-    protected final void clearTask() {
+    private void clearTask() {
         task = null;
     }
 
@@ -57,7 +44,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
         //Executors.newSingleThreadExecutor().submit(getTask());
         if (!isStarted()) {
             onStart();
-            getTask().run();
+            startTask();
         } else {
             LoggerFactory.getLogger(getClass()).warn("Alredy started");
         }
@@ -67,17 +54,84 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
     public synchronized boolean stop(boolean force) {
         if (isStarted()) {
             onFinish();
-            return getTask().cancel(force);
+            return interruptTask(force);
         } else {
             return false;
         }
     }
 
-    protected FutureTask<Pair<T, Instant>> getTask() {
-        if (task == null) {
-            task = buildTask();
+    protected boolean interruptTask(boolean force) {
+        if (task != null) {
+            if (task.isCancelled() || task.isDone()) {
+                task = null;
+                return true;
+            } else {
+                return task.cancel(force);
+            }
+        } else {
+            return false;
         }
-        return task;
+    }
+
+    protected ThreadGroup getThreadGroup() {
+        return null;
+    }
+
+    protected Duration getMeasurementTimeout() {
+        return null;
+    }
+
+    protected String getThreadName() {
+        return "measurement thread";
+    }
+
+    protected void startTask() {
+        Runnable process = () -> {
+            Pair<T, Instant> res;
+            try {
+                Duration timeout = getMeasurementTimeout();
+                task = buildTask();
+                task.run();
+                if (timeout == null) {
+                    res = task.get();
+                } else {
+                    res = task.get(getMeasurementTimeout().toMillis(), TimeUnit.MILLISECONDS);
+                }
+                if (res != null) {
+                    result(res.getKey(), res.getValue());
+                } else {
+                    throw new MeasurementException("Empty result");
+                }
+            } catch (Exception ex) {
+                onError(ex);
+            }
+            clearTask();
+            finishTask();
+        };
+        new Thread(getThreadGroup(), process, getThreadName()).start();
+    }
+
+    /**
+     * Reset measurement task and notify listeners
+     */
+    protected void finishTask() {
+        onFinish();
+    }
+
+    private FutureTask<Pair<T, Instant>> buildTask() {
+        return new FutureTask<>(() -> {
+            try {
+                T res = doMeasure();
+                if (res == null) {
+                    return null;
+                }
+                Instant time = Instant.now();
+                return new Pair<>(res, time);
+            } catch (Exception ex) {
+                onError(ex);
+                return null;
+            }
+        });
     }
 
 }

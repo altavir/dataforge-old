@@ -6,9 +6,6 @@
 package hep.dataforge.control.measurements;
 
 import java.time.Duration;
-import java.time.Instant;
-import java.util.concurrent.FutureTask;
-import javafx.util.Pair;
 
 /**
  *
@@ -19,28 +16,12 @@ public abstract class RegularMeasurement<T> extends SimpleMeasurement<T> {
     private boolean stopFlag = false;
 
     @Override
-    protected FutureTask<Pair<T, Instant>> buildTask() {
-        //FIXME refactor using FutureTask runAndReset
-        return new FutureTask<>(() -> {
-            try {
-                Thread.sleep(getDelay().toMillis());
-                T res = doMeasure();
-                Instant time = Instant.now();
-                result(res, time);
-                return new Pair<>(res, time);
-            } catch (Exception ex) {
-                onError(ex);
-                return null;
-            } finally {
-                clearTask();
-                if (stopFlag || (stopOnError() && getState() == MeasurementState.FAILED)) {
-                    onFinish();
-                } else {
-                    //Task is null so it is reset automaically
-                    getTask().run();
-                }
-            }
-        });
+    protected void finishTask() {
+        if (stopFlag || (stopOnError() && getState() == MeasurementState.FAILED)) {
+            onFinish();
+        } else {
+            startTask();
+        }
     }
 
     @Override
@@ -48,7 +29,7 @@ public abstract class RegularMeasurement<T> extends SimpleMeasurement<T> {
         if (isFinished()) {
             return false;
         } else if (force) {
-            return getTask().cancel(force);
+            return interruptTask(force);
         } else {
             stopFlag = true;
             return true;
