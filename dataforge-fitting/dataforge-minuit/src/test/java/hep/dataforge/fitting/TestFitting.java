@@ -15,7 +15,6 @@
  */
 package hep.dataforge.fitting;
 
-import hep.dataforge.context.GlobalContext;
 import static hep.dataforge.context.GlobalContext.out;
 import hep.dataforge.data.ListDataSet;
 import hep.dataforge.datafitter.FitState;

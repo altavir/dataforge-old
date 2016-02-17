@@ -7,6 +7,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.context.Encapsulated;
 
 /**
  *

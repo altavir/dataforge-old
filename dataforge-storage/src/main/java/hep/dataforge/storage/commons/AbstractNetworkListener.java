@@ -21,7 +21,6 @@ import hep.dataforge.io.envelopes.Envelope;
 import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.Responder;
-import hep.dataforge.io.envelopes.Tag;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.io.IOException;

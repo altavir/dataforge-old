@@ -15,11 +15,11 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Storage;
 import java.util.HashMap;

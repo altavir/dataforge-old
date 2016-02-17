@@ -16,7 +16,6 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.context.Context;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;

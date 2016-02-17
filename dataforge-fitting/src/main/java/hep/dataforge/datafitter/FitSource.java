@@ -15,14 +15,14 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.datafitter.models.Model;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
+import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.DerivativeCalculator;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
-import hep.dataforge.content.NamedMetaHolder;
+import hep.dataforge.meta.Meta;
 
 /**
  * <p>FitSource class.</p>

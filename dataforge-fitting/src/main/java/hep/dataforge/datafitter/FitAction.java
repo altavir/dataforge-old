@@ -16,17 +16,17 @@
 package hep.dataforge.datafitter;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MergeRule;
-import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
-import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
+import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.MergeRule;
+import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;

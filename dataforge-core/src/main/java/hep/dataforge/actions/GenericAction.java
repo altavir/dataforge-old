@@ -15,21 +15,21 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.content.Content;
 import hep.dataforge.content.Named;
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.context.Context;
 import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.dependencies.GenericDependency;
-import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
-import hep.dataforge.content.NamedMetaHolder;
+import hep.dataforge.meta.Meta;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;

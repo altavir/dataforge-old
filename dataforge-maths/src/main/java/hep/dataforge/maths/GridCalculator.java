@@ -18,7 +18,6 @@ package hep.dataforge.maths;
 import hep.dataforge.data.DataPoint;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
 /**

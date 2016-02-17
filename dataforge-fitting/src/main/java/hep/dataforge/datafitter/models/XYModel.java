@@ -15,12 +15,12 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.meta.Meta;
 import static java.lang.Math.log;
 import static java.lang.Math.sqrt;
 

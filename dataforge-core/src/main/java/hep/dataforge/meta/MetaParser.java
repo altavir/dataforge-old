@@ -15,11 +15,11 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.context.Encapsulated;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import hep.dataforge.context.Encapsulated;
 
 /**
  * An interface which allows conversion from Meta to string and vise versa

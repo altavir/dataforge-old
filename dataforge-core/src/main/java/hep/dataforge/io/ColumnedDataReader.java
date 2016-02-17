@@ -15,12 +15,12 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataParser;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.ListDataSet;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

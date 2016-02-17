@@ -15,9 +15,9 @@
  */
 package hep.dataforge.dependencies;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.content.Content;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 
 /**

@@ -16,16 +16,16 @@
 package hep.dataforge.maths;
 
 import hep.dataforge.context.GlobalContext;
+import static java.lang.Math.abs;
 import java.util.Arrays;
+import static java.util.Arrays.fill;
+import static java.util.Arrays.sort;
 import org.apache.commons.math3.linear.DecompositionSolver;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularMatrixException;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

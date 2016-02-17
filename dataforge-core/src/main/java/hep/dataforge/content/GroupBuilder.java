@@ -16,8 +16,8 @@
 package hep.dataforge.content;
 
 import hep.dataforge.description.DescriptorUtils;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

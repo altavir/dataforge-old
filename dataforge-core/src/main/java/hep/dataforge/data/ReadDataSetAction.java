@@ -16,15 +16,14 @@
 package hep.dataforge.data;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.context.Context;
-import hep.dataforge.values.ValueType;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Meta;
 import java.io.IOException;
 
 /**

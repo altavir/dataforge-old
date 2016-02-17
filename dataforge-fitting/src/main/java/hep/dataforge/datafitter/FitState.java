@@ -15,14 +15,14 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.datafitter.models.Model;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataSet;
+import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.NamedFunction;
 import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import static hep.dataforge.io.PrintNamed.printNamedMatrix;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import java.io.PrintWriter;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;

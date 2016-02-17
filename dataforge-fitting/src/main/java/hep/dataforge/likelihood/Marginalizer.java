@@ -15,7 +15,6 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;

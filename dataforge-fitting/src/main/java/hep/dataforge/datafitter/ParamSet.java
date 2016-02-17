@@ -15,10 +15,8 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Meta;

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.Meta;
 
 /**
  * Любой объект, который может содержать график или набор графиков

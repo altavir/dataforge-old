@@ -15,11 +15,11 @@
  */
 package hep.dataforge.io.envelopes;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;

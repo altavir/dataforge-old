@@ -15,10 +15,10 @@
  */
 package hep.dataforge.dependencies;
 
-import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.content.Named;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 
 /**

@@ -87,9 +87,8 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      */
     @Override
     public abstract Value getValue(String path);
-    
-//    public abstract List<Value> getValues(String path);
 
+//    public abstract List<Value> getValues(String path);
     public boolean hasChildren() {
         return !getNodeNames().isEmpty();
     }
@@ -203,7 +202,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
 
     @Override
     public boolean equals(Object obj) {
-        if (obj instanceof Meta) {
+        if (super.equals(obj)) {
+            return true;
+        } else if (obj instanceof Meta) {
             Meta other = (Meta) obj;
             if (!Objects.equals(getName(), other.getName())) {
                 return false;

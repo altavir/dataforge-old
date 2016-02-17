@@ -20,6 +20,7 @@ import hep.dataforge.actions.Pack;
 import hep.dataforge.content.ContentList;
 import hep.dataforge.content.NamedGroup;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import static hep.dataforge.data.FileData.FILE_META;
 import hep.dataforge.dependencies.GenericDependency;
 import hep.dataforge.description.NodeDef;
@@ -34,7 +35,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
-import hep.dataforge.context.Encapsulated;
 
 /**
  * A replacement for obsolete ImportDataAction

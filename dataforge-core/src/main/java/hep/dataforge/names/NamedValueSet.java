@@ -15,8 +15,8 @@
  */
 package hep.dataforge.names;
 
-import hep.dataforge.values.Value;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.values.Value;
 
 /**
  * <p>

@@ -15,12 +15,11 @@
  */
 package hep.dataforge.maths.integration;
 
-import hep.dataforge.context.GlobalContext;
+import static java.util.Arrays.fill;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.MultivariateRealDistribution;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.random.RandomGenerator;
-import static java.util.Arrays.fill;
 import org.slf4j.LoggerFactory;
 
 /**

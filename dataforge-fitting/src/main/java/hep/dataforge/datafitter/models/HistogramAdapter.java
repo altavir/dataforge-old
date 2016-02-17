@@ -17,9 +17,8 @@ package hep.dataforge.datafitter.models;
 
 import hep.dataforge.data.AbstractDataAdapter;
 import hep.dataforge.data.DataAdapter;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.values.Value;
+import hep.dataforge.meta.MetaBuilder;
 
 /**
  * TODO сделать адаптер для гистограммы с фиксированными бинами

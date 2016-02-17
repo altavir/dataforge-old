@@ -15,13 +15,13 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.content.Named;
+import hep.dataforge.context.Encapsulated;
+import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
-import hep.dataforge.context.Encapsulated;
 
 /**
  * A place to store tasks and their results

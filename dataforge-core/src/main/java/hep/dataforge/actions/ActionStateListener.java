@@ -5,8 +5,6 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.dependencies.DependencySet;
-
 /**
  *
  * @author Alexander Nozik

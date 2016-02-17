@@ -18,8 +18,6 @@ package hep.dataforge.context;
 import hep.dataforge.content.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The interface to define a Context plugin. A plugin could be loaded into the

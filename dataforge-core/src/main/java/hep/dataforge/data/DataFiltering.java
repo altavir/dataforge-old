@@ -20,7 +20,6 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import java.util.List;
 import java.util.function.Predicate;
 

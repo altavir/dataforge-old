@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.SimpleDataParser;
 import hep.dataforge.data.DataParser;
 import hep.dataforge.data.DataPoint;
+import hep.dataforge.data.SimpleDataParser;
 import java.io.InputStream;
 import java.util.Iterator;
 

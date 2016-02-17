@@ -14,10 +14,7 @@ import hep.dataforge.values.Value;
 import java.net.URL;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -33,8 +30,6 @@ import javafx.scene.control.cell.TextFieldTreeTableCell;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
-import javafx.util.Callback;
-import javafx.util.StringConverter;
 import org.slf4j.LoggerFactory;
 
 /**

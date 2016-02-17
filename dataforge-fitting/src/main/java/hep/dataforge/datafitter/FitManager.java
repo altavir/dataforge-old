@@ -15,18 +15,18 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
 import hep.dataforge.datafitter.models.XYModel;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.io.PrintNamed;
-import java.io.PrintWriter;
-import hep.dataforge.context.Encapsulated;
 import static hep.dataforge.io.PrintNamed.printResiduals;
+import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Meta;
+import java.io.PrintWriter;
 
 /**
  * <p>

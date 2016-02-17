@@ -15,8 +15,8 @@
  */
 package hep.dataforge.utils;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.context.GlobalContext;
+import hep.dataforge.meta.Meta;
 
 /**
  * <p>Abstract AnnotationTemplate class.</p>

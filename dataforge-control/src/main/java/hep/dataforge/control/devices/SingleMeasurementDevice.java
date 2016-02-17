@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;

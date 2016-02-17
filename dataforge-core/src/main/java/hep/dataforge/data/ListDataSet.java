@@ -15,11 +15,11 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Comparator;

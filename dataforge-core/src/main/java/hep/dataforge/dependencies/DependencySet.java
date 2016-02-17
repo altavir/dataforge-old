@@ -15,8 +15,8 @@
  */
 package hep.dataforge.dependencies;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.content.Named;
+import hep.dataforge.meta.Annotated;
 
 /**
  * A uniform named set of dependencies.

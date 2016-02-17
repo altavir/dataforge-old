@@ -15,8 +15,8 @@
  */
 package hep.dataforge.content;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.meta.Annotated;
 import java.util.List;
 
 /**

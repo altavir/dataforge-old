@@ -15,8 +15,8 @@
  */
 package hep.dataforge.control.ports;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.exceptions.PortException;
+import hep.dataforge.meta.Meta;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

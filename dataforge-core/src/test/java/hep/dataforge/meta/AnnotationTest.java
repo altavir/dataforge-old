@@ -15,8 +15,6 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.exceptions.NameNotFoundException;
 import org.junit.After;
 import org.junit.AfterClass;

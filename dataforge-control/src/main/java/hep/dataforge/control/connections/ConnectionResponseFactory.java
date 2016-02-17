@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.storage.commons.MessageFactory;
 
 /**

@@ -7,6 +7,7 @@ package hep.dataforge.fx;
 
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
+import java.util.List;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.value.ObservableBooleanValue;
 
@@ -15,13 +16,13 @@ public class MetaTreeBranch extends MetaTree {
     MetaTreeBranch parent;
     Configuration node;
     NodeDescriptor descriptor;
-    
+
     private final ObservableBooleanValue isDefaultValue = new BooleanBinding() {
-            @Override
-            protected boolean computeValue() {
-                return (node == null || node.isEmpty()) && descriptor != null;
-            }
-        };
+        @Override
+        protected boolean computeValue() {
+            return (node == null || node.isEmpty()) && descriptor != null;
+        }
+    };
 
     public MetaTreeBranch(MetaTreeBranch parent, Configuration node, NodeDescriptor descriptor) {
         this.parent = parent;
@@ -36,11 +37,24 @@ public class MetaTreeBranch extends MetaTree {
     @Override
     public String getName() {
         if (node != null) {
-            return node.getName();
+            return node.getName() + getIndex();
         } else if (descriptor != null) {
             return descriptor.getName();
         } else {
             return "";
+        }
+    }
+
+    private String getIndex() {
+        if (node != null && getParent() != null) {
+            List<Configuration> list = getParent().getNode().getNodes(node.getName());
+            if(list.size()>1){
+                return String.format(" [%d]", list.indexOf(node));
+            } else {
+                return "";//single item node
+            }
+        } else {
+            return "";//no node
         }
     }
 

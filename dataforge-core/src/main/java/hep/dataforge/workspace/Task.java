@@ -15,10 +15,10 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.content.Named;
 import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.dependencies.DependencySet;
+import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
 
 /**

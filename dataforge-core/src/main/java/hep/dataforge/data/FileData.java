@@ -15,11 +15,11 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.content.NamedMetaHolder;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import static hep.dataforge.io.IOUtils.readFileMask;
-import hep.dataforge.content.NamedMetaHolder;
+import hep.dataforge.meta.Meta;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;

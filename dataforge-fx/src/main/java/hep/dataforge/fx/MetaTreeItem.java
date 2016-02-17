@@ -72,23 +72,26 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
             if (config != null) {
                 for (String childNodeName : config.getNodeNames()) {
                     List<Configuration> childConfigs = config.getNodes(childNodeName);
-                    for (Configuration childConfig : childConfigs) {
+                    childConfigs.stream().map((childConfig) -> {
                         //applying descriptor from parent
                         NodeDescriptor childDescriptor = descriptor == null ? null : descriptor.childDescriptor(childNodeName);
                         //applying descriptor from external provider if it is present
-                        if(childDescriptor == null && descriptorProvider != null){
+                        if (childDescriptor == null && descriptorProvider != null) {
                             childDescriptor = descriptorProvider.apply(childConfig);
                         }
                         MetaTree childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                        return childTree;
+                    }).forEach((childTree) -> {
                         children.add(new MetaTreeItem(childTree));
-                    }
+                    });
                 }
 
                 // adding values with descriptors if available
-                for (String valueName : config.getValueNames()) {
-                    MetaTreeLeaf valueLeaf = new MetaTreeLeaf(branch, valueName);
-                    children.add(new MetaTreeItem(valueLeaf));
-                }
+                config.getValueNames().stream()
+                        .map((valueName) -> new MetaTreeLeaf(branch, valueName))
+                        .forEach((valueLeaf) -> {
+                            children.add(new MetaTreeItem(valueLeaf));
+                        });
             }
 
             // adding the rest default value from descriptor. Ignoring the ones allready added

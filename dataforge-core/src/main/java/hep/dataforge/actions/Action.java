@@ -15,12 +15,12 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.meta.Annotated;
 
 /**
  * The action is an independent process that could be performed on one
