@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Future;
 
 /**
  * The static dependency for several data pieces one of which should be default.
@@ -28,30 +29,30 @@ import java.util.Map;
 public class StaticDependency implements Dependency {
 
     private final Map<String, Object> data;
-    private final Map<String, Class> types;
+//    private final Map<String, Class> types;
     private final String defaultDataKey;
     private final String name;
 
     public StaticDependency(String name, Map<String, Object> data, String defaultDataKey) {
         this.name = name;
         this.data = new HashMap<>(data);
-        this.types = new HashMap<>();
-        
+//        this.types = new HashMap<>();
+
         if (!data.keySet().contains(defaultDataKey)) {
             throw new IllegalArgumentException("The default key should be present in the data");
         }
-        
+
         this.defaultDataKey = defaultDataKey;
-        data.entrySet().stream().forEach((entry) -> {
-            this.types.put(entry.getKey(), entry.getValue().getClass());
-        });
+//        data.entrySet().stream().forEach((entry) -> {
+//            this.types.put(entry.getKey(), entry.getValue().getClass());
+//        });
     }
 
     @Override
     public String getName() {
         return name;
     }
-    
+
     @Override
     public Object get() {
         return data.get(defaultDataKey);
@@ -61,18 +62,37 @@ public class StaticDependency implements Dependency {
     public Object get(String key) {
         if (this.data.containsKey(key)) {
             return this.data.get(key);
+        } else if (defaultDataKey.equals(key)) {
+            return null;
         } else {
             throw new NameNotFoundException(key);
         }
     }
 
     @Override
+    public Future getInFuture() {
+        return new ConstantFuture<>(get());
+    }
+
+    @Override
+    public Future getInFuture(String key) {
+        return new ConstantFuture<>(get(key));
+    }
+
+    @Override
     public Class type(String key) {
-        if (this.types.containsKey(key)) {
-            return this.types.get(key);
+        if (this.data.containsKey(key)) {
+            return this.data.get(key).getClass();
+        } else if (defaultDataKey.equals(key)) {
+            return null;
         } else {
             throw new NameNotFoundException(key);
         }
+    }
+
+    @Override
+    public Class type() {
+        return type(defaultDataKey);
     }
 
     @Override

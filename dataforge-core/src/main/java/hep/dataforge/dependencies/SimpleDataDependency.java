@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
+import java.util.concurrent.Future;
 
 /**
  * A simple static dependency wrapper for single named data piece. Data is
@@ -90,13 +91,25 @@ public class SimpleDataDependency<T extends Named> implements Dependency<T> {
     }
 
     @Override
+    public Class<T> type() {
+        return (Class<T>) data.getClass();
+    }
+    
+    
+
+    @Override
     public Names keys() {
         return Names.of("");
     }
 
     @Override
-    public boolean isValid() {
-        return data != null;
+    public Future<T> getInFuture() {
+        return new ConstantFuture<>(get());
     }
+
+    @Override
+    public <R> Future<R> getInFuture(String key) {
+        return new ConstantFuture<>(get(key));
+    }    
 
 }

@@ -28,11 +28,10 @@ public interface DependencySet<T> extends Named, Annotated, Iterable<Dependency<
 
     /**
      * Get a dependency with given name
-     *
+     * <p> PENDING support chainpath?</p>
      * @param path
      * @return
      */
-    //PENDING support chainpath?
     Dependency<T> get(String path);
 
     /**

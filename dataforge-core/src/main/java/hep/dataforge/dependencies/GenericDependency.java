@@ -18,6 +18,8 @@ package hep.dataforge.dependencies;
 import hep.dataforge.names.Names;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.function.Supplier;
 
 /**
@@ -27,6 +29,7 @@ import java.util.function.Supplier;
  */
 public class GenericDependency<T> implements Dependency<T> {
 
+    //FIXME store result after calculation
     private String name;
 
     private Supplier<T> data;
@@ -55,19 +58,22 @@ public class GenericDependency<T> implements Dependency<T> {
     }
 
     @Override
-    public T get() {
-        return data.get();
+    public Future<T> getInFuture() {
+        return new FutureTask<>(() -> data.get());
     }
 
+    //PENDING replace Future task by central ExecutorService?
     @Override
-    public Object get(String key) {
-        if (extraList.containsKey(key)) {
-            return extraList.get(key).get();
-        } else if (key.equals(Dependency.DEFAULT_KEY)) {
-            return data.get();
-        } else {
-            return null;
-        }
+    public <R> Future<R> getInFuture(String key) {
+        return new FutureTask<>(() -> {
+            if (extraList.containsKey(key)) {
+                return (R)extraList.get(key).get();
+            } else if (key.equals(Dependency.DEFAULT_KEY)) {
+                return (R)data.get();
+            } else {
+                return null;
+            }
+        });
     }
 
     @Override
@@ -77,6 +83,11 @@ public class GenericDependency<T> implements Dependency<T> {
         } else {
             return extraTypeList.get(key);
         }
+    }
+
+    @Override
+    public Class<T> type() {
+        return type;
     }
 
     @Override

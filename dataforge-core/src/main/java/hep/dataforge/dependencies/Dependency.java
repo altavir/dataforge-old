@@ -19,6 +19,8 @@ import hep.dataforge.content.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 
 /**
  * A generalized dependency could be static data or task to be performed on
@@ -46,13 +48,28 @@ public interface Dependency<T> extends Named, Annotated {
     public static final String DEFAULT_KEY = "";
     public static final String META_KEY = "meta";
 
+//    public static enum DependencyState {
+//        INIT,
+//        PENDING,
+//        READY,
+//        ERROR
+//    }
+
     /**
      * The data provided by this dependency for default key. Could be stored
      * statically or obtained on-demand. Equivalent of get("").
      *
      * @return a {@link java.lang.Object} object.
      */
-    T get();
+    default T get() {
+        try {
+            return getInFuture().get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new RuntimeException("Dependency result calculation failed", ex);
+        }
+    }
+
+    Future<T> getInFuture();
 
     /**
      * Get data for given key. Return null if given key is not present.
@@ -61,7 +78,16 @@ public interface Dependency<T> extends Named, Annotated {
      * @param key
      * @return
      */
-    <R> R get(String key);
+    default <R> R get(String key){
+        try {
+            return this.<R>getInFuture(key).get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new RuntimeException("Dependency result calculation failed", ex);
+        }
+
+    }
+
+    <R> Future<R> getInFuture(String key);
 
     /**
      * Get the declared type for given key
@@ -71,10 +97,7 @@ public interface Dependency<T> extends Named, Annotated {
      */
     Class type(String key);
 
-    @SuppressWarnings("unchecked")
-    default Class<T> type() {
-        return type(DEFAULT_KEY);
-    }
+    Class<T> type();
 
     /**
      * The set of present keys
@@ -83,14 +106,14 @@ public interface Dependency<T> extends Named, Annotated {
      */
     Names keys();
 
-    default boolean isValid() {
-        return true;
-    }
-    
+//    default boolean isReady() {
+//        return true;
+//    }
+
     @Override
-    default Meta meta(){
+    default Meta meta() {
         Meta res = this.<Meta>get(META_KEY);
-        if(res != null){
+        if (res != null) {
             return res;
         } else {
             return Meta.buildEmpty(META_KEY);
