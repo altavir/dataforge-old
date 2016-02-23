@@ -16,12 +16,12 @@
 package hep.dataforge.data;
 
 /**
- * <p>DataParser interface.</p>
+ * <p>PointParser interface.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface DataParser {
+public interface PointParser {
     /**
      * <p>parse.</p>
      *

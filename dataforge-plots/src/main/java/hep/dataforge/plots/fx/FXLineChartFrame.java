@@ -16,7 +16,7 @@
 package hep.dataforge.plots.fx;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.XYPlotFrame;
@@ -96,7 +96,7 @@ public class FXLineChartFrame extends XYPlotFrame {
             LoggerFactory.getLogger(getClass()).warn("The provided Plottable is not a subclass of XYPlottable");
         }
 
-        XYDataAdapter adapter = plottable.adapter();
+        XYAdapter adapter = plottable.adapter();
         
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();

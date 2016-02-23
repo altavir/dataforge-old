@@ -16,11 +16,11 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.data.PointListener;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
 import java.util.Collection;
+import hep.dataforge.data.PointSet;
 
 /**
  * PointLoader is intended to load a set of datapoints. The loader can have one
@@ -44,7 +44,7 @@ public interface PointLoader extends Loader, Iterable<DataPoint> {
      * @return
      * @throws StorageException
      */
-    DataSet asDataSet() throws StorageException;
+    PointSet asDataSet() throws StorageException;
 
 //    /**
 //     * Build a custom index. In case it is a map index it could be stored

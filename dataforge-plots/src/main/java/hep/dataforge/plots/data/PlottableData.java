@@ -16,15 +16,15 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.data.MapDataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import hep.dataforge.data.PointSet;
 
 /**
  *
@@ -64,7 +64,7 @@ public class PlottableData extends XYPlottable {
         return plot(name, x, y, null, null);
     }
 
-    public static PlottableData plot(String name, XYDataAdapter adapter, boolean showErrors) {
+    public static PlottableData plot(String name, XYAdapter adapter, boolean showErrors) {
         MetaBuilder builder = new MetaBuilder("dataPlot")
                 .setNode("adapter", adapter.meta());
         builder.setValue("showErrors", showErrors);
@@ -73,13 +73,13 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, XYDataAdapter adapter, Iterable<DataPoint> data) {
+    public static PlottableData plot(String name, XYAdapter adapter, Iterable<DataPoint> data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
     }
     
-    public static PlottableData plot(DataSet data, XYDataAdapter adapter){
+    public static PlottableData plot(PointSet data, XYAdapter adapter){
         PlottableData plot = plot(data.getName(), adapter, true);
         plot.fillData(data);
         if(data.meta().hasNode("plot")){
@@ -103,7 +103,7 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
-//    private static Meta extractMeta(DataSet data) {
+//    private static Meta extractMeta(PointSet data) {
 //        return data.meta().getNode("plot", Meta.buildEmpty("plot"));
 //    }
     @Override

@@ -10,15 +10,15 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
 import java.util.Map;
 
-public abstract class AbstractDataAdapter implements DataAdapter {
+public abstract class AbstractPointAdapter implements PointAdapter {
 
     private final Meta meta;
 
-    public AbstractDataAdapter() {
+    public AbstractPointAdapter() {
         meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
     }
 
-    public AbstractDataAdapter(Meta meta) {
+    public AbstractPointAdapter(Meta meta) {
         if (meta == null) {
             this.meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
         } else {
@@ -30,7 +30,7 @@ public abstract class AbstractDataAdapter implements DataAdapter {
      *
      * @param map
      */
-    public AbstractDataAdapter(Map<String, String> map) {
+    public AbstractPointAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_ANNOTATION_NAME);
         map.entrySet().stream().forEach((entry) -> {
             mb.setValue(entry.getKey(), entry.getValue());

@@ -25,12 +25,12 @@ import java.util.function.Predicate;
 
 /**
  * <p>
- * DataFiltering class.</p>
+ Filtering class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class DataFiltering {
+public class Filtering {
 
     /**
      * A simple condition that DataPoint has all presented tags

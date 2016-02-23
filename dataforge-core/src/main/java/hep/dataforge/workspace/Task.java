@@ -16,10 +16,10 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.content.Named;
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
+import hep.dataforge.dependencies.Data;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * The replacement for Action, task is a general way to define any process in a
@@ -43,7 +43,7 @@ public interface Task<T> extends Named {
      * @param config the meta-data of the task
      * @return
      */
-    DependencySet<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException;
+    DataNode<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException;
 
     /**
      * Run task and return result for specific target. Could be optimized to
@@ -53,7 +53,7 @@ public interface Task<T> extends Named {
      * @param target
      * @return
      */
-    default Dependency<T> runForTarget(Meta config, String target) throws InterruptedException, ExecutionException {
+    default Data<T> runForTarget(Meta config, String target) throws InterruptedException, ExecutionException {
         return run(config, target).get(target);
     }
 
@@ -65,8 +65,8 @@ public interface Task<T> extends Named {
      * @param config
      * @return
      */
-    default Dependency<T> runForDefaultTarget(Meta config) throws InterruptedException, ExecutionException {
-        DependencySet<T> map = run(config);
+    default Data<T> runForDefaultTarget(Meta config) throws InterruptedException, ExecutionException {
+        DataNode<T> map = run(config);
         if (map.size() == 1) {
             return map.iterator().next();
         } else {

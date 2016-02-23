@@ -15,11 +15,11 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataParser;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.SimpleDataParser;
+import hep.dataforge.data.SimpleParser;
 import java.io.InputStream;
 import java.util.Iterator;
+import hep.dataforge.data.PointParser;
 
 /**
  *
@@ -31,16 +31,16 @@ import java.util.Iterator;
 public class DataPointStringIterator implements Iterator<DataPoint> {
 
     private final Iterator<String> reader;
-    private final DataParser parser;
+    private final PointParser parser;
 
     /**
      * <p>
      * Constructor for DataPointStringIterator.</p>
      *
      * @param reader a {@link java.util.Iterator} object.
-     * @param parser a {@link hep.dataforge.data.DataParser} object.
+     * @param parser a {@link hep.dataforge.data.PointParser} object.
      */
-    public DataPointStringIterator(Iterator<String> reader, DataParser parser) {
+    public DataPointStringIterator(Iterator<String> reader, PointParser parser) {
         this.reader = reader;
         this.parser = parser;
     }
@@ -50,9 +50,9 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      * Constructor for DataPointStringIterator.</p>
      *
      * @param stream a {@link java.io.InputStream} object.
-     * @param parser a {@link hep.dataforge.data.DataParser} object.
+     * @param parser a {@link hep.dataforge.data.PointParser} object.
      */
-    public DataPointStringIterator(InputStream stream, DataParser parser) {
+    public DataPointStringIterator(InputStream stream, PointParser parser) {
         this.reader = new LineIterator(stream);
         this.parser = parser;
     }
@@ -66,7 +66,7 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      */
     public DataPointStringIterator(InputStream stream, String[] names) {
         this.reader = new LineIterator(stream);
-        this.parser = new SimpleDataParser(names);
+        this.parser = new SimpleParser(names);
     }
 
     /**
@@ -78,7 +78,7 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      */
     public DataPointStringIterator(Iterator<String> reader, String[] names) {
         this.reader = reader;
-        this.parser = new SimpleDataParser(names);
+        this.parser = new SimpleParser(names);
     }
 
     /**
@@ -90,7 +90,7 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      */
     public DataPointStringIterator(Iterator<String> reader, String headline) {
         this.reader = reader;
-        this.parser = new SimpleDataParser(headline);
+        this.parser = new SimpleParser(headline);
     }
 
     /**

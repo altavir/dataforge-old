@@ -16,8 +16,8 @@
 package hep.dataforge.data;
 
 import hep.dataforge.content.Content;
-import static hep.dataforge.data.DataFiltering.getTagCondition;
-import static hep.dataforge.data.DataFiltering.getValueCondition;
+import static hep.dataforge.data.Filtering.getTagCondition;
+import static hep.dataforge.data.Filtering.getValueCondition;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
@@ -28,12 +28,12 @@ import java.util.stream.Stream;
 
 /**
  * <p>
- * DataSet interface.</p>
+ PointSet interface.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface DataSet extends Iterable<DataPoint>, Content {
+public interface PointSet extends Iterable<DataPoint>, Content {
 
     /**
      * Фильтрует набор данных и оставляет только те точки, что удовлетовряют
@@ -41,9 +41,9 @@ public interface DataSet extends Iterable<DataPoint>, Content {
      *
      * @param condition a {@link java.util.function.Predicate} object.
      * @throws hep.dataforge.exceptions.NamingException if any.
-     * @return a {@link hep.dataforge.data.DataSet} object.
+     * @return a {@link hep.dataforge.data.PointSet} object.
      */
-    DataSet filter(Predicate<DataPoint> condition) throws NamingException;
+    PointSet filter(Predicate<DataPoint> condition) throws NamingException;
 
     /**
      * Быстрый фильтр для значений одного поля
@@ -54,11 +54,11 @@ public interface DataSet extends Iterable<DataPoint>, Content {
      * @return
      * @throws hep.dataforge.exceptions.NamingException
      */
-    default DataSet filter(String valueName, Value a, Value b) throws NamingException {
+    default PointSet filter(String valueName, Value a, Value b) throws NamingException {
         return this.filter(getValueCondition(valueName, a, b));
     }
 
-    default DataSet filter(String valueName, double a, double b) throws NamingException {
+    default PointSet filter(String valueName, double a, double b) throws NamingException {
         return this.filter(getValueCondition(valueName, Value.of(a), Value.of(b)));
     }
 
@@ -70,22 +70,22 @@ public interface DataSet extends Iterable<DataPoint>, Content {
      * @return a {@link hep.dataforge.data.Column} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    default DataSet filter(String... tags) throws NamingException {
+    default PointSet filter(String... tags) throws NamingException {
         return this.filter(getTagCondition(tags));
     }
 
     DataPoint get(int i);
     Column getColumn(String name) throws NameNotFoundException;
 
-    DataFormat getDataFormat();
+    Format getDataFormat();
 
     Value getValue(int index, String name) throws NameNotFoundException;
 
     int size();
 
-    DataSet sort(String name, boolean ascending);
+    PointSet sort(String name, boolean ascending);
 
-    DataSet sort(Comparator<DataPoint> comparator);
+    PointSet sort(Comparator<DataPoint> comparator);
     
     Stream<DataPoint> stream();
 

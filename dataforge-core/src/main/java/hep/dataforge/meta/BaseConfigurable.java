@@ -34,7 +34,7 @@ public abstract class BaseConfigurable extends SimpleConfigurable {
     }
 
     protected final void setValueContext(ValueProvider context) {
-        this.laminate.setDefaultValueProvider(context);
+        this.laminate.setValueContext(context);
     }
 
     protected final void setDescriptor(NodeDescriptor descriptor) {

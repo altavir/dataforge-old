@@ -16,7 +16,7 @@
 package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -296,7 +296,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     protected void updatePlotData(String name) {
         XYPlottable plottable = get(name);
 
-        XYDataAdapter adapter = plottable.adapter();
+        XYAdapter adapter = plottable.adapter();
 
         XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
         for (DataPoint point : plottable.plotData()) {

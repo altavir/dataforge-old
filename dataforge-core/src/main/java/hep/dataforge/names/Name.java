@@ -39,7 +39,7 @@ public interface Name {
      */
     public static final String NAME_TOKEN_SEPARATOR = ".";
     
-    public static final String NAMESPACE_SEPARATOR = "#";
+    public static final String NAMESPACE_SEPARATOR = ":";
 
     public static Name of(String str) {
         String namespace;
@@ -92,27 +92,33 @@ public interface Name {
 
     /**
      *
-     * имя в виде строки
+     * The name as a String including query but ignoring namespace
      *
      * @return
      */
     @Override
     String toString();
-
+    
     /**
-     * Есть дополнительный запрос в квадратных скобках
+     * if has query for the last element
      *
      * @return a boolean.
      */
     boolean hasQuery();
 
     /**
-     * Дополнительный запрос последнего элемента в виде строки
+     * Query for last elements without brackets
      *
      * @return a {@link java.lang.String} object.
      */
     String getQuery();
-
+    
+    /**
+     * This name without last element query. If there is no query, returns itself
+     * @return 
+     */
+    Name ignoreQuery();
+    
     /**
      * Количество токенов в имени
      *
@@ -128,21 +134,21 @@ public interface Name {
     Name getFirst();
 
     /**
-     * последний токен
+     * Last token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
     Name getLast();
 
     /**
-     * Все кроме первого токена
+     *  The whole name but the first token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
     Name cutFirst();
 
     /**
-     * Все кроме последнего токена
+     * The whole name but the lat token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */

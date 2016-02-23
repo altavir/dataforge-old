@@ -17,7 +17,6 @@ package hep.dataforge.datafitter;
 
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
 import hep.dataforge.description.NodeDef;
@@ -30,6 +29,7 @@ import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
+import hep.dataforge.data.PointSet;
 
 /**
  * <p>
@@ -38,7 +38,7 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "fit", inputType = DataSet.class, outputType = FitState.class, description = "Fit dataset with previously stored model.")
+@TypedActionDef(name = "fit", inputType = PointSet.class, outputType = FitState.class, description = "Fit dataset with previously stored model.")
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
@@ -48,7 +48,7 @@ import java.util.List;
         + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
         target = "method::hep.dataforge.datafitter.ParamSet.fromAnnotation")
 @NodeDef(name = "task", multiple = true, info = "Fit tasks")
-public class FitAction extends OneToOneAction<DataSet, FitState> {
+public class FitAction extends OneToOneAction<PointSet, FitState> {
 
     /**
      * Constant <code>FIT_ACTION_NAME="fit"</code>
@@ -88,7 +88,7 @@ public class FitAction extends OneToOneAction<DataSet, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Logable log, Meta meta, DataSet input) {
+    protected FitState execute(Logable log, Meta meta, PointSet input) {
         List<FitTask> tasks = buildTaskList(input.meta(), meta());
 
 //        boolean printresult = meta().getBoolean("printresult", true);
@@ -112,7 +112,7 @@ public class FitAction extends OneToOneAction<DataSet, FitState> {
         return res;
     }
 
-    private FitState buildInitialState(Meta meta, DataSet input) {
+    private FitState buildInitialState(Meta meta, PointSet input) {
         Model model;
 
         ModelManager mm = fm.getModelManager();

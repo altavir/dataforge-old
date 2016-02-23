@@ -16,7 +16,7 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.values.Value;
@@ -52,11 +52,11 @@ public abstract class XYPlottable extends AbstractPlottable implements Plottable
      *
      * @return
      */
-    public XYDataAdapter adapter() {
+    public XYAdapter adapter() {
         if (meta().hasNode("adapter")) {
-            return new XYDataAdapter(meta().getNode("adapter"));
+            return new XYAdapter(meta().getNode("adapter"));
         } else {
-            return new XYDataAdapter();
+            return new XYAdapter();
         }
     }
 }

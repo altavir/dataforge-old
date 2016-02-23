@@ -17,7 +17,6 @@ package hep.dataforge.actions;
 
 import hep.dataforge.content.NullContent;
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ActionExecutionException;
@@ -29,6 +28,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * <p>
@@ -54,7 +54,7 @@ public class RunConfigAction extends GenericAction {
     }
 
     @Override
-    protected List execute(Logable log, Meta packAnnotation, DependencySet input) {
+    protected List execute(Logable log, Meta packAnnotation, DataNode input) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
@@ -65,7 +65,7 @@ public class RunConfigAction extends GenericAction {
      * @return
      */
     @Override
-    public ActionResult run(DependencySet input) throws ActionExecutionException {
+    public ActionResult run(DataNode input) throws ActionExecutionException {
         Meta cfg;
 
         Meta meta = readMeta(input.meta());

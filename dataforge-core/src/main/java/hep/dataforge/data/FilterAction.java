@@ -17,7 +17,7 @@ package hep.dataforge.data;
 
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import static hep.dataforge.data.DataFiltering.buildConditionSet;
+import static hep.dataforge.data.Filtering.buildConditionSet;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
@@ -31,9 +31,9 @@ import java.util.function.Predicate;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "filterData", inputType = DataSet.class, outputType = DataSet.class, description = "Filter dataset with given filtering rules")
+@TypedActionDef(name = "filterData", inputType = PointSet.class, outputType = PointSet.class, description = "Filter dataset with given filtering rules")
 @NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.data.DataFiltering.buildConditionSet")
-public class DataFilterAction extends OneToOneAction<DataSet, DataSet> {
+public class FilterAction extends OneToOneAction<PointSet, PointSet> {
 
     /**
      * <p>
@@ -42,7 +42,7 @@ public class DataFilterAction extends OneToOneAction<DataSet, DataSet> {
      * @param context a {@link hep.dataforge.context.Context} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
      */
-    public DataFilterAction(Context context, Meta annotation) {
+    public FilterAction(Context context, Meta annotation) {
         super(context, annotation);
     }
 
@@ -52,10 +52,10 @@ public class DataFilterAction extends OneToOneAction<DataSet, DataSet> {
      * @return
      */
     @Override
-    protected DataSet execute(Logable log, Meta meta, DataSet input) {
+    protected PointSet execute(Logable log, Meta meta, PointSet input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
-        DataSet res;
+        PointSet res;
         if (filterSet != null) {
             res = input.filter(filterSet);
         } else {

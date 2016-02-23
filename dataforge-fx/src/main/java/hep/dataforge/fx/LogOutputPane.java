@@ -53,7 +53,7 @@ public class LogOutputPane extends ScrollPane implements Consumer<LogEntry> {
      * @param logable 
      */
     public void attachLog(Logable logable){
-        logable.getLog().setLogListener(this);
+        logable.getLog().addLogListener(this);
     }
     
     /**

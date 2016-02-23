@@ -17,7 +17,7 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public class PlottableFunction extends XYPlottable {
      * @param data
      * @param xName
      */
-    public PlottableFunction(String name, UnivariateFunction function, Iterable<DataPoint> data, XYDataAdapter adapter) {
+    public PlottableFunction(String name, UnivariateFunction function, Iterable<DataPoint> data, XYAdapter adapter) {
         super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);

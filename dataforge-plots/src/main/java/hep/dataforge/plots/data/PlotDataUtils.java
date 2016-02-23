@@ -5,12 +5,11 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.data.DataFormat;
+import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.ListDataSet;
+import hep.dataforge.data.ListPointSet;
 import hep.dataforge.data.MapDataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
@@ -19,6 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import hep.dataforge.data.PointSet;
 
 /**
  *
@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
  */
 public class PlotDataUtils {
 
-    public static DataSet collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
+    public static PointSet collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
         List<XYPlottable> plottables = new ArrayList<>(frame.getAll());
 
         if (visibleOnly) {
@@ -38,7 +38,7 @@ public class PlotDataUtils {
         names.add("x");
         
         for (XYPlottable pl : plottables) {
-            XYDataAdapter adapter = pl.adapter();
+            XYAdapter adapter = pl.adapter();
 
             names.add(pl.getName());
             for (DataPoint point : pl.plotData()) {
@@ -54,7 +54,7 @@ public class PlotDataUtils {
                 mdp.putValue(pl.getName(), adapter.getY(point));
             }
         }
-        ListDataSet res = new ListDataSet(frame.getName(), DataFormat.forNames(8, names));
+        ListPointSet res = new ListPointSet(frame.getName(), Format.forNames(8, names));
         res.addAll(points.values());
         return res;
     }

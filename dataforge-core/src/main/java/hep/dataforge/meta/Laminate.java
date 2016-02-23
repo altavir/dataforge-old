@@ -43,7 +43,7 @@ public class Laminate extends Meta {
     private List<Meta> layers;
     private NodeDescriptor descriptor;
     private Meta descriptorLayer;
-    private ValueProvider defaultValueProvider;
+    private ValueProvider valueContext;
 
     public Laminate(String name) {
         this.name = name;
@@ -68,8 +68,8 @@ public class Laminate extends Meta {
         this(name, Arrays.asList(layers));
     }
 
-    public ValueProvider getDefaultValueProvider() {
-        return defaultValueProvider;
+    public ValueProvider valueContext() {
+        return valueContext;
     }
 
     /**
@@ -94,15 +94,16 @@ public class Laminate extends Meta {
         }
     }
 
-    public Laminate setDefaultValueProvider(ValueProvider defaultValueProvider) {
-        this.defaultValueProvider = defaultValueProvider;
+    public Laminate setValueContext(ValueProvider defaultValueProvider) {
+        this.valueContext = defaultValueProvider;
         return this;
     }
 
     /**
      * Add primary (first layer)
+     *
      * @param layer
-     * @return 
+     * @return
      */
     public Laminate addFirstLayer(Meta layer) {
         this.layers.add(0, layer);
@@ -111,8 +112,9 @@ public class Laminate extends Meta {
 
     /**
      * Add layer to stack
+     *
      * @param layer
-     * @return 
+     * @return
      */
     public Laminate addLayer(Meta layer) {
         this.layers.add(layer);
@@ -150,14 +152,16 @@ public class Laminate extends Meta {
             if (descriptor != null && descriptor.childrenDescriptors().containsKey(path)) {
                 laminate.setDescriptor(descriptor.childDescriptor(path));
             }
-            laminate.setDefaultValueProvider(getDefaultValueProvider());
+            laminate.setValueContext(valueContext());
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
-         if (descriptorLayer != null) {
+        {
+            if (descriptorLayer != null) {
                 return descriptorLayer.getNode(path);
             } else {
                 throw new NameNotFoundException(path);
             }
+        }
     }
 
     @Override
@@ -173,11 +177,13 @@ public class Laminate extends Meta {
             }
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
-         if (descriptorLayer != null) {
+        {
+            if (descriptorLayer != null) {
                 return descriptorLayer.getNodes(path);
             } else {
                 throw new NameNotFoundException(path);
             }
+        }
     }
 
     @Override
@@ -230,21 +236,16 @@ public class Laminate extends Meta {
         //searching layers for value
         for (Meta m : layers) {
             if (m.hasValue(path)) {
-                return m.getValue(path);
+                return MetaUtils.transformValue(m.getValue(path), valueContext());
             }
         }
 
         // if descriptor layer is definded, serching it for value
         if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
-            return descriptorLayer.getValue(path);
+            return MetaUtils.transformValue(descriptorLayer.getValue(path),valueContext());
         }
 
-        // if default value provider is defined, using it for default value
-        if (defaultValueProvider != null) {
-            return defaultValueProvider.getValue(path);
-        } else {
-            throw new NameNotFoundException(path);
-        }
+        throw new NameNotFoundException(path);
     }
 
 }

@@ -15,10 +15,10 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.data.AbstractDataAdapter;
-import hep.dataforge.data.DataAdapter;
+import hep.dataforge.data.AbstractPointAdapter;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.data.PointAdapter;
 
 /**
  * TODO сделать адаптер для гистограммы с фиксированными бинами
@@ -26,7 +26,7 @@ import hep.dataforge.meta.MetaBuilder;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistogramAdapter extends AbstractDataAdapter {
+public class HistogramAdapter extends AbstractPointAdapter {
 
     public static final String BIN_BEGIN_NAME = "binBegin";
     public static final String BIN_END_NAME = "binEnd";
@@ -37,7 +37,7 @@ public class HistogramAdapter extends AbstractDataAdapter {
     }
     
     public HistogramAdapter(String binBeginName, String binEndName, String countName) {
-        super(new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
+        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_ANNOTATION_NAME)
                 .putValue(BIN_BEGIN_NAME, binBeginName)
                 .putValue(BIN_END_NAME, binEndName)
                 .putValue(COUNT_NAME, countName)

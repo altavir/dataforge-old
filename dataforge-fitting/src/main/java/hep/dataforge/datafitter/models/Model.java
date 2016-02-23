@@ -17,13 +17,13 @@ package hep.dataforge.datafitter.models;
 
 import hep.dataforge.content.Content;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.NamedSet;
+import hep.dataforge.data.PointSet;
 
 /**
  *
@@ -124,7 +124,7 @@ public interface Model extends NamedSet, Content {
      * @param data
      * @return
      */
-    default public ParamSet getParametersGuess(DataSet data) {
+    default public ParamSet getParametersGuess(PointSet data) {
         throw new NotDefinedException("Initial guess not defined");
     }
 

@@ -5,11 +5,11 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.data.DataSet;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.StorageQueryException;
 import hep.dataforge.values.Value;
 import java.util.List;
+import hep.dataforge.data.PointSet;
 
 /**
  * Some indexed reader. Each index pull operation should be run in a separate
@@ -91,7 +91,7 @@ public interface Index<T> {
      * @return
      * @throws StorageQueryException
      */
-    default DataSet pull(Query query) throws StorageException{
+    default PointSet pull(Query query) throws StorageException{
         throw new StorageException("Query not supported");
     }
 }

@@ -16,12 +16,12 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
+import hep.dataforge.dependencies.Data;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * A simple workspace without caching and stages
@@ -31,13 +31,13 @@ import java.util.concurrent.ExecutionException;
 public class SimpleWorkspace implements Workspace {
 
     Map<String, Task> tasks = new HashMap<>();
-    Map<String, Dependency> data = new HashMap<>();
+    Map<String, Data> data = new HashMap<>();
     Meta meta;
     String name;
     Context context;
 
     @Override
-    public DependencySet runTask(String taskName, Meta config, String... targets) throws InterruptedException, ExecutionException {
+    public DataNode runTask(String taskName, Meta config, String... targets) throws InterruptedException, ExecutionException {
         if (!tasks.containsKey(taskName)) {
             throw new TaskNotFoundException(taskName);
         }
@@ -51,8 +51,8 @@ public class SimpleWorkspace implements Workspace {
     }
 
     @Override
-    public Dependency getData(String stage, String name) {
-        Dependency d = data.get(name);
+    public Data getData(String stage, String name) {
+        Data d = data.get(name);
         return d;
     }
 

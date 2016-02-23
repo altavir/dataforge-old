@@ -15,11 +15,11 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.DependencySet;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * The mutable data content of a task.
@@ -37,7 +37,7 @@ public class TaskState {
     /**
      * list of stages results
      */
-    private final Map<String, DependencySet> stages = new HashMap<>();
+    private final Map<String, DataNode> stages = new HashMap<>();
     /**
      * final result of task
      */
@@ -47,7 +47,7 @@ public class TaskState {
     private TaskState() {
     }
 
-    public TaskState(DependencySet data, List<String> targets) {
+    public TaskState(DataNode data, List<String> targets) {
         this.stages.put(INITAIL_DATA_STAGE, data);
         if (targets != null) {
             this.targets = targets;
@@ -56,7 +56,7 @@ public class TaskState {
         }
     }
 
-    public DependencySet getData(String stage) {
+    public DataNode getData(String stage) {
         return stages.get(stage);
     }
 
@@ -65,7 +65,7 @@ public class TaskState {
      *
      * @return
      */
-    public DependencySet getData() {
+    public DataNode getData() {
         return getData(INITAIL_DATA_STAGE);
     }
 
@@ -73,7 +73,7 @@ public class TaskState {
         return Collections.unmodifiableMap(result);
     }
 
-    public TaskState setData(String stage, DependencySet data) {
+    public TaskState setData(String stage, DataNode data) {
         if (isFinal) {
             throw new IllegalStateException("Can't edit task state after result is finalized");
         } else {

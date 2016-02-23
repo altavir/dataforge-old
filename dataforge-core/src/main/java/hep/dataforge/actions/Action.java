@@ -16,33 +16,20 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.content.Named;
-import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.context.GlobalContext;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Annotated;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * The action is an independent process that could be performed on one
  * dependency or set of uniform dependencies. The number and naming of results
  * not necessarily is the same as in input.
+ * 
  *
  * @author Alexander Nozik
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
  */
 public interface Action<T, R> extends Named, Annotated, Encapsulated {
-
-    @Override
-    default Context getContext() {
-        return GlobalContext.instance();
-    }
-
-    ActionResult<R> run(DependencySet<T> set);
-    
-    void addListener(ActionStateListener listener);
-
-    
-    void removeListener(ActionStateListener listener);
-
+    DataNode<R> run(DataNode<T> set);
 }

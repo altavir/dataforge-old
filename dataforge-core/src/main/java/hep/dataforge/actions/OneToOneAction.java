@@ -15,20 +15,19 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.content.Named;
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.dependencies.SimpleDataDependency;
-import hep.dataforge.exceptions.ContentException;
-import hep.dataforge.io.log.Log;
+import hep.dataforge.dependencies.Data;
 import hep.dataforge.io.log.Logable;
-import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
-import java.util.List;
+import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.dependencies.DataSet;
+import hep.dataforge.dependencies.NamedData;
+import hep.dataforge.io.log.Log;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.stream.Stream;
+import javafx.util.Pair;
 
 /**
  * A template to build actions that reflect strictly one to one content
@@ -39,7 +38,7 @@ import java.util.stream.StreamSupport;
  * @param <R>
  * @version $Id: $Id
  */
-public abstract class OneToOneAction<T extends Named, R extends Named> extends GenericAction<T, R> {
+public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
     public OneToOneAction(Context context, String name, Meta annotation) {
         super(context, name, annotation);
@@ -49,107 +48,56 @@ public abstract class OneToOneAction<T extends Named, R extends Named> extends G
         super(context, annotation);
     }
 
+    /**
+     * Build asynchronous result for single data. Data types separated from
+     * action generics to be able to operate maps instead of raw data
+     *
+     * @param meta
+     * @param data
+     * @return
+     */
+    public ActionResult<R> runOne(String name, Meta meta, Data<? extends T> data) {
+        ActionResult<T> previous = (ActionResult<T>) data;
+        Log log = buildLog(meta, previous);
+        CompletableFuture<R> future = previous.getInFuture().
+                thenCompose((T t) -> CompletableFuture
+                        .supplyAsync(() -> transform(name, log, meta, t), buildExecutor(meta, data)));
+
+        return new ActionResult(getOutputType(),
+                log,
+                future);
+    }
+    
+    public ActionResult<R> runOne(Meta meta, NamedData<T> data){
+        return runOne(data.getName(), meta, data);
+    }    
+
     @Override
-    protected List<Dependency<R>> execute(Logable packLog, Meta packAnnotation, DependencySet<T> input) {
-        List<Dependency<R>> res;
+    public DataNode<R> run(DataNode<T> set) {
+        Stream<Pair<String, Data<? extends T>>> stream = set.stream();
         if (isParallelExecutionAllowed()) {
-            res = StreamSupport.stream(input.spliterator(), true)
-                    .<Dependency<R>>map((d) -> runOne(packLog, packAnnotation, d))
-                    .collect(Collectors.toList());
-        } else {
-            res = StreamSupport.stream(input.spliterator(), false)
-                    .<Dependency<R>>map((d) -> runOne(packLog, packAnnotation, d))
-                    .collect(Collectors.toList());
+            stream = stream.parallel();
         }
+        return wrap(set.getName(), set.meta(),
+                stream.collect(Collectors.toMap(entry -> entry.getKey(),
+                        entry -> runOne(entry.getKey(), set.meta(), entry.getValue()))));
+    }
+    
+    private R transform(String name, Logable log, Meta meta, T input) {
+        beforeAction(name, input, log);
+        R res = execute(log, meta, input);
+        afterAction(name, res);
         return res;
     }
 
-    public R runOne(T input){
-        return runOne(getContext(), null, new SimpleDataDependency<>(input)).get();
-    }
-    
-    
-    /**
-     * Run action on single dependency
-     *
-     * @param packLog
-     * @param packAnnotation a {@link hep.dataforge.meta.Meta}
-     * object.
-     * @param input a T object.
-     * @return a R object.
-     */
-    public Dependency<R> runOne(Logable packLog, Meta packAnnotation, Dependency<T> input) {
-        beforeSingle(packLog, input);
-        //building annotation for a single run or using existing content meta
-        Meta singleMeta = null;
-        if (input.keys().contains(ACTION_DEPENDENCY_META_KEY)) {
-            singleMeta = input.<Meta>get(ACTION_DEPENDENCY_META_KEY);
-        } else if (input.type().isAssignableFrom(Annotated.class)) {
-            singleMeta = ((Annotated) input.get()).meta();
-        } else {
-            singleMeta = input.meta();
-        }
-
-        //building log for input if it does not exist
-        Logable singleLog;
-        if (input.keys().contains(ACTION_DEPENDENCY_LOG_KEY)) {
-            singleLog = input.<Logable>get(ACTION_DEPENDENCY_LOG_KEY);
-        } else {
-            singleLog = new Log(input.getName(), packLog);
-        }
-
-        R res = execute(new Log(this.getName(), singleLog), readMeta(singleMeta, packAnnotation), input.get());
-
-        Meta resultMeta = singleMeta;
-        if (res instanceof Annotated) {
-            if (singleMeta != null) {
-                resultMeta = MergeRule.getDefault().merge(((Annotated) res).meta(), singleMeta);
-            } else {
-                resultMeta = ((Annotated) res).meta();
-            }
-        }
-
-        Dependency<R> resDep = wrap(singleLog, resultMeta, res);
-        afterSingle(packLog, resDep);
-//        res.annotate(MergeRule.getDefault().merge(res.meta(), input.meta()));
-        return resDep;
-    }
-
-    /**
-     * Calculate the action result for single input content TODO replace input
-     * by Dependency
-     *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param reader a {@link hep.dataforge.description.MetaReader}
-     * object.
-     * @param input a T object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     * @return a R object.
-     */
     protected abstract R execute(Logable log, Meta meta, T input);
 
-    /**
-     * Выполняется один раз перед основным действием независимо от того,
-     * распаралелено действие или нет
-     *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param input a {@link hep.dataforge.content.Content} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
-    protected void beforeSingle(Logable log, Dependency<T> input) throws ContentException {
-        log.log("Starting action '{}' on content with name '{}'", getName(), input.getName());
+    protected void afterAction(String name, R res) {
+        logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    /**
-     * Выполняется один раз после основного действия независимо от того,
-     * распаралелено действие или нет
-     *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param output a {@link hep.dataforge.content.Content} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
-    protected void afterSingle(Logable log, Dependency<R> output) throws ContentException {
-        log.log("Action '{}' is finished with result named '{}'", getName(), output.getName());
+    protected void beforeAction(String name, T datum, Logable log) {
+        logger().info("Starting action '{}[{}]'", getName(), name);
     }
 
 }

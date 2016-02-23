@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListDataSet extends NamedMetaHolder implements DataSet {
+public class ListPointSet extends NamedMetaHolder implements PointSet {
 
     private final ArrayList<DataPoint> data = new ArrayList<>();
 
@@ -46,39 +46,39 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * точке из набора данных. Набор полей каждой точки может быть шире, но не
      * уже.
      */
-    private final DataFormat format;
+    private final Format format;
 
-    public ListDataSet(String name, DataFormat format) {
+    public ListPointSet(String name, Format format) {
         super(name);
         this.format = format;
     }
 
-    public ListDataSet(DataFormat format) {
+    public ListPointSet(Format format) {
         super();
         this.format = format;
     }
 
-    public ListDataSet(String... format) {
+    public ListPointSet(String... format) {
         super();
-        this.format =  DataFormat.forNames(format);
+        this.format =  Format.forNames(format);
     }
 
-    public ListDataSet(String name, String[] format) {
+    public ListPointSet(String name, String[] format) {
         super(name);
-        this.format =  DataFormat.forNames(format);
+        this.format =  Format.forNames(format);
     }
 
-    public ListDataSet(String name) {
+    public ListPointSet(String name) {
         super(name);
-        this.format = new DataFormat();
+        this.format = new Format();
     }
 
     /**
      * По-умолчанию делаем набор данных анонимным, чтобы не было накладок с
      * конструктором
      */
-    public ListDataSet() {
-        this.format = new DataFormat();
+    public ListPointSet() {
+        this.format = new Format();
     }
     
     /**
@@ -86,10 +86,10 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      *
      * @param name a {@link java.lang.String} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param format a {@link hep.dataforge.data.DataFormat} object.
+     * @param format a {@link hep.dataforge.data.Format} object.
      * @param points a {@link java.lang.Iterable} object.
      */
-    public ListDataSet(String name, Meta annotation, Iterable<DataPoint> points, DataFormat format) {
+    public ListPointSet(String name, Meta annotation, Iterable<DataPoint> points, Format format) {
         super(name, annotation);
         this.format = format;
         if (points != null) {
@@ -104,12 +104,12 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
      * @param points a {@link java.util.List} object.
      */
-    public ListDataSet(String name, Meta annotation, List<DataPoint> points) {
+    public ListPointSet(String name, Meta annotation, List<DataPoint> points) {
         super(name, annotation);
         if (points.isEmpty()) {
             throw new IllegalArgumentException("Can't create ListDataSet from the empty list. Format required.");
         }
-        this.format = DataFormat.forPoint(points.get(0));
+        this.format = Format.forPoint(points.get(0));
         addAll(points);
     }
 
@@ -140,8 +140,8 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * условиям
      */
     @Override
-    public ListDataSet filter(Predicate<DataPoint> condition) throws NamingException {
-        ListDataSet res = new ListDataSet(getName(), this.getDataFormat());
+    public ListPointSet filter(Predicate<DataPoint> condition) throws NamingException {
+        ListPointSet res = new ListPointSet(getName(), this.getDataFormat());
         for (DataPoint dp : this) {
             if (condition.test(dp)) {
                 res.add(dp);
@@ -165,7 +165,7 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * {@inheritDoc}
      */
     @Override
-    public DataFormat getDataFormat() {
+    public Format getDataFormat() {
         return format;
     }
 
@@ -217,8 +217,8 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * sorts dataset and returns sorted one
      */
     @Override
-    public ListDataSet sort(String name, boolean ascending) {
-        ListDataSet res = new ListDataSet(getName(), this.getDataFormat());
+    public ListPointSet sort(String name, boolean ascending) {
+        ListPointSet res = new ListPointSet(getName(), this.getDataFormat());
         res.addAll(this);
         res.data.sort((DataPoint o1, DataPoint o2) -> {
             if (ascending) {
@@ -235,8 +235,8 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
      * {@inheritDoc}
      */
     @Override
-    public DataSet sort(Comparator<DataPoint> comparator) {
-        ListDataSet res = new ListDataSet(getName(), this.getDataFormat());
+    public PointSet sort(Comparator<DataPoint> comparator) {
+        ListPointSet res = new ListPointSet(getName(), this.getDataFormat());
         res.addAll(this);
         res.data.sort(comparator);
         res.setMeta(meta());
@@ -252,7 +252,7 @@ public class ListDataSet extends NamedMetaHolder implements DataSet {
     }
 
     /**
-     * Clear all data in the DataSet. Does not affect annotation.
+     * Clear all data in the PointSet. Does not affect annotation.
      */
     public void clear() {
         this.data.clear();

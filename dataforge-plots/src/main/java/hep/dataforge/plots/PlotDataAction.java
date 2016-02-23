@@ -18,8 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.actions.ActionResult;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.data.PointSet;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 @TypedActionDef(name = "plotData",
-        description = "Scatter plot of given DataSet", inputType = DataSet.class, outputType = DataSet.class)
+        description = "Scatter plot of given DataSet", inputType = PointSet.class, outputType = PointSet.class)
 @ValueDef(name = "plotFrameName", def = "default",
         info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
 @ValueDef(name = "plotTitle", def = "",
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
         info = "Serialize plot to file with default parameters")
 @NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.data.XYDataAdapter")
 
-public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
+public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
 
     private final PlotHolder holder;
 //    private final static DescriptorBuilder frameDescriptor = new DescriptorBuilder(XYPlotFrame.class);
@@ -97,7 +97,7 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
     }
 
     @Override
-    protected DataSet execute(Logable log, Meta meta, DataSet input){
+    protected PointSet execute(Logable log, Meta meta, PointSet input){
         Meta finder = readMeta(input.meta());
         PlotFrame frame;
 
@@ -108,7 +108,7 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
         } else {
             frame = holder.buildPlotFrame(frame_name, findFrameDescription(finder, frame_name));
         }
-        XYDataAdapter adapter = new XYDataAdapter(finder.getNode("adapter",Meta.buildEmpty("adapter")));
+        XYAdapter adapter = new XYAdapter(finder.getNode("adapter",Meta.buildEmpty("adapter")));
         
         frame.add(PlottableData.plot(input,adapter));
 

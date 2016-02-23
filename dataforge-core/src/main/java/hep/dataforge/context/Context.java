@@ -151,7 +151,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         getLogger().addAppender(appender);
         
         if (!io.out().equals(System.out)) {
-            getLog().setLogListener((LogEntry t) -> {
+            getLog().addLogListener((LogEntry t) -> {
                 try {
                     io.out().write((t.toString() + "\n").getBytes());
                     io.out().flush();

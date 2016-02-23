@@ -22,7 +22,7 @@ import hep.dataforge.content.NamedGroup;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import static hep.dataforge.data.FileData.FILE_META;
-import hep.dataforge.dependencies.GenericDependency;
+import hep.dataforge.dependencies.StaticData;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
@@ -112,7 +112,7 @@ public class DataManager implements Encapsulated {
             List<? extends Meta> groupAnnotations = ds.getNodes("group");
             for (Meta an : groupAnnotations) {
                 List<FileData> list = readDataConfiguration(parentDir, an);
-                for (FileData d : list) {
+                list.stream().map((d) -> {
                     // Обновляем аннотацию файла. Основной считаем аннотацию файла, а не контейнера
 
                     //FIXME сделать тут добавление группового тэга во всевложенные аннотации
@@ -120,8 +120,10 @@ public class DataManager implements Encapsulated {
                         Meta fileMeta = an.getNode(FILE_META);
                         d.setMeta(MergeRule.replace(d.meta(), fileMeta));
                     }
+                    return d;
+                }).forEach((d) -> {
                     res.add(d);
-                }
+                });
             }
 
         }
@@ -167,7 +169,7 @@ public class DataManager implements Encapsulated {
             });
             return new Pack(null, dataConfiguration, getContext(), FileData.class,
                     res.stream()
-                    .map((FileData f) -> new GenericDependency.Builder<>(f).build(f.getName()))
+                    .map((FileData f) -> new StaticData<>(f))
                     .collect(Collectors.toList()));
         } catch (IOException | ParseException ex) {
             throw new ContentException("File not found");

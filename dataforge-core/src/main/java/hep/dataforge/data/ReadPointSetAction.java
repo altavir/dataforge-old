@@ -28,17 +28,17 @@ import java.io.IOException;
 
 /**
  * <p>
- * ReadDataSetAction class.</p>
+ ReadPointSetAction class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "readdataset", inputType = BinaryData.class, outputType = DataSet.class, description = "Read DataSet from text file")
+@TypedActionDef(name = "readdataset", inputType = BinaryData.class, outputType = PointSet.class, description = "Read DataSet from text file")
 @ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
 @ValueDef(name = "encoding", def = "UTF8", info = "file encoding")
 @ValueDef(name = "headerLength", type = "NUMBER", info = "The number of header lines to be ignored")
 @ValueDef(name = "dataSetName", info = "The name of resulting DataSet. By default the input content name is taken.")
-public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
+public class ReadPointSetAction extends OneToOneAction<BinaryData, PointSet> {
 
     /**
      * Constant <code>READ_DATA_SET_ACTION_NAME="readdataset"</code>
@@ -52,7 +52,7 @@ public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
      * @param context a {@link hep.dataforge.context.Context} object.
      * @param an a {@link hep.dataforge.meta.Meta} object.
      */
-    public ReadDataSetAction(Context context, Meta an) {
+    public ReadPointSetAction(Context context, Meta an) {
         super(context, an);
     }
 
@@ -63,8 +63,8 @@ public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
      * @return
      */
     @Override
-    protected DataSet execute(Logable log, Meta meta, BinaryData source) {
-        ListDataSet fileData;
+    protected PointSet execute(Logable log, Meta meta, BinaryData source) {
+        ListPointSet fileData;
 
         String encoding = source.meta().getString("encoding", meta.getString("encoding"));
         try {
@@ -76,10 +76,10 @@ public class ReadDataSetAction extends OneToOneAction<BinaryData, DataSet> {
             if (meta().hasValue("columnNames")) {
                 String[] names = meta().getStringArray("columnNames");
                 dpReader = new DataPointStringIterator(iterator, names);
-                fileData = new ListDataSet(dataSetName,  names);
+                fileData = new ListPointSet(dataSetName,  names);
             } else {
                 dpReader = new DataPointStringIterator(iterator, iterator.next());
-                fileData = new ListDataSet(dataSetName);
+                fileData = new ListPointSet(dataSetName);
             }
 
             int headerLines = meta().getInt("headerLength", 0);

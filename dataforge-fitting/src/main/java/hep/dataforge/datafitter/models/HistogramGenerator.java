@@ -16,8 +16,7 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.ListDataSet;
+import hep.dataforge.data.ListPointSet;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
@@ -26,6 +25,10 @@ import static java.lang.Math.sqrt;
 import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import hep.dataforge.data.PointSet;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
 
 /**
  * Генератор наборов данных для спектров. На входе требуется набор данных,
@@ -64,8 +67,8 @@ public class HistogramGenerator implements Generator {
 
     /** {@inheritDoc} */
     @Override
-    public ListDataSet generateData(Iterable<DataPoint> config) {
-        ListDataSet res = new ListDataSet(Histogram.names);
+    public ListPointSet generateData(Iterable<DataPoint> config) {
+        ListPointSet res = new ListPointSet(Histogram.names);
         for (Iterator<DataPoint> it = config.iterator(); it.hasNext();) {
             res.add(this.generateDataPoint(it.next()));
 
@@ -127,9 +130,9 @@ public class HistogramGenerator implements Generator {
      * @param binNumber a int.
      * @return a {@link hep.dataforge.datafitter.models.Histogram} object.
      */
-    public DataSet generateUniformHistogram(double begin, double end, int binNumber) {
+    public PointSet generateUniformHistogram(double begin, double end, int binNumber) {
         assert end > begin;
-        ListDataSet res = new ListDataSet(Histogram.names);
+        ListPointSet res = new ListPointSet(Histogram.names);
         DataPoint bin;
         double step = (end - begin) / (binNumber);
         double a = begin;

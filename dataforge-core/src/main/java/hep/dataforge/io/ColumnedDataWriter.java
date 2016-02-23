@@ -15,9 +15,8 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataFormat;
+import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,6 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Scanner;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.data.PointSet;
 
 /**
  * Вывод форматированного набора данных в файл или любой другой поток вывода
@@ -39,7 +39,7 @@ import org.slf4j.LoggerFactory;
 public class ColumnedDataWriter implements AutoCloseable {
 
     private final PrintWriter writer;
-    private final DataFormat format;
+    private final Format format;
 
     /**
      * <p>
@@ -49,7 +49,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param names a {@link java.lang.String} object.
      */
     public ColumnedDataWriter(OutputStream stream, String... names) {
-        this(stream, DataFormat.forNames(8, names));
+        this(stream, Format.forNames(8, names));
     }
 
     /**
@@ -57,14 +57,14 @@ public class ColumnedDataWriter implements AutoCloseable {
      * Constructor for ColumnedDataWriter.</p>
      *
      * @param stream a {@link java.io.OutputStream} object.
-     * @param format a {@link hep.dataforge.data.DataFormat} object.
+     * @param format a {@link hep.dataforge.data.Format} object.
      */
-    public ColumnedDataWriter(OutputStream stream, DataFormat format) {
+    public ColumnedDataWriter(OutputStream stream, Format format) {
         this.writer = new PrintWriter(stream);
         this.format = format;
     }
 
-    public ColumnedDataWriter(OutputStream stream, Charset encoding, DataFormat format) {
+    public ColumnedDataWriter(OutputStream stream, Charset encoding, Format format) {
         this.writer = new PrintWriter(new OutputStreamWriter(stream, encoding));
         this.format = format;
     }
@@ -79,7 +79,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
-        this(file, append, Charset.defaultCharset(), DataFormat.forNames(8, names));
+        this(file, append, Charset.defaultCharset(), Format.forNames(8, names));
     }
 
     /**
@@ -88,11 +88,11 @@ public class ColumnedDataWriter implements AutoCloseable {
      *
      * @param file a {@link java.io.File} object.
      * @param append a boolean.
-     * @param format a {@link hep.dataforge.data.DataFormat} object.
+     * @param format a {@link hep.dataforge.data.Format} object.
      * @param encoding
      * @throws java.io.FileNotFoundException if any.
      */
-    public ColumnedDataWriter(File file, boolean append, Charset encoding, DataFormat format) throws FileNotFoundException {
+    public ColumnedDataWriter(File file, boolean append, Charset encoding, Format format) throws FileNotFoundException {
         this(new FileOutputStream(file, append), encoding, format);
     }
 
@@ -167,13 +167,13 @@ public class ColumnedDataWriter implements AutoCloseable {
      * writeDataSet.</p>
      *
      * @param file a {@link java.io.File} object.
-     * @param data a {@link hep.dataforge.data.DataSet} object.
+     * @param data a {@link hep.dataforge.data.PointSet} object.
      * @param head a {@link java.lang.String} object.
      * @param append a boolean.
      * @param names a {@link java.lang.String} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static void writeDataSet(File file, DataSet data, String head, boolean append, String... names) throws IOException {
+    public static void writeDataSet(File file, PointSet data, String head, boolean append, String... names) throws IOException {
         try (FileOutputStream os = new FileOutputStream(file, append)) {
             writeDataSet(os, data, head, names);
         }
@@ -184,16 +184,16 @@ public class ColumnedDataWriter implements AutoCloseable {
      * writeDataSet.</p>
      *
      * @param stream a {@link java.io.OutputStream} object.
-     * @param data a {@link hep.dataforge.data.DataSet} object.
+     * @param data a {@link hep.dataforge.data.PointSet} object.
      * @param head a {@link java.lang.String} object.
      * @param names a {@link java.lang.String} object.
      */
-    public static void writeDataSet(OutputStream stream, DataSet data, String head, String... names) {
+    public static void writeDataSet(OutputStream stream, PointSet data, String head, String... names) {
         ColumnedDataWriter writer;
-        DataFormat format;
+        Format format;
         if (data.getDataFormat().isEmpty()) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
-            format = DataFormat.forPoint(data.get(0));
+            format = Format.forPoint(data.get(0));
             LoggerFactory.getLogger(ColumnedDataWriter.class)
                     .debug("No DataSet format defined. Constucting default based on the first data point");
         } else {

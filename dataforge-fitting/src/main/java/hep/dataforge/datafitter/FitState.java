@@ -15,7 +15,6 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.data.DataSet;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.NamedFunction;
 import static hep.dataforge.io.FittingIOUtils.printParamSet;
@@ -27,12 +26,13 @@ import java.io.PrintWriter;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
+import hep.dataforge.data.PointSet;
 
 /**
  * This class combine the information required to fit data. The key elements are
- * DataSet, Model and initial ParamSet. Additionally, one can provide covariance
- * matrix, prior probability, fit history etc. To simplify construction of
- * FitState use FitStateBuilder
+ PointSet, Model and initial ParamSet. Additionally, one can provide covariance
+ matrix, prior probability, fit history etc. To simplify construction of
+ FitState use FitStateBuilder
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -68,11 +68,11 @@ public class FitState extends FitSource {
     /**
      * <p>Constructor for FitState.</p>
      *
-     * @param dataSet a {@link hep.dataforge.data.DataSet} object.
+     * @param dataSet a {@link hep.dataforge.data.PointSet} object.
      * @param model a {@link hep.dataforge.datafitter.models.Model} object.
      * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
      */
-    public FitState(DataSet dataSet, Model model, ParamSet pars) {
+    public FitState(PointSet dataSet, Model model, ParamSet pars) {
         this(null, null, dataSet, model, pars);
     }
 
@@ -81,11 +81,11 @@ public class FitState extends FitSource {
      *
      * @param name a {@link java.lang.String} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param dataSet a {@link hep.dataforge.data.DataSet} object.
+     * @param dataSet a {@link hep.dataforge.data.PointSet} object.
      * @param model a {@link hep.dataforge.datafitter.models.Model} object.
      * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
      */
-    public FitState(String name, Meta annotation, DataSet dataSet, Model model, ParamSet pars) {
+    public FitState(String name, Meta annotation, PointSet dataSet, Model model, ParamSet pars) {
         super(name, annotation, dataSet, model, null);
         this.pars = pars;
         this.covariance = null;
@@ -97,14 +97,14 @@ public class FitState extends FitSource {
      *
      * @param name a {@link java.lang.String} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param dataSet a {@link hep.dataforge.data.DataSet} object.
+     * @param dataSet a {@link hep.dataforge.data.PointSet} object.
      * @param model a {@link hep.dataforge.datafitter.models.Model} object.
      * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
      * @param interval a {@link hep.dataforge.datafitter.IntervalEstimate} object.
      * @param prior a {@link hep.dataforge.functions.NamedFunction} object.
      */
-    public FitState(String name, Meta annotation, DataSet dataSet, Model model, ParamSet pars,
+    public FitState(String name, Meta annotation, PointSet dataSet, Model model, ParamSet pars,
             NamedMatrix covariance, IntervalEstimate interval, NamedFunction prior) {
         super(name, annotation, dataSet, model, prior);
         this.covariance = covariance;
@@ -268,7 +268,7 @@ public class FitState extends FitSource {
         /**
          *
          */
-        protected DataSet dataSet;
+        protected PointSet dataSet;
 
         /**
          *
@@ -331,7 +331,7 @@ public class FitState extends FitSource {
          * @param dataSet the dataSet to set
          * @return
          */
-        public Builder setDataSet(DataSet dataSet) {
+        public Builder setDataSet(PointSet dataSet) {
             this.dataSet = dataSet;
             return this;
         }

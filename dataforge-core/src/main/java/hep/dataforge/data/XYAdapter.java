@@ -31,22 +31,22 @@ import hep.dataforge.values.Value;
 @ValueDef(name = "y", def = "y", info = "Y value name")
 @ValueDef(name = "xErr", def = "xErr", info = "X error value name")
 @ValueDef(name = "yErr", def = "yErr", info = "Y error value name")
-public class XYDataAdapter extends AbstractDataAdapter {
+public class XYAdapter extends AbstractPointAdapter {
 
     public static final String X_NAME = "x";
     public static final String Y_NAME = "y";
     public static final String X_ERR_NAME = "xErr";
     public static final String Y_ERR_NAME = "yErr";
 
-    public XYDataAdapter() {
+    public XYAdapter() {
     }
 
-    public XYDataAdapter(Meta meta) {
+    public XYAdapter(Meta meta) {
         super(meta);
     }
 
-    public XYDataAdapter(String xName, String xErrName, String yName, String yErrName) {
-        super(new MetaBuilder(DataAdapter.DATA_ADAPTER_ANNOTATION_NAME)
+    public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
+        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_ANNOTATION_NAME)
                 .putValue(X_NAME, xName)
                 .putValue(Y_NAME, yName)
                 .putValue(X_ERR_NAME, xErrName)
@@ -55,11 +55,11 @@ public class XYDataAdapter extends AbstractDataAdapter {
         );
     }
 
-    public XYDataAdapter(String xName, String yName, String yErrName) {
+    public XYAdapter(String xName, String yName, String yErrName) {
         this(xName, null, yName, yErrName);
     }
 
-    public XYDataAdapter(String xName, String yName) {
+    public XYAdapter(String xName, String yName) {
         this(xName, null, yName, null);
     }
 
@@ -145,11 +145,11 @@ public class XYDataAdapter extends AbstractDataAdapter {
     }
 
     /**
-     * Return a default DataFormat corresponding to this adapter
+     * Return a default Format corresponding to this adapter
      * @return 
      */
-    public DataFormat getFormat(){
-        return new DataFormatBuilder()
+    public Format getFormat(){
+        return new FormatBuilder()
                 .addNumber(X_NAME)
                 .addNumber(Y_NAME)
                 .build();

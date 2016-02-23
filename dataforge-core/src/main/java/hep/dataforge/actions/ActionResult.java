@@ -15,23 +15,47 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.dependencies.Data;
+import hep.dataforge.io.log.Log;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
- * the temporal storage for components needed to perform an action. It contains
- * the data itself, log and annotation for the pack
+ * The asynchronous result of the action
  *
  * @author Alexander Nozik
- * @param <T>
+ * @param <R>
  */
-public interface ActionResult<T> extends DependencySet<T> {
+public class ActionResult<R> implements Data<R>{
+    
+    private final Log log;
+    private final CompletableFuture<R> future;
+    private final Class<R> type;
 
-    @SuppressWarnings("unchecked")
-    public static ActionResult empty() {
-        return new Pack(null, null, null, null);
+    public ActionResult(Class<R> type, Log log, Supplier<R> supplier, Executor executor) {
+        this.log = log;
+        this.type = type;
+        this.future = CompletableFuture.supplyAsync(supplier, executor);
+    }
+    
+    public ActionResult(Class<R> type, Log log, CompletableFuture<R> future) {
+        this.log = log;
+        this.type = type;
+        this.future = future;
+    }    
+
+    public Log log(){
+        return log;
     }
 
-//    Item<Dependency<T>> data();
-    Logable log();
+    @Override
+    public CompletableFuture<R> getInFuture() {
+        return future;
+    }
+
+    @Override
+    public Class<R> dataType() {
+        return type;
+    }
 }

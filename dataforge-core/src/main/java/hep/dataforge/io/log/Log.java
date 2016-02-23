@@ -19,6 +19,7 @@ import ch.qos.logback.classic.Logger;
 import hep.dataforge.content.Named;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
+import hep.dataforge.utils.ReferenceRegistry;
 import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
@@ -42,7 +43,7 @@ public class Log implements Logable, Named {
     private Logable parent;
     private Logger logger;
     private final String name;
-    private Consumer<LogEntry> logListener;
+    private final ReferenceRegistry<Consumer<LogEntry>> logListeners = new ReferenceRegistry<>();
 
     public Log(String name, Logable parent) {
         if (name == null || name.isEmpty()) {
@@ -73,9 +74,9 @@ public class Log implements Logable, Named {
             log.poll();// Ограничение на размер лога
             logger.warn("Log at maximum capacity!");
         }
-        if (logListener != null) {
-            logListener.accept(entry);
-        }
+        logListeners.forEach((Consumer<LogEntry> listener) -> {
+            listener.accept(entry);
+        });
 
         if (getParent() != null) {
             LogEntry newEntry = pushTrace(entry, getName());
@@ -85,12 +86,12 @@ public class Log implements Logable, Named {
     }
 
     /**
-     * Set the consumer which listens to any new log entries. Could be null.
+     * Add a weak log listener to this  log
      *
      * @param logListener
      */
-    public void setLogListener(Consumer<LogEntry> logListener) {
-        this.logListener = logListener;
+    public void addLogListener(Consumer<LogEntry> logListener) {
+        this.logListeners.add(logListener);
     }
 
     private LogEntry pushTrace(LogEntry entry, String toTrace) {
@@ -107,9 +108,9 @@ public class Log implements Logable, Named {
 
     public void print(PrintWriter out) {
         out.println();
-        for (LogEntry entry : log) {
+        log.stream().forEach((entry) -> {
             out.println(entry.toString());
-        }
+        });
         out.println();
         out.flush();
     }

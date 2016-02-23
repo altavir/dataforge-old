@@ -23,13 +23,13 @@ import hep.dataforge.values.Value;
  * Specialized adapter for poissonian distributed values
  * @author darksnake
  */
-public class XYPoissonDataAdapter extends XYDataAdapter {
+public class XYPoissonAdapter extends XYAdapter {
 
-    public XYPoissonDataAdapter(Meta adapterAnnotation) {
+    public XYPoissonAdapter(Meta adapterAnnotation) {
         super(adapterAnnotation);
     }
 
-    public XYPoissonDataAdapter(String xName, String yName) {
+    public XYPoissonAdapter(String xName, String yName) {
         super(xName, yName);
     }
 

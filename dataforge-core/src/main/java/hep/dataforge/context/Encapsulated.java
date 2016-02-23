@@ -28,5 +28,7 @@ public interface Encapsulated {
      *
      * @return a {@link hep.dataforge.context.Context} object.
      */
-    Context getContext();
+    default Context getContext() {
+        return GlobalContext.instance();
+    }
 }

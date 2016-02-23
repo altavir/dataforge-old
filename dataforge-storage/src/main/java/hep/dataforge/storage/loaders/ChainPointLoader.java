@@ -16,7 +16,6 @@
 package hep.dataforge.storage.loaders;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Index;
@@ -25,6 +24,7 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.data.PointSet;
 
 /**
  * The point loader that mirrors all points to the secondary storage
@@ -64,7 +64,7 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public DataSet asDataSet() throws StorageException {
+    public PointSet asDataSet() throws StorageException {
         return primaryLoader.asDataSet();
     }
 

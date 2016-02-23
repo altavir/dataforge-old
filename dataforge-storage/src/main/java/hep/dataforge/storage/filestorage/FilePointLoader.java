@@ -6,12 +6,10 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.data.DataFormat;
-import hep.dataforge.data.DataParser;
+import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.ListDataSet;
-import hep.dataforge.data.SimpleDataParser;
+import hep.dataforge.data.ListPointSet;
+import hep.dataforge.data.SimpleParser;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.LineIterator;
 import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
@@ -31,6 +29,8 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
+import hep.dataforge.data.PointSet;
+import hep.dataforge.data.PointParser;
 
 /**
  *
@@ -59,8 +59,8 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     private final String uri;
-    private DataFormat format;
-    private DataParser parser;
+    private Format format;
+    private PointParser parser;
 
     /**
      * An envelop used for pushing
@@ -88,7 +88,7 @@ public class FilePointLoader extends AbstractPointLoader {
             while (!reader.isEof()) {
                 String line = reader.readLine();
                 if (line.startsWith("#f")) {
-                    format = new DataFormat(Names.of(line.substring(2).trim().split("[^\\w']+")));
+                    format = new Format(Names.of(line.substring(2).trim().split("[^\\w']+")));
                 }
             }
         }
@@ -126,12 +126,12 @@ public class FilePointLoader extends AbstractPointLoader {
         return this.envelope;
     }
 
-    private DataFormat getFormat() {
+    private Format getFormat() {
         if (format == null) {
             if (meta().hasNode("format")) {
-                format = DataFormat.fromMeta(meta().getNode("format"));
+                format = Format.fromMeta(meta().getNode("format"));
             } else if (meta().hasValue("format")) {
-                format = DataFormat.forNames(meta().getStringArray("format"));
+                format = Format.forNames(meta().getStringArray("format"));
             } else {
                 format = null;
             }
@@ -139,9 +139,9 @@ public class FilePointLoader extends AbstractPointLoader {
         return format;
     }
 
-    private DataParser getParser() {
+    private PointParser getParser() {
         if (parser == null) {
-            parser = new SimpleDataParser(getFormat());
+            parser = new SimpleParser(getFormat());
         }
         return parser;
     }
@@ -169,8 +169,8 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public DataSet asDataSet() throws StorageException {
-        return new ListDataSet(getName(), meta(), this, getFormat());
+    public PointSet asDataSet() throws StorageException {
+        return new ListPointSet(getName(), meta(), this, getFormat());
     }
 
     @Override

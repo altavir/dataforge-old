@@ -15,8 +15,8 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.Dependency;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.dependencies.Data;
 
 /**
  * A generalization of result of the task. It could be lazy!
@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  * @param <T>
  */
-public interface TaskResult<T> extends Dependency<T> {
+public interface TaskResult<T> extends Data<T> {
 
     /**
      * The taskName of the task which produced this result

@@ -15,11 +15,11 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.Dependency;
+import hep.dataforge.dependencies.Data;
 
 /**
- * Dependency resolver is the tool used to validate for dependency availability,
- * and provide it.
+ * Data resolver is the tool used to validate for dependency availability,
+ and provide it.
  * <p>
  *  The address of the dependency consists of stage and name. 
  * </p>
@@ -38,7 +38,7 @@ public interface DependencyResolver {
      * resolving direct dependency.
      * @return
      */
-    Dependency resolve(String stage, String name) throws DependencyResolutionException;
+    Data resolve(String stage, String name) throws DependencyResolutionException;
 
     /**
      * Check the whole dependency tree searching for:
@@ -46,7 +46,7 @@ public interface DependencyResolver {
      * <li>Missed dependencies</li>
      * <li>Main dependency type mismatch (secondary types by default are not
      * checked)</li>
-     * <li>Dependency graph cycles</li>
+     * <li>Data graph cycles</li>
      * </ul>
      * If caching is used, than all invalid cache entries are invalidated
      * automatically. It also generates appropriate log entries for warnings.

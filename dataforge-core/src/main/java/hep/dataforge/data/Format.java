@@ -32,31 +32,31 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- * DataFormat class.</p>
+ Format class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class DataFormat implements Names {
+public class Format implements Names {
 
     private final Names names;
     private final Map<String, ValueFormat> formats;
 
-    public static DataFormat fromMeta(Meta annotation) {
+    public static Format fromMeta(Meta annotation) {
         if (annotation.hasNode("column")) {
             Map<String, ValueFormat> map = new LinkedHashMap<>();
             for (Meta head : annotation.getNodes("column")) {
                 map.put(head.getString("name"), ValueFormatFactory.build(head));
             }
-            return new DataFormat(map);
+            return new Format(map);
         } else if (annotation.hasValue("names")) {
-            return DataFormat.forNames(annotation.getStringArray("names"));
+            return Format.forNames(annotation.getStringArray("names"));
         } else {
-            return new DataFormat();
+            return new Format();
         }
     }
 
-    public static Meta toMeta(DataFormat format) {
+    public static Meta toMeta(Format format) {
         MetaBuilder builder = new MetaBuilder("format");
         for (String name : format) {
             MetaBuilder column = new MetaBuilder("column");
@@ -82,51 +82,51 @@ public class DataFormat implements Names {
      *
      * @param width
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.DataFormat} object.
+     * @return a {@link hep.dataforge.data.Format} object.
      */
-    public static DataFormat forNames(int width, String... names) {
+    public static Format forNames(int width, String... names) {
         return forNames(width, Arrays.asList(names));
     }
 
-    public static DataFormat forNames(String... names) {
+    public static Format forNames(String... names) {
         return forNames(Arrays.asList(names));
     }
 
-    public static DataFormat forNames(Iterable<String> names) {
-        return new DataFormat(Names.of(names));
+    public static Format forNames(Iterable<String> names) {
+        return new Format(Names.of(names));
     }
 
-    public static DataFormat forNames(int width, Iterable<String> names) {
+    public static Format forNames(int width, Iterable<String> names) {
         Map<String, ValueFormat> formats = new LinkedHashMap<>();
         if (width > 0) {
             for (String name : names) {
                 formats.put(name, ValueFormatFactory.fixedWidth(Math.max(width, name.length())));
             }
         }
-        return new DataFormat(formats);
+        return new Format(formats);
     }
 
-    public static DataFormat forPoint(DataPoint point) {
+    public static Format forPoint(DataPoint point) {
         //TODO добавить тут возможность выбора подсписка?
         Names names = Names.of(point);
         Map<String, ValueFormat> map = new LinkedHashMap<>();
         for (String name : names) {
             map.put(name, ValueFormatFactory.forValue(point.getValue(name)));
         }
-        return new DataFormat(names, map);
+        return new Format(names, map);
     }
 
-    public DataFormat(Map<String, ValueFormat> formats) {
+    public Format(Map<String, ValueFormat> formats) {
         names = Names.of(formats.keySet());
         this.formats = formats;
     }
 
-    public DataFormat(Names names, Map<String, ValueFormat> formats) {
+    public Format(Names names, Map<String, ValueFormat> formats) {
         this.names = names;
         this.formats = formats;
     }
 
-    public DataFormat(Names names) {
+    public Format(Names names) {
         this.names = names;
         this.formats = Collections.emptyMap();
     }
@@ -137,7 +137,7 @@ public class DataFormat implements Names {
 //     * @param width
 //     * @param names a {@link hep.dataforge.names.Names} object.
 //     */
-//    public DataFormat(int width, Names names) {
+//    public Format(int width, Names names) {
 //        this.names = names;
 //        formats = new LinkedHashMap<>();
 //        if (width > 0) {
@@ -149,7 +149,7 @@ public class DataFormat implements Names {
     /**
      * Free format
      */
-    public DataFormat() {
+    public Format() {
         names = Names.of();
         formats = new LinkedHashMap<>();
     }
@@ -243,12 +243,12 @@ public class DataFormat implements Names {
      * subSet.</p>
      *
      * @param newNames a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.DataFormat} object.
+     * @return a {@link hep.dataforge.data.Format} object.
      */
-    public DataFormat subSet(String... newNames) {
+    public Format subSet(String... newNames) {
         //Если список пустой, значит допустимы все имена
         if (this.names.asList().isEmpty()) {
-            return DataFormat.forNames(0, newNames);
+            return Format.forNames(0, newNames);
         }
 
         if (!this.names.contains(newNames)) {
@@ -260,7 +260,7 @@ public class DataFormat implements Names {
                 newFormat.put(newName, formats.get(newName));
             }
         }
-        return new DataFormat(Names.of(newNames), newFormat);
+        return new Format(Names.of(newNames), newFormat);
     }
 
     /**

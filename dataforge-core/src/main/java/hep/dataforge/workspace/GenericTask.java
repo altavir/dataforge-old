@@ -16,13 +16,13 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.meta.Meta;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * A generic implementation of task with 4 phases:
@@ -49,14 +49,14 @@ public abstract class GenericTask<T> implements Task<T> {
     }
 
     @Override
-    public DependencySet<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException {
+    public DataNode<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException {
         logger.info("Starting task '{}'", getName());
         List<String> targetList = generateTargets(config, targets);
 
         logger.debug("Creating executor...");
         final TaskExecutor executor = new TaskExecutor(workspace.getWorkspaceThreadGroup(), name, listener);
 
-        Future<DependencySet<T>> res = executor.submit(() -> {
+        Future<DataNode<T>> res = executor.submit(() -> {
             logger.info("Starting gathering phase");
             
             TaskState state = new TaskState(gather(executor, getWorkspace(), config, targetList), targetList);
@@ -105,7 +105,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param config
      * @return
      */
-    protected abstract DependencySet gather(TaskExecutor executor, Workspace workspace, Meta config, List<String> targets);
+    protected abstract DataNode gather(TaskExecutor executor, Workspace workspace, Meta config, List<String> targets);
 
     /**
      * The main task body
@@ -134,6 +134,6 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param config
      * @return
      */
-    protected abstract DependencySet<T> result(TaskExecutor executor, Workspace workspace, TaskState state, Meta config);
+    protected abstract DataNode<T> result(TaskExecutor executor, Workspace workspace, TaskState state, Meta config);
 
 }

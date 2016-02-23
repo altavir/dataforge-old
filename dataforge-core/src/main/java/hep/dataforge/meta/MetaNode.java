@@ -16,16 +16,18 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
+import javafx.util.Pair;
 
 /**
  * An immutable representation of annotation node. Descendants could be mutable
@@ -51,17 +53,17 @@ public class MetaNode<T extends MetaNode> extends Meta {
         MetaNode<MetaNode> res = new MetaNode<>(annotation.getName());
 
         Collection<String> valueNames = annotation.getValueNames();
-        for (String valueName : valueNames) {
+        valueNames.stream().forEach((valueName) -> {
             res.values.put(valueName, annotation.getValue(valueName));
-        }
+        });
 
         Collection<String> nodeNames = annotation.getNodeNames();
-        for (String elementName : nodeNames) {
+        nodeNames.stream().forEach((elementName) -> {
             List<MetaNode> item = annotation.getNodes(elementName).stream()
                     .<MetaNode>map((an) -> from(an))
                     .collect(Collectors.toList());
             res.nodes.put(elementName, new ArrayList<>(item));
-        }
+        });
         return res;
     }
 
@@ -82,79 +84,91 @@ public class MetaNode<T extends MetaNode> extends Meta {
         Name head = path.getFirst();
         if (names.contains(head.entry())) {
             List<T> child = getChildNodeItem(head.entry());
-            if (child.size() == 1 || !head.hasQuery()) {
-                return child.get(0);
-            } else {
-                int num;
-                try {
-                    num = Integer.parseInt(head.getQuery());
-                } catch (NumberFormatException ex) {
-                    throw new PathSyntaxException("The query ([]) syntax for annotation must contain only integer numbers");
-                }
-                if (num < 0 || num >= child.size()) {
-                    throw new NameNotFoundException(path.toString(), "No list element with given index");
-                }
-                return child.get(num);
+            if (head.hasQuery()) {
+                child = MetaUtils.applyQuery(child, head.getQuery());
             }
+            return child.get(0);
         } else {
             throw new NameNotFoundException(path.toString());
         }
     }
-    
+
     /**
      * Return a node list using path notation and null if node does not exist
+     *
      * @param path
-     * @return 
-     */   
-    protected List<T> getNodeItem(String path) {
+     * @return
+     */
+    protected List<T> getNodeItem(Name path) {
         List<T> res;
-        if (getNodeNames().contains(path)) {
-            res = getChildNodeItem(path);
-        } else {
-            Name pathName = Name.of(path);
-            if (pathName.length() > 1 && nodes.containsKey(pathName.getFirst().entry())) {
-                res = getHead(pathName).getNodeItem(pathName.cutFirst().toString());
+        if (path.length() == 1) {
+            String pathStr = path.ignoreQuery().toString();
+            if (getNodeNames().contains(pathStr)) {
+                res = getChildNodeItem(pathStr);
             } else {
-                return null;
+                res = null;
+            }
+        } else if (path.length() > 1 && nodes.containsKey(path.getFirst().entry())) {
+            res = getHead(path).getNodeItem(path.cutFirst());
+        } else {
+            res = null;
+        }
+
+        /**
+         * Filtering nodes using query
+         */
+        if (res != null) {
+            if (path.hasQuery()) {
+                res = MetaUtils.applyQuery(res, path.getQuery());
+            }
+            if (res.isEmpty()) {
+                res = null;
             }
         }
+
         return res;
     }
 
     /**
      * Return a value using path notation and null if it does not exist
+     *
      * @param path
-     * @return 
+     * @return
      */
-    protected Value getValueItem(String path) {
+    protected Value getValueItem(Name path) {
         Value res;
-        if (getValueNames().contains(path)) {
-            res = getChildValueItem(path);
-        } else {
-            Name pathName = Name.of(path);
-            if (pathName.length() > 1 && nodes.containsKey(pathName.getFirst().entry())) {
-                res = getHead(pathName).getValueItem(pathName.cutFirst().toString());
+        if (path.length() == 1) {
+            String pathStr = path.toString();
+            if (getValueNames().contains(pathStr)) {
+                res = getChildValue(pathStr);
             } else {
                 return null;
             }
+        } else if (path.length() > 1 && nodes.containsKey(path.getFirst().entry())) {
+            res = getHead(path).getValueItem(path.cutFirst());
+        } else {
+            return null;
         }
         return res;
+
     }
 
     /**
-     * В случае передачи {@code "$all"} или {@code null} в качестве аргумента
-     * возвращает всех прямых наследников
+     * Return a list of all nodes for given name filtered by query if it exists.
+     * If node not found or there are no results for the query, the exception is
+     * thrown.
      *
      * @param name
      * @return
      */
     @Override
     public List<T> getNodes(String name) {
-        List<T> item = getNodeItem(name);
+        Name n = Name.of(name);
+        List<T> item = getNodeItem(n);
         if (item == null) {
             throw new NameNotFoundException(name);
         } else {
-            return Collections.unmodifiableList(item);
+            return item;
         }
     }
 
@@ -165,7 +179,7 @@ public class MetaNode<T extends MetaNode> extends Meta {
 
     @Override
     public Value getValue(String name) {
-        Value item = getValueItem(name);
+        Value item = getValueItem(Name.of(name));
         if (item == null) {
             throw new NameNotFoundException(name);
         } else {
@@ -205,8 +219,9 @@ public class MetaNode<T extends MetaNode> extends Meta {
 
     /**
      * Return a direct descendant node with given name.
+     *
      * @param name
-     * @return 
+     * @return
      */
     protected List<T> getChildNodeItem(String name) {
         if (getNodeNames().contains(name)) {
@@ -218,10 +233,11 @@ public class MetaNode<T extends MetaNode> extends Meta {
 
     /**
      * Return value of this node with given name
+     *
      * @param name
-     * @return 
+     * @return
      */
-    protected Value getChildValueItem(String name) {
+    protected Value getChildValue(String name) {
         if (getValueNames().contains(name)) {
             return values.get(name);
         } else {
@@ -239,6 +255,42 @@ public class MetaNode<T extends MetaNode> extends Meta {
         } else {
             return def;
         }
+    }
+
+    /**
+     * A stream containing pairs
+     *
+     * @param prefix
+     * @return
+     */
+    protected Stream<Pair<String, T>> nodeStream(String prefix) {
+        return Stream.concat(Stream.of(new Pair<String, T>(prefix, (T) MetaNode.this)),
+                nodes.entrySet().stream().<Pair<String, T>>flatMap((Map.Entry<String, List<T>> entry) -> {
+                    String nodePrefix;
+                    if (prefix == null || prefix.isEmpty()) {
+                        nodePrefix = entry.getKey();
+                    } else {
+                        nodePrefix = prefix + "." + entry.getKey();
+                    }
+                    return IntStream.range(0, entry.getValue().size())
+                            .mapToObj((int i) -> new Pair<>(String.format("%s[%d]", nodePrefix, i), entry.getValue().get(i)))
+                            .flatMap((Pair<String, T> item) -> item.getValue().nodeStream(item.getKey()));
+                })
+        );
+    }
+
+    public Stream<Pair<String, T>> nodeStream() {
+        return nodeStream("");
+    }
+
+    public Stream<Pair<String, Value>> valueStream() {
+        return nodeStream().<Pair<String, Value>>flatMap((Pair<String, T> entry) -> entry.getValue().values.entrySet().stream()
+                .<Pair<String, Value>>map(new Function<Map.Entry<String, Value>, Pair<String, Value>>() {
+                    @Override
+                    public Pair<String, Value> apply(Map.Entry<String, Value> valueItem) {
+                        return new Pair<>(entry.getKey() + "." + valueItem.getKey(), valueItem.getValue());
+                    }
+                }));
     }
 
 }

@@ -77,13 +77,13 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     protected abstract T currentState();
 
     /**
-     * Add new Annotation to Annotation Item with given name. Create new one if
-     * it does not exist.
+     * Add a copy of given meta to the node list with given name. Create a new
+     * one if it does not exist
      *
      * @param element
      * @param notify notify listeners
      */
-    public T putNode(Meta element, boolean notify) {
+    public T putNode(String name, Meta element, boolean notify) {
         if (element.isAnonimous()) {
             throw new AnonymousNotAlowedException();
         }
@@ -92,15 +92,15 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         if (!isValidElementName(aName)) {
             throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", aName));
         }
-        List<T> list = this.getNodeItem(aName);
+        List<T> list = this.getChildNodeItem(aName);
         List<T> oldList = list != null ? new ArrayList<>(list) : null;
         if (list == null) {
             List<Meta> newList = new ArrayList<>();
-            newList.add(element);
+            newList.add(transformNode(name, element));
             this.setNodeItem(aName, newList);
-            list = this.getNodeItem(aName);
+            list = this.getChildNodeItem(aName);
         } else {
-            list.add(transformNode(element));
+            list.add(transformNode(name, element));
         }
         if (notify) {
             notifyNodeChanged(element.getName(), oldList, list);
@@ -115,7 +115,21 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * @return
      */
     public T putNode(Meta element) {
-        return putNode(element, true);
+        if(element.isAnonimous()){
+            throw new AnonymousNotAlowedException();
+        }
+        return putNode(element.getName(), element, true);
+    }
+
+    /**
+     * Same as {@code putNode(Meta)}, but also renames new node
+     *
+     * @param name
+     * @param element
+     * @return
+     */
+    public T putNode(String name, Meta element) {
+        return putNode(name, element, true);
     }
 
     /**
@@ -136,7 +150,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
             if (hasValue(name)) {
                 Value oldValue = getValue(name);
 
-                List<Value> list = new ArrayList(this.getValueItem(name).listValue());
+                List<Value> list = new ArrayList(this.getValue(name).listValue());
                 list.add(value);
 
                 Value newValue = Value.of(list);
@@ -195,13 +209,13 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         if (elements != null && !elements.isEmpty()) {
             List<T> oldNodeItem;
             if (hasNode(name)) {
-                oldNodeItem = new ArrayList<>(getNodeItem(name));
+                oldNodeItem = new ArrayList<>(getNodes(name));
             } else {
                 oldNodeItem = null;
             }
             setNodeItem(name, elements);
             if (notify) {
-                notifyNodeChanged(name, oldNodeItem, getNodeItem(name));
+                notifyNodeChanged(name, oldNodeItem, getNodes(name));
             }
         } else {
             removeNode(name);
@@ -244,7 +258,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         } else {
             Value oldValueItem;
             if (hasValue(name)) {
-                oldValueItem = getValueItem(name);
+                oldValueItem = getValue(name);
             } else {
                 oldValueItem = null;
             }
@@ -255,12 +269,13 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         }
         return currentState();
     }
-    
+
     /**
      * setValue(name, value, true)
+     *
      * @param name
      * @param value
-     * @return 
+     * @return
      */
     public T setValue(String name, Value value) {
         return setValue(name, value, true);
@@ -297,7 +312,10 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      *
      * @param name
      */
-    protected void renameNode(String name) {
+    protected void setName(String name) {
+        if(parent!= null){
+            throw new RuntimeException("Can't rename attached node");
+        }
         this.name = name;
     }
 
@@ -422,17 +440,19 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      */
     private List<T> transformNodeItem(String name, List<? extends Meta> item) {
         List<T> res = new ArrayList<>();
-        for (Meta an : item) {
-            T el = transformNode(an);
+        item.stream().map((an) -> transformNode(name, an)).map((el) -> {
             el.parent = this;
+            return el;
+        }).forEach((el) -> {
             res.add(el);
-        }
+        });
         return res;
     }
 
-    private T transformNode(Meta node) {
+    private T transformNode(String name, Meta node) {
         T el = cloneNode(node);
         el.parent = this;
+        el.setName(name);
         return el;
     }
 

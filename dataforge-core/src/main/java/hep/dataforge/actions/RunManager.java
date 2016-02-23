@@ -17,7 +17,6 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataManager;
-import hep.dataforge.dependencies.DependencySet;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
@@ -28,6 +27,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import hep.dataforge.dependencies.DataNode;
 
 /**
  * <p>
@@ -147,7 +147,7 @@ public class RunManager {
         return new Action() {
 
             @Override
-            public ActionResult run(DependencySet res) {
+            public ActionResult run(DataNode res) {
                 return last.run(first.run(res));
             }
 

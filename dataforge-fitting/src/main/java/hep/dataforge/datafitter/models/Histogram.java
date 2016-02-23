@@ -15,10 +15,11 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.data.ListDataSet;
+import hep.dataforge.data.ListPointSet;
 import hep.dataforge.exceptions.NamingException;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import java.util.Arrays;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 
 /**
  * <p>
@@ -27,7 +28,7 @@ import java.util.Arrays;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Histogram extends ListDataSet {
+public class Histogram extends ListPointSet {
 
     public static String[] names = {"binBegin", "binEnd", "count"};
     private double[] borders;

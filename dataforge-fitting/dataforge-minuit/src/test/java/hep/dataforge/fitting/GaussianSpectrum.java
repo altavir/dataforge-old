@@ -17,9 +17,8 @@ package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.ListDataSet;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.data.ListPointSet;
+import hep.dataforge.data.XYAdapter;
 import hep.dataforge.datafitter.FitManager;
 import hep.dataforge.datafitter.FitSource;
 import hep.dataforge.datafitter.FitState;
@@ -37,6 +36,7 @@ import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.AbstractNamedSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import hep.dataforge.data.PointSet;
 
 /**
  *
@@ -46,7 +46,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     private static final String[] list = {"w", "pos", "amp"};
 
-    public static FitState fit(ListDataSet data, ParamSet pars, String engine) {
+    public static FitState fit(ListPointSet data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
         XYModel model = new XYModel("gaussian", new GaussianSpectrum());
         FitState state = FitManager.buildState(data, model, pars);
@@ -54,7 +54,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         return fm.runTask(state, engine, "run", "pos");
     }
 
-    public static void printInvHessian(DataSet data, ParamSet pars) {
+    public static void printInvHessian(PointSet data, ParamSet pars) {
         XYModel model = new XYModel("gaussian", new GaussianSpectrum());
         FitSource fs = new FitSource(data, model);
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
@@ -92,9 +92,9 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         return this.names().contains(name);
     }
 
-    public ListDataSet sample(double pos, double w, double amp, double a, double b, int number) {
-        XYDataAdapter factory = new XYDataAdapter();
-        ListDataSet data = new ListDataSet();
+    public ListPointSet sample(double pos, double w, double amp, double a, double b, int number) {
+        XYAdapter factory = new XYAdapter();
+        ListPointSet data = new ListPointSet();
         double[] v = new double[3];
         v[0] = w;
         v[1] = pos;

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.data.DataFormat;
+import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.exceptions.StorageException;
@@ -71,7 +71,7 @@ public class FileDataPointLoaderTest {
 
         FileStorage storage = FileStorage.in(dir, null);
 
-        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", DataFormat.forNames(names));
+        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", Format.forNames(names));
 //(FileDataLoader) storage.createNewFileLoader(StorageTools.buildDataPointLoaderMeta("test", "", names));
 
         System.out.println("push");

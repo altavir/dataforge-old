@@ -23,7 +23,7 @@ import hep.dataforge.values.Value;
  * An adapter to interpret datapoint
  * @author Alexander Nozik
  */
-public interface DataAdapter extends Annotated {
+public interface PointAdapter extends Annotated {
     
     public static final String WEIGHT = "@weight";    
 
