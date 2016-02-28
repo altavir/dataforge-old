@@ -64,7 +64,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapDataPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME),getValueName(Y_ERR_NAME)},
+        return new MapPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME),getValueName(Y_ERR_NAME)},
                 x, y, yErr);
     }
 
@@ -128,7 +128,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public DataPoint mapTo(DataPoint point, String xName, String yName, String xErrName, String yErrName) {
-        MapDataPoint res = new MapDataPoint();
+        MapPoint res = new MapPoint();
         res.putValue(xName, getX(point));
         res.putValue(yName, getY(point));
         if (providesXError(point)) {

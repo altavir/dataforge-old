@@ -21,12 +21,12 @@ import hep.dataforge.values.Value;
 import java.util.Map;
 
 /**
- * <p>MaskDataPoint class.</p>
+ * <p>MaskPoint class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MaskDataPoint implements DataPoint {
+public class MaskPoint implements DataPoint {
 
     private final Map<String, String> nameMap;
     private final DataPoint source;
@@ -38,7 +38,7 @@ public class MaskDataPoint implements DataPoint {
      * @param source a {@link hep.dataforge.data.DataPoint} object.
      * @param nameMap a {@link java.util.Map} object.
      */
-    public MaskDataPoint(DataPoint source, Map<String, String> nameMap) {
+    public MaskPoint(DataPoint source, Map<String, String> nameMap) {
         this.source = source;
         this.nameMap = nameMap;
         names = Names.of(nameMap.keySet());
@@ -47,8 +47,8 @@ public class MaskDataPoint implements DataPoint {
     /** {@inheritDoc}
      * @return  */
     @Override
-    public MaskDataPoint copy(){
-        return new MaskDataPoint(source.copy(), nameMap);
+    public MaskPoint copy(){
+        return new MaskPoint(source.copy(), nameMap);
     }
 
         /** {@inheritDoc}

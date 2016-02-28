@@ -17,7 +17,7 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;
@@ -77,7 +77,7 @@ public class FileDataPointLoaderTest {
         System.out.println("push");
         for (int i = 0; i < 100; i++) {
 //            try {
-            loader.push(new MapDataPoint(names, i, i * 2, Math.sqrt(i)));
+            loader.push(new MapPoint(names, i, i * 2, Math.sqrt(i)));
             System.out.printf("Point with number %d loaded%n", i);
 //            } catch (Exception ex) {
 //                System.out.printf("%nPoint with number %d loader failed with message: %n%n", i, ex.getMessage());

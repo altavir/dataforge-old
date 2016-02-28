@@ -16,7 +16,7 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
@@ -110,7 +110,7 @@ public class DynamicPlottable extends XYPlottable {
         Map<String, Value> point = new HashMap<>(2);
         point.put("timestamp", Value.of(time));
         point.put(yName, value);
-        this.map.put(time, new MapDataPoint(point));
+        this.map.put(time, new MapPoint(point));
         if (lastUpdate == null || time.isAfter(lastUpdate)) {
             lastUpdate = time;
         }

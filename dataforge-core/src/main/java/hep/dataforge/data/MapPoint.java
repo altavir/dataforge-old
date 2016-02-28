@@ -28,7 +28,7 @@ import java.util.Map;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MapDataPoint implements DataPoint {
+public class MapPoint implements DataPoint {
 
     private Map<String, Value> valueMap;
 
@@ -38,7 +38,7 @@ public class MapDataPoint implements DataPoint {
      *
      * @param point a {@link hep.dataforge.data.DataPoint} object.
      */
-    public MapDataPoint(DataPoint point) {
+    public MapPoint(DataPoint point) {
         this.valueMap = new LinkedHashMap<>(point.names().getDimension());
         for (String name : point.names()) {
             this.valueMap.put(name, point.getValue(name));
@@ -48,7 +48,7 @@ public class MapDataPoint implements DataPoint {
     /**
      * <p>Constructor for MapDataPoint.</p>
      */
-    public MapDataPoint() {
+    public MapPoint() {
         this.valueMap = new LinkedHashMap<>();
     }
 
@@ -59,7 +59,7 @@ public class MapDataPoint implements DataPoint {
      * @param list an array of {@link java.lang.String} objects.
      * @param values a {@link java.lang.Number} object.
      */
-    public MapDataPoint(String[] list, Number... values) {
+    public MapPoint(String[] list, Number... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -76,7 +76,7 @@ public class MapDataPoint implements DataPoint {
      * @param list an array of {@link java.lang.String} objects.
      * @param values a {@link hep.dataforge.values.Value} object.
      */
-    public MapDataPoint(String[] list, Value... values) {
+    public MapPoint(String[] list, Value... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -99,7 +99,7 @@ public class MapDataPoint implements DataPoint {
      * @param list an array of {@link java.lang.String} objects.
      * @param values an array of {@link java.lang.Object} objects.
      */
-    public MapDataPoint(String[] list, Object[] values) {
+    public MapPoint(String[] list, Object[] values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -121,7 +121,7 @@ public class MapDataPoint implements DataPoint {
      *
      * @param map a {@link java.util.Map} object.
      */
-    public MapDataPoint(Map<String, Value> map) {
+    public MapPoint(Map<String, Value> map) {
         this.valueMap = map;
     }
 
@@ -137,8 +137,8 @@ public class MapDataPoint implements DataPoint {
 
     /** {@inheritDoc} */
     @Override
-    public MapDataPoint copy() {
-        return new MapDataPoint(this);
+    public MapPoint copy() {
+        return new MapPoint(this);
     }
 
     /** {@inheritDoc} */
@@ -176,9 +176,9 @@ public class MapDataPoint implements DataPoint {
      *
      * @param name a {@link java.lang.String} object.
      * @param value a {@link hep.dataforge.values.Value} object.
-     * @return a {@link hep.dataforge.data.MapDataPoint} object.
+     * @return a {@link hep.dataforge.data.MapPoint} object.
      */
-    public MapDataPoint putValue(String name, Value value) {
+    public MapPoint putValue(String name, Value value) {
         this.valueMap.put(name, value);
         return this;
     }
@@ -189,9 +189,9 @@ public class MapDataPoint implements DataPoint {
      *
      * @param name a {@link java.lang.String} object.
      * @param value a {@link java.lang.Object} object.
-     * @return a {@link hep.dataforge.data.MapDataPoint} object.
+     * @return a {@link hep.dataforge.data.MapPoint} object.
      */
-    public MapDataPoint putValue(String name, Object value) {
+    public MapPoint putValue(String name, Object value) {
         this.valueMap.put(name, Value.of(value));
         return this;
     }
@@ -216,10 +216,10 @@ public class MapDataPoint implements DataPoint {
      * <p>join.</p>
      *
      * @param point a {@link hep.dataforge.data.DataPoint} object.
-     * @return a {@link hep.dataforge.data.MapDataPoint} object.
+     * @return a {@link hep.dataforge.data.MapPoint} object.
      */
-    public MapDataPoint join(DataPoint point) {
-        MapDataPoint res = this.copy();
+    public MapPoint join(DataPoint point) {
+        MapPoint res = this.copy();
         for (String name : point.namesAsArray()) {
             res.putValue(name, point.getValue(name));
         }

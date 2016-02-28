@@ -17,7 +17,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleArray;
@@ -52,7 +52,7 @@ public class OutputData {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.value(point);
-            DataPoint dp = new MapDataPoint(format, values);
+            DataPoint dp = new MapPoint(format, values);
             res.add(dp);
         }
         return res;
@@ -73,7 +73,7 @@ public class OutputData {
         for (int i = 0; i < format.length; i++) {
             values[0] = points[i];
             values[1] = func.value(points[i]);
-            DataPoint dp = new MapDataPoint(format, values);
+            DataPoint dp = new MapPoint(format, values);
             res.add(dp);
         }
         return res;

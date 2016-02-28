@@ -15,7 +15,7 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.data.PointListener;
 import hep.dataforge.values.Value;
 import java.time.Instant;
@@ -75,7 +75,7 @@ public class PointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        MapDataPoint point = new MapDataPoint();
+        MapPoint point = new MapPoint();
 
         point.putValue("timestamp", time);
         valueMap.entrySet().stream().forEach((entry) -> {

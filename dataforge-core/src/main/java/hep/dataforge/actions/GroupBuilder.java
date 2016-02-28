@@ -13,15 +13,24 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.content;
+package hep.dataforge.actions;
 
+import hep.dataforge.content.ContentList;
+import hep.dataforge.content.NamedGroup;
+import hep.dataforge.dependencies.Data;
+import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.dependencies.DataSet;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import javafx.util.Pair;
 
 /**
  * The class to build groups of content with annotation defined rules
@@ -41,21 +50,22 @@ public class GroupBuilder {
     public static GroupRule byValue(final String tag, String defaultTagValue) {
         return new GroupRule() {
             @Override
-            public <T> List<NamedGroup<T>> group(Iterable<T> content) {
-                Map<String, List<T>> map = new HashMap<>();
-                for (T c : content) {
-                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(c))
+            public <T> Map<String, DataNode<T>> group(DataNode<T> input) {
+                Map<String, DataSet.Builder<T>> map = new HashMap<>();
+
+                input.stream().forEach((Pair<String, Data<? extends T>> entry) -> {
+                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(entry.getValue()))
                             .getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
-                        map.put(tagValue, new ArrayList<>());
+                        DataSet.Builder<T> builder = DataSet.builder();
+                        builder.setName(tagValue);
+                        //PENDING share meta here?
+                        map.put(tagValue, builder);
                     }
-                    map.get(tagValue).add(c);
-                }
-                List<NamedGroup<T>> res = new ArrayList<>();
-                for (Map.Entry<String, List<T>> entry : map.entrySet()) {
-                    res.add(new ContentList(entry.getKey(), entry.getValue()));
-                }
-                return res;
+                    map.get(tagValue).putData(entry.getKey(), entry.getValue());
+                });
+
+                return map.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry-> entry.getValue().build()));
             }
         };
     }
@@ -68,11 +78,6 @@ public class GroupBuilder {
     }
 
     public interface GroupRule {
-
-        <T> List<NamedGroup<T>> group(Iterable<T> content);
-
-        default <T> List<NamedGroup<T>> group(NamedGroup<T> content) {
-            return group(content.asList());
-        }
+        <T> Map<String, DataNode<T>> group(DataNode<T> input);
     }
 }

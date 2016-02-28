@@ -17,7 +17,7 @@ package hep.dataforge.plots.tests;
 
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.data.XYAdapter;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
@@ -55,9 +55,9 @@ public class PlotContainerTest {
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
         List<DataPoint> data = new ArrayList<>();
-        data.add(new MapDataPoint(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(new MapDataPoint(names, 1d, 1d, 0.2, 0.5));
-        data.add(new MapDataPoint(names, 3d, 7d, 0, 0.5));
+        data.add(new MapPoint(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(new MapPoint(names, 1d, 1d, 0.2, 0.5));
+        data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         PointSet ds = new ListPointSet("data", null, data);
 
         PlottableData dataPlot = PlottableData.plot(ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));

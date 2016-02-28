@@ -72,7 +72,7 @@ public class SimpleParser implements PointParser {
             }
         }
 
-        DataPoint point = new MapDataPoint(format, values);
+        DataPoint point = new MapPoint(format, values);
 
 //            //Все, что после послднего значения считаем тэгами
 //            while (sc.hasNext()) {

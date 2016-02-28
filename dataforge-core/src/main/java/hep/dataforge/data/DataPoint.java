@@ -49,7 +49,7 @@ public interface DataPoint extends NamedSet, ValueProvider {
             for (String key : pointAn.getValueNames()) {
                 map.put(key, pointAn.getValue(key));
             }
-            res.add(new MapDataPoint(map));
+            res.add(new MapPoint(map));
         }
         return res;
     }

@@ -8,7 +8,7 @@ package hep.dataforge.plots.data;
 import hep.dataforge.data.Format;
 import hep.dataforge.data.DataPoint;
 import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.data.XYAdapter;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
@@ -33,7 +33,7 @@ public class PlotDataUtils {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
         }
 
-        Map<Value, MapDataPoint> points = new LinkedHashMap<>();
+        Map<Value, MapPoint> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
         
@@ -43,11 +43,11 @@ public class PlotDataUtils {
             names.add(pl.getName());
             for (DataPoint point : pl.plotData()) {
                 Value x = adapter.getX(point);
-                MapDataPoint mdp;
+                MapPoint mdp;
                 if (points.containsKey(x)) {
                     mdp = points.get(x);
                 } else {
-                    mdp = new MapDataPoint();
+                    mdp = new MapPoint();
                     mdp.putValue("x", x);
                     points.put(x, mdp);
                 }

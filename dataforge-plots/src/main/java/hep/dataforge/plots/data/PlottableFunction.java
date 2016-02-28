@@ -16,7 +16,7 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.data.XYAdapter;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.plots.XYPlottable;
@@ -82,7 +82,7 @@ public class PlottableFunction extends XYPlottable {
         List<DataPoint> list = new ArrayList<>();
 
         for (double x : grid) {
-            list.add(new MapDataPoint(new String[]{"x", "y"}, x, function.value(x)));
+            list.add(new MapPoint(new String[]{"x", "y"}, x, function.value(x)));
         }
         return list;
     }

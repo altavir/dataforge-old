@@ -16,7 +16,7 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.data.MapPoint;
 import hep.dataforge.data.XYAdapter;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
@@ -44,7 +44,7 @@ public class PlottableData extends XYPlottable {
 
         List<DataPoint> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            MapDataPoint point = new MapDataPoint(new String[]{"x", "y"}, x[i], y[i]);
+            MapPoint point = new MapPoint(new String[]{"x", "y"}, x[i], y[i]);
 
             if (xErrs != null) {
                 point.putValue("xErr", xErrs[i]);
