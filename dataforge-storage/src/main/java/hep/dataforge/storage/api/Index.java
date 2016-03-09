@@ -9,7 +9,7 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.StorageQueryException;
 import hep.dataforge.values.Value;
 import java.util.List;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * Some indexed reader. Each index pull operation should be run in a separate

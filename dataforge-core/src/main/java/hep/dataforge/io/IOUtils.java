@@ -15,8 +15,8 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
@@ -87,7 +87,7 @@ public class IOUtils {
      *
      * @param fileName a {@link java.lang.String} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.ListPointSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public static ListPointSet readColumnedData(String fileName, String... names) throws FileNotFoundException {
@@ -100,7 +100,7 @@ public class IOUtils {
      *
      * @param file a {@link java.io.File} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.ListPointSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public static ListPointSet readColumnedData(File file, String... names) throws FileNotFoundException {

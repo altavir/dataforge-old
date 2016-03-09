@@ -15,9 +15,9 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.data.Format;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapPoint;
+import hep.dataforge.points.Format;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;

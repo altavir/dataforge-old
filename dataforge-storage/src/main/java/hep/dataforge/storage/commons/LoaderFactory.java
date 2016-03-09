@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.data.Format;
+import hep.dataforge.points.Format;
 import hep.dataforge.exceptions.LoaderNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;

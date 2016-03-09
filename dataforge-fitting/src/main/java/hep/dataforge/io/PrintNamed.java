@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
@@ -315,7 +315,7 @@ public class PrintNamed {
      * @param spectrum a {@link hep.dataforge.functions.ParametricFunction} object.
      * @param data a {@link java.lang.Iterable} object.
      * @param adapter a
-     * {@link hep.dataforge.data.XYAdapter} object.
+     * {@link hep.dataforge.points.XYAdapter} object.
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,

@@ -15,20 +15,14 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.content.ContentList;
-import hep.dataforge.content.NamedGroup;
-import hep.dataforge.dependencies.Data;
-import hep.dataforge.dependencies.DataNode;
-import hep.dataforge.dependencies.DataSet;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataSet;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
 

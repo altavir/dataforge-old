@@ -5,11 +5,11 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.data.Format;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.Format;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  *
@@ -54,7 +54,7 @@ public class PlotDataUtils {
                 mdp.putValue(pl.getName(), adapter.getY(point));
             }
         }
-        ListPointSet res = new ListPointSet(frame.getName(), Format.forNames(8, names));
+        ListPointSet res = new ListPointSet(Format.forNames(8, names));
         res.addAll(points.values());
         return res;
     }

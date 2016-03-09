@@ -15,7 +15,6 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.content.Content;
 import hep.dataforge.utils.NamingUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -186,8 +185,6 @@ public interface Value extends Comparable<Value>, Serializable {
         } else if (obj instanceof Value) {
             //это можно делать так как Value неизменяемый
             return (Value) obj;
-        } else if (obj instanceof Content) {
-            return of((Content) obj);
         } else if (obj instanceof String) {
             return of((String) obj);
         } else if (obj instanceof Collection) {

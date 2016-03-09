@@ -23,6 +23,7 @@ import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -136,7 +137,17 @@ public class Laminate extends Meta {
     }
 
     public List<Meta> layers() {
-        return layers;
+        return Collections.unmodifiableList(layers);
+    }
+    
+    /**
+     * Get laminate layers in inverse order
+     * @return 
+     */
+    public List<Meta> layersInverse(){
+        List<Meta> layersInverse = new ArrayList<>(this.layers);
+        Collections.reverse(layersInverse);
+        return layersInverse;
     }
 
     @Override

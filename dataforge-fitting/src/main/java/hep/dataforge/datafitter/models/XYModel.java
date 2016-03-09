@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
@@ -55,7 +55,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      *
      * @param name a {@link java.lang.String} object.
      * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param format a {@link hep.dataforge.data.XYAdapter} object.
+     * @param format a {@link hep.dataforge.points.XYAdapter} object.
      */
     public XYModel(String name, ParametricFunction source, XYAdapter format) {
         super(name, source, format);

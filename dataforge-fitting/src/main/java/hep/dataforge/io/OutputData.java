@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapPoint;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.MapPoint;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleArray;
@@ -26,7 +26,7 @@ import hep.dataforge.names.Names;
 import java.io.PrintWriter;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * Формирование и печать наборов данных
@@ -41,7 +41,7 @@ public class OutputData {
      *
      * @param func a {@link hep.dataforge.functions.NamedFunction} object.
      * @param points a {@link java.util.List} object.
-     * @return a {@link hep.dataforge.data.ListPointSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      */
     public static ListPointSet getNamedFunctionData(NamedFunction func, List<NamedDoubleArray> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
@@ -63,7 +63,7 @@ public class OutputData {
      *
      * @param func a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      * @param points an array of double.
-     * @return a {@link hep.dataforge.data.ListPointSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      */
     public static ListPointSet getUnivariateFunctionData(UnivariateFunction func, double[] points) {
         final String[] format = {"point", "value"};
@@ -84,7 +84,7 @@ public class OutputData {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param outputFormat a {@link java.lang.String} object.
-     * @param data a {@link hep.dataforge.data.PointSet} object.
+     * @param data a {@link hep.dataforge.points.PointSet} object.
      * @param head a {@link java.lang.String} object.
      */
     public static void printDataSet(PrintWriter out, PointSet data, String head, String... outputFormat) {

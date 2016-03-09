@@ -60,10 +60,10 @@ public interface Names extends Iterable<String> {
     /**
      * <p>of.</p>
      *
-     * @param set a {@link hep.dataforge.names.NamedSet} object.
+     * @param set a {@link hep.dataforge.names.NameSet} object.
      * @return a {@link hep.dataforge.names.Names} object.
      */
-    public static Names of(NamedSet set) {
+    public static Names of(NameSet set) {
         return new NameList(set.names());
     }
 

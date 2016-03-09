@@ -18,8 +18,8 @@ package hep.dataforge.functions;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.names.NamedSet;
 import hep.dataforge.names.Names;
+import hep.dataforge.names.NameSet;
 
 /**
  * <p>
@@ -54,9 +54,9 @@ public abstract class AbstractParametricFunction extends AbstractNamedSet implem
      * <p>
      * Constructor for AbstractNamedSpectrum.</p>
      *
-     * @param set a {@link hep.dataforge.names.NamedSet} object.
+     * @param set a {@link hep.dataforge.names.NameSet} object.
      */
-    public AbstractParametricFunction(NamedSet set) {
+    public AbstractParametricFunction(NameSet set) {
         super(set);
     }
 

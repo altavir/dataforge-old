@@ -16,9 +16,9 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.datafitter.FitManager;
 import hep.dataforge.datafitter.FitSource;
 import hep.dataforge.datafitter.FitState;
@@ -36,7 +36,7 @@ import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.AbstractNamedSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  *
@@ -49,7 +49,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     public static FitState fit(ListPointSet data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
         XYModel model = new XYModel("gaussian", new GaussianSpectrum());
-        FitState state = FitManager.buildState(data, model, pars);
+        FitState state = new FitState(data, model, pars);
 
         return fm.runTask(state, engine, "run", "pos");
     }

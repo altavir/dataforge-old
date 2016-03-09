@@ -16,20 +16,16 @@
 package hep.dataforge.datafitter;
 
 import hep.dataforge.content.NamedMetaHolder;
-import hep.dataforge.data.DataPoint;
+import hep.dataforge.points.DataPoint;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.DerivativeCalculator;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
-/**
- * <p>FitSource class.</p>
- *
- * @author Alexander Nozik
- */
-public class FitSource extends NamedMetaHolder {
+
+public class FitSource{
 
     /**
      *
@@ -47,8 +43,7 @@ public class FitSource extends NamedMetaHolder {
     protected final NamedFunction prior;
 
 
-    public FitSource(String name, Meta annotation, PointSet dataSet, Model model, NamedFunction prior) {
-        super(name, annotation);
+    public FitSource(PointSet dataSet, Model model, NamedFunction prior) {
         this.dataSet = dataSet;
         this.model = model;
         this.prior = prior;
@@ -56,7 +51,7 @@ public class FitSource extends NamedMetaHolder {
 
 
     public FitSource(PointSet dataSet, Model model) {
-        this(null, null, dataSet, model, null);
+        this(dataSet, model, null);
     }
 
     /**

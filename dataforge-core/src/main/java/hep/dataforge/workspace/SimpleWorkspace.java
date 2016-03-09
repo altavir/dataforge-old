@@ -20,8 +20,8 @@ import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
-import hep.dataforge.dependencies.Data;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
 
 /**
  * A simple workspace without caching and stages

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.names.NamedSet;
+import hep.dataforge.names.NameSet;
 
 /**
  * <p>NamedDoubleSet interface.</p>
@@ -24,7 +24,7 @@ import hep.dataforge.names.NamedSet;
  * @version $Id: $Id
  */
 //TODO заменить везде все на Value
-public interface NamedDoubleSet extends NamedSet {
+public interface NamedDoubleSet extends NameSet {
 
     /**
      * <p>getValue.</p>

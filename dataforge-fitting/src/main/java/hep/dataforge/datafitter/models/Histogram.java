@@ -15,9 +15,8 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.data.ListPointSet;
+import hep.dataforge.points.ListPointSet;
 import hep.dataforge.exceptions.NamingException;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import java.util.Arrays;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 
@@ -41,8 +40,8 @@ public class Histogram extends ListPointSet {
      * @param end a double.
      * @param binSize a double.
      */
-    public Histogram(String name, double begin, double end, double binSize) {
-        super(name, names);
+    public Histogram(double begin, double end, double binSize) {
+        super(names);
         this.borders = getUniformUnivariateGrid(begin, end, binSize);
     }
 
@@ -51,8 +50,8 @@ public class Histogram extends ListPointSet {
      *
      * @param borders
      */
-    public Histogram(String name, double[] borders) {
-        super(name, names);
+    public Histogram(double[] borders) {
+        super(names);
         this.borders = borders;
         Arrays.sort(borders);
     }
@@ -65,8 +64,8 @@ public class Histogram extends ListPointSet {
      * @param binSize a double.
      * @param binNum a int.
      */
-    public Histogram(String name, double begin, double binSize, int binNum) {
-        super(name, names);
+    public Histogram(double begin, double binSize, int binNum) {
+        super(names);
         this.borders = getUniformUnivariateGrid(begin, binSize * binNum, binNum);
     }
 

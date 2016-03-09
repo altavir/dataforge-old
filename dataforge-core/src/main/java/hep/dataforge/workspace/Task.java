@@ -18,8 +18,8 @@ package hep.dataforge.workspace;
 import hep.dataforge.content.Named;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
-import hep.dataforge.dependencies.Data;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
 
 /**
  * The replacement for Action, task is a general way to define any process in a

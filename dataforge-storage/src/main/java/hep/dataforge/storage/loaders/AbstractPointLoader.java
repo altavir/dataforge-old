@@ -15,9 +15,9 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.data.DataPoint;
-import static hep.dataforge.data.DataPoint.fromMeta;
-import hep.dataforge.data.PointListener;
+import hep.dataforge.points.DataPoint;
+import static hep.dataforge.points.DataPoint.fromMeta;
+import hep.dataforge.points.PointListener;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.WrongTargetException;

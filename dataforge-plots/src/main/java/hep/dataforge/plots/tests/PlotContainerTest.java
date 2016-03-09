@@ -15,10 +15,10 @@
  */
 package hep.dataforge.plots.tests;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.MapPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
@@ -28,7 +28,7 @@ import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  *
@@ -58,7 +58,7 @@ public class PlotContainerTest {
         data.add(new MapPoint(names, 0.5d, 0.2, 0.1, 0.1));
         data.add(new MapPoint(names, 1d, 1d, 0.2, 0.5));
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
-        PointSet ds = new ListPointSet("data", null, data);
+        PointSet ds = new ListPointSet(data);
 
         PlottableData dataPlot = PlottableData.plot(ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));
 

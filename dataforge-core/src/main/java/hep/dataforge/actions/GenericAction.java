@@ -26,9 +26,10 @@ import hep.dataforge.io.log.Log;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.io.OutputStream;
-import hep.dataforge.dependencies.Data;
-import hep.dataforge.dependencies.DataNode;
-import hep.dataforge.dependencies.DataSet;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataSet;
+import hep.dataforge.meta.Annotated;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -115,96 +116,9 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         return executor;
     }
 
-//    /**
-//     * Join map of data in data of map
-//     *
-//     * @param <T>
-//     * @param data
-//     * @return
-//     */
-//    protected <T> Data<Map<String, T>> join(Map<String, Data<T>> data) {
-//        return new LazyData<>(Map.class, () -> {
-//            return data.entrySet().stream().parallel()
-//                    .collect(Collectors.toMap(entry -> entry.getKey(), entry -> entry.getValue().get()));
-//        });
-//    }
-//
-//    /**
-//     * Separate result with map into map of results using predefined key set
-//     *
-//     * @param <R>
-//     * @param resultType
-//     * @param result
-//     * @param keySet
-//     * @return
-//     */
-//    protected <R> Map<String, Data<R>> separate(Class<R> resultType, ActionResult<Map<String, R>> result, Collection<String> keySet) {
-//        Map<String, Data<R>> res = new HashMap<>();
-//        keySet.forEach((key) -> {
-//            res.put(key, new LazyData<>(resultType, () -> result.get().get(key)));
-//        });
-//        return res;
-//    }
-
-//    /**
-//     * Wrap result of single or separate executions into DataNode
-//     *
-//     * @param singleLog an individual log for this result. Could be null;
-//     * @param singleMeta an individual meta for this result. Could be null;
-//     * @param singleResult
-//     * @return
-//     */
-//    protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>>... results) {
-//        DataSet.Builder<R> builder = DataSet.builder(getOutputType());
-//        for (Map<String, ? extends Data<R>> result : results) {
-//            result.forEach(builder::putData);
-//        }
-//        return builder.build();
-//    }
-//
-//    protected DataNode<R> wrap(String name, Meta meta, Collection<NamedData<R>> results) {
-//        DataSet.Builder<R> builder = DataSet.builder(getOutputType());
-//        builder.setMeta(meta);
-//        builder.setName(name);
-//        results.stream().forEach((result) -> {
-//            builder.putData(result);
-//        });
-//
-//        return builder.build();
-//    }
-
     protected boolean isEmptyInputAllowed() {
         return false;
     }
-
-//    /**
-//     * {@inheritDoc}
-//     *
-//     * @param input
-//     * @return
-//     */
-//    @Override
-//    public DataNode<R> run(DataNode<T> input) {
-//        final Logable log;
-//        if (input instanceof ActionResult) {
-//            ActionResult prevRes = (ActionResult) input;
-//            log = prevRes.log() != null ? prevRes.log() : getContext();
-//        } else {
-//            log = getContext();
-//        }
-//
-//        beforeAction(input, log);
-//        if (input.isEmpty() && !isEmptyInputAllowed()) {
-//            log.logError("No input data in action {}", getName());
-//            throw new RuntimeException("No input data in action in non-generator action");
-//        }
-//
-//        List<Data<R>> out = execute(log, input.meta(), input);
-//        ActionResult<R> res = new Pack<>(getName(), input.meta(), log, getOutputType(), out);
-//        afterAction(res);
-//        return res;
-//    }
-//    protected abstract Map<String, ActionResult<R>> execute(Logable log, ActionStateListener listener, DataNode<T> input);
 
 
     /**
@@ -265,22 +179,33 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
             return Object.class;
         }
     }
-
-    protected Meta readMeta(Meta inputAnnotation) {
-        return new Laminate(inputAnnotation, meta())
+    
+    protected Laminate buildMeta(Data<? extends T> input, Meta nodeMeta){
+        return new Laminate(input.meta(), nodeMeta, meta())
                 .setValueContext(getContext())
                 .setDescriptor(getDescriptor());
     }
-
-    protected Meta readMeta(Meta inputAnnotation, Meta groupAnnotation) {
-        if (groupAnnotation == null) {
-            return this.readMeta(inputAnnotation);
-        } else {
-            return new Laminate(inputAnnotation, groupAnnotation, meta())
-                    .setValueContext(getContext())
-                    .setDescriptor(getDescriptor());
-        }
-    }
+    
+    protected Laminate buildMeta(Meta nodeMeta){
+        return new Laminate(nodeMeta, meta())
+                .setValueContext(getContext())
+                .setDescriptor(getDescriptor());
+    }    
+//    protected Meta readMeta(Meta inputAnnotation) {
+//        return new Laminate(inputAnnotation, meta())
+//                .setValueContext(getContext())
+//                .setDescriptor(getDescriptor());
+//    }
+//
+//    protected Meta readMeta(Meta inputAnnotation, Meta groupAnnotation) {
+//        if (groupAnnotation == null) {
+//            return this.readMeta(inputAnnotation);
+//        } else {
+//            return new Laminate(inputAnnotation, groupAnnotation, meta())
+//                    .setValueContext(getContext())
+//                    .setDescriptor(getDescriptor());
+//        }
+//    }
 
     /**
      * Create default OuputStream for given Action and given name
@@ -293,14 +218,14 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         return getContext().io().out(getName(), name);
     }
 
-    /**
-     * Create default OuputStream for given Action and given Content
-     *
-     * @param action a {@link hep.dataforge.actions.Action} object.
-     * @param content a {@link hep.dataforge.content.Content} object.
-     * @return a {@link java.io.OutputStream} object.
-     */
-    public OutputStream buildActionOutput(Named content) {
-        return getContext().io().out(getName(), content.getName());
-    }
+//    /**
+//     * Create default OuputStream for given Action and given Content
+//     *
+//     * @param action a {@link hep.dataforge.actions.Action} object.
+//     * @param content a {@link hep.dataforge.content.Content} object.
+//     * @return a {@link java.io.OutputStream} object.
+//     */
+//    public OutputStream buildActionOutput(Named content) {
+//        return getContext().io().out(getName(), content.getName());
+//    }
 }

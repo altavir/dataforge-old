@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.data.DataPoint;
+import hep.dataforge.points.DataPoint;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Index;
@@ -24,7 +24,7 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * The point loader that mirrors all points to the secondary storage

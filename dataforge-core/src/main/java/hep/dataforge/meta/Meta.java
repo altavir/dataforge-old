@@ -36,6 +36,8 @@ import java.util.Objects;
  * @version $Id: $Id
  */
 public abstract class Meta extends AbstractProvider implements Named, ValueProvider, Serializable {
+    
+    private static final Meta EMPTY = new MetaBuilder("").build();
 
     /**
      * Build an empty annotation with given name FIXME make a separate simple
@@ -52,8 +54,8 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      * Empty anonymous meta
      * @return 
      */
-    public static Meta buildEmpty() {
-        return new MetaBuilder("").build();
+    public static Meta empty() {
+        return EMPTY;
     }    
 
     /**

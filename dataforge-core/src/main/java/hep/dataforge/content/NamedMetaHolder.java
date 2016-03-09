@@ -9,7 +9,7 @@ import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
 
 
-public class NamedMetaHolder extends BaseMetaHolder implements Content {
+public class NamedMetaHolder extends BaseMetaHolder implements Named {
 
     private String name;
     

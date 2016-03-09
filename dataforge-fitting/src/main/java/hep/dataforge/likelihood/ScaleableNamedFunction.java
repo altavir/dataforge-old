@@ -18,9 +18,9 @@ package hep.dataforge.likelihood;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.names.NamedSet;
 import hep.dataforge.names.Names;
 import static java.lang.Math.exp;
+import hep.dataforge.names.NameSet;
 
 /**
  * <p>Abstract ScaleableNamedFunction class.</p>
@@ -47,9 +47,9 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
     /**
      * <p>Constructor for ScaleableNamedFunction.</p>
      *
-     * @param named a {@link hep.dataforge.names.NamedSet} object.
+     * @param named a {@link hep.dataforge.names.NameSet} object.
      */
-    public ScaleableNamedFunction(NamedSet named) {
+    public ScaleableNamedFunction(NameSet named) {
         super(named.names());
     }    
 

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapPoint;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;

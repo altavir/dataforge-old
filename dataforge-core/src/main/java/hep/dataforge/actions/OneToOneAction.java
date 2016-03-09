@@ -16,14 +16,12 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.Data;
+import hep.dataforge.data.Data;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.dependencies.DataNode;
-import hep.dataforge.dependencies.DataSet;
-import hep.dataforge.dependencies.NamedData;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.io.log.Log;
-import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,25 +50,26 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
      *
-     * @param meta
+     * @param groupMeta
      * @param data
      * @return
      */
-    public ActionResult<R> runOne(String name, Meta meta, Data<? extends T> data) {
+    public ActionResult<R> runOne(String name, Meta groupMeta, Data<? extends T> data) {
         ActionResult<T> previous = (ActionResult<T>) data;
-        Log log = buildLog(meta, previous);
+        Log log = buildLog(groupMeta, previous);
+        Meta meta = buildMeta(data, groupMeta);
         CompletableFuture<R> future = previous.getInFuture().
                 thenCompose((T t) -> CompletableFuture
-                        .supplyAsync(() -> transform(name, log, meta, t), buildExecutor(meta, data)));
+                        .supplyAsync(() -> transform(log, name, meta, t), buildExecutor(groupMeta, data)));
 
         return new ActionResult(getOutputType(),
                 log,
                 future);
     }
-    
-    public ActionResult<R> runOne(Meta meta, NamedData<T> data){
+
+    public ActionResult<R> runOne(Meta meta, NamedData<T> data) {
         return runOne(data.getName(), meta, data);
-    }    
+    }
 
     @Override
     public DataNode<R> run(DataNode<T> set) {
@@ -82,15 +81,24 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                 stream.collect(Collectors.toMap(entry -> entry.getKey(),
                         entry -> runOne(entry.getKey(), set.meta(), entry.getValue()))));
     }
-    
-    private R transform(String name, Logable log, Meta meta, T input) {
+
+    /**
+     *
+     * @param log log for this evaluation
+     * @param name name of the input item
+     * @param meta combined meta for this evaluation. Includes data meta, group
+     * meta and action meta
+     * @param input input data
+     * @return
+     */
+    private R transform(Logable log, String name, Meta meta, T input) {
         beforeAction(name, input, log);
-        R res = execute(log, meta, input);
+        R res = execute(log, name, meta, input);
         afterAction(name, res);
         return res;
     }
 
-    protected abstract R execute(Logable log, Meta meta, T input);
+    protected abstract R execute(Logable log, String name, Meta meta, T input);
 
     protected void afterAction(String name, R res) {
         logger().info("Action '{}[{}]' is finished", getName(), name);

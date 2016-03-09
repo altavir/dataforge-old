@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;

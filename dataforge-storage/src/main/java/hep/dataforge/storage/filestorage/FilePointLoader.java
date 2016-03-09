@@ -6,10 +6,10 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.data.Format;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.data.SimpleParser;
+import hep.dataforge.points.Format;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.SimpleParser;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.LineIterator;
 import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
@@ -29,8 +29,8 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import hep.dataforge.data.PointSet;
-import hep.dataforge.data.PointParser;
+import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointParser;
 
 /**
  *
@@ -170,7 +170,7 @@ public class FilePointLoader extends AbstractPointLoader {
 
     @Override
     public PointSet asDataSet() throws StorageException {
-        return new ListPointSet(getName(), meta(), this, getFormat());
+        return new ListPointSet(this, getFormat());
     }
 
     @Override

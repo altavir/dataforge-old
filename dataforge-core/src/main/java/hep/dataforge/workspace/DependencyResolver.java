@@ -15,7 +15,7 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.Data;
+import hep.dataforge.data.Data;
 
 /**
  * Data resolver is the tool used to validate for dependency availability,

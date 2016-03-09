@@ -15,11 +15,11 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.SimpleParser;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.SimpleParser;
 import java.io.InputStream;
 import java.util.Iterator;
-import hep.dataforge.data.PointParser;
+import hep.dataforge.points.PointParser;
 
 /**
  *
@@ -38,7 +38,7 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      * Constructor for DataPointStringIterator.</p>
      *
      * @param reader a {@link java.util.Iterator} object.
-     * @param parser a {@link hep.dataforge.data.PointParser} object.
+     * @param parser a {@link hep.dataforge.points.PointParser} object.
      */
     public DataPointStringIterator(Iterator<String> reader, PointParser parser) {
         this.reader = reader;
@@ -50,7 +50,7 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      * Constructor for DataPointStringIterator.</p>
      *
      * @param stream a {@link java.io.InputStream} object.
-     * @param parser a {@link hep.dataforge.data.PointParser} object.
+     * @param parser a {@link hep.dataforge.points.PointParser} object.
      */
     public DataPointStringIterator(InputStream stream, PointParser parser) {
         this.reader = new LineIterator(stream);

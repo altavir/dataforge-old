@@ -19,7 +19,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.DataNode;
 
 /**
  * The mutable data content of a task.

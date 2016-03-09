@@ -22,12 +22,10 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.DataNode;
 
 /**
  * <p>
@@ -54,10 +52,10 @@ public class RunManager {
      * @param actionRoot
      * @return
      */
-    public static ActionResult executeAction(Context context, Meta actionRoot) {
+    public static DataNode executeAction(Context context, Meta actionRoot) {
         Action action = readAction(context, actionRoot);
 
-        ActionResult data;
+        DataNode data;
 
         if (actionRoot.hasNode(DataManager.DATA_ELEMENT)) {
             Meta dataElement = actionRoot.getNode(DataManager.DATA_ELEMENT);
@@ -68,21 +66,16 @@ public class RunManager {
         return action.run(data);
     }
 
-    @Deprecated
-    public static ActionResult executeXML(Context context, File cfgFile) throws IOException, InterruptedException, ParseException {
-        if (cfgFile.exists()) {
+    public static DataNode executeAction(Context context, String path) throws IOException, ParseException {
+        MetaBuilder config = MetaFileReader.instance().read(context, path);
 
-            MetaBuilder config = MetaFileReader.instance().read(context, cfgFile, null);
-
-            //FIXME substitution of properties and context properties should be the same
-            readProperties(context, config);
-            //building Meta ensures that context values are substituted
-            return executeAction(context, config.build());
-        } else {
-            throw new FileNotFoundException();
-        }
+        //FIXME substitution of properties and context properties should be the same
+        readProperties(context, config);
+        //building Meta ensures that context values are substituted
+        return executeAction(context, config.build());
     }
 
+    
     /**
      * считываем action или actionlist в зависимости от того, что на входе
      *
@@ -118,21 +111,13 @@ public class RunManager {
         return res;
     }
 
-    /**
-     * <p>
-     * readOptions.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param element a {@link hep.dataforge.meta.Meta} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
     public static void readProperties(Context context, Meta element)
             throws ContentException {
         if (element.hasNode("property")) {
             List<? extends Meta> propertyNodes = element.getNodes("property");
-            for (Meta option : propertyNodes) {
+            propertyNodes.stream().forEach((option) -> {
                 context.putValue(option.getString("key"), option.getString("value"));
-            }
+            });
         }
     }
 
@@ -145,15 +130,9 @@ public class RunManager {
      */
     public static Action composite(Action first, Action last) {
         return new Action() {
-
             @Override
-            public ActionResult run(DataNode res) {
+            public DataNode run(DataNode res) {
                 return last.run(first.run(res));
-            }
-
-            @Override
-            public Meta meta() {
-                return null;
             }
 
             @Override
@@ -162,18 +141,9 @@ public class RunManager {
             }
 
             @Override
-            public void addListener(ActionStateListener listener) {
-                first.addListener(listener);
-                last.addListener(listener);
+            public Meta meta() {
+                return Meta.empty();
             }
-
-            @Override
-            public void removeListener(ActionStateListener listener) {
-                first.removeListener(listener);
-                last.removeListener(listener);
-            }
-
         };
-
     }
 }

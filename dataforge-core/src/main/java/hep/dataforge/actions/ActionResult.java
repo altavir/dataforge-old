@@ -15,7 +15,7 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.dependencies.Data;
+import hep.dataforge.data.Data;
 import hep.dataforge.io.log.Log;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;

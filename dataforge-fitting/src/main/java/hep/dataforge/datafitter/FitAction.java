@@ -24,12 +24,13 @@ import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * <p>
@@ -88,8 +89,8 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Logable log, Meta meta, PointSet input) {
-        List<FitTask> tasks = buildTaskList(input.meta(), meta());
+    protected FitState execute(Logable log, String name, Meta meta, PointSet input) {
+        List<FitTask> tasks = buildTaskList(meta);
 
 //        boolean printresult = meta().getBoolean("printresult", true);
         if (tasks.isEmpty()) {
@@ -97,18 +98,12 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
         }
 
         FitState res = buildInitialState(meta, input);
-        PrintWriter writer = new PrintWriter(buildActionOutput(input));
+        PrintWriter writer = new PrintWriter(buildActionOutput(name));
 
         for (FitTask task : tasks) {
             res = fm.runTask(res, task, writer, log);
         }
         log.getLog().print(writer);
-//        if (printresult) {
-//
-//            res.print(writer);
-
-//            //Вывод идет в UI по-умолчанию для этого действия и этого результата
-//        }
         return res;
     }
 
@@ -123,25 +118,28 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
             model = mm.buildModel(getContext(), meta.getString(MODEL_PATH));
         }
 
-        ParamSet params = ParamSet.fromAnnotation(meta());
-        params.updateFrom(ParamSet.fromAnnotation(input.meta()));
+        ParamSet params;
+        if (meta instanceof Laminate) {
+            //updating parameters for each laminate 
+            Laminate laminate = (Laminate) meta;
+            params = new ParamSet();
+            laminate.layersInverse().stream().forEach((layer) -> {
+                params.updateFrom(ParamSet.fromAnnotation(layer));
+            });
+        } else {
+            params = ParamSet.fromAnnotation(meta());
+        }
 
-        return FitManager.buildState(input, model, params);
-
-    }
-
-    private List<FitTask> buildTaskList(Meta dataAnnotation, Meta actionAnnotation) {
-        Meta defan = MergeRule.replace(dataAnnotation, actionAnnotation);
-        return buildTaskList(defan);
+        return new FitState(input, model, params);
 
     }
 
     private List<FitTask> buildTaskList(Meta annotation) {
         List<FitTask> list = new ArrayList<>();
         if (annotation.hasNode(TASK_PATH)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
-            for (Meta an : annotation.getNodes(TASK_PATH)) {
+            annotation.getNodes(TASK_PATH).stream().forEach((an) -> {
                 list.add(new FitTask(an));
-            }
+            });
         } else { // если и там нет, то считаем что имеется всего одна задача и она зашифрована в а аннотациях
             list.add(new FitTask(annotation));
 

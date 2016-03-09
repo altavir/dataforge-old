@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
@@ -25,7 +25,7 @@ import static java.lang.Math.sqrt;
 import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 import static java.lang.Double.isNaN;
 import static java.lang.Double.isNaN;
 import static java.lang.Double.isNaN;

@@ -16,7 +16,7 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.data.ListPointSet;
+import hep.dataforge.points.ListPointSet;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.MINUITPlugin;
 import hep.dataforge.datafitter.ParamSet;

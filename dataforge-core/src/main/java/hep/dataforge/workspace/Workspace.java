@@ -20,8 +20,8 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
-import hep.dataforge.dependencies.Data;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
 
 /**
  * A place to store tasks and their results

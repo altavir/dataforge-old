@@ -16,7 +16,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.dependencies.Data;
+import hep.dataforge.data.Data;
 
 /**
  * A generalization of result of the task. It could be lazy!

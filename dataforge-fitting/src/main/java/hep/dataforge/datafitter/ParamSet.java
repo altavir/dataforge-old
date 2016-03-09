@@ -40,13 +40,6 @@ import org.slf4j.LoggerFactory;
  */
 public class ParamSet implements NamedDoubleSet {
 
-    /**
-     * <p>
-     * fromAnnotation.</p>
-     *
-     * @param cfg a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.datafitter.ParamSet} object.
-     */
     @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.datafitter.Param.fromAnnotation")
     @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
     public static ParamSet fromAnnotation(Meta cfg) {
@@ -469,9 +462,9 @@ public class ParamSet implements NamedDoubleSet {
      * @param set a {@link hep.dataforge.datafitter.ParamSet} object.
      */
     public void updateFrom(ParamSet set) {
-        for (Param p : set.getParams()) {
+        set.getParams().stream().forEach((p) -> {
             setPar(p);
-        }
+        });
     }
 
 }

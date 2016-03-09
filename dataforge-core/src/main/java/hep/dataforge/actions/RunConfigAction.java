@@ -15,47 +15,24 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.content.NullContent;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.ActionExecutionException;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.DataNode;
 
-/**
- * <p>
- * RunConfigAction class.</p>
- *
- * @author Alexander Nozik
- * @version $Id: $Id
- */
-@TypedActionDef(name = "run", inputType = NullContent.class, description = "Run action with given configuration")
+@TypedActionDef(name = "run", description = "Run action with given configuration")
 @ValueDef(name = "configFile", info = "The configuration file name and path")
 @ValueDef(name = "contextName", info = "The name of the context in which the action will be run")
 public class RunConfigAction extends GenericAction {
 
-    /**
-     * <p>
-     * Constructor for RunConfigAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     */
     public RunConfigAction(Context context, Meta annotation) {
         super(context, "run", annotation);
-    }
-
-    @Override
-    protected List execute(Logable log, Meta packAnnotation, DataNode input) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -65,10 +42,10 @@ public class RunConfigAction extends GenericAction {
      * @return
      */
     @Override
-    public ActionResult run(DataNode input) throws ActionExecutionException {
+    public DataNode run(DataNode input){
         Meta cfg;
 
-        Meta meta = readMeta(input.meta());
+        Meta meta = buildMeta(input.meta());
 
         String contextName = meta.getString("contextName", getName());
         Context ac = new Context(getContext(), contextName);

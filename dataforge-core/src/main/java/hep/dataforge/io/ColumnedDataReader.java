@@ -15,10 +15,8 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListPointSet;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -26,8 +24,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import hep.dataforge.data.PointSet;
-import hep.dataforge.data.PointParser;
+import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointParser;
 
 /**
  * <p>
@@ -46,7 +44,7 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
      * Constructor for ColumnedDataReader.</p>
      *
      * @param file a {@link java.io.File} object.
-     * @param parser a {@link hep.dataforge.data.PointParser} object.
+     * @param parser a {@link hep.dataforge.points.PointParser} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataReader(File file, PointParser parser) throws FileNotFoundException {
@@ -99,15 +97,19 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
         reader.skip(n);
     }
 
-    /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
     public Iterator<DataPoint> iterator() {
         return reader;
     }
 
     /**
-     * <p>Getter for the field <code>meta</code>.</p>
+     * <p>
+     * Getter for the field <code>meta</code>.</p>
      *
      * @return a {@link java.lang.String} object.
      */
@@ -115,23 +117,12 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
         return meta;
     }
 
-    private Meta getAnnotation() {
-        return MetaBuilder.buildEmpty("");
-    }
-
-    /**
-     * <p>toDataSet.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.PointSet} object.
-     */
-    public PointSet toDataSet(String name) {
-        Meta an = getAnnotation();
+    public PointSet toDataSet() {
         List<DataPoint> points = new ArrayList<>();
         for (Iterator<DataPoint> iterator = this.iterator(); iterator.hasNext();) {
             points.add(iterator.next());
         }
-        return new ListPointSet(name, an, points);
+        return new ListPointSet(points);
     }
 
 }

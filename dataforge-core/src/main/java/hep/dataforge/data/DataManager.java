@@ -15,26 +15,20 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.actions.ActionResult;
-import hep.dataforge.actions.Pack;
-import hep.dataforge.content.ContentList;
-import hep.dataforge.content.NamedGroup;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import static hep.dataforge.data.FileData.FILE_META;
-import hep.dataforge.dependencies.StaticData;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.points.SourceSetLoader;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
  * A replacement for obsolete ImportDataAction
@@ -43,20 +37,11 @@ import java.util.stream.Collectors;
  */
 public class DataManager implements Encapsulated {
 
-    /**
-     * Constant <code>DATA_DIR="dataDir"</code>
-     */
     public static final String DATA_DIR = "dataDir";
-
-    /**
-     * Constant <code>DATA_ELEMENT="data"</code>
-     */
     public static final String DATA_ELEMENT = "data";
-
-    /**
-     * Constant <code>GROUP_TAG="dataGroup"</code>
-     */
     public static final String GROUP_TAG = "dataGroup";
+    public static final String FILE_META = "meta";
+    
     private final Context context;
 
     public DataManager(Context context) {
@@ -68,14 +53,6 @@ public class DataManager implements Encapsulated {
         return context;
     }
 
-    /**
-     * <p>
-     * read.</p>
-     *
-     * @param an
-     * @return a {@link hep.dataforge.content.NamedGroup} object.
-     * @throws java.io.IOException if any.
-     */
     @ValueDef(name = "dataDir", info = "The absolute or relative path to the data directory. By default is taken from Context.")
     @NodeDef(name = "file", multiple = true, info = "Single file or multiple files imported by mask with the same metadata", target = "method::hep.dataforge.data.FileData.buildByMask")
     @NodeDef(name = "group", multiple = true, info = "The group of data with same metadata. The metadata is provided by 'meta' element. It is possible to combine multiple subgroups (in this case metatadata is merged).")
@@ -89,9 +66,9 @@ public class DataManager implements Encapsulated {
         return new ContentList<>("data", readDataConfiguration(parentDir, an));
     }
 
-    private List<FileData> readDataConfiguration(File parentDir, Meta ds) throws IOException, ContentException, ParseException {
+    private DataNode readDataConfiguration(File parentDir, Meta ds) throws IOException, ContentException, ParseException {
         assert parentDir.exists() && parentDir.isDirectory();
-        List<FileData> res = new ArrayList<>();
+        List<Data> res = new ArrayList<>();
 
         if (ds.hasNode("file")) {
             List<? extends Meta> fileMaskAnnotations = ds.getNodes("file");
@@ -112,7 +89,7 @@ public class DataManager implements Encapsulated {
             List<? extends Meta> groupAnnotations = ds.getNodes("group");
             for (Meta an : groupAnnotations) {
                 List<FileData> list = readDataConfiguration(parentDir, an);
-                list.stream().map((d) -> {
+                list.stream().<Data>map((d) -> {
                     // Обновляем аннотацию файла. Основной считаем аннотацию файла, а не контейнера
 
                     //FIXME сделать тут добавление группового тэга во всевложенные аннотации
@@ -151,7 +128,7 @@ public class DataManager implements Encapsulated {
         return res;
     }
 
-    public ActionResult readFromConfig(Meta dataConfiguration) throws ContentException {
+    public DataNode readFromConfig(Meta dataConfiguration) throws ContentException {
         if (dataConfiguration.hasNode(DATA_ELEMENT)) {
             dataConfiguration = dataConfiguration.getNode(DATA_ELEMENT);
         }
@@ -163,14 +140,16 @@ public class DataManager implements Encapsulated {
         }
 
         try {
+            
+            //FIXME revise data holders
             List<FileData> res = readDataConfiguration(parentDir, dataConfiguration);
             res.stream().forEach((d) -> {
                 getContext().log("Importing file {}", d.getInputFile().getName());
             });
-            return new Pack(null, dataConfiguration, getContext(), FileData.class,
-                    res.stream()
-                    .map((FileData f) -> new StaticData<>(f))
-                    .collect(Collectors.toList()));
+            return DataSet.builder(FileData.class)
+                    .putAll(res)
+                    .build();
+
         } catch (IOException | ParseException ex) {
             throw new ContentException("File not found");
         }

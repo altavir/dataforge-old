@@ -25,7 +25,7 @@ import hep.dataforge.values.Value;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface NamedValueSet extends NamedSet, Cloneable {
+public interface NamedValueSet extends NameSet, Cloneable {
 
     /**
      * <p>

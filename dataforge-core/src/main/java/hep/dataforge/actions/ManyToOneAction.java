@@ -15,9 +15,8 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.content.Content;
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.DataNode;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
@@ -33,7 +32,7 @@ import java.util.concurrent.CompletableFuture;
  * @param <T>
  * @param <R>
  */
-public abstract class ManyToOneAction<T extends Content, R extends Content> extends GenericAction<T, R> {
+public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     public ManyToOneAction(Context context, String name, Meta annotation) {
         super(context, name, annotation);

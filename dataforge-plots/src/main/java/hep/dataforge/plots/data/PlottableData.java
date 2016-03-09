@@ -15,16 +15,16 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  *
@@ -104,7 +104,7 @@ public class PlottableData extends XYPlottable {
     }
 
 //    private static Meta extractMeta(PointSet data) {
-//        return data.meta().getNode("plot", Meta.buildEmpty("plot"));
+//        return data.meta().getNode("plot", Meta.empty("plot"));
 //    }
     @Override
     public Collection<DataPoint> plotData() {

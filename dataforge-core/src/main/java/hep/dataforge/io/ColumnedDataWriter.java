@@ -15,8 +15,8 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.Format;
-import hep.dataforge.data.DataPoint;
+import hep.dataforge.points.Format;
+import hep.dataforge.points.DataPoint;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -28,7 +28,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Scanner;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * Вывод форматированного набора данных в файл или любой другой поток вывода
@@ -57,7 +57,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * Constructor for ColumnedDataWriter.</p>
      *
      * @param stream a {@link java.io.OutputStream} object.
-     * @param format a {@link hep.dataforge.data.Format} object.
+     * @param format a {@link hep.dataforge.points.Format} object.
      */
     public ColumnedDataWriter(OutputStream stream, Format format) {
         this.writer = new PrintWriter(stream);
@@ -88,7 +88,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      *
      * @param file a {@link java.io.File} object.
      * @param append a boolean.
-     * @param format a {@link hep.dataforge.data.Format} object.
+     * @param format a {@link hep.dataforge.points.Format} object.
      * @param encoding
      * @throws java.io.FileNotFoundException if any.
      */
@@ -125,7 +125,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * <p>
      * writePoint.</p>
      *
-     * @param point a {@link hep.dataforge.data.DataPoint} object.
+     * @param point a {@link hep.dataforge.points.DataPoint} object.
      */
     public void writePoint(DataPoint point) {
         writer.println(format.format(point));
@@ -167,7 +167,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * writeDataSet.</p>
      *
      * @param file a {@link java.io.File} object.
-     * @param data a {@link hep.dataforge.data.PointSet} object.
+     * @param data a {@link hep.dataforge.points.PointSet} object.
      * @param head a {@link java.lang.String} object.
      * @param append a boolean.
      * @param names a {@link java.lang.String} object.
@@ -179,15 +179,6 @@ public class ColumnedDataWriter implements AutoCloseable {
         }
     }
 
-    /**
-     * <p>
-     * writeDataSet.</p>
-     *
-     * @param stream a {@link java.io.OutputStream} object.
-     * @param data a {@link hep.dataforge.data.PointSet} object.
-     * @param head a {@link java.lang.String} object.
-     * @param names a {@link java.lang.String} object.
-     */
     public static void writeDataSet(OutputStream stream, PointSet data, String head, String... names) {
         ColumnedDataWriter writer;
         Format format;
@@ -207,9 +198,9 @@ public class ColumnedDataWriter implements AutoCloseable {
         }
         writer.comment(head);
         writer.ln();
-        if (!data.meta().isEmpty()) {
-            writer.comment(new XMLMetaWriter().writeString(data.meta(), null));
-        }
+//        if (!data.meta().isEmpty()) {
+//            writer.comment(new XMLMetaWriter().writeString(data.meta(), null));
+//        }
         writer.writeFormatHeader();
         for (DataPoint dp : data) {
             writer.writePoint(dp);

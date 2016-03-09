@@ -19,18 +19,21 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
 import java.nio.ByteBuffer;
 import java.util.Map;
+import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 /**
  * The message is a pack that can include three principal parts:
  * <ul>
- *  <li>Envelope properties</li>
- *  <li>Envelope meta-data</li>
- *  <li>binary data</li>
+ * <li>Envelope properties</li>
+ * <li>Envelope meta-data</li>
+ * <li>binary data</li>
  * </ul>
+ *
  * @author Alexander Nozik
  */
 public interface Envelope extends Annotated {
-    
+
     //Constants
     public static final String TYPE_KEY = "type";
     public static final String VERSION_KEY = "version";
@@ -39,10 +42,27 @@ public interface Envelope extends Annotated {
     public static final String META_ENCODING_KEY = "metaEncoding";
     public static final String META_LENGTH_KEY = "metaLength";
     public static final String DATA_TYPE_KEY = "dataType";
-    public static final String DATA_LENGTH_KEY = "dataLength";    
-    
+    public static final String DATA_LENGTH_KEY = "dataLength";
+
     Map<String, Value> getProperties();
-    
+
+    /**
+     * Read data into buffer. This operation could take a lot of time so be
+     * careful when performing it synchronously
+     *
+     * @return
+     */
     ByteBuffer getData();
-    
+
+    /**
+     * Get data in future using asynchronous call
+     *
+     * @return
+     */
+    default Future<ByteBuffer> getDataInFuture() {
+        FutureTask<ByteBuffer> res = new FutureTask<>(() -> getData());
+        res.run();
+        return res;
+    }
+
 }

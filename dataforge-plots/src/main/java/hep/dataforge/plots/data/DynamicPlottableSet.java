@@ -15,7 +15,7 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.data.DataPoint;
+import hep.dataforge.points.DataPoint;
 import hep.dataforge.values.Value;
 import java.util.Iterator;
 

@@ -5,8 +5,8 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.data.MapPoint;
-import hep.dataforge.data.PointListener;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.PointListener;
 import hep.dataforge.values.Value;
 import java.time.Duration;
 import java.time.Instant;

@@ -18,7 +18,7 @@ package hep.dataforge.actions;
 import hep.dataforge.content.Named;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.dependencies.DataNode;
+import hep.dataforge.data.DataNode;
 
 /**
  * The action is an independent process that could be performed on one

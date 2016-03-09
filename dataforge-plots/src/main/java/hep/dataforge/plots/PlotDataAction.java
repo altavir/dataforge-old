@@ -18,7 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.actions.ActionResult;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.data.PointSet;
+import hep.dataforge.points.PointSet;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -73,7 +73,7 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     public PlotDataAction(Context context, Meta annotation) {
         super(context, annotation);
         //initializing plots plugin if it is not present
-        if(!context.provides("plots")){
+        if (!context.provides("plots")) {
             context.loadPlugin(new PlotsPlugin());
         }
         holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
@@ -97,30 +97,29 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     }
 
     @Override
-    protected PointSet execute(Logable log, Meta meta, PointSet input){
-        Meta finder = readMeta(input.meta());
+    protected PointSet execute(Logable log, String name, Meta meta, PointSet input) {
         PlotFrame frame;
 
-        String groupBy = finder.getString("groupBy");
-        String frame_name = finder.getString(groupBy, "default");
+        String groupBy = meta.getString("groupBy");
+        String frame_name = meta.getString(groupBy, "default");
         if (holder.hasPlotFrame(frame_name)) {
             frame = holder.getPlotFrame(frame_name);
         } else {
-            frame = holder.buildPlotFrame(frame_name, findFrameDescription(finder, frame_name));
+            frame = holder.buildPlotFrame(frame_name, findFrameDescription(meta, frame_name));
         }
-        XYAdapter adapter = new XYAdapter(finder.getNode("adapter",Meta.buildEmpty("adapter")));
-        
-        frame.add(PlottableData.plot(input,adapter));
+        XYAdapter adapter = new XYAdapter(meta.getNode("adapter", Meta.buildEmpty("adapter")));
 
-        if (finder.hasNode("snapshot")) {
-            snapshot(log, frame, finder.getNode("snapshot"));
-        } else if (finder.getBoolean("snapshot", false)) {
+        frame.add(PlottableData.plot(input, adapter));
+
+        if (meta.hasNode("snapshot")) {
+            snapshot(log, frame, meta.getNode("snapshot"));
+        } else if (meta.getBoolean("snapshot", false)) {
             snapshot(log, frame, MetaBuilder.buildEmpty("snapshot"));
         }
 
-        if (finder.hasNode("serialize")) {
-            serialize(log, frame, finder.getNode("serialize"));
-        } else if (finder.getBoolean("serialize", false)) {
+        if (meta.hasNode("serialize")) {
+            serialize(log, frame, meta.getNode("serialize"));
+        } else if (meta.getBoolean("serialize", false)) {
             serialize(log, frame, MetaBuilder.buildEmpty("serialize"));
         }
 
@@ -131,18 +130,13 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
-    protected void afterAction(ActionResult output) throws ContentException {
+    protected void afterAction(String name, PointSet res) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
-
-        for (Runnable r : snapshotTasks.values()) {
-            r.run();
-        }
+        snapshotTasks.values().stream().forEach((r) -> r.run());
         snapshotTasks.clear();
-        for (Runnable r : serializeTasks.values()) {
-            r.run();
-        }
+        serializeTasks.values().stream().forEach((r) -> r.run());
         serializeTasks.clear();
-        super.afterAction(output); //To change body of generated methods, choose Tools | Templates.
+        super.afterAction(name, res);
     }
 
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
@@ -184,4 +178,4 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
             LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart serialization is supported.");
         }
     }
- }
+}

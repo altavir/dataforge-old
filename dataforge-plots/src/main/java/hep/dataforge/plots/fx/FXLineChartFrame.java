@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.XYPlotFrame;
