@@ -151,7 +151,11 @@ class NameToken implements Name {
      * The full name including query
      */
     private String token() {
-        return String.format("%s[%s]", theName, theQuery);
+        if (theQuery != null) {
+            return String.format("%s[%s]", theName, theQuery);
+        } else {
+            return theName;
+        }
     }
 
 }

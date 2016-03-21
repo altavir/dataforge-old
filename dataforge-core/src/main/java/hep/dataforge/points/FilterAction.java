@@ -26,7 +26,7 @@ import hep.dataforge.meta.Meta;
 import java.util.function.Predicate;
 
 /**
- * действие для фильтрации {@code ListDataSet}
+ * действие для фильтрации {@code ListPointSet}
  *
  * @author Alexander Nozik
  * @version $Id: $Id

@@ -6,11 +6,14 @@
 package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.description.NodeDef;
 import hep.dataforge.meta.Meta;
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+@NodeDef(name = "file", info = "File data element or list of files with the same meta defined by mask.")
+@NodeDef(name = "dir", info = "Directory data node.")
 public class FileDataFactory extends DataFactory {
 
     public static final String FILE_NODE = "file";

@@ -83,7 +83,7 @@ public class ListPointSet implements PointSet {
      */
     public ListPointSet(List<DataPoint> points) {
         if (points.isEmpty()) {
-            throw new IllegalArgumentException("Can't create ListDataSet from the empty list. Format required.");
+            throw new IllegalArgumentException("Can't create ListPointSet from the empty list. Format required.");
         }
         this.format = Format.forPoint(points.get(0));
         addAll(points);

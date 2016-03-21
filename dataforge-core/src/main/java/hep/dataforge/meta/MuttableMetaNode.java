@@ -84,23 +84,20 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * @param notify notify listeners
      */
     public T putNode(String name, Meta element, boolean notify) {
-        if (element.isAnonimous()) {
-            throw new AnonymousNotAlowedException();
+        if (!isValidElementName(name)) {
+            throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", name));
         }
-
-        String aName = element.getName();
-        if (!isValidElementName(aName)) {
-            throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", aName));
-        }
-        List<T> list = this.getChildNodeItem(aName);
+        
+        T newNode = transformNode(name, element);
+        List<T> list = this.getChildNodeItem(name);
         List<T> oldList = list != null ? new ArrayList<>(list) : null;
         if (list == null) {
             List<Meta> newList = new ArrayList<>();
-            newList.add(transformNode(name, element));
-            this.setNodeItem(aName, newList);
-            list = this.getChildNodeItem(aName);
+            newList.add(newNode);
+            this.setNodeItem(name, newList);
+            list = this.getChildNodeItem(name);
         } else {
-            list.add(transformNode(name, element));
+            list.add(newNode);
         }
         if (notify) {
             notifyNodeChanged(element.getName(), oldList, list);
@@ -150,18 +147,18 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
             if (hasValue(name)) {
                 Value oldValue = getValue(name);
 
-                List<Value> list = new ArrayList(this.getValue(name).listValue());
+                List<Value> list = new ArrayList(oldValue.listValue());
                 list.add(value);
 
                 Value newValue = Value.of(list);
 
-                this.values.put(name, newValue);
+                setValueItem(name, newValue);
 
                 if (notify) {
                     notifyValueChanged(name, oldValue, newValue);
                 }
             } else {
-                this.values.put(name, value);
+                setValueItem(name, value);
             }
         }
         return currentState();
@@ -451,8 +448,8 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 
     private T transformNode(String name, Meta node) {
         T el = cloneNode(node);
-        el.parent = this;
         el.setName(name);
+        el.parent = this;        
         return el;
     }
 

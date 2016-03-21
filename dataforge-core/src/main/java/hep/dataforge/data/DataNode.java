@@ -36,6 +36,14 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     Data<? extends T> getData(String name);
+    
+    /**
+     * Access first data element in this node. Useful for single data nodes.
+     * @return 
+     */
+    default Data<? extends T> getData(){
+        return stream().findFirst().orElse(null).getValue();
+    }
 
     /**
      * Named stream of data elements including subnodes if they are present

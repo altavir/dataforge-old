@@ -218,31 +218,23 @@ public class MetaNode<T extends MetaNode> extends Meta {
     }
 
     /**
-     * Return a direct descendant node with given name.
+     * Return a direct descendant node with given name. Return null if it is not found.
      *
      * @param name
      * @return
      */
     protected List<T> getChildNodeItem(String name) {
-        if (getNodeNames().contains(name)) {
-            return nodes.get(name);
-        } else {
-            throw new NameNotFoundException(name);
-        }
+        return nodes.get(name);
     }
 
     /**
-     * Return value of this node with given name
+     * Return value of this node with given name. Return null if it is not found.
      *
      * @param name
      * @return
      */
     protected Value getChildValue(String name) {
-        if (getValueNames().contains(name)) {
-            return values.get(name);
-        } else {
-            throw new NameNotFoundException(name);
-        }
+        return values.get(name);
     }
 
     protected boolean isValidElementName(String name) {

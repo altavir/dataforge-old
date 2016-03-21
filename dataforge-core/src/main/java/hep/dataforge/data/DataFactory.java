@@ -16,6 +16,9 @@
 package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
+import static hep.dataforge.data.DataFactory.*;
+import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaFactory;
 
@@ -24,6 +27,10 @@ import hep.dataforge.utils.MetaFactory;
  *
  * @author Alexander Nozik
  */
+@NodeDef(name = DATA_META_KEY, info = "node meta-data")
+@NodeDef(name = DATA_NODE_KEY)
+@ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
+@ValueDef(name = TYPE_VALUE_KEY, info = "Node or data type")
 public abstract class DataFactory implements MetaFactory<DataTree> {
 
     public static final String DATA_META_KEY = "@meta";
