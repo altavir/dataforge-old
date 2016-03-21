@@ -43,7 +43,7 @@ public class PlotContainerTest {
         PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
 
         JFreeChartFrame frame = new JFreeChartFrame("my plot", null);
-        
+
         container.setPlot(frame);
 
         UnivariateFunction func = (double x1) -> x1 * x1;
@@ -60,7 +60,7 @@ public class PlotContainerTest {
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         PointSet ds = new ListPointSet(data);
 
-        PlottableData dataPlot = PlottableData.plot(ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));
+        PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 

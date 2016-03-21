@@ -15,7 +15,7 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Configurable;
 import javafx.collections.ObservableList;

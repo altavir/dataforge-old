@@ -15,7 +15,7 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 

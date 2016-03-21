@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.io.envelopes.Target;
 import hep.dataforge.meta.Annotated;

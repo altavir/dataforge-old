@@ -16,7 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.data.DataManager;
+import hep.dataforge.data.DataFactory;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
@@ -26,6 +26,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.FileDataFactory;
 
 /**
  * <p>
@@ -44,6 +45,8 @@ public class RunManager {
      * Constant <code>ACTION_LABEL="action"</code>
      */
     public static final String ACTION_LABEL = "action";
+    
+    public static final String DATA_ELEMENT = "data";
 
     /**
      * хелпер для быстрого запуска действия, использующего только ввод и вывод
@@ -57,9 +60,9 @@ public class RunManager {
 
         DataNode data;
 
-        if (actionRoot.hasNode(DataManager.DATA_ELEMENT)) {
-            Meta dataElement = actionRoot.getNode(DataManager.DATA_ELEMENT);
-            data = new DataManager(context).readFromConfig(dataElement);
+        if (actionRoot.hasNode(DATA_ELEMENT)) {
+            Meta dataElement = actionRoot.getNode(DATA_ELEMENT);
+            data = new FileDataFactory().build(context, dataElement);
         } else {
             data = null;
         }

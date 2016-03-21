@@ -15,8 +15,8 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.content.Named;
-import hep.dataforge.content.NamedMetaHolder;
+import hep.dataforge.names.Named;
+import hep.dataforge.names.NamedMetaHolder;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.description.ActionDescriptor;
@@ -29,7 +29,6 @@ import java.io.OutputStream;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
-import hep.dataforge.meta.Annotated;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -180,32 +179,17 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         }
     }
     
-    protected Laminate buildMeta(Data<? extends T> input, Meta nodeMeta){
+    protected Laminate inputMeta(Data<? extends T> input, Meta nodeMeta){
         return new Laminate(input.meta(), nodeMeta, meta())
                 .setValueContext(getContext())
                 .setDescriptor(getDescriptor());
     }
     
-    protected Laminate buildMeta(Meta nodeMeta){
+    protected Laminate inputMeta(Meta nodeMeta){
         return new Laminate(nodeMeta, meta())
                 .setValueContext(getContext())
                 .setDescriptor(getDescriptor());
     }    
-//    protected Meta readMeta(Meta inputAnnotation) {
-//        return new Laminate(inputAnnotation, meta())
-//                .setValueContext(getContext())
-//                .setDescriptor(getDescriptor());
-//    }
-//
-//    protected Meta readMeta(Meta inputAnnotation, Meta groupAnnotation) {
-//        if (groupAnnotation == null) {
-//            return this.readMeta(inputAnnotation);
-//        } else {
-//            return new Laminate(inputAnnotation, groupAnnotation, meta())
-//                    .setValueContext(getContext())
-//                    .setDescriptor(getDescriptor());
-//        }
-//    }
 
     /**
      * Create default OuputStream for given Action and given name
@@ -217,15 +201,11 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
     public OutputStream buildActionOutput(String name) {
         return getContext().io().out(getName(), name);
     }
-
+    
 //    /**
-//     * Create default OuputStream for given Action and given Content
-//     *
-//     * @param action a {@link hep.dataforge.actions.Action} object.
-//     * @param content a {@link hep.dataforge.content.Content} object.
-//     * @return a {@link java.io.OutputStream} object.
+//     * Calculate output meta for given input data node. This operation is performed on {@code run} call.
+//     * @param input
+//     * @return 
 //     */
-//    public OutputStream buildActionOutput(Named content) {
-//        return getContext().io().out(getName(), content.getName());
-//    }
+//    protected abstract Meta calculateMeta(DataNode<? extends T> input);    
 }

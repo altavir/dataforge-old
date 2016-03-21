@@ -11,6 +11,6 @@ import java.io.InputStream;
  *
  * @author Alexander Nozik
  */
-public interface StreamData<T extends InputStream> extends Data<T>  {
+public interface StreamData extends Data<InputStream>  {
     
 }

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.content;
+package hep.dataforge.names;
 
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;

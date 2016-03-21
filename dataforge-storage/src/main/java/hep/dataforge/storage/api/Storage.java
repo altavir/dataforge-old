@@ -15,8 +15,8 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Dispatcher;

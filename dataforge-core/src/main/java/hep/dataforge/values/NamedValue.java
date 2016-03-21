@@ -15,7 +15,7 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import java.time.Instant;
 
 /**

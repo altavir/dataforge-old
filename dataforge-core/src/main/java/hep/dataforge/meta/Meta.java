@@ -15,8 +15,9 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.exceptions.TargetNotProvidedException;
+import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
 import hep.dataforge.navigation.ValueProvider;
@@ -254,4 +255,11 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
         }
         return hash;
     }
+
+    @Override
+    public String toString() {
+        return new XMLMetaWriter().writeString(this);
+    }
+    
+    
 }

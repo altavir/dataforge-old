@@ -18,7 +18,7 @@ package hep.dataforge.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;

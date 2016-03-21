@@ -22,6 +22,7 @@ import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
@@ -31,6 +32,7 @@ import javafx.util.Pair;
  *
  * @author Alexander Nozik
  */
+
 public class GroupBuilder {
 
     /**
@@ -44,7 +46,7 @@ public class GroupBuilder {
     public static GroupRule byValue(final String tag, String defaultTagValue) {
         return new GroupRule() {
             @Override
-            public <T> Map<String, DataNode<T>> group(DataNode<T> input) {
+            public <T> List<DataNode<T>> group(DataNode<T> input) {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
                 input.stream().forEach((Pair<String, Data<? extends T>> entry) -> {
@@ -59,7 +61,7 @@ public class GroupBuilder {
                     map.get(tagValue).putData(entry.getKey(), entry.getValue());
                 });
 
-                return map.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey(), entry-> entry.getValue().build()));
+                return map.values().stream().<DataNode<T>>map(item->item.build()).collect(Collectors.toList());
             }
         };
     }
@@ -72,6 +74,6 @@ public class GroupBuilder {
     }
 
     public interface GroupRule {
-        <T> Map<String, DataNode<T>> group(DataNode<T> input);
+        <T> List<DataNode<T>> group(DataNode<T> input);
     }
 }

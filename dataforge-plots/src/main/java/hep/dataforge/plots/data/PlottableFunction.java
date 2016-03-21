@@ -78,9 +78,7 @@ public class PlottableFunction extends XYPlottable {
 
     @Override
     public Collection<DataPoint> plotData() {
-
         List<DataPoint> list = new ArrayList<>();
-
         for (double x : grid) {
             list.add(new MapPoint(new String[]{"x", "y"}, x, function.value(x)));
         }

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.content.NamedMetaHolder;
+import hep.dataforge.names.NamedMetaHolder;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.DerivativeCalculator;

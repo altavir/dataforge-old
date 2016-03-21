@@ -16,7 +16,7 @@
 package hep.dataforge.io.log;
 
 import ch.qos.logback.classic.Logger;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.utils.ReferenceRegistry;

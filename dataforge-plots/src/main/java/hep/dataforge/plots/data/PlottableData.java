@@ -19,6 +19,7 @@ import hep.dataforge.points.DataPoint;
 import hep.dataforge.points.MapPoint;
 import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
@@ -79,14 +80,21 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
     
-    public static PlottableData plot(PointSet data, XYAdapter adapter){
-        PlottableData plot = plot(data.getName(), adapter, true);
+    public static PlottableData plot(String name, Meta meta, PointSet data, XYAdapter adapter){
+        PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
-        if(data.meta().hasNode("plot")){
-            plot.configure(data.meta().getNode("plot"));
+        if(!meta.isEmpty()){
+            plot.configure(meta);
         }
         return plot;
     }
+    
+    public static PlottableData plot(String name, PointSet data, XYAdapter adapter){
+        PlottableData plot = plot(name, adapter, true);
+        plot.fillData(data);
+        return plot;
+    }
+    
 
     protected List<DataPoint> data;
 

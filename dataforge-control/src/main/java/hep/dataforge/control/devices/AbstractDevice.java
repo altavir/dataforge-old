@@ -15,7 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.content.AnonimousNotAlowed;
+import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.control.connections.Connection;

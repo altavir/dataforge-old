@@ -5,7 +5,6 @@
  */
 package hep.dataforge.data;
 
-import com.sun.istack.internal.Nullable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;

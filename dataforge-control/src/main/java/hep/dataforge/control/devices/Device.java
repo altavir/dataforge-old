@@ -15,7 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;

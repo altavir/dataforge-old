@@ -55,16 +55,13 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public ActionResult<R> runOne(String name, Meta groupMeta, Data<? extends T> data) {
-        ActionResult<T> previous = (ActionResult<T>) data;
-        Log log = buildLog(groupMeta, previous);
-        Meta meta = buildMeta(data, groupMeta);
-        CompletableFuture<R> future = previous.getInFuture().
+        Log log = buildLog(groupMeta, data);
+        Meta meta = inputMeta(data, groupMeta);
+        CompletableFuture<R> future = data.getInFuture().
                 thenCompose((T t) -> CompletableFuture
                         .supplyAsync(() -> transform(log, name, meta, t), buildExecutor(groupMeta, data)));
 
-        return new ActionResult(getOutputType(),
-                log,
-                future);
+        return new ActionResult(getOutputType(), log, future, outputMeta(name, groupMeta, data));
     }
 
     public ActionResult<R> runOne(Meta meta, NamedData<T> data) {
@@ -86,19 +83,33 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      *
      * @param log log for this evaluation
      * @param name name of the input item
-     * @param meta combined meta for this evaluation. Includes data meta, group
+     * @param inputMeta combined meta for this evaluation. Includes data meta, group
      * meta and action meta
      * @param input input data
      * @return
      */
-    private R transform(Logable log, String name, Meta meta, T input) {
+    private R transform(Logable log, String name, Meta inputMeta, T input) {
         beforeAction(name, input, log);
-        R res = execute(log, name, meta, input);
+        R res = execute(log, name, inputMeta, input);
         afterAction(name, res);
         return res;
     }
 
-    protected abstract R execute(Logable log, String name, Meta meta, T input);
+    protected abstract R execute(Logable log, String name, Meta inputMeta, T input);
+
+    /**
+     * Build output meta for given data. This meta is calculated on action call
+     * (no lazy calculations). By default output meta is the same as input data
+     * meta.
+     *
+     * @param name
+     * @param inputMeta
+     * @param data
+     * @return
+     */
+    protected Meta outputMeta(String name, Meta inputMeta, Data<? extends T> data) {
+        return data.meta();
+    }
 
     protected void afterAction(String name, R res) {
         logger().info("Action '{}[{}]' is finished", getName(), name);

@@ -5,7 +5,7 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.navigation.Provider;
 import java.util.stream.Stream;
@@ -20,7 +20,15 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
 
     public static final String DATA_TARGET = "data";
     public static final String NODE_TARGET = "node";
+
+    public static <T> DataNode<T> empty(String name, Class<T> type) {
+        return new EmptyDataNode<>(name, type);
+    }
     
+    public static DataNode empty() {
+        return new EmptyDataNode<>("", Object.class);
+    }    
+
     /**
      * Get Data with given Name
      *
@@ -58,7 +66,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     int size();
 
     /**
-     * Get descendant node in case of tree structure. In case of flats structure
+     * Get descendant node in case of tree structure. In case of flat structure
      * returns node composed of all Data elements with names that begin with
      * {@code <nodename>.}. Child node inherits meta from parent node. In case
      * both nodes have meta, it is merged.

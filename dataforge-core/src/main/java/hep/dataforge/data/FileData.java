@@ -5,16 +5,18 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.names.BaseMetaHolder;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
 /**
  * A data container for Java File
  * @author Alexander Nozik
  */
-public class FileData implements StreamData<FileInputStream> {
+public class FileData extends BaseMetaHolder implements StreamData {
     
     private final File file;
 
@@ -23,7 +25,7 @@ public class FileData implements StreamData<FileInputStream> {
     }
 
     @Override
-    public CompletableFuture<FileInputStream> getInFuture() {
+    public CompletableFuture<InputStream> getInFuture() {
         try {
             return CompletableFuture.completedFuture(new FileInputStream(file));
         } catch (FileNotFoundException ex) {
@@ -33,12 +35,15 @@ public class FileData implements StreamData<FileInputStream> {
     }
 
     @Override
-    public Class<? super FileInputStream> dataType() {
-        return FileInputStream.class;
+    public Class<? super InputStream> dataType() {
+        return InputStream.class;
     }
 
     public File getFile() {
         return file;
     }
     
+    public String fileName(){
+        return file.getName();
+    }
 }

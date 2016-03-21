@@ -58,7 +58,7 @@ public class JFreeFXTest extends Application {
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         PointSet ds = new ListPointSet(data);
 
-        PlottableData dataPlot = PlottableData.plot(ds, new XYAdapter("myX", "myY", "myXErr", "myYErr"));
+        PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myY", "myXErr", "myYErr"));
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

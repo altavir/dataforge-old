@@ -45,7 +45,7 @@ public class RunConfigAction extends GenericAction {
     public DataNode run(DataNode input){
         Meta cfg;
 
-        Meta meta = buildMeta(input.meta());
+        Meta meta = inputMeta(input.meta());
 
         String contextName = meta.getString("contextName", getName());
         Context ac = new Context(getContext(), contextName);

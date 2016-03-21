@@ -5,7 +5,7 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 
 /**
  *

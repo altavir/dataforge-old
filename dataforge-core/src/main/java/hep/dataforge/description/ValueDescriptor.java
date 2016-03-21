@@ -5,8 +5,8 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;

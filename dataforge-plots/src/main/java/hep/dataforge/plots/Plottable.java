@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Annotated;

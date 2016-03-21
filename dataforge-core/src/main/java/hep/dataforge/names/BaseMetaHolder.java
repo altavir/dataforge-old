@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.content;
+package hep.dataforge.names;
 
 import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
@@ -12,16 +12,17 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.navigation.ValueProvider;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
 
 /**
- * The base class for Annotated objects with immutable meta which also
+ * The base class for {@code Meta} objects with immutable meta which also
  * implements ValueProvider and Described interfaces
  *
  * @author Alexander Nozik
  */
 public class BaseMetaHolder implements Annotated, ValueProvider, Described {
 
-    public static final Meta DEFAULT_EMPTY_META = Meta.buildEmpty("");
+    public static final Meta DEFAULT_EMPTY_META = Meta.empty();
 
     private Meta meta;
     private NodeDescriptor descriptor;
@@ -29,6 +30,11 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
     public BaseMetaHolder(Meta meta) {
         this.meta = meta;
     }
+
+    public BaseMetaHolder() {
+    }
+    
+    
 
     /**
      * Return meta of this object. If it is null, than return default meta from
@@ -54,34 +60,40 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
     }
 
     /**
-     * The method to modify meta after creation. It could be blocked by implementation
+     * The method to modify meta after creation. It could be blocked by
+     * implementation
      *
      * @param meta
      */
     public void setMeta(Meta meta) {
+        if(meta != null){
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotanted object");
+        }
         this.meta = meta;
     }
 
     /**
      * Get descriptor and cache it in case we will need it again
-     * @return 
+     *
+     * @return
      */
     @Override
     public NodeDescriptor getDescriptor() {
-        if(descriptor == null){
+        if (descriptor == null) {
             descriptor = Described.super.getDescriptor();
-        } 
+        }
         return descriptor;
     }
 
     /**
-     * Reserved method to set descriptor later
-     * @param descriptor 
+     * Reserved method to set override descriptor later
+     *
+     * @param descriptor
      */
-    protected final void setDescriptor(NodeDescriptor descriptor){
+    protected final void setDescriptor(NodeDescriptor descriptor) {
         this.descriptor = descriptor;
     }
-    
+
     /**
      * If this object's meta provides given value, return it, otherwise, use
      * descriptor

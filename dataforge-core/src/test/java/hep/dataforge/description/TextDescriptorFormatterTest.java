@@ -15,7 +15,7 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import org.junit.Test;
 
 /**

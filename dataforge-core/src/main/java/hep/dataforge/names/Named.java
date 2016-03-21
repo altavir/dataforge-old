@@ -13,17 +13,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.content;
+package hep.dataforge.names;
 
 /**
- * <p>
- * Named interface.</p>
+ * Any object that have name
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public interface Named {
 
+    /**
+     * The name of this object instance
+     * @return 
+     */
     String getName();
 
     /**

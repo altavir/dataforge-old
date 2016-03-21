@@ -5,7 +5,7 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.content.AnonimousNotAlowed;
+import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.NotConnectedException;
 import hep.dataforge.io.envelopes.Envelope;

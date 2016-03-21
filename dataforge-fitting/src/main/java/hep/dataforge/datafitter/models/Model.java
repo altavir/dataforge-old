@@ -15,7 +15,7 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;

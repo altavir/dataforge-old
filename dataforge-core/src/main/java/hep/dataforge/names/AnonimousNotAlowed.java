@@ -13,18 +13,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.meta;
+package hep.dataforge.names;
 
-import java.util.List;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * The rule to join two lists of something. Mostly used to join meta nodes.
+ * An annotation for class implementing {@code Named} interface that states that empty
+ * name is not allowed for this class.
  *
  * @author Alexander Nozik
- * @param <T>
- * @version $Id: $Id
  */
-public interface ListMergeRule<T> {
+@Target(value = ElementType.TYPE)
+@Retention(value = RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+public @interface AnonimousNotAlowed {
 
-    List<? extends T> merge(String name, List<? extends T> first, List<? extends T> second);
 }
