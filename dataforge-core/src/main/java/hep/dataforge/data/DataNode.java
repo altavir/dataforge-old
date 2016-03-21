@@ -8,6 +8,7 @@ package hep.dataforge.data;
 import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.navigation.Provider;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 
@@ -72,6 +73,21 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     int size();
+    
+    /**
+     * Force start data computation
+     */
+    default DataNode<T> compute(){
+        computation().join();
+        return this;
+    }
+    
+    default CompletableFuture<Void> computation(){
+        CompletableFuture<?>[] futures = this.stream()
+                .<CompletableFuture>map(item->item.getValue().getInFuture())
+                .toArray((int value) -> new CompletableFuture[value]);
+        return CompletableFuture.allOf(futures);
+    }
 
     /**
      * Get descendant node in case of tree structure. In case of flat structure

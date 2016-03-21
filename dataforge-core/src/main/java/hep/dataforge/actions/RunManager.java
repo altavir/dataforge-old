@@ -66,7 +66,7 @@ public class RunManager {
         } else {
             data = null;
         }
-        return action.run(data);
+        return action.run(data).compute();
     }
 
     public static DataNode executeAction(Context context, String path) throws IOException, ParseException {
