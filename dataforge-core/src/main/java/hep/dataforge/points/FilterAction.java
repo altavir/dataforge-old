@@ -17,12 +17,12 @@ package hep.dataforge.points;
 
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import static hep.dataforge.points.Filtering.buildConditionSet;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
+import static hep.dataforge.points.Filtering.buildConditionSet;
 import java.util.function.Predicate;
 
 /**
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  * @version $Id: $Id
  */
 @TypedActionDef(name = "filterData", inputType = PointSet.class, outputType = PointSet.class, description = "Filter dataset with given filtering rules")
-@NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.data.DataFiltering.buildConditionSet")
+@NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.points.Filtering.buildConditionSet")
 public class FilterAction extends OneToOneAction<PointSet, PointSet> {
 
     /**

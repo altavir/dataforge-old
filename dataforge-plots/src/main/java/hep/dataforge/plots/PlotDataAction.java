@@ -15,19 +15,18 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.actions.ActionResult;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
+import hep.dataforge.points.PointSet;
+import hep.dataforge.points.XYAdapter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -35,7 +34,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.points.PointSet;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -63,7 +61,7 @@ import hep.dataforge.points.PointSet;
         info = "Save plot shapshots to file with default parameters")
 @ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
         info = "Serialize plot to file with default parameters")
-@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.data.XYDataAdapter")
+@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.points.XYAdapter")
 
 public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
 

@@ -17,11 +17,11 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
-import hep.dataforge.io.log.Logable;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.io.log.Log;
+import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,6 +57,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     public ActionResult<R> runOne(String name, Meta groupMeta, Data<? extends T> data) {
         Log log = buildLog(groupMeta, data);
         Meta meta = inputMeta(data, groupMeta);
+        //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
                 thenCompose((T t) -> CompletableFuture
                         .supplyAsync(() -> transform(log, name, meta, t), buildExecutor(groupMeta, data)));
@@ -70,6 +71,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
     @Override
     public DataNode<R> run(DataNode<T> set) {
+        if(set.isEmpty()){
+            throw new RuntimeException("Running 1 to 1 action on empty data node");
+        }
+        
         Stream<Pair<String, Data<? extends T>>> stream = set.stream();
         if (isParallelExecutionAllowed()) {
             stream = stream.parallel();

@@ -149,7 +149,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
         }
 
         public Builder<T> putData(String key, Data<? extends T> data) {
-            if (type.isInstance(data.dataType())) {
+            if (type.isAssignableFrom(data.dataType())) {
                 if (!dataMap.containsKey(key)) {
                     dataMap.put(key, data);
                 } else {

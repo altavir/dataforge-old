@@ -5,13 +5,14 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.names.BaseMetaHolder;
 import java.util.concurrent.CompletableFuture;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class StaticData<T> implements Data<T> {
+public class StaticData<T> extends BaseMetaHolder implements Data<T> {
 
     private final T object;
     private final Class<T> type;

@@ -39,11 +39,11 @@ public abstract class DataFactory implements MetaFactory<DataTree> {
     public static final String NODE_NAME_KEY = "name";
 
     @Override
-    public DataTree build(Context context, Meta meta) {
+    public DataTree build(Context context, Meta dataConfig) {
         Class type;
-        if (meta.hasValue(TYPE_VALUE_KEY)) {
+        if (dataConfig.hasValue(TYPE_VALUE_KEY)) {
             try {
-                type = Class.forName(meta.getString(TYPE_VALUE_KEY));
+                type = Class.forName(dataConfig.getString(TYPE_VALUE_KEY));
             } catch (ClassNotFoundException ex) {
                 throw new RuntimeException("Can't initialize data node", ex);
             }
@@ -53,22 +53,22 @@ public abstract class DataFactory implements MetaFactory<DataTree> {
         DataTree.Builder<?> builder = DataTree.builder(type);
 
         // Apply node name
-        if (meta.hasNode(NODE_NAME_KEY)) {
-            builder.setName(meta.getString(NODE_NAME_KEY));
+        if (dataConfig.hasNode(NODE_NAME_KEY)) {
+            builder.setName(dataConfig.getString(NODE_NAME_KEY));
         }
 
         // Apply node type
-        if (meta.hasNode(DATA_META_KEY)) {
-            builder.setMeta(meta.getNode(DATA_META_KEY));
+        if (dataConfig.hasNode(DATA_META_KEY)) {
+            builder.setMeta(dataConfig.getNode(DATA_META_KEY));
         }
 
         // Apply non-specific child nodes
-        if (meta.hasNode(DATA_NODE_KEY)) {
-            meta.getNodes(DATA_NODE_KEY).forEach((Meta nodeMeta) -> builder.putBranch(build(context, nodeMeta)));
+        if (dataConfig.hasNode(DATA_NODE_KEY)) {
+            dataConfig.getNodes(DATA_NODE_KEY).forEach((Meta nodeMeta) -> builder.putBranch(build(context, nodeMeta)));
         }
 
         // Apply child nodes specific to this factory
-        buildChildren(context, builder, meta);
+        buildChildren(context, builder, dataConfig);
 
         return builder.build();
     }
