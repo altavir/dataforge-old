@@ -40,7 +40,7 @@ public class FitPlugin extends BasicPlugin {
         FitEngineBuilder.addEngine("QOW", new QOWFitEngine());
         FitEngineBuilder.addEngine("CM", new CMFitEngine());
 
-        ActionManager.buildFrom(context).registerAction(FitAction.FIT_ACTION_NAME, FitAction::new);
+        ActionManager.buildFrom(context).registerAction(FitAction.class);
     }
 
     @Override

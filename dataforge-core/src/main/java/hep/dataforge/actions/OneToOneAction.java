@@ -18,9 +18,9 @@ package hep.dataforge.actions;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.data.NamedData;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
@@ -38,14 +38,6 @@ import javafx.util.Pair;
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
-    public OneToOneAction(Context context, String name, Meta annotation) {
-        super(context, name, annotation);
-    }
-
-    public OneToOneAction(Context context, Meta annotation) {
-        super(context, annotation);
-    }
-
     /**
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
@@ -54,53 +46,53 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @param data
      * @return
      */
-    public ActionResult<R> runOne(String name, Meta groupMeta, Data<? extends T> data) {
-        Log log = buildLog(groupMeta, data);
-        Meta meta = inputMeta(data, groupMeta);
+    public ActionResult<R> runOne(Context context, String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
+        Log log = buildLog(context, groupMeta, data);
+        Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
         //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
-                thenCompose((T t) -> CompletableFuture
-                        .supplyAsync(() -> transform(log, name, meta, t), buildExecutor(groupMeta, data)));
+                thenCompose((T datum) -> CompletableFuture
+                        .supplyAsync(() -> transform(context, log, name, meta, datum), buildExecutor(groupMeta, datum)));
 
         return new ActionResult(getOutputType(), log, future, outputMeta(name, groupMeta, data));
     }
 
-    public ActionResult<R> runOne(Meta meta, NamedData<T> data) {
-        return runOne(data.getName(), meta, data);
-    }
-
+//    public ActionResult<R> runOne(Meta meta, NamedData<T> data) {
+//        return runOne(data.getName(), data, meta);
+//    }
     @Override
-    public DataNode<R> run(DataNode<T> set) {
-        if(set.isEmpty()){
+    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+        if (set.isEmpty()) {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
         }
-        
+
         Stream<Pair<String, Data<? extends T>>> stream = set.stream();
-        if (isParallelExecutionAllowed()) {
+        if (isParallelExecutionAllowed(actionMeta)) {
             stream = stream.parallel();
         }
+
         return wrap(set.getName(), set.meta(),
                 stream.collect(Collectors.toMap(entry -> entry.getKey(),
-                        entry -> runOne(entry.getKey(), set.meta(), entry.getValue()))));
+                        entry -> runOne(context, entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
     }
 
     /**
      *
      * @param log log for this evaluation
      * @param name name of the input item
-     * @param inputMeta combined meta for this evaluation. Includes data meta, group
-     * meta and action meta
+     * @param inputMeta combined meta for this evaluation. Includes data meta,
+     * group meta and action meta
      * @param input input data
      * @return
      */
-    private R transform(Logable log, String name, Meta inputMeta, T input) {
-        beforeAction(name, input, log);
-        R res = execute(log, name, inputMeta, input);
-        afterAction(name, res);
+    private R transform(Context context, Logable log, String name, Laminate inputMeta, T input) {
+        beforeAction(context, name, input, inputMeta, log);
+        R res = execute(context, log, name, inputMeta, input);
+        afterAction(context, name, res, inputMeta);
         return res;
     }
 
-    protected abstract R execute(Logable log, String name, Meta inputMeta, T input);
+    protected abstract R execute(Context context, Logable log, String name, Laminate inputMeta, T input);
 
     /**
      * Build output meta for given data. This meta is calculated on action call
@@ -116,11 +108,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         return data.meta();
     }
 
-    protected void afterAction(String name, R res) {
+    protected void afterAction(Context context, String name, R res, Laminate meta) {
         logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    protected void beforeAction(String name, T datum, Logable log) {
+    protected void beforeAction(Context context, String name, T datum, Laminate meta, Logable log) {
         logger().info("Starting action '{}[{}]'", getName(), name);
     }
 

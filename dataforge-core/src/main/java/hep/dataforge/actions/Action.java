@@ -15,21 +15,23 @@
  */
 package hep.dataforge.actions;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.names.Named;
-import hep.dataforge.context.Encapsulated;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Meta;
 
 /**
  * The action is an independent process that could be performed on one
  * dependency or set of uniform dependencies. The number and naming of results
  * not necessarily is the same as in input.
- * 
+ *
  *
  * @author Alexander Nozik
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
  */
-public interface Action<T, R> extends Named, Annotated, Encapsulated {
-    DataNode<R> run(DataNode<T> set);
+public interface Action<T, R> extends Named {
+
+    DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta);
+
 }

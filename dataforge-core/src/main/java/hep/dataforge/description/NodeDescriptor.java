@@ -72,7 +72,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
     }
 
     /**
-     * The value descriptor for given value name. Null if there is no such value descriptor
+     * The value descriptor for given value name. Null if there is no such value
+     * descriptor
      *
      * @param name
      * @return
@@ -138,15 +139,26 @@ public class NodeDescriptor extends DescriptorBase implements Named {
     public String getName() {
         return meta().getString("name", "");
     }
-    
+
     /**
      * Identify if this descriptor has child value descriptor with default
+     *
      * @param name
-     * @return 
+     * @return
      */
-    public boolean hasDefaultForValue(String name){
+    public boolean hasDefaultForValue(String name) {
         ValueDescriptor desc = valueDescriptor(name);
         return desc != null && desc.hasDefault();
+    }
+
+    /**
+     * The key of the value which is used to display this node in case it is
+     * multiple. By default, the key is empty which means that node index is used.
+     *
+     * @return
+     */
+    public String titleKey() {
+        return meta().getString("titleKey", "");
     }
 
 }

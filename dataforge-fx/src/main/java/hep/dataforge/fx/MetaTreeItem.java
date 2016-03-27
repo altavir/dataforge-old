@@ -70,21 +70,26 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
             // recursevely adding child nodes including descriptors
             if (config != null) {
-                for (String childNodeName : config.getNodeNames()) {
+                config.getNodeNames().stream().forEach((childNodeName) -> {
                     List<Configuration> childConfigs = config.getNodes(childNodeName);
-                    childConfigs.stream().map((childConfig) -> {
+                    for (int i = 0; i < childConfigs.size(); i++) {
+                        Configuration childConfig = childConfigs.get(i);
                         //applying descriptor from parent
                         NodeDescriptor childDescriptor = descriptor == null ? null : descriptor.childDescriptor(childNodeName);
                         //applying descriptor from external provider if it is present
                         if (childDescriptor == null && descriptorProvider != null) {
                             childDescriptor = descriptorProvider.apply(childConfig);
                         }
-                        MetaTree childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
-                        return childTree;
-                    }).forEach((childTree) -> {
+                        MetaTree childTree;
+                        //if node is list add its index to constructor
+                        if (childConfigs.size() > 1) {
+                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor, i);
+                        } else {
+                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                        }
                         children.add(new MetaTreeItem(childTree));
-                    });
-                }
+                    }
+                });
 
                 // adding values with descriptors if available
                 config.getValueNames().stream()

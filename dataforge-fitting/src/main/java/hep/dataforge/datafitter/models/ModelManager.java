@@ -63,26 +63,10 @@ public class ModelManager {
     public ModelManager() {
     }
 
-    /**
-     * <p>
-     * addModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param mf a {@link hep.dataforge.utils.MetaFactory} object.
-     */
     public void addModel(String name, MetaFactory<Model> mf) {
         modelList.put(name.toLowerCase(), mf);
     }
 
-    /**
-     * <p>
-     * addModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param mf a {@link hep.dataforge.utils.MetaFactory} object.
-     * @param descriptor a
-     * {@link hep.dataforge.datafitter.models.ModelDescriptor} object.
-     */
     public void addModel(String name, MetaFactory<Model> mf, ModelDescriptor descriptor) {
         modelList.put(name.toLowerCase(), mf);
         descriptorList.put(name.toLowerCase(), descriptor);
@@ -98,14 +82,6 @@ public class ModelManager {
         return descriptorList;
     }
 
-    /**
-     * <p>
-     * buildModel.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param a a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.datafitter.models.Model} object.
-     */
     @ValueDef(name = "modelName", info = "The name of the preloaded model to use.")
     public Model buildModel(Context context, Meta a) {
         String modelName = a.getString(MODEL_NAME);
@@ -120,15 +96,6 @@ public class ModelManager {
         return factory.build(context, a);
     }
 
-    /**
-     * <p>
-     * buildModel.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.datafitter.models.Model} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
     public Model buildModel(Context context, String name) throws NameNotFoundException {
         MetaFactory<Model> factory = modelList.get(name.toLowerCase());
         if (factory == null) {

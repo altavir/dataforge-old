@@ -23,10 +23,10 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.io.IOException;
 import java.io.InputStream;
-
 
 @TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = PointSet.class, description = "Read DataSet from text file")
 @ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
@@ -37,10 +37,6 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
 
     public static final String READ_DATA_SET_ACTION_NAME = "readdataset";
 
-    public ReadPointSetAction(Context context, Meta an) {
-        super(context, an);
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -48,18 +44,18 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
      * @return
      */
     @Override
-    protected PointSet execute(Logable log, String name, Meta meta, InputStream source) {
+    protected PointSet execute(Context context, Logable log, String name, Laminate meta, InputStream source) {
         ListPointSet fileData;
 
-        String encoding = meta.getString("encoding","UTF-8");
+        String encoding = meta.getString("encoding", "UTF-8");
         try {
             LineIterator iterator = new LineIterator(source, encoding);
 
             String dataSetName = meta.getString("dataSetName", name);
-            
+
             DataPointStringIterator dpReader;
-            if (meta().hasValue("columnNames")) {
-                String[] names = meta().getStringArray("columnNames");
+            if (meta.hasValue("columnNames")) {
+                String[] names = meta.getStringArray("columnNames");
                 dpReader = new DataPointStringIterator(iterator, names);
                 fileData = new ListPointSet(names);
             } else {
@@ -67,7 +63,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
                 fileData = new ListPointSet(dataSetName);
             }
 
-            int headerLines = meta().getInt("headerLength", 0);
+            int headerLines = meta.getInt("headerLength", 0);
             if (headerLines > 0) {
                 dpReader.skip(headerLines);
             }

@@ -95,8 +95,8 @@ public class Laminate extends Meta {
         }
     }
 
-    public Laminate setValueContext(ValueProvider defaultValueProvider) {
-        this.valueContext = defaultValueProvider;
+    public Laminate setValueContext(ValueProvider valueContext) {
+        this.valueContext = valueContext;
         return this;
     }
 
@@ -139,12 +139,13 @@ public class Laminate extends Meta {
     public List<Meta> layers() {
         return Collections.unmodifiableList(layers);
     }
-    
+
     /**
      * Get laminate layers in inverse order
-     * @return 
+     *
+     * @return
      */
-    public List<Meta> layersInverse(){
+    public List<Meta> layersInverse() {
         List<Meta> layersInverse = new ArrayList<>(this.layers);
         Collections.reverse(layersInverse);
         return layersInverse;
@@ -166,13 +167,11 @@ public class Laminate extends Meta {
             laminate.setValueContext(valueContext());
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNode(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
@@ -188,13 +187,11 @@ public class Laminate extends Meta {
             }
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNodes(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
@@ -209,6 +206,11 @@ public class Laminate extends Meta {
      */
     @Override
     public Collection<String> getNodeNames() {
+        return getNodeNames(true);
+    }
+    
+    
+    public Collection<String> getNodeNames(boolean includeDefaults) {
         Set<String> names = new HashSet<>();
         if (layers != null) {
             layers.stream().forEach((m) -> {
@@ -216,7 +218,7 @@ public class Laminate extends Meta {
             });
         }
 
-        if (descriptorLayer != null) {
+        if (includeDefaults && descriptorLayer != null) {
             names.addAll(descriptorLayer.getNodeNames());
         }
 
@@ -224,18 +226,22 @@ public class Laminate extends Meta {
     }
 
     /**
-     * Value names includes descriptor values, but does not include defaults
+     * Value names includes descriptor values,
      *
      * @return
      */
     @Override
     public Collection<String> getValueNames() {
+        return getValueNames(true);
+    }
+
+    public Collection<String> getValueNames(boolean includeDefaults) {
         Set<String> names = new HashSet<>();
         layers.stream().forEach((m) -> {
             names.addAll(m.getValueNames());
         });
 
-        if (descriptorLayer != null) {
+        if (includeDefaults && descriptorLayer != null) {
             names.addAll(descriptorLayer.getValueNames());
         }
 
@@ -253,7 +259,7 @@ public class Laminate extends Meta {
 
         // if descriptor layer is definded, serching it for value
         if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
-            return MetaUtils.transformValue(descriptorLayer.getValue(path),valueContext());
+            return MetaUtils.transformValue(descriptorLayer.getValue(path), valueContext());
         }
 
         throw new NameNotFoundException(path);

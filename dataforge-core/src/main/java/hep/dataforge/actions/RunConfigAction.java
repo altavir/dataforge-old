@@ -31,10 +31,6 @@ import hep.dataforge.data.DataNode;
 @ValueDef(name = "contextName", info = "The name of the context in which the action will be run")
 public class RunConfigAction extends GenericAction {
 
-    public RunConfigAction(Context context, Meta annotation) {
-        super(context, "run", annotation);
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -42,24 +38,24 @@ public class RunConfigAction extends GenericAction {
      * @return
      */
     @Override
-    public DataNode run(DataNode input){
+    public DataNode run(Context context, DataNode input, Meta actionMeta) {
         Meta cfg;
 
-        Meta meta = inputMeta(input.meta());
+        Meta meta = inputMeta(context, input.meta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = new Context(getContext(), contextName);
+        Context ac = new Context(context, contextName);
         if (meta.hasValue("configFile")) {
-            File cfgFile = getContext().io().getFile(meta.getString("configFile"));
+            File cfgFile = context.io().getFile(meta.getString("configFile"));
             try {
                 cfg = MetaFileReader.instance().read(ac, cfgFile, null);
             } catch (IOException | ParseException ex) {
                 throw new ContentException("Can't read config file", ex);
             }
         } else {
-            cfg = meta();
+            cfg = actionMeta;
         }
-        return RunManager.executeAction(ac, cfg);
+        return ActionUtils.runConfig(ac, cfg);
     }
 
 }

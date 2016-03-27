@@ -25,7 +25,6 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
-import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -51,37 +50,11 @@ import hep.dataforge.points.PointSet;
 @NodeDef(name = "task", multiple = true, info = "Fit tasks")
 public class FitAction extends OneToOneAction<PointSet, FitState> {
 
-    /**
-     * Constant <code>FIT_ACTION_NAME="fit"</code>
-     */
     public static final String FIT_ACTION_NAME = "fit";
-    /**
-     * Constant <code>TASK_PATH="task"</code>
-     */
+
     public static final String TASK_PATH = "task";
-    /**
-     * Constant <code>MODEL_PATH="model"</code>
-     */
+
     public static final String MODEL_PATH = "model";
-    private final FitManager fm;
-
-    /**
-     * <p>
-     * Constructor for FitAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param an a {@link hep.dataforge.meta.Meta} object.
-     */
-    public FitAction(Context context, Meta an) {
-        super(context, an);
-
-        if (context.provides("fitting")) {
-            this.fm = context.provide("fitting", FitPlugin.class).getFitManager();
-        } else {
-            this.fm = new FitManager(context);
-        }
-
-    }
 
     /**
      * {@inheritDoc}
@@ -89,7 +62,14 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Logable log, String name, Meta meta, PointSet input) {
+    protected FitState execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
+        FitManager fm;
+        if (context.provides("fitting")) {
+            fm = context.provide("fitting", FitPlugin.class).getFitManager();
+        } else {
+            fm = new FitManager(context);
+        }
+
         List<FitTask> tasks = buildTaskList(meta);
 
 //        boolean printresult = meta().getBoolean("printresult", true);
@@ -97,8 +77,8 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
             throw new ContentException("No fit tasks defined");
         }
 
-        FitState res = buildInitialState(meta, input);
-        PrintWriter writer = new PrintWriter(buildActionOutput(name));
+        FitState res = buildInitialState(context, meta, input, fm);
+        PrintWriter writer = new PrintWriter(buildActionOutput(context, name));
 
         for (FitTask task : tasks) {
             res = fm.runTask(res, task, writer, log);
@@ -107,28 +87,24 @@ public class FitAction extends OneToOneAction<PointSet, FitState> {
         return res;
     }
 
-    private FitState buildInitialState(Meta meta, PointSet input) {
+    private FitState buildInitialState(Context context, Laminate meta, PointSet input, FitManager fm) {
         Model model;
 
         ModelManager mm = fm.getModelManager();
 
         if (meta.hasNode(MODEL_PATH)) {
-            model = mm.buildModel(getContext(), meta.getNode(MODEL_PATH));
+            model = mm.buildModel(context, meta.getNode(MODEL_PATH));
         } else {
-            model = mm.buildModel(getContext(), meta.getString(MODEL_PATH));
+            model = mm.buildModel(context, meta.getString(MODEL_PATH));
         }
 
         ParamSet params;
-        if (meta instanceof Laminate) {
-            //updating parameters for each laminate 
-            Laminate laminate = (Laminate) meta;
-            params = new ParamSet();
-            laminate.layersInverse().stream().forEach((layer) -> {
-                params.updateFrom(ParamSet.fromAnnotation(layer));
-            });
-        } else {
-            params = ParamSet.fromAnnotation(meta());
-        }
+
+        //updating parameters for each laminate 
+        params = new ParamSet();
+        meta.layersInverse().stream().forEach((layer) -> {
+            params.updateFrom(ParamSet.fromAnnotation(layer));
+        });
 
         return new FitState(input, model, params);
 

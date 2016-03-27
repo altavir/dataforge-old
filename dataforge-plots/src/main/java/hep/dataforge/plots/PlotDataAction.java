@@ -21,6 +21,7 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
@@ -65,18 +66,6 @@ import org.slf4j.LoggerFactory;
 
 public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
 
-    private final PlotHolder holder;
-//    private final static DescriptorBuilder frameDescriptor = new DescriptorBuilder(XYPlotFrame.class);
-
-    public PlotDataAction(Context context, Meta annotation) {
-        super(context, annotation);
-        //initializing plots plugin if it is not present
-        if (!context.provides("plots")) {
-            context.loadPlugin(new PlotsPlugin());
-        }
-        holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
-    }
-
     private Meta findFrameDescription(Meta meta, String name) {
         //TODO сделать тут возможность подстановки стилей?
         List<? extends Meta> frameDescriptions = meta.getNodes("plotFrame");
@@ -95,7 +84,13 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     }
 
     @Override
-    protected PointSet execute(Logable log, String name, Meta meta, PointSet input) {
+    protected PointSet execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
+        //initializing plot plugin if necessary
+        if (!context.provides("plots")) {
+            context.loadPlugin(new PlotsPlugin());
+        }
+        PlotHolder holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
+
         PlotFrame frame;
 
         String groupBy = meta.getString("groupBy");
@@ -110,15 +105,15 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
         frame.add(PlottableData.plot(name, meta, input, adapter));
 
         if (meta.hasNode("snapshot")) {
-            snapshot(log, frame, meta.getNode("snapshot"));
+            snapshot(context, log, frame, meta.getNode("snapshot"));
         } else if (meta.getBoolean("snapshot", false)) {
-            snapshot(log, frame, MetaBuilder.buildEmpty("snapshot"));
+            snapshot(context, log, frame, MetaBuilder.buildEmpty("snapshot"));
         }
 
         if (meta.hasNode("serialize")) {
-            serialize(log, frame, meta.getNode("serialize"));
+            serialize(context, log, frame, meta.getNode("serialize"));
         } else if (meta.getBoolean("serialize", false)) {
-            serialize(log, frame, MetaBuilder.buildEmpty("serialize"));
+            serialize(context, log, frame, MetaBuilder.buildEmpty("serialize"));
         }
 
         return input;
@@ -128,25 +123,25 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
-    protected void afterAction(String name, PointSet res) {
+    protected void afterAction(Context context, String name, PointSet res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
         snapshotTasks.values().stream().forEach((r) -> r.run());
         snapshotTasks.clear();
         serializeTasks.values().stream().forEach((r) -> r.run());
         serializeTasks.clear();
-        super.afterAction(name, res);
+        super.afterAction(context, name, res, meta);
     }
 
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void snapshot(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".png";
             snapshotTasks.put(fileName, () -> {
                 log.log("Saving plot snapshot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
+                OutputStream stream = buildActionOutput(context, fileName);
                 jfcFrame.toPNG(stream, snapshotCfg);
             });
         } else {
@@ -156,13 +151,13 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     }
 
     @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void serialize(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".jfc";
             serializeTasks.put(fileName, () -> {
                 log.log("Saving serialized plot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
+                OutputStream stream = buildActionOutput(context, fileName);
                 try {
                     ObjectOutputStream ostr = new ObjectOutputStream(stream);
                     ostr.writeObject(jfcFrame.getChart());

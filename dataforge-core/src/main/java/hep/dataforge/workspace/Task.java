@@ -18,7 +18,6 @@ package hep.dataforge.workspace;
 import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 
 /**

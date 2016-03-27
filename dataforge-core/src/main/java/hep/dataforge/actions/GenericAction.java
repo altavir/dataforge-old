@@ -15,10 +15,8 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.names.Named;
-import hep.dataforge.names.NamedMetaHolder;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.names.Named;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
@@ -43,36 +41,17 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  * @param <R>
  */
-public abstract class GenericAction<T, R> extends NamedMetaHolder implements Action<T, R> {
+public abstract class GenericAction<T, R> implements Action<T, R> {
 
-    private final Context context;
     private Executor executor;
-
-    public GenericAction(Context context, String name, Meta annotation) {
-        super(name, annotation);
-        this.context = context;
-    }
-
-    public GenericAction(Context context, Meta annotation) {
-        super(annotation);
-        this.context = context;
-    }
-
-    @Override
-    public Context getContext() {
-        if (context == null) {
-            return GlobalContext.instance();
-        }
-        return context;
-    }
 
     public Logger logger() {
         //TODO provide from context
         return LoggerFactory.getLogger(getClass());
     }
 
-    protected boolean isParallelExecutionAllowed() {
-        return meta().getBoolean("action.allowParallel", true);
+    protected boolean isParallelExecutionAllowed(Meta meta) {
+        return meta.getBoolean("allowParallel", true);
     }
 
     /**
@@ -89,7 +68,7 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         return builder.build();
     }
 
-    protected Log buildLog(Meta meta, Object data) {
+    protected Log buildLog(Context context, Meta meta, Object data) {
         String logName = getName();
         if (data instanceof Named) {
             logName += "[" + ((Named) data).getName() + "]";
@@ -100,10 +79,10 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
                 //Getting parent from previous log
                 return new Log(logName, actionLog.getParent());
             } else {
-                return new Log(logName, getContext());
+                return new Log(logName, context);
             }
         } else {
-            return new Log(logName, getContext());
+            return new Log(logName, context);
         }
     }
 
@@ -118,7 +97,6 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
     protected boolean isEmptyInputAllowed() {
         return false;
     }
-
 
     /**
      * Возвращает описание, заданное в классе. null, если описание отсутствует
@@ -138,7 +116,6 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
      *
      * @return
      */
-    @Override
     public NodeDescriptor getDescriptor() {
         return ActionDescriptor.build(this);
     }
@@ -157,10 +134,15 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         if (def != null && !def.name().isEmpty()) {
             return def.name();
         } else {
-            return super.getName();
+            throw new RuntimeException("Name not defined");
         }
     }
 
+    /**
+     * Input type bases on ActionDef
+     *
+     * @return
+     */
     public Class getInputType() {
         TypedActionDef def = getDef();
         if (getDef() != null) {
@@ -170,6 +152,11 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
         }
     }
 
+    /**
+     * OutputType based on ActionDef
+     *
+     * @return
+     */
     public Class getOutputType() {
         TypedActionDef def = getDef();
         if (getDef() != null) {
@@ -178,18 +165,32 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
             return Object.class;
         }
     }
-    
-    protected Laminate inputMeta(Data<? extends T> input, Meta nodeMeta){
-        return new Laminate(input.meta(), nodeMeta, meta())
-                .setValueContext(getContext())
+
+    /**
+     * Generate input meta for given data input, group meta and action meta
+     *
+     * @param input
+     * @param nodeMeta
+     * @param actionMeta
+     * @return
+     */
+    protected Laminate inputMeta(Context context, Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
+        return new Laminate(input.meta(), nodeMeta, actionMeta)
+                .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
-    
-    protected Laminate inputMeta(Meta nodeMeta){
-        return new Laminate(nodeMeta, meta())
-                .setValueContext(getContext())
+
+    protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
+        return new Laminate(nodeMeta, actionMeta)
+                .setValueContext(context)
                 .setDescriptor(getDescriptor());
-    }    
+    }
+
+    protected Laminate inputMeta(Context context, Meta actionMeta) {
+        return new Laminate(actionMeta)
+                .setValueContext(context)
+                .setDescriptor(getDescriptor());
+    }
 
     /**
      * Create default OuputStream for given Action and given name
@@ -198,14 +199,7 @@ public abstract class GenericAction<T, R> extends NamedMetaHolder implements Act
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(String name) {
-        return getContext().io().out(getName(), name);
+    public OutputStream buildActionOutput(Context context, String name) {
+        return context.io().out(getName(), name);
     }
-    
-//    /**
-//     * Calculate output meta for given input data node. This operation is performed on {@code run} call.
-//     * @param input
-//     * @return 
-//     */
-//    protected abstract Meta calculateMeta(DataNode<? extends T> input);    
 }

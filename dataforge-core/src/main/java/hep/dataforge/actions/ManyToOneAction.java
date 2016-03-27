@@ -20,14 +20,14 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.values.Value;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import javafx.util.Pair;
 
 /**
@@ -39,42 +39,42 @@ import javafx.util.Pair;
  */
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
-    public ManyToOneAction(Context context, String name, Meta annotation) {
-        super(context, name, annotation);
-    }
-
-    public ManyToOneAction(Context context, Meta annotation) {
-        super(context, annotation);
-    }
-
     @Override
-    public DataNode<R> run(DataNode<T> set) {
-        List<DataNode<T>> groups = buildGroups(set);
+    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+        List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
-        groups.forEach((group) -> results.put(group.getName(), runGroup(group)));
+        groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));
         return wrap(set.getName(), set.meta(), results);
     }
 
-    public ActionResult<R> runGroup(DataNode<T> data) {
-        Log log = buildLog(data.meta(), data);
+    public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
+        Log log = buildLog(context, data.meta(), data);
+        Laminate meta = inputMeta(context, data.meta(), actionMeta);
         Meta outputMeta = outputMeta(data).build();
-        CompletableFuture<R> future = CompletableFuture.supplyAsync(() -> {
-            beforeGroup(log, data);
-            R res = execute(log, data);
-            afterGroup(log, data.getName(), outputMeta, res);
-            return res;
-        }, buildExecutor(data.meta(), data));
+
+        //Creating dependency on data
+        CompletableFuture<R> future = data.computation()
+                .thenCompose((Void t) -> CompletableFuture.supplyAsync(() -> {
+                    beforeGroup(context, log, data);
+                    // In this moment, all the data is already calculated
+                    Map<String, T> collection = data.stream()
+                            .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
+                    //.<T>map(item -> item.getValue().get()).collect(Collectors.toList());
+                    R res = execute(context, log, data.getName(), collection, meta);
+                    afterGroup(context, log, data.getName(), outputMeta, res);
+                    return res;
+                }, buildExecutor(data.meta(), data)));
         return new ActionResult<>(getOutputType(), log, future, outputMeta);
 
     }
 
-    protected List<DataNode<T>> buildGroups(DataNode<T> input) {
-        return GroupBuilder.byAnnotation(inputMeta(input.meta())).group(input);
+    protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
+        return GroupBuilder.byAnnotation(inputMeta(context, input.meta(), actionMeta)).group(input);
     }
 
-    protected abstract R execute(Logable log, DataNode<T> input);
+    protected abstract R execute(Context context, Logable log, String nodeName, Map<String, T> input, Meta meta);
 
-    protected MetaBuilder outputMeta(DataNode<T> input){
+    protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder("node")
                 .putValue("name", input.getName())
                 .putValue("type", input.type().getName());
@@ -82,10 +82,10 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             MetaBuilder dataNode = new MetaBuilder("data")
                     .putValue("name", item.getKey());
             Data<? extends T> data = item.getValue();
-            if(!data.dataType().equals(input.type())){
+            if (!data.dataType().equals(input.type())) {
                 dataNode.putValue("type", data.dataType().getName());
             }
-            if(!data.meta().isEmpty()){
+            if (!data.meta().isEmpty()) {
                 dataNode.putNode("@meta", data.meta());
             }
             builder.putNode(dataNode);
@@ -99,7 +99,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param input
      */
-    protected void beforeGroup(Logable log, DataNode<? extends T> input) {
+    protected void beforeGroup(Context context, Logable log, DataNode<? extends T> input) {
 
     }
 
@@ -109,7 +109,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param output
      */
-    protected void afterGroup(Logable log, String groupName, Meta outputMeta, R output) {
+    protected void afterGroup(Context context, Logable log, String groupName, Meta outputMeta, R output) {
 
     }
 

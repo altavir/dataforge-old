@@ -11,7 +11,7 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Meta;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -42,7 +42,7 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         this.context = null;
     }
 
-    private final Map<String, ActionFactory> actionMap = new HashMap<>();
+    private final Map<String, Action> actionMap = new HashMap<>();
 
     protected ActionManager getParent() {
         if (getContext() == null || getContext().getParent() == null || !context.getParent().provides("actions")) {
@@ -52,16 +52,11 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         }
     }
 
-    public Action buildAction(String name, Context context, Meta a)
-            throws NameNotFoundException {
-        return getActionFactory(name).build(context, a);
-    }
-
     private boolean hasAction(String name) {
         return actionMap.containsKey(name) || (getParent() != null && getParent().hasAction(name));
     }
 
-    private ActionFactory getActionFactory(String name) {
+    public Action getAction(String name) {
         if (actionMap.containsKey(name)) {
             return actionMap.get(name);
         } else {
@@ -70,16 +65,16 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
                 //TODO сделать ActionNotFoundException
                 throw new NameNotFoundException(name);
             } else {
-                return parent.getActionFactory(name);
+                return parent.getAction(name);
             }
         }
     }
 
-    public void registerAction(String name, ActionFactory actionFactory) {
-        if (actionMap.containsKey(name)) {
-            LoggerFactory.getLogger(getClass()).warn("Duplicate action names in ActionBuilder.");
+    private void putAction(Action action) {
+        if (actionMap.containsKey(action.getName())) {
+            LoggerFactory.getLogger(getClass()).warn("Duplicate action names in ActionManager.");
         } else {
-            actionMap.put(name, actionFactory);
+            actionMap.put(action.getName(), action);
         }
     }
 
@@ -90,23 +85,13 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
      * @param actionClass a {@link java.lang.Class} object.
      */
     public void registerAction(Class<? extends Action> actionClass) {
-        ActionDescriptor descr = ActionDescriptor.build(actionClass);
-        String actionName = descr.getName();
         try {
-            actionClass.getDeclaredConstructor(Context.class, Meta.class);
+            putAction(actionClass.getDeclaredConstructor().newInstance());
         } catch (NoSuchMethodException ex) {
-            throw new RuntimeException("Action must have default constructor (context, annotation) to be registered.");
+            throw new RuntimeException("Action must have default empty constructor to be registered.");
+        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+            throw new RuntimeException("Error while constructing Action", ex);
         }
-
-        ActionFactory factory = (Context factoryContext, Meta annotation) -> {
-            try {
-                return actionClass.getDeclaredConstructor(Context.class, Meta.class)
-                        .newInstance(factoryContext, annotation);
-            } catch (Exception ex) {
-                throw new Error(ex);
-            }
-        };
-        registerAction(actionName, factory);
     }
 
     /**
@@ -131,9 +116,9 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         } else {
             list = new ArrayList<>();
         }
-        for (ActionFactory factory : this.actionMap.values()) {
-            list.add(ActionDescriptor.build(factory.build(getContext(), null)));
-        }
+        this.actionMap.values().stream().forEach((action) -> {
+            list.add(ActionDescriptor.build(action));
+        });
 
         Collections.sort(list, (ActionDescriptor o1, ActionDescriptor o2) -> o1.getName().compareTo(o2.getName()));
         return list;

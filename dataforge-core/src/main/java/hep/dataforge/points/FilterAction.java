@@ -21,6 +21,7 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.points.Filtering.buildConditionSet;
 import java.util.function.Predicate;
@@ -36,23 +37,12 @@ import java.util.function.Predicate;
 public class FilterAction extends OneToOneAction<PointSet, PointSet> {
 
     /**
-     * <p>
-     * Constructor for DataFilterAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     */
-    public FilterAction(Context context, Meta annotation) {
-        super(context, annotation);
-    }
-
-    /**
      * {@inheritDoc}
      *
      * @return
      */
     @Override
-    protected PointSet execute(Logable log, String name, Meta meta, PointSet input) {
+    protected PointSet execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
         PointSet res;

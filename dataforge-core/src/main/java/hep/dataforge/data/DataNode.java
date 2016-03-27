@@ -25,10 +25,10 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     public static <T> DataNode<T> empty(String name, Class<T> type) {
         return new EmptyDataNode<>(name, type);
     }
-    
+
     public static DataNode empty() {
         return new EmptyDataNode<>("", Object.class);
-    }    
+    }
 
     /**
      * Get Data with given Name
@@ -37,12 +37,13 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     Data<? extends T> getData(String name);
-    
+
     /**
      * Access first data element in this node. Useful for single data nodes.
-     * @return 
+     *
+     * @return
      */
-    default Data<? extends T> getData(){
+    default Data<? extends T> getData() {
         return stream().findFirst().orElse(null).getValue();
     }
 
@@ -73,18 +74,29 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     int size();
-    
+
     /**
-     * Force start data computation
+     * Force start data computation for all data
      */
-    default DataNode<T> compute(){
+    default DataNode<T> compute() {
         computation().join();
         return this;
     }
     
-    default CompletableFuture<Void> computation(){
+    /**
+     * Cancel all data computation
+     */
+    default void cancel(){
+        computation().cancel(true);
+    }
+
+    /**
+     * Computation control for data
+     * @return 
+     */
+    default CompletableFuture<Void> computation() {
         CompletableFuture<?>[] futures = this.stream()
-                .<CompletableFuture>map(item->item.getValue().getInFuture())
+                .<CompletableFuture>map(item -> item.getValue().getInFuture())
                 .toArray((int value) -> new CompletableFuture[value]);
         return CompletableFuture.allOf(futures);
     }
