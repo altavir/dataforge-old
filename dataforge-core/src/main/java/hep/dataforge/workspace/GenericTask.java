@@ -17,7 +17,6 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
-import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import org.slf4j.Logger;
@@ -37,65 +36,39 @@ import hep.dataforge.data.DataNode;
  */
 public abstract class GenericTask<T> implements Task<T> {
 
-    private final String name;
-    private final Workspace workspace;
-    protected Logger logger;
-    protected TaskProgressListener listener;
-
-    public GenericTask(String name, Workspace workspace) {
-        this.name = name;
-        this.workspace = workspace;
-        logger = LoggerFactory.getLogger(name);
-    }
-
     @Override
-    public DataNode<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException {
-        logger.info("Starting task '{}'", getName());
-        List<String> targetList = generateTargets(config, targets);
+    public DataNode<T> run(Workspace workspace, Meta config) {
+//        logger.info("Starting task '{}'", getName());
+//        List<String> targetList = generateTargets(config, targets);
 
-        logger.debug("Creating executor...");
-        final TaskExecutor executor = new TaskExecutor(workspace.getWorkspaceThreadGroup(), name, listener);
+        getLogger().debug("Creating executor...");
+        final TaskExecutor executor = new TaskExecutor(workspace.getWorkspaceThreadGroup(), getName());
 
         Future<DataNode<T>> res = executor.submit(() -> {
-            logger.info("Starting gathering phase");
-            
-            TaskState state = new TaskState(gather(executor, getWorkspace(), config, targetList), targetList);
+            getLogger().info("Starting gathering phase");
 
-            logger.info("Starting transformation phase");
-            transform(executor, state, config);
+            TaskState state = new TaskState(gather(executor, workspace, config));
 
-            logger.info("Starting report phase");
-            report(executor, getWorkspace().getContext(), state, config);
+            getLogger().info("Starting transformation phase");
+            transform(executor, workspace.getContext(), state, config);
 
-            logger.info("Starting result generation");
-            return result(executor, getWorkspace(), state, config);
+            getLogger().info("Starting report phase");
+            report(executor, workspace.getContext(), state, config);
+
+            getLogger().info("Starting result generation");
+            return result(executor, workspace, state, config);
         });
 
-        return res.get();
+        try {
+            return res.get();
+        } catch (InterruptedException | ExecutionException ex) {
+            throw new RuntimeException("Uncached exception during task execution", ex);
+        }
     }
 
-    public void setListener(TaskProgressListener listener) {
-        this.listener = listener;
+    public Logger getLogger() {
+        return LoggerFactory.getLogger(getName());
     }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    protected Workspace getWorkspace() {
-        return workspace;
-    }
-
-    /**
-     * Generate the list of targets to run in this task with respect to
-     * configuration and provided list of targets.
-     *
-     * @param config
-     * @param targets
-     * @return
-     */
-    protected abstract List<String> generateTargets(Meta config, String... targets);
 
     /**
      * Gathering of dependencies from workspace
@@ -105,7 +78,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param config
      * @return
      */
-    protected abstract DataNode gather(TaskExecutor executor, Workspace workspace, Meta config, List<String> targets);
+    protected abstract DataNode gather(TaskExecutor executor, Workspace workspace, Meta config);
 
     /**
      * The main task body
@@ -114,7 +87,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @param config
      */
-    protected abstract void transform(TaskExecutor executor, TaskState state, Meta config);
+    protected abstract void transform(TaskExecutor executor, Context context, TaskState state, Meta config);
 
     /**
      * Reporting task results. No change of state is allowed.

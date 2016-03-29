@@ -31,22 +31,22 @@ public class TaskExecutor {
     private final ExecutorService executor;
     private ThreadGroup threadGroup;
 
-    /**
-     * completion of the task in percents. -1 means indeterminate.
-     */
-    private double progress = -1;
+//    /**
+//     * completion of the task in percents. -1 means indeterminate.
+//     */
+//    private double progress = -1;
     private boolean isFinished = false;
 
-    private TaskProgressListener listener;
+//    private TaskProgressListener listener;
 
-    public TaskExecutor(ThreadGroup parent, String threadName, TaskProgressListener listener) {
+    public TaskExecutor(ThreadGroup parent, String threadName) {
         if (parent == null) {
             threadGroup = new ThreadGroup(threadName);
         } else {
             threadGroup = new ThreadGroup(parent, threadName);
         }
         executor = Executors.newCachedThreadPool((Runnable r) -> new Thread(threadGroup, r));
-        this.listener = listener;
+//        this.listener = listener;
     }
 
     /**
@@ -71,16 +71,16 @@ public class TaskExecutor {
         return executor.submit(c);
     }
 
-    public double getProgress() {
-        return progress;
-    }
-
-    public void setProgress(double progress) {
-        this.progress = progress;
-        if (listener != null) {
-            listener.notifyProgress(progress);
-        }
-    }
+//    public double getProgress() {
+//        return progress;
+//    }
+//
+//    public void setProgress(double progress) {
+//        this.progress = progress;
+//        if (listener != null) {
+//            listener.notifyProgress(progress);
+//        }
+//    }
 
     /**
      * Should be called by task logic when task execution is finished. This
@@ -90,10 +90,10 @@ public class TaskExecutor {
     public void finish() {
         executor.shutdown();
         isFinished = true;
-        progress = 100d;
-        if (listener != null) {
-            listener.notifyFinished();
-        }
+//        progress = 100d;
+//        if (listener != null) {
+//            listener.notifyFinished();
+//        }
     }
 
     public boolean isFinished() {
@@ -108,10 +108,10 @@ public class TaskExecutor {
         threadGroup.interrupt();
         threadGroup.destroy();
         isFinished = true;
-        progress = 100d;
-        if (listener != null) {
-            listener.notifyCanceled();
-        }
+//        progress = 100d;
+//        if (listener != null) {
+//            listener.notifyCanceled();
+//        }
     }
 
 }

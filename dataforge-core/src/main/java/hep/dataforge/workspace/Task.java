@@ -17,7 +17,6 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
-import java.util.concurrent.ExecutionException;
 import hep.dataforge.data.DataNode;
 
 /**
@@ -27,59 +26,22 @@ import hep.dataforge.data.DataNode;
  * @author Alexander Nozik
  * @param <T>
  */
-public interface Task<T> extends Named {
+public interface Task<R> extends Named {
 
-    public static final String DEFAULT_TARGET = "";
+//    /**
+//     * Run the task with given configuration and list of desired targets and
+//     * return a set of named results (names are the target names). If target
+//     * list is empty then all targets supported by configuration are calculated.
+//     * Only those targets that supported by configuration are calculated even if
+//     * they are explicitly mentioned in target list. The resulting dependency
+//     * set is not guaranteed to contain all given targets.
+//     *
+//     * @param config the meta-data of the task
+//     * @return
+//     */
+    
+    
+    
+    DataNode<R> run(Workspace workspace, Meta config);
 
-    /**
-     * Run the task with given configuration and list of desired targets and
-     * return a set of named results (names are the target names). If target
-     * list is empty then all targets supported by configuration are calculated.
-     * Only those targets that supported by configuration are calculated even if
-     * they are explicitly mentioned in target list. The resulting dependency
-     * set is not guaranteed to contain all given targets.
-     *
-     * @param config the meta-data of the task
-     * @return
-     */
-    DataNode<T> run(Meta config, String... targets) throws InterruptedException, ExecutionException;
-//
-//    /**
-//     * Run task and return result for specific target. Could be optimized to
-//     * ignore all other targets if overridden.
-//     *
-//     * @param config
-//     * @param target
-//     * @return
-//     */
-//    default Data<T> runForTarget(Meta config, String target) throws InterruptedException, ExecutionException {
-//        return run(config, target).get(target);
-//    }
-//
-//    /**
-//     * Run task for default target. If task return only one target, than it is
-//     * returned ignoring its name, otherwise, target with default name is
-//     * returned.
-//     *
-//     * @param config
-//     * @return
-//     */
-//    default Data<T> runForDefaultTarget(Meta config) throws InterruptedException, ExecutionException {
-//        DataNode<T> map = run(config);
-//        if (map.size() == 1) {
-//            return map.iterator().next();
-//        } else {
-//            return map.get(DEFAULT_TARGET);
-//        }
-//    }
-//
-//    /**
-//     * The method to check task identity. Task do not have state, so the only
-//     * thing that could be changed is the bytecode itself.
-//     *
-//     * @return
-//     */
-//    default Identity getIdentity() {
-//        return new ClassIdentity(this.getClass());
-//    }
 }
