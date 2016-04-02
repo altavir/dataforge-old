@@ -33,7 +33,7 @@ import hep.dataforge.utils.MetaFactory;
 @ValueDef(name = TYPE_VALUE_KEY, info = "Node or data type")
 public abstract class DataFactory implements MetaFactory<DataTree> {
 
-    public static final String DATA_META_KEY = "@meta";
+    public static final String DATA_META_KEY = "meta";
     public static final String TYPE_VALUE_KEY = "type";
     public static final String DATA_NODE_KEY = "node";
     public static final String NODE_NAME_KEY = "name";

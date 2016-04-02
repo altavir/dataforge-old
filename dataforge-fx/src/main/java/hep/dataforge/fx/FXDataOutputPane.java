@@ -73,6 +73,8 @@ public class FXDataOutputPane extends AnchorPane {
     private synchronized void tab() {
         currentTab++;
         textArea.appendText("\t");
+//        double scale = getTabSize() / 4d;
+//        textArea.append(ReadOnlyStyledDocument.fromString("\t", "-fx-scale-x: " + scale));
 //        for (int i = 0; i < getTabSize(); i++) {
 //            textArea.appendText(" ");
 //        }
@@ -85,7 +87,7 @@ public class FXDataOutputPane extends AnchorPane {
     }
 
     private int getTabWith() {
-        return  getTabSize() * SYMBOL_WIDTH;
+        return getTabSize() * SYMBOL_WIDTH;
     }
 
     private int getTabSize() {
@@ -131,7 +133,7 @@ public class FXDataOutputPane extends AnchorPane {
             private final PrintStream printStream = forward == null ? null : new PrintStream(forward);
 
             @Override
-            public void flush() throws IOException {
+            public synchronized void flush() throws IOException {
                 String text = toString();
                 if (text.length() == 0) {
                     return;
@@ -140,7 +142,7 @@ public class FXDataOutputPane extends AnchorPane {
                 reset();
             }
 
-            private void append(String text) {
+            private synchronized void append(String text) {
                 if (isEmpty()) {
                     buffer.setLength(0);
                 }
@@ -152,7 +154,7 @@ public class FXDataOutputPane extends AnchorPane {
                 }
             }
 
-            private void clearBuffer() {
+            private synchronized void clearBuffer() {
                 String line = buffer.toString();
                 appendLine(line);
 

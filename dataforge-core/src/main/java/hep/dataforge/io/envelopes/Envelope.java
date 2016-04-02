@@ -15,6 +15,7 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
 import java.nio.ByteBuffer;
@@ -52,15 +53,15 @@ public interface Envelope extends Annotated {
      *
      * @return
      */
-    ByteBuffer getData();
+    Binary getData();
 
     /**
      * Get data in future using asynchronous call
      *
      * @return
      */
-    default Future<ByteBuffer> getDataInFuture() {
-        FutureTask<ByteBuffer> res = new FutureTask<>(() -> getData());
+    default Future<Binary> getDataInFuture() {
+        FutureTask<Binary> res = new FutureTask<>(() -> getData());
         res.run();
         return res;
     }

@@ -15,6 +15,8 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
@@ -124,7 +126,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             }
         }
 
-        Supplier<ByteBuffer> supplier = () -> {
+        Supplier<Binary> supplier = () -> {
             int dataLength = properties.get(DATA_LENGTH_KEY).intValue();
             try {
                 if (metaLength == Tag.INFINITE_SIZE) {
@@ -147,17 +149,17 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         return SEPARATOR;
     }
 
-    public ByteBuffer readData(InputStream stream, int length) throws IOException {
+    public Binary readData(InputStream stream, int length) throws IOException {
         if (length == -1) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             while (stream.available() > 0) {
                 baos.write(stream.read());
             }
-            return ByteBuffer.wrap(baos.toByteArray());
+            return new BufferedBinary(baos.toByteArray());
         } else {
             byte[] bytes = new byte[length];
             stream.read(bytes);
-            return ByteBuffer.wrap(bytes);
+            return new BufferedBinary(bytes);
         }
     }
 

@@ -15,6 +15,8 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.BufferedBinary;
 import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -33,7 +35,7 @@ public class EnvelopeBuilder {
 
     private Map<String, Value> properties = new HashMap<>();
     private MetaBuilder meta = new MetaBuilder("envelope");
-    private ByteBuffer data = ByteBuffer.allocate(0);
+    private Binary data;
 
 
     public EnvelopeBuilder(Envelope envelope) {
@@ -111,10 +113,20 @@ public class EnvelopeBuilder {
         return setProperty(META_ENCODING_KEY, metaEncodingValue);
     }
 
-    public EnvelopeBuilder setData(ByteBuffer data) {
+    public EnvelopeBuilder setData(Binary data) {
         this.data = data;
         return this;
     }
+    
+    public EnvelopeBuilder setData(ByteBuffer data) {
+        this.data = new BufferedBinary(data);
+        return this;
+    }    
+    
+    public EnvelopeBuilder setData(byte[] data) {
+        this.data = new BufferedBinary(data);
+        return this;
+    }    
 
 //    public EnvelopeBuilder setPriority(int priority) {
 //        return setProperty(MESSAGE_PRIORITY_KEY, priority);
@@ -156,7 +168,7 @@ public class EnvelopeBuilder {
         return meta;
     }
 
-    public ByteBuffer getData() {
+    public Binary getData() {
         return data;
     }
 

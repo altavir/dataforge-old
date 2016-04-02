@@ -6,16 +6,13 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
 import java.io.OutputStream;
-import java.io.StringWriter;
 import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -51,7 +48,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
             transformer.setOutputProperty(OutputKeys.ENCODING, charset.displayName());
 //            transformer.setOutputProperty(OutputKeys.METHOD, "text");
-            StringWriter writer = new StringWriter();
+//            StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(stream));
         } catch (TransformerException ex) {
             throw new RuntimeException(ex);
@@ -79,7 +76,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             elementName = an.getName();
         }
         Element res = doc.createElement(elementName);
-        MetaBuilder builder = an.getBuilder();
+//        MetaBuilder builder = an.getBuilder();
 //        Map<String, Item<Annotation>> elements = builder.getElementMap();
 //        Map<String, Item<Value>> values = builder.getValueMap();
 

@@ -6,6 +6,8 @@
 package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -22,6 +24,9 @@ public class FileDataFactory extends DataFactory {
     public static final String FILE_MASK_NODE = "files";
     public static final String DIRECTORY_NODE = "dir";
     public static final String DATA_DIR_KEY = "dataDir";
+
+    public static final String FILE_NAME_KEY = "fileName";
+    public static final String FILE_PATH_KEY = "filePath";
 
     @Override
     protected void buildChildren(Context context, DataTree.Builder<?> builder, Meta dataConfig) {
@@ -41,14 +46,23 @@ public class FileDataFactory extends DataFactory {
         if (dataConfig.hasNode(DIRECTORY_NODE)) {
             dataConfig.getNodes(DIRECTORY_NODE).forEach((node) -> addDir(context, builder, parentFile, node));
         }
-        
+
         if (dataConfig.hasValue("file")) {
             Value fileValue = dataConfig.getValue("file");
             fileValue.listValue().stream().forEach((fileName) -> {
                 addFile(context, builder, parentFile, new MetaBuilder("file")
                         .putValue("path", fileName));
             });
-        }        
+        }
+    }
+
+    private Data<Binary> buildFileData(File file, Meta meta) {
+        StaticData<Binary> fileData = new StaticData(new FileBinary(file));
+        MetaBuilder mb = new MetaBuilder(meta);
+        mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());
+        mb.putValue(FILE_NAME_KEY, file.getName());
+        fileData.setMeta(mb.build());
+        return fileData;
     }
 
     /**
@@ -64,19 +78,12 @@ public class FileDataFactory extends DataFactory {
             context.getLogger().warn("No files matching the filter: " + fileNode.toString());
         } else if (files.size() == 1) {
             File file = files.get(0);
-            StaticData<File> fileData = new StaticData(file);
-            if (fileNode.hasNode(DATA_META_KEY)) {
-                fileData.setMeta(fileNode.getNode(DATA_META_KEY));
-            }
-            String fileName = fileNode.getString(NODE_NAME_KEY, fileName(file));
-            builder.putData(fileName, fileData);
+            Meta fileMeta = fileNode.hasNode(DATA_META_KEY) ? fileNode.getNode(DATA_META_KEY) : Meta.empty();
+            builder.putData(fileName(file), buildFileData(file, fileMeta));
         } else {
             files.forEach(file -> {
-                StaticData<File> fileData = new StaticData(file);
-                if (fileNode.hasNode(DATA_META_KEY)) {
-                    fileData.setMeta(fileNode.getNode(DATA_META_KEY));
-                }
-                builder.putData(fileName(file), fileData);
+                Meta fileMeta = fileNode.hasNode(DATA_META_KEY) ? fileNode.getNode(DATA_META_KEY) : Meta.empty();
+                builder.putData(fileName(file), buildFileData(file, fileMeta));
             });
         }
     }
@@ -105,12 +112,12 @@ public class FileDataFactory extends DataFactory {
         for (File file : dir.listFiles()) {
             //TODO add file filter here
             if (file.isFile()) {
-                StaticData<File> fd = new StaticData(file);                
-                dirBuilder.putData(fileName(file), fd);
+                dirBuilder.putData(fileName(file), buildFileData(file, Meta.empty()));
             } else if (recurse) {
                 addDir(context, dirBuilder, dir, Meta.empty());
             }
         }
+        builder.putBranch(dirBuilder.build());
 
     }
 

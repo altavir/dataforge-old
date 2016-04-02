@@ -47,6 +47,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public ActionResult<R> runOne(Context context, String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
+        if (!this.getInputType().isAssignableFrom(data.dataType())) {
+            throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
+                    getName(), getInputType().getName(), data.dataType().getName()));
+        }
+
         Log log = buildLog(context, groupMeta, data);
         Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
         //FIXME add error evaluation

@@ -15,6 +15,8 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Tag;
@@ -74,7 +76,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     @Override
-    public ByteBuffer getData() {
+    public Binary getData() {
         try {
             if (dataSize == INFINITE_DATA_SIZE) {
                 dataSize = getContent().length() - dataOffset;
@@ -82,7 +84,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
             getContent().seek(dataOffset);
 
-            return readBlock((int) dataOffset, (int) dataSize);
+            return new BufferedBinary(readBlock((int) dataOffset, (int) dataSize));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

@@ -17,6 +17,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
+import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
@@ -86,7 +87,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                 dataNode.putValue("type", data.dataType().getName());
             }
             if (!data.meta().isEmpty()) {
-                dataNode.putNode("@meta", data.meta());
+                dataNode.putNode(DataFactory.DATA_META_KEY, data.meta());
             }
             builder.putNode(dataNode);
         });

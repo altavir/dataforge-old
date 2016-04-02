@@ -21,6 +21,7 @@ import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.values.Value;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
@@ -76,8 +77,8 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         }
         newProperties.putIfAbsent(META_LENGTH_KEY, Value.of(metaSize));
 
-        byte[] dataBytes = envelope.getData().array();
-        int dataSize = dataBytes.length;
+//        byte[] dataBytes = envelope.getData().array();
+        long dataSize = envelope.getData().size();
         newProperties.putIfAbsent(DATA_LENGTH_KEY, Value.of(dataSize));
 
         if (useStamp) {
@@ -103,7 +104,19 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         if (meta.length > 0) {
             stream.write(SEPARATOR);
         }
-        stream.write(dataBytes);
+
+        if (dataSize > 0) {
+            InputStream inputStream = envelope.getData().getStream();
+            for (int i = 0; i < dataSize; i++) {
+                stream.write(inputStream.read());
+            }
+        } else if (dataSize < 0) {
+            InputStream inputStream = envelope.getData().getStream();
+            while (inputStream.available() > 0) {
+                stream.write(inputStream.read());
+            }
+        }
+
     }
 
 }
