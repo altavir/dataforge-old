@@ -64,7 +64,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                     R res = execute(context, log, data.getName(), collection, meta);
                     afterGroup(context, log, data.getName(), outputMeta, res);
                     return res;
-                }, buildExecutor(data.meta(), data)));
+                }, buildExecutor(context, data.getName())));
         return new ActionResult<>(getOutputType(), log, future, outputMeta);
 
     }

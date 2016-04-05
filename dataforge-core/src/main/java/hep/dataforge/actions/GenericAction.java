@@ -86,12 +86,12 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         }
     }
 
-    protected Executor buildExecutor(Meta meta, Object data) {
-        if (executor == null) {
-            ThreadGroup group = new ThreadGroup(getName());
-            executor = Executors.newCachedThreadPool((Runnable r) -> new Thread(group, r));
-        }
-        return executor;
+    protected Executor buildExecutor(Context context, String dataName) {
+        return context.processManager().executor(getName(), dataName);
+    }    
+    
+    protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
+        return buildExecutor(context, dataName);
     }
 
     protected boolean isEmptyInputAllowed() {

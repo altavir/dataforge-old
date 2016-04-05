@@ -57,7 +57,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
                 thenCompose((T datum) -> CompletableFuture
-                        .supplyAsync(() -> transform(context, log, name, meta, datum), buildExecutor(groupMeta, datum)));
+                        .supplyAsync(() -> transform(context, log, name, meta, datum), buildExecutor(context, name)));
 
         return new ActionResult(getOutputType(), log, future, outputMeta(name, groupMeta, data));
     }

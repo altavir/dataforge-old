@@ -28,6 +28,9 @@ import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import static java.lang.Math.abs;
+import static java.util.Arrays.fill;
+import static java.util.Arrays.sort;
 
 /**
  * <p>MatrixOperations class.</p>

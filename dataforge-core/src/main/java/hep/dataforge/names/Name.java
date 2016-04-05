@@ -15,6 +15,7 @@
  */
 package hep.dataforge.names;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
@@ -38,8 +39,17 @@ public interface Name {
      * Constant <code>NAME_TOKEN_SEPARATOR="."</code>
      */
     public static final String NAME_TOKEN_SEPARATOR = ".";
-    
+
     public static final String NAMESPACE_SEPARATOR = ":";
+    
+    /**
+     * The length of Name produced from given string
+     * @param name
+     * @return 
+     */
+    public static int lengthOf(String name){
+        return Name.of(name).length();
+    }
 
     public static Name of(String str) {
         String namespace;
@@ -66,6 +76,7 @@ public interface Name {
 
     /**
      * Join all segments in the given order. Segments could be composite.
+     *
      * @param segments
      * @return a {@link hep.dataforge.names.Name} object.
      */
@@ -73,10 +84,22 @@ public interface Name {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String segment : segments) {
             Name segmentName = of(segment);
-            if(segmentName instanceof NameToken){
-                list.add((NameToken)segmentName);
+            if (segmentName instanceof NameToken) {
+                list.add((NameToken) segmentName);
             } else {
-                list.addAll(((NamePath)segmentName).getNames());
+                list.addAll(((NamePath) segmentName).getNames());
+            }
+        }
+        return new NamePath(list);
+    }
+
+    public static Name join(Name... segments) {
+        LinkedList<NameToken> list = new LinkedList<>();
+        for (Name segmentName : segments) {
+            if (segmentName instanceof NameToken) {
+                list.add((NameToken) segmentName);
+            } else {
+                list.addAll(((NamePath) segmentName).getNames());
             }
         }
         return new NamePath(list);
@@ -98,7 +121,7 @@ public interface Name {
      */
     @Override
     String toString();
-    
+
     /**
      * if has query for the last element
      *
@@ -112,13 +135,15 @@ public interface Name {
      * @return a {@link java.lang.String} object.
      */
     String getQuery();
-    
+
     /**
-     * This name without last element query. If there is no query, returns itself
-     * @return 
+     * This name without last element query. If there is no query, returns
+     * itself
+     *
+     * @return
      */
     Name ignoreQuery();
-    
+
     /**
      * Количество токенов в имени
      *
@@ -141,7 +166,7 @@ public interface Name {
     Name getLast();
 
     /**
-     *  The whole name but the first token
+     * The whole name but the first token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
@@ -179,6 +204,19 @@ public interface Name {
 
     default Name removeNameSpace() {
         return toNameSpace("");
+    }
+
+    /**
+     * Create a new name with given name appended to the end of this one
+     * @param name
+     * @return 
+     */
+    default Name append(Name name) {
+        return join(this, name);
+    }
+
+    default Name append(String name) {
+        return join(this, of(name));
     }
 
     String[] asArray();

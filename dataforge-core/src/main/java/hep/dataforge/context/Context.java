@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Окружение для выполнения действий (и не только). Имеет собственный лог и
@@ -134,10 +135,11 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     }
 
     /**
-     * Do not use this!!! use IOManager::attachTo instead
-     * @param io 
+     * Set IO manager for this context
+     *
+     * @param io
      */
-    public void attachIoManager(IOManager io) {
+    public void setIO(IOManager io) {
         io.setContext(this);
 
         LoggerContext loggerContext = getLogger().getLoggerContext();
@@ -149,7 +151,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         appender.start();
 
         getLogger().addAppender(appender);
-        
+
         if (!io.out().equals(System.out)) {
             getLog().addLogListener((LogEntry t) -> {
                 try {
@@ -159,7 +161,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
                     throw new RuntimeException(ex);
                 }
             });
-        }        
+        }
         this.io = io;
     }
 
@@ -171,10 +173,10 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     public final PluginManager pluginManager() {
         return this.pm;
     }
-    
-    public ProcessManager processManager(){
-        if(this.processManager == null){
-            if(getParent()!= null){
+
+    public ProcessManager processManager() {
+        if (this.processManager == null) {
+            if (getParent() != null) {
                 return getParent().processManager();
             } else {
                 return GlobalContext.instance().processManager();
@@ -182,7 +184,12 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         } else {
             return processManager;
         }
-    } 
+    }
+
+    public void setProcessManager(ProcessManager manager) {
+        manager.setContext(this);
+        this.processManager = manager;
+    }
 
     /**
      * {@inheritDoc}

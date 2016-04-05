@@ -63,11 +63,13 @@ public class GlobalContext extends Context {
         actions.registerAction(FilterAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
+        this.processManager = new ProcessManager();
+        this.processManager.setContext(this);        
     }
 
     @Override
-    public void attachIoManager(IOManager io) {
-        super.attachIoManager(io);
+    public void setIO(IOManager io) {
+        super.setIO(io);
         //redirect all logging output to new ioManager
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
 
@@ -83,7 +85,7 @@ public class GlobalContext extends Context {
     @Override
     public IOManager io() {
         if (this.io == null) {
-            attachIoManager(new BasicIOManager());
+            setIO(new BasicIOManager());
             getLog().addLogListener((LogEntry t) -> {
                 System.out.println(t.toString());
             });
