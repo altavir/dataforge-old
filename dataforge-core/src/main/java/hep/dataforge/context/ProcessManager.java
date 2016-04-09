@@ -8,6 +8,8 @@ package hep.dataforge.context;
 import hep.dataforge.names.Name;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 /**
@@ -26,6 +28,8 @@ public class ProcessManager implements Encapsulated {
      */
     private Context context;
 
+    protected ExecutorService executor;
+
     @Override
     public Context getContext() {
         return this.context;
@@ -38,8 +42,8 @@ public class ProcessManager implements Encapsulated {
     protected Process buildProcess(String processName, CompletableFuture future) {
         return rootProcess.addChild(processName, future);
     }
-    
-    public Process findProcess(String processName){
+
+    public Process findProcess(String processName) {
         return rootProcess.findProcess(processName);
     }
 
@@ -64,22 +68,17 @@ public class ProcessManager implements Encapsulated {
      * @return
      */
     public synchronized Process post(String processName, Runnable runnable) {
-        getContext().getLogger().debug("Posting proess with name '{}' to the process manager", processName);
-        CompletableFuture future = CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command))
-                .whenComplete((Object res, Throwable ex) -> {
-                    onProcessFinished(processName);
-                    if (ex != null) {
-                        onProcessException(processName, ex);
-                    }
-                });
-        onProcessStarted(processName);
-        return buildProcess(processName, future);
+        return post(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 
-    public synchronized Process post(String processName, Supplier<?> sup) {
-        getContext().getLogger().debug("Posting proess with name '{}' to the process manager", processName);
-        CompletableFuture future = CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command))
-                .whenComplete((Object res, Throwable ex) -> {
+    public synchronized <U> Process post(String processName, Supplier<U> sup) {
+        return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
+    }
+
+    public synchronized <U> Process post(String processName, CompletableFuture<U> task) {
+        getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
+        CompletableFuture future = task
+                .whenComplete((U res, Throwable ex) -> {
                     onProcessFinished(processName);
                     if (res != null) {
                         onProcessResult(processName, res);
@@ -100,7 +99,11 @@ public class ProcessManager implements Encapsulated {
      * @param runnable
      */
     protected void execute(String processName, Runnable runnable) {
-        new Thread(runnable, processName).start();
+        if (this.executor == null) {
+            getContext().getLogger().info("Initializing executor");
+            this.executor = Executors.newWorkStealingPool();
+        }
+        executor.execute(runnable);
     }
 
     /**
@@ -119,6 +122,13 @@ public class ProcessManager implements Encapsulated {
      */
     protected void onProcessFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
+        synchronized (this) {
+            if (rootProcess.isDone() && executor != null) {
+                executor.shutdown();
+                executor = null;
+                getContext().getLogger().info("All processes complete. Shuting executor down");
+            }
+        }
     }
 
     /**
@@ -151,7 +161,7 @@ public class ProcessManager implements Encapsulated {
      */
     public void updateProgress(String processName, double progress, double maxProgress) {
         //TODO check calling thread
-
+        rootProcess.findProcess(processName).setProgress(progress, maxProgress);
     }
 
     /**
@@ -163,7 +173,11 @@ public class ProcessManager implements Encapsulated {
      */
     public void updateMessage(String processName, String message) {
         //TODO check calling thread
+        rootProcess.findProcess(processName).setMessage(message);
+    }
 
+    public void updateTitle(String processName, String title) {
+        rootProcess.findProcess(processName).setTitle(title);
     }
 
     /**
@@ -176,9 +190,15 @@ public class ProcessManager implements Encapsulated {
     public void cancel(String processName, boolean interrupt) {
         findProcess(processName).cancel(interrupt);
     }
+    
+    public void cleanup(){
+        this.rootProcess.cleanup();
+    }
 
     public static interface ProgressCallback {
+
         public void updateProgress(String processName, double progress, double maxProgress);
+
         public void updateMessage(String processName, String message);
     }
 }
