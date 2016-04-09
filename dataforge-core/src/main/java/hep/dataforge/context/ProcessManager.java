@@ -19,7 +19,7 @@ public class ProcessManager implements Encapsulated {
     /**
      * root process map
      */
-    private final Process rootProcess = Process.empty("root");
+    private final Process rootProcess = new Process("root");
 
     /**
      * A context for this process manager
@@ -35,8 +35,12 @@ public class ProcessManager implements Encapsulated {
         this.context = context;
     }
 
-    protected <U> Process<U> buildProcess(String processName, CompletableFuture<U> future) {
-        return rootProcess.createChild(Name.of(processName), future);
+    protected Process buildProcess(String processName, CompletableFuture future) {
+        return rootProcess.addChild(processName, future);
+    }
+    
+    public Process findProcess(String processName){
+        return rootProcess.findProcess(processName);
     }
 
     /**
@@ -63,7 +67,7 @@ public class ProcessManager implements Encapsulated {
         getContext().getLogger().debug("Posting proess with name '{}' to the process manager", processName);
         CompletableFuture future = CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command))
                 .whenComplete((Object res, Throwable ex) -> {
-                    onProcessFinished(processName); 
+                    onProcessFinished(processName);
                     if (ex != null) {
                         onProcessException(processName, ex);
                     }
@@ -72,11 +76,11 @@ public class ProcessManager implements Encapsulated {
         return buildProcess(processName, future);
     }
 
-    public synchronized <U> Process<U> post(String processName, Supplier<U> sup) {
+    public synchronized Process post(String processName, Supplier<?> sup) {
         getContext().getLogger().debug("Posting proess with name '{}' to the process manager", processName);
-        CompletableFuture<U> future = CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command))
-                .whenComplete((U res, Throwable ex) -> {
-                    onProcessFinished(processName); 
+        CompletableFuture future = CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command))
+                .whenComplete((Object res, Throwable ex) -> {
+                    onProcessFinished(processName);
                     if (res != null) {
                         onProcessResult(processName, res);
                     }
@@ -84,7 +88,7 @@ public class ProcessManager implements Encapsulated {
                         onProcessException(processName, ex);
                     }
                 });
-        onProcessStarted(processName);        
+        onProcessStarted(processName);
         return buildProcess(processName, future);
     }
 
@@ -99,128 +103,82 @@ public class ProcessManager implements Encapsulated {
         new Thread(runnable, processName).start();
     }
 
+    /**
+     * This method is called internally on process start
+     *
+     * @param processName
+     */
     protected void onProcessStarted(String processName) {
         getContext().getLogger().debug("Process '{}' started", processName);
     }
 
+    /**
+     * This method is called internally on process finish (exceptionally or not)
+     *
+     * @param processName
+     */
     protected void onProcessFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
     }
 
+    /**
+     * This method is called internally on process exception
+     *
+     * @param processName
+     * @param exception
+     */
     protected void onProcessException(String processName, Throwable exception) {
         getContext().getLogger().debug("Process '{}' finished with exception: {}", processName, exception.getMessage());
     }
 
+    /**
+     * This method is called internally on process successful finish with result
+     * (null result does not count)
+     *
+     * @param processName
+     * @param result
+     */
     protected void onProcessResult(String processName, Object result) {
         getContext().getLogger().debug("Process '{}' produced a result: {}", processName, result);
     }
 
-    protected void updateProgress(String processName, double progress, String status) {
+    /**
+     * Called externally to notify status change progress for the process
+     *
+     * @param processName
+     * @param progress
+     * @param message
+     */
+    public void updateProgress(String processName, double progress, double maxProgress) {
+        //TODO check calling thread
 
     }
 
-//
-//    private ScheduledExecutorService executor;
-//    private Map<String, ThreadGroup> groups;
-//    private Map<String, Thread> threads;
-//    private final ThreadGroup root;
-//
-//
-//
-//    /**
-//     * Lazily initialized executor service
-//     *
-//     * @return
-//     */
-//    public ScheduledExecutorService internalExecutor() {
-//        if (executor == null) {
-//            executor = buildExecutor();
-//            context.getLogger().info("Started executor service in context {}", getContext().getName());
-//        }
-//        return executor;
-//    }
-//
-//    protected ScheduledExecutorService buildExecutor() {
-//        return new ScheduledThreadPoolExecutor(Runtime.getRuntime().availableProcessors());
-//    }
-//
-//    /**
-//     * Post anonymous task on general thread pool
-//     *
-//     * @param task
-//     * @return
-//     */
-//    public Future post(Runnable task) {
-//        return internalExecutor().post(task);
-//    }
-//
-//    /**
-//     * Post anonymous task on general thread pool
-//     *
-//     * @param task
-//     * @return
-//     */
-//    public <T> Future<T> post(Callable<T> task) {
-//        return internalExecutor().post(task);
-//    }
-//
-//    private ThreadGroup buildGroups(Name path) {
-//        ThreadGroup currentRoot = root;
-//        Name currentPath = path;
-//        while (path.length() > 1) {
-//            currentRoot = new ThreadGroup(currentRoot, currentPath.cutFirst().toString());
-//            this.groups.put(currentPath.cutFirst().toString(), currentRoot);
-//            currentPath = path.cutFirst();
-//        }
-//        return new ThreadGroup(currentRoot, path.toString());
-//    }
-//
-//    /**
-//     * Create a new named thread outside common thread pool but does not start
-//     * it
-//     *
-//     * @param taskName
-//     * @param task
-//     * @return
-//     */
-//    public Thread createTask(String taskName, Runnable task) {
-//        Name name = Name.of(taskName);
-//        Thread thread;
-//        if (name.length() == 1) {
-//            thread = new Thread(root, task, name.toString());
-//        } else {
-//            thread = new Thread(buildGroups(name.cutLast()), task, name.getFirst().toString());
-//        }
-//        this.threads.put(taskName, thread);
-//        return thread;
-//    }
-//
-//    /**
-//     * Create a new named thread outside common thread pool but does not and
-//     * start it
-//     *
-//     * @param taskName
-//     * @param task
-//     */
-//    public void runTask(String taskName, Runnable task) {
-//        createTask(taskName, task).start();
-//    }
-//
-//    /**
-//     * Return a ThreadGroup with given name if it is registered, null otherwise
-//     * @param name
-//     * @return 
-//     */
-//    public ThreadGroup getThreadGroup(String name){
-//        return this.groups.get(name);
-//    }
-//    
-//    /**
-//     * Return a Thread with given name if it is registered, null otherwise.
-//     * @param name
-//     * @return 
-//     */
-//    public Thread getThread(String name){
-//        return this.threads.get(name);
-//    }
+    /**
+     * Called externally to notify status change message for the process
+     *
+     * @param processName
+     * @param progress
+     * @param message
+     */
+    public void updateMessage(String processName, String message) {
+        //TODO check calling thread
+
+    }
+
+    /**
+     * Externally cancel process with the given name. Empty name corresponds to
+     * the root process
+     *
+     * @param processName
+     * @param interrupt
+     */
+    public void cancel(String processName, boolean interrupt) {
+        findProcess(processName).cancel(interrupt);
+    }
+
+    public static interface ProgressCallback {
+        public void updateProgress(String processName, double progress, double maxProgress);
+        public void updateMessage(String processName, String message);
+    }
 }

@@ -15,7 +15,6 @@
  */
 package hep.dataforge.names;
 
-import java.util.Arrays;
 import java.util.LinkedList;
 
 /**
