@@ -16,6 +16,7 @@ import java.util.concurrent.Callable;
  * A device with single one-time or periodic measurement
  *
  * @author Alexander Nozik
+ * @param <T>
  */
 @StateDef(name = "measuring", readOnly = true, info = "Shows if this sensor is actively measuring")
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
@@ -23,8 +24,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
     /**
      * Create simple sensor with simple one-time measurement
      *
-     * @param name
-     * @param context
+     * @param <T>
      * @param proc
      * @return
      */
@@ -48,6 +48,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      * Read sensor data synchronously
      *
      * @return
+     * @throws hep.dataforge.exceptions.MeasurementException
      */
     public synchronized T read() throws MeasurementException {
         return startMeasurement().getResult();
@@ -73,6 +74,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      *
      * @param force if true than current measurement will be interrupted even if
      * running
+     * @throws hep.dataforge.exceptions.MeasurementException
      */
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {

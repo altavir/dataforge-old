@@ -220,6 +220,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param stateName
      * @param stateValue
      * @return
+     * @throws hep.dataforge.exceptions.ControlException
      */
     protected boolean applyState(String stateName, Value stateValue) throws ControlException {
         throw new ControlException("State " + stateName + " is not defined or read only");
@@ -242,10 +243,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     /**
      * Attach connection
      *
-     * @param name
      * @param connection
-     * @return
-     * @throws Exception
+     * @param roles
      */
     @Override
     public synchronized void connect(Connection<Device> connection, String... roles) {
@@ -277,6 +276,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * predicate. Both role and predicate could be empty
      *
      * @param role
+     * @param predicate
      * @param action
      */
     public void forEachConnection(String role, Predicate<Connection> predicate, Consumer<Connection> action) {
@@ -307,6 +307,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * For each connection of given class and role. Role may be empty, but type
      * is mandatory
      *
+     * @param <T>
+     * @param role
      * @param type
      * @param action
      */
