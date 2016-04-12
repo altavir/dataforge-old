@@ -110,7 +110,7 @@ public class PluginManager implements Encapsulated {
             }
         }
 
-        plugin.apply(getContext());
+        plugin.attach(getContext());
         plugins.put(plugin.getName(), plugin);
         return plugin;
     }

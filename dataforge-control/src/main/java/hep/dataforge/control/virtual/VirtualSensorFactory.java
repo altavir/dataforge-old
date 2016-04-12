@@ -18,7 +18,10 @@ import hep.dataforge.values.Value;
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -26,58 +29,59 @@ import java.util.function.Function;
  *
  * @author Alexander Nozik
  */
-public class SensorFactory<T> {
+public class VirtualSensorFactory<T> {
 
-    private Function<Sensor<T>, T> valueFactory;
+    private Function<Sensor<T>, T> valueFactory = (Sensor<T> sensor) -> null;
     private Function<Sensor<T>, Duration> delayFactory = (sensor) -> Duration.ZERO;
-    private String name;
+    private String name = "device";
     private Context context = GlobalContext.instance();
     private Meta meta = Meta.buildEmpty("device");
     private List<StateDef> states = new ArrayList<>();
     private List<RoleDef> roles = new ArrayList<>();
+    private final Map<String, BiConsumer<Sensor<T>, Value>> commands = new HashMap<>();
 
-    public SensorFactory(String name, Function<Sensor<T>, T> valueFactory) {
-        this.valueFactory = valueFactory;
-        this.name = name;
-    }
-
-    public SensorFactory<T> setValueFactory(Function<Sensor<T>, T> valueFactory) {
+    public VirtualSensorFactory<T> setValueFactory(Function<Sensor<T>, T> valueFactory) {
         this.valueFactory = valueFactory;
         return this;
     }
 
-    public SensorFactory<T> setDelayFactory(Function<Sensor<T>, Duration> delayFactory) {
+    public VirtualSensorFactory<T> setDelayFactory(Function<Sensor<T>, Duration> delayFactory) {
         this.delayFactory = delayFactory;
         return this;
     }
 
-    public SensorFactory<T> setName(String name) {
+    public VirtualSensorFactory<T> setName(String name) {
         this.name = name;
         return this;
     }
 
-    public SensorFactory<T> setContext(Context context) {
+    public VirtualSensorFactory<T> setContext(Context context) {
         this.context = context;
         return this;
     }
 
-    public SensorFactory<T> setMeta(Meta meta) {
+    public VirtualSensorFactory<T> setMeta(Meta meta) {
         this.meta = meta;
         return this;
     }
 
-    public SensorFactory<T> setStates(List<StateDef> states) {
+    public VirtualSensorFactory<T> setStates(List<StateDef> states) {
         this.states = states;
         return this;
     }
 
-    public SensorFactory<T> setRoles(List<RoleDef> roles) {
+    public VirtualSensorFactory<T> setRoles(List<RoleDef> roles) {
         this.roles = roles;
         return this;
     }
 
+    public VirtualSensorFactory<T> addCommand(String commandName, BiConsumer<Sensor<T>, Value> consumer) {
+        commands.put(commandName, consumer);
+        return this;
+    }
+
     //TODO add methods for custom states
-    public SensorFactory<T> addState(String name) {
+    public VirtualSensorFactory<T> addState(String name) {
         states.add(new StateDef() {
             @Override
             public String name() {
@@ -90,11 +94,6 @@ public class SensorFactory<T> {
             }
 
             @Override
-            public boolean readOnly() {
-                return false;
-            }
-
-            @Override
             public Class<? extends Annotation> annotationType() {
                 return StateDef.class;
             }
@@ -102,7 +101,7 @@ public class SensorFactory<T> {
         return this;
     }
 
-    public SensorFactory<T> addRole(String name) {
+    public VirtualSensorFactory<T> addRole(String name) {
         roles.add(new RoleDef() {
             @Override
             public String name() {
@@ -145,12 +144,16 @@ public class SensorFactory<T> {
             }
 
             @Override
-            protected boolean applyState(String stateName, Value stateValue) throws ControlException {
-                return hasState(stateName);
+            public void command(String commandName, Value argument) throws ControlException {
+                if (commands.containsKey(commandName)) {
+                    commands.get(commandName).accept(this, argument);
+                } else {
+                    super.command(commandName, argument);
+                }
             }
 
         };
-        
+
         sensor.setName(name);
         sensor.setMeta(meta);
         sensor.setContext(context);

@@ -18,7 +18,7 @@ import java.util.concurrent.Callable;
  * @author Alexander Nozik
  * @param <T>
  */
-@StateDef(name = "measuring", readOnly = true, info = "Shows if this sensor is actively measuring")
+@StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
 
     /**

@@ -30,7 +30,7 @@ public class FitPlugin extends BasicPlugin {
     private FitManager fitManager;
     
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
         if(getFitManager() == null){
             fitManager = new FitManager(context);
         } else {
@@ -44,7 +44,7 @@ public class FitPlugin extends BasicPlugin {
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
         fitManager = null;
         ActionManager.buildFrom(context).unRegisterAction(FitAction.FIT_ACTION_NAME);
 

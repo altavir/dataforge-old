@@ -46,10 +46,16 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
     public ComPortHandler(Meta annotation) {
-        super(annotation.getString("name"));
         this.annotation = annotation;
     }
 
+    @Override
+    public String getPortId() {
+        return String.format("com::%s", port.getPortName());
+    }
+
+    
+    
     public ComPortHandler(String portName, int baudRate, int dataBits, int stopBits, int parity) {
         this(new MetaBuilder("port")
                 .putValue("name", portName)
@@ -83,7 +89,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     public void open() throws PortException {
         try {
             if (port == null) {
-                port = new SerialPort(getPortName());
+                port = new SerialPort(getPortId());
                 port.openPort();
                 Meta an = meta();
                 int baudRate = an.getInt("baudRate", BAUDRATE_9600);

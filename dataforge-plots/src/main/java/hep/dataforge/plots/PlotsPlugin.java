@@ -28,12 +28,12 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
     PlotHolder plotHolderDelegate = new DefaultPlotHolder();
 
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
 
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
 
     }
 

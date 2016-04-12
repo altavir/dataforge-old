@@ -63,10 +63,18 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
     }
 
-    protected void onResult(T result) {
+    /**
+     * Internal method to notify measurement complete. Uses current system time
+     * @param result 
+     */
+    protected final void result(T result) {
         result(result, Instant.now());
     }
 
+    /**
+     * Internal method to notify measurement complete
+     * @param result 
+     */    
     protected synchronized void result(T result, Instant time) {
         this.lastResult = new Pair<>(result, time);
         setState(MeasurementState.OK);
@@ -114,7 +122,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         }
         while (state == MeasurementState.PENDING) {
             try {
-                //Wait for onResult could cause deadlock if called in main thread
+                //Wait for result could cause deadlock if called in main thread
                 wait();
             } catch (InterruptedException ex) {
                 throw new MeasurementException(ex);

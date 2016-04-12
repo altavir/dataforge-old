@@ -37,10 +37,5 @@ public @interface StateDef {
      * @return 
      */
     String info() default "";
-    
-    /**
-     * If state is read only
-     * @return 
-     */
-    boolean readOnly() default false;
+
 }

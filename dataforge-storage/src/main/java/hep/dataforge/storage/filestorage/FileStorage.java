@@ -200,9 +200,6 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-//    private FileObject getCfgFile() throws FileSystemException {
-//        return getDataDir().resolveFile(STORAGE_CONFIGURATION_FILE);
-//    }
     protected synchronized void updateDirectoryLoaders() {
         try {
             this.shelves.clear();
@@ -339,7 +336,11 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 }
             }
             refresh();
-            return getLoader(name);
+            Loader loader = getLoader(name);
+            if(loader == null){
+                throw new StorageException("Loader could not be initialized from existing file");
+            }
+            return loader;
         } catch (IOException ex) {
             throw new StorageException(ex);
         }
@@ -368,17 +369,17 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void fileCreated(FileChangeEvent event) throws Exception {
-        refresh();
+        updateFile(event.getFile());
     }
 
     @Override
     public void fileDeleted(FileChangeEvent event) throws Exception {
-        refresh();
+        //do nothing we suppose that file could not be deleted in the runtime
     }
 
     @Override
     public void fileChanged(FileChangeEvent event) throws Exception {
-        refresh();
+        //do nothing
     }
 
 }

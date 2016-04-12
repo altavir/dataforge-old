@@ -36,10 +36,7 @@ public abstract class VirtualPort extends PortHandler {
     private final Set<TaggedFuture> futures = new CopyOnWriteArraySet<>();
 
     private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(4);
-
-    public VirtualPort(String portName) {
-        super(portName);
-    }
+    
 
     @Override
     public void send(String message) throws PortException {

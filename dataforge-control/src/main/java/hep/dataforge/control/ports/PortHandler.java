@@ -41,11 +41,11 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
     private Predicate<String> phraseCondition = defaultPhraseCondition();
 
     private final ReentrantLock portLock = new ReentrantLock(true);
-    private final String portName;
+//    private final String portName;
 
-    public PortHandler(String portName) {
-        this.portName = portName;
-    }
+//    public PortHandler(String portName) {
+//        this.portName = portName;
+//    }
 
     public void setPhraseCondition(Predicate<String> condition) {
         this.phraseCondition = condition;
@@ -67,9 +67,11 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
         portLock.unlock();
     }
 
-    public String getPortName() {
-        return portName;
-    }
+    /**
+     * An unique ID for this port
+     * @return 
+     */
+    public abstract String getPortId();
 
     /**
      * Acquire lock on this instance of port handler with given controller
@@ -87,7 +89,7 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
         try {
             portLock.lockInterruptibly();
         } catch (InterruptedException ex) {
-            LoggerFactory.getLogger(getClass()).error("Lock on port {} is broken", portName);
+            LoggerFactory.getLogger(getClass()).error("Lock on port {} is broken", getPortId());
             throw new PortException(ex);
         }
         LoggerFactory.getLogger(getClass()).debug("Locked by {}", controller);

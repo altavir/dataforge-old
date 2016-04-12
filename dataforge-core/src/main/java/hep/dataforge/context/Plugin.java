@@ -28,7 +28,7 @@ import hep.dataforge.meta.Meta;
 public interface Plugin extends Annotated, Named {
 
     /**
-     * Plugin dependencies which are required to apply this plugin. Plugin
+     * Plugin dependencies which are required to attach this plugin. Plugin
      * dependencies must be initialized and enabled in the Context before this
      * plugin is enabled.
      *
@@ -37,12 +37,12 @@ public interface Plugin extends Annotated, Named {
     VersionTag[] dependsOn();
 
     /**
-     * Start this plugin and apply registration info to the context. This method
+     * Start this plugin and attach registration info to the context. This method
      * should be called only via PluginManager to avoid dependency issues.
      *
      * @param context
      */
-    void apply(Context context);
+    void attach(Context context);
 
     /**
      * Stop this plugin and remove registration info from context and other
@@ -51,7 +51,7 @@ public interface Plugin extends Annotated, Named {
      *
      * @param context
      */
-    void clean(Context context);
+    void detach(Context context);
 
     /**
      * Get tag for this plugin
@@ -71,7 +71,7 @@ public interface Plugin extends Annotated, Named {
     }
 
     /**
-     * Set config for this plugin and apply changes
+     * Set config for this plugin and attach changes
      *
      * @param config
      */

@@ -18,7 +18,7 @@ import java.util.ServiceLoader;
  */
 public class StorageFactory {
 
-    private static ServiceLoader<StorageType> loader = ServiceLoader.load(StorageType.class);
+    private static final ServiceLoader<StorageType> loader = ServiceLoader.load(StorageType.class);
     private static final String DEFAULT_STORAGE_TYPE = "file";
 
     private static MetaFactory<Storage> getStorageFactory(String type) {

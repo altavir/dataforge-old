@@ -15,12 +15,12 @@ import hep.dataforge.context.Context;
 public class GrindPlugin extends BasicPlugin {
 
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
     

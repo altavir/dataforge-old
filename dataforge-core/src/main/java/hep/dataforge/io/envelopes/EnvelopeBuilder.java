@@ -35,7 +35,8 @@ public class EnvelopeBuilder {
 
     private Map<String, Value> properties = new HashMap<>();
     private MetaBuilder meta = new MetaBuilder("envelope");
-    private Binary data;
+    //initializing with empty buffer
+    private Binary data = new BufferedBinary(new byte[0]);
 
 
     public EnvelopeBuilder(Envelope envelope) {

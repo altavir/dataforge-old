@@ -64,16 +64,16 @@ public interface DeviceListener {
 
     }
 
-//    /**
-//     * Notify that command is accepted. By default is ignored.
-//     *
-//     * @param device
-//     * @param command
-//     * @param commandMeta
-//     */
-//    default void notifyDeviceCommandAccepted(Device device, String command, Meta commandMeta) {
-//
-//    }
+    /**
+     * Notify that command is accepted. By default is ignored.
+     *
+     * @param device
+     * @param command
+     * @param commandMeta
+     */
+    default void notifyDeviceCommandAccepted(Device device, String command) {
+
+    }
 
     /**
      * Evaluate device event

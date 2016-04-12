@@ -33,6 +33,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.logging.Level;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,6 @@ import org.slf4j.LoggerFactory;
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
 
     private Context context;
-    private String name;
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
     private final Map<Connection, List<String>> connections = new HashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
@@ -62,7 +62,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     public void setName(String name) {
-        this.name = name;
+        this.getConfig().setValue("name", name);
     }
 
     /**
@@ -139,11 +139,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public String getName() {
-        if (name == null) {
-            return "";
-        } else {
-            return this.name;
-        }
+        return meta().getString("name", "");
     }
 
     @Override
@@ -190,42 +186,50 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param stateName
      */
     protected final void invalidateState(String stateName) {
-        this.states.remove(name);
-//        listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, null));
+        this.states.put(stateName, Value.NULL);
     }
 
-    /**
-     * Set state of the device changing its physical configuration if needed
-     *
-     * @param stateName
-     * @param stateValue
-     */
     @Override
-    public void setState(String stateName, Object stateValue) {
-        try {
-            Value val = Value.of(stateValue);
-            if (applyState(stateName, val)) {
-                notifyStateChanged(stateName, val);
-            } else {
-                getLogger().warn("State {} not changed", stateName);
-            }
-        } catch (ControlException ex) {
-            notifyError("Can't change state " + stateName, ex);
-        }
+    public void command(String commandName, Value argument) throws ControlException {
+        throw new ControlException("Command with name " + commandName + " not defined");
     }
 
-    /**
-     * Apply state to device
-     *
-     * @param stateName
-     * @param stateValue
-     * @return
-     * @throws hep.dataforge.exceptions.ControlException
-     */
-    protected boolean applyState(String stateName, Value stateValue) throws ControlException {
-        throw new ControlException("State " + stateName + " is not defined or read only");
+    @Override
+    public void command(String commandName, Meta commandConfiguration) throws ControlException {
+        throw new ControlException("Command with name " + commandName + " not defined");
     }
 
+//    /**
+//     * Set state of the device changing its physical configuration if needed
+//     *
+//     * @param stateName
+//     * @param stateValue
+//     */
+//    @Override
+//    public void setState(String stateName, Object stateValue) {
+//        try {
+//            Value val = Value.of(stateValue);
+//            if (applyState(stateName, val)) {
+//                notifyStateChanged(stateName, val);
+//            } else {
+//                getLogger().warn("State {} not changed", stateName);
+//            }
+//        } catch (ControlException ex) {
+//            notifyError("Can't change state " + stateName, ex);
+//        }
+//    }
+//
+//    /**
+//     * Apply state to device
+//     *
+//     * @param stateName
+//     * @param stateValue
+//     * @return
+//     * @throws hep.dataforge.exceptions.ControlException
+//     */
+//    protected boolean applyState(String stateName, Value stateValue) throws ControlException {
+//        throw new ControlException("State " + stateName + " is not defined or read only");
+//    }
     protected abstract Object calculateState(String stateName) throws ControlException;
 
     @Override
@@ -234,8 +238,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             try {
                 return Value.of(calculateState(stateName));
             } catch (ControlException ex) {
-                notifyError("Can't calculate stat " + stateName, ex);
-                return null;
+                notifyError("Can't calculate state " + stateName, ex);
+                return Value.NULL;
             }
         });
     }
@@ -254,7 +258,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             if (!hasRole(role)) {
                 getLogger().warn("The device {} does not support role {}", getName(), role);
             } else {
-                RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().get();
+                RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).findAny().get();
                 if (!rd.objectType().isInstance(connection)) {
                     getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
                             role, rd.objectType().getName());
@@ -266,8 +270,18 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             getLogger().debug("Opening connection...");
             connection.open(this);
         } catch (Exception ex) {
-            //FIXME evaluate error here
-            throw new Error(ex);
+            this.notifyError("Can not open connection", ex);
+        }
+    }
+
+    public synchronized void disconnect(Connection<Device> connection) {
+        if (connections.containsKey(connection)) {
+            try {
+                connection.close();
+            } catch (Exception ex) {
+                this.notifyError("Can not close connection", ex);
+            }
+            this.connections.remove(connection);
         }
     }
 
@@ -331,6 +345,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public String type() {
-        return "unknown";
+        return meta().getString("type", "unknown");
     }
 }

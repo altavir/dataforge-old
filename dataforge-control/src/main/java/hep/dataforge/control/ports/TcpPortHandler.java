@@ -39,9 +39,7 @@ public class TcpPortHandler extends PortHandler {
     private volatile boolean stopFlag = false;
 
     //TODO сделать аннотацию и конструктор по аннотации
-    
-    public TcpPortHandler(String ip, int port, String portName) throws PortException {
-        super(portName);
+    public TcpPortHandler(String ip, int port) throws PortException {
         try {
             socket = new Socket(ip, port);
         } catch (IOException ex) {
@@ -50,9 +48,13 @@ public class TcpPortHandler extends PortHandler {
 
     }
 
-    public TcpPortHandler(Socket socket, String portName) throws IOException {
-        super(portName);
+    public TcpPortHandler(Socket socket) throws IOException {
         this.socket = socket;
+    }
+
+    @Override
+    public String getPortId() {
+        return String.format("tcp::%s:%s", socket.getInetAddress(), socket.getPort());
     }
 
     @Override
@@ -74,7 +76,6 @@ public class TcpPortHandler extends PortHandler {
 //        open();
 //
 //    }
-
     @Override
     public void close() throws PortException {
         try {
@@ -82,7 +83,7 @@ public class TcpPortHandler extends PortHandler {
             listenerThread.join();
             listenerThread = null;
             socket.close();
-        } catch (IOException |InterruptedException ex) {
+        } catch (IOException | InterruptedException ex) {
             throw new PortException(ex);
         }
     }
@@ -117,7 +118,7 @@ public class TcpPortHandler extends PortHandler {
             OutputStream stream = socket.getOutputStream();
             stream.write(message.getBytes());
             stream.flush();
-            LoggerFactory.getLogger(getClass()).debug("SEND: " + message);            
+            LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
         } catch (IOException ex) {
             throw new PortException(ex);
         }

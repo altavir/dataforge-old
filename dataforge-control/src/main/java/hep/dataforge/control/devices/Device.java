@@ -25,6 +25,7 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.util.List;
 
@@ -58,7 +59,6 @@ import java.util.List;
  */
 public interface Device extends Configurable, Annotated, Encapsulated, Named, Responder {
 
-    //TODO add device states annotations
     /**
      * Device type
      *
@@ -77,8 +77,7 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      */
     Value getState(String name);
 
-    void setState(String stateName, Object stateValue);
-
+//    void setState(String stateName, Object stateValue);
     /**
      * Initialize device and check if it is working but do not start any
      * measurements or issue commands. Init method could be called only once per
@@ -120,7 +119,29 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      */
     void removeDeviceListener(DeviceListener listenrer);
 
+    /**
+     * Register connection for this device
+     *
+     * @param connection
+     * @param roles a set of roles for this connection
+     */
     void connect(Connection<Device> connection, String... roles);
+
+    /**
+     * Invoke a simple command (set state) for this device
+     *
+     * @param commandName
+     * @param arguments
+     */
+    void command(String commandName, Value argument) throws ControlException;
+
+    /**
+     * A command with complex configuration
+     *
+     * @param commandName
+     * @param arguments
+     */
+    void command(String commandName, Meta commandConfiguration) throws ControlException;
 
     /**
      * A list of all available states
@@ -141,39 +162,33 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
     }
 
     /**
-     * A quick way to find if device has a state with given name
-     * @param name
-     * @return 
-     */
-    default boolean hasState(String name) {
-        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findAny().isPresent();
-    }
-    
-    /**
      * Find a state definition for given name. Null if not found.
+     *
      * @param name
-     * @return 
+     * @return
      */
-    default StateDef getStateDef(String name){
+    default StateDef getStateDef(String name) {
         return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst().orElse(null);
     }
 
     /**
      * A quick way to find if device accepts connection with given role
+     *
      * @param name
-     * @return 
+     * @return
      */
     default boolean hasRole(String name) {
         return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().isPresent();
     }
-    
+
     /**
      * Find a role definition for given name. Null if not found.
+     *
      * @param name
-     * @return 
+     * @return
      */
-    default RoleDef getRoleDef(String name){
+    default RoleDef getRoleDef(String name) {
         return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findFirst().orElse(null);
-    }    
+    }
 
 }

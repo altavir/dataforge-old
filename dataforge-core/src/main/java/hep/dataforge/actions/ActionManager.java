@@ -33,12 +33,12 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
     private Context context;
 
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
         this.context = context;
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
         this.context = null;
     }
 
