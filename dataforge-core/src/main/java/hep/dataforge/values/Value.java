@@ -172,7 +172,7 @@ public interface Value extends Comparable<Value>, Serializable {
      */
     public static Value of(Object obj) {
         if (obj == null) {
-            return new NullValue();
+            return Value.NULL;
         }
         if (obj instanceof Number) {
             return new NumberValue((Number) obj);

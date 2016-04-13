@@ -16,6 +16,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
@@ -53,6 +54,9 @@ import org.slf4j.LoggerFactory;
  *
  * @author Darksnake
  */
+@ValueDef(name = "path", info = "Path to storage root")
+@ValueDef(name = "monitor", type = "BOOLEAN", def = "false",
+        info = "Enable file sistem monitoring for sybchronous acess to single storage from different instances")
 public class FileStorage extends AbstractStorage implements FileListener {
 
     public static final String LOADER_PATH_KEY = "path";
@@ -192,7 +196,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private void startMonitor() {
-        if (meta().getBoolean("monitor", true)) {
+        if (meta().getBoolean("monitor", false)) {
             monitor = new DefaultFileMonitor(this);
             monitor.setRecursive(false);
             monitor.addFile(dataDir);
@@ -337,7 +341,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
             }
             refresh();
             Loader loader = getLoader(name);
-            if(loader == null){
+            if (loader == null) {
                 throw new StorageException("Loader could not be initialized from existing file");
             }
             return loader;
@@ -369,6 +373,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void fileCreated(FileChangeEvent event) throws Exception {
+        //evaluate only new files
         updateFile(event.getFile());
     }
 

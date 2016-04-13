@@ -23,8 +23,24 @@ package hep.dataforge.names;
 public interface Named {
 
     /**
+     * Get the name of given object. If object is Named its name is used,
+     * otherwise, use Object.toString
+     *
+     * @param obj
+     * @return
+     */
+    public static String nameOf(Object obj) {
+        if (obj instanceof Named) {
+            return ((Named) obj).getName();
+        } else {
+            return obj.toString();
+        }
+    }
+
+    /**
      * The name of this object instance
-     * @return 
+     *
+     * @return
      */
     String getName();
 

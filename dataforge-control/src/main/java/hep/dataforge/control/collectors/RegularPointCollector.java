@@ -107,4 +107,13 @@ public class RegularPointCollector implements ValueCollector {
         }
     }
 
+    @Override
+    public void clear() {
+        values.clear();
+        cancel();
+        startTime = null;
+    }
+    
+    
+
 }

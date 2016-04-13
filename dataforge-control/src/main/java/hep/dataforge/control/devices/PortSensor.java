@@ -60,7 +60,9 @@ public abstract class PortSensor<T> extends Sensor<T> {
     public void shutdown() throws ControlException {
         super.shutdown();
         try {
-            handler.close();
+            if (handler != null) {
+                handler.close();
+            }
             updateState(CONNECTION_STATE, false);
         } catch (Exception ex) {
             throw new ControlException(ex);

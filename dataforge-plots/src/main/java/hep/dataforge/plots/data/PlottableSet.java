@@ -63,14 +63,14 @@ public class PlottableSet<T extends Plottable> implements  Iterable<T> {
             pl.configure(config);
         });
     }
-
+   
     /**
      * Set configuration value for each plottable
      *
      * @param name
      * @param value
      */
-    public void setEachConfigValue(String name, Value value) {
+    public void setEachConfigValue(String name, Object value) {
         map.values().stream().forEach((pl) -> {
             pl.getConfig().setValue(name, value);
         });

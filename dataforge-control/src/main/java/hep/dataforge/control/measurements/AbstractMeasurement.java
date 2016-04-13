@@ -42,7 +42,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     /**
      * Call after measurement started
      */
-    protected void onStart() {
+    protected void afterStart() {
         setState(MeasurementState.PENDING);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
     }
@@ -50,12 +50,12 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     /**
      * Call after measurement stopped
      */
-    protected void onFinish() {
+    protected void afterStop() {
         setState(MeasurementState.FINISHED);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
     }
 
-    protected synchronized void onError(Throwable error) {
+    protected synchronized void error(Throwable error) {
         LoggerFactory.getLogger(getClass()).error("Measurement failed with error", error);
         setState(MeasurementState.FAILED);
         this.exception = error;
@@ -82,11 +82,11 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(this, result, time));
     }
 
-    protected void onProgressUpdate(double progress) {
+    protected void progressUpdate(double progress) {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, progress));
     }
 
-    protected void onProgressUpdate(String message) {
+    protected void progressUpdate(String message) {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, message));
     }
 

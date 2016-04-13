@@ -91,4 +91,11 @@ public class PointCollector implements ValueCollector {
         valueMap.clear();
     }
 
+    @Override
+    public void clear() {
+        valueMap.clear();
+    }
+    
+    
+
 }

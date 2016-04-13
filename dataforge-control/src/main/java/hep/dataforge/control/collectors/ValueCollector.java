@@ -26,4 +26,10 @@ public interface ValueCollector {
      * even if not all values are present.
      */
     public void collect();
+    
+    /**
+     * Clear currently collected data
+     */
+    public void clear();
+    
 }

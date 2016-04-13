@@ -24,6 +24,7 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import java.util.Arrays;
@@ -199,37 +200,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         throw new ControlException("Command with name " + commandName + " not defined");
     }
 
-//    /**
-//     * Set state of the device changing its physical configuration if needed
-//     *
-//     * @param stateName
-//     * @param stateValue
-//     */
-//    @Override
-//    public void setState(String stateName, Object stateValue) {
-//        try {
-//            Value val = Value.of(stateValue);
-//            if (applyState(stateName, val)) {
-//                notifyStateChanged(stateName, val);
-//            } else {
-//                getLogger().warn("State {} not changed", stateName);
-//            }
-//        } catch (ControlException ex) {
-//            notifyError("Can't change state " + stateName, ex);
-//        }
-//    }
-//
-//    /**
-//     * Apply state to device
-//     *
-//     * @param stateName
-//     * @param stateValue
-//     * @return
-//     * @throws hep.dataforge.exceptions.ControlException
-//     */
-//    protected boolean applyState(String stateName, Value stateValue) throws ControlException {
-//        throw new ControlException("State " + stateName + " is not defined or read only");
-//    }
     protected abstract Object calculateState(String stateName) throws ControlException;
 
     @Override
@@ -252,7 +222,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      */
     @Override
     public synchronized void connect(Connection<Device> connection, String... roles) {
-        getLogger().info("Attaching connection with roles {}", String.join(", ", roles));
+        getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
         //Checking if connection could serve given roles
         for (String role : roles) {
             if (!hasRole(role)) {
@@ -267,7 +237,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
         this.connections.put(connection, Arrays.asList(roles));
         try {
-            getLogger().debug("Opening connection...");
+            getLogger().debug("Opening connection {}",connection.toString());
             connection.open(this);
         } catch (Exception ex) {
             this.notifyError("Can not open connection", ex);
@@ -276,11 +246,14 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     public synchronized void disconnect(Connection<Device> connection) {
         if (connections.containsKey(connection)) {
+            String conName = Named.nameOf(connection);
             try {
+                getLogger().debug("Closing connection {}", conName);
                 connection.close();
             } catch (Exception ex) {
                 this.notifyError("Can not close connection", ex);
             }
+            getLogger().info("Detaching connection {}", conName);
             this.connections.remove(connection);
         }
     }

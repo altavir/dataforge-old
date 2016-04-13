@@ -245,7 +245,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     public boolean hasData() {
         try {
-            return this.dataOffset == this.eofPos();
+            return this.dataOffset < this.eofPos();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

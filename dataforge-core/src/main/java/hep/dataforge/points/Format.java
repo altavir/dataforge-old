@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- Format class.</p>
+ * Format class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -45,9 +45,9 @@ public class Format implements Names {
     public static Format fromMeta(Meta annotation) {
         if (annotation.hasNode("column")) {
             Map<String, ValueFormat> map = new LinkedHashMap<>();
-            for (Meta head : annotation.getNodes("column")) {
+            annotation.getNodes("column").stream().forEach((head) -> {
                 map.put(head.getString("name"), ValueFormatFactory.build(head));
-            }
+            });
             return new Format(map);
         } else if (annotation.hasValue("names")) {
             return Format.forNames(annotation.getStringArray("names"));
@@ -131,21 +131,6 @@ public class Format implements Names {
         this.formats = Collections.emptyMap();
     }
 
-//    /**
-//     * Constructs format for given names with fixed with
-//     *
-//     * @param width
-//     * @param names a {@link hep.dataforge.names.Names} object.
-//     */
-//    public Format(int width, Names names) {
-//        this.names = names;
-//        formats = new LinkedHashMap<>();
-//        if (width > 0) {
-//            for (String name : names) {
-//                formats.put(name, ValueFormatFactory.fixedWidth(Math.max(width, name.length())));
-//            }
-//        }
-//    }
     /**
      * Free format
      */
@@ -220,7 +205,7 @@ public class Format implements Names {
      * @return a {@link java.lang.String} object.
      */
     public String formatCaption() {
-        return this
+        return "#f" + this
                 .asList()
                 .stream()
                 .map((name) -> getValueFormat(name).formatString(name))

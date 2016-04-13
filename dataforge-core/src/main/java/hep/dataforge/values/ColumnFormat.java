@@ -45,31 +45,6 @@ public abstract class ColumnFormat implements ValueFormat {
         if (bd.doubleValue() == 0) {
             return String.format("%" + maxWidth + "s", "0");
         }
-//
-//        if (bd.doubleValue() != 0) {
-//            bd = bd.round(new MathContext(maxWidth, RoundingMode.HALF_DOWN)).stripTrailingZeros();
-//        } else {
-//            return String.format("%" + maxWidth +"s", "0");
-//        }
-//        
-//        int precision = maxWidth;
-//
-//        if (bd.signum() < 0) {
-//            precision--;//sign
-//        }
-//
-//        if (bd.scale() != 0) {
-//            precision--;//decimal point
-//        }
-//
-//        if ((bd.scale() - bd.precision() >= maxWidth - 2) || bd.scale() < 0) {
-//            precision -= 4;
-//        }
-//
-//        if (precision <= 0) {
-//            precision = 0;
-//        }
-//        
         int precision = Math.min(maxWidth, significantDigits(bd));
 
         //FIXME fix number formats!!!

@@ -23,6 +23,9 @@ import java.time.Instant;
  */
 class NullValue implements Value {
 
+    NullValue() {
+    }
+
     /**
      * {@inheritDoc}
      */

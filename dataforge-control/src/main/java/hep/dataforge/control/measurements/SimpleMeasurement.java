@@ -43,7 +43,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
         //PENDING do we need executor here?
         //Executors.newSingleThreadExecutor().submit(getTask());
         if (!isStarted()) {
-            onStart();
+            afterStart();
             startTask();
         } else {
             LoggerFactory.getLogger(getClass()).warn("Alredy started");
@@ -53,7 +53,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
     @Override
     public synchronized boolean stop(boolean force) {
         if (isStarted()) {
-            onFinish();
+            afterStop();
             return interruptTask(force);
         } else {
             return false;
@@ -103,7 +103,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                     throw new MeasurementException("Empty result");
                 }
             } catch (Exception ex) {
-                onError(ex);
+                error(ex);
             }
             clearTask();
             finishTask();
@@ -115,7 +115,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
      * Reset measurement task and notify listeners
      */
     protected void finishTask() {
-        onFinish();
+        afterStop();
     }
 
     private FutureTask<Pair<T, Instant>> buildTask() {
@@ -128,7 +128,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                 Instant time = Instant.now();
                 return new Pair<>(res, time);
             } catch (Exception ex) {
-                onError(ex);
+                error(ex);
                 return null;
             }
         });

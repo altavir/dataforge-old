@@ -179,6 +179,9 @@ public class MapPoint implements DataPoint {
      * @return a {@link hep.dataforge.points.MapPoint} object.
      */
     public MapPoint putValue(String name, Value value) {
+        if(value == null){
+            value = Value.NULL;
+        }
         this.valueMap.put(name, value);
         return this;
     }
