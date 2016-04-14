@@ -40,7 +40,7 @@ public class PortFactory {
             addres = portName;
         }
         
-        String canonPortName = protocol + "::"+ addres;
+        String canonPortName = protocol + ":"+ addres;
 
         if (portMap.containsKey(canonPortName)) {
             return portMap.get(canonPortName);
@@ -60,6 +60,7 @@ public class PortFactory {
                         port = 8080;
                     }
                     res = new TcpPortHandler(addres, port);
+                    break;
                 default:
                     throw new ControlException("Unknown protocol");
             }

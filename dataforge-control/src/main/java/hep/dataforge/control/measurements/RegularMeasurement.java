@@ -17,7 +17,7 @@ public abstract class RegularMeasurement<T> extends SimpleMeasurement<T> {
 
     @Override
     protected void finishTask() {
-        if (stopFlag || (stopOnError() && getState() == MeasurementState.FAILED)) {
+        if (stopFlag || (stopOnError() && getMeasurementState() == MeasurementState.FAILED)) {
             afterStop();
         } else {
             startTask();

@@ -31,11 +31,11 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     protected Pair<T, Instant> lastResult;
     protected Throwable exception;
 
-    protected MeasurementState getState() {
+    protected MeasurementState getMeasurementState() {
         return state;
     }
 
-    protected void setState(MeasurementState state) {
+    protected void setMeasurementState(MeasurementState state) {
         this.state = state;
     }
 
@@ -43,7 +43,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      * Call after measurement started
      */
     protected void afterStart() {
-        setState(MeasurementState.PENDING);
+        setMeasurementState(MeasurementState.PENDING);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
     }
 
@@ -51,13 +51,13 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      * Call after measurement stopped
      */
     protected void afterStop() {
-        setState(MeasurementState.FINISHED);
+        setMeasurementState(MeasurementState.FINISHED);
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
     }
 
     protected synchronized void error(Throwable error) {
         LoggerFactory.getLogger(getClass()).error("Measurement failed with error", error);
-        setState(MeasurementState.FAILED);
+        setMeasurementState(MeasurementState.FAILED);
         this.exception = error;
         notify();
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
@@ -77,7 +77,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      */    
     protected synchronized void result(T result, Instant time) {
         this.lastResult = new Pair<>(result, time);
-        setState(MeasurementState.OK);
+        setMeasurementState(MeasurementState.OK);
         notify();
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(this, result, time));
     }
@@ -116,7 +116,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     }
 
     protected synchronized Pair<T, Instant> get() throws MeasurementException {
-        if (getState() == MeasurementState.INIT) {
+        if (getMeasurementState() == MeasurementState.INIT) {
             start();
             LoggerFactory.getLogger(getClass()).debug("Measurement not started. Starting");
         }

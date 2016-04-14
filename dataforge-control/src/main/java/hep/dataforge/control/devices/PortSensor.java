@@ -18,6 +18,7 @@ import static hep.dataforge.control.devices.PortSensor.PORT_NAME_STATE;
  * A Sensor that uses a PortHandler to obtain data
  *
  * @author darksnake
+ * @param <T>
  */
 @ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 @StateDef(name = CONNECTION_STATE, info = "The connection state for this device")
@@ -34,10 +35,10 @@ public abstract class PortSensor<T> extends Sensor<T> {
         this.portName = portName;
     }
 
-    public PortSensor(PortHandler handler) {
-        this.handler = handler;
-        portName = handler.getPortId();
-    }
+//    public PortSensor(PortHandler handler) {
+//        this.handler = handler;
+//        portName = handler.getPortId();
+//    }
 
     protected final void setHandler(PortHandler handler) {
         this.handler = handler;

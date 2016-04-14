@@ -70,7 +70,7 @@ public abstract class ColumnFormat implements ValueFormat {
                     return formatWidth("-");
                 }
             case NULL:
-                return formatWidth("");
+                return formatWidth("@null");
             case NUMBER:
                 return formatNumber(val.numberValue());
             case STRING:
