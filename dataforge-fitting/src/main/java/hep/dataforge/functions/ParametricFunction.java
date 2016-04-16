@@ -16,7 +16,7 @@
 package hep.dataforge.functions;
 
 import hep.dataforge.maths.NamedDoubleSet;
-import hep.dataforge.names.NamedSet;
+import hep.dataforge.names.NameSet;
 
 /**
  * <p>NamedSpectrum interface.</p>
@@ -24,7 +24,7 @@ import hep.dataforge.names.NamedSet;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface ParametricFunction extends NamedSet {
+public interface ParametricFunction extends NameSet {
 
     /**
      * <p>derivValue.</p>

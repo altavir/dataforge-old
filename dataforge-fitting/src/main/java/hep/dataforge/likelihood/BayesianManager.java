@@ -27,21 +27,6 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.names.NamedUtils.exclude;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.String.format;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.names.NamedUtils.exclude;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.String.format;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.names.NamedUtils.exclude;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.String.format;
 
 /**
  * TODO переделать freePars в varArgs

@@ -15,11 +15,12 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Configurable;
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.content.Named;
-import hep.dataforge.data.DataPoint;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
+import hep.dataforge.points.DataPoint;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Configurable;
 import java.util.Collection;
 
 /**
@@ -29,8 +30,9 @@ import java.util.Collection;
  */
 @ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name.")
 @ValueDef(name = "preferedPlotter", def = "jFreeChart", info = "A prefered plotting library. It is used if supported by destination PlotFrame.")
+@ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
-public interface Plottable extends Named, Configurable{
+public interface Plottable extends Named, Annotated, Configurable{
 
     /**
      * Данные для рисования.

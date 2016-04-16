@@ -15,26 +15,35 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.events.Event;
 import hep.dataforge.values.Value;
 
 /**
  * A listener that listens to device state change initialization and shut down
+ *
  * @author Alexander Nozik
  */
 public interface DeviceListener {
 
     /**
-     * The device is initialized. No measurement or control procedure performed here
-     * @param device 
+     * The device is initialized. No measurement or control procedure performed
+     * here
+     *
+     * @param device
      */
-    void notifyDeviceInitialized(Device device);
+    default void notifyDeviceInitialized(Device device){
+        
+    }
 
     /**
-     * The device is shut down. No 
-     * @param device 
+     * The device is shut down. No measurement or control procedure performed
+     * here
+     *
+     * @param device
      */
-    void notifyDeviceShutdown(Device device);
+    default void notifyDeviceShutdown(Device device){
+        
+    }
 
     /**
      * Notify that state of device is changed. either oldState or newState could
@@ -42,24 +51,39 @@ public interface DeviceListener {
      *
      * @param device
      * @param name the name of the state
-     * @param oldState
-     * @param newState
+     * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value oldState, Value newState);
+    void notifyDeviceStateChanged(Device device, String name, Value state);
 
-//    /**
-//     * Ask listener to send or display given message
-//     * @param device
-//     * @param priority
-//     * @param message 
-//     */
-//    void sendMessage(Device device, int priority, Meta message);
-//    
-//    /**
-//     * Notify listener that device received and accepted message.
-//     * @param device
-//     * @param message 
-//     */
-//    void notifyMessageRecieved(Device device, Meta message);
-    
+    /**
+     * Notify that device configuration has changed. By default is ignored.
+     *
+     * @param device
+     */
+    default void notifyDeviceConfigChanged(Device device) {
+
+    }
+
+    /**
+     * Notify that command is accepted. By default is ignored.
+     *
+     * @param device
+     * @param command
+     * @param commandMeta
+     */
+    default void notifyDeviceCommandAccepted(Device device, String command) {
+
+    }
+
+    /**
+     * Evaluate device event
+     *
+     * @param device
+     * @param status
+     */
+    default void evaluateDeviceEvent(Event event){
+        
+    }
+
+    void evaluateDeviceException(Device device, String message, Throwable exception);
 }

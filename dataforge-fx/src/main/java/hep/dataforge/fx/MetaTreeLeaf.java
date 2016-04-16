@@ -6,30 +6,36 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.description.ValueDescriptor;
+import hep.dataforge.fx.values.ValueChooser;
+import hep.dataforge.fx.values.ValueChooserFactory;
+import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.binding.ObjectBinding;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableValue;
 
-public class MetaTreeLeaf implements MetaTree {
+public class MetaTreeLeaf extends MetaTree {
 
     MetaTreeBranch parent;
-    String name;
-    boolean frozen = false;
+
+    String valueName;
 
     public MetaTreeLeaf(MetaTreeBranch parent, String name) {
         this.parent = parent;
-        this.name = name;
+        this.valueName = name;
     }
 
     @Override
     public String getName() {
-        return name;
+        return valueName;
     }
 
-    @Override
-    public Value getValue() {
-        if (parent.node!=null && parent.node.hasValue(name)) {
-            return parent.node.getValue(name);
-        } else if(parent.getDescriptor() != null) {
-            ValueDescriptor vd = parent.descriptor.valueDescriptor(name);
+    private Value getValue() {
+        if (parent.getNode() != null && parent.getNode().hasValue(valueName)) {
+            return parent.node.getValue(valueName);
+        } else if (parent.getDescriptor() != null) {
+            ValueDescriptor vd = parent.descriptor.valueDescriptor(valueName);
             if (vd == null) {
                 return null;
             } else {
@@ -40,12 +46,13 @@ public class MetaTreeLeaf implements MetaTree {
         }
     }
 
-    @Override
-    public void setValue(Value value) {
-        if (parent.isDefault()) {
-            parent.buildNode();
-        }
-        parent.node.setValue(name, value);
+    public ObservableValue<Value> value() {
+        return new ObjectBinding<Value>() {
+            @Override
+            protected Value computeValue() {
+                return MetaTreeLeaf.this.getValue();
+            }
+        };
     }
 
     @Override
@@ -53,7 +60,7 @@ public class MetaTreeLeaf implements MetaTree {
         if (parent.getDescriptor() == null) {
             return null;
         } else {
-            ValueDescriptor vd = parent.getDescriptor().valueDescriptor(name);
+            ValueDescriptor vd = parent.getDescriptor().valueDescriptor(valueName);
             if (vd != null) {
                 return vd.info();
             } else {
@@ -66,7 +73,7 @@ public class MetaTreeLeaf implements MetaTree {
         if (parent.getDescriptor() == null) {
             return null;
         } else {
-            return parent.getDescriptor().valueDescriptor(name);
+            return parent.getDescriptor().valueDescriptor(valueName);
         }
     }
 
@@ -76,28 +83,33 @@ public class MetaTreeLeaf implements MetaTree {
     }
 
     @Override
-    public boolean isDefault() {
-        return (parent.isDefault()) || !parent.node.hasValue(name);
+    public ObservableBooleanValue isDefault() {
+        return new BooleanBinding() {
+            @Override
+            protected boolean computeValue() {
+                return parent.isDefault().get() || !parent.node.hasValue(valueName);
+            }
+        };
+
     }
 
     @Override
     public boolean hasDescriptor() {
         return parent.hasDescriptor() && parent.getDescriptor().valueDescriptors().containsKey(getName());
     }
-    
-    /**
-     * True if this node is frozen and could not be edited
-     * @return 
-     */
-    @Override
-    public boolean isFrozen(){
-        return frozen;
-    }    
 
-    public void setFrozen(boolean frozen) {
-        this.frozen = frozen;
+    public Configuration getParentNode() {
+        return parent.getNode();
     }
 
-    
-
+    public ValueChooser valueChooser() {
+        ValueChooser chooser;
+        if (hasDescriptor()) {
+            chooser = ValueChooserFactory.getInstance().build(getDescriptor(), getParentNode(), valueName);
+        } else {
+            chooser = ValueChooserFactory.getInstance().build(getParentNode(), valueName);
+        }
+        chooser.setDisabled(!protectedProperty().get());
+        return chooser;
+    }
 }

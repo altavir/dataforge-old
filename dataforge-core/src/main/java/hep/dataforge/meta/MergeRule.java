@@ -126,56 +126,16 @@ public abstract class MergeRule {
         return builder;
     }
 
-    /**
-     * <p>
-     * mergeName.</p>
-     *
-     * @param mainName 
-     * @param secondName 
-     * @return 
-     */
     protected abstract String mergeName(String mainName, String secondName);
 
-    /**
-     * <p>
-     * valuesMerger.</p>
-     *
-     * @return a {@link hep.dataforge.meta.ListMergeRule} object.
-     */
     protected abstract ListMergeRule<Value> valuesMerger();
 
-    /**
-     * <p>
-     * elementsMerger.</p>
-     *
-     * @return a {@link hep.dataforge.meta.ListMergeRule} object.
-     */
     protected abstract ListMergeRule<Meta> elementsMerger();
 
-    /**
-     * <p>
-     * writeValue.</p>
-     *
-     * @param builder 
-     * object.
-     * @param item 
-     * @param name 
-     * @return 
-     */
     protected MetaBuilder writeValue(MetaBuilder builder, String name, Value item) {
         return builder.setValue(name, item);
     }
 
-    /**
-     * <p>
-     * writeElement.</p>
-     *
-     * @param builder 
-     * object.
-     * @param item 
-     * @param name 
-     * @return 
-     */
     protected MetaBuilder writeElement(MetaBuilder builder, String name, List<? extends Meta> item) {
         return builder.setNode(name, item);
     }

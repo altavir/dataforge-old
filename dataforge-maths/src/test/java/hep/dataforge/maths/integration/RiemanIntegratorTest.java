@@ -15,10 +15,9 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.Test;
 
 /**
  *

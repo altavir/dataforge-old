@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListDataSet;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
@@ -43,6 +43,68 @@ import java.util.ArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * <p>
@@ -95,7 +157,7 @@ public class PrintNamed {
             }
         }
 
-        ListDataSet data = getNamedFunctionData(func, points);
+        ListPointSet data = getNamedFunctionData(func, points);
 
         printDataSet(out, data, head);
     }
@@ -149,7 +211,7 @@ public class PrintNamed {
             points.add(new NamedDoubleArray(names, distr.sample()));
         }
 
-        ListDataSet data = getNamedFunctionData(func, points);
+        ListPointSet data = getNamedFunctionData(func, points);
 
         printDataSet(out, data, head);
     }
@@ -253,11 +315,11 @@ public class PrintNamed {
      * @param spectrum a {@link hep.dataforge.functions.ParametricFunction} object.
      * @param data a {@link java.lang.Iterable} object.
      * @param adapter a
-     * {@link hep.dataforge.data.XYDataAdapter} object.
+     * {@link hep.dataforge.points.XYAdapter} object.
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,
-            Iterable<DataPoint> data, XYDataAdapter adapter, NamedDoubleSet pars) {
+            Iterable<DataPoint> data, XYAdapter adapter, NamedDoubleSet pars) {
         out.println();// можно тут вставить шапку
         out.printf("%8s\t%8s\t%8s\t%8s\t%8s%n", "x", "data", "error", "fit", "residual");
 

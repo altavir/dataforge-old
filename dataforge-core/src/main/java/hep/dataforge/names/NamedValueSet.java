@@ -15,8 +15,8 @@
  */
 package hep.dataforge.names;
 
-import hep.dataforge.values.Value;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.values.Value;
 
 /**
  * <p>
@@ -25,7 +25,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface NamedValueSet extends NamedSet, Cloneable {
+public interface NamedValueSet extends NameSet, Cloneable {
 
     /**
      * <p>

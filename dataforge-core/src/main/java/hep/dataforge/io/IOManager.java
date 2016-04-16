@@ -32,6 +32,7 @@ import java.io.OutputStream;
 public interface IOManager {
 
     public static final String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
+    public static final String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
 
     /**
      * Output stream for specific stage and specific name. All parameters could
@@ -89,17 +90,26 @@ public interface IOManager {
      * @param path a {@link java.lang.String} object.
      * @return a {@link java.io.File} object.
      */
-    //Pending replace by VFS?
     File getFile(String path);
 
     /**
-     * Return the root directory for this IOManager
-     *
-     * TODO replace by VFS object
+     * Return the root directory for this IOManager. By convention, Context
+     * should not have access outside root directory to prevent System damage.
      *
      * @return a {@link java.io.File} object.
      */
     File getRootDirectory();
+
+    /**
+     * The directory for temporary files. This directory could be cleaned up any
+     * moment.
+     *
+     * @return
+     */
+    default File getTmpDirectory() {
+        String tmpDir = getContext().getString(TEMP_DIRECTORY_CONTEXT_KEY, "temp");
+        return new File(getRootDirectory(), tmpDir);
+    }
 
     /**
      * Context for this IOManager
@@ -107,13 +117,7 @@ public interface IOManager {
      * @return a {@link hep.dataforge.context.Context} object.
      */
     Context getContext();
-    
+
     void setContext(Context context);
 
-//    /**
-//     * Register this ioManager in given context
-//     *
-//     * @param context
-//     */
-//    void attachTo(Context context);
 }

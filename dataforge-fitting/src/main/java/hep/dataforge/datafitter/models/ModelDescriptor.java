@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.meta.Meta;
 
 /**
  * <p>ModelDescriptor class.</p>

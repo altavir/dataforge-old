@@ -5,55 +5,62 @@
  */
 package hep.dataforge.fx;
 
-import hep.dataforge.values.Value;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.ReadOnlyStringWrapper;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.beans.property.adapter.JavaBeanObjectPropertyBuilder;
+import java.util.Observable;
+import javafx.beans.binding.StringBinding;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.value.ObservableStringValue;
 
 /**
  * Tree item for meta nodes and values
  *
  * @author Alexander Nozik
  */
-public interface MetaTree {
+public abstract class MetaTree extends Observable {
+
+    private final StringBinding nameValue = new StringBinding() {
+        @Override
+        protected String computeValue() {
+            return MetaTree.this.getName();
+        }
+    };
+
+    private final StringBinding descriptionValue = new StringBinding() {
+        @Override
+        protected String computeValue() {
+            return MetaTree.this.getDescription();
+        }
+    };
+
+    private final BooleanProperty protectedProperty = new SimpleBooleanProperty(false);
+    private final BooleanProperty visibleProperty = new SimpleBooleanProperty(true);
+
+    public BooleanProperty protectedProperty(){
+        return protectedProperty;
+    }
+    
+    public BooleanProperty visibleProperty(){
+        return visibleProperty;
+    }
+    
+    /**
+     * 
+     * @return
+     */
+    public ObservableStringValue nameValue() {
+        return nameValue;
+    }
 
     /**
      * getter for name property
      *
      * @return
      */
-    String getName();
+    public abstract String getName();
 
-//    /**
-//     * setter for name. Used only for new nodes
-//     */
-//    void setName();
-    /**
-     * getter for meta value.
-     *
-     * @return
-     */
-    Value getValue();
-
-    /**
-     * setter for value
-     *
-     * @param value
-     */
-    void setValue(Value value);
-
-    default void setStringValue(String value) {
-        setValue(Value.of(value));
-    }
-
-    default String getStringValue() {
-        if (getValue() == null) {
-            return "";
-        } else {
-            return getValue().stringValue();
-        }
+    public ObservableStringValue descriptionValue() {
+        return descriptionValue;
     }
 
     /**
@@ -61,55 +68,33 @@ public interface MetaTree {
      *
      * @return
      */
-    String getDescription();
+    public abstract String getDescription();
 
     /**
      * is MetaNode tree item
      *
      * @return
      */
-    boolean isNode();
+    protected abstract boolean isNode();
 
     /**
      * is default value from descriptor
      *
      * @return
      */
-    boolean isDefault();
-    
+    public abstract ObservableBooleanValue isDefault();
+
+
     /**
      * true if there is a descriptor for this element
-     * @return 
+     *
+     * @return
      */
-    boolean hasDescriptor();
+    protected abstract boolean hasDescriptor();
     
-    default StringProperty nameProperty() {
-        //return new ReadOnlyStringWrapper(getName());
-        return new ReadOnlyStringWrapper(this, "name", getName());
+    public void invalidate(){
+        nameValue.invalidate();
+        descriptionValue.invalidate();
     }
 
-    default StringProperty descriptionProperty() {
-        //return new ReadOnlyStringWrapper(getDescription());
-        return new ReadOnlyStringWrapper(this, "description", getDescription());
-    }
-
-    default StringProperty stringValueProperty() {
-        return new SimpleStringProperty(this, "stringValue", getStringValue());
-    }
-
-    default ObjectProperty<Value> valueProperty() {
-        try {
-            return new JavaBeanObjectPropertyBuilder<>().bean(this).name("value").build();
-        } catch (NoSuchMethodException ex) {
-            throw new Error(ex);
-        }
-    }
-    
-    /**
-     * True if this node is frozen and could not be edited
-     * @return 
-     */
-    default boolean isFrozen(){
-        return false;
-    }    
 }

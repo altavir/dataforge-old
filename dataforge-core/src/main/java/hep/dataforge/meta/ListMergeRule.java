@@ -25,13 +25,6 @@ import java.util.List;
  * @version $Id: $Id
  */
 public interface ListMergeRule<T> {
-    /**
-     * <p>merge.</p>
-     *
-     * @param name 
-     * @param first 
-     * @param second 
-     * @return 
-     */
+
     List<? extends T> merge(String name, List<? extends T> first, List<? extends T> second);
 }

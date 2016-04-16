@@ -15,12 +15,12 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.meta.Meta;
 import static java.lang.Math.log;
 import static java.lang.Math.sqrt;
 
@@ -32,7 +32,7 @@ import static java.lang.Math.sqrt;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class XYModel extends AbstractModel<XYDataAdapter> {
+public class XYModel extends AbstractModel<XYAdapter> {
 
     private final ParametricFunction source;
 
@@ -45,7 +45,7 @@ public class XYModel extends AbstractModel<XYDataAdapter> {
      * object.
      */
     public XYModel(String name, ParametricFunction source) {
-        super(name, source, new XYDataAdapter());
+        super(name, source, new XYAdapter());
         this.source = source;
     }
 
@@ -55,9 +55,9 @@ public class XYModel extends AbstractModel<XYDataAdapter> {
      *
      * @param name a {@link java.lang.String} object.
      * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param format a {@link hep.dataforge.data.XYDataAdapter} object.
+     * @param format a {@link hep.dataforge.points.XYAdapter} object.
      */
-    public XYModel(String name, ParametricFunction source, XYDataAdapter format) {
+    public XYModel(String name, ParametricFunction source, XYAdapter format) {
         super(name, source, format);
         this.source = source;
     }
@@ -72,7 +72,7 @@ public class XYModel extends AbstractModel<XYDataAdapter> {
      * object.
      */
     public XYModel(ParametricFunction source, Meta annotation) {
-        super(annotation.getName(), source, new XYDataAdapter(annotation));
+        super(annotation.getName(), source, new XYAdapter(annotation));
         this.source = source;
     }
 
@@ -88,7 +88,7 @@ public class XYModel extends AbstractModel<XYDataAdapter> {
      * @param yErrName a {@link java.lang.String} object.
      */
     public XYModel(String name, ParametricFunction source, String xName, String xErrName, String yName, String yErrName) {
-        super(name, source, new XYDataAdapter(xName, yName, xErrName, yErrName));
+        super(name, source, new XYAdapter(xName, yName, xErrName, yErrName));
         this.source = source;
     }
 
@@ -104,12 +104,12 @@ public class XYModel extends AbstractModel<XYDataAdapter> {
      * @param yErrName a {@link java.lang.String} object.
      */
     public XYModel(String name, ParametricFunction source, String xName, String yName, String yErrName) {
-        super(name, source, new XYDataAdapter(xName, yName, yErrName));
+        super(name, source, new XYAdapter(xName, yName, yErrName));
         this.source = source;
     }
 
 //    public XYModel(String name, NamedSpectrum source, String xName, String yName) {
-//        super(name, source, new XYDataAdapter(xName, yName));
+//        super(name, source, new XYAdapter(xName, yName));
 //        this.source = source;
 //    }
     /** {@inheritDoc} */

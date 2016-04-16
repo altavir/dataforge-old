@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 
 /**
  *
- * Путь, состоящий из нескольких токенов
+ * The name path composed of tokens
  *
  * @author Alexander Nozik
  */
@@ -43,27 +43,29 @@ class NamePath implements Name {
 
     @Override
     public Name cutFirst() {
-        if (length() == 2) {
-            return names.getLast();
-        } else if (length() == 1) {
-            throw new NamingException("Can not cut name token");
-        } else {
-            LinkedList<NameToken> tokens = new LinkedList<>(names);
-            tokens.removeFirst();
-            return new NamePath(tokens);
+        switch (length()) {
+            case 2:
+                return names.getLast();
+            case 1:
+                throw new NamingException("Can not cut name token");
+            default:
+                LinkedList<NameToken> tokens = new LinkedList<>(names);
+                tokens.removeFirst();
+                return new NamePath(tokens);
         }
     }
 
     @Override
     public Name cutLast() {
-        if (length() == 2) {
-            return names.getFirst();
-        } else if (length() == 1) {
-            throw new NamingException("Can not cut name token");
-        } else {
-            LinkedList<NameToken> tokens = new LinkedList<>(names);
-            tokens.removeLast();
-            return new NamePath(tokens);
+        switch (length()) {
+            case 2:
+                return names.getFirst();
+            case 1:
+                throw new NamingException("Can not cut name token");
+            default:
+                LinkedList<NameToken> tokens = new LinkedList<>(names);
+                tokens.removeLast();
+                return new NamePath(tokens);
         }
     }
 
@@ -85,6 +87,19 @@ class NamePath implements Name {
     @Override
     public boolean hasQuery() {
         return names.getLast().hasQuery();
+    }
+
+    @Override
+    public Name ignoreQuery() {
+        //Replace last element if needed
+        if (hasQuery()) {
+            LinkedList<NameToken> tokens = new LinkedList<>(names);
+            tokens.removeLast();
+            tokens.addLast(names.getLast().ignoreQuery());
+            return new NamePath(tokens);
+        } else {
+            return this;
+        }
     }
 
     @Override

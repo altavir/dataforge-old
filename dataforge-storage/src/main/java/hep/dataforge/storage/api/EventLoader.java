@@ -27,7 +27,7 @@ import java.util.function.Predicate;
  * @author darksnake
  * @param <T>
  */
-public interface EventLoader<T extends Event> extends Loader {
+public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
 
     public static final String EVENT_LOADER_TYPE = "event";
 
@@ -38,7 +38,6 @@ public interface EventLoader<T extends Event> extends Loader {
      */
     void push(T event) throws StorageException;
 
-//    List<T> pull(LocalDateTime from, LocalDateTime to) throws StorageException;
     /**
      * Add named listener for specific events
      *

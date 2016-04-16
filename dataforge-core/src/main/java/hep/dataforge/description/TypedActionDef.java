@@ -15,7 +15,6 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.content.Content;
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -39,7 +38,7 @@ public @interface TypedActionDef {
 
     String description() default "";
 
-    Class inputType() default Content.class;
+    Class inputType() default Object.class;
 
-    Class outputType() default Content.class;
+    Class outputType() default Object.class;
 }

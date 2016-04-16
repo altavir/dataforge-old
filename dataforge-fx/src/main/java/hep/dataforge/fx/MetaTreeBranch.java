@@ -7,18 +7,32 @@ package hep.dataforge.fx;
 
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
-import hep.dataforge.values.Value;
+import javafx.beans.binding.BooleanBinding;
+import javafx.beans.value.ObservableBooleanValue;
 
-public class MetaTreeBranch implements MetaTree {
+public class MetaTreeBranch extends MetaTree {
 
     MetaTreeBranch parent;
     Configuration node;
     NodeDescriptor descriptor;
+    int index = -1;
+
+    private final ObservableBooleanValue isDefaultValue = new BooleanBinding() {
+        @Override
+        protected boolean computeValue() {
+            return (node == null || node.isEmpty()) && descriptor != null;
+        }
+    };
 
     public MetaTreeBranch(MetaTreeBranch parent, Configuration node, NodeDescriptor descriptor) {
         this.parent = parent;
         this.node = node;
         this.descriptor = descriptor;
+    }
+
+    public MetaTreeBranch(MetaTreeBranch parent, Configuration node, NodeDescriptor descriptor, int index) {
+        this(parent, node, descriptor);
+        this.index = index;
     }
 
     public void setDescriptor(NodeDescriptor descriptor) {
@@ -27,23 +41,21 @@ public class MetaTreeBranch implements MetaTree {
 
     @Override
     public String getName() {
-        if(node != null){
-            return node.getName();
-        } else if(descriptor!= null){
+        if (node != null) {
+            return node.getName() + getIndex();
+        } else if (descriptor != null) {
             return descriptor.getName();
         } else {
             return "";
         }
     }
 
-    @Override
-    public Value getValue() {
-        return null;
-    }
-
-    @Override
-    public void setValue(Value value) {
-
+    private String getIndex() {
+        String titleStr = this.index >= 0 ? "[" + Integer.toString(this.index) + "]" : "";
+        if (hasDescriptor() && !getDescriptor().titleKey().isEmpty() && node.hasValue(getDescriptor().titleKey())) {
+            titleStr += " : " + node.getString(getDescriptor().titleKey());
+        }
+        return titleStr;
     }
 
     @Override
@@ -57,21 +69,18 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     @Override
-    public boolean isDefault() {
-        return (node == null || node.isEmpty()) && descriptor != null;
+    public ObservableBooleanValue isDefault() {
+        return isDefaultValue;
     }
 
     /**
      * Build new node from default if it was not existing before
      */
     void buildNode() {
-        if (isDefault()) {
-            //building node if empty
-            parent.buildNode();
-            //creating new configuration node
-            this.node = new Configuration(getName(), parent.node);
-            //adding this node to parent
-            parent.node.putNode(node);
+        if (node == null && parent != null) {
+            //building node
+            this.node = new Configuration(getName());
+            parent.getNode().attachNode(node);
         }
     }
 
@@ -80,6 +89,9 @@ public class MetaTreeBranch implements MetaTree {
     }
 
     public Configuration getNode() {
+        if (node == null) {
+            buildNode();
+        }
         return node;
     }
 

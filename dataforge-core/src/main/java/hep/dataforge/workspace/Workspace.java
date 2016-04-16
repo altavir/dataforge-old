@@ -15,13 +15,13 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.content.Named;
-import hep.dataforge.context.Confined;
-import hep.dataforge.dependencies.DependencySet;
+import hep.dataforge.names.Named;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.ExecutionException;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
 
 /**
  * A place to store tasks and their results
@@ -29,7 +29,7 @@ import java.util.concurrent.ExecutionException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Workspace extends Annotated, Named, Confined {
+public interface Workspace extends Annotated, Named, Encapsulated {
 
     /**
      * Check task dependencies and run it with given configuration
@@ -38,7 +38,7 @@ public interface Workspace extends Annotated, Named, Confined {
      * @param config
      * @return
      */
-    DependencySet runTask(String taskName, Meta config, String... targets) throws InterruptedException, ExecutionException;
+    DataNode runTask(String taskName, Meta config, String... targets) throws InterruptedException, ExecutionException;
 
 //    /**
 //     * Run task for specific target.
@@ -49,7 +49,7 @@ public interface Workspace extends Annotated, Named, Confined {
 //     * @param target
 //     * @return
 //     */
-//    <T> Dependency<T> runTask(String taskName, Meta config, String target);
+//    <T> Data<T> runTask(String taskName, Meta config, String target);
     /**
      * Check if workspace has static data dependency with given stage and name.
      * Stages are used for complex workspaces and could be completely omitted
@@ -70,7 +70,7 @@ public interface Workspace extends Annotated, Named, Confined {
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.lang.Object} object.
      */
-    Dependency getData(String stage, String name);
+    Data getData(String stage, String name);
 
 //    <T> void putData(String name, T data);
 //    

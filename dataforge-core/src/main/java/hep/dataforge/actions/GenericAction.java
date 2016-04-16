@@ -15,25 +15,23 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.content.AbstractContent;
-import hep.dataforge.content.Content;
-import hep.dataforge.content.Named;
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.dependencies.GenericDependency;
-import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.names.Named;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
+import hep.dataforge.meta.Meta;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataSet;
+import java.util.Map;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A basic implementation of Action interface
@@ -43,145 +41,61 @@ import java.util.List;
  * @param <T>
  * @param <R>
  */
-public abstract class GenericAction<T extends Named, R extends Named> extends AbstractContent implements Action<T, R> {
+public abstract class GenericAction<T, R> implements Action<T, R> {
 
-    public static final String ACTION_DEPENDENCY_LOG_KEY = "log";
-    public static final String ACTION_DEPENDENCY_META_KEY = "meta";
+    private Executor executor;
 
-    private final Context context;
-    
-    private List<ActionStateListener> listeners = new ArrayList<>();
-
-    /**
-     * <p>
-     * Constructor for GenericAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     */
-    public GenericAction(Context context, String name, Meta annotation) {
-        super(name, annotation);
-        this.context = context;
+    public Logger logger() {
+        //TODO provide from context
+        return LoggerFactory.getLogger(getClass());
     }
 
-    public GenericAction(Context context, Meta annotation) {
-        super(annotation);
-        this.context = context;
+    protected boolean isParallelExecutionAllowed(Meta meta) {
+        return meta.getBoolean("allowParallel", true);
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public Context getContext() {
-        return context;
-    }
-
-    public ActionResult<R> run(Meta config, Collection<Dependency<T>> data) {
-        return run(new Pack<>(null, config, buildLog(config), getInputType(), data));
-    }
-
-    protected Logable buildLog(Meta config) {
-        //TODO add log builder from annotation
-        return getContext();
-    }
-
-    protected boolean isParallelExecutionAllowed() {
-        return meta().getBoolean("action.allowParallel", true);
-    }
-
-    /**
-     * Wrap result of single execution to present it as a dependency
+     * Wrap result of single or separate executions into DataNode
      *
      * @param singleLog an individual log for this result. Could be null;
      * @param singleMeta an individual meta for this result. Could be null;
      * @param singleResult
      * @return
      */
-    protected Dependency<R> wrap(Logable singleLog, Meta singleMeta, R singleResult) {
-        GenericDependency.Builder<R> builder = new GenericDependency.Builder(singleResult);
-        if (singleLog != null) {
-            builder.putExtra(ACTION_DEPENDENCY_LOG_KEY, singleLog);
+    protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>> result) {
+        DataSet.Builder<R> builder = DataSet.builder(getOutputType());
+        result.forEach(builder::putData);
+        return builder.build();
+    }
+
+    protected Log buildLog(Context context, Meta meta, Object data) {
+        String logName = getName();
+        if (data instanceof Named) {
+            logName += "[" + ((Named) data).getName() + "]";
         }
-        if (singleMeta != null) {
-            builder.putExtra(ACTION_DEPENDENCY_META_KEY, singleMeta);
+        if (data instanceof ActionResult) {
+            Log actionLog = ((ActionResult) data).log();
+            if (actionLog.getParent() != null) {
+                //Getting parent from previous log
+                return new Log(logName, actionLog.getParent());
+            } else {
+                return new Log(logName, context);
+            }
+        } else {
+            return new Log(logName, context);
         }
-        return builder.build(singleResult.getName());
+    }
+
+    protected Executor buildExecutor(Context context, String dataName) {
+        return context.processManager().executor(getName(), dataName);
+    }    
+    
+    protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
+        return buildExecutor(context, dataName);
     }
 
     protected boolean isEmptyInputAllowed() {
         return false;
-    }
-
-    /**
-     * Build log for given dependency
-     *
-     * @param dep
-     * @param parent
-     * @return
-     */
-    protected Logable getDependencyLog(Dependency<T> dep, Logable parent) {
-        if (dep.keys().contains(ACTION_DEPENDENCY_LOG_KEY)
-                && dep.type(ACTION_DEPENDENCY_LOG_KEY).isAssignableFrom(Logable.class)) {
-            return dep.<Logable>get(ACTION_DEPENDENCY_LOG_KEY);
-        } else {
-            return new Log(dep.getName(), parent);
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param input
-     * @return
-     */
-    @Override
-    public ActionResult<R> run(DependencySet<T> input) {
-        final Logable log;
-        //= input.log() != null ? input.log() : getContext();
-        if (input instanceof ActionResult) {
-            ActionResult prevRes = (ActionResult) input;
-            log = prevRes.log() != null ? prevRes.log() : getContext();
-        } else {
-            log = getContext();
-        }
-
-        beforeAction(input, log);
-        if (input.isEmpty() && !isEmptyInputAllowed()) {
-            log.logError("No input data in action {}", getName());
-            throw new RuntimeException("No input data in action in non-generator action");
-        }
-
-        List<Dependency<R>> out = execute(log, input.meta(), input);
-        ActionResult<R> res = new Pack<>(getName(), input.meta(), log, getOutputType(), out);
-        afterAction(res);
-        return res;
-    }
-
-    protected abstract List<Dependency<R>> execute(Logable log, Meta packAnnotation, DependencySet<T> input);
-
-    protected void afterAction(ActionResult<R> pack) throws ContentException {
-        pack.log().log("Action '{}' is finished", getName());
-        for(ActionStateListener listener: listeners){
-            listener.notifyActionFinished(this, pack);
-        }
-    }
-
-    /**
-     * <p>
-     * beforeAction.</p>
-     *
-     * @param pack a {@link hep.dataforge.actions.ActionResult} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
-    protected void beforeAction(DependencySet<T> pack, Logable log) throws ContentException {
-        log.log("Starting action '{}'", getName());
-        for(ActionStateListener listener: listeners){
-            listener.notifyActionStarted(this, pack);
-        }        
     }
 
     /**
@@ -202,7 +116,6 @@ public abstract class GenericAction<T extends Named, R extends Named> extends Ab
      *
      * @return
      */
-    @Override
     public NodeDescriptor getDescriptor() {
         return ActionDescriptor.build(this);
     }
@@ -221,48 +134,62 @@ public abstract class GenericAction<T extends Named, R extends Named> extends Ab
         if (def != null && !def.name().isEmpty()) {
             return def.name();
         } else {
-            return super.getName();
+            throw new RuntimeException("Name not defined");
         }
     }
 
     /**
-     * <p>
-     * getInputType.</p>
+     * Input type bases on ActionDef
      *
-     * @return a {@link java.lang.Class} object.
+     * @return
      */
     public Class getInputType() {
         TypedActionDef def = getDef();
         if (getDef() != null) {
             return def.inputType();
         } else {
-            return Content.class;
+            return Object.class;
         }
     }
 
+    /**
+     * OutputType based on ActionDef
+     *
+     * @return
+     */
     public Class getOutputType() {
         TypedActionDef def = getDef();
         if (getDef() != null) {
             return def.outputType();
         } else {
-            return Content.class;
+            return Object.class;
         }
     }
 
-    protected Meta readMeta(Meta inputAnnotation) {
-        return new Laminate(inputAnnotation, meta())
-                .setDefaultValueProvider(getContext())
+    /**
+     * Generate input meta for given data input, group meta and action meta
+     *
+     * @param input
+     * @param nodeMeta
+     * @param actionMeta
+     * @return
+     */
+    protected Laminate inputMeta(Context context, Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
+        return new Laminate(input.meta(), nodeMeta, actionMeta)
+                .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Meta readMeta(Meta inputAnnotation, Meta groupAnnotation) {
-        if (groupAnnotation == null) {
-            return this.readMeta(inputAnnotation);
-        } else {
-            return new Laminate(inputAnnotation, groupAnnotation, meta())
-                    .setDefaultValueProvider(getContext())
-                    .setDescriptor(getDescriptor());
-        }
+    protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
+        return new Laminate(nodeMeta, actionMeta)
+                .setValueContext(context)
+                .setDescriptor(getDescriptor());
+    }
+
+    protected Laminate inputMeta(Context context, Meta actionMeta) {
+        return new Laminate(actionMeta)
+                .setValueContext(context)
+                .setDescriptor(getDescriptor());
     }
 
     /**
@@ -272,27 +199,7 @@ public abstract class GenericAction<T extends Named, R extends Named> extends Ab
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(String name) {
-        return getContext().io().out(getName(), name);
-    }
-
-    /**
-     * Create default OuputStream for given Action and given Content
-     *
-     * @param action a {@link hep.dataforge.actions.Action} object.
-     * @param content a {@link hep.dataforge.content.Content} object.
-     * @return a {@link java.io.OutputStream} object.
-     */
-    public OutputStream buildActionOutput(Content content) {
-        return getContext().io().out(getName(), content.getName());
-    }
-    
-    public void addListener(ActionStateListener listener){
-        listeners.add(listener);
-    }
-
-    
-    public void removeListener(ActionStateListener listener){
-        listeners.remove(listener);
+    public OutputStream buildActionOutput(Context context, String name) {
+        return context.io().out(getName(), name);
     }
 }

@@ -7,9 +7,14 @@ package hep.dataforge.utils;
 
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.AbstractCollection;
 import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 import java.util.Set;
-import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * A registry of listener references. References could be weak to allow GC to
@@ -19,9 +24,12 @@ import java.util.function.Consumer;
  *
  * @author Alexander Nozik
  */
-public class ReferenceRegistry<T> {
+public class ReferenceRegistry<T> extends AbstractCollection<T> {
 
     private final Set<Reference<T>> weakRegistry = new HashSet<>();
+    /**
+     * Used only to store strongreferences
+     */
     private final Set<T> strongRegistry = new HashSet<>();
 
     /**
@@ -30,12 +38,11 @@ public class ReferenceRegistry<T> {
      *
      * @param obj
      */
-    public synchronized void add(T obj, boolean isStrong) {
+    public synchronized boolean add(T obj, boolean isStrong) {
         if (isStrong) {
             strongRegistry.add(obj);
-        } else {
-            weakRegistry.add(new WeakReference<>(obj));
         }
+        return weakRegistry.add(new WeakReference<>(obj));
     }
 
     /**
@@ -48,28 +55,64 @@ public class ReferenceRegistry<T> {
      *
      * @param obj
      */
-    public void add(T obj) {
-        add(obj, false);
+    @Override
+    public boolean add(T obj) {
+        return add(obj, false);
     }
 
-    public synchronized void remove(T obj) {
-        Reference<T> reference
-                = weakRegistry.stream()
-                .filter(it -> obj.equals(it.get())).findFirst().orElse(null);
-        if (reference != null) {
-            weakRegistry.remove(reference);
-        }
+    @Override
+    public synchronized boolean remove(Object obj) {
         strongRegistry.remove(obj);
+        Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
+
+        if (reference != null) {
+            return weakRegistry.remove(reference);
+        } else {
+            return false;
+        }
     }
 
     /**
-     * Perform given action on each of existing listeners
-     *
-     * @param action
+     * Clean up all null entries from weak registry
      */
-    public void forEach(Consumer<T> action) {
-        weakRegistry.stream().filter(it -> it.get() != null).forEach(it -> action.accept(it.get()));
-        strongRegistry.stream().filter(it -> it != null).forEach(it -> action.accept(it));
+    private synchronized void cleanUp() {
+        weakRegistry.removeIf(ref -> ref.get() == null);
     }
 
+    @Override
+    public synchronized Iterator<T> iterator() {
+        cleanUp();
+        //FIXME concurrency problem here?
+        final Iterator<Reference<T>> referenceIterator = weakRegistry.iterator();
+        return new Iterator<T>() {
+            @Override
+            public boolean hasNext() {
+                return referenceIterator.hasNext();
+            }
+
+            @Override
+            public T next() {
+                return referenceIterator.next().get();
+            }
+        };
+    }
+
+    @Override
+    public int size() {
+        return weakRegistry.size();
+    }
+
+    public Optional<T> findFirst(Predicate<T> predicate) {
+        return this.weakRegistry.stream()
+                .map(ref -> ref.get())
+                .filter((t) -> t != null && predicate.test(t))
+                .findFirst();
+    }
+
+    public List<T> findAll(Predicate<T> predicate) {
+        return this.weakRegistry.stream()
+                .map(ref -> ref.get())
+                .filter((t) -> t != null && predicate.test(t))
+                .collect(Collectors.toList());
+    }
 }

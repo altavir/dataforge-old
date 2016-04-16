@@ -15,14 +15,15 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.ListDataSet;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
+import static java.util.regex.Pattern.compile;
 import static java.util.regex.Pattern.compile;
 
 /**
@@ -63,18 +64,18 @@ public class IOUtils {
 
     }
 
-//    public static ListDataSet readColumnedData(File input, String... names) {
+//    public static ListPointSet readColumnedData(File input, String... names) {
 //        return readColumnedData(null, input, names);
 //    }
 //
-//    public static ListDataSet readColumnedData(String name, File input, String... names) throws FileNotFoundException {
+//    public static ListPointSet readColumnedData(String name, File input, String... names) throws FileNotFoundException {
 //        ColumnedDataReader reader;
 //        if (names.length > 0) {
 //            reader = new ColumnedDataReader(input, names);
 //        } else {
 //            reader = new ColumnedDataReader(input);
 //        }
-//        ListDataSet res = new ListDataSet(name, names);
+//        ListPointSet res = new ListPointSet(name, names);
 //        for (DataPoint dp : reader) {
 //            res.add(dp);
 //        }
@@ -86,10 +87,10 @@ public class IOUtils {
      *
      * @param fileName a {@link java.lang.String} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.ListDataSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static ListDataSet readColumnedData(String fileName, String... names) throws FileNotFoundException {
+    public static ListPointSet readColumnedData(String fileName, String... names) throws FileNotFoundException {
         return readColumnedData(new File(fileName), names);
     }
 
@@ -99,17 +100,17 @@ public class IOUtils {
      *
      * @param file a {@link java.io.File} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.data.ListDataSet} object.
+     * @return a {@link hep.dataforge.points.ListPointSet} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static ListDataSet readColumnedData(File file, String... names) throws FileNotFoundException {
+    public static ListPointSet readColumnedData(File file, String... names) throws FileNotFoundException {
         ColumnedDataReader reader;
         if (names.length == 0) {
             reader = new ColumnedDataReader(file);
         } else {
             reader = new ColumnedDataReader(file, names);
         }
-        ListDataSet res = new ListDataSet(names);
+        ListPointSet res = new ListPointSet(names);
         for (DataPoint dp : reader) {
             res.add(dp);
         }

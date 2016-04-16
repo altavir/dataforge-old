@@ -16,17 +16,16 @@
 package hep.dataforge.io.log;
 
 import ch.qos.logback.classic.Logger;
-import hep.dataforge.content.Named;
 
 /**
  * An object that could handle and store its own log. A purpose of DataForge log
  * is different from standard logging because analysis log is part of the
- * result. THerfeore logable objects should be used only when one needs to sore
+ * result. Therfore logable objects should be used only when one needs to sore
  * resulting log.
  *
  * @author Alexander Nozik
  */
-public interface Logable extends Named {
+public interface Logable{
 
     default Logger getLogger(){
         return getLog().getLogger();

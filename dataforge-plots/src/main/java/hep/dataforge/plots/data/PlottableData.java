@@ -15,40 +15,37 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
+import hep.dataforge.points.PointSet;
 
 /**
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 
-    private List<DataPoint> data;
-
-    public PlottableData(String name, double[] x, double[] y) {
-        this(name, x, y, null, null);
-    }
-
-    public PlottableData(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
-        super(name, null);
+    public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
+        PlottableData plot = new PlottableData(name);
 
         if (x.length != y.length) {
             throw new IllegalArgumentException("Arrays size mismatch");
         }
 
-        this.data = new ArrayList<>();
+        List<DataPoint> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            MapDataPoint point = new MapDataPoint(new String[]{"x", "y"}, x[i], y[i]);
+            MapPoint point = new MapPoint(new String[]{"x", "y"}, x[i], y[i]);
 
             if (xErrs != null) {
                 point.putValue("xErr", xErrs[i]);
@@ -59,57 +56,64 @@ public class PlottableData extends XYPlottable {
             }
 
             data.add(point);
-
         }
-
+        plot.fillData(data);
+        return plot;
     }
 
-    public PlottableData(String name, Meta annotation, Iterable<DataPoint> data) {
-        super(name, annotation);
-        fillData(data);
+    public static PlottableData plot(String name, double[] x, double[] y) {
+        return plot(name, x, y, null, null);
     }
 
-    public PlottableData(DataSet data, String xName, String yName) {
-        this(data.getName(), extractMeta(data), data, xName, yName);
+    public static PlottableData plot(String name, XYAdapter adapter, boolean showErrors) {
+        MetaBuilder builder = new MetaBuilder("dataPlot")
+                .setNode("adapter", adapter.meta());
+        builder.setValue("showErrors", showErrors);
+        PlottableData plot = new PlottableData(name);
+        plot.setMetaBase(builder.build());
+        return plot;
     }
 
-    public PlottableData(DataSet data, String xName, String yName, String xErrName, String yErrName) {
-        this(data.getName(), extractMeta(data), data, xName, yName, xErrName, yErrName);
+    public static PlottableData plot(String name, XYAdapter adapter, Iterable<DataPoint> data) {
+        PlottableData plot = plot(name, adapter, true);
+        plot.fillData(data);
+        return plot;
     }
-
-    public PlottableData(String name, Meta meta, Iterable<DataPoint> data, String xName, String yName) {
-        this(name, meta, data);
-        getConfig().setValue("adapter.xName", xName);
-        getConfig().setValue("adapter.yName", yName);
-        getConfig().setValue("showErrors", false);
-    }
-
-    public PlottableData(String name, Meta meta, Iterable<DataPoint> data, String xName, String yName, String xErrName, String yErrName) {
-        this(name, meta, data);
-        getConfig().setValue("adapter.xName", xName);
-        getConfig().setValue("adapter.yName", yName);
-        getConfig().setValue("showErrors", false);
-
-        if (xErrName != null) {
-            getConfig().setValue("adapter.xErrName", xErrName);
+    
+    public static PlottableData plot(String name, Meta meta, PointSet data, XYAdapter adapter){
+        PlottableData plot = plot(name, adapter, true);
+        plot.fillData(data);
+        if(!meta.isEmpty()){
+            plot.configure(meta);
         }
+        return plot;
+    }
+    
+    public static PlottableData plot(String name, PointSet data, XYAdapter adapter){
+        PlottableData plot = plot(name, adapter, true);
+        plot.fillData(data);
+        return plot;
+    }
+    
 
-        if (yErrName != null) {
-            getConfig().setValue("adapter.yErrName", yErrName);
-        }
+    protected List<DataPoint> data;
+
+    protected PlottableData(String name) {
+        super(name);
+        data = new ArrayList<>();
     }
 
-    private void fillData(Iterable<DataPoint> it) {
+    public void fillData(Iterable<DataPoint> it) {
         this.data = new ArrayList<>();
         for (DataPoint dp : it) {
             data.add(dp);
         }
-    }
-    
-    private static Meta extractMeta(DataSet data){
-        return data.meta().getNode("plot", Meta.buildEmpty("plot"));
+        notifyDataChanged();
     }
 
+//    private static Meta extractMeta(PointSet data) {
+//        return data.meta().getNode("plot", Meta.empty("plot"));
+//    }
     @Override
     public Collection<DataPoint> plotData() {
         return data;

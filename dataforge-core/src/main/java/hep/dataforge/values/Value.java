@@ -15,7 +15,6 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.content.Content;
 import hep.dataforge.utils.NamingUtils;
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -82,7 +81,7 @@ public interface Value extends Comparable<Value>, Serializable {
         }
 
         if ("true".equals(str) || "false".equals(str)) {
-            return new BooleanValue(str);
+            return BooleanValue.ofBoolean(str);
         }
 
         if (str.startsWith("[") && str.endsWith("]")) {
@@ -110,60 +109,25 @@ public interface Value extends Comparable<Value>, Serializable {
      * @return a {@link hep.dataforge.values.Value} object.
      */
     public static Value of(boolean b) {
-        return new BooleanValue(b);
+        return BooleanValue.ofBoolean(b);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param d a double.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(double d) {
         return new NumberValue(d);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param i a int.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(int i) {
         return new NumberValue(i);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param l a long.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(long l) {
         return new NumberValue(l);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param bd a {@link java.math.BigDecimal} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(BigDecimal bd) {
         return new NumberValue(bd);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param t a {@link java.time.Instant} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value of(LocalDateTime t) {
         return new TimeValue(LocalDateTime.from(t));
     }
@@ -195,12 +159,6 @@ public interface Value extends Comparable<Value>, Serializable {
         }
     }
 
-    /**
-     * <p>
-     * getNull.</p>
-     *
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
     public static Value getNull() {
         return NULL;
     }
@@ -214,7 +172,7 @@ public interface Value extends Comparable<Value>, Serializable {
      */
     public static Value of(Object obj) {
         if (obj == null) {
-            return new NullValue();
+            return Value.NULL;
         }
         if (obj instanceof Number) {
             return new NumberValue((Number) obj);
@@ -223,12 +181,10 @@ public interface Value extends Comparable<Value>, Serializable {
         } else if (obj instanceof LocalDateTime) {
             return new TimeValue((LocalDateTime) obj);
         } else if (obj instanceof Boolean) {
-            return new BooleanValue((boolean) obj);
+            return BooleanValue.ofBoolean((boolean) obj);
         } else if (obj instanceof Value) {
             //это можно делать так как Value неизменяемый
             return (Value) obj;
-        } else if (obj instanceof Content) {
-            return of((Content) obj);
         } else if (obj instanceof String) {
             return of((String) obj);
         } else if (obj instanceof Collection) {

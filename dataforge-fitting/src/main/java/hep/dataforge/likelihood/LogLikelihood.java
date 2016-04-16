@@ -15,7 +15,6 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.datafitter.FitSource;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NamingException;

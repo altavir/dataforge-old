@@ -20,8 +20,8 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.actions.RunConfigAction;
-import hep.dataforge.data.DataFilterAction;
-import hep.dataforge.data.ReadDataSetAction;
+import hep.dataforge.points.FilterAction;
+import hep.dataforge.points.ReadPointSetAction;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
@@ -60,22 +60,24 @@ public class GlobalContext extends Context {
         Locale.setDefault(Locale.US);
         ActionManager actions = new ActionManager();
         loadPlugin(actions);
-        actions.registerAction(DataFilterAction.class);
-        actions.registerAction(ReadDataSetAction.class);
+        actions.registerAction(FilterAction.class);
+        actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
+        this.processManager = new ProcessManager();
+        this.processManager.setContext(this);        
     }
 
     @Override
-    public void attachIoManager(IOManager io) {
-        super.attachIoManager(io);
+    public void setIO(IOManager io) {
+        super.setIO(io);
         //redirect all logging output to new ioManager
         Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-        
+
         //redirect output to given outputstream
         root.detachAndStopAllAppenders();
         OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setOutputStream(io.out());
         appender.setContext(root.getLoggerContext());
+        appender.setOutputStream(io.out());
         appender.start();
         root.addAppender(appender);
     }
@@ -83,8 +85,8 @@ public class GlobalContext extends Context {
     @Override
     public IOManager io() {
         if (this.io == null) {
-            attachIoManager(new BasicIOManager());
-            getLog().setLogListener((LogEntry t) -> {
+            setIO(new BasicIOManager());
+            getLog().addLogListener((LogEntry t) -> {
                 System.out.println(t.toString());
             });
         }

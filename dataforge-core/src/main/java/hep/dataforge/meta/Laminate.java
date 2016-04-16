@@ -23,6 +23,7 @@ import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -39,11 +40,11 @@ import org.slf4j.LoggerFactory;
  */
 public class Laminate extends Meta {
 
-    String name;
-    List<Meta> layers;
-    NodeDescriptor descriptor;
-    Meta descriptorLayer;
-    ValueProvider defaultValueProvider;
+    private String name;
+    private List<Meta> layers;
+    private NodeDescriptor descriptor;
+    private Meta descriptorLayer;
+    private ValueProvider valueContext;
 
     public Laminate(String name) {
         this.name = name;
@@ -53,26 +54,23 @@ public class Laminate extends Meta {
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
         this.layers = new ArrayList(layers);
+        this.layers.removeIf((meta) -> meta == null);
     }
 
     public Laminate(List<Meta> layers) {
-        //TODO check input for nulls
-        this.name = layers.isEmpty() ? "" : layers.get(0).getName();
-        this.layers = new ArrayList(layers);
+        this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(), layers);
     }
 
     public Laminate(Meta... layers) {
-        this.name = layers.length == 0 ? "" : layers[0].getName();
-        this.layers = new ArrayList(Arrays.asList(layers));
+        this(Arrays.asList(layers));
     }
 
     public Laminate(String name, Meta... layers) {
-        this.name = name;
-        this.layers = new ArrayList(Arrays.asList(layers));
+        this(name, Arrays.asList(layers));
     }
 
-    public ValueProvider getDefaultValueProvider() {
-        return defaultValueProvider;
+    public ValueProvider valueContext() {
+        return valueContext;
     }
 
     /**
@@ -97,55 +95,91 @@ public class Laminate extends Meta {
         }
     }
 
-    public Laminate setDefaultValueProvider(ValueProvider defaultValueProvider) {
-        this.defaultValueProvider = defaultValueProvider;
+    public Laminate setValueContext(ValueProvider valueContext) {
+        this.valueContext = valueContext;
         return this;
     }
 
+    /**
+     * Add primary (first layer)
+     *
+     * @param layer
+     * @return
+     */
+    public Laminate addFirstLayer(Meta layer) {
+        this.layers.add(0, layer);
+        return this;
+    }
+
+    /**
+     * Add layer to stack
+     *
+     * @param layer
+     * @return
+     */
     public Laminate addLayer(Meta layer) {
         this.layers.add(layer);
         return this;
     }
 
+    public Laminate setLayers(Meta... layers) {
+        this.layers.clear();
+        this.layers.addAll(Arrays.asList(layers));
+        this.layers.removeIf((meta) -> meta == null);
+        return this;
+    }
+
+    public Laminate setLayers(Collection<Meta> layers) {
+        this.layers.clear();
+        this.layers.addAll(layers);
+        this.layers.removeIf((meta) -> meta == null);
+        return this;
+    }
+
     public List<Meta> layers() {
-        return layers;
+        return Collections.unmodifiableList(layers);
+    }
+
+    /**
+     * Get laminate layers in inverse order
+     *
+     * @return
+     */
+    public List<Meta> layersInverse() {
+        List<Meta> layersInverse = new ArrayList<>(this.layers);
+        Collections.reverse(layersInverse);
+        return layersInverse;
     }
 
     @Override
     public Meta getNode(String path) {
         List<Meta> childLayers = new ArrayList<>();
-        for (Meta m : layers) {
-            if (m.hasNode(path)) {
-                //FIXME child elements are not chained!
-                childLayers.add(m.getNode(path));
-            }
-        }
+        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
+            //FIXME child elements are not chained!
+            childLayers.add(m.getNode(path));
+        });
         if (!childLayers.isEmpty()) {
             Laminate laminate = new Laminate(childLayers);
             //adding child node descriptor to the child laminate
             if (descriptor != null && descriptor.childrenDescriptors().containsKey(path)) {
                 laminate.setDescriptor(descriptor.childDescriptor(path));
             }
-            laminate.setDefaultValueProvider(getDefaultValueProvider());
+            laminate.setValueContext(valueContext());
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNode(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
     public List<? extends Meta> getNodes(String path) {
         List<List<? extends Meta>> childLayers = new ArrayList<>();
-        for (Meta m : layers) {
-            if (m.hasNode(path)) {
-                childLayers.add(m.getNodes(path));
-            }
-        }
+        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
+            childLayers.add(m.getNodes(path));
+        });
         if (!childLayers.isEmpty()) {
             if (childLayers.size() > 1) {
                 LoggerFactory.getLogger(getClass())
@@ -153,13 +187,11 @@ public class Laminate extends Meta {
             }
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
-        {
-            if (descriptorLayer != null) {
+         if (descriptorLayer != null) {
                 return descriptorLayer.getNodes(path);
             } else {
                 throw new NameNotFoundException(path);
             }
-        }
     }
 
     @Override
@@ -174,31 +206,42 @@ public class Laminate extends Meta {
      */
     @Override
     public Collection<String> getNodeNames() {
+        return getNodeNames(true);
+    }
+    
+    
+    public Collection<String> getNodeNames(boolean includeDefaults) {
         Set<String> names = new HashSet<>();
-        for (Meta m : layers) {
-            names.addAll(m.getNodeNames());
+        if (layers != null) {
+            layers.stream().forEach((m) -> {
+                names.addAll(m.getNodeNames());
+            });
         }
-        
-        if (descriptorLayer != null) {
+
+        if (includeDefaults && descriptorLayer != null) {
             names.addAll(descriptorLayer.getNodeNames());
         }
-        
+
         return names;
     }
 
     /**
-     * Value names includes descriptor values, but does not include defaults
+     * Value names includes descriptor values,
      *
      * @return
      */
     @Override
     public Collection<String> getValueNames() {
+        return getValueNames(true);
+    }
+
+    public Collection<String> getValueNames(boolean includeDefaults) {
         Set<String> names = new HashSet<>();
-        for (Meta m : layers) {
+        layers.stream().forEach((m) -> {
             names.addAll(m.getValueNames());
-        }
-        
-        if (descriptorLayer != null) {
+        });
+
+        if (includeDefaults && descriptorLayer != null) {
             names.addAll(descriptorLayer.getValueNames());
         }
 
@@ -210,21 +253,16 @@ public class Laminate extends Meta {
         //searching layers for value
         for (Meta m : layers) {
             if (m.hasValue(path)) {
-                return m.getValue(path);
+                return MetaUtils.transformValue(m.getValue(path), valueContext());
             }
         }
 
         // if descriptor layer is definded, serching it for value
         if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
-            return descriptorLayer.getValue(path);
+            return MetaUtils.transformValue(descriptorLayer.getValue(path), valueContext());
         }
 
-        // if default value provider is defined, using it for default value
-        if (defaultValueProvider != null) {
-            return defaultValueProvider.getValue(path);
-        } else {
-            throw new NameNotFoundException(path);
-        }
+        throw new NameNotFoundException(path);
     }
 
 }

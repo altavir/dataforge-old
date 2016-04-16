@@ -15,21 +15,25 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.storage.api.BinaryLoader;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.ObjectLoader;
 
 /**
  *
  * @author Alexander Nozik
  */
-public abstract class AbstractBinaryLoader<T> extends AbstractLoader implements BinaryLoader<T> {
+public abstract class AbstractBinaryLoader<T> extends AbstractLoader implements ObjectLoader<T> {
 
     public AbstractBinaryLoader(Storage storage, String name, Meta annotation) {
         super(storage, name, annotation);
     }
 
+    public AbstractBinaryLoader(Storage storage, String name) {
+        super(storage, name);
+    }
+    
     @Override
     public Envelope respond(Envelope message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
@@ -38,7 +42,7 @@ public abstract class AbstractBinaryLoader<T> extends AbstractLoader implements 
 
     @Override
     public String getType() {
-        return BINARY_LOADER_TYPE;
+        return OBJECT_LOADER_TYPE;
     }
     
     

@@ -5,6 +5,6 @@ dependencies {
     compile project(':dataforge-storage')
 //    compile project(':dataforge-grind')
     compile 'org.freemarker:freemarker:2.3.+'
-    compile 'io.ratpack:ratpack-core:1.1.1'
+    compile 'io.ratpack:ratpack-core:1.2.0'
     compile 'com.google.visualization:visualization-datasource:1.1.1'
 }

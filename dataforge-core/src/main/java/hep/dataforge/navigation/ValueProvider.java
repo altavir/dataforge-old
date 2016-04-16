@@ -49,7 +49,7 @@ public interface ValueProvider {
      * @param def a boolean.
      * @return a boolean.
      */
-    default boolean getBoolean(String name, boolean def) {
+    default Boolean getBoolean(String name, boolean def) {
         if (this.hasValue(name)) {
             return getValue(name).booleanValue();
         } else {
@@ -64,7 +64,7 @@ public interface ValueProvider {
      * @param name a {@link java.lang.String} object.
      * @return a boolean.
      */
-    default boolean getBoolean(String name) {
+    default Boolean getBoolean(String name) {
         return getValue(name).booleanValue();
     }
 
@@ -76,7 +76,7 @@ public interface ValueProvider {
      * @param def a double.
      * @return a double.
      */
-    default double getDouble(String name, double def) {
+    default Double getDouble(String name, double def) {
         if (this.hasValue(name)) {
             return getValue(name).doubleValue();
         } else {
@@ -91,7 +91,7 @@ public interface ValueProvider {
      * @param name a {@link java.lang.String} object.
      * @return a double.
      */
-    default double getDouble(String name) {
+    default Double getDouble(String name) {
         return getValue(name).doubleValue();
     }
 
@@ -103,7 +103,7 @@ public interface ValueProvider {
      * @param def a int.
      * @return a int.
      */
-    default int getInt(String name, int def) {
+    default Integer getInt(String name, int def) {
         if (this.hasValue(name)) {
             return getValue(name).intValue();
         } else {
@@ -118,7 +118,7 @@ public interface ValueProvider {
      * @param name a {@link java.lang.String} object.
      * @return a int.
      */
-    default int getInt(String name) {
+    default Integer getInt(String name) {
         return getValue(name).intValue();
     }
 

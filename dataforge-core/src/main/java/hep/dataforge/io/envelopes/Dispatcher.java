@@ -6,6 +6,7 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
+import static hep.dataforge.io.envelopes.Target.ENVELOPE_TARGET_NODE;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -15,13 +16,10 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  */
 public interface Dispatcher {
-    public static final String ENVELOPE_META_TARGET_NODE = "target";
-    public static final String TARGET_NAME_KEY = "name";
-    public static final String TARGET_TYPE_KEY = "type";
    
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     
     default Responder getResponder(Envelope envelope){
-        return getResponder(envelope.meta().getNode(ENVELOPE_META_TARGET_NODE));
+        return getResponder(envelope.meta().getNode(ENVELOPE_TARGET_NODE));
     }
 }

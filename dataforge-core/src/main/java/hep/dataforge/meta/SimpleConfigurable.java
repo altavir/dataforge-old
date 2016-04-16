@@ -26,17 +26,96 @@ import java.util.List;
  */
 public abstract class SimpleConfigurable implements Configurable, Annotated {
 
-    private final Configuration configuration;
+    private Configuration configuration = null;
 
     /**
-     * Create new configurable object and register observer that notifies this object if configuration changes
-     * @param an 
+     * {@inheritDoc }
+     *
+     * @return
      */
-    public SimpleConfigurable(Meta an) {
-        if(an == null){
-            an = Meta.buildEmpty("config");
+    @Override
+    public final Configuration getConfig() {
+        if (configuration == null) {
+            initConfig();
         }
-        configuration = new Configuration(an);
+        return configuration;
+    }
+
+    /**
+     * Get configuration as an immutable annotation
+     *
+     * @return
+     */
+    @Override
+    public Meta meta() {
+        return getConfig();
+    }
+
+    /**
+     * Apply the whole new configuration. It does not change configuration,
+     * merely applies changes
+     *
+     * @param config
+     */
+    protected abstract void applyConfig(Meta config);
+
+    /**
+     * Apply specific value change. By default applies the whole configuration.
+     *
+     * @param name
+     * @param oldItem
+     * @param newItem
+     */
+    protected void applyValueChange(String name, Value oldItem, Value newItem) {
+        applyConfig(getConfig());
+    }
+
+    /**
+     * Apply specific element change. By default applies the whole
+     * configuration.
+     *
+     * @param name
+     * @param oldItem
+     * @param newItem
+     */
+    protected void applyElementChange(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+        applyConfig(getConfig());
+    }
+
+    /**
+     * Add additional getConfig observer to configuration
+     *
+     * @param observer
+     */
+    public void addConfigObserver(ConfigChangeListener observer) {
+        this.getConfig().addObserver(observer);
+    }
+
+    /**
+     * remove additional getConfig observer from configuration
+     *
+     * @param observer
+     */
+    public void removeConfigObserver(ConfigChangeListener observer) {
+        this.getConfig().addObserver(observer);
+    }
+
+    /**
+     * validate incoming configuration changes and return correct version (all
+     * invalid values are excluded). By default just returns unchanged
+     * configuration.
+     *
+     * @param config
+     * @return
+     */
+    protected Meta validate(Meta config) {
+        return config;
+    }
+
+    private void initConfig() {
+        if (configuration == null) {
+            configuration = new Configuration("");
+        }
         configuration.addObserver(new ConfigChangeListener() {
 
             @Override
@@ -51,75 +130,16 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
         });
     }
 
-    public SimpleConfigurable() {
-        this(Meta.buildEmpty("config"));
-    }
-
-    /**
-     * {@inheritDoc }
-     * @return 
-     */
-    @Override
-    public final Configuration getConfig() {
-        return configuration;
-    }
-
-    /**
-     * Get configuration as an immutable annotation
-     * @return 
-     */
-    @Override
-    public Meta meta() {
-        return configuration;
-    }
-    
-    /**
-     * Apply the whole new configuration. It does not change configuration, merely applies changes
-     * @param config 
-     */
-    protected abstract void applyConfig(Meta config);
-    
-    /**
-     * Apply specific value change. By default applies the whole configuration.
-     * @param name
-     * @param oldItem
-     * @param newItem 
-     */
-    protected void applyValueChange(String name, Value oldItem, Value newItem){
-        applyConfig(configuration);
-    }
-    
-    /**
-     * Apply specific element change. By default applies the whole configuration.
-     * @param name
-     * @param oldItem
-     * @param newItem 
-     */
-    protected void applyElementChange(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem){
-        applyConfig(configuration);
-    }
-    
-    /**
-     * Add additional getConfig observer to configuration
-     * @param observer 
-     */
-    public void addConfigObserver(ConfigChangeListener observer){
-        this.configuration.addObserver(observer);
-    }
-
-    /**
-     * remove additional getConfig observer from configuration
-     * @param observer 
-     */
-    public void removeConfigObserver(ConfigChangeListener observer){
-        this.configuration.addObserver(observer);
-    }
-    
     /**
      * Applies changes from given config to this one
-     * @param config 
+     *
+     * @param config
      */
-    public void updateConfig(Meta config){
-        this.configuration.update(config);
+    @Override
+    public void configure(Meta config) {
+        //Check and correct input configuration
+        getConfig().update(config);
+
+        applyConfig(getConfig());
     }
 }

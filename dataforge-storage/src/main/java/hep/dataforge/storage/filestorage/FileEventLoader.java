@@ -15,21 +15,19 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.events.Event;
 import hep.dataforge.exceptions.StorageException;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
+import hep.dataforge.storage.commons.JSONMetaWriter;
 import hep.dataforge.storage.loaders.AbstractEventLoader;
-import java.io.File;
-import java.io.IOException;
 import java.nio.charset.Charset;
-import java.text.ParseException;
+import java.util.Iterator;
 import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.provider.local.DefaultLocalFileProvider;
 
 /**
  *
@@ -40,16 +38,17 @@ public class FileEventLoader extends AbstractEventLoader {
     private static final Charset CHARSET = Charset.forName("UTF-8");
     private static final byte[] NEWLINE = {'\r', '\n'};
 
-    public static FileEventLoader fromLocalFile(Storage storage, File file, boolean readOnly) throws IOException, ParseException, StorageException {
-        return fromFile(storage, new DefaultLocalFileProvider().findLocalFile(file), readOnly);
-    }
-
-    public static FileEventLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws IOException, ParseException, StorageException {
-        FileEnvelope envelope = new FileEnvelope(file, readOnly);
-        if (isValidFileEventLoaderEnvelope(envelope)) {
-            return new FileEventLoader(envelope, storage, FilenameUtils.getBaseName(file.getName().getBaseName()), envelope.meta());
-        } else {
-            throw new StorageException("Is not a valid event loader file");
+    public static FileEventLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+            if (isValidFileEventLoaderEnvelope(envelope)) {
+                FileEventLoader res = new FileEventLoader(file.getURL().toString(),
+                        storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
+                        envelope.meta());
+                res.setReadOnly(readOnly);
+                return res;
+            } else {
+                throw new StorageException("Is not a valid point loader file");
+            }
         }
     }
 
@@ -58,12 +57,36 @@ public class FileEventLoader extends AbstractEventLoader {
                 && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.EVENT_LOADER_TYPE_CODE;
     }
 
-    private final FileEnvelope envelope;
+    private final String filePath;
+    private FileEnvelope file;
     private Predicate<Event> filter;
 
-    public FileEventLoader(FileEnvelope envelope, Storage storage, String name, Meta annotation) {
+    public FileEventLoader(String filePath, Storage storage, String name, Meta annotation) {
         super(storage, name, annotation);
-        this.envelope = envelope;
+        this.filePath = filePath;
+    }
+    
+
+    @Override
+    public void open() throws Exception {
+        if(this.meta == null){
+            this.meta = getFile().meta();
+        }
+        if (!isOpen()) {
+            file = new FileEnvelope(filePath, isReadOnly());
+        }
+    }
+
+    @Override
+    public boolean isOpen() {
+        return file != null;
+    }
+
+    @Override
+    public void close() throws Exception {
+        getFile().close();
+        file = null;
+        super.close();
     }
 
     @Override
@@ -85,21 +108,37 @@ public class FileEventLoader extends AbstractEventLoader {
     protected void pushDirect(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
-                envelope.append(event.toString().getBytes(CHARSET));
-                envelope.append(NEWLINE);
-            } catch (IOException ex) {
+                String eventString = new JSONMetaWriter(false).writeString(event.meta(),CHARSET);
+                getFile().append(eventString.getBytes(CHARSET));
+                getFile().append(NEWLINE);
+            } catch (Exception ex) {
                 throw new StorageException(ex);
             }
         }
     }
 
+//    /**
+//     * Get the whole log as a String
+//     *
+//     * @return
+//     */
+//    public String getLog() {
+//        return new String(getFile().getData().array(), CHARSET);
+//    }
+
+    @Override
+    public Iterator iterator() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
     /**
-     * Get the whole log as a String
-     *
-     * @return
+     * @return the file
      */
-    public String getLog() {
-        return new String(envelope.getData().array(), CHARSET);
+    private FileEnvelope getFile() throws Exception {
+        if(file == null){
+            open();
+        }
+        return file;
     }
 
 }

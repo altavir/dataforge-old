@@ -9,7 +9,6 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import java.util.List;
-import java.util.function.BiFunction;
 import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -37,7 +36,6 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
     }
 
     private Function<Configuration, NodeDescriptor> descriptorProvider;
-    private BiFunction<Configuration, String, Boolean> frozenValuePredicate;
 
     private boolean invalid = true;
 
@@ -72,29 +70,33 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
             // recursevely adding child nodes including descriptors
             if (config != null) {
-                for (String childNodeName : config.getNodeNames()) {
+                config.getNodeNames().stream().forEach((childNodeName) -> {
                     List<Configuration> childConfigs = config.getNodes(childNodeName);
-                    for (Configuration childConfig : childConfigs) {
+                    for (int i = 0; i < childConfigs.size(); i++) {
+                        Configuration childConfig = childConfigs.get(i);
                         //applying descriptor from parent
                         NodeDescriptor childDescriptor = descriptor == null ? null : descriptor.childDescriptor(childNodeName);
                         //applying descriptor from external provider if it is present
-                        if(childDescriptor == null && descriptorProvider != null){
+                        if (childDescriptor == null && descriptorProvider != null) {
                             childDescriptor = descriptorProvider.apply(childConfig);
                         }
-                        MetaTree childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                        MetaTree childTree;
+                        //if node is list add its index to constructor
+                        if (childConfigs.size() > 1) {
+                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor, i);
+                        } else {
+                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                        }
                         children.add(new MetaTreeItem(childTree));
                     }
-                }
+                });
 
                 // adding values with descriptors if available
-                for (String valueName : config.getValueNames()) {
-                    MetaTreeLeaf valueLeaf = new MetaTreeLeaf(branch, valueName);
-                    //aplying frozen status if predicate is available
-                    if(frozenValuePredicate!= null && frozenValuePredicate.apply(config, valueName)){
-                        valueLeaf.setFrozen(true);
-                    }
-                    children.add(new MetaTreeItem(valueLeaf));
-                }
+                config.getValueNames().stream()
+                        .map((valueName) -> new MetaTreeLeaf(branch, valueName))
+                        .forEach((valueLeaf) -> {
+                            children.add(new MetaTreeItem(valueLeaf));
+                        });
             }
 
             // adding the rest default value from descriptor. Ignoring the ones allready added
@@ -164,7 +166,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
     public void remove() {
         if (this.isRoot()) {
             LoggerFactory.getLogger(getClass()).error("Can't remove root node");
-        } else if (getValue().isDefault()) {
+        } else if (getValue().isDefault().get()) {
             LoggerFactory.getLogger(getClass()).error("Can't remove default node");
         } else {
             if (isLeaf()) {
@@ -200,11 +202,6 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
     public void setDescriptorProvider(Function<Configuration, NodeDescriptor> descriptorProvider) {
         this.descriptorProvider = descriptorProvider;
-        invalidate();
-    }
-
-    public void setFrozenValuePredicate(BiFunction<Configuration, String, Boolean> frozenValuePredicate) {
-        this.frozenValuePredicate = frozenValuePredicate;
         invalidate();
     }
 

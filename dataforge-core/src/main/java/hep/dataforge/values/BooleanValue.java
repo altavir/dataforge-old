@@ -17,13 +17,27 @@ package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
 import java.time.Instant;
-import java.util.List;
 
 /**
  *
  * @author Alexander Nozik
  */
 class BooleanValue implements Value {
+
+    public static Value TRUE = new BooleanValue(true);
+    public static Value FALSE = new BooleanValue(false);
+
+    public static Value ofBoolean(boolean b) {
+        if (b) {
+            return TRUE;
+        } else {
+            return FALSE;
+        }
+    }
+
+    public static Value ofBoolean(String b) {
+        return ofBoolean(Boolean.parseBoolean(b));
+    }
 
     /**
      * {@inheritDoc}
@@ -52,24 +66,8 @@ class BooleanValue implements Value {
 
     private final boolean value;
 
-    /**
-     * <p>
-     * Constructor for BooleanValue.</p>
-     *
-     * @param value a boolean.
-     */
-    public BooleanValue(boolean value) {
+    private BooleanValue(boolean value) {
         this.value = value;
-    }
-
-    /**
-     * <p>
-     * Constructor for BooleanValue.</p>
-     *
-     * @param value a {@link java.lang.String} object.
-     */
-    public BooleanValue(String value) {
-        this.value = Boolean.parseBoolean(value);
     }
 
     /**

@@ -15,23 +15,81 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.data.Data;
+import hep.dataforge.io.log.Log;
+import hep.dataforge.meta.Meta;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
- * the temporal storage for components needed to perform an action. It contains
- * the data itself, log and annotation for the pack
+ * The asynchronous result of the action
  *
  * @author Alexander Nozik
- * @param <T>
+ * @param <R>
  */
-public interface ActionResult<T> extends DependencySet<T> {
+public class ActionResult<R> implements Data<R> {
 
-    @SuppressWarnings("unchecked")
-    public static ActionResult empty() {
-        return new Pack(null, null, null, null);
+    private final Log log;
+    private final CompletableFuture<R> future;
+    private final Class<R> type;
+    private final Meta meta;
+
+    public ActionResult(Class<R> type, Log log, Supplier<R> supplier, Executor executor) {
+        this.log = log;
+        this.type = type;
+        this.future = CompletableFuture.supplyAsync(supplier, executor);
+        this.meta = Meta.empty();
+    }
+    
+    public ActionResult(Class<R> type, Log log, Supplier<R> supplier, Executor executor, Meta meta) {
+        this.log = log;
+        this.type = type;
+        this.future = CompletableFuture.supplyAsync(supplier, executor);
+        this.meta = meta;
+    }    
+
+    public ActionResult(Class<R> type, Log log, CompletableFuture<R> future) {
+        this.log = log;
+        this.type = type;
+        this.future = future;
+        this.meta = Meta.empty();        
     }
 
-//    Item<Dependency<T>> data();
-    Logable log();
+    public ActionResult(Class<R> type, Log log, CompletableFuture<R> future, Meta meta) {
+        this.log = log;
+        this.future = future;
+        this.type = type;
+        this.meta = meta;
+    }
+    
+    
+
+    public Log log() {
+        return log;
+    }
+
+    @Override
+    public CompletableFuture<R> getInFuture() {
+        return future;
+    }
+
+    @Override
+    public Class<R> dataType() {
+        return type;
+    }
+
+    @Override
+    public Meta meta() {
+        return meta;
+    }
+//
+//    public ActionResult<R> setMeta(@NotNull Meta meta) {
+//        if (this.meta != null) {
+//            throw new RuntimeException("Meta for ActionResult is already set");
+//        } else {
+//            this.meta = meta;
+//        }
+//        return this;
+//    }
 }

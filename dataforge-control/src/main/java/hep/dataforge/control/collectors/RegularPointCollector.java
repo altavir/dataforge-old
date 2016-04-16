@@ -5,8 +5,8 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.data.MapDataPoint;
-import hep.dataforge.data.PointListener;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.PointListener;
 import hep.dataforge.values.Value;
 import java.time.Duration;
 import java.time.Instant;
@@ -60,7 +60,7 @@ public class RegularPointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        MapDataPoint point = new MapDataPoint();
+        MapPoint point = new MapPoint();
 
         Instant average = Instant.ofEpochMilli((time.toEpochMilli() + startTime.toEpochMilli()) / 2);
 
@@ -106,5 +106,14 @@ public class RegularPointCollector implements ValueCollector {
             timer.cancel();
         }
     }
+
+    @Override
+    public void clear() {
+        values.clear();
+        cancel();
+        startTime = null;
+    }
+    
+    
 
 }

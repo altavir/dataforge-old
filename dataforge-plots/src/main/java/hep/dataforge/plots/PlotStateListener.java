@@ -15,8 +15,6 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
-
 /**
  *
  * @author darksnake

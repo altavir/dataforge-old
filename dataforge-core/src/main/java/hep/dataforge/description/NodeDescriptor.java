@@ -5,14 +5,15 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 /**
- * descriptor for meta node
+ * Descriptor for meta node. Could contain additional information for viewing
+ * and editing.
  *
  * @author Alexander Nozik
  */
@@ -71,7 +72,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
     }
 
     /**
-     * The value descriptor for given value name
+     * The value descriptor for given value name. Null if there is no such value
+     * descriptor
      *
      * @param name
      * @return
@@ -136,6 +138,27 @@ public class NodeDescriptor extends DescriptorBase implements Named {
     @Override
     public String getName() {
         return meta().getString("name", "");
+    }
+
+    /**
+     * Identify if this descriptor has child value descriptor with default
+     *
+     * @param name
+     * @return
+     */
+    public boolean hasDefaultForValue(String name) {
+        ValueDescriptor desc = valueDescriptor(name);
+        return desc != null && desc.hasDefault();
+    }
+
+    /**
+     * The key of the value which is used to display this node in case it is
+     * multiple. By default, the key is empty which means that node index is used.
+     *
+     * @return
+     */
+    public String titleKey() {
+        return meta().getString("titleKey", "");
     }
 
 }

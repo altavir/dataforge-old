@@ -15,10 +15,10 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import java.nio.ByteBuffer;
 
 /**

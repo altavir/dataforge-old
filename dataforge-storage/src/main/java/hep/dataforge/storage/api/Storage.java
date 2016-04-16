@@ -15,14 +15,15 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.content.Named;
-import hep.dataforge.context.Confined;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Dispatcher;
 import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.envelopes.Target;
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.navigation.Provider;
 import java.util.Map;
 
@@ -37,7 +38,7 @@ import java.util.Map;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Confined {
+public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, Target {
 
     /**
      * Initialize this storage.
@@ -45,6 +46,8 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @throws hep.dataforge.exceptions.StorageException
      */
     void open() throws StorageException;
+    
+    boolean isOpen();
 
     /**
      * Refresh the state of storage

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.data.MapDataPoint;
-import hep.dataforge.data.PointListener;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.PointListener;
 import hep.dataforge.values.Value;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -75,22 +75,27 @@ public class PointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        MapDataPoint point = new MapDataPoint();
+        MapPoint point = new MapPoint();
 
         point.putValue("timestamp", time);
-        for (Map.Entry<String, Value> entry : valueMap.entrySet()) {
+        valueMap.entrySet().stream().forEach((entry) -> {
             point.putValue(entry.getKey(), entry.getValue());
-        }
+        });
 
         // filling all missing values with nulls
-        for (String name : names) {
-            if (!point.hasValue(name)) {
-                point.putValue(name, Value.getNull());
-            }
-        }
+        names.stream().filter((name) -> (!point.hasValue(name))).forEach((name) -> {
+            point.putValue(name, Value.getNull());
+        });
 
         consumer.accept(point);
         valueMap.clear();
     }
+
+    @Override
+    public void clear() {
+        valueMap.clear();
+    }
+    
+    
 
 }

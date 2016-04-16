@@ -15,7 +15,7 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.context.Confined;
+import hep.dataforge.context.Encapsulated;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -27,7 +27,7 @@ import java.text.ParseException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface MetaParser extends Confined {
+public interface MetaParser extends Encapsulated {
     
     /**
      * Convert Annotation to String

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
 
@@ -26,7 +26,7 @@ import hep.dataforge.storage.api.Storage;
  */
 public class BasicMaskLoader implements Loader {
 
-    private Loader loader;
+    private final Loader loader;
 
     public BasicMaskLoader(Loader loader) {
         this.loader = loader;
@@ -68,7 +68,14 @@ public class BasicMaskLoader implements Loader {
     }
 
     @Override
-    public void open() {
+    public boolean isOpen() {
+        return loader.isOpen();
+    }
+
+    
+    
+    @Override
+    public void open() throws Exception {
         loader.open();
     }
 
@@ -80,5 +87,10 @@ public class BasicMaskLoader implements Loader {
     @Override
     public boolean isEmpty() {
         return loader.isEmpty();
+    }
+
+    @Override
+    public Meta targetDescription() {
+        return loader.targetDescription();
     }
 }

@@ -15,9 +15,6 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.likelihood.Marginalizer;
-import hep.dataforge.likelihood.NamedGaussianPDFLog;
-import hep.dataforge.likelihood.ScaleableNamedFunction;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedMatrix;
 import static java.lang.Math.abs;

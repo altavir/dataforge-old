@@ -17,8 +17,8 @@ package hep.dataforge.navigation;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
-import static hep.dataforge.navigation.SegmentedPath.TARGET_EMPTY;
-import static hep.dataforge.navigation.SegmentedPath.TARGET_SEPARATOR;
+import static hep.dataforge.navigation.Path.TARGET_EMPTY;
+import static hep.dataforge.navigation.Path.TARGET_SEPARATOR;
 
 /**
  * Сегмент пути. Представляет собой пару цель::имя. Если цель не указана или

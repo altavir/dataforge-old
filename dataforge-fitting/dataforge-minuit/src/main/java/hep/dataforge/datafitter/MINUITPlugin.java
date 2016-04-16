@@ -65,7 +65,7 @@ public class MINUITPlugin extends BasicPlugin {
     }
 
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
         FitEngineBuilder.addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
 
         clearStaticLog();
@@ -74,7 +74,7 @@ public class MINUITPlugin extends BasicPlugin {
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
         clearStaticLog();
     }
 

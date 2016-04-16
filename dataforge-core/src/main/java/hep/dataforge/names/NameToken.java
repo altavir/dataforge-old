@@ -28,10 +28,20 @@ class NameToken implements Name {
 
     private final String nameSpace;
 
-    private final String singlet;
+    private final String theName;
+
+    private final String theQuery;
 
     public NameToken(String nameSpace, String singlet) {
-        this.singlet = singlet;
+        if (singlet.matches(".*\\[.*\\]")) {
+            int bracketIndex = singlet.indexOf("[");
+            this.theName = singlet.substring(0, bracketIndex);
+            this.theQuery = singlet.substring(bracketIndex + 1, singlet.indexOf("]"));
+        } else {
+            this.theName = singlet;
+            this.theQuery = null;
+        }
+
         this.nameSpace = nameSpace;
     }
 
@@ -57,8 +67,8 @@ class NameToken implements Name {
 
     @Override
     public String getQuery() {
-        if (hasQuery()) {
-            return singlet.substring(singlet.indexOf("[")+1,singlet.indexOf("]"));
+        if (theQuery != null) {
+            return theQuery;
         } else {
             return "";
         }
@@ -66,7 +76,16 @@ class NameToken implements Name {
 
     @Override
     public boolean hasQuery() {
-        return singlet.matches(".*\\[.*\\]");
+        return theQuery != null;
+    }
+
+    @Override
+    public NameToken ignoreQuery() {
+        if (!hasQuery()) {
+            return this;
+        } else {
+            return new NameToken(nameSpace, theName);
+        }
     }
 
     @Override
@@ -77,19 +96,15 @@ class NameToken implements Name {
     @Override
     public String toString() {
         if (nameSpace().isEmpty()) {
-            return this.singlet;
+            return this.token();
         } else {
-            return String.format("%s%s%s", nameSpace(),NAMESPACE_SEPARATOR,singlet);
+            return String.format("%s%s%s", nameSpace(), NAMESPACE_SEPARATOR, token());
         }
     }
 
     @Override
     public String entry() {
-        if(hasQuery()){
-            return singlet.substring(0, singlet.indexOf("["));
-        } else{
-            return singlet;
-        }
+        return theName;
     }
 
     @Override
@@ -99,13 +114,13 @@ class NameToken implements Name {
 
     @Override
     public Name toNameSpace(String nameSpace) {
-        return new NameToken(nameSpace, singlet);
+        return new NameToken(nameSpace, token());
     }
 
     @Override
     public String[] asArray() {
         String[] res = new String[1];
-        res[0] = singlet;
+        res[0] = token();
         return res;
     }
 
@@ -113,7 +128,7 @@ class NameToken implements Name {
     public int hashCode() {
         int hash = 7;
         hash = 79 * hash + Objects.hashCode(this.nameSpace);
-        hash = 79 * hash + Objects.hashCode(this.singlet);
+        hash = 79 * hash + Objects.hashCode(this.token());
         return hash;
     }
 
@@ -129,12 +144,18 @@ class NameToken implements Name {
         if (!Objects.equals(this.nameSpace, other.nameSpace)) {
             return false;
         }
-        if (!Objects.equals(this.singlet, other.singlet)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(token(), other.token());
     }
 
-    
-    
+    /**
+     * The full name including query
+     */
+    private String token() {
+        if (theQuery != null) {
+            return String.format("%s[%s]", theName, theQuery);
+        } else {
+            return theName;
+        }
+    }
+
 }

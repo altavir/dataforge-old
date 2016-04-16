@@ -15,15 +15,14 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.data.DataFormat;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.points.Format;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
-import hep.dataforge.storage.commons.StoragePlugin;
-import hep.dataforge.storage.filestorage.FileStorage;
-import hep.dataforge.values.Value;
+import hep.dataforge.storage.commons.StorageManager;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import java.nio.file.Files;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -58,7 +56,7 @@ public class FileDataPointLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StoragePlugin().startGlobal();
+        new StorageManager().startGlobal();
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 
@@ -73,24 +71,26 @@ public class FileDataPointLoaderTest {
 
         FileStorage storage = FileStorage.in(dir, null);
 
-        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", DataFormat.forNames(names));
+        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", Format.forNames(names));
 //(FileDataLoader) storage.createNewFileLoader(StorageTools.buildDataPointLoaderMeta("test", "", names));
 
         System.out.println("push");
         for (int i = 0; i < 100; i++) {
-            try {
-                loader.push(new MapDataPoint(names, i, i * 2, Math.sqrt(i)));
-                System.out.printf("Point with number %d loaded%n", i);
-            } catch (Exception ex) {
-                System.out.printf("%nPoint with number %d loader failed with message: %n%n", i, ex.getMessage());
-                ex.printStackTrace();
-                fail(ex.getMessage());
-            }
+//            try {
+            loader.push(new MapPoint(names, i, i * 2, Math.sqrt(i)));
+            System.out.printf("Point with number %d loaded%n", i);
+//            } catch (Exception ex) {
+//                System.out.printf("%nPoint with number %d loader failed with message: %n%n", i, ex.getMessage());
+//                ex.printStackTrace();
+//                fail(ex.getMessage());
+//            }
         }
 
         System.out.println("pull");
-        DataPoint dp = loader.pull(Value.of(25));
-        DataPoint dp2 = loader.pull(Value.of(65536));
+        //Index<DataPoint> index = loader.getIndex("key");
+        Index<DataPoint> index = ((FilePointLoader)loader).getMapIndex("key");
+        DataPoint dp = index.pull(24,26).get(0);
+//        DataPoint dp2 = index.pullOne(Value.of(65536));
         assertEquals(5d, dp.getValue("sqrt").doubleValue(), 0.001);
     }
 

@@ -15,8 +15,6 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.likelihood.ConfidenceLimitCalculator;
-import hep.dataforge.likelihood.BayesianConfidenceLimit;
 import java.io.PrintWriter;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.function.Gaussian;

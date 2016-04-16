@@ -15,9 +15,9 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
@@ -36,8 +36,8 @@ public class PlottableFunction extends XYPlottable {
     private final UnivariateFunction function;
     //TODO Сделать построение графика по заданной решетке
 
-    public PlottableFunction(String name, Meta annotation, UnivariateFunction function, double from, double to, int numPoints) {
-        super(name, null);
+    public PlottableFunction(String name, UnivariateFunction function, double from, double to, int numPoints) {
+        super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
@@ -51,20 +51,21 @@ public class PlottableFunction extends XYPlottable {
 
     /**
      * Build function calculated in given data nodes
+     *
      * @param name
-     * @param annotation
+     * @param meta
      * @param function
      * @param data
-     * @param xName 
+     * @param xName
      */
-    public PlottableFunction(String name, Meta annotation, UnivariateFunction function, Iterable<DataPoint> data, String xName) {
-        super(name, null);
+    public PlottableFunction(String name, UnivariateFunction function, Iterable<DataPoint> data, XYAdapter adapter) {
+        super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
 
         List<Double> tempGrid = new ArrayList<>();
-        data.forEach((dp) -> tempGrid.add(dp.getDouble(xName)));
+        data.forEach((dp) -> tempGrid.add(adapter.getX(dp).doubleValue()));
         Collections.sort(tempGrid);
 
         grid = new ArrayList<>();
@@ -77,11 +78,9 @@ public class PlottableFunction extends XYPlottable {
 
     @Override
     public Collection<DataPoint> plotData() {
-
         List<DataPoint> list = new ArrayList<>();
-
         for (double x : grid) {
-            list.add(new MapDataPoint(new String[]{"x", "y"}, x, function.value(x)));
+            list.add(new MapPoint(new String[]{"x", "y"}, x, function.value(x)));
         }
         return list;
     }

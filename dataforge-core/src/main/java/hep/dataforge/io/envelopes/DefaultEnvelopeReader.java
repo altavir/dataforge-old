@@ -15,17 +15,18 @@
  */
 package hep.dataforge.io.envelopes;
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -103,17 +104,15 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         Map<String, Value> properties = readProperties(bis);
         
         if(properties == null){
-            return null;
+            throw new IOException("Empty envelope");
         }
         
         if (overrideProperties != null) {
             properties.putAll(overrideProperties);
         }
 
-        MetaStreamReader parser = MetaReaderLibrary.instance()
-                .get(properties.get(META_TYPE_KEY).stringValue());
-        Charset charset = CharsetLibrary.instance()
-                .get(properties.get(META_ENCODING_KEY).stringValue());
+        MetaStreamReader parser = EnvelopeProperties.getType(properties.get(META_TYPE_KEY)).getReader();
+        Charset charset = EnvelopeProperties.getCharset(properties.get(META_ENCODING_KEY));
         int metaLength = properties.get(META_LENGTH_KEY).intValue();
         Meta meta;
         if (metaLength == 0) {
@@ -126,7 +125,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             }
         }
 
-        Supplier<ByteBuffer> supplier = () -> {
+        Supplier<Binary> supplier = () -> {
             int dataLength = properties.get(DATA_LENGTH_KEY).intValue();
             try {
                 if (metaLength == Tag.INFINITE_SIZE) {
@@ -149,17 +148,17 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         return SEPARATOR;
     }
 
-    public ByteBuffer readData(InputStream stream, int length) throws IOException {
+    public Binary readData(InputStream stream, int length) throws IOException {
         if (length == -1) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             while (stream.available() > 0) {
                 baos.write(stream.read());
             }
-            return ByteBuffer.wrap(baos.toByteArray());
+            return new BufferedBinary(baos.toByteArray());
         } else {
             byte[] bytes = new byte[length];
             stream.read(bytes);
-            return ByteBuffer.wrap(bytes);
+            return new BufferedBinary(bytes);
         }
     }
 

@@ -42,7 +42,7 @@ public class EnvelopeCodes {
     public static final int POINT_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x504f4C4F;//POLO
     public static final int EVENT_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x45564C4F;//EVLO
     public static final int STATE_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x53544C4F;//STLO
-    public static final int BINARY_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x42494C4F;//BILO   
+    public static final int OBJECT_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x4F424C4f;//OBLO   	
 
     
     //Message data types

@@ -15,9 +15,8 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.MapDataPoint;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.MapPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
@@ -44,19 +43,20 @@ public class DynamicPlottable extends XYPlottable {
     private final String yName;
     private Instant lastUpdate;
 
-    public static DynamicPlottable build(String name, String xName, String yName, String color, double thickness) {
-        Meta meta = new MetaBuilder("plottable")
-                .setValue("adapter.yName", yName)
+    public static DynamicPlottable build(String name, String yName, String color, double thickness) {
+        DynamicPlottable res = new DynamicPlottable(name, yName);
+        res.getConfig()
                 .setValue("color", color)
-                .setValue("thickness", thickness)
-                .build();
-        return new DynamicPlottable(name, meta);
+                .setValue("thickness", thickness);
+        return res;
     }
 
-    public DynamicPlottable(String name, Meta annotation) {
-        super(name, annotation);
-        getConfig().setValue("adapter.xName", "timestamp");
-        this.yName = getConfig().getString("adapter.yName", "y");
+    public DynamicPlottable(String name) {
+        super(name);
+        MetaBuilder builder = new MetaBuilder("plottable")
+                .setValue("adapter.x", "timestamp");
+        setMetaBase(builder.build());
+        this.yName = getConfig().getString("adapter.y", name);
     }
 
     /**
@@ -67,10 +67,12 @@ public class DynamicPlottable extends XYPlottable {
      * @param annotation
      * @param yName
      */
-    public DynamicPlottable(String name, Meta annotation, String yName) {
-        super(name, annotation);
-        getConfig().setValue("adapter.xName", "timestamp");
-        getConfig().setValue("adapter.yName", yName);
+    public DynamicPlottable(String name, String yName) {
+        super(name);
+        MetaBuilder builder = new MetaBuilder("plottable")
+                .setValue("adapter.x", "timestamp")
+                .setValue("adapter.y", yName);
+        setMetaBase(builder.build());
         this.yName = yName;
     }
 
@@ -108,7 +110,7 @@ public class DynamicPlottable extends XYPlottable {
         Map<String, Value> point = new HashMap<>(2);
         point.put("timestamp", Value.of(time));
         point.put(yName, value);
-        this.map.put(time, new MapDataPoint(point));
+        this.map.put(time, new MapPoint(point));
         if (lastUpdate == null || time.isAfter(lastUpdate)) {
             lastUpdate = time;
         }
@@ -127,29 +129,29 @@ public class DynamicPlottable extends XYPlottable {
     public Instant getLastUpdateTime() {
         return lastUpdate;
     }
-    
-    public void setMaxItems(int maxItems){
+
+    public void setMaxItems(int maxItems) {
         getConfig().setValue("maxItems", maxItems);
     }
-    
-    public void setMaxAge(Duration age){
+
+    public void setMaxAge(Duration age) {
         getConfig().setValue("maxAge", age.toMillis());
     }
 
-    public int size(){
+    public int size() {
         return map.size();
     }
-    
+
     private class DataMap extends LinkedHashMap<Instant, DataPoint> {
 
         @Override
         protected boolean removeEldestEntry(Entry<Instant, DataPoint> eldest) {
-            int maxItems = getInt("maxItems", -1);
+            int maxItems = meta().getInt("maxItems", -1);
             if (maxItems > 0 && size() > maxItems) {
                 return true;
             }
-            int maxAge = getInt("maxAge", -1);
-            if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(),lastUpdate).toMillis() > maxAge) {
+            int maxAge = meta().getInt("maxAge", -1);
+            if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(), lastUpdate).toMillis() > maxAge) {
                 return true;
             }
             return false;

@@ -1,85 +1,56 @@
-/* 
- * Copyright 2015 Alexander Nozik.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.utils.ReferenceRegistry;
-import hep.dataforge.content.AnonimousNotAlowed;
-import hep.dataforge.context.Context;
-import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.control.connections.MeasurementConsumer;
+import hep.dataforge.control.connections.Roles;
+import hep.dataforge.control.measurements.Measurement;
+import hep.dataforge.control.measurements.MeasurementListener;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.Laminate;
+import hep.dataforge.meta.MetaUtils;
+import java.time.Instant;
 
-@AnonimousNotAlowed
-public abstract class AbstractMeasurementDevice<T> extends AbstractDevice implements MeasurementDevice<T> {
-
-    private final ReferenceRegistry<MeasurementListener<T>> measurementListeners = new ReferenceRegistry<>();
-
-    public AbstractMeasurementDevice(String name, Context context, Meta annotation) {
-        super(name, context, annotation);
-    }
-
-    protected Meta getDefaultMeasurement() {
-        return Meta.buildEmpty("measurement");
-    }
+public abstract class AbstractMeasurementDevice extends AbstractDevice implements MeasurementListener {
 
     /**
-     * Build a laminate using provided measurement meta and device configuration
-     * as well as context values.
+     * The method that must be called after measurement is started
      *
+     * @param <T>
      * @param measurement
+     */
+    protected <T> void onCreateMeasurement(Measurement<T> measurement) {
+        forEachTypedConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
+                (MeasurementConsumer t) -> t.accept(AbstractMeasurementDevice.this, measurement));
+    }
+
+    protected <T> void onCreateMeasurement(String measurementName, Measurement<T> measurement) {
+        forEachTypedConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
+                (MeasurementConsumer t) -> t.accept(AbstractMeasurementDevice.this, measurementName, measurement));
+    }
+    
+
+    @Override
+    public void onMeasurementResult(Measurement measurement, Object result, Instant time) {
+        
+    }
+
+    @Override
+    public void onMeasurementFailed(Measurement measurement, Throwable exception) {
+        notifyError("Measurement failed", exception);
+    }
+
+    
+    
+    /**
+     * Compute default meta for measurement
+     *
+     * @param name
      * @return
      */
-    protected Meta buildMeasurementLaminate(Meta measurement) {
-        return new Laminate("measurement", measurement, meta()).setDefaultValueProvider(context);
+    protected Meta getMetaForMeasurement(String name) {
+        return MetaUtils.findNodeByValue(meta(), "measurement", "name", name);
     }
-
-    @Override
-    public void start() throws ControlException {
-        start(getDefaultMeasurement());
-    }
-
-    @Override
-    public final void start(Meta measurement) throws ControlException {
-        doStart(measurement);
-        measurementListeners.forEach(it -> it.notifyMeasurementStarted(this, measurement));
-    }
-
-    protected abstract void doStart(Meta measurement) throws ControlException;
-
-    @Override
-    public final void stop() throws ControlException {
-        doStop();
-        measurementListeners.forEach(it -> it.notifyMeasurementStopped(this));
-    }
-
-    protected abstract void doStop() throws ControlException;
-
-    @Override
-    public void addMeasurementListener(MeasurementListener<T> listener) {
-        measurementListeners.add(listener);
-    }
-
-    protected final void measurementResult(Meta measurement, T measurementResult) {
-        getLogger().debug("Notify measurement complete");
-        measurementListeners.forEach(it -> it.notifyMeasurementResult(this, measurement, measurementResult));
-    }
-
-    @Override
-    public void removeMeasurementListener(MeasurementListener<T> listener) {
-        measurementListeners.remove(listener);
-    }
-
 }

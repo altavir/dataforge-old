@@ -6,15 +6,25 @@
 package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.ControlException;
-import jssc.SerialPortException;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Alexander Nozik <altavir@gmail.com>
  */
 public class PortFactory {
+    //PENDING convert to singleton?
 
-    public static PortHandler buildPort(String portName) throws ControlException {
+    private static Map<String, PortHandler> portMap = new HashMap<>();
+
+    /**
+     * Create new port or reuse existing one if it is already created
+     * @param portName
+     * @return
+     * @throws ControlException 
+     */
+    public static PortHandler getdPort(String portName) throws ControlException {
         String protocol;
         String addres;
         int port;
@@ -29,25 +39,45 @@ public class PortFactory {
             protocol = "com";
             addres = portName;
         }
+        
+        String canonPortName = protocol + ":"+ addres;
 
-        switch (protocol) {
-            case "com":
-                try {
-                    return new ComPortHandler(addres);
-                } catch (SerialPortException ex) {
-                    throw new ControlException("Can't bind com port",ex);
-                }
-            case "tcp":
-                if (addres.contains(":")) {
-                    String[] split = addres.split(":");
-                    addres = split[0];
-                    port = Integer.parseInt(split[1]);
-                } else {
-                    port = 8080;
-                }
-                return new TcpPortHandler(addres, port, portName);
-            default:
-                throw new ControlException("Unknown protocol");
+        if (portMap.containsKey(canonPortName)) {
+            return portMap.get(canonPortName);
+        } else {
+
+            PortHandler res;
+            switch (protocol) {
+                case "com":
+                    res = new ComPortHandler(addres);
+                    break;
+                case "tcp":
+                    if (addres.contains(":")) {
+                        String[] split = addres.split(":");
+                        addres = split[0];
+                        port = Integer.parseInt(split[1]);
+                    } else {
+                        port = 8080;
+                    }
+                    res = new TcpPortHandler(addres, port);
+                    break;
+                default:
+                    throw new ControlException("Unknown protocol");
+            }
+            portMap.put(canonPortName, res);
+            return res;
+        }
+    }
+    
+    /**
+     * Register custom portHandler. Useful for virtual ports
+     * @param handler 
+     */
+    public static void registerPort(PortHandler handler){
+        if(portMap.containsKey(handler.getPortId())){
+            throw new RuntimeException("Port with given id already exists");
+        } else {
+            portMap.put(handler.getPortId(), handler);
         }
     }
 }

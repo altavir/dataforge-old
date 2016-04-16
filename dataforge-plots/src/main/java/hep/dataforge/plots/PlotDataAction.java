@@ -15,19 +15,19 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.actions.ActionResult;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.data.DataSet;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.log.Logable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
+import hep.dataforge.points.PointSet;
+import hep.dataforge.points.XYAdapter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -45,15 +45,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 @TypedActionDef(name = "plotData",
-        description = "Scatter plot of given DataSet", inputType = DataSet.class, outputType = DataSet.class)
-@ValueDef(name = "xName", def = "x",
-        info = "The name of X Value in the DataSet")
-@ValueDef(name = "yName", def = "y",
-        info = "The name of Y Value in the DataSet")
-@ValueDef(name = "xErrName", def = "xErr",
-        info = "The name of X error Value in the DataSet (currently not working)")
-@ValueDef(name = "yErrName", def = "yErr",
-        info = "The name of Y error Value in the DataSet (currently not working)")
+        description = "Scatter plot of given DataSet", inputType = PointSet.class, outputType = PointSet.class)
 @ValueDef(name = "plotFrameName", def = "default",
         info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
 @ValueDef(name = "plotTitle", def = "",
@@ -70,20 +62,9 @@ import org.slf4j.LoggerFactory;
         info = "Save plot shapshots to file with default parameters")
 @ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
         info = "Serialize plot to file with default parameters")
+@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.points.XYAdapter")
 
-public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
-
-    private final PlotHolder holder;
-//    private final static DescriptorBuilder frameDescriptor = new DescriptorBuilder(XYPlotFrame.class);
-
-    public PlotDataAction(Context context, Meta annotation) {
-        super(context, annotation);
-        //initializing plots plugin if it is not present
-        if(!context.provides("plots")){
-            context.loadPlugin(new PlotsPlugin());
-        }
-        holder = (PlotsPlugin) context.pluginManager().getPlugin("hep.dataforge:plots");
-    }
+public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
 
     private Meta findFrameDescription(Meta meta, String name) {
         //TODO сделать тут возможность подстановки стилей?
@@ -103,34 +84,36 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
     }
 
     @Override
-    protected DataSet execute(Logable log, Meta meta, DataSet input){
-        Meta finder = readMeta(input.meta());
+    protected PointSet execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
+        //initializing plot plugin if necessary
+        if (!context.provides("plots")) {
+            context.loadPlugin(new PlotsPlugin());
+        }
+        PlotHolder holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
+
         PlotFrame frame;
 
-        String groupBy = finder.getString("groupBy");
-        String frame_name = finder.getString(groupBy, "default");
+        String groupBy = meta.getString("groupBy");
+        String frame_name = meta.getString(groupBy, "default");
         if (holder.hasPlotFrame(frame_name)) {
             frame = holder.getPlotFrame(frame_name);
         } else {
-            frame = holder.buildPlotFrame(frame_name, findFrameDescription(finder, frame_name));
+            frame = holder.buildPlotFrame(frame_name, findFrameDescription(meta, frame_name));
+        }
+        XYAdapter adapter = new XYAdapter(meta.getNode("adapter", Meta.buildEmpty("adapter")));
+
+        frame.add(PlottableData.plot(name, meta, input, adapter));
+
+        if (meta.hasNode("snapshot")) {
+            snapshot(context, log, frame, meta.getNode("snapshot"));
+        } else if (meta.getBoolean("snapshot", false)) {
+            snapshot(context, log, frame, MetaBuilder.buildEmpty("snapshot"));
         }
 
-        frame.add(new PlottableData(input,
-                finder.getString("xName"),
-                finder.getString("yName"),
-                finder.getString("xErrName"),
-                finder.getString("yErrName")));
-
-        if (finder.hasNode("snapshot")) {
-            snapshot(log, frame, finder.getNode("snapshot"));
-        } else if (finder.getBoolean("snapshot", false)) {
-            snapshot(log, frame, MetaBuilder.buildEmpty("snapshot"));
-        }
-
-        if (finder.hasNode("serialize")) {
-            serialize(log, frame, finder.getNode("serialize"));
-        } else if (finder.getBoolean("serialize", false)) {
-            serialize(log, frame, MetaBuilder.buildEmpty("serialize"));
+        if (meta.hasNode("serialize")) {
+            serialize(context, log, frame, meta.getNode("serialize"));
+        } else if (meta.getBoolean("serialize", false)) {
+            serialize(context, log, frame, MetaBuilder.buildEmpty("serialize"));
         }
 
         return input;
@@ -140,30 +123,25 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
     private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
-    protected void afterAction(ActionResult output) throws ContentException {
+    protected void afterAction(Context context, String name, PointSet res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
-
-        for (Runnable r : snapshotTasks.values()) {
-            r.run();
-        }
+        snapshotTasks.values().stream().forEach((r) -> r.run());
         snapshotTasks.clear();
-        for (Runnable r : serializeTasks.values()) {
-            r.run();
-        }
+        serializeTasks.values().stream().forEach((r) -> r.run());
         serializeTasks.clear();
-        super.afterAction(output); //To change body of generated methods, choose Tools | Templates.
+        super.afterAction(context, name, res, meta);
     }
 
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void snapshot(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".png";
             snapshotTasks.put(fileName, () -> {
                 log.log("Saving plot snapshot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
+                OutputStream stream = buildActionOutput(context, fileName);
                 jfcFrame.toPNG(stream, snapshotCfg);
             });
         } else {
@@ -173,13 +151,13 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
     }
 
     @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void serialize(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".jfc";
             serializeTasks.put(fileName, () -> {
                 log.log("Saving serialized plot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
+                OutputStream stream = buildActionOutput(context, fileName);
                 try {
                     ObjectOutputStream ostr = new ObjectOutputStream(stream);
                     ostr.writeObject(jfcFrame.getChart());
@@ -193,4 +171,4 @@ public class PlotDataAction extends OneToOneAction<DataSet, DataSet> {
             LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart serialization is supported.");
         }
     }
- }
+}

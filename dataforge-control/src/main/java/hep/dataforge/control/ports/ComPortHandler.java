@@ -15,9 +15,9 @@
  */
 package hep.dataforge.control.ports;
 
+import hep.dataforge.exceptions.PortException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.exceptions.PortException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import jssc.SerialPort;
@@ -41,15 +41,21 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
 //    private static final int CHAR_SIZE = 1;
 //    private static final int MAX_SIZE = 50;
     private SerialPort port;
-    private Meta annotation;
+    private Meta meta;
 
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-    public ComPortHandler(Meta annotation) {
-        super(annotation.getString("name"));
-        this.annotation = annotation;
+    public ComPortHandler(Meta meta) {
+        this.meta = meta;
     }
 
+    @Override
+    public String getPortId() {
+        return String.format("com::%s", meta.getString("name"));
+    }
+
+    
+    
     public ComPortHandler(String portName, int baudRate, int dataBits, int stopBits, int parity) {
         this(new MetaBuilder("port")
                 .putValue("name", portName)
@@ -75,7 +81,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
      * @param portName
      * @throws SerialPortException
      */
-    public ComPortHandler(String portName) throws SerialPortException {
+    public ComPortHandler(String portName){
         this(portName, BAUDRATE_9600, DATABITS_8, STOPBITS_1, PARITY_NONE);
     }
 
@@ -83,7 +89,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     public void open() throws PortException {
         try {
             if (port == null) {
-                port = new SerialPort(getPortName());
+                port = new SerialPort(meta.getString("name"));
                 port.openPort();
                 Meta an = meta();
                 int baudRate = an.getInt("baudRate", BAUDRATE_9600);
@@ -158,7 +164,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
 
     @Override
     public Meta meta() {
-        return annotation;
+        return meta;
     }
 
     @Override

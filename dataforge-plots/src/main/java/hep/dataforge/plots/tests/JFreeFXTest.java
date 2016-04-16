@@ -15,11 +15,11 @@
  */
 package hep.dataforge.plots.tests;
 
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.ListPointSet;
+import hep.dataforge.points.MapPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.DataSet;
-import hep.dataforge.data.ListDataSet;
-import hep.dataforge.data.MapDataPoint;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
@@ -30,6 +30,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import hep.dataforge.points.PointSet;
 
 /**
  *
@@ -41,23 +42,23 @@ public class JFreeFXTest extends Application {
     public void start(Stage primaryStage) {
         AnchorPane root = new AnchorPane();
 
-        JFreeChartFrame frame = new JFreeChartFrame("my plot", null, root);
+        JFreeChartFrame frame = new JFreeChartFrame("my plot", null).display(root);
 
         UnivariateFunction func = (double x1) -> x1 * x1;
 
-        PlottableFunction funcPlot = new PlottableFunction("func", null, func, 0.1, 4, 200);
+        PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
         List<DataPoint> data = new ArrayList<>();
-        data.add(new MapDataPoint(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(new MapDataPoint(names, 1d, 1d, 0.2, 0.5));
-        data.add(new MapDataPoint(names, 3d, 7d, 0, 0.5));
-        DataSet ds = new ListDataSet("data", null, data);
+        data.add(new MapPoint(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(new MapPoint(names, 1d, 1d, 0.2, 0.5));
+        data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
+        PointSet ds = new ListPointSet(data);
 
-        PlottableData dataPlot = new PlottableData(ds, "myX", "myY", "myXErr", "myYErr");
+        PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myY", "myXErr", "myYErr"));
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import java.nio.ByteBuffer;
 import java.util.Map;
 
 /**
@@ -27,9 +27,9 @@ import java.util.Map;
 public class SimpleEnvelope implements Envelope {
     protected final Map<String, Value> properties;
     protected final Meta meta;
-    protected final ByteBuffer data;
+    protected final Binary data;
 
-    public SimpleEnvelope(Map<String, Value> properties, Meta meta, ByteBuffer data) {
+    public SimpleEnvelope(Map<String, Value> properties, Meta meta, Binary data) {
         this.properties = properties;
         this.meta = meta;
         this.data = data;
@@ -41,7 +41,7 @@ public class SimpleEnvelope implements Envelope {
     }
 
     @Override
-    public ByteBuffer getData() {
+    public Binary getData() {
         return data;
     }
 

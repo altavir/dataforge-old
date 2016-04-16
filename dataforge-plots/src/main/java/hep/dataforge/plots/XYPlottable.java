@@ -15,11 +15,10 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.stream.Collectors;
@@ -30,20 +29,19 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  */
 @ValueDef(name = "color", info = "The color of line or symbol.")
-@ValueDef(name = "showLine", def = "true", info = "Show the connecting line.")
-@ValueDef(name = "showSymbol", def = "false", info = "Show symbols for data point.")
+@ValueDef(name = "showLine", type = "BOOLEAN", def = "true", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = "BOOLEAN", def = "false", info = "Show symbols for data point.")
 @ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
-@ValueDef(name = "symbolSize", info = "The size of the symbols for scatterplot.")
-@ValueDef(name = "lineType", info = "The type of the line.")
+@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
+@ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", info = "The type of conncetion between points.")
-@ValueDef(name = "thickness", info = "The type of the line.")
-@ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
-@NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.data.XYDataAdapter")
+@ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
+@NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.points.XYAdapter")
 public abstract class XYPlottable extends AbstractPlottable implements Plottable {
-
-    public XYPlottable(String name, Meta annotation) {
-        super(name, annotation);
-    }
+    
+    public XYPlottable(String name) {
+        super(name);
+    }    
 
     public Collection<DataPoint> plotData(Value from, Value to) {
         return plotData().stream().filter((dp) -> adapter().getX(dp).isBetween(from, to)).collect(Collectors.toList());
@@ -54,11 +52,11 @@ public abstract class XYPlottable extends AbstractPlottable implements Plottable
      *
      * @return
      */
-    public XYDataAdapter adapter() {
+    public XYAdapter adapter() {
         if (meta().hasNode("adapter")) {
-            return new XYDataAdapter(meta().getNode("adapter"));
+            return new XYAdapter(meta().getNode("adapter"));
         } else {
-            return new XYDataAdapter();
+            return new XYAdapter();
         }
     }
 }

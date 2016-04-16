@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots;
 
-
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Configuration;
@@ -27,10 +26,15 @@ import hep.dataforge.meta.Meta;
  */
 @NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
 @NodeDef(name = "yAxis", info = "The description of Y axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
+@NodeDef(name = "legend", info = "The configuration for plot legend", target = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
     public XYPlotFrame(String name, Meta annotation) {
         super(name, annotation);
+    }
+
+    public XYPlotFrame(String name) {
+        super(name);
     }
 
     @Override
@@ -47,23 +51,26 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        if (config.hasNode("xAxis")) {
-            updateAxis("x", config.getNode("xAxis"));
-        }
-        if (config.hasNode("yAxis")) {
-            updateAxis("y", config.getNode("yAxis"));
-        }
+        updateAxis("x", getXAxisConfig());
+
+        updateAxis("y", getYAxisConfig());
+
+        updateLegend(getLegendConfig());
 
     }
 
     protected abstract void updateFrame(Meta annotation);
 
     public Configuration getXAxisConfig() {
-        return getConfig().getNode("xAxis", new Configuration("xAxis"));
+        return getConfig().requestNode("xAxis");
     }
 
     public Configuration getYAxisConfig() {
-        return getConfig().getNode("yAxis", new Configuration("yAxis"));
+        return getConfig().requestNode("yAxis");
+    }
+
+    public Configuration getLegendConfig() {
+        return getConfig().requestNode("legend");
     }
 
     /**
@@ -72,11 +79,14 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
      * @param axisName
      * @param annotation
      */
-    @ValueDef(name = "timeAxis", type = "BOOLEAN", def = "false", info = "Time axis.")
-    @ValueDef(name = "logScale", type = "BOOLEAN", def = "false", info = "Apply logariphm scale to axis.")
+    @ValueDef(name = "type", allowed = "[number, log, time]", def = "number",
+            info = "The type of axis. By default number axis is used")
     @ValueDef(name = "axisTitle", info = "The title of the axis.")
     @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
     protected abstract void updateAxis(String axisName, Meta annotation);
+
+    @ValueDef(name = "show", type = "BOOLEAN", def = "true", info = "Display or hide the legend")
+    protected abstract void updateLegend(Meta legendMeta);
 
 //    protected abstract void updateXYPlot(XYPlottable plottable);
 }

@@ -30,7 +30,7 @@ public class FitPlugin extends BasicPlugin {
     private FitManager fitManager;
     
     @Override
-    public void apply(Context context) {
+    public void attach(Context context) {
         if(getFitManager() == null){
             fitManager = new FitManager(context);
         } else {
@@ -40,11 +40,11 @@ public class FitPlugin extends BasicPlugin {
         FitEngineBuilder.addEngine("QOW", new QOWFitEngine());
         FitEngineBuilder.addEngine("CM", new CMFitEngine());
 
-        ActionManager.buildFrom(context).registerAction(FitAction.FIT_ACTION_NAME, FitAction::new);
+        ActionManager.buildFrom(context).registerAction(FitAction.class);
     }
 
     @Override
-    public void clean(Context context) {
+    public void detach(Context context) {
         fitManager = null;
         ActionManager.buildFrom(context).unRegisterAction(FitAction.FIT_ACTION_NAME);
 

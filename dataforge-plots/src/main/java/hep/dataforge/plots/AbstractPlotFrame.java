@@ -17,9 +17,8 @@ package hep.dataforge.plots;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 
 /**
  *
@@ -28,34 +27,38 @@ import java.util.Map;
  */
 public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfigurable implements PlotFrame<T> {
 
-    protected Map<String, T> plottables = new LinkedHashMap<>();
+    protected ObservableList<T> plottables = FXCollections.observableArrayList();
     private final String name;
 
     public AbstractPlotFrame(String name, Meta annotation) {
-        super(annotation);
+        this.name = name;
+        super.configure(annotation);
+    }
+
+    public AbstractPlotFrame(String name) {
         this.name = name;
     }
 
     @Override
     public T get(String name) {
-        return plottables.get(name);
+        return plottables.stream().filter(pl -> name.equals(pl.getName())).findFirst().orElse(null);
     }
 
     @Override
-    public Collection<? extends T> getAll() {
-        return plottables.values();
+    public ObservableList<T> getAll() {
+        return FXCollections.unmodifiableObservableList(plottables);
     }
 
     @Override
     public void remove(String plotName) {
-        plottables.get(plotName).removeListener(this);
-        plottables.remove(plotName);
+        get(plotName).removeListener(this);
+        plottables.removeIf(pl -> pl.getName().equals(plotName));
     }
 
     @Override
-    public void add(T plottable) {
+    public synchronized void add(T plottable) {
         String pName = plottable.getName();
-        plottables.put(pName, plottable);
+        plottables.add(plottable);
         plottable.addListener(this);
         updatePlotData(pName);
         updatePlotConfig(pName);
@@ -78,7 +81,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public String getName() {
         if (name == null || name.isEmpty()) {
-            return meta().getString("frame_name");
+            return meta().getString("frameName", "default");
         } else {
             return name;
         }

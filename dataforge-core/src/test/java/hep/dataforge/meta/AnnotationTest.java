@@ -15,9 +15,7 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.exceptions.NamingException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.assertEquals;
@@ -31,21 +29,13 @@ import org.junit.Test;
  */
 public class AnnotationTest {
 
-    Meta testAnnotation;
+    static Meta testAnnotation;
 
     public AnnotationTest() {
     }
 
     @BeforeClass
     public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
-    @Before
-    public void setUp() {
         testAnnotation = new MetaBuilder("test")
                 .putValue("some", "${other}")
                 .putValue("numeric", 22.5)
@@ -64,6 +54,14 @@ public class AnnotationTest {
                         )
                 )
                 .build();
+    }
+
+    @AfterClass
+    public static void tearDownClass() {
+    }
+
+    @Before
+    public void setUp() {
 
     }
 
@@ -84,8 +82,8 @@ public class AnnotationTest {
         assertEquals("grandChildValue", testAnnotation.getString("child.grandChild.grandChildValue"));
         assertEquals("otherGrandChildValue", testAnnotation.getString("child[1].grandChild.grandChildValue"));
     }
-    
-    @Test(expected = NameNotFoundException.class)
+
+    @Test(expected = NamingException.class)
     public void testWrongPath() {
         System.out.println("Missing path search");
         assertEquals("otherGrandChildValue", testAnnotation.getString("child[2].grandChild.grandChildValue"));

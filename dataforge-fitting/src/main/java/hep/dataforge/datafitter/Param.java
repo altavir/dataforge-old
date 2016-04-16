@@ -15,9 +15,8 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.values.ValueType;
+import hep.dataforge.meta.Meta;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -246,6 +245,8 @@ public class Param {
                 digits = digits - (int) (Math.log10(err)) + 3;
             }
 
+            digits = Math.max(digits, 1);
+            
             if (isConstrained()) {
                 return String.format("'%s'\t= %." + digits + "g \u00b1 %.2g\t(%g,%g)", this.name, this.value, this.err, this.lowerBound, this.upperBound);
             } else {

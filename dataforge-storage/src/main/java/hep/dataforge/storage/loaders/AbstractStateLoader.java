@@ -33,7 +33,6 @@ import static hep.dataforge.storage.commons.StorageMessageUtils.ACTION_KEY;
 import static hep.dataforge.storage.commons.StorageMessageUtils.PULL_OPERATION;
 import static hep.dataforge.storage.commons.StorageMessageUtils.PUSH_OPERATION;
 import hep.dataforge.values.Value;
-import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -102,17 +101,17 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
     public Envelope respond(Envelope message) {
         check();
         try {
-            if (!checkTarget(message)) {
+            if (!acceptEnvelope(message)) {
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
-            Meta meta = message.meta();
-            String operation = meta.getString(ACTION_KEY);
+            Meta envelopeMeta = message.meta();
+            String operation = envelopeMeta.getString(ACTION_KEY);
             EnvelopeBuilder res = new MessageFactory().responseBase(message);
             switch (operation) {
                 case PUSH_OPERATION:
                 case "set":
-                    if (meta.hasNode("state")) {
-                        for (Meta state : meta.getNodes("state")) {
+                    if (envelopeMeta.hasNode("state")) {
+                        for (Meta state : envelopeMeta.getNodes("state")) {
                             String stateName = state.getString("name");
                             String stateValue = state.getString("value");
                             setValue(stateName, stateValue);
@@ -120,9 +119,9 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
                                     .putValue("name", stateName)
                                     .putValue("value", stateValue));
                         }
-                    } else if (meta.hasValue("state")) {
-                        String stateName = meta.getString("name");
-                        String stateValue = meta.getString("value");
+                    } else if (envelopeMeta.hasValue("state")) {
+                        String stateName = envelopeMeta.getString("name");
+                        String stateValue = envelopeMeta.getString("value");
                         setValue(stateName, stateValue);
                         res.putMetaNode(new MetaBuilder("state")
                                 .putValue("name", stateName)
@@ -133,8 +132,8 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
                 case PULL_OPERATION:
                 case "get":
                     String[] names;
-                    if (meta.hasValue("name")) {
-                        names = meta.getStringArray("name");
+                    if (envelopeMeta.hasValue("name")) {
+                        names = envelopeMeta.getStringArray("name");
                     } else {
                         names = getStateNames().toArray(new String[0]);
                     }
@@ -168,7 +167,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
         states.put(name, value);
         EventLoader el = getEventLoader();
         if (el != null) {
-            el.push(new BasicStateChangedEvent(name, oldValue, value));
+            el.push(StateChangedEvent.build(name, oldValue, value));
         }
         commit();
     }
@@ -202,68 +201,4 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
         return states.keySet();
     }
 
-    private class BasicStateChangedEvent implements StateChangedEvent {
-
-        private final String name;
-        private final Value oldState;
-        private final Value newState;
-        private final Instant time;
-
-        public BasicStateChangedEvent(String name, Value oldState, Value newState) {
-            this.name = name;
-            this.oldState = oldState;
-            this.newState = newState;
-            time = Instant.now();
-        }
-
-        @Override
-        public StateLoader loader() {
-            return AbstractStateLoader.this;
-        }
-
-        @Override
-        public Value oldState() {
-            return oldState;
-        }
-
-        @Override
-        public Value newState() {
-            return newState;
-        }
-
-        @Override
-        public int priority() {
-            return 0;
-        }
-
-        @Override
-        public String type() {
-            return "storage.stateChanged";
-        }
-
-        @Override
-        public String source() {
-            if (getStorage() != null) {
-                return getStorage().getName() + "." + getName();
-            } else {
-                return getName();
-            }
-        }
-
-        @Override
-        public String stateName() {
-            return name;
-        }
-
-        @Override
-        public Instant time() {
-            return time;
-        }
-
-        @Override
-        public String toString() {
-            return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), source(), stateName(), oldState().stringValue(), newState().stringValue());
-        }
-
-    }
 }

@@ -15,12 +15,12 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.names.NamedSet;
 import hep.dataforge.names.Names;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import hep.dataforge.names.NameSet;
 
 /**
  * Square named matrix. Не обязательно симметричная, но обзательно квадратная.
@@ -28,7 +28,7 @@ import org.apache.commons.math3.linear.RealVector;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedMatrix implements NamedSet {
+public class NamedMatrix implements NameSet {
 
     /**
      * Create diagonal named matrix from given named double set

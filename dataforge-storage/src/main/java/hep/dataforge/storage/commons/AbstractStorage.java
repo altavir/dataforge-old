@@ -54,7 +54,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     protected Storage parent;
     private final String name;
     protected Meta storageConfig;
-    private boolean readOnly = false;
 
     protected final Map<String, Loader> loaders = new HashMap<>();
 
@@ -67,15 +66,11 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     public AbstractStorage(String name, Meta annotation) {
-        this.name = name;
-        this.storageConfig = annotation;
-        this.parent = null;
+        this(null, name, annotation);
     }
 
     public AbstractStorage(String name) {
-        this.name = name;
-        this.storageConfig = Meta.buildEmpty("storage");
-        this.parent = null;
+        this(null, name,Meta.buildEmpty("storage") );
     }
 
     /**
@@ -96,6 +91,11 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     @Override
     public void refresh() throws StorageException {
 
+    }
+
+    @Override
+    public boolean isOpen() {
+        return true;
     }
 
     /**
@@ -204,8 +204,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     protected String defaultChainTarget() {
         return "loader";
     }
-    
-    
 
     @Override
     public Meta meta() {
@@ -248,7 +246,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     @Override
     public Loader getLoader(String name) throws StorageException {
-        refresh();
+//        refresh();
         if (loaders.containsKey(name)) {
             return loaders.get(name);
         } else {
@@ -365,14 +363,11 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     /**
      * Read only storage produces only read only loaders
-     * @return 
+     *
+     * @return
      */
     public boolean isReadOnly() {
-        return readOnly;
-    }
-
-    protected void setReadOnly(boolean readOnly) {
-        this.readOnly = readOnly;
+        return meta().getBoolean("readOnly", false);
     }
 
     @Override
@@ -399,6 +394,31 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
         } else {
             return responder.respond(message);
         }
+    }
+
+    @Override
+    public boolean acceptEnvelope(Envelope envelope) {
+        if (envelope.meta().hasNode(ENVELOPE_TARGET_NODE)) {
+            Meta target = envelope.meta().getNode(ENVELOPE_TARGET_NODE);
+            String targetType = target.getString(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE);
+            if (targetType.equals(STORAGE_TARGET_TYPE)) {
+                String targetName = target.getString(TARGET_NAME_KEY);
+                return targetName.endsWith(getName());
+            } else {
+                return false;
+            }
+        } else {
+            LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
+            return true;
+        }
+    }
+
+    @Override
+    public Meta targetDescription() {
+        return new MetaBuilder(ENVELOPE_TARGET_NODE)
+                .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
+                .putValue(TARGET_NAME_KEY, getName())
+                .build();
     }
 
     @Override

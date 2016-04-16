@@ -15,142 +15,102 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MergeRule;
-import hep.dataforge.content.Content;
-import hep.dataforge.content.GroupBuilder;
-import hep.dataforge.content.NamedGroup;
 import hep.dataforge.context.Context;
-import hep.dataforge.dependencies.Dependency;
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataFactory;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.io.log.Log;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import javafx.util.Pair;
 
 /**
- * <p>
- * Abstract ManyToOneAction class.</p>
+ * Action with multiple input data pieces but single output
  *
- * FIXME bad architecture
  * @author Alexander Nozik
  * @param <T>
  * @param <R>
- * @version $Id: $Id
  */
-public abstract class ManyToOneAction<T extends Content, R extends Content> extends GenericAction<T, R> {
+public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
-    /**
-     * <p>
-     * Constructor for ManyToOneAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     */
-    public ManyToOneAction(Context context, String name, Meta annotation) {
-        super(context, name, annotation);
-    }
-
-    /**
-     * <p>
-     * Constructor for ManyToOneAction.</p>
-     *
-     * @param context a {@link hep.dataforge.context.Context} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     */
-    public ManyToOneAction(Context context, Meta annotation) {
-        super(context, annotation);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param groupAnnotation
-     * @return
-     */
     @Override
-    protected List<Dependency<R>> execute(Logable log, Meta groupAnnotation, DependencySet<T> input) {
-        List<T> inputList = StreamSupport.stream(input.spliterator(), false).<T>map((i)->i.get()).collect(Collectors.toList());
-        List<NamedGroup<T>> groups = buildGroups(readMeta(groupAnnotation),inputList);
-        List<Dependency<R>> res;
-        if (isParallelExecutionAllowed()) {
-            res = groups.parallelStream()
-                    .<Dependency<R>>map((group) -> wrap(log, groupAnnotation, runGroup(log, group)))
-                    .collect(Collectors.toList());
-        } else {
-            res = groups.stream()
-                    .<Dependency<R>>map((group) -> wrap(log, groupAnnotation, runGroup(log, group)))
-                    .collect(Collectors.toList());
-        }
-        return res;
+    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+        List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
+        Map<String, ActionResult<R>> results = new HashMap<>();
+        groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));
+        return wrap(set.getName(), set.meta(), results);
+    }
+
+    public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
+        Log log = buildLog(context, data.meta(), data);
+        Laminate meta = inputMeta(context, data.meta(), actionMeta);
+        Meta outputMeta = outputMeta(data).build();
+
+        //Creating dependency on data
+        CompletableFuture<R> future = data.computation()
+                .thenCompose((Void t) -> CompletableFuture.supplyAsync(() -> {
+                    beforeGroup(context, log, data);
+                    // In this moment, all the data is already calculated
+                    Map<String, T> collection = data.stream()
+                            .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
+                    //.<T>map(item -> item.getValue().get()).collect(Collectors.toList());
+                    R res = execute(context, log, data.getName(), collection, meta);
+                    afterGroup(context, log, data.getName(), outputMeta, res);
+                    return res;
+                }, buildExecutor(context, data.getName())));
+        return new ActionResult<>(getOutputType(), log, future, outputMeta);
+
+    }
+
+    protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
+        return GroupBuilder.byAnnotation(inputMeta(context, input.meta(), actionMeta)).group(input);
+    }
+
+    protected abstract R execute(Context context, Logable log, String nodeName, Map<String, T> input, Meta meta);
+
+    protected MetaBuilder outputMeta(DataNode<T> input) {
+        MetaBuilder builder = new MetaBuilder("node")
+                .putValue("name", input.getName())
+                .putValue("type", input.type().getName());
+        input.stream().forEach((Pair<String, Data<? extends T>> item) -> {
+            MetaBuilder dataNode = new MetaBuilder("data")
+                    .putValue("name", item.getKey());
+            Data<? extends T> data = item.getValue();
+            if (!data.dataType().equals(input.type())) {
+                dataNode.putValue("type", data.dataType().getName());
+            }
+            if (!data.meta().isEmpty()) {
+                dataNode.putNode(DataFactory.DATA_META_KEY, data.meta());
+            }
+            builder.putNode(dataNode);
+        });
+        return builder;
     }
 
     /**
-     * <p>
-     * runGroup.</p>
+     * An action to be performed before each group evaluation
      *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param input a {@link hep.dataforge.content.NamedGroup} object.
-     * @return a R object.
+     * @param log
+     * @param input
      */
-    public R runGroup(Logable log, NamedGroup<T> input) {
-        beforeGroup(log, input);
-        Meta individualMeta = readMeta(input.meta());
-        R res = execute(log, individualMeta, input);
-        afterGroup(log, res);
-        res.configure(MergeRule.getDefault().merge(res.meta(), input.meta()));
-        return res;
-    }
-
-    /**
-     * <p>
-     * buildGroups.</p>
-     *
-     * @param meta a {@link hep.dataforge.description.MetaReader}
-     * object.
-     * @param input a {@link java.util.List} object.
-     * @return a {@link java.util.List} object.
-     */
-    protected List<NamedGroup<T>> buildGroups(Meta meta, List<T> input) {
-        return GroupBuilder.byAnnotation(meta.getNode("grouping")).group(input);
-    }
-
-    /**
-     * Calculate the action result for single input content
-     *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param reader a {@link hep.dataforge.description.MetaReader}
-     * object.
-     * @param input a T object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     * @return a R object.
-     */
-    protected abstract R execute(Logable log, Meta meta, NamedGroup<T> input);
-
-    /**
-     * Выполняется один раз перед основным действием независимо от того,
-     * распаралелено действие или нет
-     *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param input a {@link hep.dataforge.content.Content} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
-     */
-    protected void beforeGroup(Logable log, NamedGroup<T> input) throws ContentException {
+    protected void beforeGroup(Context context, Logable log, DataNode<? extends T> input) {
 
     }
 
     /**
-     * Выполняется один раз после основного действия независимо от того,
-     * распаралелено действие или нет
+     * An action to be performed after each group evaluation
      *
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
-     * @param output a {@link hep.dataforge.content.Content} object.
-     * @throws hep.dataforge.exceptions.ContentException if any.
+     * @param log
+     * @param output
      */
-    protected void afterGroup(Logable log, R output) throws ContentException {
+    protected void afterGroup(Context context, Logable log, String groupName, Meta outputMeta, R output) {
 
     }
 

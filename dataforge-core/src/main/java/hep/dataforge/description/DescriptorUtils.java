@@ -40,7 +40,9 @@ public class DescriptorUtils {
     public static Meta buildDefaultNode(NodeDescriptor descriptor) {
         MetaBuilder builder = new MetaBuilder(descriptor.getName());
         descriptor.valueDescriptors().values().stream().filter((vd) -> (vd.hasDefault())).forEach((vd) -> {
-            builder.setValue(vd.getName(), vd.defaultValue());
+            if (vd.hasDefault()) {
+                builder.setValue(vd.getName(), vd.defaultValue());
+            }
         });
 
         descriptor.childrenDescriptors().values().stream().forEach((NodeDescriptor nd) -> {
@@ -72,7 +74,11 @@ public class DescriptorUtils {
     }
 
     public static NodeDescriptor buildDescriptor(Object obj) {
-        return buildDescriptor(obj.getClass());
+        if (obj instanceof Described) {
+            return ((Described) obj).getDescriptor();
+        } else {
+            return buildDescriptor(obj.getClass());
+        }
     }
 
     public static NodeDescriptor buildDescriptor(AnnotatedElement element) {
@@ -90,28 +96,38 @@ public class DescriptorUtils {
         }
 
         for (NodeDef nodeDef : listAnnotations(element, NodeDef.class, true)) {
-            MetaBuilder nodeMeta = new MetaBuilder("node")
-                    .putValue("name", nodeDef.name())
-                    .putValue("info", nodeDef.info())
-                    .putValue("required", nodeDef.required())
-                    .putValue("multiple", nodeDef.multiple());
+            //TODO replace by map to avoid multiple node parsing
+            boolean exists = res.hasNode("node") && res.getNodes("node").stream()
+                    .anyMatch(mb -> mb.getString("name").equals(nodeDef.name()));
+            //avoiding dublicate nodes
+            if (!exists) {
+                MetaBuilder nodeMeta = new MetaBuilder("node")
+                        .putValue("name", nodeDef.name())
+                        .putValue("info", nodeDef.info())
+                        .putValue("required", nodeDef.required())
+                        .putValue("multiple", nodeDef.multiple());
 
-            // Either target or resource is used
-            if (!nodeDef.target().isEmpty()) {
-                AnnotatedElement target = findAnnotatedElement(nodeDef.target());
-                if (target != null) {
-                    nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
+                // Either target or resource is used
+                if (!nodeDef.target().isEmpty()) {
+                    AnnotatedElement target = findAnnotatedElement(nodeDef.target());
+                    if (target != null) {
+                        nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
+                    }
+                } else if (!nodeDef.resource().isEmpty()) {
+                    nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
                 }
-            } else if (!nodeDef.resource().isEmpty()) {
-                nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
-            }
 
-            res.putNode(nodeMeta);
+                res.putNode(nodeMeta);
+            }
         }
 
-        //FIXME forbit non-unique values and Nodes
+        //FIXME forbid non-unique values and Nodes
         for (ValueDef valueDef : listAnnotations(element, ValueDef.class, true)) {
-            res.putNode(ValueDescriptor.build(valueDef).meta());
+            boolean exists = res.hasNode("value") && res.getNodes("value").stream()
+                    .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
+            if (!exists) {
+                res.putNode(ValueDescriptor.build(valueDef).meta());
+            }
         }
 
         return res;
@@ -185,7 +201,7 @@ public class DescriptorUtils {
         }
     }
 
-    private static <T extends Annotation> List<T> listAnnotations(AnnotatedElement source, Class<T> type, boolean searchSuper) {
+    public static <T extends Annotation> List<T> listAnnotations(AnnotatedElement source, Class<T> type, boolean searchSuper) {
         List<T> res = new ArrayList<>();
         if (source instanceof Class) {
             T[] array = source.getDeclaredAnnotationsByType(type);

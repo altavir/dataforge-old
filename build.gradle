@@ -1,3 +1,26 @@
+//
+//repositories {
+//  mavenCentral()
+//}
+//
+//dependencies {
+//    ext.checkerFrameworkVersion = '1.9.12'
+//    ext.jdkVersion = JavaVersion.current().isJava7() ? 'jdk7' : 'jdk8'
+//    checkerFrameworkAnnotatedJDK "org.checkerframework:${jdkVersion}:${checkerFrameworkVersion}"
+//
+//    checkerFramework "org.checkerframework:checker:${checkerFrameworkVersion}"
+//    compile "org.checkerframework:checker-qual:${checkerFrameworkVersion}"
+//}
+//
+//configurations {
+//    checkerFrameworkAnnotatedJDK {
+//       description = 'a copy of JDK classes with Checker Framework type qualifers inserted'
+//    }
+//    checkerFramework {
+//       description = 'The Checker Framework: custom pluggable types for Java'
+//    }
+//}
+
 allprojects{
     ext{
         ignore = false
@@ -15,6 +38,16 @@ allprojects{
             header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>"; 
         }
     }
+    
+//    tasks.withType(JavaCompile).all { JavaCompile compile ->
+//        compile.options.compilerArgs = [
+//                '-processor', 'org.checkerframework.checker.nullness.NullnessChecker',
+//                '-processorpath', "${configurations.checkerFramework.asPath}",
+//                // uncomment to turn Checker Framework errors into warnings
+//                // '-Awarns',
+//                "-Xbootclasspath/p:${configurations.checkerFrameworkAnnotatedJDK.asPath}"
+//        ]
+//    }    
 }
 
 subprojects {
@@ -59,5 +92,5 @@ task dfDoc(type: Javadoc){
 }
 
 task setWrapper(type: Wrapper) {
-    gradleVersion = '2.9'
+    gradleVersion = '2.12'
 }

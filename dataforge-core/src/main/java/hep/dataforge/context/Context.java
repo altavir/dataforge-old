@@ -18,7 +18,7 @@ package hep.dataforge.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
-import hep.dataforge.content.Named;
+import hep.dataforge.names.Named;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
@@ -34,6 +34,7 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 /**
  * Окружение для выполнения действий (и не только). Имеет собственный лог и
@@ -45,12 +46,13 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Context extends AbstractProvider implements ValueProvider, Logable, Named {
 
-    final Log rootLog;
-    final Context parent;
-    final String name;
-    final Map<String, Value> properties = new ConcurrentHashMap<>();
-    final PluginManager pm;
-    IOManager io = null;
+    private final Log rootLog;
+    private final Context parent;
+    private final String name;
+    protected final Map<String, Value> properties = new ConcurrentHashMap<>();
+    private final PluginManager pm;
+    protected ProcessManager processManager = null;
+    protected IOManager io = null;
 
     /**
      * Build context from metadata
@@ -133,10 +135,11 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     }
 
     /**
-     * Do not use this!!! use IOManager::attachTo instead
-     * @param io 
+     * Set IO manager for this context
+     *
+     * @param io
      */
-    public void attachIoManager(IOManager io) {
+    public void setIO(IOManager io) {
         io.setContext(this);
 
         LoggerContext loggerContext = getLogger().getLoggerContext();
@@ -148,9 +151,9 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         appender.start();
 
         getLogger().addAppender(appender);
-        
+
         if (!io.out().equals(System.out)) {
-            getLog().setLogListener((LogEntry t) -> {
+            getLog().addLogListener((LogEntry t) -> {
                 try {
                     io.out().write((t.toString() + "\n").getBytes());
                     io.out().flush();
@@ -158,7 +161,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
                     throw new RuntimeException(ex);
                 }
             });
-        }        
+        }
         this.io = io;
     }
 
@@ -169,6 +172,23 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
      */
     public final PluginManager pluginManager() {
         return this.pm;
+    }
+
+    public ProcessManager processManager() {
+        if (this.processManager == null) {
+            if (getParent() != null) {
+                return getParent().processManager();
+            } else {
+                return GlobalContext.instance().processManager();
+            }
+        } else {
+            return processManager;
+        }
+    }
+
+    public void setProcessManager(ProcessManager manager) {
+        manager.setContext(this);
+        this.processManager = manager;
     }
 
     /**
@@ -228,13 +248,6 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         properties.put(name, value);
     }
 
-    /**
-     * <p>
-     * putValue.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param value a {@link java.lang.Object} object.
-     */
     public void putValue(String name, Object value) {
         properties.put(name, Value.of(value));
     }
@@ -272,15 +285,11 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     }
 
     public final void loadPlugin(Plugin plugin) {
-        if (!this.pluginManager().addPlugin(plugin, true)) {
-            throw new RuntimeException("Can't load plugin " + plugin.name());
-        }
+        this.pluginManager().loadPlugin(plugin);
     }
 
     public final void loadPlugin(String tag) {
-        if (!this.pluginManager().addPluginFromLibrary(VersionTag.fromString(tag))) {
-            throw new RuntimeException("Can't load plugin " + tag);
-        }
+        this.pluginManager().loadPlugin(tag);
     }
 
     public Map<String, Value> getProperties() {

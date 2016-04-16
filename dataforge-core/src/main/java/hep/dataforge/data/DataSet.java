@@ -1,131 +1,191 @@
-/* 
- * Copyright 2015 Alexander Nozik.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
  */
 package hep.dataforge.data;
 
-import hep.dataforge.content.Content;
-import static hep.dataforge.data.DataFiltering.getTagCondition;
-import static hep.dataforge.data.DataFiltering.getValueCondition;
-import hep.dataforge.values.Value;
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.NamingException;
-import java.util.Comparator;
-import java.util.function.Predicate;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
+import hep.dataforge.navigation.AbstractProvider;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.stream.Stream;
+import javafx.util.Pair;
 
 /**
- * <p>
- * DataSet interface.</p>
+ * A simple static representation of DataNode
  *
  * @author Alexander Nozik
- * @version $Id: $Id
+ * @param <T>
  */
-public interface DataSet extends Iterable<DataPoint>, Content {
+public class DataSet<T> extends AbstractProvider implements DataNode<T> {
 
     /**
-     * Фильтрует набор данных и оставляет только те точки, что удовлетовряют
-     * условиям
+     * The builder bound by type of data
      *
-     * @param condition a {@link java.util.function.Predicate} object.
-     * @throws hep.dataforge.exceptions.NamingException if any.
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
-    DataSet filter(Predicate<DataPoint> condition) throws NamingException;
-
-    /**
-     * Быстрый фильтр для значений одного поля
-     *
-     * @param valueName
-     * @param a
-     * @param b
+     * @param <T>
+     * @param type
      * @return
-     * @throws hep.dataforge.exceptions.NamingException
      */
-    default DataSet filter(String valueName, Value a, Value b) throws NamingException {
-        return this.filter(getValueCondition(valueName, a, b));
-    }
-
-    default DataSet filter(String valueName, double a, double b) throws NamingException {
-        return this.filter(getValueCondition(valueName, Value.of(a), Value.of(b)));
+    public static <T> Builder<T> builder(Class<T> type) {
+        return new Builder<>(type);
     }
 
     /**
-     * Быстрый фильтр по меткам
+     * Unbound builder
      *
-     * @param tags
-     * @throws hep.dataforge.exceptions.NamingException
-     * @return a {@link hep.dataforge.data.Column} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
+     * @return
      */
-    default DataSet filter(String... tags) throws NamingException {
-        return this.filter(getTagCondition(tags));
+    public static Builder builder() {
+        return new Builder<>(Object.class);
     }
 
-    DataPoint get(int i);
-    Column getColumn(String name) throws NameNotFoundException;
+    private final String name;
+    private final Meta meta;
+    private final Class<T> type;
+    private final Map<String, Data<? extends T>> dataMap;
 
-    /**
-     * <p>
-     * getDataFormat.</p>
-     *
-     * @return a {@link hep.dataforge.data.DataFormat} object.
-     */
-    DataFormat getDataFormat();
+    protected DataSet(String name, Meta meta, Class<T> type, Map<String, Data<? extends T>> dataMap) {
+        this.name = name;
+        this.meta = meta;
+        this.type = type;
+        this.dataMap = dataMap;
+    }
 
-    /**
-     * <p>
-     * getValue.</p>
-     *
-     * @param index a int.
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
-    Value getValue(int index, String name) throws NameNotFoundException;
+    @Override
+    public Stream<Pair<String, Data<? extends T>>> stream() {
+        return dataMap.entrySet().stream()
+                .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<? extends T>> entry)
+                        -> new Pair<>(entry.getKey(), entry.getValue()));
+    }
 
-    /**
-     * <p>
-     * size.</p>
-     *
-     * @return a int.
-     */
-    int size();
+    @Override
+    public Data<? extends T> getData(String name) {
+        return dataMap.get(name);
+    }
 
-    /**
-     * sorts dataset and returns sorted one
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param ascending a boolean.
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
-    DataSet sort(String name, boolean ascending);
+    @Override
+    public Class<T> type() {
+        return type;
+    }
 
-    /**
-     * <p>
-     * sort.</p>
-     *
-     * @param comparator a {@link java.util.Comparator} object.
-     * @return a {@link hep.dataforge.data.DataSet} object.
-     */
-    DataSet sort(Comparator<DataPoint> comparator);
-    
-    /**
-     * <p>stream.</p>
-     *
-     * @return a {@link java.util.stream.Stream} object.
-     */
-    Stream<DataPoint> stream();
+    @Override
+    public Iterator<Data<? extends T>> iterator() {
+        return dataMap.values().iterator();
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public Meta meta() {
+        return meta;
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return dataMap.isEmpty();
+    }
+
+    @Override
+    public int size() {
+        return dataMap.size();
+    }
+
+    @Override
+    protected boolean provides(String target, Name name) {
+        return DATA_TARGET.equals(target) && dataMap.containsKey(name.toString());
+    }
+
+    @Override
+    protected Object provide(String target, Name name) {
+        if (DATA_TARGET.equals(target)) {
+            return dataMap.get(name.toString());
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public DataNode<? extends T> getNode(String nodeName) {
+        Builder<T> builder = new Builder<>(type)
+                .setName(nodeName)
+                .setMeta(meta());
+        String prefix = nodeName + ".";
+        stream()
+                .filter((Pair<String, Data<? extends T>> pair) -> pair.getKey().startsWith(prefix))
+                .forEach((Pair<String, Data<? extends T>> pair) -> builder.putData(pair.getKey(), pair.getValue()));
+        if (builder.dataMap.size() > 0) {
+            return builder.build();
+        } else {
+            return null;
+        }
+    }
+
+    public static class Builder<T> {
+
+        private String name = "";
+        private Meta meta = Meta.empty();
+        private final Class<T> type;
+        private final Map<String, Data<? extends T>> dataMap = new LinkedHashMap<>();
+
+        private Builder(Class<T> type) {
+            this.type = type;
+        }
+
+        public Builder<T> setName(String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder<T> setMeta(Meta meta) {
+            this.meta = meta;
+            return this;
+        }
+
+        public Builder<T> putData(String key, Data<? extends T> data) {
+            if (type.isAssignableFrom(data.dataType())) {
+                if (!dataMap.containsKey(key)) {
+                    dataMap.put(key, data);
+                } else {
+                    throw new RuntimeException("The data with key " + key + " already exists");
+                }
+            } else {
+                throw new RuntimeException("Data does not satisfy class boundary");
+            }
+            return this;
+        }
+
+        public Builder<T> putData(NamedData<? extends T> data) {
+            return putData(data.getName(), data);
+        }
+
+        public Builder<T> putAll(Collection<NamedData<? extends T>> dataCollection) {
+            dataCollection.stream().forEach(it -> putData(it));
+            return this;
+        }
+
+        public Builder<T> putAll(Map<String, Data<? extends T>> map) {
+            this.dataMap.putAll(map);
+            return this;
+        }
+
+        public Builder<T> putStatic(String key, T staticData) {
+            if (!type.isInstance(staticData)) {
+                throw new IllegalArgumentException("The data mast be instance of " + type.getName());
+            }
+            return putData(new NamedStaticData<>(key, staticData, type));
+        }
+
+        public DataSet<T> build() {
+            return new DataSet<>(name, meta, type, dataMap);
+        }
+
+    }
 
 }

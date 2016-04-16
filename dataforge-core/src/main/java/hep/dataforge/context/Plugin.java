@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 
@@ -24,10 +25,10 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Annotated {
+public interface Plugin extends Annotated, Named {
 
     /**
-     * Plugin dependencies which are required to apply this plugin. Plugin
+     * Plugin dependencies which are required to attach this plugin. Plugin
      * dependencies must be initialized and enabled in the Context before this
      * plugin is enabled.
      *
@@ -36,36 +37,63 @@ public interface Plugin extends Annotated {
     VersionTag[] dependsOn();
 
     /**
-     * Start this plugin and apply registration info to the context. This method
+     * Start this plugin and attach registration info to the context. This method
      * should be called only via PluginManager to avoid dependency issues.
+     *
      * @param context
      */
-    void apply(Context context);
+    void attach(Context context);
 
     /**
      * Stop this plugin and remove registration info from context and other
      * plugins. This method should be called only via PluginManager to avoid
      * dependency issues.
+     *
      * @param context
      */
-    void clean(Context context);
+    void detach(Context context);
 
     /**
      * Get tag for this plugin
-     * @return 
+     *
+     * @return
      */
     VersionTag getTag();
-    
+
     /**
-     * Set config for this plugin and apply changes
-     * @param config 
+     * The name of this plugin ignoring version and group
+     *
+     * @return
+     */
+    @Override
+    public default String getName() {
+        return getTag().name();
+    }
+
+    /**
+     * Set config for this plugin and attach changes
+     *
+     * @param config
      */
     void configure(Meta config);
 
     public default String name() {
         return getTag().getFullName();
     }
-    
-    
+
+    /**
+     * Return new blank instance of this plugin. This method is used only to
+     * avoid separate factory class;
+     *
+     * @return
+     */
+    default Plugin instance() {
+        //FIXME a bad solution
+        try {
+            return getClass().getDeclaredConstructor().newInstance();
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to create instance of the plugin", ex);
+        }
+    }
 
 }

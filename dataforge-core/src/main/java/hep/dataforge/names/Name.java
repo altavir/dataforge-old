@@ -38,16 +38,18 @@ public interface Name {
      * Constant <code>NAME_TOKEN_SEPARATOR="."</code>
      */
     public static final String NAME_TOKEN_SEPARATOR = ".";
-    
-    public static final String NAMESPACE_SEPARATOR = "#";
 
+    public static final String NAMESPACE_SEPARATOR = ":";
+    
     /**
-     * <p>
-     * of.</p>
-     *
-     * @param str a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.names.Name} object.
+     * The length of Name produced from given string
+     * @param name
+     * @return 
      */
+    public static int lengthOf(String name){
+        return Name.of(name).length();
+    }
+
     public static Name of(String str) {
         String namespace;
         String name;
@@ -59,7 +61,7 @@ public interface Name {
             namespace = "";
             name = str;
         }
-        String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса
+        String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса ([^\[\]\.]+(?:\[[^\]]*\])?)*
         if (tokens.length == 1) {
             return new NameToken(namespace, name);
         } else {
@@ -73,6 +75,7 @@ public interface Name {
 
     /**
      * Join all segments in the given order. Segments could be composite.
+     *
      * @param segments
      * @return a {@link hep.dataforge.names.Name} object.
      */
@@ -80,22 +83,27 @@ public interface Name {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String segment : segments) {
             Name segmentName = of(segment);
-            if(segmentName instanceof NameToken){
-                list.add((NameToken)segmentName);
+            if (segmentName instanceof NameToken) {
+                list.add((NameToken) segmentName);
             } else {
-                list.addAll(((NamePath)segmentName).getNames());
+                list.addAll(((NamePath) segmentName).getNames());
             }
         }
         return new NamePath(list);
     }
 
-    /**
-     * <p>
-     * of.</p>
-     *
-     * @param tokens a {@link java.lang.Iterable} object.
-     * @return a {@link hep.dataforge.names.Name} object.
-     */
+    public static Name join(Name... segments) {
+        LinkedList<NameToken> list = new LinkedList<>();
+        for (Name segmentName : segments) {
+            if (segmentName instanceof NameToken) {
+                list.add((NameToken) segmentName);
+            } else {
+                list.addAll(((NamePath) segmentName).getNames());
+            }
+        }
+        return new NamePath(list);
+    }
+
     public static Name of(Iterable<String> tokens) {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String token : tokens) {
@@ -106,7 +114,7 @@ public interface Name {
 
     /**
      *
-     * имя в виде строки
+     * The name as a String including query but ignoring namespace
      *
      * @return
      */
@@ -114,18 +122,26 @@ public interface Name {
     String toString();
 
     /**
-     * Есть дополнительный запрос в квадратных скобках
+     * if has query for the last element
      *
      * @return a boolean.
      */
     boolean hasQuery();
 
     /**
-     * Дополнительный запрос последнего элемента в виде строки
+     * Query for last elements without brackets
      *
      * @return a {@link java.lang.String} object.
      */
     String getQuery();
+
+    /**
+     * This name without last element query. If there is no query, returns
+     * itself
+     *
+     * @return
+     */
+    Name ignoreQuery();
 
     /**
      * Количество токенов в имени
@@ -142,21 +158,21 @@ public interface Name {
     Name getFirst();
 
     /**
-     * последний токен
+     * Last token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
     Name getLast();
 
     /**
-     * Все кроме первого токена
+     * The whole name but the first token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
     Name cutFirst();
 
     /**
-     * Все кроме последнего токена
+     * The whole name but the lat token
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
@@ -187,6 +203,19 @@ public interface Name {
 
     default Name removeNameSpace() {
         return toNameSpace("");
+    }
+
+    /**
+     * Create a new name with given name appended to the end of this one
+     * @param name
+     * @return 
+     */
+    default Name append(Name name) {
+        return join(this, name);
+    }
+
+    default Name append(String name) {
+        return join(this, of(name));
     }
 
     String[] asArray();

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.data.DataFormat;
+import hep.dataforge.points.Format;
 import hep.dataforge.exceptions.LoaderNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
@@ -25,8 +25,8 @@ import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.loaders.MaskPointLoader;
 import java.util.Arrays;
+import hep.dataforge.storage.api.ObjectLoader;
 
 /**
  *
@@ -34,7 +34,7 @@ import java.util.Arrays;
  */
 public class LoaderFactory {
 
-    public static MetaBuilder buildDataPointLoaderMeta(String name, String indexField, DataFormat format) {
+    public static MetaBuilder buildDataPointLoaderMeta(String name, String indexField, Format format) {
         MetaBuilder builder = new MetaBuilder("loader");
 
         if (name == null || name.isEmpty()) {
@@ -50,7 +50,7 @@ public class LoaderFactory {
         builder.putValue(Loader.LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
 
         if (format != null) {
-            builder.putNode(DataFormat.toMeta(format));
+            builder.putNode(Format.toMeta(format));
             if (Arrays.binarySearch(format.asArray(), "timestamp") > 0) {
                 builder.putValue("dynamic", true);
             }
@@ -70,7 +70,7 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, DataFormat format)
+    public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, Format format)
             throws StorageException {
         if (shelfName != null && !shelfName.isEmpty()) {
             if (!storage.hasShelf(shelfName)) {
@@ -82,6 +82,32 @@ public class LoaderFactory {
         return (PointLoader) storage.buildLoader(buildDataPointLoaderMeta(loaderName, indexField, format));
     }
 
+    /**
+     * A helper to create specific loader in the storage
+     *
+     * @param storage
+     * @param loaderName
+     * @param shelfName
+     * @return
+     * @throws StorageException
+     */
+    public static ObjectLoader buildObjectLoder(Storage storage, String loaderName, String shelfName)
+            throws StorageException {
+        if (shelfName != null && !shelfName.isEmpty()) {
+            if (!storage.hasShelf(shelfName)) {
+                storage = storage.buildShelf(shelfName, null);
+            } else {
+                storage = storage.getShelf(shelfName);
+            }
+        }
+        Meta loaderAn = new MetaBuilder("loader")
+                .putValue(Loader.LOADER_NAME_KEY, loaderName)
+                .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
+                .build();
+
+        return (ObjectLoader) storage.buildLoader(loaderAn);
+    }    
+    
     /**
      * A helper to create specific loader in the storage
      *
@@ -134,13 +160,14 @@ public class LoaderFactory {
         return (EventLoader) storage.buildLoader(loaderAn);
     }
 
-    public static PointLoader getDataLoader(Storage storage, String name) throws StorageException {
+    public static PointLoader getPointLoader(Storage storage, String name) throws StorageException {
         if (storage.hasLoader(name)) {
             Loader loader = storage.getLoader(name);
             if (loader instanceof PointLoader) {
                 return (PointLoader) loader;
             } else {
-                return new MaskPointLoader(loader);
+                throw new LoaderNotFoundException();
+                //return new MaskPointLoader(loader);
             }
         } else {
             throw new LoaderNotFoundException();

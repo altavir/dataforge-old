@@ -15,12 +15,11 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -31,36 +30,32 @@ import java.util.stream.Collectors;
  */
 public class Configuration extends MuttableMetaNode<Configuration> {
 
-    protected final Set<ConfigChangeListener> observers = new HashSet<>();
-    //TODO replace by registry
-
-    public Configuration(String name, Configuration parent) {
-        super(name, parent);
-    }
+    protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
     /**
-     * Create empty configuration
-     * @param name 
+     * Create empty root configuration
+     *
+     * @param name
      */
     public Configuration(String name) {
         super(name);
     }
 
     /**
-     * A deep copy constructor
+     * Create a root configuration populated by given meta
      *
-     * @param annotation
+     * @param meta
      */
-    public Configuration(Meta annotation) {
-        super(annotation.getName());
-        Collection<String> valueNames = annotation.getValueNames();
+    public Configuration(Meta meta) {
+        super(meta.getName());
+        Collection<String> valueNames = meta.getValueNames();
         for (String valueName : valueNames) {
-            setValueItem(valueName, annotation.getValue(valueName));
+            setValueItem(valueName, meta.getValue(valueName));
         }
 
-        Collection<String> elementNames = annotation.getNodeNames();
+        Collection<String> elementNames = meta.getNodeNames();
         for (String elementName : elementNames) {
-            List<Configuration> item = annotation.getNodes(elementName).stream()
+            List<Configuration> item = meta.getNodes(elementName).stream()
                     .<Configuration>map((an) -> new Configuration(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
@@ -89,7 +84,8 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      */
     @Override
     protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
-        observers.stream().forEach((ConfigChangeListener obs) -> obs.notifyValueChanged(name, oldItem, newItem));
+        observers.stream().forEach((ConfigChangeListener obs)
+                -> obs.notifyValueChanged(name, oldItem, newItem));
         super.notifyValueChanged(name, oldItem, newItem);
     }
 
@@ -97,11 +93,23 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * Add new observer for this configuration
      *
      * @param observer
+     * @param strongReference if true, then configuration prevents observer from
+     * being recycled by GC
      */
-    public void addObserver(ConfigChangeListener observer) {
-        this.observers.add(observer);
+    public void addObserver(ConfigChangeListener observer, boolean strongReference) {
+        this.observers.add(observer, strongReference);
     }
 
+    /**
+     * addObserver(observer, true)
+     *
+     * @param observer
+     */
+    public void addObserver(ConfigChangeListener observer) {
+        addObserver(observer, true);
+    }
+
+    //PENDING add value observers inheriting value class by wrapper
     /**
      * Remove an observer from this configuration
      *
@@ -117,11 +125,11 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * @param annotation
      */
     public void update(Meta annotation) {
-        for (String valueName : annotation.getValueNames()) {
+        annotation.getValueNames().stream().forEach((valueName) -> {
             setValue(valueName, annotation.getValue(valueName));
-        }
+        });
 
-        for (String elementName : annotation.getNodeNames()) {
+        annotation.getNodeNames().stream().forEach((elementName) -> {
             setNode(elementName,
                     annotation
                     .getNodes(elementName)
@@ -129,7 +137,7 @@ public class Configuration extends MuttableMetaNode<Configuration> {
                     .<Configuration>map((el) -> new Configuration(el))
                     .collect(Collectors.toList())
             );
-        }
+        });
     }
 
     @Override
@@ -143,15 +151,31 @@ public class Configuration extends MuttableMetaNode<Configuration> {
         return currentState();
     }
 
+    /**
+     * Return existing node if it exists, otherwise build and attach empty child
+     * node
+     *
+     * @param name
+     * @return
+     */
+    public Configuration requestNode(String name) {
+        if (hasNode(name)) {
+            return getNode(name);
+        } else {
+            Configuration child = createChildNode(name);
+            super.attachNode(child);
+            return child;
+        }
+    }
+
     @Override
     protected Configuration createChildNode(String name) {
-        return new Configuration(name, this);
+        return new Configuration(name);
     }
 
     @Override
     protected Configuration cloneNode(Meta node) {
         return new Configuration(node);
     }
-    
-    
+
 }

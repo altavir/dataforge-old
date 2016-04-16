@@ -4,5 +4,7 @@ if (!hasProperty('mainClass')) {
 
 dependencies {
     compile project(':dataforge-core')
+    compile 'org.controlsfx:controlsfx:8.40.10'
+    compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
     compile 'de.jensd:shichimifx:1.+'
 }

@@ -15,16 +15,13 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.exceptions.AnnotationBuilderException;
+
 import hep.dataforge.navigation.ValueProvider;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.function.UnaryOperator;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -56,27 +53,26 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     public MetaBuilder(Meta annotation) {
         super(annotation.getName());
         Collection<String> valueNames = annotation.getValueNames();
-        for (String valueName : valueNames) {
+        valueNames.stream().forEach((valueName) -> {
             setValueItem(valueName, annotation.getValue(valueName));
-        }
+        });
 
         Collection<String> elementNames = annotation.getNodeNames();
-        for (String elementName : elementNames) {
+        elementNames.stream().forEach((elementName) -> {
             List<MetaBuilder> item = annotation.getNodes(elementName).stream()
                     .<MetaBuilder>map((an) -> new MetaBuilder(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
-        }
+        });
         if (annotation instanceof MetaBuilder) {
             valueContext = ((MetaBuilder) annotation).valueContext;
         }
 
     }
 
-    protected MetaBuilder(String name, MetaBuilder parent) {
-        super(name, parent);
-    }
-
+//    protected MetaBuilder(String name, MetaBuilder parent) {
+//        super(name, parent);
+//    }
     /**
      * return an immutable annotation base on this builder
      *
@@ -91,33 +87,8 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return this;
     }
 
-    /**
-     * <p>
-     * setName.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.meta.MetaBuilder} object.
-     */
-    public MetaBuilder setName(String name) {
-        rename(name);
-        return currentState();
-    }
-
-    /**
-     * <p>
-     * putAnnotation.</p>
-     *
-     * @param element a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.meta.MetaBuilder} object.
-     */
-    @Override
-    public MetaBuilder putNode(Meta element) {
-        super.putNode(new MetaBuilder(element));
-        return currentState();
-    }
-
     public MetaBuilder rename(String newName) {
-        super.renameNode(newName);
+        super.setName(newName);
         return currentState();
     }
 
@@ -129,23 +100,22 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      * @param elements a {@link hep.dataforge.meta.Meta} object.
      * @return a {@link hep.dataforge.meta.MetaBuilder} object.
      */
-    @Override
-    public MetaBuilder setNode(String name, Meta... elements) {
-        if (elements == null || elements.length == 0) {
-            super.removeNode(name);
-        } else {
-            super.setNode(name);
-            for (Meta element : elements) {
-                MetaBuilder newElement = new MetaBuilder(element);
-                if (!name.equals(newElement.getName())) {
-                    newElement.rename(name);
-                }
-                super.putNode(newElement);
-            }
-        }
-        return currentState();
-    }
-
+//    @Override
+//    public MetaBuilder setNode(String name, Meta... elements) {
+//        if (elements == null || elements.length == 0) {
+//            super.removeNode(name);
+//        } else {
+//            super.setNode(name);
+//            for (Meta element : elements) {
+//                MetaBuilder newElement = new MetaBuilder(element);
+//                if (!name.equals(newElement.getName())) {
+//                    newElement.rename(name);
+//                }
+//                super.putNode(newElement);
+//            }
+//        }
+//        return currentState();
+//    }
     public MetaBuilder setNode(String name, Collection<? extends Meta> elements) {
         if (elements == null || elements.isEmpty()) {
             super.removeNode(name);
@@ -180,7 +150,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         }
         List<MetaBuilder> list = super.getChildNodeItem(name);
         if (list.size() != elements.length) {
-            throw new AnnotationBuilderException("Can't update element item with an item of different size");
+            throw new RuntimeException("Can't update element item with an item of different size");
         } else {
             MetaBuilder[] newList = new MetaBuilder[list.size()];
             for (int i = 0; i < list.size(); i++) {
@@ -194,12 +164,9 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     /**
      * Update this annotation with new Annotation
      *
-     * @param annotation a {@link hep.dataforge.meta.MetaBuilder}
-     * object.
-     * @param valueMerger a {@link hep.dataforge.meta.ListMergeRule}
-     * object.
-     * @param elementMerger a {@link hep.dataforge.meta.ListMergeRule}
-     * object.
+     * @param annotation a {@link hep.dataforge.meta.MetaBuilder} object.
+     * @param valueMerger a {@link hep.dataforge.meta.ListMergeRule} object.
+     * @param elementMerger a {@link hep.dataforge.meta.ListMergeRule} object.
      * @return a {@link hep.dataforge.meta.MetaBuilder} object.
      */
     public MetaBuilder update(Meta annotation,
@@ -208,14 +175,6 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return new CustomMergeRule(valueMerger, elementMerger).merge(annotation, this);
     }
 
-    /**
-     * <p>
-     * update.</p>
-     *
-     * @param annotation a {@link hep.dataforge.meta.MetaBuilder}
-     * object.
-     * @return a {@link hep.dataforge.meta.MetaBuilder} object.
-     */
     public MetaBuilder update(MetaBuilder annotation) {
         return MergeRule.replace(annotation, this);
     }
@@ -235,23 +194,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      * @return
      */
     protected Value transformValue(Value val) {
-        if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-            String valStr = val.stringValue();
-            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
-            while (matcher.find()) {
-                String group = matcher.group();
-                String sub = matcher.group("sub");
-                ValueProvider context = getValueContext();
-                if (context != null && context.hasValue(sub)) {
-                    valStr = valStr.replace(group, context.getString(sub));
-                } else if (this.hasValue(sub)) {
-                    valStr = valStr.replace(group, this.getString(sub));
-                }
-            }
-            return Value.of(valStr);
-        } else {
-            return val;
-        }
+        return MetaUtils.transformValue(val, getValueContext(), this);
     }
 
     /**
@@ -268,16 +211,17 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
             return null;
         }
     }
-    
-    public MetaBuilder setContext(ValueProvider context){
+
+    public MetaBuilder setContext(ValueProvider context) {
         this.valueContext = context;
         return this;
     }
-    
+
     /**
      * Return transformed value
+     *
      * @param name
-     * @return 
+     * @return
      */
     @Override
     public Value getValue(String name) {
@@ -285,13 +229,14 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     }
 
     /**
-     * Create an empty child node 
+     * Create an empty child node
+     *
      * @param name
-     * @return 
+     * @return
      */
     @Override
     protected MetaBuilder createChildNode(String name) {
-        return new MetaBuilder(name, this);
+        return new MetaBuilder(name);
     }
 
     @Override
@@ -301,7 +246,8 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 
     /**
      * Attach nod to this one changing attached node's parent
-     * @param node 
+     *
+     * @param node
      */
     @Override
     public void attachNode(MetaBuilder node) {
@@ -310,25 +256,27 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 
     /**
      * Attach a list of nodes, changing each node's parent to this node
+     *
      * @param name
-     * @param nodes 
+     * @param nodes
      */
     @Override
     public void attachNodeItem(String name, List<MetaBuilder> nodes) {
         super.attachNodeItem(name, nodes);
     }
-    
+
     /**
      * Recursively apply in-place node transformation to node
+     *
      * @param transformation
-     * @return 
+     * @return
      */
-    public MetaBuilder transform(final UnaryOperator<MetaBuilder> transformation){
+    public MetaBuilder transform(final UnaryOperator<MetaBuilder> transformation) {
         MetaBuilder res = transformation.apply(this);
-        for(List<MetaBuilder> item: res.nodes.values()){
+        res.nodes.values().stream().forEach((item) -> {
             item.replaceAll((MetaBuilder t) -> t.transform(transformation));
-        }
+        });
         return res;
     }
-    
+
 }

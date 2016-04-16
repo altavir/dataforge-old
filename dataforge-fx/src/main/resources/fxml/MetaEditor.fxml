@@ -8,6 +8,9 @@
 <?import javafx.scene.layout.*?>
 
 <fx:root id="metaEditorRoot" fx:id="metaEditorRoot" minWidth="200.0" prefHeight="400.0" prefWidth="400.0"  type="AnchorPane" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@styles/metaeditor.css" />
+    </stylesheets>
     <children>
         <TreeTableView fx:id="metaEditorTable" editable="true" layoutX="200.0" layoutY="64.0" prefHeight="200.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
             <columns>
@@ -18,15 +21,15 @@
             <columnResizePolicy>
                 <TreeTableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
             </columnResizePolicy>
-         <contextMenu>
-            <ContextMenu>
-              <items>
-                <MenuItem mnemonicParsing="false" onAction="#onNodeAddClick" text="Add node" />
-                  <MenuItem mnemonicParsing="false" onAction="#onValueAddClick" text="Add value" />
-                  <MenuItem mnemonicParsing="false" onAction="#onRemoveClick" text="Remove" />
-              </items>
-            </ContextMenu>
-         </contextMenu>
+            <contextMenu>
+                <ContextMenu>
+                    <items>
+                        <MenuItem mnemonicParsing="false" onAction="#onNodeAddClick" text="Add node" />
+                        <MenuItem mnemonicParsing="false" onAction="#onValueAddClick" text="Add value" />
+                        <MenuItem mnemonicParsing="false" onAction="#onRemoveClick" text="Remove" />
+                    </items>
+                </ContextMenu>
+            </contextMenu>
         </TreeTableView>
     </children>
 </fx:root>

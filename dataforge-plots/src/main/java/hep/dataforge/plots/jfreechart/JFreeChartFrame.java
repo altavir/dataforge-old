@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.data.DataPoint;
-import hep.dataforge.data.XYDataAdapter;
+import hep.dataforge.points.DataPoint;
+import hep.dataforge.points.XYAdapter;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -28,27 +28,27 @@ import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import java.awt.BasicStroke;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
-import java.awt.Dimension;
+import java.awt.Paint;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
+import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.function.Consumer;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.beans.value.ObservableValue;
+import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.AnchorPane;
 import javax.swing.AbstractAction;
@@ -58,7 +58,6 @@ import javax.swing.JFrame;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.WindowConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
@@ -74,6 +73,8 @@ import org.jfree.chart.renderer.xy.XYErrorRenderer;
 import org.jfree.chart.renderer.xy.XYLineAndShapeRenderer;
 import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.renderer.xy.XYStepRenderer;
+import org.jfree.chart.title.LegendTitle;
+import org.jfree.data.Range;
 import org.jfree.data.xy.XYDataset;
 import org.jfree.data.xy.XYIntervalSeries;
 import org.jfree.data.xy.XYIntervalSeriesCollection;
@@ -86,76 +87,13 @@ import org.slf4j.LoggerFactory;
 public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     /**
-     * Десериализует график из файла и прицепляет его к новой формочке
-     *
-     * @param stream
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    public static JFrame deserialize(ObjectInputStream stream) throws IOException, ClassNotFoundException {
-        JFreeChart jfc = (JFreeChart) stream.readObject();
-        
-        JFrame frame = new JFrame("DataForge visualisator");
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        SwingUtilities.invokeLater(() -> {
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.setPreferredSize(new Dimension(800, 600));
-            frame.setContentPane(panel);
-            
-            panel.removeAll();
-            panel.add(new ChartPanel(jfc));
-            panel.revalidate();
-            panel.repaint();
-            
-            frame.pack();
-            frame.setVisible(true);
-        });
-        return frame;
-    }
-
-    /**
      * Index mapping names to datasets
      */
     List<String> index = new ArrayList<>();
-    
-    private JFreeChart chart;
-    private XYPlot plot;
 
-    /**
-     * Draw new JFrame containing this plot
-     *
-     * @param name
-     * @param annotation
-     * @return
-     */
-    public static JFreeChartFrame drawFrame(String name, Meta annotation) {
-        JFrame frame = new JFrame(name);
-        frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        JPanel panel = new JPanel(new BorderLayout());
-        panel.setPreferredSize(new Dimension(800, 600));
-        frame.setContentPane(panel);
-        
-        SwingUtilities.invokeLater(() -> {
-            frame.pack();
-            frame.setVisible(true);
-        });
-        return new JFreeChartFrame(name, annotation, panel);
-    }
-    
-    public JFreeChartFrame(String name, Meta annotation, Container panel) {
-        this(name, annotation, (JFreeChart t) -> {
-            panel.removeAll();
-            ChartPanel cp = new ChartPanel(t);
-            
-            cp.getPopupMenu().add(new JMenuItem(exportAction(t)));
-            
-            panel.add(cp);
-            panel.revalidate();
-            panel.repaint();
-        });
-    }
-    
+    private final JFreeChart chart;
+    private final XYPlot plot;
+
     private static Action exportAction(JFreeChart t) {
         return new AbstractAction("Export JFC") {
             @Override
@@ -164,19 +102,19 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 JFileChooser fc = new JFileChooser();
                 FileFilter filter = new FileNameExtensionFilter("JFC files", "jfc");
                 fc.setFileFilter(filter);
-                
+
                 int returnVal = fc.showSaveDialog(frame);
                 if (returnVal == JFileChooser.APPROVE_OPTION) {
                     ObjectOutputStream stream = null;
                     try {
                         File file = fc.getSelectedFile();
-                        
+
                         String fileName = file.toString();
                         if (!fileName.endsWith(".jfc")) {
                             fileName += ".jfc";
                             file = new File(fileName);
                         }
-                        
+
                         stream = new ObjectOutputStream(new FileOutputStream(file));
                         stream.writeObject(t);
                         frame.dispose();
@@ -198,181 +136,195 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         };
     }
 
-    /**
-     * Отрисовка компонента при помощи SwingNode
-     *
-     * @param name
-     * @param annotation
-     * @param parent
-     */
-    public JFreeChartFrame(String name, Meta annotation, AnchorPane parent) {
-        this(name, annotation, (JFreeChart t) -> {
-//            ChartViewer viewer = new ChartViewer(t, true);
+    public JFreeChartFrame(String name, Meta meta) {
+        super(name);
+        if (meta == null) {
+            meta = Meta.buildEmpty("plot");
+        }
+        plot = new XYPlot();
+
+        String title = meta.getString("frameTitle", "");
+
+//        if (title.equals("default")) {
+//            title = "";
+//        }
+        chart = new JFreeChart(title, plot);
+        super.configure(meta);
+    }
+
+    @Override
+    public JFreeChartFrame display(AnchorPane container) {
+        Runnable run = () -> {
             SwingNode viewer = new SwingNode();
             JPanel panel = new JPanel(new BorderLayout(), true);
-            panel.removeAll();
-            panel.add(new ChartPanel(t));
-            panel.revalidate();
-            panel.repaint();
+
+            display(panel);
             viewer.setContent(panel);
-            
-            parent.getChildren().add(viewer);
+
+            container.getChildren().add(viewer);
             AnchorPane.setBottomAnchor(viewer, 0d);
             AnchorPane.setTopAnchor(viewer, 0d);
             AnchorPane.setLeftAnchor(viewer, 0d);
             AnchorPane.setRightAnchor(viewer, 0d);
-            
-            parent.widthProperty().addListener(
-                    (ObservableValue<? extends Number> observableValue, Number oldSceneWidth, Number newSceneWidth) -> {
-                        panel.repaint();
-                    });
-            
-            parent.heightProperty().addListener(
-                    (ObservableValue<? extends Number> observableValue, Number oldSceneHeight, Number newSceneHeight) -> {
-                        panel.repaint();
-                    });
-        });
-    }
-    
-    private JFreeChartFrame(String name, Meta meta, Consumer<JFreeChart> container) {
-        super(name, meta);
-        if (meta == null) {
-            meta = Meta.buildEmpty("plot");
+        };
+
+        if (Platform.isFxApplicationThread()) {
+            run.run();
+        } else {
+            Platform.runLater(run);
         }
-        ValueAxis xaxis = getNumberAxis(meta.getNode("xAxis", Meta.buildEmpty("xAxis")));
-        ValueAxis yaxis = getNumberAxis(meta.getNode("yAxis", Meta.buildEmpty("YAxis")));
-        plot = new XYPlot(new XYIntervalSeriesCollection(), xaxis, yaxis, new XYErrorRenderer());
-        
-        String title = meta.getString("frameTitle", name);
-        
-        if (title.equals("default")) {
-            title = "";
-        }
-        
-        chart = new JFreeChart(title, plot);
-        applyConfig(meta);
-        container.accept(chart);
+
+        return this;
     }
-    
-    protected void attachTo(Consumer<JFreeChart> consumer) {
-        consumer.accept(chart);
+
+    public JFreeChartFrame display(Container panel) {
+        ChartPanel cp = new ChartPanel(getChart());
+        cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
+
+        panel.add(cp);
+        panel.revalidate();
+        panel.repaint();
+        return this;
     }
-    
+
     public JFreeChart getChart() {
         return chart;
     }
-    
+
     private ValueAxis getNumberAxis(Meta annotation) {
         NumberAxis axis = new NumberAxis();
         axis.setAutoRangeIncludesZero(false);
         axis.setAutoRangeStickyZero(false);
         return axis;
     }
-    
+
     private DateAxis getDateAxis(Meta annotation) {
         DateAxis axis = new DateAxis();
         axis.setTimeZone(TimeZone.getTimeZone("UTC"));
         return axis;
     }
-    
-    private ValueAxis getLogAxis(Meta annotation) {
+
+    private ValueAxis getLogAxis(Meta meta) {
+        //FIXME autorange with negative values
         LogarithmicAxis logAxis = new LogarithmicAxis("");
         logAxis.setMinorTickCount(10);
         logAxis.setExpTickLabelsFlag(true);
         logAxis.setMinorTickMarksVisible(true);
-        logAxis.setAutoRange(true);
+        if (meta.hasNode("range")) {
+            logAxis.setRange(getRange(meta.getNode("range")));
+        } else {
+            logAxis.setAutoRange(meta.getBoolean("autoRange", true));
+        }
         logAxis.setAllowNegativesFlag(false);
-//        logAxis.setAutoTickUnitSelection(false);
-//        logAxis.setNumberFormatOverride(new DecimalFormat("0E0"));
-//        logAxis.setSmallestValue(1e-20);
+        logAxis.setAutoRangeNextLogFlag(true);
+        logAxis.setStrictValuesFlag(false); // Ommit negatives but do not throw exception
         return logAxis;
     }
-    
+
+    private Range getRange(Meta meta) {
+        return new Range(meta.getDouble("lower", Double.NEGATIVE_INFINITY), meta.getDouble("upper", Double.POSITIVE_INFINITY));
+    }
+
+    private ValueAxis getAxis(Meta axisMeta) {
+        switch (axisMeta.getString("type", "number")) {
+            case "log":
+                return getLogAxis(axisMeta);
+            case "time":
+                return getDateAxis(axisMeta);
+            default:
+                return getNumberAxis(axisMeta);
+        }
+    }
+
     @Override
-    protected synchronized void updateAxis(String axisName, Meta annotation) {
+    protected synchronized void updateAxis(String axisName, Meta axisMeta) {
         SwingUtilities.invokeLater(() -> {
-            ValueAxis axis;
+            ValueAxis axis = getAxis(axisMeta);
+
             switch (axisName) {
                 case "x":
-                    if (annotation.getBoolean("logAxis", false)) {
-                        plot.setDomainAxis(getLogAxis(annotation));
-                    } else if (annotation.getBoolean("timeAxis", false)) {
-                        plot.setDomainAxis(getDateAxis(annotation));
-                    }
-                    axis = plot.getDomainAxis();
+                    plot.setDomainAxis(axis);
                     break;
                 case "y":
-                    
-                    if (annotation.getBoolean("logAxis", false)) {
-                        plot.setRangeAxis(getLogAxis(annotation));
-                    }
-                    axis = plot.getRangeAxis();
+                    plot.setRangeAxis(axis);
                     break;
                 default:
                     throw new NameNotFoundException(axisName, "No such axis in this plot");
             }
-            
-            if (annotation.hasValue("axisTitle")) {
-                String label = annotation.getString("axisTitle");
-                if (annotation.hasValue("axisUnits")) {
-                    label += " (" + annotation.getString("axisUnits") + ")";
+
+            if (axisMeta.hasValue("axisTitle")) {
+                String label = axisMeta.getString("axisTitle");
+                if (axisMeta.hasValue("axisUnits")) {
+                    label += " (" + axisMeta.getString("axisUnits") + ")";
                 }
                 axis.setLabel(label);
             }
         });
     }
-    
+
     @Override
-    protected synchronized void updateFrame(Meta annotation) {
+    protected void updateLegend(Meta legendMeta) {
+        if (legendMeta.getBoolean("show", true)) {
+            if (chart.getLegend() == null) {
+                chart.addLegend(new LegendTitle(plot));
+            }
+        } else {
+            chart.removeLegend();
+        }
+    }
+
+    @Override
+    protected synchronized void updateFrame(Meta meta) {
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
 //            Plottable p = get(dataset.getSeriesKey(series).toString());
 //            return p.getConfig().getString("title", p.getName());
 //        });
     }
-    
-    protected Double convertValue(Value v) {
+
+    protected double convertValue(Value v) {
         try {
-            Double res = v.doubleValue();
-            if (Double.isNaN(res)) {
-                return null;
-            } else {
-                return v.doubleValue();
+            if (v.valueType() == ValueType.NULL) {
+                return Double.NaN;
             }
+            return v.doubleValue();
         } catch (ValueConversionException ex) {
-            return null;
+            return Double.NaN;
         }
     }
-    
+
     @Override
     protected void updatePlotData(String name) {
         XYPlottable plottable = get(name);
-        
+
+        XYAdapter adapter = plottable.adapter();
+
         XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
-        XYDataAdapter adapter = plottable.adapter();
         for (DataPoint point : plottable.plotData()) {
-            Double x = convertValue(adapter.getX(point));
-            if (x != null) {
-                double y = convertValue(adapter.getY(point));
+            double x = convertValue(adapter.getX(point));
+            double y = convertValue(adapter.getY(point));
+            if (Double.isNaN(x)) {
+                LoggerFactory.getLogger(getClass()).warn("Missing x value!");
+            } else if (Double.isNaN(y)) {
+                ser.add(x, NaN, NaN, NaN, NaN, NaN);
+            } else {
                 double xErr = convertValue(adapter.getXerr(point));
                 double yErr = convertValue(adapter.getYerr(point));
                 ser.add(x, x - xErr, x + xErr, y, y - yErr, y + yErr);
-            } else {
-                ser.add(null, true);
             }
         }
-        
+
         final XYIntervalSeriesCollection data = new XYIntervalSeriesCollection();
         data.addSeries(ser);
-        
+
         if (!index.contains(plottable.getName())) {
             index.add(plottable.getName());
         }
-        
+
         SwingUtilities.invokeLater(() -> {
             plot.setDataset(index.indexOf(name), data);
         });
     }
-    
+
     @Override
     protected void updatePlotConfig(String name) {
         final Plottable plottable = get(name);
@@ -380,10 +332,10 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             index.add(plottable.getName());
         }
         int num = index.indexOf(name);
-        
-        Meta meta = new Laminate(plottable.getConfig(), meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
+
+        Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
         SwingUtilities.invokeLater(() -> {
-            
+
             XYLineAndShapeRenderer render;
             boolean showLines = meta.getBoolean("showLine", false);
             boolean showSymbols = meta.getBoolean("showSymbol", true);
@@ -416,32 +368,36 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             if (thickness > 0) {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
             }
-            
-            Color color = PlotUtils.getColor(meta);
+
+            plot.setRenderer(num, render);
+
+            Color color = PlotUtils.getAWTColor(meta);
             if (color != null) {
                 render.setSeriesPaint(0, color);
+            } else {
+                Paint paint = render.lookupSeriesPaint(0);
+                if (paint instanceof Color) {
+                    plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+                }
             }
-            
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-            
-            plot.setRenderer(num, render);
         });
-        
+
     }
-    
+
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
-        
+
         private final Map<String, String> titleMap;
-        
+
         public LabelGenerator(Map<String, String> titleMap) {
             this.titleMap = titleMap;
         }
-        
+
         @Override
         public String generateLabel(XYDataset dataset, int series) {
             return titleMap.get(dataset.getSeriesKey(series).toString());
         }
-        
+
     }
 
     /**
@@ -450,8 +406,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
      * @param stream
      * @param cfg
      */
-    @ValueDef(name = "width", def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", def = "600", info = "The height of the snapshot in pixels")
+    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
+    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     public synchronized void toPNG(OutputStream stream, Meta cfg) {
         SwingUtilities.invokeLater(() -> {
             try {

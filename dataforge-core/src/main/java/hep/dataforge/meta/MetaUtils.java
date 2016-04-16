@@ -5,10 +5,17 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.exceptions.PathSyntaxException;
+import hep.dataforge.navigation.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -67,4 +74,60 @@ public class MetaUtils {
     public static Meta findNodeByValue(Meta root, String path, String key, Object value) {
         return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(Value.of(value)));
     }
+
+    /**
+     * The transformation which should be performed on each value before it is
+     * returned to user. Basically is used to ensure automatic substitutions. If
+     * the reference not found in the current annotation scope than the value is
+     * returned as-is.
+     *
+     * @param val
+     * @param contexts a list of contexts to draw value from
+     * @return
+     */
+    public static Value transformValue(Value val, ValueProvider... contexts) {
+        if (contexts.length == 0) {
+            return val;
+        }
+        if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
+            String valStr = val.stringValue();
+            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
+            while (matcher.find()) {
+                String group = matcher.group();
+                String sub = matcher.group("sub");
+                for (ValueProvider context : contexts) {
+                    if (context != null && context.hasValue(sub)) {
+                        valStr = valStr.replace(group, context.getString(sub));
+                        break;
+                    }
+                }
+            }
+            return Value.of(valStr);
+        } else {
+            return val;
+        }
+    }
+
+    /**
+     * Apply query to node list
+     *
+     * @param <T>
+     * @param nodeList
+     * @param query
+     * @return
+     */
+    public static <T extends MetaNode> List<T> applyQuery(List<T> nodeList, String query) {
+        //TODO make queries more complicated
+        int num;
+        try {
+            num = Integer.parseInt(query);
+        } catch (NumberFormatException ex) {
+            throw new PathSyntaxException("The query ([]) syntax for annotation must contain only integer numbers");
+        }
+        if (num < 0 || num >= nodeList.size()) {
+            throw new NamingException("No list element with given index");
+        }
+        return Collections.singletonList(nodeList.get(num));
+    }
+
 }

@@ -15,7 +15,6 @@ import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.embed.swing.SwingNode;
-import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.AnchorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -42,7 +41,7 @@ public class DataOutputPane extends AnchorPane {
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scroll.getVerticalScrollBar().setUnitIncrement(32);
         node.setContent(scroll);
-        getChildren().add(node);
+        super.getChildren().add(node);
         AnchorPane.setBottomAnchor(node, 5d);
         AnchorPane.setTopAnchor(node, 5d);
         AnchorPane.setLeftAnchor(node, 5d);

@@ -1,12 +1,12 @@
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+ * and read the template in the editor.
  */
 package hep.dataforge.storage.servlet;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.commons.StoragePlugin;
+import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.storage.filestorage.FileStorage;
 import java.io.BufferedReader;
 import java.io.File;
@@ -27,15 +27,15 @@ public class TestStorageServlet {
      * @throws hep.dataforge.exceptions.StorageException
      */
     public static void main(String[] args) throws StorageException, Exception {
-        new StoragePlugin().startGlobal();
+        new StorageManager().startGlobal();
         String path = "/home/numass-storage";
 
-        FileStorage storage = FileStorage.open(new File(path), true);
+        FileStorage storage = FileStorage.connect(new File(path), true, false);
 
         RatpackServer ratpack = RatpackServer.start((RatpackServerSpec server) -> server
                 .serverConfig((ServerConfigBuilder config) -> config.port(8337))
                 .handlers((Chain chain) -> chain
-                        .get("storage", new SorageRatpackHandler(storage))
+                        .get("storage", new StorageRatpackHandler(storage))
                 )
         );
         System.out.println("Starting test numass storage servlet in " + path);

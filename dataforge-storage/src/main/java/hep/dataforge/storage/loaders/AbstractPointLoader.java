@@ -15,9 +15,9 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.data.DataPoint;
-import static hep.dataforge.data.DataPoint.fromMeta;
-import hep.dataforge.data.PointListener;
+import hep.dataforge.points.DataPoint;
+import static hep.dataforge.points.DataPoint.fromMeta;
+import hep.dataforge.points.PointListener;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.WrongTargetException;
@@ -50,6 +50,10 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
         super(storage, name, annotation);
     }
 
+    public AbstractPointLoader(Storage storage, String name) {
+        super(storage, name);
+    }
+
     @Override
     public void push(Collection<DataPoint> dps) throws StorageException {
         for (DataPoint dp : dps) {
@@ -68,7 +72,6 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
         listeners.stream().forEach((l) -> {
             l.accept(dp);
         });
-        
         pushPoint(dp);
     }
 
@@ -82,19 +85,19 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
     @Override
     public Envelope respond(Envelope message) {
         try {
-            if(!checkTarget(message)){
+            if(!acceptEnvelope(message)){
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
-            Meta annotation = message.meta();
-            String operation = annotation.getString(ACTION_KEY);
+            Meta messageMeta = message.meta();
+            String operation = messageMeta.getString(ACTION_KEY);
             switch (operation) {
                 case PUSH_OPERATION:
-                    if (!annotation.hasNode("data")) {
+                    if (!messageMeta.hasNode("data")) {
                         //TODO реализовать бинарную передачу данных
                         throw new StorageException("No data in the push data command");
                     }
 
-                    Meta data = annotation.getNode("data");
+                    Meta data = messageMeta.getNode("data");
                     for (DataPoint dp : fromMeta(data)) {
                         this.push(dp);
                     }
@@ -103,20 +106,22 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
 
                 case PULL_OPERATION:
                     MetaBuilder dataAn = new MetaBuilder("data");
-                    if (annotation.hasNode(QUERY_ELEMENT)) {
+                    if (messageMeta.hasNode(QUERY_ELEMENT)) {
                         //TODO implement query building
                         throw new UnsupportedOperationException("Not implemented");
-                    } else if (annotation.hasValue("value")) {
-                        for (Value value : annotation.getValue("value").listValue()) {
-                            DataPoint point = this.pull(value);
+                    } else if (messageMeta.hasValue("value")) {
+                        String valueName = messageMeta.getString("valueName", "");
+                        for (Value value : messageMeta.getValue("value").listValue()) {
+                            DataPoint point = this.getIndex(valueName).pullOne(value);
                             dataAn.putNode(DataPoint.toMeta(point));
                         }
-                    } else if (annotation.hasNode("range")) {
-                        for (Meta rangeAn : annotation.getNodes("range")) {
+                    } else if (messageMeta.hasNode("range")) {
+                        String valueName = messageMeta.getString("valueName", "");                        
+                        for (Meta rangeAn : messageMeta.getNodes("range")) {
                             Value from = rangeAn.getValue("from", Value.getNull());
                             Value to = rangeAn.getValue("to", Value.getNull());
                             int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
-                            for (DataPoint point : this.pull(from, to, maxItems)) {
+                            for (DataPoint point : this.getIndex(valueName).pull(from, to, maxItems)) {
                                 dataAn.putNode(DataPoint.toMeta(point));
                             }
                             //PENDING add annotation from resulting DataSet?

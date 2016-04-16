@@ -15,12 +15,14 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.dependencies.DependencySet;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.data.Data;
 
 /**
- * Dependency resolver is the tool used to validate for dependency availability,
- * and provide it.
+ * Data resolver is the tool used to validate for dependency availability,
+ and provide it.
+ * <p>
+ *  The address of the dependency consists of stage and name. 
+ * </p>
  *
  * @author Alexander Nozik
  */
@@ -30,13 +32,13 @@ public interface DependencyResolver {
      * Provide dependency set for specific task with given configuration. Does
      * not perform validate operations, so it should be performed manually.
      *
-     * @param taskName
-     * @param meta
+     * @param stage
+     * @param name
      * @throws DependencyResolutionException if there is some problem while
      * resolving direct dependency.
      * @return
      */
-    DependencySet resolve(String taskName, Meta meta) throws DependencyResolutionException;
+    Data resolve(String stage, String name) throws DependencyResolutionException;
 
     /**
      * Check the whole dependency tree searching for:
@@ -44,17 +46,17 @@ public interface DependencyResolver {
      * <li>Missed dependencies</li>
      * <li>Main dependency type mismatch (secondary types by default are not
      * checked)</li>
-     * <li>Dependency graph cycles</li>
+     * <li>Data graph cycles</li>
      * </ul>
      * If caching is used, than all invalid cache entries are invalidated
      * automatically. It also generates appropriate log entries for warnings.
      *
-     * @param taskName
-     * @param meta
+     * @param stage
+     * @param name
      * @throws DependencyResolutionException if some problem with dependency
      * graph is found PENDING replace exception by returned object, say
      * DependencyConflict
      * @return true if everything is OK
      */
-    boolean validate(String taskName, Meta meta) throws DependencyResolutionException;
+    boolean validate(String stage, String name) throws DependencyResolutionException;
 }

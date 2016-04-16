@@ -15,6 +15,11 @@ import hep.dataforge.meta.Meta;
  */
 public interface Target {
 
+    public static final String TARGET_NAME_KEY = "name";
+    public static final String TARGET_TYPE_KEY = "type";
+
+    public static final String ENVELOPE_TARGET_NODE = "target";
+
     /**
      * Get a target meta designation for this target
      *
@@ -22,5 +27,18 @@ public interface Target {
      */
     @ValueDef(name = "type")
     @ValueDef(name = "name")
-    public Meta getTargetMeta();
+    public Meta targetDescription();
+
+    /**
+     * Check if this target for given envelope. By default envelope is accepted
+     * if target information in the envelope meta is missing or if target meta
+     * equals the one provided by {@code targetDescription} method.
+     *
+     * @param env
+     * @return
+     */
+    default boolean acceptEnvelope(Envelope env) {
+        return !env.meta().hasNode(ENVELOPE_TARGET_NODE)
+                || env.meta().getNode(ENVELOPE_TARGET_NODE).equals(targetDescription());
+    }
 }

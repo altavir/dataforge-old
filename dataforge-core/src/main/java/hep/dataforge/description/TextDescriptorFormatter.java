@@ -15,11 +15,10 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.description.ActionDescriptor;
+import hep.dataforge.exceptions.DescriptorException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
-import hep.dataforge.exceptions.DescriptorException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 

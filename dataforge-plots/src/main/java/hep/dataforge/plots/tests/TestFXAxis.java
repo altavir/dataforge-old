@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots.tests;
 
-import hep.dataforge.plots.fx.FXLogAxis;
 import hep.dataforge.plots.fx.FXTimeAxis;
 import java.time.Instant;
 import java.util.Timer;

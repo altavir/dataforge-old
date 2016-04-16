@@ -17,7 +17,6 @@ package hep.dataforge.io;
 
 import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
@@ -43,78 +42,26 @@ public class LineIterator implements Iterator<String>, AutoCloseable {
     private String cachedLine;
     private boolean finished = false;
 
-    /**
-     * <p>
-     * Constructor for LineIterator.</p>
-     *
-     * @param stream a {@link java.io.InputStream} object.
-     * @param charset a {@link java.lang.String} object.
-     * @throws java.io.UnsupportedEncodingException if any.
-     */
     public LineIterator(InputStream stream, String charset) throws UnsupportedEncodingException {
         this(new InputStreamReader(stream, charset));
     }
 
-    /**
-     * <p>
-     * Constructor for LineIterator.</p>
-     *
-     * @param stream a {@link java.io.InputStream} object.
-     */
     public LineIterator(InputStream stream) {
         this(new InputStreamReader(stream));
     }
 
-    /**
-     * <p>
-     * Constructor for LineIterator.</p>
-     *
-     * @param file a {@link java.io.File} object.
-     * @param charset a {@link java.lang.String} object.
-     * @throws java.io.FileNotFoundException if any.
-     * @throws java.io.UnsupportedEncodingException if any.
-     */
-    public LineIterator(File file, String charset) throws FileNotFoundException, UnsupportedEncodingException {
-        this(new FileInputStream(file), charset);
-    }
-
-    /**
-     * <p>
-     * Constructor for LineIterator.</p>
-     *
-     * @param file a {@link java.io.File} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public LineIterator(File file) throws FileNotFoundException {
         this(new FileReader(file));
     }
 
-    /**
-     * <p>
-     * Constructor for LineIterator.</p>
-     *
-     * @param reader a {@link java.io.Reader} object.
-     */
     public LineIterator(Reader reader) {
         this.reader = new BufferedReader(reader);
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>commentStr</code>.</p>
-     *
-     * @return the commentStr
-     */
     public String getCommentStr() {
         return commentStr;
     }
 
-    /**
-     * <p>
-     * Setter for the field <code>commentStr</code>.</p>
-     *
-     * @param commentStr the commentStr to set
-     */
     public void setCommentStr(String commentStr) {
         this.commentStr = commentStr;
     }
@@ -149,20 +96,14 @@ public class LineIterator implements Iterator<String>, AutoCloseable {
         return false;
     }
 
-    /**
-     * <p>
-     * isValidLine.</p>
-     *
-     * @param line a {@link java.lang.String} object.
-     * @return a boolean.
-     */
     protected boolean isValidLine(String line) {
         return !line.isEmpty() && !line.trim().startsWith(commentStr);
     }
 
     /**
      * {@inheritDoc}
-     * @return 
+     *
+     * @return
      */
     @Override
     public String next() {
