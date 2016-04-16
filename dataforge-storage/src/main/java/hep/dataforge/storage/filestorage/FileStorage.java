@@ -24,14 +24,12 @@ import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.Tag;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.storage.api.BinaryLoader;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
-import static hep.dataforge.storage.commons.EnvelopeCodes.BINARY_LOADER_TYPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.EVENT_LOADER_TYPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.POINT_LOADER_TYPE_CODE;
@@ -48,6 +46,8 @@ import org.apache.commons.vfs2.FileSystemException;
 import static org.apache.commons.vfs2.FileType.FOLDER;
 import org.apache.commons.vfs2.impl.DefaultFileMonitor;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.storage.api.ObjectLoader;
+import static hep.dataforge.storage.commons.EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
 
 /**
  * Сервер данных на локальных текстовых файлах.
@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  */
 @ValueDef(name = "path", info = "Path to storage root")
 @ValueDef(name = "monitor", type = "BOOLEAN", def = "false",
-        info = "Enable file sistem monitoring for sybchronous acess to single storage from different instances")
+        info = "Enable file sistem monitoring for synchronous acess to single storage from different instances")
 public class FileStorage extends AbstractStorage implements FileListener {
 
     public static final String LOADER_PATH_KEY = "path";
@@ -272,8 +272,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 return FileStateLoader.fromFile(this, file, isReadOnly());
             case EVENT_LOADER_TYPE_CODE:
                 return FileEventLoader.fromFile(this, file, isReadOnly());
-            case BINARY_LOADER_TYPE_CODE:
-
+            case OBJECT_LOADER_TYPE_CODE:
+                return FileObjectLoader.fromFile(this, file, isReadOnly());
             default:
                 throw new StorageException("The loader type with code " + Integer.toHexString(stamp.getDataType()) + " is not supported");
         }
@@ -305,8 +305,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 return createNewFileLoader(loaderConfiguration, ".points", EnvelopeCodes.POINT_LOADER_TYPE_CODE);
             case StateLoader.STATE_LOADER_TYPE:
                 return createNewFileLoader(loaderConfiguration, ".state", EnvelopeCodes.STATE_LOADER_TYPE_CODE);
-            case BinaryLoader.BINARY_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".binary", EnvelopeCodes.BINARY_LOADER_TYPE_CODE);
+            case ObjectLoader.OBJECT_LOADER_TYPE:
+                return createNewFileLoader(loaderConfiguration, ".binary", EnvelopeCodes.OBJECT_LOADER_TYPE_CODE);
             case EventLoader.EVENT_LOADER_TYPE:
                 return createNewFileLoader(loaderConfiguration, ".event", EnvelopeCodes.EVENT_LOADER_TYPE_CODE);
             default:

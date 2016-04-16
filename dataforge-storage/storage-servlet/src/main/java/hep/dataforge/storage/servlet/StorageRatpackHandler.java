@@ -16,13 +16,13 @@ import ratpack.handling.Handler;
 /**
  * Created by darksnake on 13-Dec-15.
  */
-public class SorageRatpackHandler implements Handler {
+public class StorageRatpackHandler implements Handler {
 
     private final Storage root;
 
     private final Map<String, SoftReference<Loader>> cache = new ConcurrentHashMap<>();
 
-    public SorageRatpackHandler(Storage root) {
+    public StorageRatpackHandler(Storage root) {
         this.root = root;
     }
 
@@ -48,15 +48,25 @@ public class SorageRatpackHandler implements Handler {
                     renderStates(ctx, (StateLoader) loader);
                     return;
                 case EventLoader.EVENT_LOADER_TYPE:
-                    ctx.render("Event loader view not yet implemented");
+                    renderEvents(ctx, (EventLoader) loader);
                     return;
                 case PointLoader.POINT_LOADER_TYPE:
                     renderPoints(ctx, (PointLoader) loader);
+                    return;
+                case ObjectLoader.OBJECT_LOADER_TYPE:
+                    renderObjects(ctx, (ObjectLoader) loader);
+                    return;
+                default:
+                    defaultRenderLoader(ctx, loader);
             }
         }
     }
 
-    private void renderStorageTree(Context ctx, Storage storage) {
+    protected void defaultRenderLoader(Context ctx, Loader loader) {
+        ctx.render("Loader view for loader " + loader.getName() + " not yet implemented");
+    }
+
+    protected void renderStorageTree(Context ctx, Storage storage) {
         try {
             ctx.getResponse().contentType("text/html");
             Template template = Utils.freemarkerConfig().getTemplate("StorageTemplate.ftl");
@@ -79,7 +89,7 @@ public class SorageRatpackHandler implements Handler {
         }
     }
 
-    private void renderStorage(StringBuilder b, Storage storage) throws StorageException {
+    protected void renderStorage(StringBuilder b, Storage storage) throws StorageException {
         b.append("<div class=\"node\">\n");
         if (!storage.loaders().isEmpty()) {
             b.append("<div class=\"leaf\">\n"
@@ -101,12 +111,12 @@ public class SorageRatpackHandler implements Handler {
         b.append("</div>\n");
     }
 
-    private void renderLoader(StringBuilder b, Loader loader) {
+    protected void renderLoader(StringBuilder b, Loader loader) {
         String href = "/storage?path=" + loader.getFullPath();
         b.append(String.format("<li><a href=\"%s\">%s</a> (%s)</li>", href, loader.getName(), loader.getType()));
     }
 
-    private void renderStates(Context ctx, StateLoader loader) {
+    protected void renderStates(Context ctx, StateLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
             Template template = Utils.freemarkerConfig().getTemplate("StateLoaderTemplate.ftl");
@@ -130,15 +140,22 @@ public class SorageRatpackHandler implements Handler {
         }
     }
 
-    private void renderPoints(Context ctx, PointLoader loader) {
+    protected void renderEvents(Context ctx, EventLoader loader) {
+        defaultRenderLoader(ctx, loader);
+    }
+
+    protected void renderObjects(Context ctx, ObjectLoader loader) {
+        defaultRenderLoader(ctx, loader);
+    }
+
+    protected void renderPoints(Context ctx, PointLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
             Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
 
             Map data = new HashMap(2);
 
-            
-            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName","timestamp");
+            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
             String from = ctx.getRequest().getQueryParams().get("from");
             String to = ctx.getRequest().getQueryParams().get("to");
             String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");

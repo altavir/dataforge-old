@@ -144,6 +144,10 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         }
     }
 
+    /**
+     * Save index to default file
+     * @throws StorageException 
+     */
     private synchronized void saveIndex() throws StorageException {
         File indexFile = getIndexFile();
         try {

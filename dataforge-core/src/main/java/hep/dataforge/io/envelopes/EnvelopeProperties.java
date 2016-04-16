@@ -8,6 +8,7 @@ package hep.dataforge.io.envelopes;
 import hep.dataforge.exceptions.PropertyCodeException;
 import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import java.nio.charset.Charset;
 import java.util.HashSet;
 import java.util.ServiceLoader;
@@ -30,10 +31,10 @@ public class EnvelopeProperties {
         charsets.add(new CompositePropertyValue(1, "US-ASCII"));
     }
 
-    public static void addCharset(int code, Charset charset){
+    public static void addCharset(int code, Charset charset) {
         charsets.add(new CompositePropertyValue(code, charset.name()));
     }
-    
+
     public static Value getCharsetValue(String charsetName) {
         for (Value val : charsets) {
             if (val.stringValue().equalsIgnoreCase(charsetName)) {
@@ -61,7 +62,11 @@ public class EnvelopeProperties {
     }
 
     public static Charset getCharset(Value val) {
-        return getCharset(val.stringValue());
+        if (val.valueType() == ValueType.NUMBER) {
+            return getCharset((short) val.intValue());
+        } else {
+            return getCharset(val.stringValue());
+        }
     }
 
     public static MetaType getType(String name) {

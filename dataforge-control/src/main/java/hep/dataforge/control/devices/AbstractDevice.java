@@ -190,6 +190,19 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         this.states.put(stateName, Value.NULL);
     }
 
+    /**
+     * Force invalidate and immediately recalculate state
+     *
+     * @param stateName
+     */
+    protected final void recalculateState(String stateName) {
+        try {
+            updateState(stateName, calculateState(stateName));
+        } catch (ControlException ex) {
+            notifyError("Can't calculate state " + stateName, ex);
+        }
+    }
+
     @Override
     public void command(String commandName, Value argument) throws ControlException {
         throw new ControlException("Command with name " + commandName + " not defined");
@@ -206,7 +219,9 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     public Value getState(String stateName) {
         return this.states.computeIfAbsent(stateName, (String t) -> {
             try {
-                return Value.of(calculateState(stateName));
+                Value newState = Value.of(calculateState(stateName));
+                notifyStateChanged(stateName, newState);
+                return newState;
             } catch (ControlException ex) {
                 notifyError("Can't calculate state " + stateName, ex);
                 return Value.NULL;
@@ -237,7 +252,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
         this.connections.put(connection, Arrays.asList(roles));
         try {
-            getLogger().debug("Opening connection {}",connection.toString());
+            getLogger().debug("Opening connection {}", connection.toString());
             connection.open(this);
         } catch (Exception ex) {
             this.notifyError("Can not open connection", ex);

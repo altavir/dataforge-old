@@ -30,6 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Map;
+import org.apache.commons.vfs2.FileNotFoundException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.RandomAccessContent;
 import org.apache.commons.vfs2.VFS;
@@ -51,7 +52,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private final String uri;
     private FileObject file;
     private Meta meta;
-    private RandomAccessContent content;
+    private RandomAccessContent randomAccess;
     private Map<String, Value> properties;
     private long dataOffset;
     private long dataSize;
@@ -63,28 +64,29 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public synchronized void close() throws Exception {
-        if (content != null) {
+        if (randomAccess != null) {
             LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope content " + uri);
-            content.close();
-            content = null;
+            randomAccess.close();
+            randomAccess = null;
         }
         if (file != null) {
             LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope FileObject " + uri);
             file.close();
             file = null;
         }
+        dataOffset = 0;
     }
 
     @Override
     public Binary getData() {
         try {
             if (dataSize == INFINITE_DATA_SIZE) {
-                dataSize = getContent().length() - dataOffset;
+                dataSize = getRandomAccess().length() - getDataOffset();
             }
 
-            getContent().seek(dataOffset);
+            getRandomAccess().seek(getDataOffset());
 
-            return new BufferedBinary(readBlock((int) dataOffset, (int) dataSize));
+            return new BufferedBinary(readBlock((int) getDataOffset(), (int) dataSize));
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -100,7 +102,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         if (properties == null) {
             try {
                 getFile();
-            } catch (IOException | ParseException ex) {
+            } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
         }
@@ -109,7 +111,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public String readLine(int offset) throws IOException {
-        getContent().seek(offset);
+        getRandomAccess().seek(offset);
         return readLine();
     }
 
@@ -121,10 +123,10 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      */
     public String readLine() throws IOException {
         ByteBuffer buffer = ByteBuffer.allocate(1024);
-        byte nextChar = getContent().readByte();
-        while (getContent().getFilePointer() < getContent().length() && nextChar != '\r') {
+        byte nextChar = getRandomAccess().readByte();
+        while (getRandomAccess().getFilePointer() < getRandomAccess().length() && nextChar != '\r') {
             buffer.put(nextChar);
-            nextChar = getContent().readByte();
+            nextChar = getRandomAccess().readByte();
 
             if (!buffer.hasRemaining()) {
                 ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + 1024);
@@ -136,14 +138,14 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public void seek(long pos) throws IOException {
-        getContent().seek(pos);
+        getRandomAccess().seek(pos);
     }
 
     public ByteBuffer readBlock(int offset, int length) throws IOException {
-        getContent().seek(offset);
+        getRandomAccess().seek(offset);
         ByteBuffer block = ByteBuffer.allocate(length);
         while (block.hasRemaining()) {
-            block.put(getContent().readByte());
+            block.put(getRandomAccess().readByte());
         }
 //        content.getChannel().read(block);
         return block;
@@ -156,7 +158,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     private ByteBuffer getHeader() throws IOException {
-        return readBlock(0, (int) dataOffset);
+        return readBlock(0, (int) getDataOffset());
     }
 
     /**
@@ -169,13 +171,11 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         try (OutputStream stream = getFile().getContent().getOutputStream(false)) {
             stream.write(header.array());
             setDataSize(0);
-        } catch (ParseException ex) {
-            throw new RuntimeException(ex);
         }
     }
 
     public long readerPos() throws IOException {
-        return getContent().getFilePointer();
+        return getRandomAccess().getFilePointer();
     }
 
     /**
@@ -184,14 +184,14 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     public void resetPos() throws IOException {
-        getContent().seek(dataOffset);
+        getRandomAccess().seek(getDataOffset());
     }
 
     synchronized protected void setDataSize(int size) throws IOException {
-        long offset = getContent().getFilePointer();
-        getContent().seek(DATA_SIZE_PROPERTY_OFFSET);//seeking binary 
-        getContent().writeInt(size); // write 4 bytes
-        getContent().seek(offset);//return to the initial position
+        long offset = getRandomAccess().getFilePointer();
+        getRandomAccess().seek(DATA_SIZE_PROPERTY_OFFSET);//seeking binary 
+        getRandomAccess().writeInt(size); // write 4 bytes
+        getRandomAccess().seek(offset);//return to the initial position
         properties.put(DATA_LENGTH_KEY, Value.of(size));//update property
     }
 
@@ -206,10 +206,10 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         if (isReadOnly()) {
             throw new IOException("Trying to write to readonly file " + uri);
         } else {
-            getContent().seek(eofPos());
-            getContent().write(bytes);
+            getRandomAccess().seek(eofPos());
+            getRandomAccess().write(bytes);
             dataSize += bytes.length;
-            setDataSize((int) (eofPos() - getContent().getFilePointer()));
+            setDataSize((int) (eofPos() - getRandomAccess().getFilePointer()));
         }
     }
 
@@ -224,7 +224,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public long eofPos() throws IOException {
-        return getContent().length();
+        return getRandomAccess().length();
     }
 
     public boolean isReadOnly() {
@@ -245,45 +245,48 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     public boolean hasData() {
         try {
-            return this.eofPos() > this.dataOffset;
+            return this.eofPos() > this.getDataOffset();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
     public BufferedInputStream getDataStream() throws IOException {
-        BufferedInputStream stream = new BufferedInputStream(getContent().getInputStream());
-        stream.skip(dataOffset);
+        BufferedInputStream stream = new BufferedInputStream(getFile().getContent().getInputStream());
+        stream.skip(getDataOffset());
         return stream;
     }
 
     /**
      * @return the content
      */
-    private synchronized RandomAccessContent getContent() {
+    private synchronized RandomAccessContent getRandomAccess() {
         try {
             if (!getFile().getContent().isOpen()) {
-                content = null;
+                randomAccess = null;
             }
-            if (content == null) {
+            if (randomAccess == null) {
                 if (isReadOnly()) {
-                    content = getFile().getContent().getRandomAccessContent(RandomAccessMode.READ);
+                    randomAccess = getFile().getContent().getRandomAccessContent(RandomAccessMode.READ);
                 } else {
-                    content = getFile().getContent().getRandomAccessContent(RandomAccessMode.READWRITE);
+                    randomAccess = getFile().getContent().getRandomAccessContent(RandomAccessMode.READWRITE);
                 }
             }
-        } catch (IOException | ParseException ex) {
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
-        return content;
+        return randomAccess;
     }
 
     /**
      * @return the file
      */
-    private synchronized FileObject getFile() throws IOException, ParseException {
+    private synchronized FileObject getFile() throws IOException {
         if (this.file == null) {
             this.file = VFS.getManager().resolveFile(uri);
+            if (!file.exists()) {
+                throw new java.io.FileNotFoundException();
+            }
             try (InputStream stream = file.getContent().getInputStream()) {
                 LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
                 Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
@@ -294,5 +297,19 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             }
         }
         return this.file;
+    }
+
+    /**
+     * @return the dataOffset
+     */
+    private long getDataOffset() {
+        if (dataOffset == 0) {
+            try {
+                getFile();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+        return dataOffset;
     }
 }

@@ -18,7 +18,6 @@ package hep.dataforge.io.envelopes;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
-import java.nio.ByteBuffer;
 import java.util.Map;
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;

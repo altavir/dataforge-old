@@ -26,6 +26,7 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
 import java.util.Arrays;
+import hep.dataforge.storage.api.ObjectLoader;
 
 /**
  *
@@ -90,6 +91,32 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
+    public static ObjectLoader buildObjectLoder(Storage storage, String loaderName, String shelfName)
+            throws StorageException {
+        if (shelfName != null && !shelfName.isEmpty()) {
+            if (!storage.hasShelf(shelfName)) {
+                storage = storage.buildShelf(shelfName, null);
+            } else {
+                storage = storage.getShelf(shelfName);
+            }
+        }
+        Meta loaderAn = new MetaBuilder("loader")
+                .putValue(Loader.LOADER_NAME_KEY, loaderName)
+                .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
+                .build();
+
+        return (ObjectLoader) storage.buildLoader(loaderAn);
+    }    
+    
+    /**
+     * A helper to create specific loader in the storage
+     *
+     * @param storage
+     * @param loaderName
+     * @param shelfName
+     * @return
+     * @throws StorageException
+     */
     public static StateLoader buildStateLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         if (shelfName != null && !shelfName.isEmpty()) {
@@ -133,7 +160,7 @@ public class LoaderFactory {
         return (EventLoader) storage.buildLoader(loaderAn);
     }
 
-    public static PointLoader getDataLoader(Storage storage, String name) throws StorageException {
+    public static PointLoader getPointLoader(Storage storage, String name) throws StorageException {
         if (storage.hasLoader(name)) {
             Loader loader = storage.getLoader(name);
             if (loader instanceof PointLoader) {

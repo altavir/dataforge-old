@@ -35,7 +35,7 @@ public class TestStorageServlet {
         RatpackServer ratpack = RatpackServer.start((RatpackServerSpec server) -> server
                 .serverConfig((ServerConfigBuilder config) -> config.port(8337))
                 .handlers((Chain chain) -> chain
-                        .get("storage", new SorageRatpackHandler(storage))
+                        .get("storage", new StorageRatpackHandler(storage))
                 )
         );
         System.out.println("Starting test numass storage servlet in " + path);

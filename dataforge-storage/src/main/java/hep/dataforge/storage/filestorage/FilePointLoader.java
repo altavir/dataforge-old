@@ -63,7 +63,7 @@ public class FilePointLoader extends AbstractPointLoader {
     private PointParser parser;
 
     /**
-     * An envelop used for pushing
+     * An envelope used for pushing
      */
     private FileEnvelope envelope;
 

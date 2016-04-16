@@ -27,7 +27,6 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.HashMap;
@@ -105,7 +104,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         Map<String, Value> properties = readProperties(bis);
         
         if(properties == null){
-            return null;
+            throw new IOException("Empty envelope");
         }
         
         if (overrideProperties != null) {
