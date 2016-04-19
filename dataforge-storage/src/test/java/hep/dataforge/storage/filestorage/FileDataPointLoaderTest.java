@@ -23,6 +23,7 @@ import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
+import hep.dataforge.storage.commons.ValueIndex;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -88,7 +89,7 @@ public class FileDataPointLoaderTest {
 
         System.out.println("pull");
         //Index<DataPoint> index = loader.getIndex("key");
-        Index<DataPoint> index = ((FilePointLoader)loader).getMapIndex("key");
+        ValueIndex<DataPoint> index = ((FilePointLoader)loader).getMapIndex("key");
         DataPoint dp = index.pull(24,26).get(0);
 //        DataPoint dp2 = index.pullOne(Value.of(65536));
         assertEquals(5d, dp.getValue("sqrt").doubleValue(), 0.001);

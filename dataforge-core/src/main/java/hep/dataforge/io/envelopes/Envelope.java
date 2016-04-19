@@ -54,15 +54,4 @@ public interface Envelope extends Annotated {
      */
     Binary getData();
 
-    /**
-     * Get data in future using asynchronous call
-     *
-     * @return
-     */
-    default Future<Binary> getDataInFuture() {
-        FutureTask<Binary> res = new FutureTask<>(() -> getData());
-        res.run();
-        return res;
-    }
-
 }

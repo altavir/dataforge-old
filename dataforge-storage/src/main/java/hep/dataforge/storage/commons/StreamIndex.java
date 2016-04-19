@@ -21,7 +21,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-public abstract class StreamIndex<K, T> implements Index<T>, Iterable<K> {
+public abstract class StreamIndex<K, T> implements ValueIndex<T>, Iterable<K> {
 
     @Override
     public abstract Iterator<K> iterator();

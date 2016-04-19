@@ -43,6 +43,7 @@ public class EnvelopeCodes {
     public static final int EVENT_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x45564C4F;//EVLO
     public static final int STATE_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x53544C4F;//STLO
     public static final int OBJECT_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x4F424C4f;//OBLO   	
+    public static final int ENVELOPE_LOADER_TYPE_CODE = LOADER_TYPE_CODE | 0x454e4c4f;//ENLO   	
 
     
     //Message data types

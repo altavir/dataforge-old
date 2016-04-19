@@ -21,6 +21,7 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
 import java.util.Collection;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.storage.commons.ValueIndex;
 
 /**
  * PointLoader is intended to load a set of datapoints. The loader can have one
@@ -64,7 +65,7 @@ public interface PointLoader extends Loader, Iterable<DataPoint> {
      * @param name
      * @return
      */
-    Index<DataPoint> getIndex(String name);
+    ValueIndex<DataPoint> getIndex(String name);
 
     /**
      * Push the DataPoint to the loader.

@@ -6,92 +6,37 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.exceptions.StorageQueryException;
-import hep.dataforge.values.Value;
-import java.util.List;
-import hep.dataforge.points.PointSet;
+import hep.dataforge.meta.Meta;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
- * Some indexed reader. Each index pull operation should be run in a separate
- * process
  *
  * @author Alexander Nozik
  */
 public interface Index<T> {
 
     /**
-     * Search for the index field value closest to provided one. Specific search
-     * mechanism could differ for different loaders.
-     *
-     * @param value
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    List<T> pull(Value value) throws StorageException;
-
-    default List<T> pull(Object value) throws StorageException {
-        return pull(Value.of(value));
-    }
-    
-    /**
-     * Pull the first entry with given key
-     * @param value
+     * Return a stream of suppliers of objects corresponding to query
+     * @param query
      * @return
      * @throws StorageException 
      */
-    default T pullOne(Value value) throws StorageException{
-        List<T> res = pull(value);
-        if(!res.isEmpty()){
-            return res.get(0);
-        } else {
-            return null;
-        }
-    }
+    Stream<Supplier<T>> query(Meta query) throws StorageException;
 
-    /**
-     * Возвращает список точек, ключ которых лежит строго в пределах от from до
-     * to. Работает только для сравнимых значений (для строк может выдавать
-     * ерунду)
-     *
-     * @param from
-     * @param to
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    List<T> pull(Value from, Value to) throws StorageException;
-
-    default List<T> pull(Object from, Object to) throws StorageException {
-        return pull(Value.of(from), Value.of(to));
-    }
-
-    /**
-     * Возвращает список точек, ключ которых лежит строго в пределах от from до
-     * to. В случае если число точек в диапазоне превышает {@code maxItems},
-     * выкидывает не все точки, а точки с некоторым шагом. Методика фильтрации
-     * специфична за загрузчика.
-     *
-     * @param from
-     * @param to
-     * @param maxItems
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    List<T> pull(Value from, Value to, int maxItems) throws StorageException;
-
-    default List<T> pull(Object from, Object to, int maxItems) throws StorageException {
-        return pull(Value.of(from), Value.of(to), maxItems);
-    }
     
     /**
-     * Pull a number of points according to given Query. If query is supported
-     * but no matching results found, empty list is returned. The results are
-     * supposed to be ordered, but it is not guaranteed.
-     *
-     * @param query
-     * @return
-     * @throws StorageQueryException
+     * Create new index that uses a transformation for each of this index result items.
+     * @param <R>
+     * @param transformation
+     * @return 
      */
-    default PointSet pull(Query query) throws StorageException{
-        throw new StorageException("Query not supported");
+    default <R> Index<R> transform(Function<T, R> transformation) {
+        final Index<T> theIndex = this;
+        return (Meta query) -> theIndex
+                .query(query)
+                .map((Supplier<T> t) -> () -> transformation.apply(t.get()));
     }
+    
 }

@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  * @param K intermediate key representation for entries.
  */
-public abstract class MapIndex<T, K> implements Index<T> {
+public abstract class MapIndex<T, K> implements ValueIndex<T> {
 
     protected TreeMap<Value, List<K>> map = new TreeMap<>();
 

@@ -30,7 +30,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Map;
-import org.apache.commons.vfs2.FileNotFoundException;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.RandomAccessContent;
 import org.apache.commons.vfs2.VFS;
@@ -54,8 +53,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private Meta meta;
     private RandomAccessContent randomAccess;
     private Map<String, Value> properties;
-    private long dataOffset;
-    private long dataSize;
+    private long dataOffset = -1;
+    private long dataSize = -1;
 
     public FileEnvelope(String uri, boolean readOnly) throws IOException, ParseException {
         this.uri = uri;
@@ -64,6 +63,9 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public synchronized void close() throws Exception {
+        dataOffset = -1;
+        dataSize = -1;
+        properties = null;
         if (randomAccess != null) {
             LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope content " + uri);
             randomAccess.close();
@@ -74,7 +76,6 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             file.close();
             file = null;
         }
-        dataOffset = 0;
     }
 
     @Override
@@ -101,7 +102,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     public Map<String, Value> getProperties() {
         if (properties == null) {
             try {
-                getFile();
+                open();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }
@@ -203,6 +204,9 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     synchronized public void append(byte[] bytes) throws IOException {
+        if (dataSize < 0) {
+            open();
+        }
         if (isReadOnly()) {
             throw new IOException("Trying to write to readonly file " + uri);
         } else {
@@ -287,25 +291,33 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             if (!file.exists()) {
                 throw new java.io.FileNotFoundException();
             }
-            try (InputStream stream = file.getContent().getInputStream()) {
-                LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
-                Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
-                this.properties = header.getProperties();
-                meta = header.meta();
-                dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
-                dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
-            }
         }
         return this.file;
+    }
+
+    /**
+     * Setup envelope properties, data offset and data size
+     *
+     * @throws IOException
+     */
+    private void open() throws IOException {
+        try (InputStream stream = getFile().getContent().getInputStream()) {
+            LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
+            Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
+            this.properties = header.getProperties();
+            meta = header.meta();
+            dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
+            dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
+        }
     }
 
     /**
      * @return the dataOffset
      */
     private long getDataOffset() {
-        if (dataOffset == 0) {
+        if (dataOffset <= 0) {
             try {
-                getFile();
+                open();
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

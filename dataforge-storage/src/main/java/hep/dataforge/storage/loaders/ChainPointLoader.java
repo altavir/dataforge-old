@@ -25,6 +25,7 @@ import hep.dataforge.storage.commons.StorageUtils;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.storage.commons.ValueIndex;
 
 /**
  * The point loader that mirrors all points to the secondary storage
@@ -69,7 +70,7 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public Index<DataPoint> getIndex(String name) {
+    public ValueIndex<DataPoint> getIndex(String name) {
         return primaryLoader.getIndex(name);
     }
 

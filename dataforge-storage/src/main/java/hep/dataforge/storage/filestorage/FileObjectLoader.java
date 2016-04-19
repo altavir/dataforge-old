@@ -26,6 +26,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
 /**
+ * A file loader to store Serializable java objects
  *
  * @author Alexander Nozik
  */
@@ -118,11 +119,6 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
     protected synchronized Map<String, T> readDataMap() throws StorageException {
         try (ObjectInputStream ois = new ObjectInputStream(getEnvelope().getDataStream())) {
             return (Map<String, T>) ois.readObject();
-//            if (ois.available() > 0) {
-//
-//            } else {
-//                return new HashMap<>();
-//            }
         } catch (Exception ex) {
             return new HashMap<>();
             //throw new StorageException(ex);

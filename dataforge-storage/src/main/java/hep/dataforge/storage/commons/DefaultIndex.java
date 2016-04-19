@@ -6,7 +6,6 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.api.Index;
 import hep.dataforge.values.Value;
 import java.util.Iterator;
 import java.util.List;
@@ -21,7 +20,7 @@ import javafx.util.Pair;
  * @author Alexander Nozik
  * @param <T>
  */
-public class DefaultIndex<T> implements Index<T>, Iterable<Pair<Integer, T>> {
+public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>> {
 
     private final Iterable<T> iterable;
 

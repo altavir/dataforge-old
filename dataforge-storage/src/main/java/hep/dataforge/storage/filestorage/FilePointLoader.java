@@ -31,6 +31,7 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 import hep.dataforge.points.PointSet;
 import hep.dataforge.points.PointParser;
+import hep.dataforge.storage.commons.ValueIndex;
 
 /**
  *
@@ -203,7 +204,7 @@ public class FilePointLoader extends AbstractPointLoader {
 //    public Index<DataPoint> buildIndex(Meta indexMeta) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }
-    public Index<DataPoint> getMapIndex(String name) {
+    public ValueIndex<DataPoint> getMapIndex(String name) {
         return new FilePointIndex(name, getStorage().getContext(), () -> {
             try {
                 return getEnvelope();
@@ -214,7 +215,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public Index<DataPoint> getIndex(String name) {
+    public ValueIndex<DataPoint> getIndex(String name) {
         if (name == null || name.isEmpty()) {
             return new DefaultIndex<>(this);
         } else {

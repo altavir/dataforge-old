@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.StorageException;
 import java.util.Collection;
 
 /**
- * The binary loader contains one o several binary fragments with common loader annotation.
+ * The Object loader contains one o several Java object fragments with common loader annotation.
  * @author darksnake
  * @param <T>
  */
