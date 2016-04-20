@@ -6,8 +6,8 @@
 package hep.dataforge.fx;
 
 import de.jensd.shichimifx.utils.ConsoleDude;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
 import javafx.scene.Scene;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.ToggleButton;
@@ -22,6 +22,7 @@ public class ConsoleWindow {
 
     private Stage stage;
     private TextArea consolePane;
+    
 
     public ConsoleWindow(ToggleButton button) {
         consolePane = new TextArea();
@@ -43,14 +44,24 @@ public class ConsoleWindow {
                 onHide(consolePane);
             }
         });
+        consolePane.textProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {
+            //FIXME fix this
+            if(newValue.length()> 2000){
+                consolePane.clear();
+            }
+        });
     }
 
     public Stage getStage() {
         return stage;
     }
 
-    public TextArea getTextArea() {
-        return consolePane;
+    public void appendText(String text) {
+        consolePane.appendText(text);
+    }
+
+    public void appendLine(String text) {
+        consolePane.appendText(text + "\r\n");
     }
 
     protected void onShow(TextArea textArea) {
