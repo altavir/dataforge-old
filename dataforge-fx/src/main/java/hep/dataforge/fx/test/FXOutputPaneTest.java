@@ -20,11 +20,16 @@ public class FXOutputPaneTest extends Application {
     public void start(Stage primaryStage) {
         
         FXDataOutputPane out = new FXDataOutputPane();
+        out.setMaxLines(5);
         
-        out.appendLine("a\tb\tc");
-        out.appendLine("aaaaa\tbbb\tccc");
+        for (int i = 0; i < 12; i++) {
+            out.appendLine("my text number " + i);
+        }
         
-        Scene scene = new Scene(out, 400, 400);
+//        out.appendLine("a\tb\tc");
+//        out.appendLine("aaaaa\tbbb\tccc");
+        
+        Scene scene = new Scene(out.getHolder(), 400, 400);
         
         primaryStage.setTitle("FXOutputPaneTest");
         primaryStage.setScene(scene);

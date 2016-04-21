@@ -8,9 +8,10 @@ package hep.dataforge.fx;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.PrintStream;
-import java.util.List;
 import javafx.application.Platform;
+import javafx.beans.property.IntegerProperty;
+import javafx.beans.property.SimpleIntegerProperty;
+import javafx.collections.ObservableList;
 import javafx.scene.layout.AnchorPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.ReadOnlyStyledDocument;
@@ -20,17 +21,20 @@ import org.fxmisc.richtext.ReadOnlyStyledDocument;
  *
  * @author Alexander Nozik
  */
-public class FXDataOutputPane extends AnchorPane {
+public class FXDataOutputPane {
 
     private static final int DEFAULT_TAB_STOP_SIZE = 12;
     private static final int SYMBOL_WIDTH = 8;
 
+    private final AnchorPane holder;
     private final InlineCssTextArea textArea;
+
+    private final IntegerProperty maxLinesProperty = new SimpleIntegerProperty(-1);
 
     /**
      * Tab stop positions
      */
-    private List<Integer> tabstops;
+    private ObservableList<Integer> tabstops;
 
     /**
      * current tab stop
@@ -40,15 +44,33 @@ public class FXDataOutputPane extends AnchorPane {
     public FXDataOutputPane() {
         textArea = new InlineCssTextArea();
         textArea.setEditable(false);
-
-        super.getChildren().add(textArea);
+        holder = new AnchorPane(textArea);
         AnchorPane.setBottomAnchor(textArea, 5d);
         AnchorPane.setTopAnchor(textArea, 5d);
         AnchorPane.setLeftAnchor(textArea, 5d);
         AnchorPane.setRightAnchor(textArea, 5d);
     }
 
+    /**
+     * The holder Anchor pane
+     *
+     * @return
+     */
+    public AnchorPane getHolder() {
+        return holder;
+    }
+
+    public IntegerProperty maxLinesProperty() {
+        return maxLinesProperty;
+    }
+
+    public void setMaxLines(int maxLines) {
+        this.maxLinesProperty.set(maxLines);
+    }
+
     private synchronized void append(String text, String style) {
+        // Unifying newlines
+        text = text.replace("\r\n", "\n");
         if (text.contains("\n")) {
             String[] lines = text.split("\n");
             for (int i = 0; i < lines.length - 1; i++) {
@@ -81,9 +103,17 @@ public class FXDataOutputPane extends AnchorPane {
         //textArea.append(ReadOnlyStyledDocument.fromString("\t", "-fx-min-width: " + getTabWith()));
     }
 
+    private int countLines() {
+        return (int) textArea.getText().chars().filter((int value) -> value == '\n').count();
+    }
+
     private synchronized void newline() {
+        while (maxLinesProperty.get() > 0 && countLines() >= maxLinesProperty.get()) {
+            //FIXME bad way to counts remove lines
+            textArea.replaceText(0, textArea.getText().indexOf("\n") + 1, "");
+        }
         currentTab = 0;
-        textArea.appendText("\n");
+        textArea.appendText("\r\n");
     }
 
     private int getTabWith() {
@@ -102,6 +132,12 @@ public class FXDataOutputPane extends AnchorPane {
         } else {
             return tabstops.get(num);
         }
+    }
+
+    public synchronized void append(String text) {
+        Platform.runLater(() -> {
+            append(text, "");
+        });
     }
 
     public synchronized void appendLine(String line) {
@@ -125,13 +161,12 @@ public class FXDataOutputPane extends AnchorPane {
         Platform.runLater(() -> textArea.clear());
     }
 
-    public OutputStream getOutputStream(OutputStream forward) {
+    public OutputStream getOutputStream() {
         return new ByteArrayOutputStream() {
 
-            private final StringBuilder buffer = new StringBuilder(80);
-            private final String EOL = "\n";
-            private final PrintStream printStream = forward == null ? null : new PrintStream(forward);
-
+//            private final StringBuilder buffer = new StringBuilder(80);
+//            private final String EOL = "\n";
+//            private final PrintStream printStream = forward == null ? null : new PrintStream(forward);
             @Override
             public synchronized void flush() throws IOException {
                 String text = toString();
@@ -141,29 +176,6 @@ public class FXDataOutputPane extends AnchorPane {
                 append(text);
                 reset();
             }
-
-            private synchronized void append(String text) {
-                if (isEmpty()) {
-                    buffer.setLength(0);
-                }
-                if (EOL.equals(text)) {
-                    buffer.append(text);
-                } else {
-                    buffer.append(text);
-                    clearBuffer();
-                }
-            }
-
-            private synchronized void clearBuffer() {
-                String line = buffer.toString();
-                appendLine(line);
-
-                if (printStream != null) {
-                    printStream.print(line);
-                }
-                buffer.setLength(0);
-            }
-
         };
     }
 

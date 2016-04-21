@@ -10,6 +10,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 /**
@@ -67,12 +69,46 @@ public class ProcessManager implements Encapsulated {
      * @param runnable
      * @return
      */
-    public synchronized Process post(String processName, Runnable runnable) {
+    public Process post(String processName, Runnable runnable) {
         return post(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 
-    public synchronized <U> Process post(String processName, Supplier<U> sup) {
+    public <U> Process post(String processName, Supplier<U> sup) {
         return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
+    }
+
+    public Process post(String processName, Consumer<Callback> con) {
+        Callback callback = createCallback(processName);
+        return post(processName, () -> con.accept(callback));
+    }
+
+    public <U> Process post(String processName, Function<Callback, U> func) {
+        Callback callback = createCallback(processName);
+        return post(processName, () -> func.apply(callback));
+    }
+
+    private Callback createCallback(String processName) {
+        return new Callback() {
+            @Override
+            public ProcessManager getManager() {
+                return ProcessManager.this;
+            }
+
+            @Override
+            public void updateProgress(double progress, double maxProgress) {
+                ProcessManager.this.updateProgress(processName, progress, maxProgress);
+            }
+
+            @Override
+            public void updateTitle(String message) {
+                ProcessManager.this.updateTitle(processName, message);
+            }
+
+            @Override
+            public void updateMessage(String message) {
+                ProcessManager.this.updateMessage(processName, message);
+            }
+        };
     }
 
     public synchronized <U> Process post(String processName, CompletableFuture<U> task) {
@@ -190,15 +226,22 @@ public class ProcessManager implements Encapsulated {
     public void cancel(String processName, boolean interrupt) {
         findProcess(processName).cancel(interrupt);
     }
-    
-    public void cleanup(){
+
+    public void cleanup() {
         this.rootProcess.cleanup();
     }
 
-    public static interface ProgressCallback {
+    /**
+     * A process manager callback
+     */
+    public static interface Callback {
 
-        public void updateProgress(String processName, double progress, double maxProgress);
+        ProcessManager getManager();
 
-        public void updateMessage(String processName, String message);
+        void updateProgress(double progress, double maxProgress);
+
+        void updateTitle(String message);
+
+        void updateMessage(String message);
     }
 }
