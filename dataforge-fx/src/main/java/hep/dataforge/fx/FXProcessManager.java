@@ -5,7 +5,7 @@
  */
 package hep.dataforge.fx;
 
-import hep.dataforge.context.Process;
+import hep.dataforge.context.DFProcess;
 import hep.dataforge.context.ProcessManager;
 import java.util.concurrent.CompletableFuture;
 import javafx.application.Platform;
@@ -27,8 +27,8 @@ public class FXProcessManager extends ProcessManager {
 //    private final Map<String, ProcessTask> tasks = new HashMap<>();
 
     @Override
-    public synchronized <U> Process post(String processName, CompletableFuture<U> task) {
-        Process proc = super.post(processName, task);
+    public synchronized <U> DFProcess post(String processName, CompletableFuture<U> task) {
+        DFProcess proc = super.post(processName, task);
         ProcessTask fxTask = new ProcessTask(proc);
         Platform.runLater(() -> {
             view.getTasks().add(fxTask);
@@ -51,9 +51,9 @@ public class FXProcessManager extends ProcessManager {
 
     private class ProcessTask extends Task {
 
-        private final Process proc;
+        private final DFProcess proc;
 
-        public ProcessTask(Process proc) {
+        public ProcessTask(DFProcess proc) {
             this.proc = proc;
             updateMessage(proc.getMessage());
             proc.messageProperty().addListener((ObservableValue<? extends String> observable, String oldValue, String newValue) -> {

@@ -23,7 +23,7 @@ public class ProcessManager implements Encapsulated {
     /**
      * root process map
      */
-    private final Process rootProcess = new Process("root");
+    private final DFProcess rootProcess = new DFProcess("root");
 
     /**
      * A context for this process manager
@@ -41,11 +41,11 @@ public class ProcessManager implements Encapsulated {
         this.context = context;
     }
 
-    protected Process buildProcess(String processName, CompletableFuture future) {
+    protected DFProcess buildProcess(String processName, CompletableFuture future) {
         return rootProcess.addChild(processName, future);
     }
 
-    public Process findProcess(String processName) {
+    public DFProcess findProcess(String processName) {
         return rootProcess.findProcess(processName);
     }
 
@@ -69,49 +69,29 @@ public class ProcessManager implements Encapsulated {
      * @param runnable
      * @return
      */
-    public Process post(String processName, Runnable runnable) {
+    public DFProcess post(String processName, Runnable runnable) {
         return post(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 
-    public <U> Process post(String processName, Supplier<U> sup) {
+    public <U> DFProcess post(String processName, Supplier<U> sup) {
         return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
     }
 
-    public Process post(String processName, Consumer<Callback> con) {
+    public DFProcess post(String processName, Consumer<Callback> con) {
         Callback callback = createCallback(processName);
         return post(processName, () -> con.accept(callback));
     }
 
-    public <U> Process post(String processName, Function<Callback, U> func) {
+    public <U> DFProcess post(String processName, Function<Callback, U> func) {
         Callback callback = createCallback(processName);
         return post(processName, () -> func.apply(callback));
     }
 
     private Callback createCallback(String processName) {
-        return new Callback() {
-            @Override
-            public ProcessManager getManager() {
-                return ProcessManager.this;
-            }
-
-            @Override
-            public void updateProgress(double progress, double maxProgress) {
-                ProcessManager.this.updateProgress(processName, progress, maxProgress);
-            }
-
-            @Override
-            public void updateTitle(String message) {
-                ProcessManager.this.updateTitle(processName, message);
-            }
-
-            @Override
-            public void updateMessage(String message) {
-                ProcessManager.this.updateMessage(processName, message);
-            }
-        };
+        return new Callback(this, processName);
     }
 
-    public synchronized <U> Process post(String processName, CompletableFuture<U> task) {
+    public synchronized <U> DFProcess post(String processName, CompletableFuture<U> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
         CompletableFuture future = task
                 .whenComplete((U res, Throwable ex) -> {
@@ -174,7 +154,8 @@ public class ProcessManager implements Encapsulated {
      * @param exception
      */
     protected void onProcessException(String processName, Throwable exception) {
-        getContext().getLogger().debug("Process '{}' finished with exception: {}", processName, exception.getMessage());
+        getContext().getLogger().error(String.format("Process '%s' finished with exception: %s", processName, exception.getMessage()),
+                exception);
     }
 
     /**
@@ -197,7 +178,7 @@ public class ProcessManager implements Encapsulated {
      */
     public void updateProgress(String processName, double progress, double maxProgress) {
         //TODO check calling thread
-        rootProcess.findProcess(processName).setProgress(progress, maxProgress);
+        updateProcess(processName, p -> p.setProgress(progress, maxProgress));
     }
 
     /**
@@ -209,11 +190,20 @@ public class ProcessManager implements Encapsulated {
      */
     public void updateMessage(String processName, String message) {
         //TODO check calling thread
-        rootProcess.findProcess(processName).setMessage(message);
+        updateProcess(processName, p -> p.setMessage(message));
     }
 
     public void updateTitle(String processName, String title) {
-        rootProcess.findProcess(processName).setTitle(title);
+        updateProcess(processName, p -> p.setTitle(title));
+    }
+
+    private void updateProcess(String processName, Consumer<DFProcess> consumer) {
+        DFProcess p = rootProcess.findProcess(processName);
+        if (p != null) {
+            consumer.accept(p);
+        } else {
+            getContext().getLogger().warn("Can't find process with name {}", processName);
+        }
     }
 
     /**
@@ -234,14 +224,47 @@ public class ProcessManager implements Encapsulated {
     /**
      * A process manager callback
      */
-    public static interface Callback {
+    public static class Callback {
 
-        ProcessManager getManager();
+        private final ProcessManager manager;
+        private final String processName;
 
-        void updateProgress(double progress, double maxProgress);
+        public Callback(ProcessManager manager, String processName) {
+            this.manager = manager;
+            this.processName = processName;
+        }
 
-        void updateTitle(String message);
+        public ProcessManager getManager() {
+            return manager;
+        }
 
-        void updateMessage(String message);
+        public String processName() {
+            return processName;
+        }
+
+        public DFProcess getProcess() {
+            return getManager().findProcess(processName());
+        }
+
+        public void updateProcess(Consumer<DFProcess> consumer) {
+            getManager().updateProcess(processName(), consumer);
+        }
+
+        public void updateProgress(double progress, double maxProgress) {
+            getManager().updateProgress(processName(), progress, maxProgress);
+        }
+
+        public void changeProgress(double incProgress, double incMaxProgress) {
+            updateProcess(p -> p.changeProgress(incProgress, incMaxProgress));
+        }
+
+        public void updateTitle(String message) {
+            getManager().updateTitle(processName(), message);
+        }
+
+        public void updateMessage(String message) {
+            getManager().updateMessage(processName(), message);
+        }
+
     }
 }

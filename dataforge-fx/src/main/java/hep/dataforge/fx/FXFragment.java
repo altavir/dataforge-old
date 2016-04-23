@@ -5,13 +5,14 @@
  */
 package hep.dataforge.fx;
 
+import java.util.function.Supplier;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 import javafx.stage.WindowEvent;
+import org.slf4j.LoggerFactory;
 
 /**
  * A separate window. In future could possibly be attachable
@@ -21,14 +22,16 @@ import javafx.stage.WindowEvent;
 public abstract class FXFragment implements AutoCloseable {
 
     private Stage stage;
-    private final Window owner;
+    private Supplier<Window> owner;
+    private Runnable onShow;
+    private Runnable onHide;
 
     public FXFragment() {
         owner = null;
     }
 
-    public FXFragment(Window owner) {
-        this.owner = owner;
+    public FXFragment(Window window) {
+        this.owner = () -> window;
     }
 
     /**
@@ -37,14 +40,13 @@ public abstract class FXFragment implements AutoCloseable {
      * @param boolVal
      */
     public void bindTo(ObservableBooleanValue boolVal) {
-        boolVal.addListener(new WeakChangeListener<>(
-                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    if (newValue && newValue != stage.isShowing()) {
-                        stage.show();
-                    } else {
-                        stage.hide();
-                    }
-                }));
+        boolVal.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+            if (newValue && newValue != getStage().isShowing()) {
+                show();
+            } else {
+                hide();
+            }
+        });
     }
 
     /**
@@ -54,11 +56,12 @@ public abstract class FXFragment implements AutoCloseable {
      */
     public void bindTo(ToggleButton button) {
         bindTo(button.selectedProperty());
-        stage.setOnHidden((WindowEvent event) -> {
+        owner = () -> button.getScene().getWindow();
+        onHide = () -> {
             if (button.isSelected()) {
                 button.setSelected(false);
             }
-        });
+        };
     }
 
     protected abstract Stage buildStage();
@@ -66,7 +69,7 @@ public abstract class FXFragment implements AutoCloseable {
     public Stage getStage() {
         if (stage == null) {
             stage = buildStage();
-            stage.setOnShowing((WindowEvent event) -> {
+            stage.setOnShown((WindowEvent event) -> {
                 onShow();
             });
 
@@ -74,19 +77,25 @@ public abstract class FXFragment implements AutoCloseable {
                 onHide();
             });
             if (owner != null) {
-                stage.initOwner(owner);
+                try {
+                    stage.initOwner(owner.get());
+                } catch (Exception ex) {
+                    LoggerFactory.getLogger(getClass()).error("Failed to set window owner", ex);
+                }
             }
         }
         return stage;
     }
-    
+
     /**
      * hide and destroy the stage
      */
     @Override
-    public void close(){
-        stage.close();
-        stage = null;
+    public void close() {
+        if (stage != null) {
+            stage.close();
+            stage = null;
+        }
     }
 
     public void hide() {
@@ -98,11 +107,15 @@ public abstract class FXFragment implements AutoCloseable {
     }
 
     protected void onShow() {
-
+        if (onShow != null) {
+            onShow.run();
+        }
     }
 
     protected void onHide() {
-
+        if (onHide != null) {
+            onHide.run();
+        }
     }
 
 }

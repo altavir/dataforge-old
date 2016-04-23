@@ -29,13 +29,13 @@ import javafx.collections.ObservableMap;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class Process implements Named {
+public class DFProcess implements Named {
 
     private final String name;
 
     private final ObjectProperty<CompletableFuture> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, Process> children = FXCollections.observableHashMap();
+    private final ObservableMap<String, DFProcess> children = FXCollections.observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 
@@ -60,7 +60,7 @@ public class Process implements Named {
 
     private final BooleanBinding isDone;
 
-    public Process(String name) {
+    public DFProcess(String name) {
         this.name = name;
         this.curProgress = new SimpleDoubleProperty(-1);
 
@@ -92,7 +92,7 @@ public class Process implements Named {
             @Override
             protected boolean computeValue() {
                 return (taskProperty.get() == null || taskProperty.get().isDone())
-                        && children.values().stream().allMatch((Process p) -> p.isDone());
+                        && children.values().stream().allMatch((DFProcess p) -> p.isDone());
             }
         };
 
@@ -134,7 +134,7 @@ public class Process implements Named {
 
     }
 
-    public Process findProcess(String processName) {
+    public DFProcess findProcess(String processName) {
         return findProcess(Name.of(processName));
     }
 
@@ -145,26 +145,30 @@ public class Process implements Named {
      * @param processName
      * @return null if process not found
      */
-    public Process findProcess(Name processName) {
+    public DFProcess findProcess(Name processName) {
         if (processName.entry().isEmpty()) {
             return this;
         }
         if (this.children.containsKey(processName.entry())) {
-            return this.children.get(processName.entry()).findProcess(processName.cutFirst());
+            if (processName.length() == 1) {
+                return this.children.get(processName.entry());
+            } else {
+                return this.children.get(processName.entry()).findProcess(processName.cutFirst());
+            }
         } else {
             return null;
         }
     }
 
-    public Process addChild(String childName, CompletableFuture<?> future) {
+    public DFProcess addChild(String childName, CompletableFuture<?> future) {
         return addChild(Name.of(childName), future);
     }
 
-    public Process addChild(Name childName, CompletableFuture<?> future) {
+    public DFProcess addChild(Name childName, CompletableFuture<?> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
-            Process childProcess;
+            DFProcess childProcess;
             if (children.containsKey(childName.getFirst().toString())) {
                 childProcess = children.get(childName.getFirst().toString());
             } else {
@@ -181,12 +185,12 @@ public class Process implements Named {
      * @param childName a name of child process without path notation
      * @param future could be null
      */
-    protected Process addDirectChild(String childName, CompletableFuture<?> future) {
+    protected DFProcess addDirectChild(String childName, CompletableFuture<?> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
-        Process childProcess = new Process(Name.join(getName(), childName).toString());
+        DFProcess childProcess = new DFProcess(Name.join(getName(), childName).toString());
         if (future != null) {
             childProcess.setTask(future);
         }
@@ -251,9 +255,24 @@ public class Process implements Named {
         this.titleProperty().set(title);
     }
 
+    /**
+     * Set progress values to given values
+     * @param progress
+     * @param maxProgress 
+     */
     public void setProgress(double progress, double maxProgress) {
         this.curProgress.set(progress);
         this.curMaxProgress.set(maxProgress);
+    }
+
+    /**
+     * Change progress values by given values
+     * @param incProgress
+     * @param incMaxProgress 
+     */
+    public void changeProgress(double incProgress, double incMaxProgress) {
+        this.curProgress.set(this.curProgress.get() + incProgress);
+        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
     }
 
     /**
@@ -275,7 +294,7 @@ public class Process implements Named {
         if (this.taskProperty.get() != null) {
             this.taskProperty.get().cancel(interrupt);
         }
-        this.children.values().forEach((Process p) -> p.cancel(interrupt));
+        this.children.values().forEach((DFProcess p) -> p.cancel(interrupt));
     }
 
     /**
@@ -289,7 +308,7 @@ public class Process implements Named {
                 .collect(Collectors.toList())) {
             this.children.remove(childName);
         }
-        this.children.forEach((String procName, Process proc) -> proc.cleanup());
+        this.children.forEach((String procName, DFProcess proc) -> proc.cleanup());
     }
 
 }

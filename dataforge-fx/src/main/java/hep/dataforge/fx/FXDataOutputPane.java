@@ -44,6 +44,7 @@ public class FXDataOutputPane {
     public FXDataOutputPane() {
         textArea = new InlineCssTextArea();
         textArea.setEditable(false);
+        textArea.setWrapText(true);
         holder = new AnchorPane(textArea);
         AnchorPane.setBottomAnchor(textArea, 5d);
         AnchorPane.setTopAnchor(textArea, 5d);
@@ -78,13 +79,17 @@ public class FXDataOutputPane {
                 newline();
             }
             append(lines[lines.length - 1], style);
-        } else if (text.contains("\t")) {
-            String[] tabs = text.split("\t");
-            for (int i = 0; i < tabs.length - 1; i++) {
-                append(tabs[i], style);
-                tab();
+            if (text.endsWith("\n")) {
+                newline();
             }
-            append(tabs[tabs.length - 1], style);
+            
+//        } else if (text.contains("\t")) {
+//            String[] tabs = text.split("\t");
+//            for (int i = 0; i < tabs.length - 1; i++) {
+//                append(tabs[i], style);
+//                tab();
+//            }
+//            append(tabs[tabs.length - 1], style);
         } else if (style.isEmpty()) {
             textArea.appendText(text);
         } else {
