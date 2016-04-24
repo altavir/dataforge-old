@@ -27,6 +27,7 @@ import java.io.PrintWriter;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 /**
  * Формирование и печать наборов данных
@@ -87,11 +88,11 @@ public class OutputData {
      * @param data a {@link hep.dataforge.points.PointSet} object.
      * @param head a {@link java.lang.String} object.
      */
-    public static void printDataSet(PrintWriter out, PointSet data, String head, String... outputFormat) {
-        Names format = data.getDataFormat();
+    public static void printDataSet(PrintWriter out, PointSource data, String head, String... outputFormat) {
+        Names format = data.getFormat();
 
         if (outputFormat.length > 0) {
-            if (!data.getDataFormat().contains(outputFormat)) {
+            if (!data.getFormat().contains(outputFormat)) {
                 throw new NameNotFoundException();
             }
             format = Names.of(outputFormat);

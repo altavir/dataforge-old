@@ -6,7 +6,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.points.Format;
+import hep.dataforge.points.PointFormat;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.points.ListPointSet;
 import hep.dataforge.points.SimpleParser;
@@ -60,7 +60,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     private final String uri;
-    private Format format;
+    private PointFormat format;
     private PointParser parser;
 
     /**
@@ -89,7 +89,7 @@ public class FilePointLoader extends AbstractPointLoader {
             while (!reader.isEof()) {
                 String line = reader.readLine();
                 if (line.startsWith("#f")) {
-                    format = new Format(Names.of(line.substring(2).trim().split("[^\\w']+")));
+                    format = new PointFormat(Names.of(line.substring(2).trim().split("[^\\w']+")));
                 }
             }
         }
@@ -127,12 +127,13 @@ public class FilePointLoader extends AbstractPointLoader {
         return this.envelope;
     }
 
-    private Format getFormat() {
+    @Override
+    public PointFormat getFormat() {
         if (format == null) {
             if (meta().hasNode("format")) {
-                format = Format.fromMeta(meta().getNode("format"));
+                format = PointFormat.fromMeta(meta().getNode("format"));
             } else if (meta().hasValue("format")) {
-                format = Format.forNames(meta().getStringArray("format"));
+                format = PointFormat.forNames(meta().getStringArray("format"));
             } else {
                 format = null;
             }
@@ -168,11 +169,13 @@ public class FilePointLoader extends AbstractPointLoader {
             throw new RuntimeException("Can't access loader envelope", ex);
         }
     }
+    
+    
 
-    @Override
-    public PointSet asDataSet() throws StorageException {
-        return new ListPointSet(this, getFormat());
-    }
+//    @Override
+//    public PointSet asPointSet() throws StorageException {
+//        return new ListPointSet(getFormat(), this);
+//    }
 
     @Override
     public Iterator<DataPoint> iterator() {

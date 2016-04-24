@@ -20,10 +20,10 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -44,34 +44,45 @@ public class ListPointSet implements PointSet {
      * точке из набора данных. Набор полей каждой точки может быть шире, но не
      * уже.
      */
-    private final Format format;
+    private final PointFormat format;
 
-    public ListPointSet(Format format) {
+    public ListPointSet(PointFormat format) {
         this.format = format;
     }
 
     public ListPointSet(String... format) {
-        this.format =  Format.forNames(format);
+        this.format = PointFormat.forNames(format);
     }
-
 
     public ListPointSet() {
-        this.format = new Format();
+        this.format = new PointFormat();
     }
-    
+
     /**
      * Проверяет, что все точки соответствуют формату
      *
      * @param name a {@link java.lang.String} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param format a {@link hep.dataforge.points.Format} object.
+     * @param format a {@link hep.dataforge.points.PointFormat} object.
      * @param points a {@link java.lang.Iterable} object.
      */
-    public ListPointSet(Iterable<DataPoint> points, Format format) {
+    public ListPointSet(PointFormat format, Iterable<DataPoint> points) {
         this.format = format;
         if (points != null) {
             addAll(points);
         }
+    }
+
+    public ListPointSet(PointFormat format, Stream<DataPoint> points) {
+        this.format = format;
+        if (points != null) {
+            addAll(points.collect(Collectors.toList()));
+        }
+    }
+
+    @Override
+    public PointSet subSet(UnaryOperator<Stream<DataPoint>> streamTransform) {
+        return new ListPointSet(getFormat(), streamTransform.apply(stream()));
     }
 
     /**
@@ -85,7 +96,7 @@ public class ListPointSet implements PointSet {
         if (points.isEmpty()) {
             throw new IllegalArgumentException("Can't create ListPointSet from the empty list. Format required.");
         }
-        this.format = Format.forPoint(points.get(0));
+        this.format = PointFormat.forPoint(points.get(0));
         addAll(points);
     }
 
@@ -112,23 +123,6 @@ public class ListPointSet implements PointSet {
     /**
      * {@inheritDoc}
      *
-     * Фильтрует набор данных и оставляет только те точки, что удовлетовряют
-     * условиям
-     */
-    @Override
-    public ListPointSet filter(Predicate<DataPoint> condition) throws NamingException {
-        ListPointSet res = new ListPointSet(this.getDataFormat());
-        for (DataPoint dp : this) {
-            if (condition.test(dp)) {
-                res.add(dp);
-            }
-        }
-        return res;
-    }
-
-    /**
-     * {@inheritDoc}
-     *
      * @param i
      * @return
      */
@@ -141,7 +135,7 @@ public class ListPointSet implements PointSet {
      * {@inheritDoc}
      */
     @Override
-    public Format getDataFormat() {
+    public PointFormat getFormat() {
         return format;
     }
 
@@ -188,49 +182,10 @@ public class ListPointSet implements PointSet {
     }
 
     /**
-     * {@inheritDoc}
-     *
-     * sorts dataset and returns sorted one
-     */
-    @Override
-    public ListPointSet sort(String name, boolean ascending) {
-        ListPointSet res = new ListPointSet(this.getDataFormat());
-        res.addAll(this);
-        res.data.sort((DataPoint o1, DataPoint o2) -> {
-            if (ascending) {
-                return o1.getValue(name).compareTo(o2.getValue(name));
-            } else {
-                return -o1.getValue(name).compareTo(o2.getValue(name));
-            }
-        });
-        return res;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public PointSet sort(Comparator<DataPoint> comparator) {
-        ListPointSet res = new ListPointSet(this.getDataFormat());
-        res.addAll(this);
-        res.data.sort(comparator);
-        return res;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Stream<DataPoint> stream() {
-        return this.data.stream();
-    }
-
-    /**
      * Clear all data in the PointSet. Does not affect annotation.
      */
     public void clear() {
         this.data.clear();
     }
-    
-    
+
 }

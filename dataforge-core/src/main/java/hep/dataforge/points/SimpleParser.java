@@ -48,7 +48,7 @@ public class SimpleParser implements PointParser {
         this.format = line.trim().split("[^\\w']+");
     }
     
-    public SimpleParser(Format format){
+    public SimpleParser(PointFormat format){
         this.format = format.asArray();
     }
 

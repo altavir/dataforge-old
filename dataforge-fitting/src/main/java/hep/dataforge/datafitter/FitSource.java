@@ -23,6 +23,7 @@ import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 
 public class FitSource{

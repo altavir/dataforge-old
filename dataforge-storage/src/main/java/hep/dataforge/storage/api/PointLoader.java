@@ -19,8 +19,9 @@ import hep.dataforge.points.DataPoint;
 import hep.dataforge.points.PointListener;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.points.PointFormat;
 import java.util.Collection;
-import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 import hep.dataforge.storage.commons.ValueIndex;
 
 /**
@@ -32,20 +33,27 @@ import hep.dataforge.storage.commons.ValueIndex;
  */
 @NodeDef(name = "format", required = true, info = "data point format for this loader")
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
-public interface PointLoader extends Loader, Iterable<DataPoint> {
+public interface PointLoader extends Loader, PointSource {
 
     public static final String POINT_LOADER_TYPE = "point";
     public static final String DEFAULT_INDEX_FIELD = "";
 
     public static final String LOADER_FORMAT_KEY = "format";
 
+//    /**
+//     * Pull the whole loader as a data set.
+//     *
+//     * @return
+//     * @throws StorageException
+//     */
+//    PointSet asPointSet() throws StorageException;
+    
     /**
-     * Pull the whole loader as a data set.
-     *
-     * @return
-     * @throws StorageException
+     * The minimal format for points in this loader. Is null for unformatted loader
+     * @return 
      */
-    PointSet asDataSet() throws StorageException;
+    @Override
+    PointFormat getFormat();
 
 //    /**
 //     * Build a custom index. In case it is a map index it could be stored

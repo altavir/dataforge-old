@@ -28,7 +28,8 @@ public class TestStorageServlet {
      */
     public static void main(String[] args) throws StorageException, Exception {
         new StorageManager().startGlobal();
-        String path = "/home/numass-storage";
+        String path = "D:/temp/test";
+        //String path = "/home/numass-storage";
 
         FileStorage storage = FileStorage.connect(new File(path), true, false);
 

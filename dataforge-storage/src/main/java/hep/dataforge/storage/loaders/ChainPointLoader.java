@@ -18,13 +18,12 @@ package hep.dataforge.storage.loaders;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.storage.api.Index;
+import hep.dataforge.points.PointFormat;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
 import java.util.Iterator;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.points.PointSet;
 import hep.dataforge.storage.commons.ValueIndex;
 
 /**
@@ -65,9 +64,16 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public PointSet asDataSet() throws StorageException {
-        return primaryLoader.asDataSet();
+    public PointFormat getFormat() {
+        return primaryLoader.getFormat();
     }
+
+    
+    
+//    @Override
+//    public PointSet asPointSet() throws StorageException {
+//        return primaryLoader.asPointSet();
+//    }
 
     @Override
     public ValueIndex<DataPoint> getIndex(String name) {

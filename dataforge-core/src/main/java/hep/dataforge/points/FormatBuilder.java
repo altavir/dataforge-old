@@ -127,10 +127,10 @@ public class FormatBuilder {
      * <p>
      * build.</p>
      *
-     * @return a {@link hep.dataforge.points.Format} object.
+     * @return a {@link hep.dataforge.points.PointFormat} object.
      */
-    public Format build() {
-        return new Format(Names.of(nameList), formats);
+    public PointFormat build() {
+        return new PointFormat(Names.of(nameList), formats);
     }
 
 }

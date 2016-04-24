@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 /**
  *
@@ -80,7 +81,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
     
-    public static PlottableData plot(String name, Meta meta, PointSet data, XYAdapter adapter){
+    public static PlottableData plot(String name, Meta meta, PointSource data, XYAdapter adapter){
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         if(!meta.isEmpty()){

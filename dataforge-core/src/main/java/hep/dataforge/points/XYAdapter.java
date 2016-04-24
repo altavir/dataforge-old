@@ -145,10 +145,10 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     /**
-     * Return a default Format corresponding to this adapter
+     * Return a default PointFormat corresponding to this adapter
      * @return 
      */
-    public Format getFormat(){
+    public PointFormat getFormat(){
         return new FormatBuilder()
                 .addNumber(X_NAME)
                 .addNumber(Y_NAME)

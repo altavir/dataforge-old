@@ -29,6 +29,18 @@ import hep.dataforge.points.PointSet;
 import static java.lang.Double.isNaN;
 import static java.lang.Double.isNaN;
 import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
 
 /**
  * Генератор наборов данных для спектров. На входе требуется набор данных,

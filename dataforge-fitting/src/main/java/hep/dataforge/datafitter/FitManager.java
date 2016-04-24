@@ -28,6 +28,7 @@ import java.io.PrintWriter;
 import hep.dataforge.points.PointSet;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
+import hep.dataforge.points.PointSource;
 
 /**
  * <p>

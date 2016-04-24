@@ -27,6 +27,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 import hep.dataforge.points.XYAdapter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;

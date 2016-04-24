@@ -30,6 +30,7 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 /**
  * <p>

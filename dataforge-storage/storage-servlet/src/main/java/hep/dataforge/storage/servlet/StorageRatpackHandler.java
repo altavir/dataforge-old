@@ -16,14 +16,23 @@ import ratpack.handling.Handler;
 /**
  * Created by darksnake on 13-Dec-15.
  */
+@SuppressWarnings("unchecked")
 public class StorageRatpackHandler implements Handler {
 
     private final Storage root;
+    private final Map<String, SoftReference<Loader>> cache;
 
-    private final Map<String, SoftReference<Loader>> cache = new ConcurrentHashMap<>();
+    public StorageRatpackHandler(Storage root, Map<String, SoftReference<Loader>> cache) {
+        this.root = root;
+        if (cache == null) {
+            this.cache = new ConcurrentHashMap<>();
+        } else {
+            this.cache = cache;
+        }
+    }
 
     public StorageRatpackHandler(Storage root) {
-        this.root = root;
+        this(root, null);
     }
 
     @Override
@@ -51,7 +60,11 @@ public class StorageRatpackHandler implements Handler {
                     renderEvents(ctx, (EventLoader) loader);
                     return;
                 case PointLoader.POINT_LOADER_TYPE:
-                    renderPoints(ctx, (PointLoader) loader);
+                    if (ctx.getRequest().getQueryParams().containsKey("tqx")) {
+                        new PointLoaderVisualizationHandler((PointLoader) loader).handle(ctx);
+                    } else {
+                        renderPoints(ctx, (PointLoader) loader);
+                    }
                     return;
                 case ObjectLoader.OBJECT_LOADER_TYPE:
                     renderObjects(ctx, (ObjectLoader) loader);
@@ -151,17 +164,18 @@ public class StorageRatpackHandler implements Handler {
     protected void renderPoints(Context ctx, PointLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
-            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
+//            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
+            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
 
             Map data = new HashMap(2);
 
-            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
-            String from = ctx.getRequest().getQueryParams().get("from");
-            String to = ctx.getRequest().getQueryParams().get("to");
-            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
-
+//            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
+//            String from = ctx.getRequest().getQueryParams().get("from");
+//            String to = ctx.getRequest().getQueryParams().get("to");
+//            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
+            data.put("dataSource", ctx.getRequest().getLocalAddress() + ctx.getRequest().getUri());
             data.put("loaderName", loader.getName());
-            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
+//            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 
             StringWriter writer = new StringWriter();
             template.process(data, writer);

@@ -19,6 +19,9 @@ import hep.dataforge.points.ListPointSet;
 import hep.dataforge.exceptions.NamingException;
 import java.util.Arrays;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 
 /**
  * <p>

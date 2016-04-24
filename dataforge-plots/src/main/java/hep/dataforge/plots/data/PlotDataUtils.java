@@ -5,7 +5,7 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.points.Format;
+import hep.dataforge.points.PointFormat;
 import hep.dataforge.points.DataPoint;
 import hep.dataforge.points.ListPointSet;
 import hep.dataforge.points.MapPoint;
@@ -54,7 +54,7 @@ public class PlotDataUtils {
                 mdp.putValue(pl.getName(), adapter.getY(point));
             }
         }
-        ListPointSet res = new ListPointSet(Format.forNames(8, names));
+        ListPointSet res = new ListPointSet(PointFormat.forNames(8, names));
         res.addAll(points.values());
         return res;
     }

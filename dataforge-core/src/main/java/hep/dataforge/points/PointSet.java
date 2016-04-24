@@ -22,10 +22,39 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.values.Value;
 import java.util.Comparator;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-public interface PointSet extends Iterable<DataPoint> {
+public interface PointSet extends PointSource {
 
+    DataPoint get(int i);
+
+    Column getColumn(String name) throws NameNotFoundException;
+
+
+    default Value getValue(int index, String name) throws NameNotFoundException{
+        return get(index).getValue(name);
+    }
+
+    int size();
+    
+    PointSet subSet(UnaryOperator<Stream<DataPoint>> streamTransform);
+
+    default Stream<DataPoint> stream() {
+        return StreamSupport.stream(this.spliterator(), false);
+    }
+    
+    default PointSet sort(Comparator<DataPoint> comparator) {
+        return subSet(stream -> stream.sorted(comparator));
+    }    
+
+    default PointSet sort(String name, boolean ascending) {
+        return subSet(stream -> stream.sorted((DataPoint o1, DataPoint o2) -> {
+            int signum = ascending ? +1 : -1;
+            return o1.getValue(name).compareTo(o2.getValue(name)) * signum;
+        }));
+    }
     /**
      * Фильтрует набор данных и оставляет только те точки, что удовлетовряют
      * условиям
@@ -34,7 +63,9 @@ public interface PointSet extends Iterable<DataPoint> {
      * @throws hep.dataforge.exceptions.NamingException if any.
      * @return a {@link hep.dataforge.points.PointSet} object.
      */
-    PointSet filter(Predicate<DataPoint> condition) throws NamingException;
+    default PointSet filter(Predicate<DataPoint> condition) throws NamingException{
+        return subSet(stream -> stream.filter(condition));
+    }
 
     /**
      * Быстрый фильтр для значений одного поля
@@ -51,8 +82,8 @@ public interface PointSet extends Iterable<DataPoint> {
 
     default PointSet filter(String valueName, double a, double b) throws NamingException {
         return this.filter(getValueCondition(valueName, Value.of(a), Value.of(b)));
-    }
-
+    }    
+    
     /**
      * Быстрый фильтр по меткам
      *
@@ -63,20 +94,5 @@ public interface PointSet extends Iterable<DataPoint> {
      */
     default PointSet filter(String... tags) throws NamingException {
         return this.filter(getTagCondition(tags));
-    }
-
-    DataPoint get(int i);
-    Column getColumn(String name) throws NameNotFoundException;
-
-    Format getDataFormat();
-
-    Value getValue(int index, String name) throws NameNotFoundException;
-
-    int size();
-
-    PointSet sort(String name, boolean ascending);
-
-    PointSet sort(Comparator<DataPoint> comparator);
-    
-    Stream<DataPoint> stream();
+    }    
 }

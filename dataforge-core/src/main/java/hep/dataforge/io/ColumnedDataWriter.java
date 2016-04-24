@@ -15,7 +15,7 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.points.Format;
+import hep.dataforge.points.PointFormat;
 import hep.dataforge.points.DataPoint;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -39,7 +39,7 @@ import hep.dataforge.points.PointSet;
 public class ColumnedDataWriter implements AutoCloseable {
 
     private final PrintWriter writer;
-    private final Format format;
+    private final PointFormat format;
 
     /**
      * <p>
@@ -49,7 +49,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param names a {@link java.lang.String} object.
      */
     public ColumnedDataWriter(OutputStream stream, String... names) {
-        this(stream, Format.forNames(8, names));
+        this(stream, PointFormat.forNames(8, names));
     }
 
     /**
@@ -57,14 +57,14 @@ public class ColumnedDataWriter implements AutoCloseable {
      * Constructor for ColumnedDataWriter.</p>
      *
      * @param stream a {@link java.io.OutputStream} object.
-     * @param format a {@link hep.dataforge.points.Format} object.
+     * @param format a {@link hep.dataforge.points.PointFormat} object.
      */
-    public ColumnedDataWriter(OutputStream stream, Format format) {
+    public ColumnedDataWriter(OutputStream stream, PointFormat format) {
         this.writer = new PrintWriter(stream);
         this.format = format;
     }
 
-    public ColumnedDataWriter(OutputStream stream, Charset encoding, Format format) {
+    public ColumnedDataWriter(OutputStream stream, Charset encoding, PointFormat format) {
         this.writer = new PrintWriter(new OutputStreamWriter(stream, encoding));
         this.format = format;
     }
@@ -79,7 +79,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
-        this(file, append, Charset.defaultCharset(), Format.forNames(8, names));
+        this(file, append, Charset.defaultCharset(), PointFormat.forNames(8, names));
     }
 
     /**
@@ -88,11 +88,11 @@ public class ColumnedDataWriter implements AutoCloseable {
      *
      * @param file a {@link java.io.File} object.
      * @param append a boolean.
-     * @param format a {@link hep.dataforge.points.Format} object.
+     * @param format a {@link hep.dataforge.points.PointFormat} object.
      * @param encoding
      * @throws java.io.FileNotFoundException if any.
      */
-    public ColumnedDataWriter(File file, boolean append, Charset encoding, Format format) throws FileNotFoundException {
+    public ColumnedDataWriter(File file, boolean append, Charset encoding, PointFormat format) throws FileNotFoundException {
         this(new FileOutputStream(file, append), encoding, format);
     }
 
@@ -181,14 +181,14 @@ public class ColumnedDataWriter implements AutoCloseable {
 
     public static void writeDataSet(OutputStream stream, PointSet data, String head, String... names) {
         ColumnedDataWriter writer;
-        Format format;
-        if (data.getDataFormat().isEmpty()) {
+        PointFormat format;
+        if (data.getFormat().isEmpty()) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
-            format = Format.forPoint(data.get(0));
+            format = PointFormat.forPoint(data.get(0));
             LoggerFactory.getLogger(ColumnedDataWriter.class)
                     .debug("No DataSet format defined. Constucting default based on the first data point");
         } else {
-            format = data.getDataFormat();
+            format = data.getFormat();
         }
 
         if (names.length == 0) {

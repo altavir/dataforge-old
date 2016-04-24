@@ -25,6 +25,7 @@ import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.points.PointSet;
 import hep.dataforge.names.NameSet;
+import hep.dataforge.points.PointSource;
 
 /**
  *
@@ -125,7 +126,7 @@ public interface Model extends NameSet, Named, Annotated {
      * @param data
      * @return
      */
-    default public ParamSet getParametersGuess(PointSet data) {
+    default public ParamSet getParametersGuess(PointSource data) {
         throw new NotDefinedException("Initial guess not defined");
     }
 

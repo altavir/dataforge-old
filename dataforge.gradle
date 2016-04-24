@@ -21,7 +21,8 @@ publishing {
     }
 }  
     
-repositories {
+repositories {    
+    jcenter()
     mavenCentral()
     //maven { url "http://www.inr.ru/~nozik/maven2/" }
     //        mavenLocal()

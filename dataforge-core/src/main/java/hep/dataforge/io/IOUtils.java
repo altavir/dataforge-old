@@ -25,6 +25,12 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
 
 /**
  * <p>

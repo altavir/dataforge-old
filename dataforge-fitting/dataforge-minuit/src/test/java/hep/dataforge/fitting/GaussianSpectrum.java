@@ -37,6 +37,7 @@ import hep.dataforge.names.AbstractNamedSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 /**
  *

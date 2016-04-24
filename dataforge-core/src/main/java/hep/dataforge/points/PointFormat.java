@@ -32,31 +32,31 @@ import java.util.stream.Collectors;
 
 /**
  * <p>
- * Format class.</p>
+ PointFormat class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Format implements Names {
+public class PointFormat implements Names {
 
     private final Names names;
     private final Map<String, ValueFormat> formats;
 
-    public static Format fromMeta(Meta annotation) {
+    public static PointFormat fromMeta(Meta annotation) {
         if (annotation.hasNode("column")) {
             Map<String, ValueFormat> map = new LinkedHashMap<>();
             annotation.getNodes("column").stream().forEach((head) -> {
                 map.put(head.getString("name"), ValueFormatFactory.build(head));
             });
-            return new Format(map);
+            return new PointFormat(map);
         } else if (annotation.hasValue("names")) {
-            return Format.forNames(annotation.getStringArray("names"));
+            return PointFormat.forNames(annotation.getStringArray("names"));
         } else {
-            return new Format();
+            return new PointFormat();
         }
     }
 
-    public static Meta toMeta(Format format) {
+    public static Meta toMeta(PointFormat format) {
         MetaBuilder builder = new MetaBuilder("format");
         for (String name : format) {
             MetaBuilder column = new MetaBuilder("column");
@@ -82,51 +82,51 @@ public class Format implements Names {
      *
      * @param width
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.points.Format} object.
+     * @return a {@link hep.dataforge.points.PointFormat} object.
      */
-    public static Format forNames(int width, String... names) {
+    public static PointFormat forNames(int width, String... names) {
         return forNames(width, Arrays.asList(names));
     }
 
-    public static Format forNames(String... names) {
+    public static PointFormat forNames(String... names) {
         return forNames(Arrays.asList(names));
     }
 
-    public static Format forNames(Iterable<String> names) {
-        return new Format(Names.of(names));
+    public static PointFormat forNames(Iterable<String> names) {
+        return new PointFormat(Names.of(names));
     }
 
-    public static Format forNames(int width, Iterable<String> names) {
+    public static PointFormat forNames(int width, Iterable<String> names) {
         Map<String, ValueFormat> formats = new LinkedHashMap<>();
         if (width > 0) {
             for (String name : names) {
                 formats.put(name, ValueFormatFactory.fixedWidth(Math.max(width, name.length())));
             }
         }
-        return new Format(formats);
+        return new PointFormat(formats);
     }
 
-    public static Format forPoint(DataPoint point) {
+    public static PointFormat forPoint(DataPoint point) {
         //TODO добавить тут возможность выбора подсписка?
         Names names = Names.of(point);
         Map<String, ValueFormat> map = new LinkedHashMap<>();
         for (String name : names) {
             map.put(name, ValueFormatFactory.forValue(point.getValue(name)));
         }
-        return new Format(names, map);
+        return new PointFormat(names, map);
     }
 
-    public Format(Map<String, ValueFormat> formats) {
+    public PointFormat(Map<String, ValueFormat> formats) {
         names = Names.of(formats.keySet());
         this.formats = formats;
     }
 
-    public Format(Names names, Map<String, ValueFormat> formats) {
+    public PointFormat(Names names, Map<String, ValueFormat> formats) {
         this.names = names;
         this.formats = formats;
     }
 
-    public Format(Names names) {
+    public PointFormat(Names names) {
         this.names = names;
         this.formats = Collections.emptyMap();
     }
@@ -134,7 +134,7 @@ public class Format implements Names {
     /**
      * Free format
      */
-    public Format() {
+    public PointFormat() {
         names = Names.of();
         formats = new LinkedHashMap<>();
     }
@@ -228,12 +228,12 @@ public class Format implements Names {
      * subSet.</p>
      *
      * @param newNames a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.points.Format} object.
+     * @return a {@link hep.dataforge.points.PointFormat} object.
      */
-    public Format subSet(String... newNames) {
+    public PointFormat subSet(String... newNames) {
         //Если список пустой, значит допустимы все имена
         if (this.names.asList().isEmpty()) {
-            return Format.forNames(0, newNames);
+            return PointFormat.forNames(0, newNames);
         }
 
         if (!this.names.contains(newNames)) {
@@ -245,7 +245,7 @@ public class Format implements Names {
                 newFormat.put(newName, formats.get(newName));
             }
         }
-        return new Format(Names.of(newNames), newFormat);
+        return new PointFormat(Names.of(newNames), newFormat);
     }
 
     /**

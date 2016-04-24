@@ -25,6 +25,7 @@ import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
 import hep.dataforge.points.PointSet;
+import hep.dataforge.points.PointSource;
 
 /**
  * This class combine the information required to fit data. The key elements are

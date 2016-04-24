@@ -25,6 +25,7 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.points.Filtering.buildConditionSet;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * действие для фильтрации {@code ListPointSet}
