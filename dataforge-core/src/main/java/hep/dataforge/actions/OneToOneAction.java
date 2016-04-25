@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.log.Log;
@@ -42,11 +43,14 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
      *
+     * @param context
+     * @param name
      * @param groupMeta
      * @param data
+     * @param actionMeta
      * @return
      */
-    public ActionResult<R> runOne(Context context, String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
+    protected ActionResult<R> runOne(Context context, String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
         if (!this.getInputType().isAssignableFrom(data.dataType())) {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
                     getName(), getInputType().getName(), data.dataType().getName()));
@@ -95,6 +99,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         R res = execute(context, log, name, inputMeta, input);
         afterAction(context, name, res, inputMeta);
         return res;
+    }
+    
+    public R eval(T input, Meta... metaLayers){
+        Context context = GlobalContext.instance();
+        return transform(context, new Log("eval",context), "eval", inputMeta(context, metaLayers), input);
     }
 
     protected abstract R execute(Context context, Logable log, String name, Laminate inputMeta, T input);

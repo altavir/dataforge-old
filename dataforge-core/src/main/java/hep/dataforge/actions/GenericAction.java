@@ -180,6 +180,12 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
                 .setDescriptor(getDescriptor());
     }
 
+    protected Laminate inputMeta(Context context, Meta... meta) {
+        return new Laminate(meta)
+                .setValueContext(context)
+                .setDescriptor(getDescriptor());
+    }
+    
     protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
         return new Laminate(nodeMeta, actionMeta)
                 .setValueContext(context)
