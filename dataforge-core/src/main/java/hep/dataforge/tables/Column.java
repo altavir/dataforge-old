@@ -13,20 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.names;
+package hep.dataforge.tables;
+
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFormatFactory;
+import java.util.List;
+import hep.dataforge.values.ValueFormatter;
 
 /**
+ * колонка однородных значений
  *
  * @author Alexander Nozik
+ * @version $Id: $Id
  */
-public interface NameSet {
-    Names names();
+public interface Column extends Iterable<Value>, Annotated {
     
-    default int getDimension(){
-        return names().getDimension();
+    default ValueFormatter formatter(){
+        return ValueFormatFactory.build(meta());
     }
+    Value get(int n);
+    List<Value> asList();
     
-    default String[] namesAsArray(){
-        return names().asArray();
-    }
 }

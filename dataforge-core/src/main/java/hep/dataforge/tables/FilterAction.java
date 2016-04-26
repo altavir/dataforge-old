@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
@@ -23,7 +23,7 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import static hep.dataforge.points.Filtering.buildConditionSet;
+import static hep.dataforge.tables.Filtering.buildConditionSet;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -33,9 +33,9 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "filterData", inputType = PointSet.class, outputType = PointSet.class, description = "Filter dataset with given filtering rules")
+@TypedActionDef(name = "filterData", inputType = Table.class, outputType = Table.class, description = "Filter dataset with given filtering rules")
 @NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.points.Filtering.buildConditionSet")
-public class FilterAction extends OneToOneAction<PointSet, PointSet> {
+public class FilterAction extends OneToOneAction<Table, Table> {
 
     /**
      * {@inheritDoc}
@@ -43,10 +43,10 @@ public class FilterAction extends OneToOneAction<PointSet, PointSet> {
      * @return
      */
     @Override
-    protected PointSet execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
+    protected Table execute(Context context, Logable log, String name, Laminate meta, Table input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
-        PointSet res;
+        Table res;
         if (filterSet != null) {
             res = input.filter(filterSet);
         } else {

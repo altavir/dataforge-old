@@ -15,10 +15,10 @@
  */
 package hep.dataforge.plots.tests;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.MapPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableFunction;
@@ -30,7 +30,7 @@ import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.points.PointSet;
+import hep.dataforge.tables.Table;
 
 /**
  *
@@ -56,7 +56,7 @@ public class JFreeFXTest extends Application {
         data.add(new MapPoint(names, 0.5d, 0.2, 0.1, 0.1));
         data.add(new MapPoint(names, 1d, 1d, 0.2, 0.5));
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
-        PointSet ds = new ListPointSet(data);
+        Table ds = new ListTable(data);
 
         PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myY", "myXErr", "myYErr"));
 

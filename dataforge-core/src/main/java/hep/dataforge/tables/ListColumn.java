@@ -13,45 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueFormat;
 import hep.dataforge.values.ValueFormatFactory;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import hep.dataforge.values.ValueFormatter;
 
 /**
- * A simple immutable Column implementation
+ * A simple immutable Column implementation using list of values
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 public class ListColumn implements Column {
     
+    private final Meta columnMeta;
     private final List<Value> values;
-    private final ValueFormat format;
+    private ValueFormatter format;
 
-    /**
-     * <p>Constructor for ListColumn.</p>
-     *
-     * @param values a {@link java.util.List} object.
-     * @param format a {@link hep.dataforge.values.ValueFormat} object.
-     */
-    public ListColumn(List<Value> values, ValueFormat format) {
+    public ListColumn(Meta meta, List<Value> values) {
+        this.columnMeta = meta;
         this.values = values;
-        this.format = format;
     }
 
-    /**
-     * <p>Constructor for ListColumn.</p>
-     *
-     * @param values a {@link java.util.List} object.
-     */
     public ListColumn(List<Value> values) {
+        columnMeta = Meta.buildEmpty("column");
         this.values = values;
-        format = ValueFormatFactory.EMPTY_FORMAT;
     }
 
     /**
@@ -66,7 +57,11 @@ public class ListColumn implements Column {
     
     /** {@inheritDoc} */
     @Override
-    public ValueFormat format() {
+    public ValueFormatter formatter() {
+        if(format == null){
+            format = ValueFormatFactory.build(columnMeta);
+        }
+            
         return format;
     }
 
@@ -80,6 +75,11 @@ public class ListColumn implements Column {
     @Override
     public Iterator<Value> iterator() {
         return values.iterator();
+    }
+
+    @Override
+    public Meta meta() {
+        return columnMeta;
     }
     
 }

@@ -15,8 +15,9 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
 
 /**
  * <p>Generator interface.</p>
@@ -31,15 +32,15 @@ public interface Generator {
      * входным
      *
      * @param config a {@link java.lang.Iterable} object.
-     * @return a {@link hep.dataforge.points.ListPointSet} object.
+     * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    ListPointSet generateData(Iterable<DataPoint> config);
+    Table generateData(Iterable<DataPoint> config);
 
     /**
      * <p>generateDataPoint.</p>
      *
-     * @param configPoint a {@link hep.dataforge.points.DataPoint} object.
-     * @return a {@link hep.dataforge.points.DataPoint} object.
+     * @param configPoint a {@link hep.dataforge.tables.DataPoint} object.
+     * @return a {@link hep.dataforge.tables.DataPoint} object.
      */
     DataPoint generateDataPoint(DataPoint configPoint);
 

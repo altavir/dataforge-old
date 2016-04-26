@@ -15,13 +15,11 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.ListTable;
 import hep.dataforge.exceptions.NamingException;
 import java.util.Arrays;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import hep.dataforge.tables.SimplePointSource;
 
 /**
  * <p>
@@ -30,7 +28,7 @@ import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Histogram extends ListPointSet {
+public class Histogram extends SimplePointSource {
 
     public static String[] names = {"binBegin", "binEnd", "count"};
     private double[] borders;
@@ -111,7 +109,7 @@ public class Histogram extends ListPointSet {
 
         for (int i = 0; i < borders.length - 1; i++) {
             try {
-                this.add(new HistogramBin(borders[i], borders[i + 1], countInBin(data, borders[i], borders[i + 1])));
+                this.addRow(new HistogramBin(borders[i], borders[i + 1], countInBin(data, borders[i], borders[i + 1])));
             } catch (NamingException ex) {
                 throw new Error(ex);
             }

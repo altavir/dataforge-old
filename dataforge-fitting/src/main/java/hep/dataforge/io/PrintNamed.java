@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
@@ -35,74 +35,13 @@ import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 
@@ -157,7 +96,7 @@ public class PrintNamed {
             }
         }
 
-        ListPointSet data = getNamedFunctionData(func, points);
+        Table data = getNamedFunctionData(func, points);
 
         printDataSet(out, data, head);
     }
@@ -211,7 +150,7 @@ public class PrintNamed {
             points.add(new NamedDoubleArray(names, distr.sample()));
         }
 
-        ListPointSet data = getNamedFunctionData(func, points);
+        Table data = getNamedFunctionData(func, points);
 
         printDataSet(out, data, head);
     }
@@ -315,7 +254,7 @@ public class PrintNamed {
      * @param spectrum a {@link hep.dataforge.functions.ParametricFunction} object.
      * @param data a {@link java.lang.Iterable} object.
      * @param adapter a
-     * {@link hep.dataforge.points.XYAdapter} object.
+     * {@link hep.dataforge.tables.XYAdapter} object.
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,

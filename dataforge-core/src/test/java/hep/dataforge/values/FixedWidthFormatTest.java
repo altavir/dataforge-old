@@ -31,7 +31,7 @@ public class FixedWidthFormatTest {
     @Test
     public void testPi() {
         System.out.println("Print Pi with the length of 5");
-        ValueFormat shortFormat = new FixedWidthFormat(5);
+        ValueFormatter shortFormat = new FixedWidthFormat(5);
         Value val = Value.of(Math.PI);
         System.out.println(shortFormat.format(val));
         assertTrue(shortFormat.format(val).length() == 5);
@@ -40,7 +40,7 @@ public class FixedWidthFormatTest {
     @Test
     public void testExpPi() {
         System.out.println("Print Pi*10^-5 with the length of 5");
-        ValueFormat shortFormat = new FixedWidthFormat(5);
+        ValueFormatter shortFormat = new FixedWidthFormat(5);
         Value val = Value.of(Math.PI*1e-5);
         System.out.println(shortFormat.format(val));
         assertTrue(shortFormat.format(val).length() == 5);
@@ -49,7 +49,7 @@ public class FixedWidthFormatTest {
     @Test
     public void testInt() {
         System.out.println("Print 34");
-        ValueFormat shortFormat = new FixedWidthFormat(5);
+        ValueFormatter shortFormat = new FixedWidthFormat(5);
         Value val = Value.of(34);
         System.out.println(shortFormat.format(val));
         assertTrue(shortFormat.format(val).length() == 5);
@@ -60,7 +60,7 @@ public class FixedWidthFormatTest {
      */
     @Test
     public void testAllowed() {
-        ValueFormat format = new FixedWidthFormat(5);
+        ValueFormatter format = new FixedWidthFormat(5);
         assertTrue(!format.allowed(Value.of(Instant.now())));
     }
 

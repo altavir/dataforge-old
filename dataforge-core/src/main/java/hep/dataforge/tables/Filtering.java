@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;

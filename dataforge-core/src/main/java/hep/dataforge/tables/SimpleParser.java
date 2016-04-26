@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.values.Value;
 import java.util.Scanner;
@@ -48,8 +48,8 @@ public class SimpleParser implements PointParser {
         this.format = line.trim().split("[^\\w']+");
     }
     
-    public SimpleParser(PointFormat format){
-        this.format = format.asArray();
+    public SimpleParser(TableFormat format){
+        this.format = format.namesAsArray();
     }
 
     /**

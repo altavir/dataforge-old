@@ -18,7 +18,7 @@ package hep.dataforge.functions;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedDoubleSet;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  * <p>NamedFunction interface.</p>
@@ -26,7 +26,7 @@ import hep.dataforge.names.NameSet;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface NamedFunction extends NameSet {
+public interface NamedFunction extends NameSetContainer {
 
     /**
      * <p>value.</p>

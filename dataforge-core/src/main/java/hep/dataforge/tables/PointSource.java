@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 /**
  *
@@ -11,6 +11,6 @@ package hep.dataforge.points;
  */
 public interface PointSource extends Iterable<DataPoint> {
 
-    PointFormat getFormat();
+    TableFormat getFormat();
     
 }

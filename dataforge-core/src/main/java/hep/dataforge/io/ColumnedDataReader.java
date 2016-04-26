@@ -15,8 +15,8 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,8 +24,8 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointParser;
+import hep.dataforge.tables.PointParser;
+import hep.dataforge.tables.Table;
 
 /**
  * <p>
@@ -44,7 +44,7 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
      * Constructor for ColumnedDataReader.</p>
      *
      * @param file a {@link java.io.File} object.
-     * @param parser a {@link hep.dataforge.points.PointParser} object.
+     * @param parser a {@link hep.dataforge.tables.PointParser} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataReader(File file, PointParser parser) throws FileNotFoundException {
@@ -117,12 +117,12 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
         return meta;
     }
 
-    public PointSet toDataSet() {
+    public Table toDataSet() {
         List<DataPoint> points = new ArrayList<>();
         for (Iterator<DataPoint> iterator = this.iterator(); iterator.hasNext();) {
             points.add(iterator.next());
         }
-        return new ListPointSet(points);
+        return new ListTable(points);
     }
 
 }

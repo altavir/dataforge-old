@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Meta;
@@ -50,7 +50,7 @@ public class WeightedXYModel extends XYModel {
      *
      * @param name a {@link java.lang.String} object.
      * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param format a {@link hep.dataforge.points.XYAdapter} object.
+     * @param format a {@link hep.dataforge.tables.XYAdapter} object.
      * @param weightFunction a {@link java.util.function.Function} object.
      */
     public WeightedXYModel(String name, ParametricFunction source, XYAdapter format, Function<DataPoint, Double> weightFunction) {

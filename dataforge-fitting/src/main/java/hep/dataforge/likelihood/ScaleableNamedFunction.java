@@ -20,7 +20,7 @@ import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.Names;
 import static java.lang.Math.exp;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  * <p>Abstract ScaleableNamedFunction class.</p>
@@ -47,9 +47,9 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
     /**
      * <p>Constructor for ScaleableNamedFunction.</p>
      *
-     * @param named a {@link hep.dataforge.names.NameSet} object.
+     * @param named a {@link hep.dataforge.names.NameSetContainer} object.
      */
-    public ScaleableNamedFunction(NameSet named) {
+    public ScaleableNamedFunction(NameSetContainer named) {
         super(named.names());
     }    
 

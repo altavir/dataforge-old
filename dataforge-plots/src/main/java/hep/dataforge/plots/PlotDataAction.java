@@ -26,9 +26,8 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.XYAdapter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -36,6 +35,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.tables.Table;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -46,7 +46,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 @TypedActionDef(name = "plotData",
-        description = "Scatter plot of given DataSet", inputType = PointSet.class, outputType = PointSet.class)
+        description = "Scatter plot of given DataSet", inputType = Table.class, outputType = Table.class)
 @ValueDef(name = "plotFrameName", def = "default",
         info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
 @ValueDef(name = "plotTitle", def = "",
@@ -65,7 +65,7 @@ import org.slf4j.LoggerFactory;
         info = "Serialize plot to file with default parameters")
 @NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.points.XYAdapter")
 
-public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
+public class PlotDataAction extends OneToOneAction<Table, Table> {
 
     private Meta findFrameDescription(Meta meta, String name) {
         //TODO сделать тут возможность подстановки стилей?
@@ -85,7 +85,7 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     }
 
     @Override
-    protected PointSet execute(Context context, Logable log, String name, Laminate meta, PointSet input) {
+    protected Table execute(Context context, Logable log, String name, Laminate meta, Table input) {
         //initializing plot plugin if necessary
         if (!context.provides("plots")) {
             context.loadPlugin(new PlotsPlugin());
@@ -124,7 +124,7 @@ public class PlotDataAction extends OneToOneAction<PointSet, PointSet> {
     private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
-    protected void afterAction(Context context, String name, PointSet res, Laminate meta) {
+    protected void afterAction(Context context, String name, Table res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
         snapshotTasks.values().stream().forEach((r) -> r.run());
         snapshotTasks.clear();

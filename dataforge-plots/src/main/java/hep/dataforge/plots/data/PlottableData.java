@@ -15,9 +15,9 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.MapPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -25,8 +25,8 @@ import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 /**
  *
@@ -46,7 +46,7 @@ public class PlottableData extends XYPlottable {
 
         List<DataPoint> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            MapPoint point = new MapPoint(new String[]{"x", "y"}, x[i], y[i]);
+            MapPoint.Builder point = new MapPoint(new String[]{"x", "y"}, x[i], y[i]).builder();
 
             if (xErrs != null) {
                 point.putValue("xErr", xErrs[i]);
@@ -56,7 +56,7 @@ public class PlottableData extends XYPlottable {
                 point.putValue("yErr", yErrs[i]);
             }
 
-            data.add(point);
+            data.add(point.build());
         }
         plot.fillData(data);
         return plot;
@@ -90,7 +90,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
     
-    public static PlottableData plot(String name, PointSet data, XYAdapter adapter){
+    public static PlottableData plot(String name, PointSource data, XYAdapter adapter){
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
@@ -112,7 +112,7 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
-//    private static Meta extractMeta(PointSet data) {
+//    private static Meta extractMeta(Table data) {
 //        return data.meta().getNode("plot", Meta.empty("plot"));
 //    }
     @Override

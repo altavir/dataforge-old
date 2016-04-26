@@ -16,15 +16,15 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.names.NamedMetaHolder;
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.AbstractNamedFunction;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.Names;
-import hep.dataforge.points.PointAdapter;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  * <p>
@@ -48,7 +48,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
         this.names = names;
     }
 
-    protected AbstractModel(String name, NameSet source, T adapter) {
+    protected AbstractModel(String name, NameSetContainer source, T adapter) {
         super(name);
         this.adapter = adapter;
         this.names = source.names();

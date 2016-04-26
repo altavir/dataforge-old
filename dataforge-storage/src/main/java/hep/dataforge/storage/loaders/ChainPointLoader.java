@@ -15,10 +15,10 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.points.PointFormat;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
@@ -64,7 +64,7 @@ public class ChainPointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public PointFormat getFormat() {
+    public TableFormat getFormat() {
         return primaryLoader.getFormat();
     }
 

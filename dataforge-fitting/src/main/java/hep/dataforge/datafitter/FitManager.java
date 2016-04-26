@@ -25,10 +25,12 @@ import hep.dataforge.io.PrintNamed;
 import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
-import hep.dataforge.points.PointSet;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
 
 /**
  * <p>
@@ -39,7 +41,7 @@ import hep.dataforge.points.PointSource;
  */
 public class FitManager implements Encapsulated {
 
-//    public static FitState buildState(PointSet data, Model model, ParamSet pars) {
+//    public static FitState buildState(Table data, Model model, ParamSet pars) {
 //        String name;
 //        if (data.isAnonimous()) {
 //            name = "fitState";
@@ -91,12 +93,12 @@ public class FitManager implements Encapsulated {
         return getModelManager().buildModel(getContext(), modelAnnotation);
     }
 
-    public FitState buildState(PointSet data, String modelName, ParamSet pars) {
+    public FitState buildState(Table data, String modelName, ParamSet pars) {
         Model model = getModelManager().buildModel(getContext(), modelName);
         return new FitState(data, model, pars);
     }
 
-    public FitState buildState(PointSet data, Meta modelAnnotation, ParamSet pars) {
+    public FitState buildState(Table data, Meta modelAnnotation, ParamSet pars) {
         Model model = getModelManager().buildModel(getContext(), modelAnnotation);
         return new FitState(data, model, pars);
     }

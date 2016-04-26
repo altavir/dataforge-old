@@ -15,13 +15,13 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.PointListener;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointListener;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.points.PointFormat;
+import hep.dataforge.tables.TableFormat;
 import java.util.Collection;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
 import hep.dataforge.storage.commons.ValueIndex;
 
 /**
@@ -53,7 +53,7 @@ public interface PointLoader extends Loader, PointSource {
      * @return 
      */
     @Override
-    PointFormat getFormat();
+    TableFormat getFormat();
 
 //    /**
 //     * Build a custom index. In case it is a map index it could be stored

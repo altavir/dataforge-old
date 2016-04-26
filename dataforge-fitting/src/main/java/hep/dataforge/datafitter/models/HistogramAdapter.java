@@ -15,10 +15,10 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.AbstractPointAdapter;
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.AbstractPointAdapter;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.points.PointAdapter;
+import hep.dataforge.tables.PointAdapter;
 
 /**
  * TODO сделать адаптер для гистограммы с фиксированными бинами

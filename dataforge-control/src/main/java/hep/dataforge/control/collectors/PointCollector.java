@@ -15,8 +15,8 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.points.MapPoint;
-import hep.dataforge.points.PointListener;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
 import java.time.Instant;
 import java.util.ArrayList;
@@ -75,7 +75,7 @@ public class PointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        MapPoint point = new MapPoint();
+        MapPoint.Builder point = new MapPoint.Builder();
 
         point.putValue("timestamp", time);
         valueMap.entrySet().stream().forEach((entry) -> {
@@ -83,11 +83,11 @@ public class PointCollector implements ValueCollector {
         });
 
         // filling all missing values with nulls
-        names.stream().filter((name) -> (!point.hasValue(name))).forEach((name) -> {
+        names.stream().filter((name) -> (!point.build().hasValue(name))).forEach((name) -> {
             point.putValue(name, Value.getNull());
         });
 
-        consumer.accept(point);
+        consumer.accept(point.build());
         valueMap.clear();
     }
 

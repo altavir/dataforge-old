@@ -21,7 +21,7 @@ package hep.dataforge.names;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class AbstractNamedSet implements NameSet {
+public class AbstractNamedSet implements NameSetContainer {
     
     private final Names names;
 
@@ -46,9 +46,9 @@ public class AbstractNamedSet implements NameSet {
     /**
      * <p>Constructor for AbstractNamedSet.</p>
      *
-     * @param set a {@link hep.dataforge.names.NameSet} object.
+     * @param set a {@link hep.dataforge.names.NameSetContainer} object.
      */
-    public AbstractNamedSet(NameSet set) {
+    public AbstractNamedSet(NameSetContainer set) {
         this.names = set.names();
     }    
     

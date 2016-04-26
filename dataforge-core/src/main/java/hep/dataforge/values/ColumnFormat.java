@@ -8,10 +8,11 @@ package hep.dataforge.values;
 import java.math.BigDecimal;
 
 /**
+ * Special format for columned text
  *
  * @author Alexander Nozik
  */
-public abstract class ColumnFormat implements ValueFormat {
+public abstract class ColumnFormat implements ValueFormatter {
 
     /**
      * Get maximum width of column in symbols
@@ -22,7 +23,7 @@ public abstract class ColumnFormat implements ValueFormat {
 
     /**
      * The default type of this column. Theoretically it is possible to use
-     * other types is well.
+     * other types as well.
      *
      * @return
      */

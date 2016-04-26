@@ -15,31 +15,16 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
-import static java.lang.Double.isNaN;
 import static java.lang.Math.sqrt;
 import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.points.PointSet;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
+import hep.dataforge.tables.Table;
 import static java.lang.Double.isNaN;
 
 /**
@@ -79,13 +64,13 @@ public class HistogramGenerator implements Generator {
 
     /** {@inheritDoc} */
     @Override
-    public ListPointSet generateData(Iterable<DataPoint> config) {
-        ListPointSet res = new ListPointSet(Histogram.names);
+    public Table generateData(Iterable<DataPoint> config) {
+        ListTable.Builder res = new ListTable.Builder(Histogram.names);
         for (Iterator<DataPoint> it = config.iterator(); it.hasNext();) {
-            res.add(this.generateDataPoint(it.next()));
+            res.addRow(this.generateDataPoint(it.next()));
 
         }
-        return res;
+        return res.build();
     }
 
     /** {@inheritDoc} */
@@ -142,9 +127,9 @@ public class HistogramGenerator implements Generator {
      * @param binNumber a int.
      * @return a {@link hep.dataforge.datafitter.models.Histogram} object.
      */
-    public PointSet generateUniformHistogram(double begin, double end, int binNumber) {
+    public Table generateUniformHistogram(double begin, double end, int binNumber) {
         assert end > begin;
-        ListPointSet res = new ListPointSet(Histogram.names);
+        ListTable.Builder res = new ListTable.Builder(Histogram.names);
         DataPoint bin;
         double step = (end - begin) / (binNumber);
         double a = begin;
@@ -152,11 +137,11 @@ public class HistogramGenerator implements Generator {
         for (int i = 0; i < binNumber; i++) {
             bin = new HistogramBin(a, b, 0);
             bin = this.generateDataPoint(bin);
-            res.add(bin);
+            res.addRow(bin);
             a = b;
             b += step;
         }
-        return res;
+        return res.build();
     }
 
     /** {@inheritDoc} */

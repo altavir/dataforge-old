@@ -18,13 +18,13 @@ import com.google.visualization.datasource.datatable.value.ValueType;
 import com.ibm.icu.util.GregorianCalendar;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
-import hep.dataforge.points.PointFormat;
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.ColumnFormat;
-import hep.dataforge.values.ValueFormat;
 import java.util.Date;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.values.ValueFormatter;
 
 /**
  *
@@ -46,9 +46,9 @@ public class Utils {
     
     public static DataTable generateDataTable(PointSource source) {
         DataTable table = new DataTable();
-        PointFormat format = source.getFormat();
-        for (String name : format) {
-            ValueFormat vf = format.getValueFormat(name);
+        TableFormat format = source.getFormat();
+        for (String name : format.names()) {
+            ValueFormatter vf = format.getValueFormat(name);
             ValueType vt;
             if (vf instanceof ColumnFormat) {
                 ColumnFormat cf = (ColumnFormat) vf;
@@ -70,7 +70,7 @@ public class Utils {
         
         for (DataPoint p : source) {
             TableRow row = new TableRow();
-            for (String name : format) {
+            for (String name : format.names()) {
                 row.addCell(toGoogleValue(p.getValue(name)));
             }
             try {

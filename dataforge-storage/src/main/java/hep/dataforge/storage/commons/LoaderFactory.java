@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.points.PointFormat;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.exceptions.LoaderNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
@@ -34,7 +34,7 @@ import hep.dataforge.storage.api.ObjectLoader;
  */
 public class LoaderFactory {
 
-    public static MetaBuilder buildDataPointLoaderMeta(String name, String indexField, PointFormat format) {
+    public static MetaBuilder buildDataPointLoaderMeta(String name, String indexField, TableFormat format) {
         MetaBuilder builder = new MetaBuilder("loader");
 
         if (name == null || name.isEmpty()) {
@@ -50,8 +50,8 @@ public class LoaderFactory {
         builder.putValue(Loader.LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
 
         if (format != null) {
-            builder.putNode(PointFormat.toMeta(format));
-            if (Arrays.binarySearch(format.asArray(), "timestamp") > 0) {
+            builder.putNode(TableFormat.toMeta(format));
+            if (Arrays.binarySearch(format.namesAsArray(), "timestamp") > 0) {
                 builder.putValue("dynamic", true);
             }
         }
@@ -70,7 +70,7 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, PointFormat format)
+    public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, TableFormat format)
             throws StorageException {
         if (shelfName != null && !shelfName.isEmpty()) {
             if (!storage.hasShelf(shelfName)) {

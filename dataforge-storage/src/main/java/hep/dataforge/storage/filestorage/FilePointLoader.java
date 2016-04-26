@@ -6,17 +6,16 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.points.PointFormat;
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.SimpleParser;
+import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.io.IOUtils;
 import hep.dataforge.io.LineIterator;
 import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
 import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
-import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.EnvelopeCodes;
@@ -29,8 +28,7 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointParser;
+import hep.dataforge.tables.PointParser;
 import hep.dataforge.storage.commons.ValueIndex;
 
 /**
@@ -60,7 +58,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     private final String uri;
-    private PointFormat format;
+    private TableFormat format;
     private PointParser parser;
 
     /**
@@ -89,7 +87,7 @@ public class FilePointLoader extends AbstractPointLoader {
             while (!reader.isEof()) {
                 String line = reader.readLine();
                 if (line.startsWith("#f")) {
-                    format = new PointFormat(Names.of(line.substring(2).trim().split("[^\\w']+")));
+                    format = TableFormat.forNames(Names.of(line.substring(2).trim().split("[^\\w']+")));
                 }
             }
         }
@@ -128,12 +126,12 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public PointFormat getFormat() {
+    public TableFormat getFormat() {
         if (format == null) {
             if (meta().hasNode("format")) {
-                format = PointFormat.fromMeta(meta().getNode("format"));
+                format = TableFormat.fromMeta(meta().getNode("format"));
             } else if (meta().hasValue("format")) {
-                format = PointFormat.forNames(meta().getStringArray("format"));
+                format = TableFormat.forNames(meta().getStringArray("format"));
             } else {
                 format = null;
             }
@@ -152,7 +150,7 @@ public class FilePointLoader extends AbstractPointLoader {
     protected void pushPoint(DataPoint dp) throws StorageException {
         try {
             if (!getEnvelope().hasData()) {
-                getEnvelope().appendLine(getFormat().formatCaption());
+                getEnvelope().appendLine(IOUtils.formatCaption(getFormat()));
             }
             String str = getFormat().format(dp);
             getEnvelope().appendLine(str);
@@ -169,14 +167,11 @@ public class FilePointLoader extends AbstractPointLoader {
             throw new RuntimeException("Can't access loader envelope", ex);
         }
     }
-    
-    
 
 //    @Override
-//    public PointSet asPointSet() throws StorageException {
-//        return new ListPointSet(getFormat(), this);
+//    public Table asPointSet() throws StorageException {
+//        return new ListTable(getFormat(), this);
 //    }
-
     @Override
     public Iterator<DataPoint> iterator() {
         try {

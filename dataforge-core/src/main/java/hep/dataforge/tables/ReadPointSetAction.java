@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
@@ -28,12 +28,12 @@ import hep.dataforge.meta.Meta;
 import java.io.IOException;
 import java.io.InputStream;
 
-@TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = PointSet.class, description = "Read DataSet from text file")
+@TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, description = "Read DataSet from text file")
 @ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
 @ValueDef(name = "encoding", def = "UTF8", info = "file encoding")
 @ValueDef(name = "headerLength", type = "NUMBER", info = "The number of header lines to be ignored")
 @ValueDef(name = "dataSetName", info = "The name of resulting DataSet. By default the input content name is taken.")
-public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
+public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
 
     public static final String READ_DATA_SET_ACTION_NAME = "readdataset";
 
@@ -44,8 +44,8 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
      * @return
      */
     @Override
-    protected PointSet execute(Context context, Logable log, String name, Laminate meta, InputStream source) {
-        ListPointSet fileData;
+    protected Table execute(Context context, Logable log, String name, Laminate meta, InputStream source) {
+        ListTable.Builder fileData;
 
         String encoding = meta.getString("encoding", "UTF-8");
         try {
@@ -57,10 +57,10 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
             if (meta.hasValue("columnNames")) {
                 String[] names = meta.getStringArray("columnNames");
                 dpReader = new DataPointStringIterator(iterator, names);
-                fileData = new ListPointSet(names);
+                fileData = new ListTable.Builder(names);
             } else {
                 dpReader = new DataPointStringIterator(iterator, iterator.next());
-                fileData = new ListPointSet(dataSetName);
+                fileData = new ListTable.Builder(dataSetName);
             }
 
             int headerLines = meta.getInt("headerLength", 0);
@@ -69,13 +69,13 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, PointSet> {
             }
 
             while (dpReader.hasNext()) {
-                fileData.add(dpReader.next());
+                fileData.addRow(dpReader.next());
             }
 
         } catch (IOException ex) {
             throw new ContentException("Can't open data source");
         }
-        return fileData;
+        return fileData.build();
     }
 
 }

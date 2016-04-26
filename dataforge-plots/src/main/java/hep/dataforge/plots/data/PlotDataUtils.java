@@ -5,11 +5,11 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.points.PointFormat;
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.MapPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
@@ -18,7 +18,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import hep.dataforge.points.PointSet;
+import hep.dataforge.tables.Table;
 
 /**
  *
@@ -26,14 +26,14 @@ import hep.dataforge.points.PointSet;
  */
 public class PlotDataUtils {
 
-    public static PointSet collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
+    public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
         List<XYPlottable> plottables = new ArrayList<>(frame.getAll());
 
         if (visibleOnly) {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
         }
 
-        Map<Value, MapPoint> points = new LinkedHashMap<>();
+        Map<Value, DataPoint> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
         
@@ -43,19 +43,19 @@ public class PlotDataUtils {
             names.add(pl.getName());
             for (DataPoint point : pl.plotData()) {
                 Value x = adapter.getX(point);
-                MapPoint mdp;
+                MapPoint.Builder mdp;
                 if (points.containsKey(x)) {
-                    mdp = points.get(x);
+                    mdp = new MapPoint.Builder(points.get(x));
                 } else {
-                    mdp = new MapPoint();
+                    mdp = new MapPoint.Builder();
                     mdp.putValue("x", x);
-                    points.put(x, mdp);
+                    points.put(x, mdp.build());
                 }
                 mdp.putValue(pl.getName(), adapter.getY(point));
             }
         }
-        ListPointSet res = new ListPointSet(PointFormat.forNames(8, names));
-        res.addAll(points.values());
-        return res;
+        ListTable.Builder res = new ListTable.Builder(TableFormat.fixedWidth(8, names));
+        res.addRows(points.values());
+        return res.build();
     }
 }

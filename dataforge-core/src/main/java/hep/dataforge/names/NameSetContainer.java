@@ -15,26 +15,18 @@
  */
 package hep.dataforge.names;
 
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.values.Value;
-
 /**
- * <p>
- * NamedValueSet interface.</p>
- *
+ * A container class for a set of names
  * @author Alexander Nozik
- * @version $Id: $Id
  */
-public interface NamedValueSet extends NameSetContainer, Cloneable {
-
-    /**
-     * <p>
-     * getValue.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
-    Value getValue(String name) throws NameNotFoundException;
-
+public interface NameSetContainer {
+    Names names();
+    
+    default int getDimension(){
+        return names().getDimension();
+    }
+    
+    default String[] namesAsArray(){
+        return names().asArray();
+    }
 }

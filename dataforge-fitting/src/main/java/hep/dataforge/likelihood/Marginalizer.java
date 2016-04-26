@@ -30,7 +30,7 @@ import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  * TODO передедать конструкторы
@@ -38,7 +38,7 @@ import hep.dataforge.names.NameSet;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Marginalizer implements NameSet {
+public class Marginalizer implements NameSetContainer {
 
     private static int DEFAULT_MAXIMUM_CALLS = 10000;
 

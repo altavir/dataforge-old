@@ -15,9 +15,9 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.MapPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;

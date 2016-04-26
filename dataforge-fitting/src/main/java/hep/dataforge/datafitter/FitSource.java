@@ -16,14 +16,14 @@
 package hep.dataforge.datafitter;
 
 import hep.dataforge.names.NamedMetaHolder;
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.DerivativeCalculator;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 
 public class FitSource{
@@ -31,7 +31,7 @@ public class FitSource{
     /**
      *
      */
-    protected final PointSet dataSet;
+    protected final Table dataSet;
 
     /**
      *
@@ -44,14 +44,14 @@ public class FitSource{
     protected final NamedFunction prior;
 
 
-    public FitSource(PointSet dataSet, Model model, NamedFunction prior) {
+    public FitSource(Table dataSet, Model model, NamedFunction prior) {
         this.dataSet = dataSet;
         this.model = model;
         this.prior = prior;
     }
 
 
-    public FitSource(PointSet dataSet, Model model) {
+    public FitSource(Table dataSet, Model model) {
         this(dataSet, model, null);
     }
 
@@ -84,7 +84,7 @@ public class FitSource{
      * @return a double.
      */
     public double getDis(int i, ParamSet pars) {
-        return model.distance(dataSet.get(i), pars);
+        return model.distance(dataSet.getRow(i), pars);
     }
 
     /**
@@ -99,7 +99,7 @@ public class FitSource{
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        DataPoint dp = dataSet.get(i);
+        DataPoint dp = dataSet.getRow(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -117,7 +117,7 @@ public class FitSource{
      * @return a double.
      */
     public double getDispersion(int i, ParamSet pars) {
-        double res = model.dispersion(dataSet.get(i), pars);
+        double res = model.dispersion(dataSet.getRow(i), pars);
         if (res > 0) {
             return res;
         } else {
@@ -224,7 +224,7 @@ public class FitSource{
         return this.model.getName();
     }
 
-    public PointSet getDataSet() {
+    public Table getDataSet() {
         return dataSet;
     }
 

@@ -16,10 +16,11 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.ListTable;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.MINUITPlugin;
 import hep.dataforge.datafitter.ParamSet;
+import hep.dataforge.tables.Table;
 
 /**
  *
@@ -52,7 +53,7 @@ public class TestFitting {
         
         FitState r = null;
         for (int i = 0; i < runs; i++) {
-            ListPointSet data = sp.sample(0, 1, 100, -3, 3, num);
+            Table data = sp.sample(0, 1, 100, -3, 3, num);
             r = GaussianSpectrum.fit(data, allPars, "MINUIT");
             res[i] = r.getParameters().getValue("pos");
             errs[i] = r.getParameters().getError("pos");

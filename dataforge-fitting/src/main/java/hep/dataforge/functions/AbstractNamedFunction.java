@@ -17,7 +17,7 @@ package hep.dataforge.functions;
 
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.Names;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  * <p>Abstract AbstractNamedFunction class.</p>
@@ -48,9 +48,9 @@ public abstract class AbstractNamedFunction extends AbstractNamedSet implements 
     /**
      * <p>Constructor for AbstractNamedFunction.</p>
      *
-     * @param set a {@link hep.dataforge.names.NameSet} object.
+     * @param set a {@link hep.dataforge.names.NameSetContainer} object.
      */
-    public AbstractNamedFunction(NameSet set) {
+    public AbstractNamedFunction(NameSetContainer set) {
         super(set);
     }
 

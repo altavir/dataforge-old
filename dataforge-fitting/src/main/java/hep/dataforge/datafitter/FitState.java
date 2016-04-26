@@ -24,14 +24,14 @@ import java.io.PrintWriter;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 /**
  * This class combine the information required to fit data. The key elements are
- * PointSet, Model and initial ParamSet. Additionally, one can provide
- * covariance matrix, prior probability, fit history etc. To simplify
- * construction of FitState use FitStateBuilder
+ Table, Model and initial ParamSet. Additionally, one can provide
+ covariance matrix, prior probability, fit history etc. To simplify
+ construction of FitState use FitStateBuilder
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -58,7 +58,7 @@ public class FitState extends FitSource {
      */
     protected final ParamSet pars;
 
-    public FitState(PointSet dataSet, Model model, ParamSet pars) {
+    public FitState(Table dataSet, Model model, ParamSet pars) {
         super(dataSet, model, null);
         this.pars = pars;
         this.covariance = null;
@@ -71,7 +71,7 @@ public class FitState extends FitSource {
      *
      * @param name a {@link java.lang.String} object.
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param dataSet a {@link hep.dataforge.points.PointSet} object.
+     * @param dataSet a {@link hep.dataforge.tables.Table} object.
      * @param model a {@link hep.dataforge.datafitter.models.Model} object.
      * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
@@ -79,7 +79,7 @@ public class FitState extends FitSource {
      * object.
      * @param prior a {@link hep.dataforge.functions.NamedFunction} object.
      */
-    public FitState(PointSet dataSet, Model model, ParamSet pars,
+    public FitState(Table dataSet, Model model, ParamSet pars,
             NamedMatrix covariance, IntervalEstimate interval, NamedFunction prior) {
         super(dataSet, model, prior);
         this.covariance = covariance;
@@ -234,7 +234,7 @@ public class FitState extends FitSource {
         /**
          *
          */
-        protected PointSet dataSet;
+        protected Table dataSet;
 
         /**
          *
@@ -276,7 +276,7 @@ public class FitState extends FitSource {
          * @param dataSet the dataSet to set
          * @return
          */
-        public Builder setDataSet(PointSet dataSet) {
+        public Builder setDataSet(Table dataSet) {
             this.dataSet = dataSet;
             return this;
         }

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -128,7 +128,8 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public DataPoint mapTo(DataPoint point, String xName, String yName, String xErrName, String yErrName) {
-        MapPoint res = new MapPoint();
+        //TODO replace by virtual point
+        MapPoint.Builder res = new MapPoint.Builder();
         res.putValue(xName, getX(point));
         res.putValue(yName, getY(point));
         if (providesXError(point)) {
@@ -137,7 +138,7 @@ public class XYAdapter extends AbstractPointAdapter {
         if (providesYError(point)) {
             res.putValue(yErrName, getYerr(point));
         }
-        return res;
+        return res.build();
     }
 
     public DataPoint mapToDefault(DataPoint point) {
@@ -145,11 +146,11 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     /**
-     * Return a default PointFormat corresponding to this adapter
+     * Return a default TableFormat corresponding to this adapter
      * @return 
      */
-    public PointFormat getFormat(){
-        return new FormatBuilder()
+    public TableFormat getFormat(){
+        return new TableFormatBuilder()
                 .addNumber(X_NAME)
                 .addNumber(Y_NAME)
                 .build();

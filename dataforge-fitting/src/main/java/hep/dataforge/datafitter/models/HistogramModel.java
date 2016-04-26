@@ -15,7 +15,7 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.FunctionUtils;
 import hep.dataforge.functions.ParametricFunction;

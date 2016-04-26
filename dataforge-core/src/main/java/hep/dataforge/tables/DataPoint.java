@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
@@ -24,15 +24,12 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import hep.dataforge.names.NameSet;
+import hep.dataforge.names.NameSetContainer;
 
 /**
- * Интерфейс для определения абстрактной точки с произвольной размерностью.
- *
- * @author Alexander Nozik
- * @version $Id: $Id
+ * A name-value mapping with some additional features
  */
-public interface DataPoint extends NameSet, ValueProvider {
+public interface DataPoint extends NameSetContainer, ValueProvider {
 
     public static Meta toMeta(DataPoint point) {
         MetaBuilder builder = new MetaBuilder("point");
@@ -68,10 +65,11 @@ public interface DataPoint extends NameSet, ValueProvider {
     @Override
     Value getValue(String name) throws NameNotFoundException;
 
-//    @Override
-//    default double getDouble(String name) throws NameNotFoundException{
-//        return getValue(name).doubleValue();
-//    }
+    @Override
+    default boolean hasValue(String path) {
+        return names().contains(path);
+    }
+
     /**
      * Метод для удобной фильтрации по булевым тэгам
      *
@@ -85,7 +83,5 @@ public interface DataPoint extends NameSet, ValueProvider {
             return getValue(name).booleanValue();
         }
     }
-
-    DataPoint copy();
 
 }

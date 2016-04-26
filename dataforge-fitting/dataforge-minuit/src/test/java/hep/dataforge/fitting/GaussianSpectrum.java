@@ -16,9 +16,9 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.datafitter.FitManager;
 import hep.dataforge.datafitter.FitSource;
 import hep.dataforge.datafitter.FitState;
@@ -36,8 +36,8 @@ import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.AbstractNamedSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 /**
  *
@@ -47,7 +47,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     private static final String[] list = {"w", "pos", "amp"};
 
-    public static FitState fit(ListPointSet data, ParamSet pars, String engine) {
+    public static FitState fit(Table data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
         XYModel model = new XYModel("gaussian", new GaussianSpectrum());
         FitState state = new FitState(data, model, pars);
@@ -55,7 +55,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         return fm.runTask(state, engine, "run", "pos");
     }
 
-    public static void printInvHessian(PointSet data, ParamSet pars) {
+    public static void printInvHessian(Table data, ParamSet pars) {
         XYModel model = new XYModel("gaussian", new GaussianSpectrum());
         FitSource fs = new FitSource(data, model);
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
@@ -93,9 +93,9 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         return this.names().contains(name);
     }
 
-    public ListPointSet sample(double pos, double w, double amp, double a, double b, int number) {
+    public Table sample(double pos, double w, double amp, double a, double b, int number) {
         XYAdapter factory = new XYAdapter();
-        ListPointSet data = new ListPointSet();
+        ListTable.Builder data = new ListTable.Builder();
         double[] v = new double[3];
         v[0] = w;
         v[1] = pos;
@@ -107,9 +107,9 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
             double error = Math.sqrt(value);
             double randValue = Math.max(0, rnd.nextGaussian() * error + value);
             DataPoint p = factory.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
-            data.add(p);
+            data.addRow(p);
         }
-        return data;
+        return data.build();
     }
 
     @Override

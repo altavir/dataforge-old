@@ -16,22 +16,22 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.names.Named;
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.names.NameSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
+import hep.dataforge.names.NameSetContainer;
 
 /**
  *
  * @author Alexander Nozik
  */
-public interface Model extends NameSet, Named, Annotated {
+public interface Model extends NameSetContainer, Named, Annotated {
 
     /**
      * Fit function value minus data point value

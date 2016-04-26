@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
-import hep.dataforge.points.MapPoint;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.MapPoint;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleArray;
@@ -26,8 +26,8 @@ import hep.dataforge.names.Names;
 import java.io.PrintWriter;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.points.PointSet;
-import hep.dataforge.points.PointSource;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 /**
  * Формирование и печать наборов данных
@@ -42,11 +42,11 @@ public class OutputData {
      *
      * @param func a {@link hep.dataforge.functions.NamedFunction} object.
      * @param points a {@link java.util.List} object.
-     * @return a {@link hep.dataforge.points.ListPointSet} object.
+     * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    public static ListPointSet getNamedFunctionData(NamedFunction func, List<NamedDoubleArray> points) {
+    public static Table getNamedFunctionData(NamedFunction func, List<NamedDoubleArray> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
-        ListPointSet res = new ListPointSet(format);
+        ListTable.Builder res = new ListTable.Builder(format);
         Double[] values = new Double[func.getDimension() + 1];
         for (NamedDoubleArray point : points) {
             for (int j = 0; j < func.getDimension(); j++) {
@@ -54,9 +54,9 @@ public class OutputData {
             }
             values[values.length - 1] = func.value(point);
             DataPoint dp = new MapPoint(format, values);
-            res.add(dp);
+            res.addRow(dp);
         }
-        return res;
+        return res.build();
     }
 
     /**
@@ -64,20 +64,20 @@ public class OutputData {
      *
      * @param func a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      * @param points an array of double.
-     * @return a {@link hep.dataforge.points.ListPointSet} object.
+     * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    public static ListPointSet getUnivariateFunctionData(UnivariateFunction func, double[] points) {
+    public static Table getUnivariateFunctionData(UnivariateFunction func, double[] points) {
         final String[] format = {"point", "value"};
-        ListPointSet res = new ListPointSet(format);
+        ListTable.Builder res = new ListTable.Builder(format);
         Double[] values = new Double[2];
         
         for (int i = 0; i < format.length; i++) {
             values[0] = points[i];
             values[1] = func.value(points[i]);
             DataPoint dp = new MapPoint(format, values);
-            res.add(dp);
+            res.addRow(dp);
         }
-        return res;
+        return res.build();
     }
 
     /**
@@ -89,10 +89,10 @@ public class OutputData {
      * @param head a {@link java.lang.String} object.
      */
     public static void printDataSet(PrintWriter out, PointSource data, String head, String... outputFormat) {
-        Names format = data.getFormat();
+        Names format = data.getFormat().names();
 
         if (outputFormat.length > 0) {
-            if (!data.getFormat().contains(outputFormat)) {
+            if (!data.getFormat().names().contains(outputFormat)) {
                 throw new NameNotFoundException();
             }
             format = Names.of(outputFormat);

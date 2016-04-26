@@ -173,7 +173,7 @@ public class StorageRatpackHandler implements Handler {
 //            String from = ctx.getRequest().getQueryParams().get("from");
 //            String to = ctx.getRequest().getQueryParams().get("to");
 //            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
-            data.put("dataSource", ctx.getRequest().getLocalAddress() + ctx.getRequest().getUri());
+            data.put("dataSource", "http://localhost:8337" + ctx.getRequest().getUri());
             data.put("loaderName", loader.getName());
 //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 

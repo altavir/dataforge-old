@@ -15,21 +15,17 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.ListPointSet;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.TableFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
+import java.util.stream.Collectors;
 import static java.util.regex.Pattern.compile;
 
 /**
@@ -70,20 +66,20 @@ public class IOUtils {
 
     }
 
-//    public static ListPointSet readColumnedData(File input, String... names) {
+//    public static ListTable readColumnedData(File input, String... names) {
 //        return readColumnedData(null, input, names);
 //    }
 //
-//    public static ListPointSet readColumnedData(String name, File input, String... names) throws FileNotFoundException {
+//    public static ListTable readColumnedData(String name, File input, String... names) throws FileNotFoundException {
 //        ColumnedDataReader reader;
 //        if (names.length > 0) {
 //            reader = new ColumnedDataReader(input, names);
 //        } else {
 //            reader = new ColumnedDataReader(input);
 //        }
-//        ListPointSet res = new ListPointSet(name, names);
+//        ListTable res = new ListTable(name, names);
 //        for (DataPoint dp : reader) {
-//            res.add(dp);
+//            res.addRow(dp);
 //        }
 //        return res;
 //    }
@@ -93,10 +89,10 @@ public class IOUtils {
      *
      * @param fileName a {@link java.lang.String} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.points.ListPointSet} object.
+     * @return a {@link hep.dataforge.tables.ListTable} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static ListPointSet readColumnedData(String fileName, String... names) throws FileNotFoundException {
+    public static Table readColumnedData(String fileName, String... names) throws FileNotFoundException {
         return readColumnedData(new File(fileName), names);
     }
 
@@ -106,23 +102,39 @@ public class IOUtils {
      *
      * @param file a {@link java.io.File} object.
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.points.ListPointSet} object.
+     * @return a {@link hep.dataforge.tables.ListTable} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static ListPointSet readColumnedData(File file, String... names) throws FileNotFoundException {
+    public static Table readColumnedData(File file, String... names) throws FileNotFoundException {
         ColumnedDataReader reader;
         if (names.length == 0) {
             reader = new ColumnedDataReader(file);
         } else {
             reader = new ColumnedDataReader(file, names);
         }
-        ListPointSet res = new ListPointSet(names);
+        ListTable.Builder res = new ListTable.Builder(names);
         for (DataPoint dp : reader) {
-            res.add(dp);
+            res.addRow(dp);
         }
-        return res;
+        return res.build();
     }
 
+        /**
+     * Format header string for text representation
+     * <p>
+     * TODO move to utils
+     * </p>
+     *
+     * @return a {@link java.lang.String} object.
+     */
+    public static String formatCaption(TableFormat format) {
+        return "#f" + format.names()
+                .asList()
+                .stream()
+                .map((name) -> format.getValueFormat(name).formatString(format.getTitle(name)))
+                .collect(Collectors.joining("\t"));
+    }
+    
     /**
      * <p>
      * readFileMask.</p>

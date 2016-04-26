@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
@@ -21,7 +21,8 @@ import hep.dataforge.values.Value;
 import java.util.Map;
 
 /**
- * <p>MaskPoint class.</p>
+ * <p>
+ * MaskPoint class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -32,30 +33,20 @@ public class MaskPoint implements DataPoint {
     private final DataPoint source;
     private final Names names;
 
-    /**
-     * <p>Constructor for MaskDataPoint.</p>
-     *
-     * @param source a {@link hep.dataforge.points.DataPoint} object.
-     * @param nameMap a {@link java.util.Map} object.
-     */
     public MaskPoint(DataPoint source, Map<String, String> nameMap) {
         this.source = source;
         this.nameMap = nameMap;
         names = Names.of(nameMap.keySet());
     }
 
-    /** {@inheritDoc}
-     * @return  */
-    @Override
-    public MaskPoint copy(){
-        return new MaskPoint(source.copy(), nameMap);
-    }
-
-        /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
     public int getDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return nameMap.size();
     }
 
     @Override
@@ -63,15 +54,19 @@ public class MaskPoint implements DataPoint {
         return nameMap.containsKey(path);
     }
 
-    /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
     public Names names() {
         return names;
     }
 
-
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Value getValue(String name) throws NameNotFoundException {
         return source.getValue(nameMap.get(name));

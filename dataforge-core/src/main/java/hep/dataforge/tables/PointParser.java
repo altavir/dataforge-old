@@ -13,39 +13,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
-
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueFormat;
-import java.util.List;
+package hep.dataforge.tables;
 
 /**
- * колонка однородных значений
+ * <p>PointParser interface.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Column extends Iterable<Value> {
+public interface PointParser {
     /**
-     * <p>format.</p>
+     * <p>parse.</p>
      *
-     * @return a {@link hep.dataforge.values.ValueFormat} object.
+     * @param str a {@link java.lang.String} object.
+     * @return a {@link hep.dataforge.tables.DataPoint} object.
      */
-    ValueFormat format();
-    
-    /**
-     * <p>get.</p>
-     *
-     * @param n a int.
-     * @return a {@link hep.dataforge.values.Value} object.
-     */
-    Value get(int n);
-    
-    /**
-     * <p>asList.</p>
-     *
-     * @return a {@link java.util.List} object.
-     */
-    List<Value> asList();
-    
+    DataPoint parse(String str);
 }

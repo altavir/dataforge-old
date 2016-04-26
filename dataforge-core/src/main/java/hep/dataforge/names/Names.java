@@ -20,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * <p>Names interface.</p>
+ * A set of names
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -60,10 +60,10 @@ public interface Names extends Iterable<String> {
     /**
      * <p>of.</p>
      *
-     * @param set a {@link hep.dataforge.names.NameSet} object.
+     * @param set a {@link hep.dataforge.names.NameSetContainer} object.
      * @return a {@link hep.dataforge.names.Names} object.
      */
-    public static Names of(NameSet set) {
+    public static Names of(NameSetContainer set) {
         return new NameList(set.names());
     }
 

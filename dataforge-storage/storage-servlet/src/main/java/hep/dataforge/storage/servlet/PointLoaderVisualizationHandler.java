@@ -6,8 +6,8 @@
 package hep.dataforge.storage.servlet;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.PointFormat;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.storage.api.PointLoader;
 import java.io.StringWriter;
 import java.util.HashMap;
@@ -24,15 +24,17 @@ import ratpack.handling.Handler;
  * A handler to evaluate Google visualization library requests to point loaders
  * <p https://developers.google.com/chart/interactive/docs/dev/implementing_data_source />
  * <p https://developers.google.com/chart/interactive/docs/reference />
+ *
  * @author Alexander Nozik
  */
 public class PointLoaderVisualizationHandler implements Handler {
+
     private final PointLoader loader;
 
     public PointLoaderVisualizationHandler(PointLoader loader) {
         this.loader = loader;
     }
-    
+
     @Override
     public void handle(Context ctx) throws Exception {
         String tq = ctx.getRequest().getQueryParams().get("tq");
@@ -67,21 +69,36 @@ public class PointLoaderVisualizationHandler implements Handler {
     public static JsonObjectBuilder makeTable(PointLoader loader, Meta query) {
         JsonObjectBuilder res = Json.createObjectBuilder();
         res.add("cols", makeCols(loader.getFormat()));
-        res.add("rows", makeCols(loader.getFormat()));
+        res.add("rows", makeRows(loader.getFormat(), loader));
         return res;
     }
 
-    private static JsonArrayBuilder makeCols(PointFormat format) {
+    private static JsonArrayBuilder makeCols(TableFormat format) {
         JsonArrayBuilder res = Json.createArrayBuilder();
-        for (String valueName : format) {
+        for (String valueName : format.names()) {
+            String type;
+            switch (format.getType(valueName)) {
+                case NUMBER:
+                    type = "number";
+                    break;
+                case BOOLEAN:
+                    type = "boolean";
+                    break;
+                case TIME:
+                    type = "date";
+                    break;
+                default:
+                    type = "string";
+            }
             res.add(Json.createObjectBuilder()
                     .add("id", valueName)
+                    .add("label", format.getTitle(valueName))
                     .add("type", "string"));
         }
         return res;
     }
 
-    private static JsonArrayBuilder makeRows(PointFormat format, Iterable<DataPoint> data) {
+    private static JsonArrayBuilder makeRows(TableFormat format, Iterable<DataPoint> data) {
         JsonArrayBuilder rows = Json.createArrayBuilder();
         for (DataPoint p : data) {
             rows.add(makeRow(format, p));
@@ -89,9 +106,9 @@ public class PointLoaderVisualizationHandler implements Handler {
         return rows;
     }
 
-    private static JsonObjectBuilder makeRow(PointFormat format, DataPoint point) {
+    private static JsonObjectBuilder makeRow(TableFormat format, DataPoint point) {
         JsonArrayBuilder values = Json.createArrayBuilder();
-        for (String valueName : format) {
+        for (String valueName : format.names()) {
             values.add(Json.createObjectBuilder().add("v", point.getString(valueName)));
         }
         return Json.createObjectBuilder()
@@ -115,4 +132,3 @@ public class PointLoaderVisualizationHandler implements Handler {
         return map;
     }
 }
-

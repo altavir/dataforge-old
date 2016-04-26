@@ -13,20 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
+
+import java.util.function.Consumer;
 
 /**
- * <p>PointParser interface.</p>
+ * A functional interface representing DataPoint listener
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface PointParser {
-    /**
-     * <p>parse.</p>
-     *
-     * @param str a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.points.DataPoint} object.
-     */
-    DataPoint parse(String str);
+public interface PointListener extends Consumer<DataPoint> {
+
 }

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
@@ -110,16 +110,6 @@ public class HistogramBin implements DataPoint {
     public double binSize() {
         //Предполагаем возможность неравномерных бинов
         return (binEnd - binBegin);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public HistogramBin copy() {
-        return new HistogramBin(this);
     }
 
     /**

@@ -26,7 +26,7 @@ import hep.dataforge.meta.Meta;
  */
 public class ValueFormatFactory {
 
-    public static final ValueFormat EMPTY_FORMAT = new ValueFormat() {
+    public static final ValueFormatter EMPTY_FORMAT = new ValueFormatter() {
         @Override
         public boolean allowed(Value val) {
             return true;
@@ -38,15 +38,15 @@ public class ValueFormatFactory {
         }
     };
 
-    public static ValueFormat forValue(Value value) {
+    public static ValueFormatter forValue(Value value) {
         return forType(value.valueType());
     }
 
-    public static ValueFormat forType(ValueType type) {
+    public static ValueFormatter forType(ValueType type) {
         return forType(type, 0);
     }
 
-    public static ValueFormat forType(ValueType type, int maxWidth) {
+    public static ValueFormatter forType(ValueType type, int maxWidth) {
         if (maxWidth > DefaultValueFormat.getDefaultWidth(type)) {
             switch (type) {
                 case NUMBER:
@@ -61,19 +61,20 @@ public class ValueFormatFactory {
         }
     }
 
-    public static ValueFormat fixedWidth(int width) {
+    public static ValueFormatter fixedWidth(int width) {
         return new FixedWidthFormat(width);
     }
 
-    public static ValueFormat build(Meta a) {
+    public static ValueFormatter build(Meta a) {
         if (a == null || a.isEmpty()) {
             return EMPTY_FORMAT;
         } else if (a.hasValue("width")) {
             return new FixedWidthFormat(a.getInt("width"));
-        } else {
-            return forType(ValueType.valueOf(a.getString("type", ValueType.STRING.name())));
+        } else if (a.hasValue("type")){
+            return forType(ValueType.valueOf(a.getString("type")));
+        } else{
+            return EMPTY_FORMAT;
         }
     }
-    
-    
+
 }

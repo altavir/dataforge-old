@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.points;
+package hep.dataforge.tables;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;

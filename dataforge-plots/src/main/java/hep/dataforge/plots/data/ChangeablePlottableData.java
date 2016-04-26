@@ -5,7 +5,7 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.points.DataPoint;
+import hep.dataforge.tables.DataPoint;
 
 
 public class ChangeablePlottableData extends PlottableData {

@@ -13,16 +13,32 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.points;
-
-import java.util.function.Consumer;
+package hep.dataforge.values;
 
 /**
- * A functional interface representing DataPoint listener
+ * Text representation of value and limits on allowed values
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
-public interface PointListener extends Consumer<DataPoint> {
+public interface ValueFormatter {
+
+    /**
+     * Answer if given value is allowed in this formatter
+     * @param val
+     * @return 
+     */
+    boolean allowed(Value val);
+
+    String format(Value val);
+
+    /**
+     * Вспомогательный метод для создания заголовка
+     *
+     * @param str
+     * @return
+     */
+    default String formatString(String str) {
+        return format(Value.of(str));
+    }
 
 }

@@ -17,8 +17,8 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.points.DataPoint;
-import hep.dataforge.points.XYAdapter;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.stream.Collectors;
