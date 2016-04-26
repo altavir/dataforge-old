@@ -9,7 +9,11 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.storage.api.PointLoader;
+import hep.dataforge.values.Value;
 import java.io.StringWriter;
+import java.math.BigDecimal;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.json.Json;
@@ -28,6 +32,8 @@ import ratpack.handling.Handler;
  * @author Alexander Nozik
  */
 public class PointLoaderVisualizationHandler implements Handler {
+
+    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
 
     private final PointLoader loader;
 
@@ -85,7 +91,7 @@ public class PointLoaderVisualizationHandler implements Handler {
                     type = "boolean";
                     break;
                 case TIME:
-                    type = "date";
+                    type = "datetime";
                     break;
                 default:
                     type = "string";
@@ -93,7 +99,7 @@ public class PointLoaderVisualizationHandler implements Handler {
             res.add(Json.createObjectBuilder()
                     .add("id", valueName)
                     .add("label", format.getTitle(valueName))
-                    .add("type", "string"));
+                    .add("type", type));
         }
         return res;
     }
@@ -109,7 +115,17 @@ public class PointLoaderVisualizationHandler implements Handler {
     private static JsonObjectBuilder makeRow(TableFormat format, DataPoint point) {
         JsonArrayBuilder values = Json.createArrayBuilder();
         for (String valueName : format.names()) {
-            values.add(Json.createObjectBuilder().add("v", point.getString(valueName)));
+            Value value = point.getValue(valueName);
+            switch (value.valueType()) {
+                case TIME:
+                    values.add(Json.createObjectBuilder().add("v", "Date(" + value.longValue() + ")")
+                            .add("f", value.stringValue()));
+                    break;
+                default:
+                    values.add(Json.createObjectBuilder().add("v", value.stringValue())
+                            .add("f", value.stringValue()));
+            }
+
         }
         return Json.createObjectBuilder()
                 .add("c", values);

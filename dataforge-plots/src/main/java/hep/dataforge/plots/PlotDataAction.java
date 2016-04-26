@@ -63,7 +63,7 @@ import hep.dataforge.tables.Table;
         info = "Save plot shapshots to file with default parameters")
 @ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
         info = "Serialize plot to file with default parameters")
-@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.points.XYAdapter")
+@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.tables.XYAdapter")
 
 public class PlotDataAction extends OneToOneAction<Table, Table> {
 

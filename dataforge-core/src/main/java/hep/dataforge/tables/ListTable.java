@@ -107,7 +107,7 @@ public class ListTable implements Table {
      */
     public ListTable(List<DataPoint> points) {
         if (points.isEmpty()) {
-            throw new IllegalArgumentException("Can't create ListPointSet from the empty list. Format required.");
+            throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
         }
         this.format = TableFormat.forPoint(points.get(0));
         addRows(points);

@@ -97,8 +97,8 @@ public class Filtering {
      * @param an a {@link hep.dataforge.meta.Meta} object.
      * @return a {@link java.util.function.Predicate} object.
      */
-    @NodeDef(name = "is", multiple = true, info = "The filtering condition that must be satisfied", target = "method::hep.dataforge.points.Filtering.buildCondition")
-    @NodeDef(name = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", target = "method::hep.dataforge.points.Filtering.buildCondition")
+    @NodeDef(name = "is", multiple = true, info = "The filtering condition that must be satisfied", target = "method::hep.dataforge.tables.Filtering.buildCondition")
+    @NodeDef(name = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", target = "method::hep.dataforge.tables.Filtering.buildCondition")
     public static Predicate<DataPoint> buildConditionSet(Meta an) {
         Predicate<DataPoint> res = null;
         if (an.hasNode("is")) {

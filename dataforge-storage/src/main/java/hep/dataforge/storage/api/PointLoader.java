@@ -46,7 +46,7 @@ public interface PointLoader extends Loader, PointSource {
 //     * @return
 //     * @throws StorageException
 //     */
-//    PointSet asPointSet() throws StorageException;
+//    Table asTable() throws StorageException;
     
     /**
      * The minimal format for points in this loader. Is null for unformatted loader

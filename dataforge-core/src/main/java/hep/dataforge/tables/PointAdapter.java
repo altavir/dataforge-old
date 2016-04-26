@@ -52,8 +52,8 @@ public interface PointAdapter extends Annotated {
      */
     Value getFrom(DataPoint point, String component);
     
-//    default public ListPointSet buildEmptyDataSet(String name) {
-//        ListPointSet res = new ListPointSet(DataFormat.forNames(0, getNames()));
+//    default public ListTable buildEmptyDataSet(String name) {
+//        ListTable res = new ListTable(DataFormat.forNames(0, getNames()));
 //        res.configure(new MetaBuilder(name).putNode(meta()).build());
 //        return res;
 //    }

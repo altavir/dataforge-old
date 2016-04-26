@@ -12,6 +12,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
+import ratpack.server.PublicAddress;
 
 /**
  * Created by darksnake on 13-Dec-15.
@@ -173,7 +174,14 @@ public class StorageRatpackHandler implements Handler {
 //            String from = ctx.getRequest().getQueryParams().get("from");
 //            String to = ctx.getRequest().getQueryParams().get("to");
 //            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
-            data.put("dataSource", "http://localhost:8337" + ctx.getRequest().getUri());
+            String hostName;
+            if (ctx.getServerConfig().getAddress() != null) {
+                hostName = ctx.getServerConfig().getAddress().getHostAddress();
+            } else {
+                hostName = "localhost";
+            }
+            String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
+            data.put("dataSource", serverAddres + ctx.getRequest().getUri());
             data.put("loaderName", loader.getName());
 //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 

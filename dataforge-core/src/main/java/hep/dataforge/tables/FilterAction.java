@@ -28,13 +28,13 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
- * действие для фильтрации {@code ListPointSet}
+ * действие для фильтрации {@code ListTable}
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 @TypedActionDef(name = "filterData", inputType = Table.class, outputType = Table.class, description = "Filter dataset with given filtering rules")
-@NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.points.Filtering.buildConditionSet")
+@NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.tables.Filtering.buildConditionSet")
 public class FilterAction extends OneToOneAction<Table, Table> {
 
     /**

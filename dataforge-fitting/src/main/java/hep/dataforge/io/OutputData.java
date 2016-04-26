@@ -85,7 +85,7 @@ public class OutputData {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param outputFormat a {@link java.lang.String} object.
-     * @param data a {@link hep.dataforge.points.PointSet} object.
+     * @param data a {@link hep.dataforge.tables.Table} object.
      * @param head a {@link java.lang.String} object.
      */
     public static void printDataSet(PrintWriter out, PointSource data, String head, String... outputFormat) {

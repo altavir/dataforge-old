@@ -112,7 +112,7 @@ public class TableFormat implements Annotated, NameSetContainer {
     @Override
     public Names names() {
         if (this.names == null) {
-            Names.of(meta().getNodes("column").stream().map(node -> node.getString("name", "")).collect(Collectors.toList()));
+            names = Names.of(meta().getNodes("column").stream().map(node -> node.getString("name", "")).collect(Collectors.toList()));
         }
         return this.names;
     }
@@ -127,7 +127,8 @@ public class TableFormat implements Annotated, NameSetContainer {
     }
 
     public Meta getColumnMeta(String columnName) {
-        return findColumnMeta(columnName).orElse(getDefaultColumnMeta());
+        Optional<Meta> op = findColumnMeta(columnName).map(m -> m);
+        return op.orElse(getDefaultColumnMeta());
     }
 
     protected Meta getDefaultColumnMeta() {

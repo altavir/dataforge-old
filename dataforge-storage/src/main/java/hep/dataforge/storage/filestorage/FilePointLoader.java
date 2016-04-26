@@ -169,7 +169,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
 //    @Override
-//    public Table asPointSet() throws StorageException {
+//    public Table asTable() throws StorageException {
 //        return new ListTable(getFormat(), this);
 //    }
     @Override

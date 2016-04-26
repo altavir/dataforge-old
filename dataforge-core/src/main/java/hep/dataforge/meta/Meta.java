@@ -37,7 +37,7 @@ import java.util.Objects;
  * @version $Id: $Id
  */
 public abstract class Meta extends AbstractProvider implements Named, ValueProvider, Serializable {
-    
+
     private static final Meta EMPTY = new MetaBuilder("").build();
 
     /**
@@ -50,14 +50,15 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     public static Meta buildEmpty(String name) {
         return new MetaBuilder(name).build();
     }
-    
+
     /**
      * Empty anonymous meta
-     * @return 
+     *
+     * @return
      */
     public static Meta empty() {
         return EMPTY;
-    }    
+    }
 
     /**
      * Возвращает билдер, который работает с копией этой аннотации
@@ -260,6 +261,5 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     public String toString() {
         return new XMLMetaWriter().writeString(this);
     }
-    
-    
+
 }

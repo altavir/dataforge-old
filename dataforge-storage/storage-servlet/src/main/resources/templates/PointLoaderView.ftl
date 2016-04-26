@@ -10,7 +10,7 @@
     
         function startUpdate() {
             var opts = {sendMethod: 'auto'};
-
+//            alert('sending request to ${dataSource}')
             var query = new google.visualization.Query("${dataSource}", opts);
             query.setRefreshInterval(30);
                 
@@ -30,7 +30,7 @@
 
             var data = response.getDataTable();
             var table = new google.visualization.Table(document.getElementById('table_div'));
-            table.draw(data, {showRowNumber: false, page: 'enable', pageSize: 50, sort : 'disable'});
+            table.draw(data, {showRowNumber: false, page: 'enable', width : '100%', pageSize: 50, sort : 'disable'});
                 
             var options = {
                 title: '${loaderName}',
@@ -42,16 +42,11 @@
             
             var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
             chart.draw(data, options);
-        };
-                
         }
     </script>
 </head>
 <body>
     <h1>Point loader: ${loaderName}</h1>
-<!--    <div id="debug">
-        <p>data source path: ${dataSource}</p>
-    </div>-->
     <br/>
     <div id="plot_div"></div>
     <br/>

@@ -71,8 +71,8 @@ public class ChainPointLoader extends AbstractPointLoader {
     
     
 //    @Override
-//    public PointSet asPointSet() throws StorageException {
-//        return primaryLoader.asPointSet();
+//    public Table asTable() throws StorageException {
+//        return primaryLoader.asTable();
 //    }
 
     @Override

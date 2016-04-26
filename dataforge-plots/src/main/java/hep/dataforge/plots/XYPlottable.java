@@ -36,7 +36,7 @@ import java.util.stream.Collectors;
 @ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", info = "The type of conncetion between points.")
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
-@NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.points.XYAdapter")
+@NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.tables.XYAdapter")
 public abstract class XYPlottable extends AbstractPlottable implements Plottable {
     
     public XYPlottable(String name) {
