@@ -7,7 +7,6 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
-import java.util.Iterator;
 
 /**
  * A segmented loader containing an ordered set of envelopes

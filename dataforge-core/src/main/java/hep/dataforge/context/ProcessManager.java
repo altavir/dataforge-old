@@ -23,7 +23,7 @@ public class ProcessManager implements Encapsulated {
     /**
      * root process map
      */
-    private final DFProcess rootProcess = new DFProcess("root");
+    private DFProcess rootProcess;
 
     /**
      * A context for this process manager
@@ -39,6 +39,11 @@ public class ProcessManager implements Encapsulated {
 
     public void setContext(Context context) {
         this.context = context;
+        if (context.getParent() == null) {
+            rootProcess = new DFProcess(this, context.getName());
+        } else {
+            rootProcess = context.getParent().processManager.getRootProcess().addChild(context.getName(), null);
+        }
     }
 
     protected DFProcess buildProcess(String processName, CompletableFuture future) {
@@ -47,6 +52,10 @@ public class ProcessManager implements Encapsulated {
 
     public DFProcess findProcess(String processName) {
         return rootProcess.findProcess(processName);
+    }
+
+    public DFProcess getRootProcess() {
+        return rootProcess;
     }
 
     /**
@@ -61,7 +70,7 @@ public class ProcessManager implements Encapsulated {
             post(Name.join(processName).toString(), command);
         };
     }
-
+    
     /**
      * Post a runnable to the process manager as a started process
      *
@@ -73,25 +82,37 @@ public class ProcessManager implements Encapsulated {
         return post(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 
-    public <U> DFProcess post(String processName, Supplier<U> sup) {
+    public <U> DFProcess<U> post(String processName, Supplier<U> sup) {
         return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
     }
 
     public DFProcess post(String processName, Consumer<Callback> con) {
-        Callback callback = createCallback(processName);
+        Callback callback = callback(processName);
         return post(processName, () -> con.accept(callback));
     }
 
-    public <U> DFProcess post(String processName, Function<Callback, U> func) {
-        Callback callback = createCallback(processName);
+    public <U> DFProcess<U> post(String processName, Function<Callback, U> func) {
+        Callback callback = callback(processName);
         return post(processName, () -> func.apply(callback));
     }
 
-    private Callback createCallback(String processName) {
+    public <U> DFProcess<U> post(String processName) {
+        getContext().getLogger().debug("Posting empty process with name '{}' to the process manager", processName);
+        return buildProcess(processName, null);
+    }
+
+    public Callback callback(String processName) {
         return new Callback(this, processName);
     }
 
-    public synchronized <U> DFProcess post(String processName, CompletableFuture<U> task) {
+    /**
+     * WARNING. Task comes with its own executor
+     * @param <U>
+     * @param processName
+     * @param task
+     * @return 
+     */
+    public synchronized <U> DFProcess<U> post(String processName, CompletableFuture<U> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
         CompletableFuture future = task
                 .whenComplete((U res, Throwable ex) -> {
@@ -103,7 +124,6 @@ public class ProcessManager implements Encapsulated {
                         onProcessException(processName, ex);
                     }
                 });
-        onProcessStarted(processName);
         return buildProcess(processName, future);
     }
 
@@ -255,7 +275,7 @@ public class ProcessManager implements Encapsulated {
         }
 
         public void changeProgress(double incProgress, double incMaxProgress) {
-            updateProcess(p -> p.changeProgress(incProgress, incMaxProgress));
+            updateProcess(p -> p.increaseProgress(incProgress, incMaxProgress));
         }
 
         public void updateTitle(String message) {

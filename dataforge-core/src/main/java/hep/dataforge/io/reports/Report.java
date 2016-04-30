@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.log;
+package hep.dataforge.io.reports;
 
 import ch.qos.logback.classic.Logger;
 import hep.dataforge.names.Named;
@@ -35,17 +35,17 @@ import org.slf4j.helpers.MessageFormatter;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Log implements Logable, Named {
+public class Report implements Reportable, Named {
 
     private static int MAX_LOG_SIZE = 1000;
 
-    protected ConcurrentLinkedQueue<LogEntry> log = new ConcurrentLinkedQueue<>();
-    private Logable parent;
+    protected ConcurrentLinkedQueue<ReportEntry> entries = new ConcurrentLinkedQueue<>();
+    private Reportable parent;
     private Logger logger;
     private final String name;
-    private final ReferenceRegistry<Consumer<LogEntry>> logListeners = new ReferenceRegistry<>();
+    private final ReferenceRegistry<Consumer<ReportEntry>> listeners = new ReferenceRegistry<>();
 
-    public Log(String name, Logable parent) {
+    public Report(String name, Reportable parent) {
         if (name == null || name.isEmpty()) {
             throw new AnonymousNotAlowedException();
         }
@@ -54,7 +54,7 @@ public class Log implements Logable, Named {
         this.logger = (Logger) LoggerFactory.getLogger(name);
     }
 
-    public Log(String name) {
+    public Report(String name) {
         this(name, GlobalContext.instance());
     }
 
@@ -68,47 +68,47 @@ public class Log implements Logable, Named {
     }
 
     @Override
-    public void log(LogEntry entry) {
-        log.add(entry);
-        if (log.size() >= getMaxLogSize()) {
-            log.poll();// Ограничение на размер лога
+    public void report(ReportEntry entry) {
+        entries.add(entry);
+        if (entries.size() >= getMaxLogSize()) {
+            entries.poll();// Ограничение на размер лога
             logger.warn("Log at maximum capacity!");
         }
-        logListeners.forEach((Consumer<LogEntry> listener) -> {
+        listeners.forEach((Consumer<ReportEntry> listener) -> {
             listener.accept(entry);
         });
 
         if (getParent() != null) {
-            LogEntry newEntry = pushTrace(entry, getName());
-            getParent().log(newEntry);
+            ReportEntry newEntry = pushTrace(entry, getName());
+            getParent().report(newEntry);
         }
 
     }
 
     /**
-     * Add a weak log listener to this  log
+     * Add a weak report listener to this  report
      *
      * @param logListener
      */
-    public void addLogListener(Consumer<LogEntry> logListener) {
-        this.logListeners.add(logListener);
+    public void addReportListener(Consumer<ReportEntry> logListener) {
+        this.listeners.add(logListener);
     }
 
-    private LogEntry pushTrace(LogEntry entry, String toTrace) {
-        return new LogEntry(entry, toTrace);
+    private ReportEntry pushTrace(ReportEntry entry, String toTrace) {
+        return new ReportEntry(entry, toTrace);
     }
 
     public void clear() {
-        log.clear();
+        entries.clear();
     }
 
-    public Logable getParent() {
+    public Reportable getParent() {
         return parent;
     }
 
     public void print(PrintWriter out) {
         out.println();
-        log.stream().forEach((entry) -> {
+        entries.stream().forEach((entry) -> {
             out.println(entry.toString());
         });
         out.println();
@@ -116,7 +116,7 @@ public class Log implements Logable, Named {
     }
 
     @Override
-    public Log getLog() {
+    public Report getReport() {
         return this;
     }
 
@@ -126,14 +126,14 @@ public class Log implements Logable, Named {
     }
 
     @Override
-    public void log(String str, Object... parameters) {
-        LogEntry entry = new LogEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
-        log(entry);
+    public void report(String str, Object... parameters) {
+        ReportEntry entry = new ReportEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
+        Report.this.report(entry);
     }
 
     @Override
-    public void logError(String str, Object... parameters) {
-        this.log.add(new LogEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
+    public void reportError(String str, Object... parameters) {
+        this.entries.add(new ReportEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
         logger.error(str, parameters);
     }
 }

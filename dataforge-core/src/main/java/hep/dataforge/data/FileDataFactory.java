@@ -117,7 +117,7 @@ public class FileDataFactory extends DataFactory {
                 addDir(context, dirBuilder, dir, Meta.empty());
             }
         }
-        builder.putBranch(dirBuilder.build());
+        builder.putNode(dirBuilder.build());
 
     }
 
@@ -161,7 +161,7 @@ public class FileDataFactory extends DataFactory {
 //            List<? extends Meta> groupAnnotations = ds.getNodes("group");
 //            for (Meta an : groupAnnotations) {
 //                List<FileData> list = readDataConfiguration(parentDir, an);
-//                list.stream().<Data>map((d) -> {
+//                list.dataStream().<Data>map((d) -> {
 //                    // Обновляем аннотацию файла. Основной считаем аннотацию файла, а не контейнера
 //
 //                    //FIXME сделать тут добавление группового тэга во всевложенные аннотации
@@ -215,8 +215,8 @@ public class FileDataFactory extends DataFactory {
 //            
 //            //FIXME revise data holders
 //            List<FileData> res = readDataConfiguration(parentDir, dataConfiguration);
-//            res.stream().forEach((d) -> {
-//                getContext().log("Importing file {}", d.getInputFile().getName());
+//            res.dataStream().forEach((d) -> {
+//                getContext().report("Importing file {}", d.getInputFile().getName());
 //            });
 //            return DataSet.builder(FileData.class)
 //                    .putAll(res)

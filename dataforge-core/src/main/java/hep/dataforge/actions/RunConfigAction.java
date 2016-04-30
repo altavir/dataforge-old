@@ -26,7 +26,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import hep.dataforge.data.DataNode;
 
-@TypedActionDef(name = "run", description = "Run action with given configuration")
+@TypedActionDef(name = "run", info = "Run action with given configuration")
 @ValueDef(name = "configFile", info = "The configuration file name and path")
 @ValueDef(name = "contextName", info = "The name of the context in which the action will be run")
 public class RunConfigAction extends GenericAction {

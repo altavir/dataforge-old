@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>
@@ -43,7 +43,7 @@ public interface FitEngine {
      * @param log
      * @return a {@link hep.dataforge.datafitter.FitTaskResult} object.
      */
-    FitTaskResult run(FitState state, FitTask task, Logable log);
+    FitTaskResult run(FitState state, FitTask task, Reportable log);
 
     /**
      *
@@ -52,7 +52,7 @@ public interface FitEngine {
      * @param log
      * @return
      */
-    default FitTaskResult run(FitState state, Meta taskAnnotation, Logable log) {
+    default FitTaskResult run(FitState state, Meta taskAnnotation, Reportable log) {
         return run(state, new FitTask(taskAnnotation), log);
     }
 

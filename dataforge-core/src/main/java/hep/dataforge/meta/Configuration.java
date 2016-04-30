@@ -141,14 +141,14 @@ public class Configuration extends MuttableMetaNode<Configuration> {
     }
 
     @Override
-    protected Configuration currentState() {
+    public Configuration self() {
         return this;
     }
 
     @Override
     public Configuration putNode(Meta an) {
         super.putNode(new Configuration(an));
-        return currentState();
+        return self();
     }
 
     /**

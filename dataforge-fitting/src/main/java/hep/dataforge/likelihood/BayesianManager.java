@@ -18,7 +18,6 @@ package hep.dataforge.likelihood;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.functions.UnivariateSplineWrapper;
-import hep.dataforge.io.log.Logable;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import hep.dataforge.maths.NamedMatrix;
 import static hep.dataforge.names.NamedUtils.exclude;
@@ -27,6 +26,162 @@ import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import hep.dataforge.io.reports.Reportable;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
+import static hep.dataforge.names.NamedUtils.exclude;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.lang.String.format;
 
 /**
  * TODO переделать freePars в varArgs
@@ -44,14 +199,14 @@ public class BayesianManager{
     private ConfidenceLimitCalculator previousCalc;
     private String previousPar;
     private FitState previousResult;
-    private final Logable log;
+    private final Reportable log;
 
     /**
      * <p>
      * Constructor for BayesianManager.</p>
      * @param log
      */
-    public BayesianManager(Logable log) {
+    public BayesianManager(Reportable log) {
         this.log = log;
     }
 
@@ -81,10 +236,10 @@ public class BayesianManager{
     }
 
     private ConfidenceLimitCalculator getCalculator(String parname, FitState state, String[] freePars, int numCalls) {
-        log.log(format(
+        log.report(format(
                 "Calculating marginal likelihood cache for parameter \'%s\'.", parname));
         if ((previousCalc != null) && parname.equals(previousPar) && state.equals(previousResult)) {
-            log.log("Using previously stored marginal likelihood cache.");
+            log.report("Using previously stored marginal likelihood cache.");
             return previousCalc;
         } else {
             UnivariateFunction function = this.calculateLikelihood(parname, state, freePars, numCalls);
@@ -96,7 +251,7 @@ public class BayesianManager{
             previousCalc = calculator;
             previousPar = parname;
             previousResult = state;
-            log.log("Likelihood cache calculation completed.");
+            log.report("Likelihood cache calculation completed.");
             return calculator;
         }
     }
@@ -111,14 +266,14 @@ public class BayesianManager{
      * @return a {@link hep.dataforge.datafitter.FitState} object.
      */
     public FitState getConfidenceInterval(String parname, FitState state, String[] freePars) {
-        log.log(
+        log.report(
                 format("Starting combined confidence limits calculation for parameter \'%s\'.", parname));
 
         ConfidenceLimitCalculator calculator = this.getCalculator(parname, state, freePars);
         BayesianConfidenceLimit limit = calculator.getLimits();
         limit.parName = parname;
         limit.freePars = freePars;
-        log.log("Confidence limit calculation completed.");
+        log.report("Confidence limit calculation completed.");
         return state.edit().setInterval(limit).build();
     }
 

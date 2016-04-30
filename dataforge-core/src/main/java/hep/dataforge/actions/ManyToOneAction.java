@@ -19,8 +19,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -30,6 +29,7 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * Action with multiple input data pieces but single output
@@ -49,7 +49,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
-        Log log = buildLog(context, data.meta(), data);
+        Report log = buildLog(context, data.meta(), data);
         Laminate meta = inputMeta(context, data.meta(), actionMeta);
         Meta outputMeta = outputMeta(data).build();
 
@@ -58,7 +58,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                 .thenCompose((Void t) -> CompletableFuture.supplyAsync(() -> {
                     beforeGroup(context, log, data);
                     // In this moment, all the data is already calculated
-                    Map<String, T> collection = data.stream()
+                    Map<String, T> collection = data.dataStream()
                             .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
                     //.<T>map(item -> item.getValue().get()).collect(Collectors.toList());
                     R res = execute(context, log, data.getName(), collection, meta);
@@ -73,13 +73,13 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         return GroupBuilder.byAnnotation(inputMeta(context, input.meta(), actionMeta)).group(input);
     }
 
-    protected abstract R execute(Context context, Logable log, String nodeName, Map<String, T> input, Meta meta);
+    protected abstract R execute(Context context, Reportable log, String nodeName, Map<String, T> input, Meta meta);
 
     protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder("node")
                 .putValue("name", input.getName())
                 .putValue("type", input.type().getName());
-        input.stream().forEach((Pair<String, Data<? extends T>> item) -> {
+        input.dataStream().forEach((Pair<String, Data<? extends T>> item) -> {
             MetaBuilder dataNode = new MetaBuilder("data")
                     .putValue("name", item.getKey());
             Data<? extends T> data = item.getValue();
@@ -100,7 +100,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param input
      */
-    protected void beforeGroup(Context context, Logable log, DataNode<? extends T> input) {
+    protected void beforeGroup(Context context, Reportable log, DataNode<? extends T> input) {
 
     }
 
@@ -110,7 +110,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param output
      */
-    protected void afterGroup(Context context, Logable log, String groupName, Meta outputMeta, R output) {
+    protected void afterGroup(Context context, Reportable log, String groupName, Meta outputMeta, R output) {
 
     }
 

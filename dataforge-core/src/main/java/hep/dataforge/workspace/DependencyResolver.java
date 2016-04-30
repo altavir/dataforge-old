@@ -18,10 +18,10 @@ package hep.dataforge.workspace;
 import hep.dataforge.data.Data;
 
 /**
- * Data resolver is the tool used to validate for dependency availability,
- and provide it.
+ * Data resolver is the tool used to validate for dependency availability, and
+ * provide it.
  * <p>
- *  The address of the dependency consists of stage and name. 
+ * The address of the dependency consists of stage and name.
  * </p>
  *
  * @author Alexander Nozik

@@ -37,7 +37,7 @@ public class StateChangedEvent extends BasicEvent {
     }
 
     public static EventBuilder builder(String stateName, Value oldState, Value newState) {
-        return new EventBuilder("storage.stateChange")
+        return EventBuilder.make("storage.stateChange")
                 .setMetaValue(STATE_NAME_KEY, stateName)
                 .setMetaValue(OLD_STATE_KEY, oldState)
                 .setMetaValue(NEW_STATE_KEY, newState);

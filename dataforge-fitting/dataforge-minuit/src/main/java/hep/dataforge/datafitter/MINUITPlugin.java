@@ -19,7 +19,7 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.io.log.Log;
+import hep.dataforge.io.reports.Report;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -37,7 +37,7 @@ public class MINUITPlugin extends BasicPlugin {
     /**
      * Constant <code>staticLog</code>
      */
-    private static final Log staticLog = new Log("MINUIT-STATIC");
+    private static final Report staticLog = new Report("MINUIT-STATIC");
 
     /**
      * <p>
@@ -58,7 +58,7 @@ public class MINUITPlugin extends BasicPlugin {
         if (staticLog == null) {
             throw new IllegalStateException("MINUIT log is not initialized.");
         }
-        staticLog.log(str, pars);
+        staticLog.report(str, pars);
         LoggerFactory.getLogger("MINUIT").info(String.format(str, pars));
 //        Out.out.printf(str,pars);
 //        Out.out.println();
@@ -70,7 +70,7 @@ public class MINUITPlugin extends BasicPlugin {
 
         clearStaticLog();
 
-        GlobalContext.instance().log("MINUIT fitter plugin started.");
+        GlobalContext.instance().report("MINUIT fitter plugin started.");
     }
 
     @Override

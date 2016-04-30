@@ -21,8 +21,7 @@ import hep.dataforge.functions.FunctionUtils;
 import hep.dataforge.functions.MultiFunction;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.functions.NamedMultiFunction;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.maths.NamedDoubleArray;
 import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import static java.lang.Math.log;
@@ -39,6 +38,7 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.AbstractSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>
@@ -67,8 +67,8 @@ public class CMFitEngine implements FitEngine {
 
     /** {@inheritDoc} */
     @Override
-    public FitTaskResult run(FitState state, FitTask task, Logable parentLog) {
-        Log log = new Log("CM", parentLog);
+    public FitTaskResult run(FitState state, FitTask task, Reportable parentLog) {
+        Report log = new Report("CM", parentLog);
         switch (task.getName()) {
             case TASK_SINGLE:
             case TASK_RUN:
@@ -84,12 +84,12 @@ public class CMFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.datafitter.FitState} object.
      * @param task a {@link hep.dataforge.datafitter.FitTask} object.
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
+     * @param log a {@link hep.dataforge.io.reports.Reportable} object.
      * @return a {@link hep.dataforge.datafitter.FitTaskResult} object.
      */
-    public FitTaskResult makeRun(FitState state, FitTask task, Logable log) {
+    public FitTaskResult makeRun(FitState state, FitTask task, Reportable log) {
 
-        log.log("Starting fit using provided Commons Math algorithms.");
+        log.report("Starting fit using provided Commons Math algorithms.");
         int maxSteps = task.meta().getInt("iterations", DEFAULT_MAXITER);
         double tolerance = task.meta().getDouble("tolerance", DEFAULT_TOLERANCE);
         String[] fitPars = this.getFitPars(state, task);
@@ -117,7 +117,7 @@ public class CMFitEngine implements FitEngine {
 
         switch (task.getMethodName()) {
             case CM_NELDERMEADSIMPLEX:
-                log.log("Using Nelder Mead Simlex (no derivs).");
+                log.report("Using Nelder Mead Simlex (no derivs).");
                 AbstractSimplex simplex = new NelderMeadSimplex(pars.getParErrors(fitPars).getValues());
                 MultivariateOptimizer nmOptimizer = new SimplexOptimizer(checker);
 
@@ -125,7 +125,7 @@ public class CMFitEngine implements FitEngine {
                 res = nmOptimizer.optimize(oFunc, maxEval, ig, GoalType.MAXIMIZE, simplex);
                 break;
             default:
-                log.log("Using CMAESO optimizer (no derivs).");
+                log.report("Using CMAESO optimizer (no derivs).");
                 SimpleBounds sb = new SimpleBounds(loBounds, upBounds);
                 MultivariateOptimizer CMAESOoptimizer = new CMAESOptimizer(100, Double.NEGATIVE_INFINITY,
                         true, 4, 4, getDefaultRandomGenerator(), false, checker);

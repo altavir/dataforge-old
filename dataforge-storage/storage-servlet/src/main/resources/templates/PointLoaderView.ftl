@@ -3,6 +3,10 @@
 <head>
     <title>${loaderName}</title>
     <meta charset="UTF-8">
+    
+    <!-- Bootstrap -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+        
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         google.charts.load('current', {'packages':['table','corechart']});
@@ -12,13 +16,7 @@
             var opts = {sendMethod: 'auto'};
 //            alert('sending request to ${dataSource}')
             var query = new google.visualization.Query("${dataSource}", opts);
-            query.setRefreshInterval(30);
-                
-
-            // Optional request to return only column C and the sum of column B, grouped by C members.
-            // query.setQuery('select C, sum(B) group by C');
-
-            // Send the query with a callback function.
+            query.setRefreshInterval(${updateInterval});
             query.send(handleQueryResponse);
         }            
 
@@ -30,26 +28,36 @@
 
             var data = response.getDataTable();
             var table = new google.visualization.Table(document.getElementById('table_div'));
-            table.draw(data, {showRowNumber: false, page: 'enable', width : '100%', pageSize: 50, sort : 'disable'});
-                
-            var options = {
-                title: '${loaderName}',
-                curveType: 'function',
-                legend: { 
-                    position: 'bottom' 
-                }
-            }
+            table.draw(data, {showRowNumber: false, page: 'enable', width : '90%', pageSize: 50, sort : 'disable'});
             
-            var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
-            chart.draw(data, options);
+            <#if  plotParams??>
+                var options = {
+                    width: '90%',
+                    height: 500,    
+                    curveType: 'function',
+                    ${plotParams}
+                }
+
+                var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
+                chart.draw(data, options);
+            </#if>
         }
     </script>
 </head>
 <body>
-    <h1>Point loader: ${loaderName}</h1>
-    <br/>
-    <div id="plot_div"></div>
-    <br/>
-    <div id="table_div"></div>
+    <div class="container">
+        <div class="page-header">
+            <h1>Point loader: ${loaderName}</h1>
+        </div>
+        <br/>
+        <div id="plot_div"></div>
+        <br/>
+        <div id="table_div"></div>
+    </div>
+    
+    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>    
 </body>
 </html>

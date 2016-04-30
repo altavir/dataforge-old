@@ -192,15 +192,32 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
 
         //starting direcotry monitoring
-        startMonitor();
+        if (meta().getBoolean("monitor", false)) {
+            startMonitor();
+        }
     }
 
     private void startMonitor() {
-        if (meta().getBoolean("monitor", false)) {
+        if (monitor == null) {
             monitor = new DefaultFileMonitor(this);
             monitor.setRecursive(false);
             monitor.addFile(dataDir);
             monitor.start();
+        }
+    }
+
+    private void stopMonitor() {
+        if (monitor != null) {
+            monitor.stop();
+            monitor = null;
+        }
+    }
+
+    public void toggleMonitor(boolean monitorActive) {
+        if (monitorActive) {
+            startMonitor();
+        } else {
+            stopMonitor();
         }
     }
 
@@ -282,9 +299,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void close() throws Exception {
-        if (monitor != null) {
-            monitor.stop();
-        }
+        stopMonitor();
         dataDir.close();
     }
 

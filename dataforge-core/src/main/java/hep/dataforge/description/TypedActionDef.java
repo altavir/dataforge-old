@@ -23,7 +23,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The annotation defining Action name, description, input and output types.
+ * The annotation defining Action name, info, input and output types.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -36,7 +36,7 @@ public @interface TypedActionDef {
 
     String name();
 
-    String description() default "";
+    String info() default "";
 
     Class inputType() default Object.class;
 

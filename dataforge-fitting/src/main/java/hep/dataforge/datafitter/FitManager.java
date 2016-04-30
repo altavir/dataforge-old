@@ -22,13 +22,137 @@ import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
 import hep.dataforge.datafitter.models.XYModel;
 import hep.dataforge.io.PrintNamed;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.Table;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import hep.dataforge.io.reports.Reportable;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 import static hep.dataforge.io.PrintNamed.printResiduals;
 
@@ -72,7 +196,7 @@ public class FitManager implements Encapsulated {
 
     public FitEngine buildEngine(String name) {
         if (name == null || name.isEmpty()) {
-            getContext().log("The fitting engine name is not defined. Using QOW engine by default");
+            getContext().report("The fitting engine name is not defined. Using QOW engine by default");
             return new QOWFitEngine();
         }
 
@@ -112,12 +236,12 @@ public class FitManager implements Encapsulated {
         return modelManager;
     }
 
-    public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Logable log, String... freePars) {
+    public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Reportable log, String... freePars) {
         FitTask task = new FitTask(QOWFitEngine.QOW_ENGINE_NAME, taskName, freePars);
         return runTask(state, task, log);
     }
 
-    public FitTaskResult runDefaultTask(FitState state, Logable log, String... freePars) {
+    public FitTaskResult runDefaultTask(FitState state, Reportable log, String... freePars) {
         FitTask task = new FitTask(QOWFitEngine.QOW_ENGINE_NAME, FitTask.TASK_RUN, freePars);
         return runTask(state, task, log);
     }
@@ -126,7 +250,7 @@ public class FitManager implements Encapsulated {
         return runDefaultTask(state, getContext(), freePars);
     }
 
-    public FitTaskResult runTask(FitState state, String engineName, String taskName, Logable log, String... freePars) {
+    public FitTaskResult runTask(FitState state, String engineName, String taskName, Reportable log, String... freePars) {
         FitTask task = new FitTask(engineName, taskName, freePars);
         return runTask(state, task, log);
     }
@@ -135,11 +259,11 @@ public class FitManager implements Encapsulated {
         return runTask(state, engineName, taskName, getContext(), freePars);
     }
 
-    public FitTaskResult runTask(FitState state, FitTask task, Logable log) {
+    public FitTaskResult runTask(FitState state, FitTask task, Reportable log) {
         return runTask(state, task, GlobalContext.out(), log);
     }
 
-    public FitTaskResult runTask(FitState state, FitTask task, PrintWriter writer, Logable log) {
+    public FitTaskResult runTask(FitState state, FitTask task, PrintWriter writer, Reportable log) {
         if(log == null){
             log = getContext();
         }
@@ -165,12 +289,12 @@ public class FitManager implements Encapsulated {
                 }
                 return new FitTaskResult(state, FitTaskResult.emptyTask("residuals"));
             default:
-                log.log("Starting task {}", task.toString());
+                log.report("Starting task {}", task.toString());
                 newState = engine.run(state, task, log);
         }
 
         if (!newState.isValid()) {
-            log.logError("The result of the task is not a valid state");
+            log.reportError("The result of the task is not a valid state");
         }
         return newState;
     }

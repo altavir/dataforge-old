@@ -8,12 +8,13 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javafx.util.Pair;
+import org.slf4j.LoggerFactory;
 
 /**
  * A simple static representation of DataNode
@@ -56,7 +57,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Stream<Pair<String, Data<? extends T>>> stream() {
+    public Stream<Pair<String, Data<? extends T>>> dataStream() {
         return dataMap.entrySet().stream()
                 .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<? extends T>> entry)
                         -> new Pair<>(entry.getKey(), entry.getValue()));
@@ -84,7 +85,11 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
 
     @Override
     public Meta meta() {
-        return meta;
+        if (meta == null) {
+            return Meta.empty();
+        } else {
+            return meta;
+        }
     }
 
     @Override
@@ -117,7 +122,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                 .setName(nodeName)
                 .setMeta(meta());
         String prefix = nodeName + ".";
-        stream()
+        dataStream()
                 .filter((Pair<String, Data<? extends T>> pair) -> pair.getKey().startsWith(prefix))
                 .forEach((Pair<String, Data<? extends T>> pair) -> builder.putData(pair.getKey(), pair.getValue()));
         if (builder.dataMap.size() > 0) {
@@ -127,7 +132,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
         }
     }
 
-    public static class Builder<T> {
+    public static class Builder<T> implements DataNode.Builder<T, DataSet<T>, Builder<T>> {
 
         private String name = "";
         private Meta meta = Meta.empty();
@@ -138,16 +143,24 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
             this.type = type;
         }
 
+        @Override
+        public Class<T> type() {
+            return type;
+        }
+
+        @Override
         public Builder<T> setName(String name) {
             this.name = name;
             return this;
         }
 
+        @Override
         public Builder<T> setMeta(Meta meta) {
             this.meta = meta;
             return this;
         }
 
+        @Override
         public Builder<T> putData(String key, Data<? extends T> data) {
             if (type.isAssignableFrom(data.dataType())) {
                 if (!dataMap.containsKey(key)) {
@@ -161,31 +174,26 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
             return this;
         }
 
-        public Builder<T> putData(NamedData<? extends T> data) {
-            return putData(data.getName(), data);
-        }
-
-        public Builder<T> putAll(Collection<NamedData<? extends T>> dataCollection) {
-            dataCollection.stream().forEach(it -> putData(it));
-            return this;
-        }
-
-        public Builder<T> putAll(Map<String, Data<? extends T>> map) {
-            this.dataMap.putAll(map);
-            return this;
-        }
-
-        public Builder<T> putStatic(String key, T staticData) {
-            if (!type.isInstance(staticData)) {
-                throw new IllegalArgumentException("The data mast be instance of " + type.getName());
+        @Override
+        public Builder<T> putNode(String as, DataNode<? extends T> node) {
+            if (!node.meta().isEmpty()) {
+                LoggerFactory.getLogger(getClass()).warn("Trying to add node with meta to flat DataNode. "
+                        + "Node meta could be lost. Consider using DataTree instead.");
             }
-            return putData(new NamedStaticData<>(key, staticData, type));
+            //PENDING rewrap data including meta?
+            node.dataStream().forEach(pair -> putData(pair.getKey(), pair.getValue()));
+            return self();
         }
 
+        @Override
         public DataSet<T> build() {
             return new DataSet<>(name, meta, type, dataMap);
         }
 
+        @Override
+        public Builder<T> self() {
+            return this;
+        }
     }
 
 }

@@ -15,7 +15,6 @@
  */
 package hep.dataforge.workspace;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import hep.dataforge.data.DataNode;

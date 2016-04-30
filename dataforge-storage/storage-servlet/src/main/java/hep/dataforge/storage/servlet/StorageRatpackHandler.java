@@ -61,8 +61,8 @@ public class StorageRatpackHandler implements Handler {
                     renderEvents(ctx, (EventLoader) loader);
                     return;
                 case PointLoader.POINT_LOADER_TYPE:
-                    if (ctx.getRequest().getQueryParams().containsKey("tqx")) {
-                        new PointLoaderVisualizationHandler((PointLoader) loader).handle(ctx);
+                    if ("pull".equals(ctx.getRequest().getQueryParams().get("action"))) {
+                        new PointLoaderDataHandler((PointLoader) loader).handle(ctx);
                     } else {
                         renderPoints(ctx, (PointLoader) loader);
                     }
@@ -161,6 +161,10 @@ public class StorageRatpackHandler implements Handler {
     protected void renderObjects(Context ctx, ObjectLoader loader) {
         defaultRenderLoader(ctx, loader);
     }
+    
+    protected String pointLoaderPlotOptions(PointLoader loader){
+        return null;
+    }
 
     protected void renderPoints(Context ctx, PointLoader loader) {
         try {
@@ -168,7 +172,7 @@ public class StorageRatpackHandler implements Handler {
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
             Template template = Utils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
 
-            Map data = new HashMap(2);
+            Map data = new HashMap(4);
 
 //            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
 //            String from = ctx.getRequest().getQueryParams().get("from");
@@ -181,8 +185,16 @@ public class StorageRatpackHandler implements Handler {
                 hostName = "localhost";
             }
             String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
-            data.put("dataSource", serverAddres + ctx.getRequest().getUri());
+
+            String dataSourceStr = serverAddres + ctx.getRequest().getUri() + "&action=pull";
+            
+            data.put("dataSource", dataSourceStr);
             data.put("loaderName", loader.getName());
+            data.put("updateInterval", 30);
+            String plotParams = pointLoaderPlotOptions(loader);
+            if(plotParams!= null){
+                data.put("plotParams", plotParams);
+            }
 //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 
             StringWriter writer = new StringWriter();

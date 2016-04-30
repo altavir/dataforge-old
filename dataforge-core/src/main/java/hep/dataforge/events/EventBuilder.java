@@ -10,6 +10,7 @@ import static hep.dataforge.events.Event.EVENT_SOURCE_KEY;
 import static hep.dataforge.events.Event.EVENT_TIME_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.GenericBuilder;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
@@ -19,12 +20,16 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class EventBuilder {
+public abstract class EventBuilder<E extends EventBuilder> implements GenericBuilder<Event, E> {
 
     protected final MetaBuilder builder = new MetaBuilder("event");
     private final Map<String, Object> objectMap = new HashMap<>();
+    
+    public static EventBuilder make(String type){
+        return new ConcreteEventBuilder(type);
+    }
 
-    public EventBuilder(String type) {
+    protected EventBuilder(String type) {
         this.builder.setValue(Event.EVENT_TYPE_KEY, type);
     }
 
@@ -79,7 +84,22 @@ public class EventBuilder {
         return this.objectMap;
     }
 
+    @Override
     public Event build() {
         return new BasicEvent(buildEventMeta(), objectMap);
     }
+
+    private static class ConcreteEventBuilder extends EventBuilder<EventBuilder>{
+
+        public ConcreteEventBuilder(String type) {
+            super(type);
+        }
+
+        @Override
+        public EventBuilder self() {
+            return this;
+        }
+        
+    }
+
 }

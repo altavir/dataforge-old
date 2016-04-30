@@ -19,14 +19,14 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.util.Pair;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * A template to build actions that reflect strictly one to one content
@@ -56,7 +56,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
 
-        Log log = buildLog(context, groupMeta, data);
+        Report log = buildLog(context, groupMeta, data);
         Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
         //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
@@ -75,7 +75,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
         }
 
-        Stream<Pair<String, Data<? extends T>>> stream = set.stream();
+        Stream<Pair<String, Data<? extends T>>> stream = set.dataStream();
         if (isParallelExecutionAllowed(actionMeta)) {
             stream = stream.parallel();
         }
@@ -87,26 +87,32 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
     /**
      *
-     * @param log log for this evaluation
+     * @param log report for this evaluation
      * @param name name of the input item
      * @param inputMeta combined meta for this evaluation. Includes data meta,
      * group meta and action meta
      * @param input input data
      * @return
      */
-    private R transform(Context context, Logable log, String name, Laminate inputMeta, T input) {
+    private R transform(Context context, Reportable log, String name, Laminate inputMeta, T input) {
         beforeAction(context, name, input, inputMeta, log);
         R res = execute(context, log, name, inputMeta, input);
         afterAction(context, name, res, inputMeta);
         return res;
     }
     
+    /**
+     * Utility method to run action outside of context or execution chain
+     * @param input
+     * @param metaLayers
+     * @return 
+     */
     public R eval(T input, Meta... metaLayers){
         Context context = GlobalContext.instance();
-        return transform(context, new Log("eval",context), "eval", inputMeta(context, metaLayers), input);
+        return transform(context, new Report("eval",context), "eval", inputMeta(context, metaLayers), input);
     }
 
-    protected abstract R execute(Context context, Logable log, String name, Laminate inputMeta, T input);
+    protected abstract R execute(Context context, Reportable log, String name, Laminate inputMeta, T input);
 
     /**
      * Build output meta for given data. This meta is calculated on action call
@@ -126,7 +132,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    protected void beforeAction(Context context, String name, T datum, Laminate meta, Logable log) {
+    protected void beforeAction(Context context, String name, T datum, Laminate meta, Reportable log) {
         logger().info("Starting action '{}[{}]'", getName(), name);
     }
 

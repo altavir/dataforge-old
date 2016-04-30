@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.log;
+package hep.dataforge.io.reports;
 
 import static java.lang.String.format;
 import java.time.Instant;
@@ -21,22 +21,23 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import static java.lang.String.format;
 
 /**
  * <p>
- * LogEntry class.</p>
+ ReportEntry class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class LogEntry {
+public class ReportEntry {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final List<String> sourceTrace = new ArrayList<>();
     private final String message;
     private final Instant time;
 
-    public LogEntry(LogEntry entry, String traceAdd) {
+    public ReportEntry(ReportEntry entry, String traceAdd) {
         this.sourceTrace.addAll(entry.sourceTrace);
         if (traceAdd != null && !traceAdd.isEmpty()) {
             this.sourceTrace.add(0, traceAdd);
@@ -45,12 +46,12 @@ public class LogEntry {
         this.time = entry.time;
     }
 
-    public LogEntry(Instant time, String message) {
+    public ReportEntry(Instant time, String message) {
         this.time = time;
         this.message = message;
     }
 
-    public LogEntry(String message) {
+    public ReportEntry(String message) {
         this.time = Instant.now();
         this.message = message;
     }

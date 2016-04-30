@@ -20,22 +20,21 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.tables.Filtering.buildConditionSet;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
+import hep.dataforge.io.reports.Reportable;
 
 /**
- * действие для фильтрации {@code ListTable}
+ * Table transformation action
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "filterData", inputType = Table.class, outputType = Table.class, description = "Filter dataset with given filtering rules")
+@TypedActionDef(name = "transformTable", inputType = Table.class, outputType = Table.class, info = "Filter dataset with given filtering rules")
 @NodeDef(name = "filters", required = true, info = "The filtering condition.", target = "method::hep.dataforge.tables.Filtering.buildConditionSet")
-public class FilterAction extends OneToOneAction<Table, Table> {
+public class TransformTableAction extends OneToOneAction<Table, Table> {
 
     /**
      * {@inheritDoc}
@@ -43,7 +42,7 @@ public class FilterAction extends OneToOneAction<Table, Table> {
      * @return
      */
     @Override
-    protected Table execute(Context context, Logable log, String name, Laminate meta, Table input) {
+    protected Table execute(Context context, Reportable log, String name, Laminate meta, Table input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
         Table res;

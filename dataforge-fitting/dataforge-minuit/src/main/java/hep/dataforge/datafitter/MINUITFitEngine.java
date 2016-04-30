@@ -30,9 +30,9 @@ import static hep.dataforge.datafitter.FitTask.TASK_COVARIANCE;
 import static hep.dataforge.datafitter.FitTask.TASK_RUN;
 import static hep.dataforge.datafitter.FitTask.TASK_SINGLE;
 import hep.dataforge.functions.MultiFunction;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>
@@ -79,10 +79,10 @@ public class MINUITFitEngine implements FitEngine {
      * @param parentLog
      */
     @Override
-    public FitTaskResult run(FitState state, FitTask task, Logable parentLog) {
-        Log log = new Log("MINUIT", parentLog);
+    public FitTaskResult run(FitState state, FitTask task, Reportable parentLog) {
+        Report log = new Report("MINUIT", parentLog);
 
-        log.log("MINUIT fit engine started task '{}'", task.getName());
+        log.report("MINUIT fit engine started task '{}'", task.getName());
         switch (task.getName()) {
             case TASK_COVARIANCE:
                 return runHesse(state, task, log);
@@ -103,11 +103,11 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link hep.dataforge.datafitter.FitTaskResult} object.
      */
-    public FitTaskResult runHesse(FitState state, FitTask task, Logable log) {
+    public FitTaskResult runHesse(FitState state, FitTask task, Reportable log) {
         int strategy;
         strategy = GlobalContext.instance().getInt("MINUIT_STRATEGY", 2);
 
-        log.log("Generating errors using MnHesse 2-nd order gradient calculator.");
+        log.report("Generating errors using MnHesse 2-nd order gradient calculator.");
 
         MultiFunction fcn;
         String[] fitPars = getFitPars(state, task);
@@ -154,10 +154,10 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link hep.dataforge.datafitter.FitTaskResult} object.
      */
-    public FitTaskResult runFit(FitState state, FitTask task, Logable log) {
+    public FitTaskResult runFit(FitState state, FitTask task, Reportable log) {
 
         MnApplication minuit;
-        log.log("Starting fit using Minuit.");
+        log.report("Starting fit using Minuit.");
 
         int strategy;
         strategy = GlobalContext.instance().getInt("MINUIT_STRATEGY", 2);
@@ -173,7 +173,7 @@ public class MINUITFitEngine implements FitEngine {
             }
         }
         if(force){
-            log.log("Using MINUIT gradient calculator.");
+            log.report("Using MINUIT gradient calculator.");
         }
 
         MultiFunction fcn;
@@ -195,7 +195,7 @@ public class MINUITFitEngine implements FitEngine {
 
         if (force) {
             minuit.setUseAnalyticalDerivatives(false);
-            log.log("Forced to use MINUIT internal derivative calculator!");
+            log.report("Forced to use MINUIT internal derivative calculator!");
         }
 
 //        minuit.setUseAnalyticalDerivatives(true);
@@ -214,9 +214,9 @@ public class MINUITFitEngine implements FitEngine {
             minimum = minuit.minimize();
         }
         if (!minimum.isValid()) {
-            log.log("Minimization failed!");
+            log.report("Minimization failed!");
         }
-        log.log("MINUIT run completed in {} function calls.", minimum.nfcn());
+        log.report("MINUIT run completed in {} function calls.", minimum.nfcn());
 
         /*
          * Генерация результата
@@ -249,7 +249,7 @@ public class MINUITFitEngine implements FitEngine {
         }
 
         if (task.getMethodName().equals(MINUIT_MINOS)) {
-            log.log("Starting MINOS procedure for precise error estimation.");
+            log.report("Starting MINOS procedure for precise error estimation.");
             MnMinos minos = new MnMinos(fcn, minimum, strategy);
             MinosError mnError;
             double[] errl = new double[fitPars.length];

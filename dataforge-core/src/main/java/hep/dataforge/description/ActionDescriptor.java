@@ -47,7 +47,7 @@ public class ActionDescriptor extends NodeDescriptor {
         TypedActionDef def = action.getClass().getAnnotation(TypedActionDef.class);
 
         if (def != null) {
-            actionDef.putValue("description", def.description());
+            actionDef.putValue("description", def.info());
         }
         builder.putNode(actionDef);
         return new ActionDescriptor(builder);
@@ -62,7 +62,7 @@ public class ActionDescriptor extends NodeDescriptor {
                     .putValue("name", def.name())
                     .putValue("inputType", def.inputType().getSimpleName())
                     .putValue("outputType", def.outputType().getSimpleName())
-                    .putValue("description", def.description());
+                    .putValue("description", def.info());
 
             if (actionClass.isAssignableFrom(ManyToOneAction.class)) {
                 actionDef.setValue("inputType", def.inputType().getSimpleName() + "[]");

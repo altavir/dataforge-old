@@ -28,6 +28,15 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     /**
+     * A general non-restricting tree builder
+     *
+     * @return
+     */
+    public static Builder<?> builder() {
+        return new Builder<>(Object.class);
+    }
+
+    /**
      * Create an empty typed DataTree with given Name. If name is composite,
      * than the whole tree structure is created
      *
@@ -54,8 +63,8 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     private final Class<T> type;
 
     private DataTree<? super T> parent;
-    private final Map<String, DataTree<T>> nodes = new HashMap<>();
-    private final Map<String, Data<? extends T>> data = new HashMap<>();
+    private final Map<String, DataTree<? extends T>> nodes = new HashMap<>();
+    private final Map<String, Data<T>> data = new HashMap<>();
 
     private DataTree(Class<T> type) {
         this.type = type;
@@ -68,10 +77,12 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      */
     private DataTree(DataTree<T> tree) {
         this.type = tree.type;
-        this.parent = tree.parent;
+//        this.parent = tree.parent;
         this.meta = tree.meta;
         this.name = tree.name;
-        this.nodes.putAll(tree.nodes);
+        nodes.forEach((String key, DataTree<? extends T> tree1) -> {
+            nodes.put(key, new DataTree<>(tree1));
+        });
         this.data.putAll(tree.data);
     }
 
@@ -82,6 +93,10 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      */
     public DataTree<? super T> parent() {
         return parent;
+    }
+
+    private void setParent(DataTree<? super T> parent) {
+        this.parent = parent;
     }
 
     public Collection<String> nodeNames() {
@@ -112,22 +127,14 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param name
      * @param data
      */
-    private void putData(Name name, Data<? extends T> data) {
+    protected void putData(Name name, Data<? extends T> data) {
         if (name.length() == 1) {
             String key = name.toString();
-            if (type.isInstance(data.dataType())) {
-                if (!this.data.containsKey(key)) {
-                    this.data.put(key, data);
-                } else {
-                    throw new RuntimeException("The data with key " + key + " already exists");
-                }
-            } else {
-                throw new RuntimeException("Data does not satisfy class boundary");
-            }
+            uncheckedPutData(key, data);
         } else {
             String head = name.getFirst().toString();
-            if(this.nodes.containsKey(head)){
-                this.nodes.get(head).putData(name.cutFirst(), data);
+            if (this.nodes.containsKey(head)) {
+                this.nodes.get(head).uncheckedPutData(name.cutFirst().toString(), data);
             } else {
                 DataTree<T> newNode = new DataTree<>(type);
                 newNode.name = head;
@@ -137,18 +144,37 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         }
     }
 
+    /**
+     * Unchecked put data method. Throws exception if types are not compatible
+     *
+     * @param key
+     * @param data
+     */
+    @SuppressWarnings("unchecked")
+    protected void uncheckedPutData(String key, Data data) {
+        if (type().isInstance(data.dataType())) {
+            if (!this.data.containsKey(key)) {
+                this.data.put(key, data);
+            } else {
+                throw new RuntimeException("The data with key " + key + " already exists");
+            }
+        } else {
+            throw new RuntimeException("Data does not satisfy class boundary");
+        }
+    }
+
     @Override
-    public Stream<Pair<String, Data<? extends T>>> stream() {
+    public Stream<Pair<String, Data<? extends T>>> dataStream() {
         Stream<Pair<String, Data<? extends T>>> dataStream = data.entrySet()
                 .stream()
-                .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<? extends T>> entry)
+                .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<T>> entry)
                         -> new Pair<>(entry.getKey(), entry.getValue()));
 
-        // iterating over nodes including node name into stream
+        // iterating over nodes including node name into dataStream
         Stream<Pair<String, Data<? extends T>>> subStream = nodes.entrySet()
                 .stream()
-                .<Pair<String, Data<? extends T>>>flatMap((Map.Entry<String, DataTree<T>> nodeEntry)
-                        -> nodeEntry.getValue().stream()
+                .<Pair<String, Data<? extends T>>>flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry)
+                        -> nodeEntry.getValue().dataStream()
                         .<Pair<String, Data<? extends T>>>map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue())));
 
         return Stream.concat(dataStream, subStream);
@@ -187,7 +213,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
     @Override
     public Iterator<Data<? extends T>> iterator() {
-        return stream().<Data<? extends T>>map(it -> it.getValue()).iterator();
+        return dataStream().<Data<? extends T>>map(it -> it.getValue()).iterator();
     }
 
     @Override
@@ -205,7 +231,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    protected boolean provides(String target, Name name) {
+    public boolean provides(String target, Name name) {
         switch (target) {
             case NODE_TARGET:
                 return getNode(name) != null;
@@ -217,7 +243,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    protected Object provide(String target, Name name) {
+    public Object provide(String target, Name name) {
         //FIXME replace nulls by unchecked exceptions
         switch (target) {
             case NODE_TARGET:
@@ -229,19 +255,57 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         }
     }
 
-    public static class Builder<T> {
+    /**
+     * A conversion of node to DataTree including deep copy
+     *
+     * @param <T>
+     * @param node
+     * @return
+     */
+    public static <T> DataTree<T> cloneNode(DataNode<T> node) {
+        if (node instanceof DataTree) {
+            return new DataTree<>((DataTree<T>) node);
+        } else {
+            DataTree.Builder<T> builder = DataTree.builder(node.type());
+            builder.setName(node.getName());
+            builder.setMeta(node.meta());
+            node.dataStream().forEach(pair -> {
+                builder.putData(pair.getKey(), pair.getValue());
+                //FIXME use internal node meta
+            });
+            return builder.build();
+        }
+    }
+
+    public static class Builder<T> implements DataNode.Builder<T, DataTree<T>, Builder<T>> {
 
         private final DataTree<T> tree;
+
+        /**
+         * Create copy-builder for a dataTree. Does not change initial tree
+         *
+         * @param oldTree
+         */
+        private Builder(DataTree<T> oldTree) {
+            this.tree = new DataTree<>(oldTree);
+        }
 
         private Builder(Class<T> type) {
             this.tree = new DataTree<>(type);
         }
 
+        @Override
+        public Class<T> type() {
+            return tree.type();
+        }
+
+        @Override
         public Builder<T> setName(String name) {
             tree.name = name;
             return this;
         }
 
+        @Override
         public Builder<T> setMeta(Meta meta) {
             if (meta == null) {
                 tree.meta = Meta.empty();
@@ -251,63 +315,46 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
             return this;
         }
 
-        public Builder<T> putBranch(Builder<T> builder) {
-            return putBranch(builder.tree);
+//        public Builder<T> putBranch(Builder<T> builder) {
+//            return putBranch(builder.tree);
+//        }
+//
+//        public Builder<T> putBranch(DataTree<T> node) {
+//            if (tree.type.isAssignableFrom(node.type())) {
+//                DataTree<T> newNode = new DataTree<>(node);
+//                newNode.setParent(tree);
+//                tree.nodes.put(node.getName(), newNode);
+//                return this;
+//            } else {
+//                throw new RuntimeException("Node type not compatible");
+//            }
+//        }
+
+        @Override
+        public Builder<T> putData(String key, Data<? extends T> data) {
+            this.tree.putData(Name.of(key), data);
+            return this;
         }
 
-        public Builder<T> putBranch(DataTree<T> node) {
+        @Override
+        public Builder<T> putNode(String key, DataNode<? extends T> node) {
             if (tree.type.isAssignableFrom(node.type())) {
-                DataTree<T> newNode = new DataTree<>(node);
-                tree.nodes.put(node.getName(), newNode);
-
-                newNode.parent = tree;
-                return this;
+                this.tree.nodes.put(key, cloneNode(node));
             } else {
                 throw new RuntimeException("Node type not compatible");
             }
-        }
-
-        public Builder<T> putData(Name name, Data<? extends T> data) {
-            tree.putData(name, data);
             return this;
         }
 
-        /**
-         * Add data
-         *
-         * @param key
-         * @param data
-         * @return
-         */
-        public Builder<T> putData(String key, Data<? extends T> data) {
-            return putData(Name.of(key), data);
-        }
-
-        public Builder<T> putData(NamedData<? extends T> data) {
-            return putData(data.getName(), data);
-        }
-
-        public Builder<T> putAll(Collection<NamedData<? extends T>> dataCollection) {
-            dataCollection.stream().forEach(it -> putData(it));
-            return this;
-        }
-
-        public Builder<T> putAll(Map<String, Data<? extends T>> map) {
-            tree.data.putAll(map);
-            return this;
-        }
-
-        public Builder<T> putStatic(String key, T staticData) {
-            if (!tree.type.isInstance(staticData)) {
-                throw new IllegalArgumentException("The data mast be instance of " + tree.type.getName());
-            }
-            return putData(new NamedStaticData<>(key, staticData, tree.type));
-        }
-
+        @Override
         public DataTree<T> build() {
             return tree;
         }
 
+        @Override
+        public Builder<T> self() {
+            return this;
+        }
     }
 
 }

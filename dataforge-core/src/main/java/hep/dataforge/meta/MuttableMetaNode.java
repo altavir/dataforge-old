@@ -18,6 +18,7 @@ package hep.dataforge.meta;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
+import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -30,14 +31,11 @@ import java.util.List;
  * @author Alexander Nozik
  */
 @SuppressWarnings("unchecked")
-public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaNode<T> implements Serializable {
+public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaNode<T> 
+        implements Serializable, GenericBuilder<Meta, T> {
 
     protected T parent;
 
-//    public MuttableMetaNode(String name, T parent) {
-//        super(name);
-//        this.parent = parent;
-//    }
     public MuttableMetaNode(String name) {
         super(name);
         this.parent = null;
@@ -74,7 +72,8 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      *
      * @return
      */
-    protected abstract T currentState();
+    @Override
+    public abstract T self();
 
     /**
      * Add a copy of given meta to the node list with given name. Create a new
@@ -102,7 +101,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         if (notify) {
             notifyNodeChanged(element.getName(), oldList, list);
         }
-        return currentState();
+        return self();
     }
 
     /**
@@ -161,7 +160,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
                 setValueItem(name, value);
             }
         }
-        return currentState();
+        return self();
     }
 
     /**
@@ -191,7 +190,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
             throw new NamingException(String.format("\"%s\" is not a valid element name in the meta", nodeName));
         }
         this.setNode(nodeName, element);
-        return currentState();
+        return self();
     }
 
     /**
@@ -217,7 +216,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         } else {
             removeNode(name);
         }
-        return currentState();
+        return self();
     }
 
     /**
@@ -264,7 +263,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
                 notifyValueChanged(name, oldValueItem, value);
             }
         }
-        return currentState();
+        return self();
     }
 
     /**
@@ -292,7 +291,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      */
     public T putValue(String name, Object value) {
         putValue(name, Value.of(value));
-        return currentState();
+        return self();
     }
 
     public T putValues(String name, Object[] values) {
@@ -301,7 +300,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
                 putValue(name, obj);
             }
         }
-        return currentState();
+        return self();
     }
 
     /**
@@ -510,5 +509,12 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         list.add(node);
         notifyNodeChanged(nodeName, oldList, list);
     }
+
+    @Override
+    public Meta build() {
+        return this;
+    }
+    
+    
 
 }

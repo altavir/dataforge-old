@@ -24,4 +24,11 @@ package hep.dataforge.workspace;
  */
 public interface Identity {
 
+    /**
+     * The string representation of this identity
+     * @return 
+     */
+    @Override
+    public String toString();
+
 }

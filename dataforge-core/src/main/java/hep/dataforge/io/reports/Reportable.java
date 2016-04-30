@@ -13,36 +13,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.log;
+package hep.dataforge.io.reports;
 
 import ch.qos.logback.classic.Logger;
 
 /**
- * An object that could handle and store its own log. A purpose of DataForge log
- * is different from standard logging because analysis log is part of the
- * result. Therfore logable objects should be used only when one needs to sore
- * resulting log.
+ * An object that could handle and store its own report. A purpose of DataForge report
+ is different from standard logging because analysis report is part of the
+ result. Therfore logable objects should be used only when one needs to sore
+ resulting report.
  *
  * @author Alexander Nozik
  */
-public interface Logable{
+public interface Reportable{
 
     default Logger getLogger(){
-        return getLog().getLogger();
+        return getReport().getLogger();
     }
 
-    Log getLog();
+    Report getReport();
 
-    default void log(String str, Object... parameters){
-        getLog().log(str, parameters);
+    default void report(String str, Object... parameters){
+        getReport().report(str, parameters);
     }
 
-    default void log(LogEntry entry){
-        getLog().log(entry);
+    default void report(ReportEntry entry){
+        getReport().report(entry);
     }
     
-    default void logError(String str, Object... parameters){
-        getLog().logError(str, parameters);
+    default void reportError(String str, Object... parameters){
+        getReport().reportError(str, parameters);
     }
     
 }

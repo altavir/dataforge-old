@@ -22,9 +22,8 @@ import hep.dataforge.names.Named;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.LogEntry;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.ReportEntry;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
@@ -35,6 +34,7 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * Окружение для выполнения действий (и не только). Имеет собственный лог и
@@ -44,9 +44,9 @@ import java.util.function.Supplier;
  *
  * @author Alexander Nozik
  */
-public class Context extends AbstractProvider implements ValueProvider, Logable, Named {
+public class Context extends AbstractProvider implements ValueProvider, Reportable, Named {
 
-    private final Log rootLog;
+    private final Report rootLog;
     private final Context parent;
     private final String name;
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
@@ -64,7 +64,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     public Context(Context parent, String name, Meta config) {
         this.pm = new PluginManager(this);
         this.parent = parent;
-        this.rootLog = new Log(name, parent);
+        this.rootLog = new Report(name, parent);
         this.name = name;
         if (config != null) {
             if (config.hasNode("property")) {
@@ -153,7 +153,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         getLogger().addAppender(appender);
 
         if (!io.out().equals(System.out)) {
-            getLog().addLogListener((LogEntry t) -> {
+            getReport().addReportListener((ReportEntry t) -> {
                 try {
                     io.out().write((t.toString() + "\n").getBytes());
                     io.out().flush();
@@ -258,7 +258,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
      * @return
      */
     @Override
-    public Log getLog() {
+    public Report getReport() {
         return this.rootLog;
     }
 

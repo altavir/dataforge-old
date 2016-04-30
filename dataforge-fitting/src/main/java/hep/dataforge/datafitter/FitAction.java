@@ -23,7 +23,6 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.io.PrintWriter;
@@ -31,6 +30,7 @@ import java.util.ArrayList;
 import java.util.List;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.Table;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>
@@ -39,7 +39,7 @@ import hep.dataforge.tables.Table;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "fit", inputType = Table.class, outputType = FitState.class, description = "Fit dataset with previously stored model.")
+@TypedActionDef(name = "fit", inputType = Table.class, outputType = FitState.class, info = "Fit dataset with previously stored model.")
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
@@ -63,7 +63,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Context context, Logable log, String name, Laminate meta, Table input) {
+    protected FitState execute(Context context, Reportable log, String name, Laminate meta, Table input) {
         FitManager fm;
         if (context.provides("fitting")) {
             fm = context.provide("fitting", FitPlugin.class).getFitManager();
@@ -84,7 +84,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         for (FitTask task : tasks) {
             res = fm.runTask(res, task, writer, log);
         }
-        log.getLog().print(writer);
+        log.getReport().print(writer);
         return res;
     }
 

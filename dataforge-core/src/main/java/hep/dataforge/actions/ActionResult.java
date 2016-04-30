@@ -16,7 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.data.Data;
-import hep.dataforge.io.log.Log;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -30,33 +30,33 @@ import java.util.function.Supplier;
  */
 public class ActionResult<R> implements Data<R> {
 
-    private final Log log;
+    private final Report log;
     private final CompletableFuture<R> future;
     private final Class<R> type;
     private final Meta meta;
 
-    public ActionResult(Class<R> type, Log log, Supplier<R> supplier, Executor executor) {
+    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor) {
         this.log = log;
         this.type = type;
         this.future = CompletableFuture.supplyAsync(supplier, executor);
         this.meta = Meta.empty();
     }
     
-    public ActionResult(Class<R> type, Log log, Supplier<R> supplier, Executor executor, Meta meta) {
+    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor, Meta meta) {
         this.log = log;
         this.type = type;
         this.future = CompletableFuture.supplyAsync(supplier, executor);
         this.meta = meta;
     }    
 
-    public ActionResult(Class<R> type, Log log, CompletableFuture<R> future) {
+    public ActionResult(Class<R> type, Report log, CompletableFuture<R> future) {
         this.log = log;
         this.type = type;
         this.future = future;
         this.meta = Meta.empty();        
     }
 
-    public ActionResult(Class<R> type, Log log, CompletableFuture<R> future, Meta meta) {
+    public ActionResult(Class<R> type, Report log, CompletableFuture<R> future, Meta meta) {
         this.log = log;
         this.future = future;
         this.type = type;
@@ -65,7 +65,7 @@ public class ActionResult<R> implements Data<R> {
     
     
 
-    public Log log() {
+    public Report log() {
         return log;
     }
 

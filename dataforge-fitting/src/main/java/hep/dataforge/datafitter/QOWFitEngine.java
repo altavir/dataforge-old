@@ -18,8 +18,7 @@ package hep.dataforge.datafitter;
 import static hep.dataforge.datafitter.FitTask.TASK_COVARIANCE;
 import static hep.dataforge.datafitter.FitTask.TASK_RUN;
 import static hep.dataforge.datafitter.FitTask.TASK_SINGLE;
-import hep.dataforge.io.log.Log;
-import hep.dataforge.io.log.Logable;
+import hep.dataforge.io.reports.Report;
 import static hep.dataforge.maths.MatrixOperations.inverse;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
@@ -28,6 +27,7 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>
@@ -50,12 +50,12 @@ public class QOWFitEngine implements FitEngine {
 //    /**
 //     * <p>Constructor for QOWFitEngine.</p>
 //     *
-//     * @param log a {@link hep.dataforge.io.Logable} object.
+//     * @param report a {@link hep.dataforge.io.Reportable} object.
 //     */
-//    public QOWFitEngine(Logable log) {
-//        super(log);
+//    public QOWFitEngine(Reportable report) {
+//        super(report);
 //    }
-    private ParamSet newtonianRun(FitState state, FitTask task, Weight weight, Logable log) {
+    private ParamSet newtonianRun(FitState state, FitTask task, Weight weight, Reportable log) {
         int maxSteps = task.meta().getInt("iterations", 100);
         double tolerance = task.meta().getDouble("tolerance", 0);
 
@@ -64,18 +64,18 @@ public class QOWFitEngine implements FitEngine {
         ParamSet par = state.getParameters().copy();
         ParamSet par1; //текущее решение
 
-        log.log("Starting newtonian iteration from: \n\t{}",
+        log.report("Starting newtonian iteration from: \n\t{}",
                 NamedDoubleSet.toString(par, weight.namesAsArray()));
 
         NamedDoubleArray eqvalues = QOWUtils.getEqValues(state, par, weight);//значения функций
 
         dis = eqvalues.getVector().getNorm();// невязка
-        log.log("Starting discrepancy is {}", dis);
+        log.report("Starting discrepancy is {}", dis);
         int i = 0;
         boolean flag = false;
         while (!flag) {
             i++;
-            log.log("Starting step number {}", i);
+            log.report("Starting step number {}", i);
 
             if (task.getMethodName().equalsIgnoreCase(QOW_METHOD_FAST)) {
                 //Берет значения матрицы в той точке, где считается вес
@@ -86,28 +86,28 @@ public class QOWFitEngine implements FitEngine {
             }
             // здесь должен стоять учет границ параметров
 
-            log.log("Parameter values after step are: \n\t{}",
+            log.report("Parameter values after step are: \n\t{}",
                     NamedDoubleSet.toString(par1, weight.namesAsArray()));
 
             eqvalues = QOWUtils.getEqValues(state, par1, weight);
             dis1 = eqvalues.getVector().getNorm();// невязка после шага
 
-            log.log("The discrepancy after step is: {}", dis1);
+            log.report("The discrepancy after step is: {}", dis1);
             if ((dis1 >= dis) && (i > 1)) {
                 //дополнительно проверяем, чтобы был сделан хотя бы один шаг
                 flag = true;
-                log.log("The discrepancy does not decrease. Stopping iteration.");
+                log.report("The discrepancy does not decrease. Stopping iteration.");
             } else {
                 par = par1;
                 dis = dis1;
             }
             if (i >= maxSteps) {
                 flag = true;
-                log.log("Maximum number of iterations reached. Stopping iteration.");
+                log.report("Maximum number of iterations reached. Stopping iteration.");
             }
             if (dis <= tolerance) {
                 flag = true;
-                log.log("Tolerance threshold is reached. Stopping iteration.");
+                log.report("Tolerance threshold is reached. Stopping iteration.");
             }
         }
 
@@ -135,9 +135,9 @@ public class QOWFitEngine implements FitEngine {
      * {@inheritDoc}
      */
     @Override
-    public FitTaskResult run(FitState state, FitTask task, Logable parentLog) {
-        Log log = new Log("QOW", parentLog);
-        log.log("QOW fit engine started task '{}'", task.getName());
+    public FitTaskResult run(FitState state, FitTask task, Reportable parentLog) {
+        Report log = new Report("QOW", parentLog);
+        log.report("QOW fit engine started task '{}'", task.getName());
         switch (task.getName()) {
             case TASK_SINGLE:
                 return makeRun(state, task, log);
@@ -152,16 +152,16 @@ public class QOWFitEngine implements FitEngine {
         }
     }
 
-    private FitTaskResult makeRun(FitState state, FitTask task, Logable log) {
+    private FitTaskResult makeRun(FitState state, FitTask task, Reportable log) {
         /*Инициализация объектов, задание исходных значений*/
-        log.log("Starting fit using quasioptimal weights method.");
+        log.report("Starting fit using quasioptimal weights method.");
 
         String[] fitPars = getFitPars(state, task);
 
         Weight curWeight = new Weight(state, fitPars, state.getParameters());
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
-        log.log("The starting weight is: \n\t{}",
+        log.report("The starting weight is: \n\t{}",
                 NamedDoubleSet.toString(curWeight.getTheta()));
 
         //Стартовая точка такая же как и параметр веса
@@ -180,19 +180,19 @@ public class QOWFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.datafitter.FitState} object.
      * @param task a {@link hep.dataforge.datafitter.FitTask} object.
-     * @param log a {@link hep.dataforge.io.log.Logable} object.
+     * @param log a {@link hep.dataforge.io.reports.Reportable} object.
      * @return a {@link hep.dataforge.datafitter.FitTaskResult} object.
      */
-    public FitTaskResult generateErrors(FitState state, FitTask task, Logable log) {
+    public FitTaskResult generateErrors(FitState state, FitTask task, Reportable log) {
 
-        log.log("Starting errors estimation using quasioptimal weights method.");
+        log.report("Starting errors estimation using quasioptimal weights method.");
 
         String[] fitPars = getFitPars(state, task);
 
         Weight curWeight = new Weight(state, fitPars, state.getParameters());
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
-        log.log("The starting weight is: \n\t{}",
+        log.report("The starting weight is: \n\t{}",
                 NamedDoubleSet.toString(curWeight.getTheta()));
 
 //        ParamSet pars = state.getParameters().copy();
@@ -202,7 +202,7 @@ public class QOWFitEngine implements FitEngine {
         EigenDecomposition decomposition = new EigenDecomposition(covar.getMatrix());
         for (double lambda : decomposition.getRealEigenvalues()) {
             if (lambda <= 0) {
-                log.log("The covariance matrix is not positive defined. Error estimation is not valid");
+                log.report("The covariance matrix is not positive defined. Error estimation is not valid");
                 result.setValid(false);
             }
         }

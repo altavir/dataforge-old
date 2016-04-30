@@ -92,5 +92,5 @@ task dfDoc(type: Javadoc){
 }
 
 task setWrapper(type: Wrapper) {
-    gradleVersion = '2.12'
+    gradleVersion = '2.13'
 }

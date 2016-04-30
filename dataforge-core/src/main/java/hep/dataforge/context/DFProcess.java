@@ -29,11 +29,11 @@ import javafx.collections.ObservableMap;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class DFProcess implements Named {
+public class DFProcess<R> implements Named {
 
     private final String name;
 
-    private final ObjectProperty<CompletableFuture> taskProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<CompletableFuture<R>> taskProperty = new SimpleObjectProperty<>();
 
     private final ObservableMap<String, DFProcess> children = FXCollections.observableHashMap();
 
@@ -60,8 +60,14 @@ public class DFProcess implements Named {
 
     private final BooleanBinding isDone;
 
-    public DFProcess(String name) {
+    /**
+     * The manager to which this process is attached
+     */
+    private final ProcessManager manager;
+
+    public DFProcess(ProcessManager manager, String name) {
         this.name = name;
+        this.manager = manager;
         this.curProgress = new SimpleDoubleProperty(-1);
 
         totalProgress = new DoubleBinding() {
@@ -105,22 +111,23 @@ public class DFProcess implements Named {
         return name;
     }
 
-    public ObjectProperty<CompletableFuture> taskProperty() {
+    public ObjectProperty<CompletableFuture<R>> taskProperty() {
         return taskProperty;
     }
 
-    void setTask(CompletableFuture<?> task) {
+    public void setTask(CompletableFuture<R> task) {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
         taskProperty.set(task.whenComplete((Object t, Throwable u) -> {
             isDone.invalidate();
             curProgress.set(curMaxProgress.get());
+            getManager().onProcessFinished(getName());
         }).whenComplete(this::handle));
         isDone.invalidate();
     }
 
-    public CompletableFuture<?> getTask() {
+    public CompletableFuture<R> getTask() {
         return taskProperty.get();
     }
 
@@ -160,11 +167,11 @@ public class DFProcess implements Named {
         }
     }
 
-    public DFProcess addChild(String childName, CompletableFuture<?> future) {
+    public <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
         return addChild(Name.of(childName), future);
     }
 
-    public DFProcess addChild(Name childName, CompletableFuture<?> future) {
+    public <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
@@ -185,12 +192,13 @@ public class DFProcess implements Named {
      * @param childName a name of child process without path notation
      * @param future could be null
      */
-    protected DFProcess addDirectChild(String childName, CompletableFuture<?> future) {
+    protected <T> DFProcess<T> addDirectChild(String childName, CompletableFuture<T> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
-        DFProcess childProcess = new DFProcess(Name.join(getName(), childName).toString());
+        DFProcess childProcess = new DFProcess(getManager(), Name.join(getName(), childName).toString());
+        getManager().onProcessStarted(childProcess.getName());
         if (future != null) {
             childProcess.setTask(future);
         }
@@ -257,8 +265,9 @@ public class DFProcess implements Named {
 
     /**
      * Set progress values to given values
+     *
      * @param progress
-     * @param maxProgress 
+     * @param maxProgress
      */
     public void setProgress(double progress, double maxProgress) {
         this.curProgress.set(progress);
@@ -267,10 +276,11 @@ public class DFProcess implements Named {
 
     /**
      * Change progress values by given values
+     *
      * @param incProgress
-     * @param incMaxProgress 
+     * @param incMaxProgress
      */
-    public void changeProgress(double incProgress, double incMaxProgress) {
+    public void increaseProgress(double incProgress, double incMaxProgress) {
         this.curProgress.set(this.curProgress.get() + incProgress);
         this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
     }
@@ -311,4 +321,10 @@ public class DFProcess implements Named {
         this.children.forEach((String procName, DFProcess proc) -> proc.cleanup());
     }
 
+    /**
+     * @return the manager
+     */
+    public ProcessManager getManager() {
+        return manager;
+    }
 }

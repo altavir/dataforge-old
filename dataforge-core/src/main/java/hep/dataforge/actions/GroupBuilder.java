@@ -49,7 +49,7 @@ public class GroupBuilder {
             public <T> List<DataNode<T>> group(DataNode<T> input) {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
-                input.stream().forEach((Pair<String, Data<? extends T>> entry) -> {
+                input.dataStream().forEach((Pair<String, Data<? extends T>> entry) -> {
                     String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(entry.getValue()))
                             .getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {

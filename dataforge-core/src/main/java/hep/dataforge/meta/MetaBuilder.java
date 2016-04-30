@@ -89,7 +89,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 
     public MetaBuilder rename(String newName) {
         super.setName(newName);
-        return currentState();
+        return self();
     }
 
     /**
@@ -114,7 +114,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 //                super.putNode(newElement);
 //            }
 //        }
-//        return currentState();
+//        return self();
 //    }
     public MetaBuilder setNode(String name, Collection<? extends Meta> elements) {
         if (elements == null || elements.isEmpty()) {
@@ -129,7 +129,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
                 super.putNode(newElement);
             }
         }
-        return currentState();
+        return self();
     }
 
     public MetaBuilder updateNode(String name, Meta element) {
@@ -180,7 +180,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     }
 
     @Override
-    protected MetaBuilder currentState() {
+    public MetaBuilder self() {
         return this;
     }
 

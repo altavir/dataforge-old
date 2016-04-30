@@ -20,7 +20,7 @@ import hep.dataforge.names.Named;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.io.log.Log;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.io.OutputStream;
@@ -29,7 +29,6 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -43,7 +42,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class GenericAction<T, R> implements Action<T, R> {
 
-    private Executor executor;
+//    private Executor executor;
 
     public Logger logger() {
         //TODO provide from context
@@ -57,7 +56,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     /**
      * Wrap result of single or separate executions into DataNode
      *
-     * @param singleLog an individual log for this result. Could be null;
+     * @param singleLog an individual report for this result. Could be null;
      * @param singleMeta an individual meta for this result. Could be null;
      * @param singleResult
      * @return
@@ -68,21 +67,21 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return builder.build();
     }
 
-    protected Log buildLog(Context context, Meta meta, Object data) {
+    protected Report buildLog(Context context, Meta meta, Object data) {
         String logName = getName();
-        if (data instanceof Named) {
+        if (data != null && data instanceof Named) {
             logName += "[" + ((Named) data).getName() + "]";
         }
-        if (data instanceof ActionResult) {
-            Log actionLog = ((ActionResult) data).log();
+        if (data != null && data instanceof ActionResult) {
+            Report actionLog = ((ActionResult) data).log();
             if (actionLog.getParent() != null) {
-                //Getting parent from previous log
-                return new Log(logName, actionLog.getParent());
+                //Getting parent from previous report
+                return new Report(logName, actionLog.getParent());
             } else {
-                return new Log(logName, context);
+                return new Report(logName, context);
             }
         } else {
-            return new Log(logName, context);
+            return new Report(logName, context);
         }
     }
 

@@ -20,7 +20,6 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -36,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
 import hep.dataforge.tables.Table;
+import hep.dataforge.io.reports.Reportable;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -46,7 +46,7 @@ import hep.dataforge.tables.Table;
  * @author Alexander Nozik
  */
 @TypedActionDef(name = "plotData",
-        description = "Scatter plot of given DataSet", inputType = Table.class, outputType = Table.class)
+        info = "Scatter plot of given DataSet", inputType = Table.class, outputType = Table.class)
 @ValueDef(name = "plotFrameName", def = "default",
         info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
 @ValueDef(name = "plotTitle", def = "",
@@ -85,7 +85,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     }
 
     @Override
-    protected Table execute(Context context, Logable log, String name, Laminate meta, Table input) {
+    protected Table execute(Context context, Reportable log, String name, Laminate meta, Table input) {
         //initializing plot plugin if necessary
         if (!context.provides("plots")) {
             context.loadPlugin(new PlotsPlugin());
@@ -136,28 +136,28 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void snapshot(Context context, Reportable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".png";
             snapshotTasks.put(fileName, () -> {
-                log.log("Saving plot snapshot to file: {}", fileName);
+                log.report("Saving plot snapshot to file: {}", fileName);
                 OutputStream stream = buildActionOutput(context, fileName);
                 jfcFrame.toPNG(stream, snapshotCfg);
             });
         } else {
-            log.logError("The plot frame does not provide snapshot capabilities. Ignoring 'snapshot' option.");
+            log.reportError("The plot frame does not provide snapshot capabilities. Ignoring 'snapshot' option.");
             LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart snapshots are supported.");
         }
     }
 
     @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(Context context, Logable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void serialize(Context context, Reportable log, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".jfc";
             serializeTasks.put(fileName, () -> {
-                log.log("Saving serialized plot to file: {}", fileName);
+                log.report("Saving serialized plot to file: {}", fileName);
                 OutputStream stream = buildActionOutput(context, fileName);
                 try {
                     ObjectOutputStream ostr = new ObjectOutputStream(stream);
@@ -168,7 +168,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
             });
 
         } else {
-            log.logError("The plot frame does not provide serialization capabilities.");
+            log.reportError("The plot frame does not provide serialization capabilities.");
             LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart serialization is supported.");
         }
     }

@@ -64,7 +64,7 @@ public abstract class DataFactory implements MetaFactory<DataTree> {
 
         // Apply non-specific child nodes
         if (dataConfig.hasNode(DATA_NODE_KEY)) {
-            dataConfig.getNodes(DATA_NODE_KEY).forEach((Meta nodeMeta) -> builder.putBranch(build(context, nodeMeta)));
+            dataConfig.getNodes(DATA_NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
         }
 
         // Apply child nodes specific to this factory

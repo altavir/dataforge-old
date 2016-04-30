@@ -60,5 +60,6 @@ public class ClassIdentity implements Identity {
         final ClassIdentity other = (ClassIdentity) obj;
         return Objects.equals(this.id, other.id);
     }
+    
 
 }

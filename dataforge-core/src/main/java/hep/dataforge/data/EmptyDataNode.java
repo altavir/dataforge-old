@@ -29,7 +29,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<Pair<String, Data<? extends T>>> stream() {
+    public Stream<Pair<String, Data<? extends T>>> dataStream() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

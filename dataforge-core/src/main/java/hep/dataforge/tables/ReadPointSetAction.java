@@ -22,13 +22,13 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
-import hep.dataforge.io.log.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.io.IOException;
 import java.io.InputStream;
+import hep.dataforge.io.reports.Reportable;
 
-@TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, description = "Read DataSet from text file")
+@TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, info = "Read DataSet from text file")
 @ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
 @ValueDef(name = "encoding", def = "UTF8", info = "file encoding")
 @ValueDef(name = "headerLength", type = "NUMBER", info = "The number of header lines to be ignored")
@@ -44,7 +44,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
      * @return
      */
     @Override
-    protected Table execute(Context context, Logable log, String name, Laminate meta, InputStream source) {
+    protected Table execute(Context context, Reportable log, String name, Laminate meta, InputStream source) {
         ListTable.Builder fileData;
 
         String encoding = meta.getString("encoding", "UTF-8");

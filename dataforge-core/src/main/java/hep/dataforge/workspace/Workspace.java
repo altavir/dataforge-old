@@ -19,7 +19,6 @@ import hep.dataforge.names.Named;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
-import java.util.concurrent.ExecutionException;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 
@@ -31,69 +30,49 @@ import hep.dataforge.data.DataNode;
  */
 public interface Workspace extends Annotated, Named, Encapsulated {
 
+    public static final String DATA_STAGE_NAME = "@data";
+
     /**
-     * Check task dependencies and run it with given configuration
+     * Get specific static data. Null if no data with given name is found
+     *
+     * @param dataName Fully qualified data name
+     * @return
+     */
+    default Data getData(String dataName) {
+        return getStage(DATA_STAGE_NAME).getData(dataName);
+    }
+
+    /**
+     * Get specific stage
+     *
+     * @param <T>
+     * @param stageName
+     * @return
+     */
+    <T> DataNode<T> getStage(String stageName);
+
+    <T> Task<T> getTask(String taskName);
+
+    /**
+     * Check task dependencies and run it with given configuration or load
+     * result from cache if it is available
      *
      * @param taskName
      * @param config
      * @return
      */
-    DataNode runTask(String taskName, Meta config, String... targets) throws InterruptedException, ExecutionException;
-
-//    /**
-//     * Run task for specific target.
-//     *
-//     * @param <T>
-//     * @param taskName
-//     * @param config
-//     * @param target
-//     * @return
-//     */
-//    <T> Data<T> runTask(String taskName, Meta config, String target);
-    /**
-     * Check if workspace has static data dependency with given stage and name.
-     * Stages are used for complex workspaces and could be completely omitted
-     * for simple ones (use empty string or null for default stage).
-     *
-     * @param stage a {@link java.lang.String} object.
-     * @param name a {@link java.lang.String} object.
-     * @return a boolean.
-     */
-    boolean hasData(String stage, String name);
+    default <T> DataNode<T> runTask(String taskName, Meta config) {
+        return this.<T>getTask(taskName).run(this, config);
+    }
 
     /**
-     * Get the static data dependency from specific stage. Stages are used for
-     * complex workspaces and could be completely omitted for simple ones (use
-     * empty string or null for default stage).
+     * Update existing or create new stage
      *
-     * @param stage a {@link java.lang.String} object.
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link java.lang.Object} object.
-     */
-    Data getData(String stage, String name);
-
-//    <T> void putData(String name, T data);
-//    
-//    <T extends Named> void putData(T data);
-    /**
-     * Get the dependency resolver for this workspace
-     *
+     * @param <T>
+     * @param data
      * @return
      */
-    DependencyResolver getDependencyResolver();
-
-    //TODO replace by ThreadFactory
-    ThreadGroup getWorkspaceThreadGroup();
-
-    /**
-     * Notify the workspace that task is complete
-     *
-     * @param taskName
-     * @param taskConfig
-     * @param target
-     * @param taskResult
-     */
-    void notifyTaskComplete(TaskResult result);
+    <T> DataNode<T> updateStage(String stage, DataNode<T> data);
 
     /**
      * Get the identity for this workspace including context identity
@@ -101,5 +80,13 @@ public interface Workspace extends Annotated, Named, Encapsulated {
      * @return
      */
     Identity getIdentity();
+
+    /**
+     * Get a predefined meta with given name
+     *
+     * @param name
+     * @return
+     */
+    Meta getMeta(String name);
 
 }

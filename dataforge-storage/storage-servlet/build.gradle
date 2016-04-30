@@ -3,7 +3,7 @@ description = 'A servlet for remote view of repository'
 dependencies {
     compile project(':dataforge-storage')
     //    compile project(':dataforge-grind')
-    compile 'org.freemarker:freemarker:2.3.+'
+    compile 'org.freemarker:freemarker:2.3.24-incubating'
     compile 'io.ratpack:ratpack-core:1.2.+'
     compile 'com.google.visualization:visualization-datasource:1.1.1'
 }

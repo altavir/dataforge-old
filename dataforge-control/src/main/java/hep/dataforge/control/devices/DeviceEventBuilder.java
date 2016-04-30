@@ -11,7 +11,7 @@ import hep.dataforge.events.EventBuilder;
  *
  * @author Alexander Nozik
  */
-public class DeviceEventBuilder extends EventBuilder {
+public class DeviceEventBuilder extends EventBuilder<DeviceEventBuilder> {
 
     public static final String DEVICE_EVENT_TYPE = "device";
 
@@ -33,5 +33,12 @@ public class DeviceEventBuilder extends EventBuilder {
         super.addReference("device", device);
         return this;
     }
+
+    @Override
+    public DeviceEventBuilder self() {
+        return this;
+    }
+    
+    
 
 }

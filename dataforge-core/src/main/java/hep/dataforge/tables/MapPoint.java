@@ -17,6 +17,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
+import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -141,7 +142,7 @@ public class MapPoint implements DataPoint {
 //        }
 //        return res;
 //    }
-    public static class Builder {
+    public static class Builder implements GenericBuilder<MapPoint, Builder> {
 
         private MapPoint p;
 
@@ -185,8 +186,14 @@ public class MapPoint implements DataPoint {
             return putValue(tag, true);
         }
 
-        public DataPoint build() {
+        @Override
+        public MapPoint build() {
             return p;
+        }
+
+        @Override
+        public Builder self() {
+            return this;
         }
     }
 }

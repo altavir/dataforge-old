@@ -20,12 +20,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.actions.RunConfigAction;
-import hep.dataforge.tables.FilterAction;
+import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.log.LogEntry;
+import hep.dataforge.io.reports.ReportEntry;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.PrintWriter;
@@ -60,7 +60,7 @@ public class GlobalContext extends Context {
         Locale.setDefault(Locale.US);
         ActionManager actions = new ActionManager();
         loadPlugin(actions);
-        actions.registerAction(FilterAction.class);
+        actions.registerAction(TransformTableAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
         this.processManager = new ProcessManager();
@@ -86,7 +86,7 @@ public class GlobalContext extends Context {
     public IOManager io() {
         if (this.io == null) {
             setIO(new BasicIOManager());
-            getLog().addLogListener((LogEntry t) -> {
+            getReport().addReportListener((ReportEntry t) -> {
                 System.out.println(t.toString());
             });
         }

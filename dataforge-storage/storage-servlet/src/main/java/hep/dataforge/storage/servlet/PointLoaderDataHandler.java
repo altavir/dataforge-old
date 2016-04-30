@@ -11,9 +11,6 @@ import hep.dataforge.tables.TableFormat;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.values.Value;
 import java.io.StringWriter;
-import java.math.BigDecimal;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
 import java.util.HashMap;
 import java.util.Map;
 import javax.json.Json;
@@ -31,13 +28,13 @@ import ratpack.handling.Handler;
  *
  * @author Alexander Nozik
  */
-public class PointLoaderVisualizationHandler implements Handler {
+public class PointLoaderDataHandler implements Handler {
 
-    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
+//    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
 
     private final PointLoader loader;
 
-    public PointLoaderVisualizationHandler(PointLoader loader) {
+    public PointLoaderDataHandler(PointLoader loader) {
         this.loader = loader;
     }
 
