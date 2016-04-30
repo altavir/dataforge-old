@@ -16,17 +16,17 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.names.Named;
+import hep.dataforge.data.Data;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataSet;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 import java.io.OutputStream;
-import hep.dataforge.data.Data;
-import hep.dataforge.data.DataNode;
-import hep.dataforge.data.DataSet;
 import java.util.Map;
 import java.util.concurrent.Executor;
 import org.slf4j.Logger;
@@ -43,7 +43,7 @@ import org.slf4j.LoggerFactory;
 public abstract class GenericAction<T, R> implements Action<T, R> {
 
 //    private Executor executor;
-
+    //TODO add custom logger and executor factories here;
     public Logger logger() {
         //TODO provide from context
         return LoggerFactory.getLogger(getClass());
@@ -67,6 +67,13 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return builder.build();
     }
 
+    protected void checkInput(DataNode input) {
+        if (!getInputType().isAssignableFrom(input.getClass())) {
+            throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
+                    getName(), getInputType().getName(), input.type().getName()));
+        }
+    }
+
     protected Report buildLog(Context context, Meta meta, Object data) {
         String logName = getName();
         if (data != null && data instanceof Named) {
@@ -87,8 +94,8 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     protected Executor buildExecutor(Context context, String dataName) {
         return context.processManager().executor(getName(), dataName);
-    }    
-    
+    }
+
     protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
         return buildExecutor(context, dataName);
     }
@@ -184,7 +191,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
-    
+
     protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
         return new Laminate(nodeMeta, actionMeta)
                 .setValueContext(context)

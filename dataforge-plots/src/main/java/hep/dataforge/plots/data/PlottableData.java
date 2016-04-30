@@ -15,18 +15,17 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
 
 /**
  *

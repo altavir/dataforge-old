@@ -19,6 +19,7 @@ import static hep.dataforge.datafitter.FitTask.TASK_COVARIANCE;
 import static hep.dataforge.datafitter.FitTask.TASK_RUN;
 import static hep.dataforge.datafitter.FitTask.TASK_SINGLE;
 import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Reportable;
 import static hep.dataforge.maths.MatrixOperations.inverse;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
@@ -27,7 +28,6 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>

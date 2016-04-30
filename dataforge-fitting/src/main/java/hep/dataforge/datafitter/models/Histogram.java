@@ -15,11 +15,10 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.tables.ListTable;
 import hep.dataforge.exceptions.NamingException;
-import java.util.Arrays;
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import hep.dataforge.tables.SimplePointSource;
+import java.util.Arrays;
 
 /**
  * <p>

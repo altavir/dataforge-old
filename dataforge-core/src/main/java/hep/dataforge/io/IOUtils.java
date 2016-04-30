@@ -25,8 +25,8 @@ import java.io.FilenameFilter;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import static java.util.regex.Pattern.compile;
+import java.util.stream.Collectors;
 
 /**
  * <p>

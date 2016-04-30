@@ -15,12 +15,12 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.names.Named;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 
 /**
  * A place to store tasks and their results

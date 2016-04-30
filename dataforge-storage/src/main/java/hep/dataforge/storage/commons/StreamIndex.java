@@ -6,7 +6,6 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.api.Index;
 import hep.dataforge.values.Value;
 import java.util.Iterator;
 import java.util.List;

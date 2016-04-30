@@ -15,10 +15,10 @@
  */
 package hep.dataforge.tables;
 
-import static hep.dataforge.tables.Filtering.getTagCondition;
-import static hep.dataforge.tables.Filtering.getValueCondition;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
+import static hep.dataforge.tables.Filtering.getTagCondition;
+import static hep.dataforge.tables.Filtering.getValueCondition;
 import hep.dataforge.values.Value;
 import java.util.Comparator;
 import java.util.function.Predicate;

@@ -5,10 +5,10 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.names.AnonimousNotAlowed;
-import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import java.util.Collections;

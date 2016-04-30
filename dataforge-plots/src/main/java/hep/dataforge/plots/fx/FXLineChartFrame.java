@@ -15,12 +15,12 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.XYAdapter;
 import java.util.function.Function;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;

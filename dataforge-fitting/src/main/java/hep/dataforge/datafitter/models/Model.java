@@ -15,17 +15,16 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.names.Named;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
 import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.names.Named;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointSource;
 
 /**
  *

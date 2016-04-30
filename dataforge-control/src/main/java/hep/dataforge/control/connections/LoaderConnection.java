@@ -7,9 +7,9 @@ package hep.dataforge.control.connections;
 
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointListener;
-import hep.dataforge.storage.api.PointLoader;
 import org.slf4j.LoggerFactory;
 
 /**

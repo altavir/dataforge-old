@@ -24,13 +24,13 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.ValueFormatFactory;
+import hep.dataforge.values.ValueFormatter;
+import hep.dataforge.values.ValueType;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
-import hep.dataforge.values.ValueFormatter;
-import hep.dataforge.values.ValueType;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * A class for point set visualization

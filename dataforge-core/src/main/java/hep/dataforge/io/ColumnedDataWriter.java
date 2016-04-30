@@ -15,9 +15,9 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.TableFormat;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.TableFormat;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -29,7 +29,6 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Scanner;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.tables.Table;
 
 /**
  * Вывод форматированного набора данных в файл или любой другой поток вывода

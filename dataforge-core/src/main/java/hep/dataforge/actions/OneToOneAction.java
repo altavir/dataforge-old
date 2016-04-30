@@ -20,13 +20,13 @@ import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.util.Pair;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * A template to build actions that reflect strictly one to one content
@@ -71,6 +71,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 //    }
     @Override
     public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+        checkInput(set);
         if (set.isEmpty()) {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
         }

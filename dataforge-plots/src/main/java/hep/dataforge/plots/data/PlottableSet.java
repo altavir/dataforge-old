@@ -8,7 +8,6 @@ package hep.dataforge.plots.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.plots.Plottable;
-import hep.dataforge.values.Value;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;

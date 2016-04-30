@@ -5,7 +5,6 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.navigation.ValueProvider;

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.meta.Meta;
 
 /**
  * <p>

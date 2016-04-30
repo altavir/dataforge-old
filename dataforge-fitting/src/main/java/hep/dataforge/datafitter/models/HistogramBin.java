@@ -15,9 +15,9 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
 import static java.lang.Math.sqrt;
 

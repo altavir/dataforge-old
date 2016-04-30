@@ -15,9 +15,6 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.tables.DataPoint;
-import static hep.dataforge.tables.DataPoint.fromMeta;
-import hep.dataforge.tables.PointListener;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.WrongTargetException;
@@ -33,6 +30,9 @@ import static hep.dataforge.storage.commons.StorageMessageUtils.PULL_OPERATION;
 import static hep.dataforge.storage.commons.StorageMessageUtils.PUSH_OPERATION;
 import static hep.dataforge.storage.commons.StorageMessageUtils.QUERY_ELEMENT;
 import static hep.dataforge.storage.commons.StorageMessageUtils.confirmationResponse;
+import hep.dataforge.tables.DataPoint;
+import static hep.dataforge.tables.DataPoint.fromMeta;
+import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.HashSet;

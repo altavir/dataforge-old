@@ -15,14 +15,11 @@
  */
 package hep.dataforge.datafitter;
 
-import hep.dataforge.names.NamedMetaHolder;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.DerivativeCalculator;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.likelihood.LogLikelihood;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
 
 

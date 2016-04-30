@@ -17,8 +17,8 @@ package hep.dataforge.storage.loaders;
 
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ObjectLoader;
+import hep.dataforge.storage.api.Storage;
 
 /**
  *

@@ -18,8 +18,8 @@ package hep.dataforge.tables;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatFactory;
-import java.util.List;
 import hep.dataforge.values.ValueFormatter;
+import java.util.List;
 
 /**
  * колонка однородных значений

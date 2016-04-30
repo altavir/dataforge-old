@@ -3,7 +3,6 @@ package hep.dataforge.storage.servlet;
 import freemarker.template.Template;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.*;
-import hep.dataforge.values.Value;
 import java.io.StringWriter;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
-import ratpack.server.PublicAddress;
 
 /**
  * Created by darksnake on 13-Dec-15.

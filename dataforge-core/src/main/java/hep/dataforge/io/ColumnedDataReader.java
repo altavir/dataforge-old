@@ -17,6 +17,8 @@ package hep.dataforge.io;
 
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.PointParser;
+import hep.dataforge.tables.Table;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,8 +26,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import hep.dataforge.tables.PointParser;
-import hep.dataforge.tables.Table;
 
 /**
  * <p>

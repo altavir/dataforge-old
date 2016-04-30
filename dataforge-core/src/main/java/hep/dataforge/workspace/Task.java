@@ -15,9 +15,9 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.names.Named;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 
 /**
 

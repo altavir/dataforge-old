@@ -26,12 +26,14 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
+import hep.dataforge.storage.api.ObjectLoader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
 import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.EVENT_LOADER_TYPE_CODE;
+import static hep.dataforge.storage.commons.EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.POINT_LOADER_TYPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.STATE_LOADER_TYPE_CODE;
 import hep.dataforge.storage.commons.StorageUtils;
@@ -46,8 +48,6 @@ import org.apache.commons.vfs2.FileSystemException;
 import static org.apache.commons.vfs2.FileType.FOLDER;
 import org.apache.commons.vfs2.impl.DefaultFileMonitor;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.storage.api.ObjectLoader;
-import static hep.dataforge.storage.commons.EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
 
 /**
  * Сервер данных на локальных текстовых файлах.

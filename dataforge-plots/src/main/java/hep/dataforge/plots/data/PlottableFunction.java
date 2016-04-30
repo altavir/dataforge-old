@@ -15,11 +15,11 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.plots.XYPlottable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;

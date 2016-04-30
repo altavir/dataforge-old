@@ -20,11 +20,11 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.tables.Filtering.buildConditionSet;
 import java.util.function.Predicate;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * Table transformation action

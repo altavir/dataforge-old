@@ -16,7 +16,6 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 
 /**

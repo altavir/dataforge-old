@@ -15,7 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.control.connections.Connection;
@@ -24,6 +23,7 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
@@ -34,7 +34,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
-import java.util.logging.Level;
 import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

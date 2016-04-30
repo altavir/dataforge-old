@@ -8,13 +8,13 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.actions.GeneratorAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import java.util.Collections;
 import java.util.Map;
 import java.util.function.Supplier;
 import javafx.util.Pair;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * An action to initialize a storage

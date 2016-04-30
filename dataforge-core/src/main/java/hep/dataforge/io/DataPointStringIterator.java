@@ -16,10 +16,10 @@
 package hep.dataforge.io;
 
 import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
 import java.io.InputStream;
 import java.util.Iterator;
-import hep.dataforge.tables.PointParser;
 
 /**
  *

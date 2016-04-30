@@ -15,9 +15,6 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.datafitter.FitState;
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
@@ -35,15 +32,17 @@ import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
+import hep.dataforge.tables.XYAdapter;
 import java.io.PrintWriter;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 
 /**
  * <p>

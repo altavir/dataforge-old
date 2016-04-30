@@ -5,14 +5,14 @@
  */
 package hep.dataforge.control.devices;
 
+import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
+import static hep.dataforge.control.devices.PortSensor.PORT_NAME_STATE;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.control.ports.PortHandler;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
-import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
-import static hep.dataforge.control.devices.PortSensor.PORT_NAME_STATE;
 
 /**
  * A Sensor that uses a PortHandler to obtain data

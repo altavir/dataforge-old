@@ -20,12 +20,11 @@ import hep.dataforge.functions.NamedFunction;
 import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import static hep.dataforge.io.PrintNamed.printNamedMatrix;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
 
 /**
  * This class combine the information required to fit data. The key elements are

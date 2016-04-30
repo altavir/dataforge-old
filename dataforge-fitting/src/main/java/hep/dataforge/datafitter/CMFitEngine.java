@@ -22,6 +22,7 @@ import hep.dataforge.functions.MultiFunction;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.functions.NamedMultiFunction;
 import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.maths.NamedDoubleArray;
 import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import static java.lang.Math.log;
@@ -38,7 +39,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.AbstractSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * <p>

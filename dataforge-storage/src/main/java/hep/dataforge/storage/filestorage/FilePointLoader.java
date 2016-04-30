@@ -6,9 +6,6 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.tables.TableFormat;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.IOUtils;
 import hep.dataforge.io.LineIterator;
@@ -19,8 +16,13 @@ import hep.dataforge.names.Names;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.EnvelopeCodes;
+import hep.dataforge.storage.commons.ValueIndex;
 import hep.dataforge.storage.commons.ValueProviderIndex;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointParser;
+import hep.dataforge.tables.SimpleParser;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
 import java.io.IOException;
 import java.text.ParseException;
@@ -28,8 +30,6 @@ import java.util.Iterator;
 import java.util.function.Supplier;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
-import hep.dataforge.tables.PointParser;
-import hep.dataforge.storage.commons.ValueIndex;
 
 /**
  *

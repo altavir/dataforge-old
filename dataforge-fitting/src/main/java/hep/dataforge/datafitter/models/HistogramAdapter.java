@@ -15,9 +15,9 @@
  */
 package hep.dataforge.datafitter.models;
 
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.AbstractPointAdapter;
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.PointAdapter;
 
 /**

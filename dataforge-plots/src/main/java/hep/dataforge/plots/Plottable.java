@@ -15,12 +15,12 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.names.AnonimousNotAlowed;
-import hep.dataforge.names.Named;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
+import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.Named;
+import hep.dataforge.tables.DataPoint;
 import java.util.Collection;
 
 /**

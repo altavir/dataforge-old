@@ -11,7 +11,6 @@ import hep.dataforge.navigation.AbstractProvider;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;

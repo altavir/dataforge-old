@@ -18,13 +18,13 @@ import com.google.visualization.datasource.datatable.value.ValueType;
 import com.ibm.icu.util.GregorianCalendar;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
-import hep.dataforge.tables.TableFormat;
 import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.ColumnFormat;
+import hep.dataforge.values.ValueFormatter;
 import java.util.Date;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.values.ValueFormatter;
 
 /**
  *

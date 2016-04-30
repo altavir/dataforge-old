@@ -15,11 +15,11 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.MapPoint;
 import hep.dataforge.values.Value;
 import java.time.Duration;
 import java.time.Instant;

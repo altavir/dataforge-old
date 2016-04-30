@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
@@ -24,7 +25,6 @@ import hep.dataforge.meta.Meta;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import hep.dataforge.data.DataNode;
 
 @TypedActionDef(name = "run", info = "Run action with given configuration")
 @ValueDef(name = "configFile", info = "The configuration file name and path")

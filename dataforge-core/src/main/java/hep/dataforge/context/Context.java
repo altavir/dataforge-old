@@ -18,14 +18,15 @@ package hep.dataforge.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
-import hep.dataforge.names.Named;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.ReportEntry;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
 import hep.dataforge.navigation.ValueProvider;
 import hep.dataforge.values.Value;
@@ -33,8 +34,6 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.function.Supplier;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * Окружение для выполнения действий (и не только). Имеет собственный лог и

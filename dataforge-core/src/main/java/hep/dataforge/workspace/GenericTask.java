@@ -19,14 +19,16 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.DFProcess;
 import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.Data;
-import hep.dataforge.meta.Meta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.reports.Report;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import java.util.concurrent.CompletableFuture;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A generic implementation of task with 4 phases:
@@ -34,7 +36,7 @@ import java.util.concurrent.CompletableFuture;
  * <li>gathering</li>
  * <li>transformation</li>
  * <li>reporting</li>
- * <li>result generation</li>
+ * <li>finish generation</li>
  * </ul>
  *
  * @author Alexander Nozik
@@ -51,14 +53,20 @@ public abstract class GenericTask<T> implements Task<T> {
                 callback -> {
                     getLogger().info("Starting gathering phase");
                     Meta gatherConfig = config.getNode("dependecies", Meta.buildEmpty("dependecies"));
-                    return new TaskState(gather(callback, workspace, gatherConfig));
+                    Report report = new Report(getName(), workspace.getContext().getReport());
+                    return new TaskState(gather(callback, workspace, gatherConfig), report);
                 }).getTask();
 
         CompletableFuture<TaskState> transformTask = gatherTask
                 .thenCompose((TaskState state) -> manager.<TaskState>post(Name.join(taskProcess.getName(), "transform").toString(),
                         callback -> {
                             getLogger().info("Starting transformation phase");
-                            return transform(callback, workspace.getContext(), state, config);
+                            TaskState result = transform(callback, workspace.getContext(), state, config);
+                            if(!result.isFinished){
+                                getLogger().warn("Task state is not finilized. Using last applyied state as a result");
+                                result.finish();
+                            }
+                            return result;
                         }).getTask());
 
         CompletableFuture<DataNode<T>> resultTask = transformTask
@@ -85,38 +93,52 @@ public abstract class GenericTask<T> implements Task<T> {
      *
      * @param executor
      * @param workspace
-     * @param config
+     * @param gatherConfig
      * @return
      */
     @NodeDef(name = "data", multiple = true, info = "Data dependency element from workspace")
     @NodeDef(name = "task", multiple = true, info = "Task dependecy element from workspace")
-    protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, Meta config) {
+    protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, Meta gatherConfig) {
         DataTree.Builder builder = DataTree.builder();
-        for (Meta dataElement : config.getNodes("data")) {
-            Data data = workspace.getData(dataElement.getString("path"));
-            builder.putData(dataElement.getString("as"), data);
-        }
-        for (Meta dataElement : config.getNodes("task")) {
-            String taskName = dataElement.getString("name");
-            Meta taskMeta;
-            if (dataElement.hasNode("meta")) {
-                if (dataElement.hasValue("meta.from")) {
-                    taskMeta = workspace.getMeta(dataElement.getString("meta.from"));
-                } else {
-                    taskMeta = dataElement.getNode("meta");
-                }
-            } else {
-                taskMeta = null;
-            }
-            DataNode taskResult = workspace.runTask(taskName, taskMeta);
-            if (dataElement.hasValue("as")) {
-                builder.putNode(dataElement.getString("as"), taskResult);
-            } else {
-                builder.putNode(taskResult);
-            }
-        }
+        gatherConfig.getNodes("data").stream().forEach((_item) -> {
+            gatherData(builder, workspace, gatherConfig);
+        });
+        gatherConfig.getNodes("task").stream().forEach((dataElement) -> {
+            gatherTask(builder, workspace, dataElement);
+        });
 
         return builder.build();
+    }
+
+    @ValueDef(name = "path", required = true)
+    @ValueDef(name = "as")
+    protected void gatherData(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
+        String dataPath = dataElement.getString("path");
+        Data data = workspace.getData(dataPath);
+        builder.putData(dataElement.getString("as", dataPath), data);
+    }
+
+    @ValueDef(name = "name", required = true)
+    @ValueDef(name = "as")
+    @NodeDef(name = "meta")
+    protected void gatherTask(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
+        String taskName = dataElement.getString("name");
+        Meta taskMeta;
+        if (dataElement.hasNode("meta")) {
+            if (dataElement.hasValue("meta.from")) {
+                taskMeta = workspace.getMeta(dataElement.getString("meta.from"));
+            } else {
+                taskMeta = dataElement.getNode("meta");
+            }
+        } else {
+            taskMeta = null;
+        }
+        DataNode taskResult = workspace.runTask(taskName, taskMeta);
+        if (dataElement.hasValue("as")) {
+            builder.putNode(dataElement.getString("as"), taskResult);
+        } else {
+            builder.putNode(taskResult);
+        }
     }
 
     /**
@@ -140,7 +162,7 @@ public abstract class GenericTask<T> implements Task<T> {
     }
 
     /**
-     * Generating result and storing it in workspace.
+     * Generating finish and storing it in workspace.
      *
      * @param executor
      * @param workspace

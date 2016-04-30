@@ -9,12 +9,12 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import javafx.util.Pair;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * An action that does not take any input data, only generates output

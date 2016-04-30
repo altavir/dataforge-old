@@ -5,11 +5,11 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.NotConnectedException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageManager;

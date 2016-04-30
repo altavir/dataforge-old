@@ -9,6 +9,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
 import hep.dataforge.io.reports.ReportEntry;
+import hep.dataforge.io.reports.Reportable;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.function.Consumer;
@@ -18,7 +19,6 @@ import javafx.scene.control.ScrollPane;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
 import javafx.scene.text.TextFlow;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * A textFlow used to represent work logs

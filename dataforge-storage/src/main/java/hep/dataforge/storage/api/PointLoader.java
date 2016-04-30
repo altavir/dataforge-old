@@ -15,14 +15,14 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.PointListener;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.commons.ValueIndex;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.PointListener;
+import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.TableFormat;
 import java.util.Collection;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.storage.commons.ValueIndex;
 
 /**
  * PointLoader is intended to load a set of datapoints. The loader can have one

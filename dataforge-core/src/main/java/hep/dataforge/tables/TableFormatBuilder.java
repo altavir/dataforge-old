@@ -19,8 +19,8 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.ValueType;
-import java.util.Map;
 import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class TableFormatBuilder {
 

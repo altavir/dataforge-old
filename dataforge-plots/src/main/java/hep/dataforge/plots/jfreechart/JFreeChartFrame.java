@@ -15,8 +15,6 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -27,6 +25,8 @@ import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import java.awt.BasicStroke;

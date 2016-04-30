@@ -16,9 +16,6 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.datafitter.FitManager;
 import hep.dataforge.datafitter.FitSource;
 import hep.dataforge.datafitter.FitState;
@@ -34,10 +31,12 @@ import hep.dataforge.maths.NamedDoubleArray;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.AbstractNamedSet;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.XYAdapter;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
 
 /**
  *

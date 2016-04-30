@@ -18,10 +18,10 @@ package hep.dataforge.tables;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatFactory;
+import hep.dataforge.values.ValueFormatter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-import hep.dataforge.values.ValueFormatter;
 
 /**
  * A simple immutable Column implementation using list of values

@@ -5,15 +5,14 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
 import hep.dataforge.utils.GenericBuilder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 

@@ -15,19 +15,19 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.MapPoint;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedDoubleArray;
 import static hep.dataforge.names.NamedUtils.combineNames;
 import hep.dataforge.names.Names;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
 
 /**
  * Формирование и печать наборов данных

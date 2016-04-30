@@ -5,8 +5,8 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.names.Named;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

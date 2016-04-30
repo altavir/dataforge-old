@@ -16,6 +16,8 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.data.DataNode;
+import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
@@ -23,8 +25,6 @@ import hep.dataforge.meta.MetaBuilder;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
-import hep.dataforge.data.DataNode;
-import hep.dataforge.data.FileDataFactory;
 
 public class ActionUtils {
 
@@ -87,7 +87,6 @@ public class ActionUtils {
         return buildAction(context, actionType).run(context, data, actionMeta);
     }
 
-    //TODO move to ActionManager
     public static Action buildAction(Context context, String actionType) {
         Action res;
         if (SEQUENCE_ACTION_TYPE.equals(actionType)) {
@@ -115,5 +114,4 @@ public class ActionUtils {
             return SEQUENCE_ACTION_TYPE;
         }
     }
-
 }

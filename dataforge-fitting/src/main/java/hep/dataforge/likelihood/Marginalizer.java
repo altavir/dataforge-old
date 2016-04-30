@@ -24,13 +24,13 @@ import hep.dataforge.maths.integration.DistributionSampler;
 import hep.dataforge.maths.integration.Integrand;
 import hep.dataforge.maths.integration.MonteCarloIntegrator;
 import hep.dataforge.maths.integration.Sampler;
+import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.NamedUtils;
 import hep.dataforge.names.Names;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.names.NameSetContainer;
 
 /**
  * TODO передедать конструкторы

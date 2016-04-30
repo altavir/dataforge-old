@@ -6,12 +6,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.TableFormat;
-import hep.dataforge.tables.MapPoint;
-import hep.dataforge.storage.api.Index;
 import hep.dataforge.storage.api.ObjectLoader;
-import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
 import java.io.File;
@@ -20,10 +15,10 @@ import java.io.IOException;
 import java.nio.file.Files;
 import org.junit.After;
 import org.junit.AfterClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *

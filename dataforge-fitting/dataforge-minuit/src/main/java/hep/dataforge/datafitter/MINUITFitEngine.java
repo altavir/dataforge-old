@@ -31,8 +31,8 @@ import static hep.dataforge.datafitter.FitTask.TASK_RUN;
 import static hep.dataforge.datafitter.FitTask.TASK_SINGLE;
 import hep.dataforge.functions.MultiFunction;
 import hep.dataforge.io.reports.Report;
-import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.maths.NamedMatrix;
 
 /**
  * <p>

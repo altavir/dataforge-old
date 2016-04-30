@@ -18,8 +18,8 @@ package hep.dataforge.functions;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.names.Names;
 import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.names.Names;
 
 /**
  * <p>

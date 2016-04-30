@@ -15,12 +15,12 @@
  */
 package hep.dataforge.maths;
 
+import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
-import hep.dataforge.names.NameSetContainer;
 
 /**
  * Square named matrix. Не обязательно симметричная, но обзательно квадратная.

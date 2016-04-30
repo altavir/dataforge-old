@@ -52,7 +52,7 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         }
     }
 
-    private boolean hasAction(String name) {
+    public boolean hasAction(String name) {
         return actionMap.containsKey(name) || (getParent() != null && getParent().hasAction(name));
     }
 
@@ -131,5 +131,5 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
     public Context getContext() {
         return context;
     }
-
+ 
 }

@@ -15,11 +15,11 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.XYAdapter;
 import java.util.function.Function;
 
 /**

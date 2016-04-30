@@ -20,6 +20,7 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -29,7 +30,6 @@ import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import javafx.util.Pair;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * Action with multiple input data pieces but single output
@@ -42,6 +42,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     @Override
     public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+        checkInput(set);
         List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
         groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));

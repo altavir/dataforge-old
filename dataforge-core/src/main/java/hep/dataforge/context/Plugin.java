@@ -15,9 +15,9 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.names.Named;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 
 /**
  * The interface to define a Context plugin. A plugin could be loaded into the

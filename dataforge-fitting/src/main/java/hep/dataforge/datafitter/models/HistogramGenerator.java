@@ -15,17 +15,17 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
+import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import static java.lang.Double.isNaN;
 import static java.lang.Math.sqrt;
 import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import hep.dataforge.tables.Table;
-import static java.lang.Double.isNaN;
 
 /**
  * Генератор наборов данных для спектров. На входе требуется набор данных,

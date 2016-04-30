@@ -15,13 +15,13 @@
  */
 package hep.dataforge.datafitter.models;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.FunctionUtils;
 import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
+import hep.dataforge.tables.DataPoint;
 import static java.lang.Math.log;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 

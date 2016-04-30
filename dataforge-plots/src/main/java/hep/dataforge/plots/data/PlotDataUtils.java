@@ -5,20 +5,20 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.tables.TableFormat;
+import hep.dataforge.plots.XYPlotFrame;
+import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.TableFormat;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import hep.dataforge.tables.Table;
 
 /**
  *

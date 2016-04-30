@@ -20,12 +20,13 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -34,8 +35,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.tables.Table;
-import hep.dataforge.io.reports.Reportable;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
