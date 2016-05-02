@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.HashMap;

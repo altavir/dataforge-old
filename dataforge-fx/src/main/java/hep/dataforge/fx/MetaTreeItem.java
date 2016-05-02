@@ -173,7 +173,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
                 ((MetaTreeBranch) this.getParent().getValue()).getNode().removeValue(getValue().getName());
             } else {
                 ((MetaTreeBranch) this.getParent().getValue()).getNode()
-                        .removeChildNode(((MetaTreeBranch) getValue()).getNode());
+                        .replaceChildNode(((MetaTreeBranch) getValue()).getNode(), null);
             }
             if (!getValue().hasDescriptor()) {
                 getParent().getChildren().remove(this);

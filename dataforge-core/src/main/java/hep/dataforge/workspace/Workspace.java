@@ -15,12 +15,16 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
+import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.meta.Annotated;
+import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Named;
+import hep.dataforge.meta.MetaProvider;
+import hep.dataforge.utils.GenericBuilder;
 
 /**
  * A place to store tasks and their results
@@ -28,7 +32,7 @@ import hep.dataforge.names.Named;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Workspace extends Annotated, Named, Encapsulated {
+public interface Workspace extends Encapsulated, MetaProvider {
 
     public static final String DATA_STAGE_NAME = "@data";
 
@@ -39,7 +43,16 @@ public interface Workspace extends Annotated, Named, Encapsulated {
      * @return
      */
     default Data getData(String dataName) {
-        return getStage(DATA_STAGE_NAME).getData(dataName);
+        return getDataStage().getData(dataName);
+    }
+
+    /**
+     * Get the whole data tree
+     *
+     * @return
+     */
+    default DataNode getDataStage() {
+        return getStage(DATA_STAGE_NAME);
     }
 
     /**
@@ -75,18 +88,67 @@ public interface Workspace extends Annotated, Named, Encapsulated {
     <T> DataNode<T> updateStage(String stage, DataNode<T> data);
 
     /**
-     * Get the identity for this workspace including context identity
-     *
-     * @return
-     */
-    Identity getIdentity();
-
-    /**
      * Get a predefined meta with given name
      *
      * @param name
      * @return
      */
+    @Override
     Meta getMeta(String name);
+
+    public interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
+
+        default B loadFrom(Meta meta) {
+            if (meta.hasValue("context")) {
+                setContext(GlobalContext.getContext(meta.getString("context")));
+            }
+            if (meta.hasNode("data")) {
+                meta.getNodes("data").forEach((Meta dataMeta) -> {
+                    DataFactory factory;
+                    if(dataMeta.hasValue("dataFactoryClass")){
+                        try {
+                            factory = (DataFactory) Class.forName(dataMeta.getString("dataFactoryClass")).newInstance();
+                        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
+                            throw new RuntimeException("Error while initializing data factory", ex);
+                        }
+                    } else{
+                        factory = new FileDataFactory();
+                    }
+                    String as = dataMeta.getString("as","");
+                    loadData(as, factory.build(getContext(), dataMeta));
+                });
+            }
+            if(meta.hasNode("config")){
+                meta.getNodes("config").forEach((Meta configMeta) -> {
+                    loadMeta(configMeta.getString("name"), configMeta.getNode("meta"));
+                });
+            }
+
+            return self();
+        }
+
+        B setContext(Context ctx);
+
+        B loadData(String name, Data data);
+
+        B loadData(String name, DataNode datanode);
+
+        default B loadData(String name, DataFactory factory, Meta dataConfig) {
+            return loadData(name, factory.build(getContext(), dataConfig));
+        }
+
+        default B putFile(String dataName, String filePath, Meta meta) {
+            return loadData(dataName, FileDataFactory.buildFileData(getContext(), filePath, meta));
+        }
+
+        default B putFile(String dataName, String filePath) {
+            return putFile(dataName, filePath, null);
+        }
+
+        B loadMeta(String name, Meta meta);
+
+        B loadTask(Task task);
+
+    }
 
 }

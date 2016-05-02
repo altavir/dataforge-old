@@ -26,22 +26,22 @@ import org.w3c.dom.Element;
 
 /**
  * A writer for XML represented Meta
+ *
  * @author Alexander Nozik
  */
 public class XMLMetaWriter implements MetaStreamWriter {
 
-    
     @Override
     public void write(OutputStream stream, Meta meta, Charset charset) {
         try {
-            if(charset == null){
+            if (charset == null) {
                 charset = Charset.forName("UTF-8");
             }
-            
+
             Document doc = getXMLDocument(meta);
             TransformerFactory tf = TransformerFactory.newInstance();
             Transformer transformer = tf.newTransformer();
-            
+
             //PENDING add constructor customization of writer?
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
@@ -68,6 +68,10 @@ public class XMLMetaWriter implements MetaStreamWriter {
         }
     }
 
+    private String normalizeName(String str) {
+        return str.replace("@", "_at_");
+    }
+
     private Element getXMLElement(Meta an, Document doc) {
         String elementName;
         if (an.isAnonimous()) {
@@ -75,7 +79,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
         } else {
             elementName = an.getName();
         }
-        Element res = doc.createElement(elementName);
+        Element res = doc.createElement(normalizeName(elementName));
 //        MetaBuilder builder = an.getBuilder();
 //        Map<String, Item<Annotation>> elements = builder.getElementMap();
 //        Map<String, Item<Value>> values = builder.getValueMap();
@@ -83,13 +87,13 @@ public class XMLMetaWriter implements MetaStreamWriter {
         for (String name : an.getValueNames()) {
             List<Value> valueList = an.getValue(name).listValue();
             if (valueList.size() == 1) {
-                res.setAttribute(name, valueList.get(0).stringValue());
+                res.setAttribute(normalizeName(name), valueList.get(0).stringValue());
             } else {
                 String val = valueList
                         .stream()
                         .<String>map((v) -> v.stringValue())
                         .collect(Collectors.joining(", ", "[", "]"));
-                res.setAttribute(name, val);
+                res.setAttribute(normalizeName(name), val);
             }
         }
 

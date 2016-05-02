@@ -16,7 +16,7 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.util.Set;
 

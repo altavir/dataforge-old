@@ -29,7 +29,7 @@ public class FileDataFactory extends DataFactory {
     public static final String FILE_PATH_KEY = "filePath";
 
     @Override
-    protected void buildChildren(Context context, DataTree.Builder<?> builder, Meta dataConfig) {
+    protected void buildChildren(Context context, DataTree.Builder builder, Meta dataConfig) {
         File parentFile;
         if (dataConfig.hasNode(DATA_DIR_KEY)) {
             parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
@@ -55,8 +55,12 @@ public class FileDataFactory extends DataFactory {
             });
         }
     }
+    
+    public static Data<Binary> buildFileData(Context context, String filePath, Meta meta){
+        return buildFileData(context.io().getFile(filePath), meta);
+    }
 
-    private Data<Binary> buildFileData(File file, Meta meta) {
+    private static Data<Binary> buildFileData(File file, Meta meta) {
         StaticData<Binary> fileData = new StaticData(new FileBinary(file));
         MetaBuilder mb = new MetaBuilder(meta);
         mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());

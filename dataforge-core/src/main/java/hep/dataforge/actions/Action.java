@@ -19,6 +19,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
+import org.slf4j.Logger;
 
 /**
  * The action is an independent process that could be performed on one
@@ -34,4 +35,13 @@ public interface Action<T, R> extends Named {
 
     DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta);
 
+    
+    
+    default Action<T,R> withLogger(Logger logger) {
+        return this;
+    }
+
+    default Action<T,R> withParentProcess(String parentProcessName) {
+        return this;
+    }
 }

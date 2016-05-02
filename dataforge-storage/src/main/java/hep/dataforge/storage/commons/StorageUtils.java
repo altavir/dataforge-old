@@ -18,11 +18,14 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.Name;
 import hep.dataforge.storage.api.Loader;
 import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
 import java.util.List;
+import java.util.stream.Stream;
+import javafx.util.Pair;
 
 /**
  * A helper class to build loaders from existing storage
@@ -84,20 +87,21 @@ public class StorageUtils {
                 .build();
     }
 
-//    /**
-//     * Сохранить существующий набор конфигураций загрузчиков в XML файл
-//     *
-//     * @param fileName
-//     * @param ans
-//     * @throws java.io.IOException
-//     */
-//    public static void saveLoaderMap(String fileName, Collection<Meta> ans) throws IOException {
-//        MetaBuilder builder = new MetaBuilder("loaders");
-//        ans.stream().filter((an) -> (an.getName().equals("loader") && an.hasValue("loadername"))).forEach((an) -> {
-//            builder.putNode(an);
-//        });
-//        String res = new JSONMetaWriter().writeString(builder, null);
-//        FileWriter writer = new FileWriter(fileName);
-//        writer.append(res);
-//    }
+    /**
+     * Stream of all loaders in the storage with corresponding relative names
+     *
+     * @param storage
+     * @return
+     */
+    public static Stream<Pair<String, Loader>> loaderStream(Storage storage) {
+        try {
+            return Stream.concat(
+                    storage.shelves().entrySet().stream().flatMap(entry -> loaderStream(entry.getValue())
+                            .map(pair -> new Pair<>(Name.joinString(entry.getKey(), pair.getKey()), pair.getValue()))),
+                    storage.loaders().entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
+            );
+        } catch (StorageException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
 }

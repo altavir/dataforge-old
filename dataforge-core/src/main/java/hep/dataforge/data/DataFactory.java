@@ -80,5 +80,5 @@ public abstract class DataFactory implements MetaFactory<DataTree> {
      * @param builder
      * @param meta
      */
-    protected abstract void buildChildren(Context context, DataTree.Builder<?> builder, Meta meta);
+    protected abstract void buildChildren(Context context, DataTree.Builder builder, Meta meta);
 }

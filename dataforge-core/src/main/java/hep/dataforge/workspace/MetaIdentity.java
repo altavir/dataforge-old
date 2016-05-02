@@ -35,7 +35,7 @@ public class MetaIdentity implements Identity {
 
     @Override
     public int hashCode() {
-        int hash = 3;
+        int hash = 3 + meta.hashCode();
         return hash;
     }
 
@@ -53,5 +53,12 @@ public class MetaIdentity implements Identity {
         }
         return true;
     }
+
+    @Override
+    public String toString() {
+        return "meta::"+hashCode();
+    }
+    
+    
 
 }

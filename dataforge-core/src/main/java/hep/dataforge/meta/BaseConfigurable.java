@@ -7,7 +7,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 
 /**
  * An object with partially changeable meta. Inner layer of meta is not

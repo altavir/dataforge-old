@@ -25,10 +25,11 @@ package hep.dataforge.workspace;
 public interface Identity {
 
     /**
-     * The string representation of this identity
-     * @return 
+     * The string representation of this identity. Usually a hash code
+     *
+     * @return
      */
     @Override
-    public String toString();
+    String toString();
 
 }

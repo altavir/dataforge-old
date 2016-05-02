@@ -7,7 +7,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.PathSyntaxException;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import java.util.Collections;
@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to work with meta
@@ -105,6 +106,38 @@ public class MetaUtils {
         } else {
             return val;
         }
+    }
+
+    /**
+     * Build a Meta using given template.
+     *
+     * @param meta
+     * @param valueProvider
+     * @param metaProvider
+     * @return
+     */
+    public static Meta compileTemplate(Meta meta, ValueProvider valueProvider, MetaProvider metaProvider) {
+        MetaBuilder res = new MetaBuilder(meta);
+        res.nodeStream().forEach(pair -> {
+            MetaBuilder node = pair.getValue();
+            if (node.hasValue("@include")) {
+                String includePath = pair.getValue().getString("@include");
+                if (metaProvider.hasMeta(includePath)) {
+                    MetaBuilder parent = node.getParent();
+                    parent.replaceChildNode(node, metaProvider.getMeta(includePath));
+                } else {
+                    LoggerFactory.getLogger(MetaUtils.class).warn("Can't compile template meta node with name {} not provided", includePath);
+                }
+            }
+        });
+
+        res.valueStream().forEach(pair -> {
+            Value val = pair.getValue();
+            if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
+                res.setValue(pair.getKey(), transformValue(val, valueProvider));
+            }
+        });
+        return res;
     }
 
     /**

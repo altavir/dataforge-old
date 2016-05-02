@@ -28,7 +28,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.io.IOException;
 import java.util.Collections;

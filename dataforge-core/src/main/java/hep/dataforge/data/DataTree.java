@@ -286,7 +286,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
          *
          * @param oldTree
          */
-        private Builder(DataTree<T> oldTree) {
+        public Builder(DataTree<T> oldTree) {
             this.tree = new DataTree<>(oldTree);
         }
 

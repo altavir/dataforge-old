@@ -42,6 +42,10 @@ public interface MetaStreamReader {
      */
     MetaBuilder read(InputStream stream, long length, Charset charset) throws IOException, ParseException;
     
+    default MetaBuilder read(InputStream stream) throws IOException, ParseException{
+        return read(stream, -1, null);
+    }
+    
     /**
      * Decide if this reader accepts given file
      * 

@@ -29,7 +29,11 @@ import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -42,10 +46,30 @@ import org.slf4j.LoggerFactory;
 public class GlobalContext extends Context {
 
     private static final GlobalContext instance = new GlobalContext();
+    private static Set<Context> contexts = new HashSet<>();
 
     public static GlobalContext instance() {
         return instance;
     }
+    
+    /**
+     * Get previously registered context
+     *
+     * @param contextName
+     * @return
+     */
+    public static Context getContext(String contextName) {
+        return contexts.stream().filter(ctx -> ctx.getName().equals(contextName)).findFirst().orElse(null);
+    }
+
+    /**
+     * Register a context to be retrieved later
+     *
+     * @param context
+     */
+    public static void putContext(Context context) {
+        contexts.add(context);
+    }    
 
     public static File getFile(String path) {
         return instance.io().getFile(path);
@@ -63,8 +87,7 @@ public class GlobalContext extends Context {
         actions.registerAction(TransformTableAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
-        this.processManager = new ProcessManager();
-        this.processManager.setContext(this);        
+        putContext(this);
     }
 
     @Override
@@ -80,6 +103,15 @@ public class GlobalContext extends Context {
         appender.setOutputStream(io.out());
         appender.start();
         root.addAppender(appender);
+    }
+
+    @Override
+    public ProcessManager processManager() {
+        if (processManager == null) {
+            this.processManager = new ProcessManager();
+            this.processManager.setContext(this);
+        }
+        return super.processManager();
     }
 
     @Override
@@ -128,5 +160,7 @@ public class GlobalContext extends Context {
     public boolean hasValue(String path) {
         return properties.containsKey(path);
     }
+
+
 
 }

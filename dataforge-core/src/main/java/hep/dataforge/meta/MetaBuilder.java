@@ -16,7 +16,7 @@
 package hep.dataforge.meta;
 
 
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,6 +78,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      *
      * @return a {@link hep.dataforge.meta.Meta} object.
      */
+    @Override
     public Meta build() {
         return MetaNode.from(this);
     }
@@ -92,30 +93,13 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return self();
     }
 
-    /**
-     * Replace an item with the given name with new item. If provided list is
-     * null or empty than corresponding item is removed if it exists.
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param elements a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.meta.MetaBuilder} object.
-     */
-//    @Override
-//    public MetaBuilder setNode(String name, Meta... elements) {
-//        if (elements == null || elements.length == 0) {
-//            super.removeNode(name);
-//        } else {
-//            super.setNode(name);
-//            for (Meta element : elements) {
-//                MetaBuilder newElement = new MetaBuilder(element);
-//                if (!name.equals(newElement.getName())) {
-//                    newElement.rename(name);
-//                }
-//                super.putNode(newElement);
-//            }
-//        }
-//        return self();
-//    }
+    @Override
+    public MetaBuilder getParent() {
+        return super.getParent();
+    }
+    
+    
+
     public MetaBuilder setNode(String name, Collection<? extends Meta> elements) {
         if (elements == null || elements.isEmpty()) {
             super.removeNode(name);
@@ -194,7 +178,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      * @return
      */
     protected Value transformValue(Value val) {
-        return MetaUtils.transformValue(val, getValueContext(), this);
+        return MetaUtils.transformValue(val, getValueContext());
     }
 
     /**

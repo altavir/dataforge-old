@@ -35,19 +35,19 @@ public class ActionResult<R> implements Data<R> {
     private final Class<R> type;
     private final Meta meta;
 
-    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor) {
-        this.log = log;
-        this.type = type;
-        this.future = CompletableFuture.supplyAsync(supplier, executor);
-        this.meta = Meta.empty();
-    }
-    
-    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor, Meta meta) {
-        this.log = log;
-        this.type = type;
-        this.future = CompletableFuture.supplyAsync(supplier, executor);
-        this.meta = meta;
-    }    
+//    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor) {
+//        this.log = log;
+//        this.type = type;
+//        this.future = CompletableFuture.supplyAsync(supplier, executor);
+//        this.meta = Meta.empty();
+//    }
+//    
+//    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor, Meta meta) {
+//        this.log = log;
+//        this.type = type;
+//        this.future = CompletableFuture.supplyAsync(supplier, executor);
+//        this.meta = meta;
+//    }    
 
     public ActionResult(Class<R> type, Report log, CompletableFuture<R> future) {
         this.log = log;

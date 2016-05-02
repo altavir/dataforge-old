@@ -18,7 +18,7 @@ package hep.dataforge.meta;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Arrays;
