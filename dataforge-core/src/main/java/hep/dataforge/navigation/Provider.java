@@ -30,23 +30,27 @@ public interface Provider {
     default Object provide(String path) {
         return this.provide(Path.of(path));
     }
-    
+
+    default <T> T provide(String path, Class<T> type) {
+        return provide(Path.of(path), type);
+    }
+
     /**
      * Type checked provide
+     *
      * @param <T>
      * @param path
      * @param type
-     * @return 
+     * @return
      */
-    @SuppressWarnings("unchecked")
-    default <T> T provide(String path, Class<T> type){
+    default <T> T provide(Path path, Class<T> type) {
         Object obj = provide(path);
-        if(type.isInstance(obj)){
+        if (type.isInstance(obj)) {
             return (T) obj;
         } else {
             throw new IllegalStateException(
-                    String.format("Error in type checked provide method. %s object expected, but %s provided"
-                            ,type.getName(),obj.getClass().getName())
+                    String.format("Error in type checked provide method. %s object expected, but %s provided", 
+                            type.getName(), obj.getClass().getName())
             );
         }
     }

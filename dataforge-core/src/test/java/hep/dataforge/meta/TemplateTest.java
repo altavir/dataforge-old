@@ -15,9 +15,9 @@ import static org.junit.Assert.*;
  *
  * @author Alexander Nozik
  */
-public class MetaUtilsTest {
-
-    public MetaUtilsTest() {
+public class TemplateTest {
+    
+    public TemplateTest() {
     }
 
     /**
@@ -28,10 +28,10 @@ public class MetaUtilsTest {
         System.out.println("compileTemplate");
         Meta template = new XMLMetaReader().read(getClass().getResourceAsStream("/meta/template.xml"));
         Meta data = new XMLMetaReader().read(getClass().getResourceAsStream("/meta/templateData.xml"));
-        Meta result = MetaUtils.compileTemplate(template, data, data);
+        Meta result = Template.compile(template, data);
         assertEquals(result.getString("someNode.myValue"), "crocodile");
         assertEquals(result.getString("someNode.subNode[0].ggg"), "81.5");
         assertEquals(result.getString("someNode.subNode[1].subNode.subNodeValue"), "ccc");
     }
-
+    
 }

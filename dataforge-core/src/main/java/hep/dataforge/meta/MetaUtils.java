@@ -80,6 +80,11 @@ public class MetaUtils {
      * returned to user. Basically is used to ensure automatic substitutions. If
      * the reference not found in the current annotation scope than the value is
      * returned as-is.
+     * <p>
+     * the notation for template is the following: {@code ${path|def}} where
+     * {@code path} is the path for value in the context and {@code def} is the
+     * default value.
+     * </p>
      *
      * @param val
      * @param contexts a list of contexts to draw value from
@@ -91,53 +96,26 @@ public class MetaUtils {
         }
         if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
             String valStr = val.stringValue();
-            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
+//            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
+            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?\\}").matcher(valStr);
             while (matcher.find()) {
                 String group = matcher.group();
                 String sub = matcher.group("sub");
+                String replacement = matcher.group("def");
                 for (ValueProvider context : contexts) {
                     if (context != null && context.hasValue(sub)) {
-                        valStr = valStr.replace(group, context.getString(sub));
+                        replacement = context.getString(sub);
                         break;
                     }
+                }
+                if (replacement != null) {
+                    valStr = valStr.replace(group, replacement);
                 }
             }
             return Value.of(valStr);
         } else {
             return val;
         }
-    }
-
-    /**
-     * Build a Meta using given template.
-     *
-     * @param meta
-     * @param valueProvider
-     * @param metaProvider
-     * @return
-     */
-    public static Meta compileTemplate(Meta meta, ValueProvider valueProvider, MetaProvider metaProvider) {
-        MetaBuilder res = new MetaBuilder(meta);
-        res.nodeStream().forEach(pair -> {
-            MetaBuilder node = pair.getValue();
-            if (node.hasValue("@include")) {
-                String includePath = pair.getValue().getString("@include");
-                if (metaProvider.hasMeta(includePath)) {
-                    MetaBuilder parent = node.getParent();
-                    parent.replaceChildNode(node, metaProvider.getMeta(includePath));
-                } else {
-                    LoggerFactory.getLogger(MetaUtils.class).warn("Can't compile template meta node with name {} not provided", includePath);
-                }
-            }
-        });
-
-        res.valueStream().forEach(pair -> {
-            Value val = pair.getValue();
-            if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-                res.setValue(pair.getKey(), transformValue(val, valueProvider));
-            }
-        });
-        return res;
     }
 
     /**

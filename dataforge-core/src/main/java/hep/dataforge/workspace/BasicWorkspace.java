@@ -19,16 +19,13 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class BasicWorkspace implements Workspace {
+public class BasicWorkspace extends AbstractWorkspace {
 
     public static Builder builder() {
         return new Builder();
     }
 
-    private Context context;
     private final Map<String, DataTree.Builder> stages = new HashMap<>();
-    private final Map<String, Task> tasks = new HashMap<>();
-    private final Map<String, Meta> metas = new HashMap<>();
 
     @Override
     public <T> DataNode<T> getStage(String stageName) {
@@ -40,11 +37,6 @@ public class BasicWorkspace implements Workspace {
     }
 
     @Override
-    public <T> Task<T> getTask(String taskName) {
-        return tasks.get(taskName);
-    }
-
-    @Override
     public <T> DataNode<T> updateStage(String stage, DataNode<T> data) {
         if (!this.stages.containsKey(stage)) {
             this.stages.put(stage, DataTree.builder().setName(stage));
@@ -52,16 +44,6 @@ public class BasicWorkspace implements Workspace {
         DataTree.Builder stageBuilder = this.stages.get(stage);
         stageBuilder.putNode(data);
         return stageBuilder.build();
-    }
-
-    @Override
-    public Meta getMeta(String name) {
-        return metas.get(name);
-    }
-
-    @Override
-    public Context getContext() {
-        return context;
     }
 
     public static class Builder implements Workspace.Builder<Builder> {
@@ -75,7 +57,7 @@ public class BasicWorkspace implements Workspace {
 
         @Override
         public Builder setContext(Context ctx) {
-            w.context = ctx;
+            w.setContext(ctx);
             return self();
         }
 

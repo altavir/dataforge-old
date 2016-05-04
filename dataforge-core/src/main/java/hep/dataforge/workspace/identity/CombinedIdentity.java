@@ -13,30 +13,26 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.identity;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaNode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 
-public class MetaIdentity implements Identity {
+/**
+ * An Identity object allowing to combine many identities into one
+ * @author Alexander Nozik
+ */
+public class CombinedIdentity implements Identity {
+    private List<Identity> ids;
 
-    private final Meta meta;
-
-    /**
-     * Constructor snapshots the meta state when it is created, if meta is
-     * somehow changed later, identity still remembers old state.
-     *
-     * @param meta
-     */
-    public MetaIdentity(Meta meta) {
-        this.meta = MetaNode.from(meta);
+    public CombinedIdentity(List<Identity> ids) {
+        this.ids = new ArrayList<>(ids);
     }
 
-    @Override
-    public int hashCode() {
-        int hash = 3 + meta.hashCode();
-        return hash;
+    public CombinedIdentity(Identity... ids) {
+        this.ids = Arrays.asList(ids);
     }
 
     @Override
@@ -44,21 +40,28 @@ public class MetaIdentity implements Identity {
         if (obj == null) {
             return false;
         }
+        
+        if(this.ids.size() == 1){
+            return Objects.equals(obj, ids.get(0));
+        }
+        
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final MetaIdentity other = (MetaIdentity) obj;
-        if (!Objects.equals(this.meta, other.meta)) {
+        final CombinedIdentity other = (CombinedIdentity) obj;
+        if (!Objects.equals(this.ids, other.ids)) {
             return false;
         }
         return true;
     }
 
     @Override
-    public String toString() {
-        return "meta::"+hashCode();
+    public int hashCode() {
+        int hash = 3;
+        hash = 79 * hash + Objects.hashCode(this.ids);
+        return hash;
     }
     
     
-
+    
 }

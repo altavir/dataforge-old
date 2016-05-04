@@ -18,9 +18,11 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataTree;
 import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaProvider;
@@ -39,11 +41,11 @@ public interface Workspace extends Encapsulated, MetaProvider {
     /**
      * Get specific static data. Null if no data with given name is found
      *
-     * @param dataName Fully qualified data name
+     * @param dataPath Fully qualified data name
      * @return
      */
-    default Data getData(String dataName) {
-        return getDataStage().getData(dataName);
+    default Data getData(String dataPath) {
+        return getDataStage().getData(dataPath);
     }
 
     /**
@@ -75,7 +77,11 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default <T> DataNode<T> runTask(String taskName, Meta config) {
-        return this.<T>getTask(taskName).run(this, config);
+        return this.<T>getTask(taskName).run(this, generateModel(taskName, config));
+    }
+
+    default <T> DataNode<T> runTask(TaskModel model) {
+        return this.<T>getTask(model.getName()).run(this, model);
     }
 
     /**
@@ -96,6 +102,27 @@ public interface Workspace extends Encapsulated, MetaProvider {
     @Override
     Meta getMeta(String name);
 
+    /**
+     * Generate a taskModel for given task configuration
+     *
+     * @param config
+     * @return
+     */
+    TaskModel generateModel(String taskName, Meta taskMeta, Meta dependencies);
+
+    default TaskModel generateModel(String taskName, Meta taskMeta) {
+        return generateModel(taskName, taskMeta, taskMeta.getNode("gather", Meta.empty()));
+    }
+
+    /**
+     * Build an input data node for task based on the taskModel using all
+     * necessary checks. Tasks could internally use or override this procedure
+     *
+     * @param model
+     * @return
+     */
+    DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model);
+
     public interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
 
         default B loadFrom(Meta meta) {
@@ -105,20 +132,20 @@ public interface Workspace extends Encapsulated, MetaProvider {
             if (meta.hasNode("data")) {
                 meta.getNodes("data").forEach((Meta dataMeta) -> {
                     DataFactory factory;
-                    if(dataMeta.hasValue("dataFactoryClass")){
+                    if (dataMeta.hasValue("dataFactoryClass")) {
                         try {
                             factory = (DataFactory) Class.forName(dataMeta.getString("dataFactoryClass")).newInstance();
                         } catch (ClassNotFoundException | InstantiationException | IllegalAccessException ex) {
                             throw new RuntimeException("Error while initializing data factory", ex);
                         }
-                    } else{
+                    } else {
                         factory = new FileDataFactory();
                     }
-                    String as = dataMeta.getString("as","");
+                    String as = dataMeta.getString("as", "");
                     loadData(as, factory.build(getContext(), dataMeta));
                 });
             }
-            if(meta.hasNode("config")){
+            if (meta.hasNode("config")) {
                 meta.getNodes("config").forEach((Meta configMeta) -> {
                     loadMeta(configMeta.getString("name"), configMeta.getNode("meta"));
                 });

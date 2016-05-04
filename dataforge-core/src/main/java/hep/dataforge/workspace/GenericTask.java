@@ -18,11 +18,7 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.DFProcess;
 import hep.dataforge.context.ProcessManager;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.data.DataTree;
-import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -44,25 +40,25 @@ import org.slf4j.LoggerFactory;
 public abstract class GenericTask<T> implements Task<T> {
 
     @Override
-    public DataNode<T> run(Workspace workspace, Meta config) {
+    public DataNode<T> run(Workspace workspace, TaskModel model) {
         ProcessManager manager = workspace.getContext().processManager();
         // root process for this task
-        final DFProcess taskProcess = manager.post(getName() + "_" + config.hashCode());
+        final DFProcess taskProcess = manager.post(getName() + "_" + model.hashCode());
 
         CompletableFuture<TaskState> gatherTask = manager.<TaskState>post(Name.join(taskProcess.getName(), "gather").toString(),
                 callback -> {
                     getLogger().info("Starting gathering phase");
-                    Meta gatherConfig = config.getNode("dependecies", Meta.buildEmpty("dependecies"));
                     Report report = new Report(getName(), workspace.getContext().getReport());
-                    return new TaskState(gather(callback, workspace, gatherConfig), report);
+                    return new TaskState(gather(callback, workspace, model), report);
                 }).getTask();
 
         CompletableFuture<TaskState> transformTask = gatherTask
                 .thenCompose((TaskState state) -> manager.<TaskState>post(Name.join(taskProcess.getName(), "transform").toString(),
                         callback -> {
                             getLogger().info("Starting transformation phase");
-                            TaskState result = transform(callback, workspace.getContext(), state, config);
-                            if(!result.isFinished){
+                            TaskState result = transform(callback, workspace.getContext(),
+                                    state, getTaskMeta(workspace.getContext(), model));
+                            if (!result.isFinished) {
                                 getLogger().warn("Task state is not finilized. Using last applyied state as a result");
                                 result.finish();
                             }
@@ -73,11 +69,11 @@ public abstract class GenericTask<T> implements Task<T> {
                 .thenCompose((TaskState state) -> manager.<DataNode<T>>post(Name.join(taskProcess.getName(), "result").toString(),
                         callback -> {
                             getLogger().info("Starting report phase");
-                            for (Meta reportMeta : config.getNodes("report")) {
+                            model.reports().stream().forEach((reportMeta) -> {
                                 report(callback, workspace.getContext(), state, reportMeta);
-                            }
+                            });
                             getLogger().info("Starting result phase");
-                            return result(callback, workspace, state, config);
+                            return result(callback, workspace, state, model);
                         }).getTask());
 
         return resultTask.join();
@@ -88,57 +84,13 @@ public abstract class GenericTask<T> implements Task<T> {
         return LoggerFactory.getLogger(getName());
     }
 
-    /**
-     * Gathering of dependencies from workspace
-     *
-     * @param executor
-     * @param workspace
-     * @param gatherConfig
-     * @return
-     */
-    @NodeDef(name = "data", multiple = true, info = "Data dependency element from workspace")
-    @NodeDef(name = "task", multiple = true, info = "Task dependecy element from workspace")
-    protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, Meta gatherConfig) {
-        DataTree.Builder builder = DataTree.builder();
-        gatherConfig.getNodes("data").stream().forEach((_item) -> {
-            gatherData(builder, workspace, gatherConfig);
-        });
-        gatherConfig.getNodes("task").stream().forEach((dataElement) -> {
-            gatherTask(builder, workspace, dataElement);
-        });
-
-        return builder.build();
+    protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, TaskModel model) {
+        //Use default workspace gathering mechanism. Coule be overriden later
+        return workspace.buildDataNode(callback, model).build();
     }
 
-    @ValueDef(name = "path", required = true)
-    @ValueDef(name = "as")
-    protected void gatherData(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
-        String dataPath = dataElement.getString("path");
-        Data data = workspace.getData(dataPath);
-        builder.putData(dataElement.getString("as", dataPath), data);
-    }
-
-    @ValueDef(name = "name", required = true)
-    @ValueDef(name = "as")
-    @NodeDef(name = "meta")
-    protected void gatherTask(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
-        String taskName = dataElement.getString("name");
-        Meta taskMeta;
-        if (dataElement.hasNode("meta")) {
-            if (dataElement.hasValue("meta.from")) {
-                taskMeta = workspace.getMeta(dataElement.getString("meta.from"));
-            } else {
-                taskMeta = dataElement.getNode("meta");
-            }
-        } else {
-            taskMeta = null;
-        }
-        DataNode taskResult = workspace.runTask(taskName, taskMeta);
-        if (dataElement.hasValue("as")) {
-            builder.putNode(dataElement.getString("as"), taskResult);
-        } else {
-            builder.putNode(taskResult);
-        }
+    protected Meta getTaskMeta(Context context, TaskModel model) {
+        return model.meta();
     }
 
     /**
@@ -148,7 +100,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @param config
      */
-    protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config);
+    protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta configuration);
 
     /**
      * Reporting task results. No change of state is allowed.
@@ -171,7 +123,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected DataNode<T> result(ProcessManager.Callback callback, Workspace workspace, TaskState state, Meta config) {
+    protected DataNode<T> result(ProcessManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
         workspace.updateStage(getName(), state.getResult());
         return state.getResult();
     }

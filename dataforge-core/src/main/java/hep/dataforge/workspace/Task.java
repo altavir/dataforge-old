@@ -16,18 +16,16 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
 /**
-
+ *
  *
  * @author Alexander Nozik
  * @param <T>
  */
 public interface Task<R> extends Named {
 
-    
-    DataNode<R> run(Workspace workspace, Meta config);
+    DataNode<R> run(Workspace workspace, TaskModel model);
 
 }

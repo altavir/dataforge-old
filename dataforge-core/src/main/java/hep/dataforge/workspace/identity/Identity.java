@@ -13,25 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.identity;
 
 /**
+ * A marker interface that designates some object with could call {@code equals}
+ * on another Identity and check if both correspond to the same state. Identity
+ * objects does not have to be precisely identical.
  *
  * @author Alexander Nozik
  */
-public interface TaskResultCache {
+public interface Identity {
 
     /**
-     * The cached task result
-     * @return 
-     */
-    TaskResult cachedResult();
-    
-    /**
-     * An object used to ensure that two different task results were obtained
-     * with the same configuration of the Workspace.
+     * The string representation of this identity. Usually a hash code
      *
      * @return
      */
-    Identity workspaceIdentity();
+    @Override
+    String toString();
+
 }

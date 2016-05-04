@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.identity;
 
 import hep.dataforge.context.Context;
 

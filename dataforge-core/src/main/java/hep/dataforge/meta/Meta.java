@@ -164,9 +164,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     @Override
     public Object provide(String target, Name name) {
         switch (target) {
-            case "value":
+            case VALUE_TARGET:
                 return getValue(name.toString());
-            case "annotation":
+            case META_TARGET:
                 return getNode(name.toString());
             default:
                 throw new TargetNotProvidedException();
@@ -179,9 +179,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     @Override
     public boolean provides(String target, Name name) {
         switch (target) {
-            case "value":
+            case VALUE_TARGET:
                 return hasValue(name.toString());
-            case "annotation":
+            case META_TARGET:
                 return hasNode(name.toString());
             default:
                 return false;

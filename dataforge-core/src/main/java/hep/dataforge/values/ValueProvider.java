@@ -16,8 +16,36 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.navigation.Path;
+import hep.dataforge.navigation.Provider;
 
 public interface ValueProvider {
+
+    public static final String VALUE_TARGET = "value";
+
+    /**
+     * Build a meta provider from given general provider
+     *
+     * @param provider
+     * @return
+     */
+    public static ValueProvider buildFrom(Provider provider) {
+        if (provider instanceof ValueProvider) {
+            return (ValueProvider) provider;
+        }
+        return new ValueProvider() {
+            @Override
+            public Value getValue(String path) {
+                return provider.provide(Path.of(path, VALUE_TARGET), Value.class);
+            }
+
+            @Override
+            public boolean hasValue(String path) {
+                return provider.provides(Path.of(path, VALUE_TARGET));
+            }
+
+        };
+    }
 
     default boolean hasValue(String path) {
         try {
