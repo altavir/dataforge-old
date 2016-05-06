@@ -167,11 +167,11 @@ public class DFProcess<R> implements Named {
         }
     }
 
-    public <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
+    <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
         return addChild(Name.of(childName), future);
     }
 
-    public <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
+    <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
@@ -197,6 +197,7 @@ public class DFProcess<R> implements Named {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
+        
         DFProcess childProcess = new DFProcess(getManager(), Name.join(getName(), childName).toString());
         getManager().onProcessStarted(childProcess.getName());
         if (future != null) {
@@ -269,20 +270,30 @@ public class DFProcess<R> implements Named {
      * @param progress
      * @param maxProgress
      */
-    public void setProgress(double progress, double maxProgress) {
+    public void setProgress(double progress) {
         this.curProgress.set(progress);
+    }
+
+    public void setMaxProgress(double maxProgress) {
         this.curMaxProgress.set(maxProgress);
     }
 
     /**
-     * Change progress values by given values
+     * Increase progress by given value
      *
      * @param incProgress
      * @param incMaxProgress
      */
-    public void increaseProgress(double incProgress, double incMaxProgress) {
+    public void increaseProgress(double incProgress) {
         this.curProgress.set(this.curProgress.get() + incProgress);
-        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
+//        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
+    }
+    
+    /**
+     * Set current progress to max progress.
+     */
+    public void setProgressToMax(){
+        this.curProgress.set(this.curMaxProgress.get());
     }
 
     /**

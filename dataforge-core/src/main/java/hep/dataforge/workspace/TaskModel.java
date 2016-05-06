@@ -5,12 +5,18 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.context.ProcessManager;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
+import java.util.Collection;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 /**
  *
@@ -22,6 +28,7 @@ public class TaskModel implements Named, Annotated {
     private Meta taskMeta;
     private Set<DataDep> dataDeps = new HashSet<>();
     private Set<TaskDep> taskDeps = new HashSet<>();
+    private Set<TaskOutput> outs = new LinkedHashSet<>();
 
     public TaskModel(String taskName, Meta taskMeta) {
         this.taskName = taskName;
@@ -37,12 +44,20 @@ public class TaskModel implements Named, Annotated {
     }
 
     /**
-     * Configuration of report actions. Could be empty
+     * Configuration of accept actions. Could be empty
      *
      * @return
      */
-    public List<? extends Meta> reports() {
-        return meta().getNodes("report");
+    public Collection<TaskOutput> outs() {
+        return outs;
+    }
+
+    public TaskOutput out(BiConsumer<Context, TaskState> consumer) {
+        TaskOutput out = (ProcessManager.Callback callback, Context context, TaskState state) -> {
+            callback.getManager().post(callback.processName() + ".output", () -> consumer.accept(context, state));
+        };
+        this.outs.add(out);
+        return out;
     }
 
     @Override
@@ -66,13 +81,12 @@ public class TaskModel implements Named, Annotated {
     public void dependsOnData(String dataPath, String as) {
         this.dataDeps.add(new DataDep(dataPath, as));
     }
-    
+
     public void dependsOnData(String dataPath) {
         this.dataDeps.add(new DataDep(dataPath, dataPath));
     }
-    
-    //TODO make meta configurable
 
+    //TODO make meta configurable
     public static class DataDep {
 
         String path;
@@ -131,5 +145,10 @@ public class TaskModel implements Named, Annotated {
         public String as() {
             return as;
         }
+    }
+
+    public interface TaskOutput {
+
+        void accept(ProcessManager.Callback callback, Context context, TaskState state);
     }
 }

@@ -44,7 +44,11 @@ import org.slf4j.LoggerFactory;
 public class GlobalContext extends Context {
 
     private static final GlobalContext instance = new GlobalContext();
-    private static Set<Context> contexts = new HashSet<>();
+    private static final Set<Context> contexts = new HashSet<>();
+    
+    static{
+        contexts.add(instance());
+    }
 
     public static GlobalContext instance() {
         return instance;
@@ -85,7 +89,6 @@ public class GlobalContext extends Context {
         actions.registerAction(TransformTableAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
-        putContext(this);
     }
 
     @Override

@@ -22,6 +22,8 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import java.util.Collections;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -69,8 +71,8 @@ public abstract class GenericTask<T> implements Task<T> {
                 .thenCompose((TaskState state) -> manager.<DataNode<T>>post(Name.join(taskProcess.getName(), "result").toString(),
                         callback -> {
                             getLogger().info("Starting report phase");
-                            model.reports().stream().forEach((reportMeta) -> {
-                                report(callback, workspace.getContext(), state, reportMeta);
+                            model.outs().forEach(reporter -> {
+                                reporter.accept(callback, workspace.getContext(), state);
                             });
                             getLogger().info("Starting result phase");
                             return result(callback, workspace, state, model);
@@ -100,18 +102,18 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @param config
      */
-    protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta configuration);
+    protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config);
 
-    /**
-     * Reporting task results. No change of state is allowed.
-     *
-     * @param executor
-     * @param state
-     * @param config
-     */
-    protected void report(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
-
-    }
+//    /**
+//     * Reporting task results. No change of state is allowed.
+//     *
+//     * @param executor
+//     * @param state
+//     * @param config
+//     */
+//    protected void accept(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
+//
+//    }
 
     /**
      * Generating finish and storing it in workspace.
@@ -126,6 +128,34 @@ public abstract class GenericTask<T> implements Task<T> {
     protected DataNode<T> result(ProcessManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
         workspace.updateStage(getName(), state.getResult());
         return state.getResult();
+    }
+
+    @Override
+    public TaskModel generateModel(Workspace workspace, Meta modelMeta, Meta... dataModels) {
+        TaskModel model = new TaskModel(getName(), modelMeta);
+
+        for (Meta dataModel : dataModels) {
+            dataModel.getNodes("data").stream().forEach((dataElement) -> {
+                String dataPath = dataElement.getString("path");
+                model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
+            });
+
+//            dataModel.getNodes("task").stream().forEach((taskElement) -> {
+//                String depTask = taskElement.getString("name");
+//                List<Meta> depMeta;
+//                if (taskElement.hasNode("meta")) {
+//                    if (taskElement.hasValue("meta.from")) {
+//                        depMeta = Collections.singletonList(workspace.getMeta(taskElement.getString("meta.from")));
+//                    } else {
+//                        depMeta = taskElement.getNode("meta");
+//                    }
+//                } else {
+//                    depMeta = null;
+//                }
+//                model.dependsOn(generateModel(workspace, depTask, depMeta), taskElement.getString("as", depTask));
+//            });
+        }
+        return model;
     }
 
 }

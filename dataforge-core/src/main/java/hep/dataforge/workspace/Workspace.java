@@ -47,6 +47,8 @@ public interface Workspace extends Encapsulated, MetaProvider {
     default Data getData(String dataPath) {
         return getDataStage().getData(dataPath);
     }
+    
+    
 
     /**
      * Get the whole data tree
@@ -77,7 +79,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default <T> DataNode<T> runTask(String taskName, Meta config) {
-        return this.<T>getTask(taskName).run(this, generateModel(taskName, config));
+        return this.<T>getTask(taskName).run(this, config);
     }
 
     default <T> DataNode<T> runTask(TaskModel model) {
@@ -102,17 +104,6 @@ public interface Workspace extends Encapsulated, MetaProvider {
     @Override
     Meta getMeta(String name);
 
-    /**
-     * Generate a taskModel for given task configuration
-     *
-     * @param config
-     * @return
-     */
-    TaskModel generateModel(String taskName, Meta taskMeta, Meta dependencies);
-
-    default TaskModel generateModel(String taskName, Meta taskMeta) {
-        return generateModel(taskName, taskMeta, taskMeta.getNode("gather", Meta.empty()));
-    }
 
     /**
      * Build an input data node for task based on the taskModel using all

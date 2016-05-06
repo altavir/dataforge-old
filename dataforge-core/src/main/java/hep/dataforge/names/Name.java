@@ -83,19 +83,21 @@ public interface Name {
     public static Name join(String... segments) {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String segment : segments) {
-            Name segmentName = of(segment);
-            if (segmentName instanceof NameToken) {
-                list.add((NameToken) segmentName);
-            } else {
-                list.addAll(((NamePath) segmentName).getNames());
+            if (!segment.isEmpty()) {
+                Name segmentName = of(segment);
+                if (segmentName instanceof NameToken) {
+                    list.add((NameToken) segmentName);
+                } else {
+                    list.addAll(((NamePath) segmentName).getNames());
+                }
             }
         }
         return new NamePath(list);
     }
-    
+
     public static String joinString(String... segments) {
         return join(segments).toString();
-    }    
+    }
 
     public static Name join(Name... segments) {
         LinkedList<NameToken> list = new LinkedList<>();

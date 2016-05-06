@@ -40,7 +40,7 @@ public class ProcessManager implements Encapsulated {
     public void setContext(Context context) {
         this.context = context;
         if (context.getParent() == null) {
-            rootProcess = new DFProcess(this, context.getName());
+            rootProcess = new DFProcess(this, "");
         } else {
             rootProcess = context.getParent().processManager.getRootProcess().addChild(context.getName(), null);
         }
@@ -70,7 +70,7 @@ public class ProcessManager implements Encapsulated {
             post(Name.join(processName).toString(), command);
         };
     }
-    
+
     /**
      * Post a runnable to the process manager as a started process
      *
@@ -107,10 +107,11 @@ public class ProcessManager implements Encapsulated {
 
     /**
      * WARNING. Task comes with its own executor
+     *
      * @param <U>
      * @param processName
      * @param task
-     * @return 
+     * @return
      */
     public synchronized <U> DFProcess<U> post(String processName, CompletableFuture<U> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
@@ -158,6 +159,7 @@ public class ProcessManager implements Encapsulated {
      */
     protected void onProcessFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
+        updateProcess(processName, p-> p.setProgressToMax());
         synchronized (this) {
             if (rootProcess.isDone() && executor != null) {
                 executor.shutdown();
@@ -189,35 +191,42 @@ public class ProcessManager implements Encapsulated {
         getContext().getLogger().debug("Process '{}' produced a result: {}", processName, result);
     }
 
-    /**
-     * Called externally to notify status change progress for the process
-     *
-     * @param processName
-     * @param progress
-     * @param message
-     */
-    public void updateProgress(String processName, double progress, double maxProgress) {
-        //TODO check calling thread
-        updateProcess(processName, p -> p.setProgress(progress, maxProgress));
-    }
+//    /**
+//     * Called externally to notify status change progress for the process
+//     *
+//     * @param processName
+//     * @param progress
+//     * @param message
+//     */
+//    public void updateProgress(String processName, double progress, double maxProgress) {
+//        //TODO check calling thread
+//        updateProcess(processName, p -> {
+//            p.setProgress(progress);
+//            p.setMaxProgress(maxProgress);
+//        });
+//    }
+//
+//    public void setProgressToMax(String processName) {
+//        updateProcess(processName, p -> p.setProgressToMax());
+//    }
+//
+//    /**
+//     * Called externally to notify status change message for the process
+//     *
+//     * @param processName
+//     * @param progress
+//     * @param message
+//     */
+//    public void updateMessage(String processName, String message) {
+//        //TODO check calling thread
+//        updateProcess(processName, p -> p.setMessage(message));
+//    }
+//
+//    public void updateTitle(String processName, String title) {
+//        updateProcess(processName, p -> p.setTitle(title));
+//    }
 
-    /**
-     * Called externally to notify status change message for the process
-     *
-     * @param processName
-     * @param progress
-     * @param message
-     */
-    public void updateMessage(String processName, String message) {
-        //TODO check calling thread
-        updateProcess(processName, p -> p.setMessage(message));
-    }
-
-    public void updateTitle(String processName, String title) {
-        updateProcess(processName, p -> p.setTitle(title));
-    }
-
-    private void updateProcess(String processName, Consumer<DFProcess> consumer) {
+    private synchronized void updateProcess(String processName, Consumer<DFProcess> consumer) {
         DFProcess p = rootProcess.findProcess(processName);
         if (p != null) {
             consumer.accept(p);
@@ -270,20 +279,28 @@ public class ProcessManager implements Encapsulated {
             getManager().updateProcess(processName(), consumer);
         }
 
-        public void updateProgress(double progress, double maxProgress) {
-            getManager().updateProgress(processName(), progress, maxProgress);
+        public void setProgress(double progress) {
+            updateProcess(p -> p.setProgress(progress));
         }
 
-        public void changeProgress(double incProgress, double incMaxProgress) {
-            updateProcess(p -> p.increaseProgress(incProgress, incMaxProgress));
+        public void setProgressToMax() {
+            updateProcess(p -> p.setProgressToMax());
+        }        
+        
+        public void setMaxProgress(double progress) {
+            updateProcess(p -> p.setMaxProgress(progress));
         }
 
-        public void updateTitle(String message) {
-            getManager().updateTitle(processName(), message);
+        public void increaseProgress(double incProgress) {
+            updateProcess(p -> p.increaseProgress(incProgress));
+        }
+
+        public void updateTitle(String title) {
+            updateProcess(p -> p.setTitle(title));
         }
 
         public void updateMessage(String message) {
-            getManager().updateMessage(processName(), message);
+            updateProcess(p -> p.setMessage(message));
         }
 
     }

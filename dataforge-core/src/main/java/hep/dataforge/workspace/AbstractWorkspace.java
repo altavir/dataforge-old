@@ -41,30 +41,6 @@ public abstract class AbstractWorkspace implements Workspace {
         this.context = context;
     }
 
-    @Override
-    public TaskModel generateModel(String taskName, Meta taskMeta, Meta dependencies) {
-        TaskModel model = new TaskModel(taskName, taskMeta);
-        dependencies.getNodes("data").stream().forEach((dataElement) -> {
-            String dataPath = dataElement.getString("path");
-            model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
-        });
-
-        dependencies.getNodes("task").stream().forEach((taskElement) -> {
-            String depTask = taskElement.getString("name");
-            Meta depMeta;
-            if (taskElement.hasNode("meta")) {
-                if (taskElement.hasValue("meta.from")) {
-                    depMeta = getMeta(taskElement.getString("meta.from"));
-                } else {
-                    depMeta = taskElement.getNode("meta");
-                }
-            } else {
-                depMeta = null;
-            }
-            model.dependsOn(generateModel(depTask, depMeta), taskElement.getString("as", depTask));
-        });
-        return model;
-    }
 
 //    /**
 //     * Gathering of dependencies from workspace
@@ -122,14 +98,14 @@ public abstract class AbstractWorkspace implements Workspace {
     @Override
     public DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model) {
         DataTree.Builder builder = DataTree.builder();
-        callback.updateProgress(0, model.taskDeps().size() + model.dataDeps().size());
+        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
         model.taskDeps().forEach(dep -> {
             builder.putNode(dep.as(), runTask(dep.taskModel()));
-            callback.changeProgress(1, 0);
+            callback.increaseProgress(1);
         });
         model.dataDeps().forEach(dep -> {
             builder.putData(dep.as(), getData(dep.path()));
-            callback.changeProgress(1, 0);
+            callback.increaseProgress(1);
         });
         return builder;
     }

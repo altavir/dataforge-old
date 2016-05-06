@@ -16,6 +16,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
 /**
@@ -28,4 +29,9 @@ public interface Task<R> extends Named {
 
     DataNode<R> run(Workspace workspace, TaskModel model);
 
+    TaskModel generateModel(Workspace workspace, Meta modelMeta, Meta... dataModel);
+
+    default DataNode<R> run(Workspace workspace, Meta modelMeta, Meta... dataModel) {
+        return run(workspace, generateModel(workspace, modelMeta, dataModel));
+    }
 }
