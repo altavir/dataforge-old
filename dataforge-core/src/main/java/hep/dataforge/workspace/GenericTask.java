@@ -22,7 +22,7 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
@@ -104,17 +104,6 @@ public abstract class GenericTask<T> implements Task<T> {
      */
     protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config);
 
-//    /**
-//     * Reporting task results. No change of state is allowed.
-//     *
-//     * @param executor
-//     * @param state
-//     * @param config
-//     */
-//    protected void accept(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
-//
-//    }
-
     /**
      * Generating finish and storing it in workspace.
      *
@@ -131,31 +120,45 @@ public abstract class GenericTask<T> implements Task<T> {
     }
 
     @Override
-    public TaskModel generateModel(Workspace workspace, Meta modelMeta, Meta... dataModels) {
-        TaskModel model = new TaskModel(getName(), modelMeta);
+    public TaskModel generateModel(Workspace workspace, Meta taskMeta, Meta... dataModels) {
+        TaskModel model = new TaskModel(getName(), taskMeta);
 
-        for (Meta dataModel : dataModels) {
+        List<Meta> dataModelList = Arrays.asList(dataModels);
+        // Use @gather node for data construction
+        if (taskMeta.hasNode(GATHER_NODE_NAME)) {
+            dataModelList.add(taskMeta.getNode(GATHER_NODE_NAME));
+        }
+
+        applyDataModels(workspace, model, dataModelList);
+
+        return model;
+    }
+
+    /**
+     * Construct task dependencies using given data models. Could be overridden.
+     *
+     * @param workspace
+     * @param model
+     * @param dataModelList
+     */
+    protected void applyDataModels(Workspace workspace, TaskModel model, List<Meta> dataModelList) {
+
+        for (Meta dataModel : dataModelList) {
+            //Iterating over direct data dependancies
+            //PENDING replace by DataFactory for unification?
             dataModel.getNodes("data").stream().forEach((dataElement) -> {
-                String dataPath = dataElement.getString("path");
+                String dataPath = dataElement.getString("name");
                 model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
             });
 
-//            dataModel.getNodes("task").stream().forEach((taskElement) -> {
-//                String depTask = taskElement.getString("name");
-//                List<Meta> depMeta;
-//                if (taskElement.hasNode("meta")) {
-//                    if (taskElement.hasValue("meta.from")) {
-//                        depMeta = Collections.singletonList(workspace.getMeta(taskElement.getString("meta.from")));
-//                    } else {
-//                        depMeta = taskElement.getNode("meta");
-//                    }
-//                } else {
-//                    depMeta = null;
-//                }
-//                model.dependsOn(generateModel(workspace, depTask, depMeta), taskElement.getString("as", depTask));
-//            });
+            //Iterating over task dependancies
+            dataModel.getNodes("task").stream().forEach((taskElement) -> {
+                String taskName = taskElement.getString("name");
+                Task task = workspace.getTask(taskName);
+                //Building model with default data construction
+                model.dependsOn(task.generateModel(workspace, taskElement), taskElement.getString("as", taskName));
+            });
         }
-        return model;
     }
 
 }

@@ -152,7 +152,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
         this.plot = plot;
         plotPane.getChildren().retainAll(optionsPannelButton);
         this.plot.display(plotPane);
-        plottableslList.setItems(plot.getAll());
+        plottableslList.setItems(plot.plottables());
     }
 
     protected void setupOptions() {
@@ -189,7 +189,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
     @FXML
     private void onFrameOptionsClick(ActionEvent event) {
         if (plot != null) {
-            displayConfigurator("Plot frame configuration: " + plot.getName(),
+            displayConfigurator("Plot frame configuration",
                     plot.getConfig(), DescriptorUtils.buildDescriptor(plot));
         }
     }

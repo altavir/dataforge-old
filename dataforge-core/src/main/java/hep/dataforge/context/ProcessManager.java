@@ -42,7 +42,7 @@ public class ProcessManager implements Encapsulated {
         if (context.getParent() == null) {
             rootProcess = new DFProcess(this, "");
         } else {
-            rootProcess = context.getParent().processManager.getRootProcess().addChild(context.getName(), null);
+            rootProcess = context.getParent().processManager().getRootProcess().addChild(context.getName(), null);
         }
     }
 
@@ -159,7 +159,7 @@ public class ProcessManager implements Encapsulated {
      */
     protected void onProcessFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
-        updateProcess(processName, p-> p.setProgressToMax());
+        updateProcess(processName, p -> p.setProgressToMax());
         synchronized (this) {
             if (rootProcess.isDone() && executor != null) {
                 executor.shutdown();
@@ -225,7 +225,6 @@ public class ProcessManager implements Encapsulated {
 //    public void updateTitle(String processName, String title) {
 //        updateProcess(processName, p -> p.setTitle(title));
 //    }
-
     private synchronized void updateProcess(String processName, Consumer<DFProcess> consumer) {
         DFProcess p = rootProcess.findProcess(processName);
         if (p != null) {
@@ -247,7 +246,9 @@ public class ProcessManager implements Encapsulated {
     }
 
     public void cleanup() {
-        this.rootProcess.cleanup();
+        if (rootProcess != null) {
+            this.rootProcess.cleanup();
+        }
     }
 
     /**
@@ -285,8 +286,8 @@ public class ProcessManager implements Encapsulated {
 
         public void setProgressToMax() {
             updateProcess(p -> p.setProgressToMax());
-        }        
-        
+        }
+
         public void setMaxProgress(double progress) {
             updateProcess(p -> p.setMaxProgress(progress));
         }

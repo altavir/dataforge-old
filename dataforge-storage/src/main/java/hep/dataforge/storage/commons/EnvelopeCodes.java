@@ -22,20 +22,17 @@ package hep.dataforge.storage.commons;
 public class EnvelopeCodes {
 
     //Container types
-    /**
-     * Java Serialization object wrapper
-     */
-    public static final short JAVA_SERIALIZATION_ENVELOPE_CODE = 64;
+
 
     /**
      * A DataForge system message type
      */
-    public static final short DATAFORGE_MESSAGE_ENVELOPE_CODE = 33;
+    public static final short DATAFORGE_MESSAGE_ENVELOPE_CODE = 0x4d45;
 
     /**
      * A DataForge permanent storage type
      */
-    public static final short DATAFORGE_STORAGE_ENVELOPE_CODE = 43;
+    public static final short DATAFORGE_STORAGE_ENVELOPE_CODE = 0x5354;
 
     //Storage loader data types
     public static final int LOADER_TYPE_CODE = 0x00004C4F;//xxLO

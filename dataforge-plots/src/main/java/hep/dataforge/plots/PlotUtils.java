@@ -75,4 +75,9 @@ public class PlotUtils {
                 .setValue("type", type);
         frame.getConfig().setNode(builder);
     }
+    
+    public static void setTitle(PlotFrame frame, String title){
+        frame.configureValue("title", title);
+    }
+    
 }

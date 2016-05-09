@@ -105,15 +105,15 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         frame.add(PlottableData.plot(name, meta, input, adapter));
 
         if (meta.hasNode("snapshot")) {
-            snapshot(context, log, frame, meta.getNode("snapshot"));
+            snapshot(context, name, frame, meta.getNode("snapshot"));
         } else if (meta.getBoolean("snapshot", false)) {
-            snapshot(context, log, frame, MetaBuilder.buildEmpty("snapshot"));
+            snapshot(context, name, frame, MetaBuilder.buildEmpty("snapshot"));
         }
 
         if (meta.hasNode("serialize")) {
-            serialize(context, log, frame, meta.getNode("serialize"));
+            serialize(context, name, frame, meta.getNode("serialize"));
         } else if (meta.getBoolean("serialize", false)) {
-            serialize(context, log, frame, MetaBuilder.buildEmpty("serialize"));
+            serialize(context, name, frame, MetaBuilder.buildEmpty("serialize"));
         }
 
         return input;
@@ -135,28 +135,27 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(Context context, Reportable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void snapshot(Context context, String plotName, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
-            String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".png";
+            String fileName = snapshotCfg.getString("name", plotName) + ".png";
             snapshotTasks.put(fileName, () -> {
-                log.report("Saving plot snapshot to file: {}", fileName);
+                logger().info("Saving plot snapshot to file: {}", fileName);
                 OutputStream stream = buildActionOutput(context, fileName);
                 jfcFrame.toPNG(stream, snapshotCfg);
             });
         } else {
-            log.reportError("The plot frame does not provide snapshot capabilities. Ignoring 'snapshot' option.");
-            LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart snapshots are supported.");
+            logger().error("The plot frame does not provide snapshot capabilities. Ignoring 'snapshot' option.");
         }
     }
 
     @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(Context context, Reportable log, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void serialize(Context context, String plotName, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
-            String fileName = snapshotCfg.getString("name", jfcFrame.getName()) + ".jfc";
+            String fileName = snapshotCfg.getString("name", plotName) + ".jfc";
             serializeTasks.put(fileName, () -> {
-                log.report("Saving serialized plot to file: {}", fileName);
+                logger().info("Saving serialized plot to file: {}", fileName);
                 OutputStream stream = buildActionOutput(context, fileName);
                 try {
                     ObjectOutputStream ostr = new ObjectOutputStream(stream);
@@ -167,8 +166,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
             });
 
         } else {
-            log.reportError("The plot frame does not provide serialization capabilities.");
-            LoggerFactory.getLogger(getClass()).error("For the moment only JFreeChart serialization is supported.");
+            logger().error("The plot frame does not provide serialization capabilities.");
         }
     }
 }

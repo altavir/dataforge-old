@@ -42,7 +42,7 @@ public class PlotContainerTest {
     public static void main(String[] args) {
         PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
 
-        JFreeChartFrame frame = new JFreeChartFrame("my plot", null);
+        JFreeChartFrame frame = new JFreeChartFrame();
 
         container.setPlot(frame);
 

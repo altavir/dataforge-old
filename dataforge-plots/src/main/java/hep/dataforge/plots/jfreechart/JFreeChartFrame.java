@@ -136,20 +136,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         };
     }
 
-    public JFreeChartFrame(String name, Meta meta) {
-        super(name);
-        if (meta == null) {
-            meta = Meta.buildEmpty("plot");
-        }
+    public JFreeChartFrame() {
         plot = new XYPlot();
-
-        String title = meta.getString("frameTitle", "");
-
-//        if (title.equals("default")) {
-//            title = "";
-//        }
-        chart = new JFreeChart(title, plot);
-        super.configure(meta);
+        chart = new JFreeChart(plot);
+    }
+    
+    public JFreeChartFrame(Meta frameMeta){
+        this();
+        configure(frameMeta);
     }
 
     @Override
@@ -275,6 +269,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     @Override
     protected synchronized void updateFrame(Meta meta) {
+        this.chart.setTitle(meta.getString("title", ""));
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
 //            Plottable p = get(dataset.getSeriesKey(series).toString());
 //            return p.getConfig().getString("title", p.getName());

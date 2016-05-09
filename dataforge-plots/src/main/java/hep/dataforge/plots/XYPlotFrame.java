@@ -17,6 +17,7 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 
@@ -28,14 +29,6 @@ import hep.dataforge.meta.Meta;
 @NodeDef(name = "yAxis", info = "The description of Y axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
 @NodeDef(name = "legend", info = "The configuration for plot legend", target = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
-
-    public XYPlotFrame(String name, Meta annotation) {
-        super(name, annotation);
-    }
-
-    public XYPlotFrame(String name) {
-        super(name);
-    }
 
     @Override
     protected abstract void updatePlotData(String name);
@@ -87,6 +80,4 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
     @ValueDef(name = "show", type = "BOOLEAN", def = "true", info = "Display or hide the legend")
     protected abstract void updateLegend(Meta legendMeta);
-
-//    protected abstract void updateXYPlot(XYPlottable plottable);
 }

@@ -15,12 +15,23 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.values.CompositePropertyValue;
+import hep.dataforge.values.Value;
+
 /**
  *
  * @author Alexander Nozik
  * @param <T>
  */
 public interface EnvelopeType<T extends Envelope> {
+
+    short getCode();
+
+    String getName();
+
+    default Value getValue() {
+        return new CompositePropertyValue(getCode(), getName());
+    }
 
     String description();
 

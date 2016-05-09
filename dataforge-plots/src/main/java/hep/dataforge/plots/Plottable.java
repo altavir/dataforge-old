@@ -16,6 +16,8 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.names.AnonimousNotAlowed;
@@ -32,7 +34,7 @@ import java.util.Collection;
 @ValueDef(name = "preferedPlotter", def = "jFreeChart", info = "A prefered plotting library. It is used if supported by destination PlotFrame.")
 @ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
-public interface Plottable extends Named, Annotated, Configurable{
+public interface Plottable extends Named, Annotated, Configurable, Wrappable{
 
     /**
      * Данные для рисования.
@@ -52,5 +54,12 @@ public interface Plottable extends Named, Annotated, Configurable{
      * @param listener 
      */
     void removeListener(PlotStateListener listener);
+
+    @Override
+    public default Envelope wrap() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+    
+    
 
 }

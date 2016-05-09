@@ -57,7 +57,8 @@ public class FXPlotUtils {
      */
     public static JFreeChartFrame displayJFreeChart(String title, double width, double height, Meta meta) {
         PlotContainer container = displayContainer(title, width, height);
-        JFreeChartFrame frame = new JFreeChartFrame(title, meta);
+        JFreeChartFrame frame = new JFreeChartFrame(meta);
+        frame.configureValue("title", title);
         container.setPlot(frame);
         return frame;
     }

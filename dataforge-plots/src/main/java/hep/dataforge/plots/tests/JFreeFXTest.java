@@ -42,7 +42,7 @@ public class JFreeFXTest extends Application {
     public void start(Stage primaryStage) {
         AnchorPane root = new AnchorPane();
 
-        JFreeChartFrame frame = new JFreeChartFrame("my plot", null).display(root);
+        JFreeChartFrame frame = new JFreeChartFrame().display(root);
 
         UnivariateFunction func = (double x1) -> x1 * x1;
 

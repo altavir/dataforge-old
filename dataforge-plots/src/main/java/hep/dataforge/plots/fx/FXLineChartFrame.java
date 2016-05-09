@@ -16,7 +16,6 @@
 package hep.dataforge.plots.fx;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
@@ -36,11 +35,11 @@ public class FXLineChartFrame extends XYPlotFrame {
 
     LineChart<Number, Number> chart;
 
-    public FXLineChartFrame(String name, Meta annotation, LineChart<Number, Number> chart) {
-        super(name, annotation);
-        this.chart = chart;
-    }
-
+//    public FXLineChartFrame(String name, Meta annotation, LineChart<Number, Number> chart) {
+//        super.setName(name);
+//        this.chart = chart;
+//        super.configure(annotation);
+//    }
     /**
      * Вставить и растянуть на всю ширину
      *
@@ -48,14 +47,8 @@ public class FXLineChartFrame extends XYPlotFrame {
      * @param pane
      * @param annotation
      */
-    public FXLineChartFrame(String name, Meta annotation, AnchorPane pane) {
-        super(name, annotation);
+    public FXLineChartFrame() {
         this.chart = new LineChart<>(new NumberAxis(), new NumberAxis());
-        AnchorPane.setTopAnchor(chart, 0d);
-        AnchorPane.setBottomAnchor(chart, 0d);
-        AnchorPane.setRightAnchor(chart, 0d);
-        AnchorPane.setLeftAnchor(chart, 0d);
-        pane.getChildren().add(chart);
     }
 
     XYChart.Series<Number, Number> getSeries(String name) {
@@ -97,7 +90,7 @@ public class FXLineChartFrame extends XYPlotFrame {
         }
 
         XYAdapter adapter = plottable.adapter();
-        
+
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();
 
@@ -119,9 +112,13 @@ public class FXLineChartFrame extends XYPlotFrame {
     }
 
     @Override
-    public PlotFrame<XYPlottable> display(AnchorPane container) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public FXLineChartFrame display(AnchorPane container) {
+        AnchorPane.setTopAnchor(chart, 0d);
+        AnchorPane.setBottomAnchor(chart, 0d);
+        AnchorPane.setRightAnchor(chart, 0d);
+        AnchorPane.setLeftAnchor(chart, 0d);
+        container.getChildren().add(chart);
+        return this;
     }
-    
 
 }

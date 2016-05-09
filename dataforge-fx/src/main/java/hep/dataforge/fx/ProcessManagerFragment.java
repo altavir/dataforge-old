@@ -29,6 +29,8 @@ public class ProcessManagerFragment extends FXFragment {
         context.setProcessManager(manager);
         return new ProcessManagerFragment(manager);
     }
+    
+    
 
     public ProcessManagerFragment(FXProcessManager manager) {
         this.manager = manager;

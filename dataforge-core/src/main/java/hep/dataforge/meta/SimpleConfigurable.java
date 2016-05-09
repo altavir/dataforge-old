@@ -139,7 +139,6 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
     public void configure(Meta config) {
         //Check and correct input configuration
         getConfig().update(config);
-
         applyConfig(getConfig());
     }
 }

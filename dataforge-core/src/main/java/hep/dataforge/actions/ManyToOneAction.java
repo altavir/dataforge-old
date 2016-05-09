@@ -88,7 +88,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                 dataNode.putValue("type", data.dataType().getName());
             }
             if (!data.meta().isEmpty()) {
-                dataNode.putNode(DataFactory.DATA_META_KEY, data.meta());
+                dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());
             }
             builder.putNode(dataNode);
         });

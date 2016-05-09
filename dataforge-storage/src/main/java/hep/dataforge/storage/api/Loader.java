@@ -16,10 +16,10 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.io.envelopes.Responder;
-import hep.dataforge.io.envelopes.Target;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Path;
+import hep.dataforge.io.envelopes.Destination;
 
 /**
  * A typed loader.
@@ -27,7 +27,7 @@ import hep.dataforge.navigation.Path;
  *
  * @author Alexander Nozik
  */
-public interface Loader extends Annotated, AutoCloseable, Named, Responder, Target {
+public interface Loader extends Annotated, AutoCloseable, Named, Responder, Destination {
 
     public static final String LOADER_NAME_KEY = "name";
     public static final String LOADER_TYPE_KEY = "type";

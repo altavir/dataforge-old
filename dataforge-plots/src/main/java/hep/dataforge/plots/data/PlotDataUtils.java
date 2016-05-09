@@ -27,7 +27,7 @@ import java.util.stream.Collectors;
 public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
-        List<XYPlottable> plottables = new ArrayList<>(frame.getAll());
+        List<XYPlottable> plottables = new ArrayList<>(frame.plottables());
 
         if (visibleOnly) {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());

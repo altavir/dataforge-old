@@ -13,12 +13,12 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public interface Target {
-
+public interface Destination {
+    //TODO remove or revise
     public static final String TARGET_NAME_KEY = "name";
     public static final String TARGET_TYPE_KEY = "type";
 
-    public static final String ENVELOPE_TARGET_NODE = "target";
+    public static final String ENVELOPE_DESTINATION_NODE = "destination";
 
     /**
      * Get a target meta designation for this target
@@ -27,18 +27,18 @@ public interface Target {
      */
     @ValueDef(name = "type")
     @ValueDef(name = "name")
-    public Meta targetDescription();
+    public Meta destinationMeta();
 
     /**
      * Check if this target for given envelope. By default envelope is accepted
      * if target information in the envelope meta is missing or if target meta
-     * equals the one provided by {@code targetDescription} method.
+     * equals the one provided by {@code destinationMeta} method.
      *
      * @param env
      * @return
      */
     default boolean acceptEnvelope(Envelope env) {
-        return !env.meta().hasNode(ENVELOPE_TARGET_NODE)
-                || env.meta().getNode(ENVELOPE_TARGET_NODE).equals(targetDescription());
+        return !env.meta().hasNode(ENVELOPE_DESTINATION_NODE)
+                || env.meta().getNode(ENVELOPE_DESTINATION_NODE).equals(destinationMeta());
     }
 }

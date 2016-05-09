@@ -76,6 +76,12 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     Stream<Pair<String, Data<? extends T>>> dataStream();
+    
+    /**
+     * Named recursive node stream
+     * @return 
+     */
+    Stream<Pair<String, DataNode<? extends T>>> nodeStream();
 
     /**
      * Get border type for this DataNode
@@ -136,6 +142,10 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
         B putData(String key, Data<? extends T> data);
         
         B putNode(String as, DataNode<? extends T> node);
+        
+        B removeNode(String nodeName);
+        
+        B removeData(String dataName);
         
         default B putNode(DataNode<? extends T> node){
             return putNode(node.getName(), node);

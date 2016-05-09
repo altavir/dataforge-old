@@ -26,6 +26,10 @@ import hep.dataforge.names.Named;
  * @param <T>
  */
 public interface Task<R> extends Named {
+    /**
+     * A meta node that is used to add additional dependencies to the task manually
+     */
+    public static final String GATHER_NODE_NAME = "@gather";
 
     DataNode<R> run(Workspace workspace, TaskModel model);
 

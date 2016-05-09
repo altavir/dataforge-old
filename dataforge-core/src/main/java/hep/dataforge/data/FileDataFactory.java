@@ -18,7 +18,7 @@ import java.util.List;
 
 @NodeDef(name = "file", info = "File data element or list of files with the same meta defined by mask.")
 @NodeDef(name = "dir", info = "Directory data node.")
-public class FileDataFactory extends DataFactory {
+public class FileDataFactory extends DataFactory<Binary> {
 
     public static final String FILE_NODE = "file";
     public static final String FILE_MASK_NODE = "files";
@@ -28,8 +28,15 @@ public class FileDataFactory extends DataFactory {
     public static final String FILE_NAME_KEY = "fileName";
     public static final String FILE_PATH_KEY = "filePath";
 
+    public FileDataFactory() {
+        super(Binary.class);
+    }
+    
+    
+
     @Override
-    protected void buildChildren(Context context, DataTree.Builder builder, Meta dataConfig) {
+    protected void buildChildren(Context context, DataTree.Builder<Binary> builder, DataFilter filter, Meta dataConfig) {
+        //FIXME add filtering here
         File parentFile;
         if (dataConfig.hasNode(DATA_DIR_KEY)) {
             parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
@@ -47,10 +54,10 @@ public class FileDataFactory extends DataFactory {
             dataConfig.getNodes(DIRECTORY_NODE).forEach((node) -> addDir(context, builder, parentFile, node));
         }
 
-        if (dataConfig.hasValue("file")) {
-            Value fileValue = dataConfig.getValue("file");
+        if (dataConfig.hasValue(FILE_NODE)) {
+            Value fileValue = dataConfig.getValue(FILE_NODE);
             fileValue.listValue().stream().forEach((fileName) -> {
-                addFile(context, builder, parentFile, new MetaBuilder("file")
+                addFile(context, builder, parentFile, new MetaBuilder(FILE_NODE)
                         .putValue("path", fileName));
             });
         }
@@ -76,17 +83,17 @@ public class FileDataFactory extends DataFactory {
      * @param parentFile
      * @param fileNode
      */
-    private void addFile(Context context, DataTree.Builder builder, File parentFile, Meta fileNode) {
+    private void addFile(Context context, DataTree.Builder<Binary> builder, File parentFile, Meta fileNode) {
         List<File> files = listFiles(context, parentFile, fileNode);
         if (files.isEmpty()) {
             context.getLogger().warn("No files matching the filter: " + fileNode.toString());
         } else if (files.size() == 1) {
             File file = files.get(0);
-            Meta fileMeta = fileNode.hasNode(DATA_META_KEY) ? fileNode.getNode(DATA_META_KEY) : Meta.empty();
+            Meta fileMeta = fileNode.hasNode(NODE_META_KEY) ? fileNode.getNode(NODE_META_KEY) : Meta.empty();
             builder.putData(fileName(file), buildFileData(file, fileMeta));
         } else {
             files.forEach(file -> {
-                Meta fileMeta = fileNode.hasNode(DATA_META_KEY) ? fileNode.getNode(DATA_META_KEY) : Meta.empty();
+                Meta fileMeta = fileNode.hasNode(NODE_META_KEY) ? fileNode.getNode(NODE_META_KEY) : Meta.empty();
                 builder.putData(fileName(file), buildFileData(file, fileMeta));
             });
         }
@@ -103,12 +110,12 @@ public class FileDataFactory extends DataFactory {
 
     }
 
-    private void addDir(Context context, final DataTree.Builder builder, File parentFile, Meta dirNode) {
-        DataTree.Builder dirBuilder = DataTree.builder(File.class);
+    private void addDir(Context context, final DataTree.Builder<Binary> builder, File parentFile, Meta dirNode) {
+        DataTree.Builder<Binary> dirBuilder = DataTree.builder(Binary.class);
         File dir = new File(parentFile, dirNode.getString("path"));
         dirBuilder.setName(dirNode.getString(NODE_NAME_KEY, dirNode.getName()));
-        if (dirNode.hasNode(DATA_META_KEY)) {
-            dirBuilder.setMeta(dirNode.getNode(DATA_META_KEY));
+        if (dirNode.hasNode(NODE_META_KEY)) {
+            dirBuilder.setMeta(dirNode.getNode(NODE_META_KEY));
         }
 
         boolean recurse = dirNode.getBoolean("recursive", true);
@@ -125,109 +132,4 @@ public class FileDataFactory extends DataFactory {
 
     }
 
-//        public static final String DATA_DIR = "dataDir";
-//    public static final String DATA_ELEMENT = "data";
-//    public static final String GROUP_TAG = "dataGroup";
-//    public static final String FILE_META = "meta";
-//    @ValueDef(name = "dataDir", info = "The absolute or relative path to the data directory. By default is taken from Context.")
-//    @NodeDef(name = "file", multiple = true, info = "Single file or multiple files imported by mask with the same metadata", target = "method::hep.dataforge.data.FileData.buildByMask")
-//    @NodeDef(name = "group", multiple = true, info = "The group of data with same metadata. The metadata is provided by 'meta' element. It is possible to combine multiple subgroups (in this case metatadata is merged).")
-//    public DataNode<FileData> read(Meta an) throws IOException, ContentException, ParseException {
-//        File parentDir = getContext().io().getRootDirectory();
-//
-//        if (an.hasValue(DATA_DIR) || getContext().hasValue(DATA_DIR)) {
-//            parentDir = getContext().io().getFile(an.getString(DATA_DIR, getContext().getString(DATA_DIR)));
-//        }
-//
-//        return new ContentList<>("data", readDataConfiguration(parentDir, an));
-//    }
-//
-//    private DataNode readDataConfiguration(File parentDir, Meta ds) throws IOException, ContentException, ParseException {
-//        assert parentDir.exists() && parentDir.isDirectory();
-//        List<Data> res = new ArrayList<>();
-//
-//        if (ds.hasNode("file")) {
-//            List<? extends Meta> fileMaskAnnotations = ds.getNodes("file");
-//            for (Meta sourceCfg : fileMaskAnnotations) {
-//                res.addAll(FileData.buildByMask(parentDir, sourceCfg));
-//            }
-//        }
-//
-//        if (ds.hasValue("file")) {
-//            List<Value> fileMasks = ds.getValue("file").listValue();
-//            for (Value val : fileMasks) {
-//                res.addAll(FileData.buildFromString(parentDir, val.stringValue()));
-//            }
-//        }
-//
-//        //набор данных с одинаковыми параметрами
-//        if (ds.hasNode("group")) {
-//            List<? extends Meta> groupAnnotations = ds.getNodes("group");
-//            for (Meta an : groupAnnotations) {
-//                List<FileData> list = readDataConfiguration(parentDir, an);
-//                list.dataStream().<Data>map((d) -> {
-//                    // Обновляем аннотацию файла. Основной считаем аннотацию файла, а не контейнера
-//
-//                    //FIXME сделать тут добавление группового тэга во всевложенные аннотации
-//                    if (an.hasNode(FILE_META)) {
-//                        Meta fileMeta = an.getNode(FILE_META);
-//                        d.setMeta(MergeRule.replace(d.meta(), fileMeta));
-//                    }
-//                    return d;
-//                }).forEach((d) -> {
-//                    res.add(d);
-//                });
-//            }
-//
-//        }
-//
-//        if (ds.hasNode(SourceSetLoader.SOURCE_SET)) {
-//            for (Meta an : ds.getNodes(SourceSetLoader.SOURCE_SET)) {
-//                String path = an.getString("path", "sourcesets.xml");
-//                String tag = an.getString("tag");
-//                SourceSetLoader loader;
-//                try {
-//                    loader = SourceSetLoader.loadFromFile(getContext(), path);
-//                } catch (InterruptedException ex) {
-//                    throw new ContentException("Can't load data from sourse set file", ex);
-//                }
-//                Object sourceSet = loader.getSourceSet(tag);
-//                if (sourceSet instanceof NamedGroup) {
-//                    res.addAll(((NamedGroup) sourceSet).asList());
-//                } else {
-//                    res.add((FileData) sourceSet);
-//                }
-//
-//            }
-//        }
-//
-//        return res;
-//    }
-//
-//    public DataNode readFromConfig(Meta dataConfiguration) throws ContentException {
-//        if (dataConfiguration.hasNode(DATA_ELEMENT)) {
-//            dataConfiguration = dataConfiguration.getNode(DATA_ELEMENT);
-//        }
-//
-//        File parentDir = getContext().io().getRootDirectory();
-//
-//        if (dataConfiguration.hasValue(DATA_DIR) || getContext().hasValue(DATA_DIR)) {
-//            parentDir = getContext().io().getFile(dataConfiguration.getString(DATA_DIR, getContext().getString(DATA_DIR)));
-//        }
-//
-//        try {
-//            
-//            //FIXME revise data holders
-//            List<FileData> res = readDataConfiguration(parentDir, dataConfiguration);
-//            res.dataStream().forEach((d) -> {
-//                getContext().report("Importing file {}", d.getInputFile().getName());
-//            });
-//            return DataSet.builder(FileData.class)
-//                    .putAll(res)
-//                    .build();
-//
-//        } catch (IOException | ParseException ex) {
-//            throw new ContentException("File not found");
-//        }
-//    }    
 }

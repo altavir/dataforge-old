@@ -94,7 +94,7 @@ public class TableFormat implements Annotated, NameSetContainer {
         for (String name : point.namesAsArray()) {
             meta.putNode(new MetaBuilder("column")
                     .setValue("name", name)
-                    .setValue("type", point.getValue(name).valueType()));
+                    .setValue("type", point.getValue(name).valueType().name()));
         }
         return new TableFormat(meta);
     }

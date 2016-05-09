@@ -69,15 +69,15 @@ public class EnvelopeProperties {
         }
     }
 
-    public static MetaType getType(String name) {
-        return getType(Value.of(name));
+    public static MetaType getMetaType(String name) {
+        return EnvelopeProperties.getMetaType(Value.of(name));
     }
 
-    public static MetaType getType(short code) {
-        return getType(Value.of(code));
+    public static MetaType getMetaType(short code) {
+        return EnvelopeProperties.getMetaType(Value.of(code));
     }
 
-    public static MetaType getType(Value val) {
+    public static MetaType getMetaType(Value val) {
         for (MetaType mt : loader) {
             if (mt.getValue().equals(val)) {
                 return mt;

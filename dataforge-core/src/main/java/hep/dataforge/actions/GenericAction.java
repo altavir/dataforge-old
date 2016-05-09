@@ -66,7 +66,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     }
 
     protected void checkInput(DataNode input) {
-        if (!getInputType().isAssignableFrom(input.getClass())) {
+        if (!getInputType().isAssignableFrom(input.type())) {
             throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
                     getName(), getInputType().getName(), input.type().getName()));
         }
@@ -111,11 +111,13 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         }
     }
 
+    @Override
     public Action<T,R> withLogger(Logger logger) {
         this.logger = logger;
         return this;
     }
 
+    @Override
     public Action<T,R> withParentProcess(String parentProcessName) {
         this.parentProcessName = parentProcessName;
         return this;

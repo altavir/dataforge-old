@@ -34,6 +34,10 @@ public abstract class FXFragment implements AutoCloseable {
         this.owner = () -> window;
     }
 
+    public void setOwner(Window owner) {
+        this.owner = () -> owner;
+    }
+
     /**
      * Bind this window showing to some observable value
      *

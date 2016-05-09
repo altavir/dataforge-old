@@ -8,6 +8,7 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.DataTree;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
 import java.util.Map;
@@ -24,6 +25,9 @@ public abstract class AbstractWorkspace implements Workspace {
 
     @Override
     public <T> Task<T> getTask(String taskName) {
+        if(! tasks.containsKey(taskName)){
+            throw new NameNotFoundException(taskName);
+        }
         return tasks.get(taskName);
     }
 

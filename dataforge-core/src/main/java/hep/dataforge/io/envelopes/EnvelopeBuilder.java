@@ -105,7 +105,7 @@ public class EnvelopeBuilder {
     }    
 
     public EnvelopeBuilder setMetaType(String metaType) {
-        Value metaTypeValue = EnvelopeProperties.getType(metaType).getValue();
+        Value metaTypeValue = EnvelopeProperties.getMetaType(metaType).getValue();
         return setProperty(META_TYPE_KEY, metaTypeValue);
     }
 
@@ -133,11 +133,15 @@ public class EnvelopeBuilder {
 //        return setProperty(MESSAGE_PRIORITY_KEY, priority);
 //    }
     
+    public EnvelopeBuilder setEnvelopeType(EnvelopeType type){
+        return this.setProperty(TYPE_KEY, type.getValue());
+    }
+    
     public EnvelopeBuilder setEnvelopeType(String type){
         return this.setProperty(TYPE_KEY, type);
     }
     
-    public EnvelopeBuilder setEnvelopeType(int type){
+    public EnvelopeBuilder setEnvelopeType(short type){
         return this.setProperty(TYPE_KEY, type);
     }    
     
@@ -149,9 +153,9 @@ public class EnvelopeBuilder {
         return this.setProperty(DATA_TYPE_KEY, type);
     }       
     
-    public EnvelopeBuilder setTime(LocalDateTime time){
-        return this.setProperty(OPT_KEY, time.toEpochSecond(ZoneOffset.UTC));
-    }
+//    public EnvelopeBuilder setTime(LocalDateTime time){
+//        return this.setProperty(OPT_KEY, time.toEpochSecond(ZoneOffset.UTC));
+//    }
     
     public EnvelopeBuilder setInfiniteDataSize(){
         return setProperty(DATA_LENGTH_KEY, -1);

@@ -9,6 +9,7 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
+import hep.dataforge.context.GlobalContext;
 import java.io.PrintStream;
 import java.util.function.BiConsumer;
 import javafx.scene.Scene;
@@ -33,13 +34,13 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
         String style;
         switch (eventObject.getLevel().toString()) {
             case "DEBUG":
-                style = "-fx-color=green";
+                style = "-fx-color: green";
                 break;
             case "WARN":
-                style = "-fx-color=orange";
+                style = "-fx-color: orange";
                 break;
             case "ERROR":
-                style = "-fx-color=red";
+                style = "-fx-color: red";
                 break;
             default:
                 style = "";
@@ -62,6 +63,7 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
             }
         };
         logAppender.setName(CONSOLE_LOG_APPENDER_NAME);
+        logAppender.setContext(GlobalContext.instance().getLogger().getLoggerContext());
         logAppender.start();
     }
 

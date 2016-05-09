@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -138,7 +139,9 @@ public class DFProcess<R> implements Named {
      * @param exception
      */
     protected void handle(Object result, Throwable exception) {
-
+        if (exception != null) {
+            getManager().getContext().getLogger().error("Exception in process execution", exception);
+        }
     }
 
     public DFProcess findProcess(String processName) {
@@ -197,7 +200,6 @@ public class DFProcess<R> implements Named {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
-        
         DFProcess childProcess = new DFProcess(getManager(), Name.join(getName(), childName).toString());
         getManager().onProcessStarted(childProcess.getName());
         if (future != null) {
@@ -213,6 +215,12 @@ public class DFProcess<R> implements Named {
         childProcess.totalMaxProgress.addListener((Observable observable) -> {
             totalMaxProgress.invalidate();
         });
+
+        //invalidating isDone in case of child state change
+        childProcess.isDone.addListener(new WeakChangeListener<>(
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    isDone.invalidate();
+                }));
 
         // Revalidate completions
         isDone.invalidate();
@@ -288,11 +296,11 @@ public class DFProcess<R> implements Named {
         this.curProgress.set(this.curProgress.get() + incProgress);
 //        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
     }
-    
+
     /**
      * Set current progress to max progress.
      */
-    public void setProgressToMax(){
+    public void setProgressToMax() {
         this.curProgress.set(this.curMaxProgress.get());
     }
 
@@ -303,6 +311,7 @@ public class DFProcess<R> implements Named {
      * @return
      */
     public boolean isDone() {
+        isDoneProperty().invalidate();
         return isDoneProperty().get();
     }
 

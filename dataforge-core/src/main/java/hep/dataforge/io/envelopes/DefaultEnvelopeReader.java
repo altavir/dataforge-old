@@ -51,7 +51,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         byte[] tagBuffer = new byte[Tag.TAG_LENGTH];
         stream.read(tagBuffer);
         if (Tag.isValidTag(tagBuffer)) {
-            Tag tag = new Tag(tagBuffer);
+            Tag tag = new Tag().read(tagBuffer);
             res.putAll(tag.asProperties());
         } else {
 //            throw new IOException("Wrong envelope format.");
@@ -111,7 +111,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             properties.putAll(overrideProperties);
         }
 
-        MetaStreamReader parser = EnvelopeProperties.getType(properties.get(META_TYPE_KEY)).getReader();
+        MetaStreamReader parser = EnvelopeProperties.getMetaType(properties.get(META_TYPE_KEY)).getReader();
         Charset charset = EnvelopeProperties.getCharset(properties.get(META_ENCODING_KEY));
         int metaLength = properties.get(META_LENGTH_KEY).intValue();
         Meta meta;
