@@ -125,19 +125,21 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * @param annotation
      */
     public void update(Meta annotation) {
-        annotation.getValueNames().stream().forEach((valueName) -> {
-            setValue(valueName, annotation.getValue(valueName));
-        });
+        if (annotation != null) {
+            annotation.getValueNames().stream().forEach((valueName) -> {
+                setValue(valueName, annotation.getValue(valueName));
+            });
 
-        annotation.getNodeNames().stream().forEach((elementName) -> {
-            setNode(elementName,
-                    annotation
-                    .getNodes(elementName)
-                    .stream()
-                    .<Configuration>map((el) -> new Configuration(el))
-                    .collect(Collectors.toList())
-            );
-        });
+            annotation.getNodeNames().stream().forEach((elementName) -> {
+                setNode(elementName,
+                        annotation
+                        .getNodes(elementName)
+                        .stream()
+                        .<Configuration>map((el) -> new Configuration(el))
+                        .collect(Collectors.toList())
+                );
+            });
+        }
     }
 
     @Override
