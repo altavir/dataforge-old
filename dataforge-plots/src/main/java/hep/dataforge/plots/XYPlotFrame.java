@@ -17,7 +17,6 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 

@@ -6,6 +6,7 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import java.util.List;
@@ -22,6 +23,11 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 public class MetaTreeItem extends TreeItem<MetaTree> {
+    
+    /**
+     * The tag not to display node or value in configurator
+     */
+    public static final String NO_CONFIGURATOR_TAG = "nocfg";
 
     public MetaTreeItem(Configuration config, NodeDescriptor descriptor) {
         super(new MetaTreeBranch(null, config, descriptor));
@@ -102,14 +108,14 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
             // adding the rest default value from descriptor. Ignoring the ones allready added
             if (descriptor != null) {
                 descriptor.childrenDescriptors().values().stream()
-                        .filter((nd) -> (config == null || !config.hasNode(nd.getName())))
+                        .filter((nd) -> (config == null || !config.hasNode(nd.getName())) && showDescribedNode(nd))
                         .map((nd) -> new MetaTreeBranch(branch, null, nd))
                         .forEach((childTree) -> {
                             children.add(new MetaTreeItem(childTree));
                         });
 
                 descriptor.valueDescriptors().values().stream()
-                        .filter((vd) -> (config == null || !config.hasValue(vd.getName())))
+                        .filter((vd) -> (config == null || !config.hasValue(vd.getName())) && showDescribedValue(vd))
                         .map((vd) -> new MetaTreeLeaf(branch, vd.getName()))
                         .forEach((childTree) -> {
                             children.add(new MetaTreeItem(childTree));
@@ -118,6 +124,27 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
             return children;
         }
+    }
+    //TODO add conditions to show non-empty nodes
+
+    /**
+     * Condition to show empty described node
+     *
+     * @param nd
+     * @return
+     */
+    protected boolean showDescribedNode(NodeDescriptor nd) {
+        return !nd.tags().contains(NO_CONFIGURATOR_TAG);
+    }
+
+    /**
+     * Condition to show empty described value
+     *
+     * @param vd
+     * @return
+     */
+    protected boolean showDescribedValue(ValueDescriptor vd) {
+        return !vd.tags().contains(NO_CONFIGURATOR_TAG);
     }
 
     public void addBranch(String name) {

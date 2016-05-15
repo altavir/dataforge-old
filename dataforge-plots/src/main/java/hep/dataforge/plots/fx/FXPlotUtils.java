@@ -35,7 +35,7 @@ public class FXPlotUtils {
             stage.setHeight(height);
             PlotContainer container = new PlotContainer();
             containerHolder.setContainer(container);
-            Scene scene = new Scene(container, width, height);
+            Scene scene = new Scene(container.getRoot(), width, height);
             stage.setTitle(titile);
             stage.setScene(scene);
             return stage;

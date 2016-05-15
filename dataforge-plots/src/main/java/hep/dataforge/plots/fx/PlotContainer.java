@@ -15,10 +15,12 @@ import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
 import java.net.URL;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
@@ -27,16 +29,20 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.scene.Node;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.SplitPane;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.Priority;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
@@ -47,26 +53,25 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alexander Nozik
  */
-public class PlotContainer extends AnchorPane implements Initializable {
-    
-    //FIXME replace inheritance by composition
+public class PlotContainer implements Initializable {
 
+    //FIXME replace inheritance by composition
     public static PlotContainer anchorTo(AnchorPane pane) {
         PlotContainer container = new PlotContainer();
-        pane.getChildren().add(container);
-        AnchorPane.setBottomAnchor(container, 0d);
-        AnchorPane.setTopAnchor(container, 0d);
-        AnchorPane.setLeftAnchor(container, 0d);
-        AnchorPane.setRightAnchor(container, 0d);
+        pane.getChildren().add(container.getRoot());
+        AnchorPane.setBottomAnchor(container.getRoot(), 0d);
+        AnchorPane.setTopAnchor(container.getRoot(), 0d);
+        AnchorPane.setLeftAnchor(container.getRoot(), 0d);
+        AnchorPane.setRightAnchor(container.getRoot(), 0d);
         return container;
     }
 
-    @FXML
     private AnchorPane root;
+
     @FXML
     private AnchorPane plotPane;
     @FXML
-    private AnchorPane specialOptionsPane;
+    private VBox sideBar;
     @FXML
     private ListView<Plottable> plottableslList;
     @FXML
@@ -80,13 +85,14 @@ public class PlotContainer extends AnchorPane implements Initializable {
 
     private Map<Configuration, Stage> configWindows = new HashMap<>();
 
-    private BooleanProperty optionsVisibleProperty = new SimpleBooleanProperty(true);
+    private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
 
     private double lastDividerPosition = -1;
 
     public PlotContainer() {
         FXMLLoader loader = new FXMLLoader(MetaEditor.class.getResource("/fxml/PlotContainer.fxml"));
-        loader.setRoot(this);
+        root = new AnchorPane();
+        loader.setRoot(root);
         loader.setController(this);
 
         try {
@@ -98,21 +104,31 @@ public class PlotContainer extends AnchorPane implements Initializable {
     }
 
     /**
+     * The root node of container
+     *
+     * @return
+     */
+    public Parent getRoot() {
+        return root;
+    }
+
+    /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
         plottableslList.setCellFactory((ListView<Plottable> param) -> new PlottableListCell());
-        setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+        plottableslList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        root.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         split.getDividers().get(0).positionProperty().addListener(
                 (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-                    optionsVisibleProperty.set(newValue.doubleValue() < 0.99);
+                    sidebarVisibleProperty.set(newValue.doubleValue() < 0.99);
                     if (newValue.doubleValue() < 0.98) {
                         lastDividerPosition = newValue.doubleValue();
                     }
                 });
 
-        optionsVisibleProperty.addListener(
+        sidebarVisibleProperty.addListener(
                 (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     if (newValue) {
                         optionsPannelButton.setText(">>");
@@ -120,9 +136,9 @@ public class PlotContainer extends AnchorPane implements Initializable {
                         optionsPannelButton.setText("<<");
                     }
                 });
-        
+
         optionsPannelButton.setOnAction((ActionEvent event) -> {
-            if (optionsVisibleProperty.get()) {
+            if (sidebarVisibleProperty.get()) {
                 split.setDividerPosition(0, 1d);
             } else if (lastDividerPosition > 0) {
                 split.setDividerPosition(0, lastDividerPosition);
@@ -133,17 +149,51 @@ public class PlotContainer extends AnchorPane implements Initializable {
         split.setDividerPositions(1.0);
     }
 
+    public void setSideBarExpanded(boolean expanded) {
+        this.sidebarVisibleProperty.set(expanded);
+    }
+    
+    public void setSideBarPosition(double position){
+        split.setDividerPositions(position);
+    }
+
     /**
-     * An AncorPane holding any special options for this plot displayed atop of
-     * plottables list
+     * A list of plottables in the sidebar
      *
      * @return
      */
-    public AnchorPane getSpecialOptionsPane() {
-        return specialOptionsPane;
+    public ListView<Plottable> getPlottableslListView() {
+        return plottableslList;
     }
 
-//    public void setPlot
+    /**
+     * An sideBar VBox
+     *
+     * @return
+     */
+    protected VBox getSideBar() {
+        return sideBar;
+    }
+
+    /**
+     * Add nodes to the end of the sideBar
+     *
+     * @param nodes
+     */
+    public void addToSideBar(Node... nodes) {
+        getSideBar().getChildren().addAll(nodes);
+    }
+
+    /**
+     * Insert nodes in sideBar at specific index
+     *
+     * @param index
+     * @param nodes
+     */
+    public void addToSideBar(int index, Node... nodes) {
+        getSideBar().getChildren().addAll(index, Arrays.asList(nodes));
+    }
+
     public PlotFrame getPlot() {
         return plot;
     }
@@ -155,7 +205,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
         plottableslList.setItems(plot.plottables());
     }
 
-    protected void setupOptions() {
+    protected void setupSideBar() {
         plottableslList.getItems().clear();
     }
 
@@ -179,7 +229,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
             stage.setOnCloseRequest((WindowEvent event) -> {
                 configWindows.remove(config);
             });
-            stage.initOwner(getScene().getWindow());
+            stage.initOwner(root.getScene().getWindow());
             configWindows.put(config, stage);
         }
         stage.show();
@@ -194,7 +244,27 @@ public class PlotContainer extends AnchorPane implements Initializable {
         }
     }
 
-    private class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
+    @FXML
+    private void onShowAll(ActionEvent event) {
+        this.plot.plottables().forEach(new Consumer<Plottable>() {
+            @Override
+            public void accept(Plottable pl) {
+                pl.configureValue("visible", true);
+            }
+        });
+    }
+
+    @FXML
+    private void onHideAll(ActionEvent event) {
+        this.plot.plottables().forEach(new Consumer<Plottable>() {
+            @Override
+            public void accept(Plottable pl) {
+                pl.configureValue("visible", false);
+            }
+        });
+    }
+
+    protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
 
         private HBox content;
         private CheckBox title;
@@ -231,6 +301,7 @@ public class PlotContainer extends AnchorPane implements Initializable {
             config.addObserver(this, true);
 
             title.setText(config.getString("title", item.getName()));
+            title.setSelected(config.getBoolean("visible", true));
             title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                 config.setValue("visible", newValue);
             });
@@ -252,12 +323,9 @@ public class PlotContainer extends AnchorPane implements Initializable {
                 title.setText(newItem.stringValue());
             } else if (name.equals("color")) {
                 title.setTextFill(Color.valueOf(newItem.stringValue()));
+            } else if (name.equals("visible")) {
+                title.setSelected(newItem.booleanValue());
             }
-//            else if (name.equals("visible")) {
-//                if (!newItem.booleanValue()) {
-//                    title.setTextFill(Color.valueOf("gray"));
-//                }
-//            }
         }
 
         @Override

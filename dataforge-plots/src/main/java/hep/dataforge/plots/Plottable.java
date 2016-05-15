@@ -16,6 +16,7 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
+import static hep.dataforge.fx.MetaTreeItem.NO_CONFIGURATOR_TAG;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Annotated;
@@ -31,10 +32,11 @@ import java.util.Collection;
  * @author Alexander Nozik
  */
 @ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name.")
-@ValueDef(name = "preferedPlotter", def = "jFreeChart", info = "A prefered plotting library. It is used if supported by destination PlotFrame.")
+@ValueDef(name = "preferedPlotter", def = "jFreeChart",
+        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
-public interface Plottable extends Named, Annotated, Configurable, Wrappable{
+public interface Plottable extends Named, Annotated, Configurable, Wrappable {
 
     /**
      * Данные для рисования.
@@ -45,13 +47,15 @@ public interface Plottable extends Named, Annotated, Configurable, Wrappable{
 
     /**
      * Add plottable state listener
-     * @param listener 
+     *
+     * @param listener
      */
     void addListener(PlotStateListener listener);
 
     /**
      * Remove plottable state listener
-     * @param listener 
+     *
+     * @param listener
      */
     void removeListener(PlotStateListener listener);
 
@@ -59,7 +63,5 @@ public interface Plottable extends Named, Annotated, Configurable, Wrappable{
     public default Envelope wrap() {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-    
-    
 
 }

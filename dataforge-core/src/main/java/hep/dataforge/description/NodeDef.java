@@ -24,7 +24,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>NodeDef class.</p>
+ * <p>
+ * NodeDef class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -35,20 +36,29 @@ import java.lang.annotation.Target;
 @Inherited
 @Repeatable(NodeDefs.class)
 public @interface NodeDef {
+
     String name();
-    String info() default ""; 
-    
+
+    String info() default "";
+
     /**
-     * The resource to the annotated method or class that could be used as a source for this node descriptor
-     * @return 
+     * The resource to the annotated method or class that could be used as a
+     * source for this node descriptor
+     *
+     * @return
      */
     String target() default "";
-    
+
     /**
      * The resource for the resource file with this node's descriptor
-     * @return 
+     *
+     * @return
      */
     String resource() default "";
+
     boolean multiple() default false;
+
     boolean required() default false;
+
+    String[] tags() default {};
 }

@@ -34,11 +34,7 @@ import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Paint;
-import java.awt.event.ActionEvent;
-import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.io.Serializable;
 import static java.lang.Double.NaN;
@@ -46,20 +42,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javafx.application.Platform;
 import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.AnchorPane;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFileChooser;
-import javax.swing.JFrame;
-import javax.swing.JMenuItem;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.filechooser.FileFilter;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -67,6 +54,7 @@ import org.jfree.chart.axis.LogarithmicAxis;
 import org.jfree.chart.axis.NumberAxis;
 import org.jfree.chart.axis.ValueAxis;
 import org.jfree.chart.encoders.SunPNGEncoderAdapter;
+import org.jfree.chart.fx.ChartViewer;
 import org.jfree.chart.labels.XYSeriesLabelGenerator;
 import org.jfree.chart.plot.XYPlot;
 import org.jfree.chart.renderer.xy.XYErrorRenderer;
@@ -91,69 +79,66 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
      */
     List<String> index = new ArrayList<>();
 
+    private boolean swingMode = false;
+
     private final JFreeChart chart;
     private final XYPlot plot;
 
-    private static Action exportAction(JFreeChart t) {
-        return new AbstractAction("Export JFC") {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JFrame frame = new JFrame("Export file location");
-                JFileChooser fc = new JFileChooser();
-                FileFilter filter = new FileNameExtensionFilter("JFC files", "jfc");
-                fc.setFileFilter(filter);
-
-                int returnVal = fc.showSaveDialog(frame);
-                if (returnVal == JFileChooser.APPROVE_OPTION) {
-                    ObjectOutputStream stream = null;
-                    try {
-                        File file = fc.getSelectedFile();
-
-                        String fileName = file.toString();
-                        if (!fileName.endsWith(".jfc")) {
-                            fileName += ".jfc";
-                            file = new File(fileName);
-                        }
-
-                        stream = new ObjectOutputStream(new FileOutputStream(file));
-                        stream.writeObject(t);
-                        frame.dispose();
-                    } catch (IOException ex) {
-                        Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
-                    } finally {
-                        if (stream != null) {
-                            try {
-                                stream.close();
-                            } catch (IOException ex) {
-                                Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
-                            }
-                        }
-                    }
-                } else {
-                    frame.dispose();
-                }
-            }
-        };
-    }
-
+//    private static Action exportAction(JFreeChart t) {
+//        return new AbstractAction("Export JFC") {
+//            @Override
+//            public void actionPerformed(ActionEvent e) {
+//                JFrame frame = new JFrame("Export file location");
+//                JFileChooser fc = new JFileChooser();
+//                FileFilter filter = new FileNameExtensionFilter("JFC files", "jfc");
+//                fc.setFileFilter(filter);
+//
+//                int returnVal = fc.showSaveDialog(frame);
+//                if (returnVal == JFileChooser.APPROVE_OPTION) {
+//                    ObjectOutputStream stream = null;
+//                    try {
+//                        File file = fc.getSelectedFile();
+//
+//                        String fileName = file.toString();
+//                        if (!fileName.endsWith(".jfc")) {
+//                            fileName += ".jfc";
+//                            file = new File(fileName);
+//                        }
+//
+//                        stream = new ObjectOutputStream(new FileOutputStream(file));
+//                        stream.writeObject(t);
+//                        frame.dispose();
+//                    } catch (IOException ex) {
+//                        Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
+//                    } finally {
+//                        if (stream != null) {
+//                            try {
+//                                stream.close();
+//                            } catch (IOException ex) {
+//                                Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
+//                            }
+//                        }
+//                    }
+//                } else {
+//                    frame.dispose();
+//                }
+//            }
+//        };
+//    }
     public JFreeChartFrame() {
         plot = new XYPlot();
         chart = new JFreeChart(plot);
     }
-    
-    public JFreeChartFrame(Meta frameMeta){
+
+    public JFreeChartFrame(Meta frameMeta) {
         this();
-        configure(frameMeta);
+        super.configure(frameMeta);
     }
 
     @Override
     public JFreeChartFrame display(AnchorPane container) {
         Runnable run = () -> {
-            SwingNode viewer = new SwingNode();
-            JPanel panel = new JPanel(new BorderLayout(), true);
-
-            display(panel);
-            viewer.setContent(panel);
+            ChartViewer viewer = new ChartViewer(getChart());
 
             container.getChildren().add(viewer);
             AnchorPane.setBottomAnchor(viewer, 0d);
@@ -173,12 +158,27 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     public JFreeChartFrame display(Container panel) {
         ChartPanel cp = new ChartPanel(getChart());
-        cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
+//        cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
 
         panel.add(cp);
         panel.revalidate();
         panel.repaint();
+        swingMode = true;
         return this;
+    }
+
+    private void run(Runnable run) {
+        if (swingMode) {
+            if (SwingUtilities.isEventDispatchThread()) {
+                run.run();
+            } else {
+                SwingUtilities.invokeLater(run);
+            }
+        } else if (Platform.isFxApplicationThread()) {
+            run.run();
+        } else {
+            Platform.runLater(run);
+        }
     }
 
     public JFreeChart getChart() {
@@ -201,7 +201,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     private ValueAxis getLogAxis(Meta meta) {
         //FIXME autorange with negative values
         LogarithmicAxis logAxis = new LogarithmicAxis("");
-        logAxis.setMinorTickCount(10);
+//        logAxis.setMinorTickCount(10);
         logAxis.setExpTickLabelsFlag(true);
         logAxis.setMinorTickMarksVisible(true);
         if (meta.hasNode("range")) {
@@ -232,7 +232,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     @Override
     protected synchronized void updateAxis(String axisName, Meta axisMeta) {
-        SwingUtilities.invokeLater(() -> {
+        run(() -> {
             ValueAxis axis = getAxis(axisMeta);
 
             switch (axisName) {
@@ -257,19 +257,23 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     }
 
     @Override
-    protected void updateLegend(Meta legendMeta) {
-        if (legendMeta.getBoolean("show", true)) {
-            if (chart.getLegend() == null) {
-                chart.addLegend(new LegendTitle(plot));
+    protected synchronized void updateLegend(Meta legendMeta) {
+        run(() -> {
+            if (legendMeta.getBoolean("show", true)) {
+                if (chart.getLegend() == null) {
+                    chart.addLegend(new LegendTitle(plot));
+                }
+            } else {
+                chart.removeLegend();
             }
-        } else {
-            chart.removeLegend();
-        }
+        });
     }
 
     @Override
     protected synchronized void updateFrame(Meta meta) {
-        this.chart.setTitle(meta.getString("title", ""));
+        run(() -> {
+            this.chart.setTitle(meta.getString("title", ""));
+        });
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
 //            Plottable p = get(dataset.getSeriesKey(series).toString());
 //            return p.getConfig().getString("title", p.getName());
@@ -288,7 +292,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     }
 
     @Override
-    protected void updatePlotData(String name) {
+    protected synchronized void updatePlotData(String name) {
         XYPlottable plottable = get(name);
 
         XYAdapter adapter = plottable.adapter();
@@ -315,13 +319,13 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             index.add(plottable.getName());
         }
 
-        SwingUtilities.invokeLater(() -> {
+        run(() -> {
             plot.setDataset(index.indexOf(name), data);
         });
     }
 
     @Override
-    protected void updatePlotConfig(String name) {
+    protected synchronized void updatePlotConfig(String name) {
         final Plottable plottable = get(name);
         if (!index.contains(plottable.getName())) {
             index.add(plottable.getName());
@@ -329,7 +333,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         int num = index.indexOf(name);
 
         Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
-        SwingUtilities.invokeLater(() -> {
+        run(() -> {
 
             XYLineAndShapeRenderer render;
             boolean showLines = meta.getBoolean("showLine", false);
@@ -377,7 +381,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             }
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
         });
-
     }
 
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {

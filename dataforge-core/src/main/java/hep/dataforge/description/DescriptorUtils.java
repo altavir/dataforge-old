@@ -105,7 +105,8 @@ public class DescriptorUtils {
                         .putValue("name", nodeDef.name())
                         .putValue("info", nodeDef.info())
                         .putValue("required", nodeDef.required())
-                        .putValue("multiple", nodeDef.multiple());
+                        .putValue("multiple", nodeDef.multiple())
+                        .putValue("tags", nodeDef.tags());
 
                 // Either target or resource is used
                 if (!nodeDef.target().isEmpty()) {

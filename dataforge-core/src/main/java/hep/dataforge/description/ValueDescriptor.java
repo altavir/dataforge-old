@@ -11,6 +11,7 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,7 +29,8 @@ public class ValueDescriptor extends DescriptorBase implements Named {
     public static ValueDescriptor build(ValueDef val) {
         MetaBuilder builder = new MetaBuilder("value")
                 .setValue("name", val.name())
-                .setValue("type", val.type());
+                .setValue("type", val.type())
+                .setValue("tags", val.tags());
 
         if (!val.required()) {
             builder.setValue("required", val.required());
@@ -109,6 +111,14 @@ public class ValueDescriptor extends DescriptorBase implements Named {
         }
     }
 
+    public List<String> tags() {
+        if (meta().hasValue("tags")) {
+            return Arrays.asList(meta().getStringArray("tags"));
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
     /**
      * Check if given value is allowed for here. The type should be allowed and
      * if it is value should be within allowed values
@@ -155,7 +165,7 @@ public class ValueDescriptor extends DescriptorBase implements Named {
             for (Value val : meta().getValue("allowedValues").listValue()) {
                 map.put(val, "");
             }
-        } else if(type().size() == 1 && type().get(0) == ValueType.BOOLEAN){
+        } else if (type().size() == 1 && type().get(0) == ValueType.BOOLEAN) {
             map.put(Value.of(true), "");
             map.put(Value.of(false), "");
         }
