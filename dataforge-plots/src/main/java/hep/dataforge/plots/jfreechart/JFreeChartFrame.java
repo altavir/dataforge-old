@@ -30,7 +30,6 @@ import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import java.awt.BasicStroke;
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
 import java.awt.Paint;
@@ -43,9 +42,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
-import javafx.embed.swing.SwingNode;
 import javafx.scene.layout.AnchorPane;
-import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -298,7 +295,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         XYAdapter adapter = plottable.adapter();
 
         XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
-        for (DataPoint point : plottable.plotData()) {
+        plottable.plotData().forEach(point -> {
             double x = convertValue(adapter.getX(point));
             double y = convertValue(adapter.getY(point));
             if (Double.isNaN(x)) {
@@ -310,7 +307,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 double yErr = convertValue(adapter.getYerr(point));
                 ser.add(x, x - xErr, x + xErr, y, y - yErr, y + yErr);
             }
-        }
+        });
 
         final XYIntervalSeriesCollection data = new XYIntervalSeriesCollection();
         data.addSeries(ser);

@@ -24,8 +24,8 @@ import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  *
@@ -66,11 +66,9 @@ public class PlottableData extends XYPlottable {
     }
 
     public static PlottableData plot(String name, XYAdapter adapter, boolean showErrors) {
-        MetaBuilder builder = new MetaBuilder("dataPlot")
-                .setNode("adapter", adapter.meta());
-        builder.setValue("showErrors", showErrors);
-        PlottableData plot = new PlottableData(name);
-        plot.setMetaBase(builder.build());
+        MetaBuilder builder = new MetaBuilder("dataPlot").setValue("showErrors", showErrors);
+        PlottableData plot = new PlottableData(name, adapter);
+        plot.configure(builder);
         return plot;
     }
 
@@ -79,28 +77,31 @@ public class PlottableData extends XYPlottable {
         plot.fillData(data);
         return plot;
     }
-    
-    public static PlottableData plot(String name, Meta meta, PointSource data, XYAdapter adapter){
+
+    public static PlottableData plot(String name, Meta meta, PointSource data, XYAdapter adapter) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
-        if(!meta.isEmpty()){
+        if (!meta.isEmpty()) {
             plot.configure(meta);
         }
         return plot;
     }
-    
-    public static PlottableData plot(String name, PointSource data, XYAdapter adapter){
+
+    public static PlottableData plot(String name, PointSource data, XYAdapter adapter) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
     }
-    
 
     protected List<DataPoint> data;
 
     protected PlottableData(String name) {
         super(name);
         data = new ArrayList<>();
+    }
+
+    public PlottableData(String name, XYAdapter adapter) {
+        super(name, adapter);
     }
 
     public void fillData(Iterable<DataPoint> it) {
@@ -111,12 +112,9 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
-//    private static Meta extractMeta(Table data) {
-//        return data.meta().getNode("plot", Meta.empty("plot"));
-//    }
     @Override
-    public Collection<DataPoint> plotData() {
-        return data;
+    public Stream<DataPoint> plotData(Meta dataConfiguration) {
+        return filterDataStream(data.stream(), dataConfiguration);
     }
 
 }

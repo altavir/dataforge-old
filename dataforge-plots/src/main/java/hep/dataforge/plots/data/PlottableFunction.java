@@ -16,14 +16,15 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
@@ -77,12 +78,9 @@ public class PlottableFunction extends XYPlottable {
     }
 
     @Override
-    public Collection<DataPoint> plotData() {
-        List<DataPoint> list = new ArrayList<>();
-        for (double x : grid) {
-            list.add(new MapPoint(new String[]{"x", "y"}, x, function.value(x)));
-        }
-        return list;
+    public Stream<DataPoint> plotData(Meta dataConfiguration) {
+        //TODO use information from cfg
+        return filterDataStream(grid.stream().map(x -> new MapPoint(new String[]{"x", "y"}, x, function.value(x))), dataConfiguration);
     }
 
 }

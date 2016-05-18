@@ -30,6 +30,12 @@ import java.util.stream.Collectors;
  */
 public class Configuration extends MuttableMetaNode<Configuration> {
 
+    /**
+     * The meta node or value descriptor tag to mark an element non
+     * configurable. It could be set only once.
+     */
+    public static final String FINAL_TAG = "final";
+
     protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
     /**

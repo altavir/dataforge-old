@@ -36,12 +36,12 @@ public class PlotDataUtils {
         Map<Value, MapPoint.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
-        
+
         for (XYPlottable pl : plottables) {
             XYAdapter adapter = pl.adapter();
 
             names.add(pl.getName());
-            for (DataPoint point : pl.plotData()) {
+            pl.plotData().forEach(point -> {
                 Value x = adapter.getX(point);
                 MapPoint.Builder mdp;
                 if (points.containsKey(x)) {
@@ -52,10 +52,11 @@ public class PlotDataUtils {
                     points.put(x, mdp);
                 }
                 mdp.putValue(pl.getName(), adapter.getY(point));
-            }
+            });
+
         }
         ListTable.Builder res = new ListTable.Builder(TableFormat.fixedWidth(8, names));
-        res.addRows(points.values().stream().map(p->p.build()).collect(Collectors.toList()));
+        res.addRows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }
 }

@@ -45,15 +45,15 @@ public class GlobalContext extends Context {
 
     private static final GlobalContext instance = new GlobalContext();
     private static final Set<Context> contexts = new HashSet<>();
-    
-    static{
+
+    static {
         contexts.add(instance());
     }
 
     public static GlobalContext instance() {
         return instance;
     }
-    
+
     /**
      * Get previously registered context
      *
@@ -71,7 +71,7 @@ public class GlobalContext extends Context {
      */
     public static void putContext(Context context) {
         contexts.add(context);
-    }    
+    }
 
     public static File getFile(String path) {
         return instance.io().getFile(path);
@@ -162,6 +162,19 @@ public class GlobalContext extends Context {
         return properties.containsKey(path);
     }
 
-
+    /**
+     * The global context independent temporary user directory. This directory
+     * is used to store user configuration files. Never use it to store data.
+     *
+     * @return
+     */
+    public File getUserDirectory() {
+        File userDir = new File(System.getProperty("user.home"));
+        File dfUserDir = new File(userDir, ".dataforge");
+        if (!dfUserDir.exists()) {
+            dfUserDir.mkdir();
+        }
+        return dfUserDir;
+    }
 
 }

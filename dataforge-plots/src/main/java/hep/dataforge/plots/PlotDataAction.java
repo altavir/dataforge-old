@@ -80,7 +80,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
             }
         }
 
-        return defaultDescription.getBuilder().putValue("frameTitle", meta.getString("plotTitle", "")).build();
+        return defaultDescription.getBuilder().putValue("title", meta.getString("plotTitle", "")).build();
     }
 
     @Override

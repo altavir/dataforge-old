@@ -29,8 +29,6 @@ public interface PointAdapter extends Annotated {
 
     public static final String DATA_ADAPTER_ANNOTATION_NAME = "adapter";
 
-//    public double getWeight(DataPoint point);
-
     /**
      * Аннотация, описывающая данный тип адаптера
      * @return 
@@ -38,12 +36,6 @@ public interface PointAdapter extends Annotated {
     @Override
     Meta meta();
 
-//    /**
-//     * минимальный набор имен в DataPoint
-//     * @return 
-//     */
-//    Names getNames();    
-    
     /**
      * Get a value with specific designation from given DataPoint
      * @param point
@@ -51,10 +43,4 @@ public interface PointAdapter extends Annotated {
      * @return 
      */
     Value getFrom(DataPoint point, String component);
-    
-//    default public ListTable buildEmptyDataSet(String name) {
-//        ListTable res = new ListTable(DataFormat.forNames(0, getNames()));
-//        res.configure(new MetaBuilder(name).putNode(meta()).build());
-//        return res;
-//    }
 }

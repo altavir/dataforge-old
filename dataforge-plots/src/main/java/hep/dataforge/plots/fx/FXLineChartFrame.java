@@ -21,6 +21,7 @@ import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
@@ -94,11 +95,10 @@ public class FXLineChartFrame extends XYPlotFrame {
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();
 
-        for (DataPoint point : plottable.plotData()) {
-            Number x = xFunc.apply(point);
-            Number y = yFunc.apply(point);
-            series.getData().add(new XYChart.Data<>(x, y));
-        }
+        series.getData().addAll(plottable.plotData()
+                .map(point -> new XYChart.Data<>(xFunc.apply(point), yFunc.apply(point)))
+                .collect(Collectors.toList()));
+
     }
 
     @Override

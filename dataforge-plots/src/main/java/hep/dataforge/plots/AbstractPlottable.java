@@ -15,31 +15,40 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.BaseConfigurable;
+import afu.org.checkerframework.checker.nullness.qual.NonNull;
 import hep.dataforge.meta.Meta;
-import java.util.HashSet;
-import java.util.Set;
+import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.utils.ReferenceRegistry;
 
 /**
  *
  * @author darksnake
  */
-public abstract class AbstractPlottable extends BaseConfigurable implements Plottable {
+public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable<T> {
+    
+    public static final String ADAPTER_KEY = "adapter";
 
     private final String name;
-    private final Set<PlotStateListener> listeners = new HashSet<>();
+    private final ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
+    private T adapter;
 
-    public AbstractPlottable(String name, Meta metaBase, Meta config) {
-        this.name = name;
-        if (metaBase != null) {
-            super.setMetaBase(metaBase);
-        }
-        if (config != null) {
-            super.configure(config);
-        }
+//    public AbstractPlottable(String name, Meta metaBase, Meta config) {
+//        this.name = name;
+//        if (metaBase != null) {
+//            super.setMetaBase(metaBase);
+//        }
+//        if (config != null) {
+//            super.configure(config);
+//        }
+//    }
+
+    public AbstractPlottable(String name, @NonNull T adapter) {
+        this(name);
+        setAdapter(adapter);
     }
-
-    public AbstractPlottable(String name) {
+    
+    public AbstractPlottable(@NonNull String name) {
         this.name = name;
     }
 
@@ -58,6 +67,31 @@ public abstract class AbstractPlottable extends BaseConfigurable implements Plot
         this.listeners.remove(listener);
     }
 
+    @Override
+    public T adapter() {
+        if(adapter == null){
+            return defaultAdapter();
+        } else {
+            return adapter;
+        }
+    }
+
+    @Override
+    public final void setAdapter(T adapter) {
+        this.adapter = adapter;
+        //Silently update meta to include adapter
+        this.getConfig().putNode(ADAPTER_KEY, adapter.meta(), false);
+    }
+
+    @Override
+    public final void setAdapter(Meta adapterMeta) {
+        setAdapter(buildAdapter(adapterMeta));
+    }
+    
+    protected abstract T buildAdapter(Meta adapterMeta);
+    
+    protected abstract T defaultAdapter();
+
     /**
      * Notify all listeners that configuration changed
      *
@@ -66,6 +100,10 @@ public abstract class AbstractPlottable extends BaseConfigurable implements Plot
     @Override
     protected void applyConfig(Meta config) {
         listeners.forEach((l) -> l.notifyConfigurationChanged(getName()));
+        //If adapter is not defined, creating new adapter.
+        if(this.adapter == null && config.hasNode(ADAPTER_KEY)){
+            setAdapter(config.getNode(ADAPTER_KEY));
+        }
     }
 
     /**

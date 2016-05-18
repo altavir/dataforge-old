@@ -21,10 +21,12 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
-import java.util.Collection;
+import hep.dataforge.tables.PointAdapter;
+import java.util.stream.Stream;
 
 /**
  * Единичный набор данных для отрисовки
@@ -36,14 +38,25 @@ import java.util.Collection;
         info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
-public interface Plottable extends Named, Annotated, Configurable, Wrappable {
+public interface Plottable<T extends PointAdapter> extends Named, Annotated, Configurable, Wrappable {
 
     /**
-     * Данные для рисования.
+     * Stream of data for plotting with default configuration
      *
      * @return
      */
-    Collection<DataPoint> plotData();
+    default Stream<DataPoint> plotData() {
+        return plotData(Meta.empty());
+    }
+
+    /**
+     * Stream of data for plotting using given configuration (range, number of
+     * points, etc.)
+     *
+     * @param dataConfiguration
+     * @return
+     */
+    Stream<DataPoint> plotData(Meta dataConfiguration);
 
     /**
      * Add plottable state listener
@@ -58,6 +71,27 @@ public interface Plottable extends Named, Annotated, Configurable, Wrappable {
      * @param listener
      */
     void removeListener(PlotStateListener listener);
+
+    /**
+     * Get current adapter for this plottable
+     *
+     * @return
+     */
+    T adapter();
+
+    /**
+     * Set custom adapter for this plottable. This method should be used with
+     * caution since it does not guarantee wrapping/unwrapping invariance
+     *
+     * @param adapter
+     */
+    void setAdapter(T adapter);
+    
+    /**
+     * Set adapter generated from given meta
+     * @param adapterMeta 
+     */
+    void setAdapter(Meta adapterMeta);
 
     @Override
     public default Envelope wrap() {
