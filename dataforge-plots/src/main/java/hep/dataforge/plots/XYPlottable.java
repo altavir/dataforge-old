@@ -22,7 +22,6 @@ import static hep.dataforge.meta.Configuration.FINAL_TAG;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import java.util.stream.Stream;
