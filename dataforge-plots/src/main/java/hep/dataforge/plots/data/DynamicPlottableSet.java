@@ -25,6 +25,13 @@ import java.util.Iterator;
  */
 public class DynamicPlottableSet extends PlottableSet<DynamicPlottable> {
 
+    public static DynamicPlottableSet buildSet(String... names) {
+        DynamicPlottableSet set= new DynamicPlottableSet();
+        for(String name: names){
+            set.addPlottable(new DynamicPlottable(name, name));
+        }
+        return set;
+    }
 
     public DynamicPlottableSet() {
     }
@@ -63,8 +70,8 @@ public class DynamicPlottableSet extends PlottableSet<DynamicPlottable> {
     public void setMaxAge(int millis) {
         setEachConfigValue("maxAge", Value.of(millis));
     }
-    
-    public void setMaxItems(int maxItems){
+
+    public void setMaxItems(int maxItems) {
         setEachConfigValue("maxItems", Value.of(maxItems));
     }
 

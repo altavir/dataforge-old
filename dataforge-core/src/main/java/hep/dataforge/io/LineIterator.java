@@ -84,7 +84,7 @@ public class LineIterator implements Iterator<String>, AutoCloseable {
                     if (line == null) {
                         finished = true;
                         return false;
-                    } else if (isValidLine(line)) {
+                    } else if (isValidLine(line.trim())) {
                         cachedLine = line.trim();
                         return true;
                     }
@@ -97,7 +97,7 @@ public class LineIterator implements Iterator<String>, AutoCloseable {
     }
 
     protected boolean isValidLine(String line) {
-        return !line.isEmpty() && !line.trim().startsWith(commentStr);
+        return !line.isEmpty() && !line.startsWith(commentStr);
     }
 
     /**

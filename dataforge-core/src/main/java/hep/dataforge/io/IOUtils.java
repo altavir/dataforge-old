@@ -20,8 +20,10 @@ import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FilenameFilter;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -107,10 +109,11 @@ public class IOUtils {
      */
     public static Table readColumnedData(File file, String... names) throws FileNotFoundException {
         ColumnedDataReader reader;
+        InputStream stream = new FileInputStream(file);
         if (names.length == 0) {
-            reader = new ColumnedDataReader(file);
+            reader = new ColumnedDataReader(stream);
         } else {
-            reader = new ColumnedDataReader(file, names);
+            reader = new ColumnedDataReader(stream, names);
         }
         ListTable.Builder res = new ListTable.Builder(names);
         for (DataPoint dp : reader) {

@@ -52,6 +52,14 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     }
 
     @Override
+    public void clear() {
+        plottables.forEach((T pl)->pl.removeListener(this));
+        plottables.clear();
+    }
+    
+    
+
+    @Override
     public synchronized void add(T plottable) {
         String pName = plottable.getName();
         plottables.add(plottable);

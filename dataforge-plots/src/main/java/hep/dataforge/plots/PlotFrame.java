@@ -55,6 +55,11 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      * @param plotName
      */
     void remove(String plotName);
+    
+    /**
+     * Remove all plottables
+     */
+    void clear();
 
     /**
      * Возвращает загруженную серию, если она есть. Иначе возвращает null

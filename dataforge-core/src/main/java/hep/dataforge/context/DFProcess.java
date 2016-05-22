@@ -116,14 +116,14 @@ public class DFProcess<R> implements Named {
         return taskProperty;
     }
 
-    public void setTask(CompletableFuture<R> task) {
+    protected void setTask(CompletableFuture<R> task) {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
         taskProperty.set(task.whenComplete((Object t, Throwable u) -> {
             isDone.invalidate();
             curProgress.set(curMaxProgress.get());
-            getManager().onProcessFinished(getName());
+//            getManager().onProcessFinished(getName());
         }).whenComplete(this::handle));
         isDone.invalidate();
     }
