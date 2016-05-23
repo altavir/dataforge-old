@@ -25,10 +25,8 @@ import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Container;
@@ -279,10 +277,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     protected double convertValue(Value v) {
         try {
-            if (v.valueType() == ValueType.NULL) {
-                return Double.NaN;
+            switch (v.valueType()) {
+                case NULL:
+                    return Double.NaN;
+//                case TIME:
+//                    return v.timeValue().toEpochMilli();
+                default:
+                    return v.doubleValue();
             }
-            return v.doubleValue();
         } catch (ValueConversionException ex) {
             return Double.NaN;
         }

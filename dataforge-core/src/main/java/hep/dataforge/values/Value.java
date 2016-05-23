@@ -20,7 +20,6 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -130,11 +129,11 @@ public interface Value extends Comparable<Value>, Serializable {
     }
 
     public static Value of(LocalDateTime t) {
-        return new TimeValue(LocalDateTime.from(t));
+        return new TimeValue(t);
     }
 
     public static Value of(Instant t) {
-        return new TimeValue(LocalDateTime.ofInstant(t, ZoneId.systemDefault()));
+        return new TimeValue(t);
     }
 
     public static Value of(Object... list){
