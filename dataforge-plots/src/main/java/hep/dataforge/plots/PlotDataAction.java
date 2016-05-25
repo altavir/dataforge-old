@@ -102,7 +102,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         }
         XYAdapter adapter = new XYAdapter(meta.getNode("adapter", Meta.buildEmpty("adapter")));
 
-        frame.add(PlottableData.plot(name, meta, input, adapter));
+        frame.add(PlottableData.plot(name, meta, adapter, input));
 
         if (meta.hasNode("snapshot")) {
             snapshot(context, name, frame, meta.getNode("snapshot"));

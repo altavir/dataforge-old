@@ -47,7 +47,7 @@ public class TableFormatBuilder {
 
     private MetaBuilder addName(String name) {
         if (!columns.containsKey(name)) {
-            MetaBuilder columnBuilder = new MetaBuilder(name);
+            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name);
             columns.put(name, columnBuilder);
             return columnBuilder;
         } else {

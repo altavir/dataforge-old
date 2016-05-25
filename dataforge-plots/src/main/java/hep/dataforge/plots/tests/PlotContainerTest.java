@@ -60,7 +60,7 @@ public class PlotContainerTest {
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));
+        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 

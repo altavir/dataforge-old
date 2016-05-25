@@ -78,7 +78,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, Meta meta, PointSource data, XYAdapter adapter) {
+    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, PointSource data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         if (!meta.isEmpty()) {
@@ -87,7 +87,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, PointSource data, XYAdapter adapter) {
+    public static PlottableData plot(String name, XYAdapter adapter, PointSource data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
