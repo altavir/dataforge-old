@@ -41,7 +41,7 @@ public class PlotDataUtils {
             XYAdapter adapter = pl.adapter();
 
             names.add(pl.getName());
-            pl.plotData().forEach(point -> {
+            pl.dataStream().forEach(point -> {
                 Value x = adapter.getX(point);
                 MapPoint.Builder mdp;
                 if (points.containsKey(x)) {

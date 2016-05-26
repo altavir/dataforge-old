@@ -26,6 +26,9 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -45,8 +48,8 @@ public interface Plottable<T extends PointAdapter> extends Named, Annotated, Con
      *
      * @return
      */
-    default Stream<DataPoint> plotData() {
-        return plotData(Meta.empty());
+    default Stream<DataPoint> dataStream() {
+        return dataStream(Meta.empty());
     }
 
     /**
@@ -56,7 +59,15 @@ public interface Plottable<T extends PointAdapter> extends Named, Annotated, Con
      * @param dataConfiguration
      * @return
      */
-    Stream<DataPoint> plotData(Meta dataConfiguration);
+    Stream<DataPoint> dataStream(Meta dataConfiguration);
+
+    default List<DataPoint> data() {
+        return data(Meta.empty());
+    }
+
+    default List<DataPoint> data(Meta dataConfiguration) {
+        return dataStream(dataConfiguration).collect(Collectors.toList());
+    }
 
     /**
      * Add plottable state listener
@@ -86,10 +97,11 @@ public interface Plottable<T extends PointAdapter> extends Named, Annotated, Con
      * @param adapter
      */
     void setAdapter(T adapter);
-    
+
     /**
      * Set adapter generated from given meta
-     * @param adapterMeta 
+     *
+     * @param adapterMeta
      */
     void setAdapter(Meta adapterMeta);
 

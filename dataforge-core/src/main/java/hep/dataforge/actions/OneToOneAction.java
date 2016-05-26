@@ -110,9 +110,9 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @param metaLayers
      * @return
      */
-    public R eval(T input, Meta... metaLayers) {
+    public R simpleRun(T input, Meta... metaLayers) {
         Context context = GlobalContext.instance();
-        return transform(context, new Report("eval", context), "eval", inputMeta(context, metaLayers), input);
+        return transform(context, new Report("simpleRun", context), "simpleRun", inputMeta(context, metaLayers), input);
     }
 
     protected abstract R execute(Context context, Reportable log, String name, Laminate inputMeta, T input);

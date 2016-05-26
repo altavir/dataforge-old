@@ -52,7 +52,7 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implement
     }
 
     public Stream<DataPoint> plotData(Value from, Value to) {
-        return plotData(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
+        return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
     }
 
     protected Stream<DataPoint> filterXRange(Stream<DataPoint> data, Meta xRange) {

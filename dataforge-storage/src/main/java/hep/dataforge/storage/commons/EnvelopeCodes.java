@@ -21,18 +21,16 @@ package hep.dataforge.storage.commons;
  */
 public class EnvelopeCodes {
 
-    //Container types
-
-
+    //Enevelope codes
     /**
      * A DataForge system message type
      */
-    public static final short DATAFORGE_MESSAGE_ENVELOPE_CODE = 0x4d45;
+    public static final short DATAFORGE_MESSAGE_ENVELOPE_CODE = 0x4d45;//ME
 
     /**
      * A DataForge permanent storage type
      */
-    public static final short DATAFORGE_STORAGE_ENVELOPE_CODE = 0x5354;
+    public static final short DATAFORGE_STORAGE_ENVELOPE_CODE = 0x5354;//ST
 
     //Storage loader data types
     public static final int LOADER_TYPE_CODE = 0x00004C4F;//xxLO

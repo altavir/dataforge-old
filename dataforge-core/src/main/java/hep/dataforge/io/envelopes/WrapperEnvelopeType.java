@@ -14,7 +14,7 @@ public class WrapperEnvelopeType extends DefaultEnvelopeType {
 
     @Override
     public String getName() {
-        return "hep.dataforge.wrapper";
+        return "df.wrapper";
     }
 
     @Override

@@ -5,6 +5,7 @@
  */
 package hep.dataforge.fx;
 
+import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -13,7 +14,7 @@ import javafx.scene.paint.Color;
  *
  * @author Alexander Nozik
  */
-public class FXUtills {
+public class FXUtils {
 
     /**
      * Add a listener that performs some update action on any window size change
@@ -39,5 +40,19 @@ public class FXUtills {
                 (int) (color.getGreen() * 255),
                 (int) (color.getBlue() * 255));
     }
-    
+
+    /**
+     * Check if current thread is FX application thread to avoid runLater from
+     * UI thread.
+     *
+     * @param r
+     */
+    public static void run(Runnable r) {
+        if (Platform.isFxApplicationThread()) {
+            r.run();
+        } else {
+            Platform.runLater(r);
+        }
+    }
+
 }

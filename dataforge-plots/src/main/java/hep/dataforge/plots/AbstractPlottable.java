@@ -15,11 +15,11 @@
  */
 package hep.dataforge.plots;
 
-import afu.org.checkerframework.checker.nullness.qual.NonNull;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  *

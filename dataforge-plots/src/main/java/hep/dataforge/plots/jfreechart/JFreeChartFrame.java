@@ -25,7 +25,6 @@ import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -34,7 +33,6 @@ import java.awt.Paint;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import static java.lang.Double.NaN;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -58,9 +56,9 @@ import org.jfree.chart.renderer.xy.XYSplineRenderer;
 import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.Range;
+import org.jfree.data.general.DatasetChangeEvent;
+import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
-import org.jfree.data.xy.XYIntervalSeries;
-import org.jfree.data.xy.XYIntervalSeriesCollection;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -292,35 +290,28 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     @Override
     protected synchronized void updatePlotData(String name) {
+        //removing data set if necessary
         XYPlottable plottable = get(name);
-
-        XYAdapter adapter = plottable.adapter();
-
-        XYIntervalSeries ser = new XYIntervalSeries(plottable.getName());
-        plottable.plotData().forEach(point -> {
-            double x = convertValue(adapter.getX(point));
-            double y = convertValue(adapter.getY(point));
-            if (Double.isNaN(x)) {
-                LoggerFactory.getLogger(getClass()).warn("Missing x value!");
-            } else if (Double.isNaN(y)) {
-                ser.add(x, NaN, NaN, NaN, NaN, NaN);
-            } else {
-                double xErr = convertValue(adapter.getXerr(point));
-                double yErr = convertValue(adapter.getYerr(point));
-                ser.add(x, x - xErr, x + xErr, y, y - yErr, y + yErr);
-            }
-        });
-
-        final XYIntervalSeriesCollection data = new XYIntervalSeriesCollection();
-        data.addSeries(ser);
-
-        if (!index.contains(plottable.getName())) {
-            index.add(plottable.getName());
+        if(plottable == null){
+            index.remove(name);
+           run(() -> {
+                plot.setDataset(index.indexOf(name), null);
+            });
+           return;
         }
+        
+        if (!index.contains(name)) {
+            IntervalXYDataset data = new JFCDataWrapper(plottable);
+            index.add(plottable.getName());
 
-        run(() -> {
-            plot.setDataset(index.indexOf(name), data);
-        });
+            run(() -> {
+                plot.setDataset(index.indexOf(name), data);
+            });
+        } else {
+            JFCDataWrapper wrapper = (JFCDataWrapper) plot.getDataset(index.indexOf(name));
+            wrapper.clearCache();
+            run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
+        }
     }
 
     @Override

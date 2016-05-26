@@ -12,7 +12,8 @@ package hep.dataforge.io.envelopes;
  */
 public interface Wrappable {
 
-    public static final short DEFAULT_WRAPPER_ENVELOPE_CODE = 0x5752;//WR
+    public static final short DEFAULT_WRAPPER_ENVELOPE_CODE = 0x4446;//DF
+    public static final String WRAPPED_TYPE_KEY = "type";
 
     Envelope wrap();
 }

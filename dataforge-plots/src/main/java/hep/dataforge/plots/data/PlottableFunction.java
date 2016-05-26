@@ -78,7 +78,7 @@ public class PlottableFunction extends XYPlottable {
     }
 
     @Override
-    public Stream<DataPoint> plotData(Meta dataConfiguration) {
+    public Stream<DataPoint> dataStream(Meta dataConfiguration) {
         //TODO use information from cfg
         return filterDataStream(grid.stream().map(x -> new MapPoint(new String[]{"x", "y"}, x, function.value(x))), dataConfiguration);
     }

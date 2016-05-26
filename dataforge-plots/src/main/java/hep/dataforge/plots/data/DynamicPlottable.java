@@ -116,7 +116,7 @@ public class DynamicPlottable extends XYPlottable {
     }
 
     @Override
-    public Stream<DataPoint> plotData(Meta cfg) {
+    public Stream<DataPoint> dataStream(Meta cfg) {
         return filterDataStream(map.values().stream(), cfg);
     }
 

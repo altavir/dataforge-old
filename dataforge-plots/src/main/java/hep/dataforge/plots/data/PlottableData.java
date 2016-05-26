@@ -26,6 +26,7 @@ import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  *
@@ -92,6 +93,8 @@ public class PlottableData extends XYPlottable {
         plot.fillData(data);
         return plot;
     }
+    
+    //TODO replace by ObservableList and allow external modification
 
     protected List<DataPoint> data;
 
@@ -112,9 +115,18 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
+    protected void setData(@NonNull List<DataPoint> data) {
+        this.data = data;
+    }
+
     @Override
-    public Stream<DataPoint> plotData(Meta dataConfiguration) {
+    public Stream<DataPoint> dataStream(Meta dataConfiguration) {
         return filterDataStream(data.stream(), dataConfiguration);
+    }
+
+    @Override
+    public List<DataPoint> data() {
+        return this.data;
     }
 
 }

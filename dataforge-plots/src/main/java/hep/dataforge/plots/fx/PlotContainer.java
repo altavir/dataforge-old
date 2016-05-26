@@ -7,6 +7,7 @@ package hep.dataforge.plots.fx;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.fx.FXUtils;
 import hep.dataforge.fx.MetaEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
@@ -21,10 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
-import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -152,8 +153,8 @@ public class PlotContainer implements Initializable {
     public void setSideBarExpanded(boolean expanded) {
         this.sidebarVisibleProperty.set(expanded);
     }
-    
-    public void setSideBarPosition(double position){
+
+    public void setSideBarPosition(double position) {
         split.setDividerPositions(position);
     }
 
@@ -198,11 +199,29 @@ public class PlotContainer implements Initializable {
         return plot;
     }
 
+    /**
+     * Set plot to display in this container
+     *
+     * @param plot
+     */
     public void setPlot(PlotFrame plot) {
         this.plot = plot;
-        plotPane.getChildren().retainAll(optionsPannelButton);
-        this.plot.display(plotPane);
-        plottableslList.setItems(plot.plottables());
+        FXUtils.run(() -> {
+            plotPane.getChildren().retainAll(optionsPannelButton);
+            this.plot.display(plotPane);
+            plottableslList.setItems(plot.plottables());
+        });
+    }
+
+    /**
+     * remove plot from container
+     */
+    public void removePlot() {
+        this.plot = null;
+        FXUtils.run(() -> {
+            plotPane.getChildren().retainAll(optionsPannelButton);
+            plottableslList.setItems(FXCollections.emptyObservableList());
+        });
     }
 
     protected void setupSideBar() {
@@ -286,35 +305,36 @@ public class PlotContainer implements Initializable {
         }
 
         private void setContent(Plottable item) {
-            setText(null);
+            FXUtils.run(() -> {
+                setText(null);
 
-            title = new CheckBox();
-            title.setSelected(true);
-            configButton = new Button("...");
-            configButton.setMinWidth(0);
-            Pane space = new Pane();
-            HBox.setHgrow(space, Priority.ALWAYS);
-            content = new HBox(title, space, configButton);
-            HBox.setHgrow(content, Priority.ALWAYS);
-            content.setMaxWidth(Double.MAX_VALUE);
-            Configuration config = item.getConfig();
-            config.addObserver(this, true);
+                title = new CheckBox();
+                title.setSelected(true);
+                configButton = new Button("...");
+                configButton.setMinWidth(0);
+                Pane space = new Pane();
+                HBox.setHgrow(space, Priority.ALWAYS);
+                content = new HBox(title, space, configButton);
+                HBox.setHgrow(content, Priority.ALWAYS);
+                content.setMaxWidth(Double.MAX_VALUE);
+                Configuration config = item.getConfig();
+                config.addObserver(this, true);
 
-            title.setText(config.getString("title", item.getName()));
-            title.setSelected(config.getBoolean("visible", true));
-            title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                config.setValue("visible", newValue);
+                title.setText(config.getString("title", item.getName()));
+                title.setSelected(config.getBoolean("visible", true));
+                title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    config.setValue("visible", newValue);
+                });
+
+                if (config.hasValue("color")) {
+                    title.setTextFill(Color.valueOf(config.getString("color")));
+                }
+
+                configButton.setOnAction((ActionEvent event) -> {
+                    displayConfigurator(item.getName() + " configuration", config, DescriptorUtils.buildDescriptor(item));
+                });
+                setGraphic(content);
             });
-
-            if (config.hasValue("color")) {
-                title.setTextFill(Color.valueOf(config.getString("color")));
-            }
-
-            configButton.setOnAction((ActionEvent event) -> {
-                displayConfigurator(item.getName() + " configuration", config, DescriptorUtils.buildDescriptor(item));
-            });
-
-            Platform.runLater(() -> setGraphic(content));
         }
 
         @Override

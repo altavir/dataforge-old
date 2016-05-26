@@ -95,7 +95,7 @@ public class FXLineChartFrame extends XYPlotFrame {
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();
 
-        series.getData().addAll(plottable.plotData()
+        series.getData().addAll(plottable.dataStream()
                 .map(point -> new XYChart.Data<>(xFunc.apply(point), yFunc.apply(point)))
                 .collect(Collectors.toList()));
 

@@ -28,7 +28,6 @@ import javafx.scene.layout.AnchorPane;
  * @param <T>
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-//@ValueDef(name = "frameName", def = "default", info = "The name of the frame. Must be unique.")
 public interface PlotFrame<T extends Plottable> extends PlotStateListener, Configurable, Wrappable {
 
     /**

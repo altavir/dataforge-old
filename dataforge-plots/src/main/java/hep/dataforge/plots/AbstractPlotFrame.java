@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.fx.FXUtils;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.EnvelopeWriter;
@@ -48,16 +49,20 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public void remove(String plotName) {
         get(plotName).removeListener(this);
-        plottables.removeIf(pl -> pl.getName().equals(plotName));
+        FXUtils.run(() -> {
+            plottables.removeIf(pl -> pl.getName().equals(plotName));
+            updatePlotData(plotName);
+        });
     }
 
     @Override
     public void clear() {
-        plottables.forEach((T pl)->pl.removeListener(this));
-        plottables.clear();
+        plottables.forEach((T pl) -> pl.removeListener(this));
+        FXUtils.run(() -> {
+            plottables.clear();
+            //FIXME remove plottables
+        });
     }
-    
-    
 
     @Override
     public synchronized void add(T plottable) {
