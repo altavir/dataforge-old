@@ -17,6 +17,8 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
+import java.util.Collections;
+import java.util.Map;
 
 /**
  *
@@ -34,6 +36,10 @@ public interface EnvelopeType<T extends Envelope> {
     }
 
     String description();
+    
+    default Map<String, Value> defaultProperties(){
+        return Collections.emptyMap();
+    }
 
     EnvelopeReader<T> getReader();
 

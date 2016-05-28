@@ -56,7 +56,6 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotContainer implements Initializable {
 
-    //FIXME replace inheritance by composition
     public static PlotContainer anchorTo(AnchorPane pane) {
         PlotContainer container = new PlotContainer();
         pane.getChildren().add(container.getRoot());

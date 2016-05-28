@@ -19,12 +19,14 @@ import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.ValueConversionException;
+import hep.dataforge.fx.FXUtils;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -38,6 +40,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
+import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartPanel;
@@ -132,6 +135,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     public JFreeChartFrame display(AnchorPane container) {
         Runnable run = () -> {
             ChartViewer viewer = new ChartViewer(getChart());
+            
+            FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
 
             container.getChildren().add(viewer);
             AnchorPane.setBottomAnchor(viewer, 0d);
@@ -140,11 +145,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             AnchorPane.setRightAnchor(viewer, 0d);
         };
 
-        if (Platform.isFxApplicationThread()) {
-            run.run();
-        } else {
-            Platform.runLater(run);
-        }
+        FXUtils.run(run);
 
         return this;
     }

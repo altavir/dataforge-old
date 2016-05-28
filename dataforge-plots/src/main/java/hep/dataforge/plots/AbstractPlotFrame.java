@@ -21,10 +21,12 @@ import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.EnvelopeWriter;
 import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.SimpleConfigurable;
+import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -106,11 +108,16 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
                 writer.write(baos, pl.wrap());
             } catch (IOException ex) {
                 throw new RuntimeException("Failed to write plotable to envelope", ex);
+            } catch (UnsupportedOperationException uex) {
+                LoggerFactory.getLogger(getClass()).error("Failed to wrap plottable {} becouse wits wrapper is not implemented", pl.getName());
             }
         }
 
-        EnvelopeBuilder builder = new EnvelopeBuilder().setMeta(meta())
-                .setDataType("hep.dataforge.plots.PlotFrame")
+        EnvelopeBuilder builder = new EnvelopeBuilder()
+                .setDataType("df.plots.PlotFrame")
+                .putMetaValue(WRAPPED_TYPE_KEY, PLOT_WRAPPER_TYPE)
+                .putMetaValue("plotFrameClass", getClass().getName())
+                .putMetaNode("plotMeta", meta())
                 .setEnvelopeType(DEFAULT_WRAPPER_ENVELOPE_CODE)
                 .setData(baos.toByteArray());
         return builder.build();

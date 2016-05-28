@@ -20,10 +20,12 @@ package hep.dataforge.io.envelopes;
  * @author darksnake
  */
 public class DefaultEnvelopeType implements EnvelopeType<Envelope> {
+
     /**
      * The set of symbols that separates tag from metadata and data
      */
     public static final byte[] SEPARATOR = {'\r', '\n'};
+    public static final byte[] CUSTOM_PROPERTY_HEAD = {'#', '?'};
 
     @Override
     public String description() {
@@ -39,8 +41,6 @@ public class DefaultEnvelopeType implements EnvelopeType<Envelope> {
     public String getName() {
         return "default";
     }
-    
-    
 
     @Override
     public EnvelopeReader<Envelope> getReader() {

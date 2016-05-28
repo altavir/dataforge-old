@@ -28,7 +28,7 @@ import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.analysis.UnivariateFunction;
+import java.util.function.Function;
 
 /**
  *
@@ -46,7 +46,7 @@ public class PlotContainerTest {
 
         container.setPlot(frame);
 
-        UnivariateFunction func = (double x1) -> x1 * x1;
+        Function<Double,Double> func = (x1) -> x1 * x1;
 
         PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 

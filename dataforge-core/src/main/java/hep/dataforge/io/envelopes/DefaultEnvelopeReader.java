@@ -19,6 +19,7 @@ import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
+import static hep.dataforge.io.envelopes.DefaultEnvelopeType.CUSTOM_PROPERTY_HEAD;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
 import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
@@ -27,11 +28,12 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -59,27 +61,33 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             return null;
         }
 
+        //reading custom properties
         stream.mark(DEFAULT_BUFFER_SIZE);
-        Scanner scan = new Scanner(stream);
-        if (scan.hasNextLine()) {
-            String line = scan.nextLine();
-            Pattern pattern = Pattern.compile("\\#\\?\\s*(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>\\w*)\\;?");
+        byte[] smallBuffer = new byte[2];
+        stream.read(smallBuffer);
+        Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*)");
 
-            while (line.isEmpty() || line.trim().startsWith("#?")) {
-                Matcher matcher = pattern.matcher(line);
-                if (matcher.matches()) {
-                    String key = matcher.group("key");
-                    String value = matcher.group("value");
-                    res.put(key, Value.of(value));
-
-                    stream.mark(DEFAULT_BUFFER_SIZE);
+        while (Arrays.equals(CUSTOM_PROPERTY_HEAD, smallBuffer)) {
+            ByteBuffer customPropertyBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE - 2);
+            byte b;
+            do {
+                b = (byte) stream.read();
+                customPropertyBuffer.put(b);
+                if (customPropertyBuffer.position() == customPropertyBuffer.limit()) {
+                    throw new RuntimeException("Custom properties with length more than " + customPropertyBuffer.limit() + " are not supported");
                 }
-                if (scan.hasNextLine()) {
-                    line = scan.nextLine();
-                } else {
-                    line = "";
-                }
+            } while ('\n' != b);
+            String line = new String(customPropertyBuffer.array()).trim();
+            Matcher matcher = pattern.matcher(line);
+            if (matcher.matches()) {
+                String key = matcher.group("key");
+                String value = matcher.group("value");
+                res.put(key, Value.of(value));
+            } else {
+                throw new RuntimeException("Custom property definition does not match format");
             }
+            stream.mark(DEFAULT_BUFFER_SIZE);
+            stream.read(smallBuffer);
         }
         stream.reset();
 
@@ -100,13 +108,18 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
      * @throws IOException
      */
     public Envelope customRead(InputStream stream, Map<String, Value> overrideProperties) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(stream);
+        BufferedInputStream bis;
+        if (stream instanceof BufferedInputStream) {
+            bis = (BufferedInputStream) stream;
+        } else {
+            bis = new BufferedInputStream(stream);
+        }
         Map<String, Value> properties = readProperties(bis);
-        
-        if(properties == null){
+
+        if (properties == null) {
             throw new IOException("Empty envelope");
         }
-        
+
         if (overrideProperties != null) {
             properties.putAll(overrideProperties);
         }

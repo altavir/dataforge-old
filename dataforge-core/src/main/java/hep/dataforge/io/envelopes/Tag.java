@@ -122,6 +122,8 @@ public class Tag {
      */
     public Map<String, Value> applyProperties(Map<String, Value> map) {
         Map<String,Value> properties = new HashMap<>(map);
+        protocolVersion = (short) (properties.containsKey(VERSION_KEY) ? properties.get(VERSION_KEY).intValue() : CURRENT_PROTOCOL_VERSION);
+        properties.remove(VERSION_KEY);
         type = getShortCompositePropertyValue(properties, TYPE_KEY);
         opt = properties.containsKey(OPT_KEY) ? properties.get(OPT_KEY).intValue() : 0;
         properties.remove(OPT_KEY);

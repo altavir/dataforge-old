@@ -18,12 +18,13 @@ package hep.dataforge.tables;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import java.io.Serializable;
 
 /**
  * An adapter to interpret datapoint
  * @author Alexander Nozik
  */
-public interface PointAdapter extends Annotated {
+public interface PointAdapter extends Annotated, Serializable {
     
     public static final String WEIGHT = "@weight";    
 

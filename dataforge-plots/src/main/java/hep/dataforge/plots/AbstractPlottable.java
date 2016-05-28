@@ -15,46 +15,44 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import static hep.dataforge.io.envelopes.Wrappable.DEFAULT_WRAPPER_ENVELOPE_CODE;
+import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.utils.NonNull;
 import hep.dataforge.utils.ReferenceRegistry;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 /**
  *
  * @author darksnake
  */
 public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable<T> {
-    
+
     public static final String ADAPTER_KEY = "adapter";
+    public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
     private final String name;
-    private final ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
+    private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
     private T adapter;
-
-//    public AbstractPlottable(String name, Meta metaBase, Meta config) {
-//        this.name = name;
-//        if (metaBase != null) {
-//            super.setMetaBase(metaBase);
-//        }
-//        if (config != null) {
-//            super.configure(config);
-//        }
-//    }
 
     public AbstractPlottable(String name, @NonNull T adapter) {
         this(name);
         setAdapter(adapter);
     }
-    
+
     public AbstractPlottable(@NonNull String name) {
         this.name = name;
     }
 
     @Override
-    public void addListener(PlotStateListener listener) {
-        listeners.add(listener);
+    public void addListener(@NonNull PlotStateListener listener) {
+        getListeners().add(listener);
     }
 
     @Override
@@ -63,13 +61,13 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     }
 
     @Override
-    public void removeListener(PlotStateListener listener) {
-        this.listeners.remove(listener);
+    public void removeListener(@NonNull PlotStateListener listener) {
+        this.getListeners().remove(listener);
     }
 
     @Override
     public T adapter() {
-        if(adapter == null){
+        if (adapter == null) {
             return defaultAdapter();
         } else {
             return adapter;
@@ -87,9 +85,9 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     public final void setAdapter(Meta adapterMeta) {
         setAdapter(buildAdapter(adapterMeta));
     }
-    
+
     protected abstract T buildAdapter(Meta adapterMeta);
-    
+
     protected abstract T defaultAdapter();
 
     /**
@@ -99,9 +97,9 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
      */
     @Override
     protected void applyConfig(Meta config) {
-        listeners.forEach((l) -> l.notifyConfigurationChanged(getName()));
+        getListeners().forEach((l) -> l.notifyConfigurationChanged(getName()));
         //If adapter is not defined, creating new adapter.
-        if(this.adapter == null && config.hasNode(ADAPTER_KEY)){
+        if (this.adapter == null && config.hasNode(ADAPTER_KEY)) {
             setAdapter(config.getNode(ADAPTER_KEY));
         }
     }
@@ -110,11 +108,48 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
      * Notify all listeners that data changed
      */
     public void notifyDataChanged() {
-        listeners.forEach((l) -> l.notifyDataChanged(getName()));
+        getListeners().forEach((l) -> l.notifyDataChanged(getName()));
     }
 
     public String getTitle() {
         return meta().getString("title", getName());
+    }
+
+    @Override
+    public Envelope wrap() {
+        return wrapBuilder().build();
+    }
+    
+    /**
+     * Protected method to customize wrap
+     * @return 
+     */
+    protected EnvelopeBuilder wrapBuilder() {
+        EnvelopeBuilder builder = new EnvelopeBuilder()
+                .setDataType("df.plots.Plottable")
+                .putMetaValue(WRAPPED_TYPE_KEY, PLOTTABLE_WRAPPER_TYPE)
+                .putMetaValue("plottableClass", getClass().getName())
+                .putMetaValue("name", getName())
+                .putMetaNode("meta", meta())
+                .setEnvelopeType(DEFAULT_WRAPPER_ENVELOPE_CODE);
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        try (ObjectOutputStream os = new ObjectOutputStream(baos)) {
+            os.writeObject(this.data());
+
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+
+        builder.setData(baos.toByteArray());
+        return builder;
+    }
+
+    /**
+     * @return the listeners
+     */
+    private ReferenceRegistry<PlotStateListener> getListeners() {
+        return listeners;
     }
 
 }

@@ -23,10 +23,10 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
-import org.checkerframework.checker.nullness.qual.NonNull;
 
 /**
  *
@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
-public class PlottableData extends XYPlottable {
+public class PlottableData extends XYPlottable{
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
@@ -96,14 +96,15 @@ public class PlottableData extends XYPlottable {
     
     //TODO replace by ObservableList and allow external modification
 
-    protected List<DataPoint> data;
+    protected List<DataPoint> data= new ArrayList<>();
+    
+    
 
-    protected PlottableData(String name) {
+    public PlottableData(String name) {
         super(name);
-        data = new ArrayList<>();
     }
 
-    public PlottableData(String name, XYAdapter adapter) {
+    protected PlottableData(String name, XYAdapter adapter) {
         super(name, adapter);
     }
 
@@ -128,5 +129,4 @@ public class PlottableData extends XYPlottable {
     public List<DataPoint> data() {
         return this.data;
     }
-
 }

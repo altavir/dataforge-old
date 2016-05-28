@@ -1,6 +1,7 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
 include ':dataforge-plots' // plot library
+include ':dataforge-plots:plots-viewer' // Viewer application for exported plots
 include ':dataforge-maths' // mathematical tools
 include ':dataforge-fx' // gui tools using JavaFx
 

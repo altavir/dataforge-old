@@ -17,7 +17,6 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
 import static hep.dataforge.fx.MetaTreeItem.NO_CONFIGURATOR_TAG;
-import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
@@ -26,7 +25,6 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -104,10 +102,5 @@ public interface Plottable<T extends PointAdapter> extends Named, Annotated, Con
      * @param adapterMeta
      */
     void setAdapter(Meta adapterMeta);
-
-    @Override
-    public default Envelope wrap() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
-    }
 
 }

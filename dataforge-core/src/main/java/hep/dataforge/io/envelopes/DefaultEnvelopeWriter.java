@@ -88,7 +88,7 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         }
 
         for (Map.Entry<String, Value> entry : newProperties.entrySet()) {
-            stream.write(String.format("#? %s: %s ;", entry.getKey(), entry.getValue().stringValue()).getBytes());
+            stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
             stream.write(SEPARATOR);
         }
 

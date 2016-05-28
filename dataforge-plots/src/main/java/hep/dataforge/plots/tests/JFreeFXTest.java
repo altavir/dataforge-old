@@ -26,11 +26,11 @@ import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.stage.Stage;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  *
@@ -44,7 +44,7 @@ public class JFreeFXTest extends Application {
 
         JFreeChartFrame frame = new JFreeChartFrame().display(root);
 
-        UnivariateFunction func = (double x1) -> x1 * x1;
+        Function<Double,Double> func = (x1) -> x1 * x1;
 
         PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 

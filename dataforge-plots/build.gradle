@@ -1,18 +1,10 @@
 description = 'dataforge-plots'
 
 dependencies {
-    //    compile 'org.jfree:jfreechart:1.0.19'
-
-  
     //JFreeChart dependancies
     compile 'org.jfree:fxgraphics2d:1.3'
-    // http://mvnrepository.com/artifact/org.jfree/jfreesvg
-    compile group: 'org.jfree', name: 'jfreesvg', version: '3.1'
-    
     compile fileTree(dir: 'libs', include: ['*.jar'])
     
-    compile project(':dataforge-fx')  
+    compile(project(':dataforge-fx')){ transitive =  false}
     compile project(':dataforge-core')
-    compile project(':dataforge-maths')    
-    testCompile group: 'ch.qos.logback', name: 'logback-classic', version:'1.1.2'
 }

@@ -5,12 +5,16 @@
  */
 package hep.dataforge.io.envelopes;
 
+import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
+import static hep.dataforge.io.envelopes.WrapperUtils.JAVA_OBJECT_TYPE;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+
 /**
  *
  * @author Alexander Nozik
  */
-public class JavaObjectUnWrapper implements UnWrapper<Object>{
-    public static final String JAVA_OBJECT_TYPE = "javaObject";
+public class JavaObjectUnWrapper implements UnWrapper<Object> {
 
     @Override
     public String type() {
@@ -19,7 +23,15 @@ public class JavaObjectUnWrapper implements UnWrapper<Object>{
 
     @Override
     public Object unWrap(Envelope envelope) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (!type().equals(envelope.meta().getString(WRAPPED_TYPE_KEY, ""))) {
+            throw new Error("Wrong wrapped type: " + envelope.meta().getString(WRAPPED_TYPE_KEY, ""));
+        }
+        try {
+            ObjectInputStream stream = new ObjectInputStream(envelope.getData().getStream());
+            return stream.readObject();
+        } catch (IOException | ClassNotFoundException ex) {
+            throw new RuntimeException(ex);
+        }
     }
-    
+
 }

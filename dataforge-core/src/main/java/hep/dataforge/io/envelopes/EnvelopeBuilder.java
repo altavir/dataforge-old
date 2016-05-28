@@ -29,6 +29,7 @@ import java.util.Map;
 
 /**
  * The convenient build for envelopes
+ *
  * @author Alexander Nozik
  */
 public class EnvelopeBuilder {
@@ -37,7 +38,6 @@ public class EnvelopeBuilder {
     private MetaBuilder meta = new MetaBuilder("envelope");
     //initializing with empty buffer
     private Binary data = new BufferedBinary(new byte[0]);
-
 
     public EnvelopeBuilder(Envelope envelope) {
         this.properties = envelope.getProperties();
@@ -48,7 +48,6 @@ public class EnvelopeBuilder {
     public EnvelopeBuilder() {
         this.properties.put(VERSION_KEY, Value.of(Tag.CURRENT_PROTOCOL_VERSION));
     }
-    
 
     public EnvelopeBuilder setProperty(String name, Value value) {
         properties.put(name, value);
@@ -62,8 +61,8 @@ public class EnvelopeBuilder {
     public EnvelopeBuilder setProperty(String name, Number value) {
         return setProperty(name, Value.of(value));
     }
-    
-    public EnvelopeBuilder setProperties(Map<String, Value> properties){
+
+    public EnvelopeBuilder setProperties(Map<String, Value> properties) {
         for (Map.Entry<String, Value> entry : properties.entrySet()) {
             setProperty(entry.getKey(), entry.getValue());
         }
@@ -74,35 +73,43 @@ public class EnvelopeBuilder {
         this.meta = annotation.getBuilder();
         return this;
     }
-    
+
     /**
-     * Get modifiable meta builder for this envelope 
-     * @return 
+     * Get modifiable meta builder for this envelope
+     *
+     * @return
      */
-    public MetaBuilder getMetaBuilder(){
+    public MetaBuilder getMetaBuilder() {
         return this.meta;
     }
-    
+
     /**
      * Helper to fast put node to envelope meta
+     *
      * @param element
-     * @return 
+     * @return
      */
-    public EnvelopeBuilder putMetaNode(Meta element){
+    public EnvelopeBuilder putMetaNode(String nodeName, Meta element) {
+        this.meta.putNode(nodeName, element);
+        return this;
+    }
+
+    public EnvelopeBuilder putMetaNode(Meta element) {
         this.meta.putNode(element);
         return this;
     }
-    
+
     /**
      * Helper to fast put value to meta root
+     *
      * @param name
      * @param value
-     * @return 
+     * @return
      */
-    public EnvelopeBuilder putMetaValue(String name, Object value){
+    public EnvelopeBuilder putMetaValue(String name, Object value) {
         this.meta.putValue(name, value);
         return this;
-    }    
+    }
 
     public EnvelopeBuilder setMetaType(String metaType) {
         Value metaTypeValue = EnvelopeProperties.getMetaType(metaType).getValue();
@@ -118,52 +125,50 @@ public class EnvelopeBuilder {
         this.data = data;
         return this;
     }
-    
+
     public EnvelopeBuilder setData(ByteBuffer data) {
         this.data = new BufferedBinary(data);
         return this;
-    }    
-    
+    }
+
     public EnvelopeBuilder setData(byte[] data) {
         this.data = new BufferedBinary(data);
         return this;
-    }    
+    }
 
 //    public EnvelopeBuilder setPriority(int priority) {
 //        return setProperty(MESSAGE_PRIORITY_KEY, priority);
 //    }
-    
-    public EnvelopeBuilder setEnvelopeType(EnvelopeType type){
+    public EnvelopeBuilder setEnvelopeType(EnvelopeType type) {
         return this.setProperty(TYPE_KEY, type.getValue());
     }
-    
-    public EnvelopeBuilder setEnvelopeType(String type){
+
+    public EnvelopeBuilder setEnvelopeType(String type) {
         return this.setProperty(TYPE_KEY, type);
     }
-    
-    public EnvelopeBuilder setEnvelopeType(short type){
+
+    public EnvelopeBuilder setEnvelopeType(short type) {
         return this.setProperty(TYPE_KEY, type);
-    }    
-    
-    public EnvelopeBuilder setDataType(String type){
+    }
+
+    public EnvelopeBuilder setDataType(String type) {
         return this.setProperty(DATA_TYPE_KEY, type);
     }
-    
-    public EnvelopeBuilder setDataType(int type){
+
+    public EnvelopeBuilder setDataType(int type) {
         return this.setProperty(DATA_TYPE_KEY, type);
-    }       
-    
+    }
+
 //    public EnvelopeBuilder setTime(LocalDateTime time){
 //        return this.setProperty(OPT_KEY, time.toEpochSecond(ZoneOffset.UTC));
 //    }
-    
-    public EnvelopeBuilder setInfiniteDataSize(){
+    public EnvelopeBuilder setInfiniteDataSize() {
         return setProperty(DATA_LENGTH_KEY, -1);
     }
-    
-    public EnvelopeBuilder setInfiniteMetaSize(){
+
+    public EnvelopeBuilder setInfiniteMetaSize() {
         return setProperty(META_LENGTH_KEY, -1);
-    }    
+    }
 
     public Map<String, Value> getProperties() {
         return properties;
