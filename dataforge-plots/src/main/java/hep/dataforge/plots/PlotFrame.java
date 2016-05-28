@@ -16,8 +16,8 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
-import hep.dataforge.names.Named;
 import javafx.collections.ObservableList;
 import javafx.scene.layout.AnchorPane;
 
@@ -27,9 +27,8 @@ import javafx.scene.layout.AnchorPane;
  * @author Alexander Nozik
  * @param <T>
  */
-@ValueDef(name = "frameTitle", info = "The title of the plot. By default the name of the Content is taken.")
-@ValueDef(name = "frameName", def = "default", info = "The name of the frame. Must be unique.")
-public interface PlotFrame<T extends Plottable> extends PlotStateListener, Configurable, Named {
+@ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
+public interface PlotFrame<T extends Plottable> extends PlotStateListener, Configurable, Wrappable {
 
     /**
      * Заменить серию с данным именем и перерисовать соответствующий график или
@@ -55,6 +54,11 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      * @param plotName
      */
     void remove(String plotName);
+    
+    /**
+     * Remove all plottables
+     */
+    void clear();
 
     /**
      * Возвращает загруженную серию, если она есть. Иначе возвращает null
@@ -69,7 +73,7 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      *
      * @return
      */
-    ObservableList<? extends T> getAll();
+    ObservableList<? extends T> plottables();
 
     
     /**

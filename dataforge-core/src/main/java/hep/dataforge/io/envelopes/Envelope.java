@@ -33,8 +33,19 @@ import java.util.Map;
 public interface Envelope extends Annotated {
 
     //Constants
+    /**
+     * The type of the envelope
+     */
     public static final String TYPE_KEY = "type";
+    /**
+     * Version of envelope
+     */
     public static final String VERSION_KEY = "version";
+//    /**
+//     * The offset between tag end and meta begin. Used to define custom
+//     * properties
+//     */
+//    public static final String META_OFFSET_KEY = "metaOffset";
     public static final String OPT_KEY = "opt";
     public static final String META_TYPE_KEY = "metaType";
     public static final String META_ENCODING_KEY = "metaEncoding";

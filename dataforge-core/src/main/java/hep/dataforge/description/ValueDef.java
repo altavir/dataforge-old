@@ -40,14 +40,16 @@ public @interface ValueDef {
     String name();
 
     String type() default "STRING";
-    
+
     boolean multiple() default false;
-    
+
     String def() default "";
 
     String info() default "";
-    
+
     boolean required() default false;
-    
+
     String allowed() default "";
+
+    String[] tags() default {};
 }

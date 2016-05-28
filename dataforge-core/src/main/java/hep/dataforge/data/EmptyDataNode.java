@@ -30,8 +30,15 @@ public class EmptyDataNode<T> implements DataNode<T> {
 
     @Override
     public Stream<Pair<String, Data<? extends T>>> dataStream() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Stream.empty();
     }
+
+    @Override
+    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
+        return Stream.empty();
+    }
+    
+    
 
     @Override
     public Class<T> type() {
@@ -50,7 +57,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
 
     @Override
     public DataNode<? extends T> getNode(String nodeName) {
-        throw new NameNotFoundException(nodeName);
+        return null;
     }
 
     @Override

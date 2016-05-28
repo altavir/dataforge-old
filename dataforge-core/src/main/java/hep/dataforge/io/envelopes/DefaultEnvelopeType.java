@@ -25,10 +25,21 @@ public class DefaultEnvelopeType implements EnvelopeType<Envelope> {
      * The set of symbols that separates tag from metadata and data
      */
     public static final byte[] SEPARATOR = {'\r', '\n'};
+    public static final byte[] CUSTOM_PROPERTY_HEAD = {'#', '?'};
 
     @Override
     public String description() {
         return "Standard envelope type. Meta and data autodetectio are not supported. Tag is mandatory.";
+    }
+
+    @Override
+    public short getCode() {
+        return 0x0000;
+    }
+
+    @Override
+    public String getName() {
+        return "default";
     }
 
     @Override

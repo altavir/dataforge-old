@@ -19,13 +19,13 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Dispatcher;
 import hep.dataforge.io.envelopes.Responder;
-import hep.dataforge.io.envelopes.Target;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
 import java.util.Map;
+import hep.dataforge.io.envelopes.Destination;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -38,7 +38,7 @@ import java.util.Map;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, Target {
+public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, Destination {
 
     /**
      * Initialize this storage.

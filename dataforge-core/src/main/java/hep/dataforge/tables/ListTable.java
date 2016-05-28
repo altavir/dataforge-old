@@ -214,18 +214,22 @@ public class ListTable implements Table {
 
     public static class Builder {
 
-        private ListTable t;
+        private ListTable table;
 
         public Builder(TableFormat format) {
-            t = new ListTable(format);
+            table = new ListTable(format);
         }
-        
+
+        public Builder(Iterable<String> format) {
+            table = new ListTable(TableFormat.forNames(format));
+        }
+
         public Builder(String... format) {
-            t = new ListTable(TableFormat.forNames(format));
+            table = new ListTable(TableFormat.forNames(format));
         }
 
         public Builder() {
-            t = new ListTable(TableFormat.empty());
+            table = new ListTable(TableFormat.empty());
         }
 
         /**
@@ -235,18 +239,18 @@ public class ListTable implements Table {
          * @throws hep.dataforge.exceptions.NamingException if any.
          */
         public Builder addRow(DataPoint e) throws NamingException {
-            t.addRow(e);
+            table.addRow(e);
             return this;
         }
 
         public Builder addRows(Iterable<? extends DataPoint> points) {
-            t.addRows(points);
+            table.addRows(points);
             return this;
         }
         //TODO make methods to add virtual columns
 
-        public Table build(){
-            return t;
+        public Table build() {
+            return table;
         }
     }
 

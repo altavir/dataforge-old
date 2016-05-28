@@ -8,11 +8,13 @@ package hep.dataforge.tables;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractPointAdapter implements PointAdapter {
 
     private final Meta meta;
+    private final Map<String, String> nameCache = new HashMap<>();
 
     public AbstractPointAdapter() {
         meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
@@ -56,12 +58,18 @@ public abstract class AbstractPointAdapter implements PointAdapter {
      * Return the name that should be searched for in the data point for
      * parameter with given name.
      *
-     * @param valueName
+     * @param component
      * @return
      */
-    protected String getValueName(String valueName) {
-        //One could add name caching here to avoid multiple meta request
-        return meta().getString(valueName, valueName);
+    protected String getValueName(String component) {
+        //caching name to avoid heavy meta request
+        if (this.nameCache.containsKey(component)) {
+            return nameCache.get(component);
+        } else {
+            String valueName = meta().getString(component, component);
+            nameCache.put(component, valueName);
+            return valueName;
+        }
     }
 
 }

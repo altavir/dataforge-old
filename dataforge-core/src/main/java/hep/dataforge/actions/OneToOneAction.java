@@ -60,8 +60,9 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
         //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
-                thenCompose((T datum) -> CompletableFuture
-                        .supplyAsync(() -> transform(context, log, name, meta, datum), buildExecutor(context, name)));
+                thenCompose((T datum) -> {
+                    return postProcess(context, name, () -> transform(context, log, name, meta, datum));
+                });
 
         return new ActionResult(getOutputType(), log, future, outputMeta(name, groupMeta, data));
     }
@@ -101,16 +102,17 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         afterAction(context, name, res, inputMeta);
         return res;
     }
-    
+
     /**
      * Utility method to run action outside of context or execution chain
+     *
      * @param input
      * @param metaLayers
-     * @return 
+     * @return
      */
-    public R eval(T input, Meta... metaLayers){
+    public R simpleRun(T input, Meta... metaLayers) {
         Context context = GlobalContext.instance();
-        return transform(context, new Report("eval",context), "eval", inputMeta(context, metaLayers), input);
+        return transform(context, new Report("simpleRun", context), "simpleRun", inputMeta(context, metaLayers), input);
     }
 
     protected abstract R execute(Context context, Reportable log, String name, Laminate inputMeta, T input);

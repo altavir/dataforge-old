@@ -15,16 +15,18 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
+//import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import org.apache.commons.math3.analysis.UnivariateFunction;
+import java.util.function.Function;
+import java.util.stream.Stream;
 
 /**
  *
@@ -33,18 +35,19 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
 public class PlottableFunction extends XYPlottable {
 
     private final List<Double> grid;
-    private final UnivariateFunction function;
+    private final Function<Double, Double> function;
     //TODO Сделать построение графика по заданной решетке
 
-    public PlottableFunction(String name, UnivariateFunction function, double from, double to, int numPoints) {
+    public PlottableFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
         super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
         this.function = function;
 
         grid = new ArrayList<>(numPoints);
-        for (double d : GridCalculator.getUniformUnivariateGrid(from, to, numPoints)) {
-            grid.add(d);
+
+        for (int i = 0; i < numPoints; i++) {
+            grid.add(from + i * (to - from) / (numPoints - 1));
         }
 
     }
@@ -58,7 +61,7 @@ public class PlottableFunction extends XYPlottable {
      * @param data
      * @param xName
      */
-    public PlottableFunction(String name, UnivariateFunction function, Iterable<DataPoint> data, XYAdapter adapter) {
+    public PlottableFunction(String name, Function<Double, Double> function, Iterable<DataPoint> data, XYAdapter adapter) {
         super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);
@@ -77,12 +80,14 @@ public class PlottableFunction extends XYPlottable {
     }
 
     @Override
-    public Collection<DataPoint> plotData() {
-        List<DataPoint> list = new ArrayList<>();
-        for (double x : grid) {
-            list.add(new MapPoint(new String[]{"x", "y"}, x, function.value(x)));
-        }
-        return list;
+    public Stream<DataPoint> dataStream(Meta dataConfiguration) {
+        //TODO use information from cfg
+        return filterDataStream(grid.stream().map(x -> new MapPoint(new String[]{"x", "y"}, x, function.apply(x))), dataConfiguration);
+    }
+
+    @Override
+    protected EnvelopeBuilder wrapBuilder() {
+        return super.wrapBuilder().putMetaValue("showErrors", false);
     }
 
 }

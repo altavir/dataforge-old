@@ -40,13 +40,14 @@ public interface Name {
     public static final String NAME_TOKEN_SEPARATOR = ".";
 
     public static final String NAMESPACE_SEPARATOR = ":";
-    
+
     /**
      * The length of Name produced from given string
+     *
      * @param name
-     * @return 
+     * @return
      */
-    public static int lengthOf(String name){
+    public static int lengthOf(String name) {
         return Name.of(name).length();
     }
 
@@ -82,14 +83,20 @@ public interface Name {
     public static Name join(String... segments) {
         LinkedList<NameToken> list = new LinkedList<>();
         for (String segment : segments) {
-            Name segmentName = of(segment);
-            if (segmentName instanceof NameToken) {
-                list.add((NameToken) segmentName);
-            } else {
-                list.addAll(((NamePath) segmentName).getNames());
+            if (!segment.isEmpty()) {
+                Name segmentName = of(segment);
+                if (segmentName instanceof NameToken) {
+                    list.add((NameToken) segmentName);
+                } else {
+                    list.addAll(((NamePath) segmentName).getNames());
+                }
             }
         }
         return new NamePath(list);
+    }
+
+    public static String joinString(String... segments) {
+        return join(segments).toString();
     }
 
     public static Name join(Name... segments) {
@@ -207,8 +214,9 @@ public interface Name {
 
     /**
      * Create a new name with given name appended to the end of this one
+     *
      * @param name
-     * @return 
+     * @return
      */
     default Name append(Name name) {
         return join(this, name);

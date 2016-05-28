@@ -37,10 +37,12 @@ import static hep.dataforge.storage.commons.EnvelopeCodes.OBJECT_LOADER_TYPE_COD
 import static hep.dataforge.storage.commons.EnvelopeCodes.POINT_LOADER_TYPE_CODE;
 import static hep.dataforge.storage.commons.EnvelopeCodes.STATE_LOADER_TYPE_CODE;
 import hep.dataforge.storage.commons.StorageUtils;
+import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.time.Instant;
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileObject;
@@ -234,6 +236,12 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
+    protected Meta buildDirectoryMeta(FileObject directory) throws FileSystemException{
+        return new MetaBuilder("storage")
+                .putValue("file.timeModified", Instant.ofEpochMilli(directory.getContent().getLastModifiedTime()))
+                .build();
+    }
+    
     /**
      * The method should be overridden in descendants to add new loader types
      *
@@ -244,7 +252,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
         if (file.getType() == FOLDER) {
             try {
                 String dirName = file.getName().getBaseName();
-                FileStorage shelf = new FileStorage(this, dirName, meta());
+                FileStorage shelf = new FileStorage(this, dirName, buildDirectoryMeta(file));
 //                shelf.setReadOnly(isReadOnly());
                 shelf.refresh();
                 shelves.putIfAbsent(dirName, shelf);
@@ -256,7 +264,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
         } else {
             try {
                 Tag stamp = readFileTag(file);
-                if (stamp != null && stamp.getType() == DATAFORGE_STORAGE_ENVELOPE_CODE) {
+                if (stamp != null && stamp.type == DATAFORGE_STORAGE_ENVELOPE_CODE) {
                     Loader loader = buildLoader(file, stamp);
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
@@ -275,14 +283,16 @@ public class FileStorage extends AbstractStorage implements FileListener {
         byte[] bytes = new byte[Tag.TAG_LENGTH];
         stream.read(bytes);
         if (Tag.isValidTag(bytes)) {
-            return new Tag(bytes);
+            Tag tag = new Tag();
+            tag.read(bytes);
+            return tag;
         } else {
             return null;
         }
     }
 
     protected Loader buildLoader(FileObject file, Tag stamp) throws Exception {
-        switch (stamp.getDataType()) {
+        switch (stamp.dataType) {
             case POINT_LOADER_TYPE_CODE:
                 return FilePointLoader.fromFile(this, file, isReadOnly());
             case STATE_LOADER_TYPE_CODE:
@@ -292,7 +302,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
             case OBJECT_LOADER_TYPE_CODE:
                 return FileObjectLoader.fromFile(this, file, isReadOnly());
             default:
-                throw new StorageException("The loader type with code " + Integer.toHexString(stamp.getDataType()) + " is not supported");
+                throw new StorageException("The loader type with code " + Integer.toHexString(stamp.dataType) + " is not supported");
         }
 
     }

@@ -62,7 +62,7 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         Map<String, Value> newProperties = new HashMap<>(defaultProperties);
         newProperties.putAll(envelope.getProperties());
 
-        MetaStreamWriter writer = EnvelopeProperties.getType(newProperties.get(META_TYPE_KEY)).getWriter();
+        MetaStreamWriter writer = EnvelopeProperties.getMetaType(newProperties.get(META_TYPE_KEY)).getWriter();
         Charset charset = EnvelopeProperties.getCharset(newProperties.get(META_ENCODING_KEY));
         byte[] meta;
         int metaSize;
@@ -82,21 +82,13 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         newProperties.putIfAbsent(DATA_LENGTH_KEY, Value.of(dataSize));
 
         if (useStamp) {
-            Tag stamp = Tag.fromProperties(newProperties);
+            Tag stamp = new Tag();
+            newProperties = stamp.applyProperties(newProperties);
             stream.write(stamp.asByteArray());
-            //Removeing keys that are already in the stamp
-            newProperties.remove(DATA_LENGTH_KEY);
-            newProperties.remove(DATA_TYPE_KEY);
-            newProperties.remove(META_ENCODING_KEY);
-            newProperties.remove(META_LENGTH_KEY);
-            newProperties.remove(META_TYPE_KEY);
-            newProperties.remove(OPT_KEY);
-            newProperties.remove(TYPE_KEY);
-            newProperties.remove(VERSION_KEY);
         }
 
         for (Map.Entry<String, Value> entry : newProperties.entrySet()) {
-            stream.write(String.format("#? %s: %s ;", entry.getKey(), entry.getValue().stringValue()).getBytes());
+            stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
             stream.write(SEPARATOR);
         }
 

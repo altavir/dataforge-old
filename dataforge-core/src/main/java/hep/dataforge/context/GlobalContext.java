@@ -29,7 +29,9 @@ import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.Locale;
+import java.util.Set;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -42,9 +44,33 @@ import org.slf4j.LoggerFactory;
 public class GlobalContext extends Context {
 
     private static final GlobalContext instance = new GlobalContext();
+    private static final Set<Context> contexts = new HashSet<>();
+
+    static {
+        contexts.add(instance());
+    }
 
     public static GlobalContext instance() {
         return instance;
+    }
+
+    /**
+     * Get previously registered context
+     *
+     * @param contextName
+     * @return
+     */
+    public static Context getContext(String contextName) {
+        return contexts.stream().filter(ctx -> ctx.getName().equals(contextName)).findFirst().orElse(null);
+    }
+
+    /**
+     * Register a context to be retrieved later
+     *
+     * @param context
+     */
+    public static void putContext(Context context) {
+        contexts.add(context);
     }
 
     public static File getFile(String path) {
@@ -63,8 +89,6 @@ public class GlobalContext extends Context {
         actions.registerAction(TransformTableAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
-        this.processManager = new ProcessManager();
-        this.processManager.setContext(this);        
     }
 
     @Override
@@ -80,6 +104,15 @@ public class GlobalContext extends Context {
         appender.setOutputStream(io.out());
         appender.start();
         root.addAppender(appender);
+    }
+
+    @Override
+    public ProcessManager processManager() {
+        if (processManager == null) {
+            this.processManager = new ProcessManager();
+            this.processManager.setContext(this);
+        }
+        return super.processManager();
     }
 
     @Override
@@ -127,6 +160,21 @@ public class GlobalContext extends Context {
     @Override
     public boolean hasValue(String path) {
         return properties.containsKey(path);
+    }
+
+    /**
+     * The global context independent temporary user directory. This directory
+     * is used to store user configuration files. Never use it to store data.
+     *
+     * @return
+     */
+    public File getUserDirectory() {
+        File userDir = new File(System.getProperty("user.home"));
+        File dfUserDir = new File(userDir, ".dataforge");
+        if (!dfUserDir.exists()) {
+            dfUserDir.mkdir();
+        }
+        return dfUserDir;
     }
 
 }

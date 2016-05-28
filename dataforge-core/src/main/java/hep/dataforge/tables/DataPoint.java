@@ -19,8 +19,9 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,7 +30,7 @@ import java.util.Map;
 /**
  * A name-value mapping with some additional features
  */
-public interface DataPoint extends NameSetContainer, ValueProvider {
+public interface DataPoint extends NameSetContainer, ValueProvider, Serializable {
 
     public static Meta toMeta(DataPoint point) {
         MetaBuilder builder = new MetaBuilder("point");

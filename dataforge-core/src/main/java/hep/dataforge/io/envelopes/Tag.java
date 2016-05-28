@@ -17,27 +17,29 @@ package hep.dataforge.io.envelopes;
 
 import static hep.dataforge.io.envelopes.Envelope.*;
 import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
+import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * An Envelope critical properties that could be encoded in a short binary representation.
+ * An Envelope critical properties that could be encoded in a short binary
+ * representation.
  *
  * @author Alexander Nozik
  */
 public class Tag {
 
     public static final short CURRENT_PROTOCOL_VERSION = 0x0001;
-    
+
     public static final short MAX_SHORT = -1;
 
     public static final int MAX_INT = -1;
 
     public static final int INFINITE_SIZE = MAX_INT;
-    
 
     /**
      * The length of serialization tag in bytes
@@ -46,35 +48,17 @@ public class Tag {
 
     public static byte[] START_SEQUENCE = {'#', '!'};
 
-    public static byte[] END_SEQUENCE = {'!', '#','\r','\n'};
+    public static byte[] END_SEQUENCE = {'!', '#', '\r', '\n'};
 
     /**
      * Create serialization tag from String enclosed in #!...!# with or without
      * new line (trim is used).
      *
      * @param str
-     * @return 
+     * @return
      */
     public static Tag fromString(String str) {
-        str = str.trim();
-        return new Tag(str.getBytes(ASCII_CHARSET));
-    }
-
-    /**
-     * Create Tag from propertiSet using defaults for not presented properties
-     * @param properties
-     * @return 
-     */
-    public static Tag fromProperties(Map<String, Value> properties) {
-        int protocolVersion = CURRENT_PROTOCOL_VERSION;
-        int type = (properties.containsKey(TYPE_KEY) ? properties.get(TYPE_KEY).intValue() : 0);
-        int time = properties.containsKey(OPT_KEY) ? properties.get(OPT_KEY).intValue(): 0;
-        int metaType = (properties.containsKey(META_TYPE_KEY) ? properties.get(META_TYPE_KEY).intValue() : 0);
-        int metaEncoding = (properties.containsKey(META_ENCODING_KEY) ? properties.get(META_ENCODING_KEY).intValue() : 0);
-        long metaLength = (properties.containsKey(META_LENGTH_KEY) ? properties.get(META_LENGTH_KEY).intValue() : -1);
-        int dataType = (properties.containsKey(DATA_TYPE_KEY) ? properties.get(DATA_TYPE_KEY).intValue() : 0);
-        long dataLength = (properties.containsKey(DATA_LENGTH_KEY) ? properties.get(DATA_LENGTH_KEY).numberValue().longValue() : -1);
-        return new Tag(protocolVersion, type, time, metaType, metaEncoding, metaLength, dataType, dataLength);
+        return new Tag().read(str.trim().getBytes(ASCII_CHARSET));
     }
 
     public static boolean isValidTag(byte[] bytes) {
@@ -84,61 +68,29 @@ public class Tag {
                 && (bytes[27] == END_SEQUENCE[1]);
     }
 
-    private short protocolVersion = CURRENT_PROTOCOL_VERSION;
+    public short protocolVersion = CURRENT_PROTOCOL_VERSION;
 
-    private final short type;
+    public short type = 0;
 
-    private final long time;
+    public long opt = 0;
 
-    private short metaType = 0x0000;
+    public short metaType = 0x0000;
 
-    private short metaEncoding = 0x0000;
+    public short metaEncoding = 0x0000;
 
-    private final long metaLength;
+    public long metaLength = -1;
 
-    private final int dataType;
+    public int dataType = 0;
 
-    private final long dataLength;
+    public long dataLength = -1;
 
-    public Tag(int protocolVersion, int type, int time, int metaType, int metaEncoding, long metaLength, int dataType, long dataLength) {
-        //TODO do runtime oveflow checks
-        this.protocolVersion = (short) protocolVersion;
-        this.type = (short) type;
-        this.time = time;
-        this.metaType = (short) metaType;
-        this.metaEncoding = (short) metaEncoding;
-        this.metaLength = metaLength;
-        this.dataType = dataType;
-        this.dataLength = dataLength;
-    }
-
-    public Tag(short type, short metaType, long metaLength, int dataType, long dataLength) {
-        this.type = type;
-        this.time = Instant.now().getEpochSecond();
-        this.metaType = metaType;
-        this.metaLength = metaLength;
-        this.dataType = dataType;
-        this.dataLength = dataLength;
-    }
-
-    public Tag(short type, int dataType, long dataLength) {
-        this.type = type;
-        this.time = Instant.now().getEpochSecond();
-        this.metaLength = 0;
-        this.dataType = dataType;
-        this.dataLength = dataLength;
-    }
-
-    public Tag(short type, short metaType, long metaLength) {
-        this.type = type;
-        this.time = Instant.now().getEpochSecond();
-        this.metaType = metaType;
-        this.metaLength = metaLength;
-        this.dataType = 0;
-        this.dataLength = 0;
-    }
-
-    public Tag(byte[] bytes) {
+    /**
+     * Read binary string into this tag
+     *
+     * @param bytes
+     * @return
+     */
+    public Tag read(byte[] bytes) {
 
         if (isValidTag(bytes)) {
 
@@ -147,7 +99,7 @@ public class Tag {
             this.protocolVersion = buffer.getShort(2);
             this.type = buffer.getShort(4);
 
-            this.time = Integer.toUnsignedLong(buffer.getInt(6));
+            this.opt = Integer.toUnsignedLong(buffer.getInt(6));
 
             this.metaType = buffer.getShort(10);
             this.metaEncoding = buffer.getShort(12);
@@ -157,82 +109,64 @@ public class Tag {
             this.dataType = buffer.getInt(18);
 
             this.dataLength = Integer.toUnsignedLong(buffer.getInt(22));
+            return this;
         } else {
             throw new IllegalArgumentException("Wrong format of tag line");
         }
     }
 
     /**
-     * Get the name of dataLength
-     *
-     * @return the name of dataLength
+     * Apply all valid properties from given map. Return a copy containing all remaining properties
+     * @param map
+     * @return 
      */
-    public long getDataLength() {
-        return dataLength;
+    public Map<String, Value> applyProperties(Map<String, Value> map) {
+        Map<String,Value> properties = new HashMap<>(map);
+        protocolVersion = (short) (properties.containsKey(VERSION_KEY) ? properties.get(VERSION_KEY).intValue() : CURRENT_PROTOCOL_VERSION);
+        properties.remove(VERSION_KEY);
+        type = getShortCompositePropertyValue(properties, TYPE_KEY);
+        opt = properties.containsKey(OPT_KEY) ? properties.get(OPT_KEY).intValue() : 0;
+        properties.remove(OPT_KEY);
+        metaType = getShortCompositePropertyValue(properties, META_TYPE_KEY);
+        metaEncoding = getShortCompositePropertyValue(properties, META_ENCODING_KEY);
+        metaLength = (properties.containsKey(META_LENGTH_KEY) ? properties.get(META_LENGTH_KEY).intValue() : -1);
+        properties.remove(META_LENGTH_KEY);
+        dataType = getCompositePropertyValue(properties, DATA_TYPE_KEY);
+        dataLength = (properties.containsKey(DATA_LENGTH_KEY) ? properties.get(DATA_LENGTH_KEY).numberValue().longValue() : -1);
+        properties.remove(DATA_LENGTH_KEY);
+        return properties;
+    }
+    
+
+    private int getCompositePropertyValue(Map<String, Value> properties, String key) {
+        if (properties.containsKey(key)) {
+            Value val = properties.get(key);
+            if (val.valueType() == ValueType.NUMBER || val instanceof CompositePropertyValue) {
+                properties.remove(key);
+                return val.intValue();
+            } else {
+                // place ? int tag and use custom property instead
+                return 0x3f3f3f3f;
+            }
+        } else {
+            return 0;
+        }
     }
 
-    /**
-     * Get the name of dataType
-     *
-     * @return the name of dataType
-     */
-    public int getDataType() {
-        return dataType;
-    }
-
-    /**
-     * Get the name of metaLength
-     *
-     * @return the name of metaLength
-     */
-    public long getMetaLength() {
-        return metaLength;
-    }
-
-    /**
-     * Get the name of metaEncoding
-     *
-     * @return the name of metaEncoding
-     */
-    public short getMetaEncoding() {
-        return metaEncoding;
-    }
-
-    /**
-     * Get the name of metaType
-     *
-     * @return the name of metaType
-     */
-    public short getMetaType() {
-        return metaType;
-    }
-
-    /**
-     * Get the name of time
-     *
-     * @return the name of time
-     */
-    public Instant getTime() {
-        return Instant.ofEpochSecond(time);
-    }
-
-    /**
-     * Get the name of type
-     *
-     * @return the name of type
-     */
-    public short getType() {
-        return type;
-    }
-
-    /**
-     * Get the name of protocolVersion
-     *
-     * @return the name of protocolVersion
-     */
-    public short getProtocolVersion() {
-        return protocolVersion;
-    }
+    private short getShortCompositePropertyValue(Map<String, Value> properties, String key) {
+        if (properties.containsKey(key)) {
+            Value val = properties.get(key);
+            if (val.valueType() == ValueType.NUMBER || val instanceof CompositePropertyValue) {
+                properties.remove(key);
+                return (short) val.intValue();
+            } else {
+                // place ? int tag and use custom property instead
+                return 0x3f3f;
+            }
+        } else {
+            return 0;
+        }
+    }    
 
     /**
      * Build new serialization tag string with enclosing #! and !# but without
@@ -252,7 +186,7 @@ public class Tag {
         buffer.putShort(protocolVersion);
         buffer.putShort(type);
 
-        buffer.putInt(new Long(time).intValue());
+        buffer.putInt(new Long(opt).intValue());
 
         buffer.putShort(metaType);
         buffer.putShort(metaEncoding);
@@ -272,7 +206,7 @@ public class Tag {
         int hash = 7;
         hash = 19 * hash + this.protocolVersion;
         hash = 19 * hash + this.type;
-        hash = 19 * hash + (int) (this.time ^ (this.time >>> 32));
+        hash = 19 * hash + (int) (this.opt ^ (this.opt >>> 32));
         hash = 19 * hash + this.metaType;
         hash = 19 * hash + this.metaEncoding;
         hash = 19 * hash + (int) (this.metaLength ^ (this.metaLength >>> 32));
@@ -296,7 +230,7 @@ public class Tag {
         if (this.type != other.type) {
             return false;
         }
-        if (this.time != other.time) {
+        if (this.opt != other.opt) {
             return false;
         }
         if (this.metaType != other.metaType) {
@@ -317,9 +251,9 @@ public class Tag {
     public Map<String, Value> asProperties() {
         Map<String, Value> res = new HashMap<>();
         res.put(TYPE_KEY, Value.of(type));
-        res.put(OPT_KEY, Value.of(Instant.ofEpochMilli(time)));
+        res.put(OPT_KEY, Value.of(Instant.ofEpochMilli(opt)));
         res.put(META_ENCODING_KEY, EnvelopeProperties.getCharsetValue(metaEncoding));
-        res.put(META_TYPE_KEY, EnvelopeProperties.getType(metaType).getValue());
+        res.put(META_TYPE_KEY, EnvelopeProperties.getMetaType(metaType).getValue());
         res.put(META_LENGTH_KEY, Value.of(metaLength));
         res.put(DATA_TYPE_KEY, Value.of(dataType));
         res.put(DATA_LENGTH_KEY, Value.of(dataLength));

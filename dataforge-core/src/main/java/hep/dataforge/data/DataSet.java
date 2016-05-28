@@ -62,6 +62,33 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                         -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
+    /**
+     * {@inheritDoc }
+     * <p>
+     * Not very effective for flat data set
+     * </p>
+     *
+     * @return
+     */
+    @Override
+    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
+        return dataStream().map((pair) -> {
+            Name dataName = Name.of(pair.getKey());
+            if (dataName.length() > 1) {
+                return dataName.cutLast().toString();
+
+            } else {
+                return "";
+            }
+        }).distinct().map((String str) -> {
+            if (str.isEmpty()) {
+                return new Pair<>("", DataSet.this);
+            } else {
+                return new Pair<>(str, getNode(str));
+            }
+        });
+    }
+
     @Override
     public Data<? extends T> getData(String name) {
         return dataMap.get(name);
@@ -181,6 +208,18 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
             }
             //PENDING rewrap data including meta?
             node.dataStream().forEach(pair -> putData(pair.getKey(), pair.getValue()));
+            return self();
+        }
+
+        @Override
+        public Builder<T> removeNode(String nodeName) {
+            this.dataMap.entrySet().removeIf(entry -> entry.getKey().startsWith(nodeName));
+            return self();
+        }
+
+        @Override
+        public Builder<T> removeData(String dataName) {
+            this.dataMap.remove(dataName);
             return self();
         }
 

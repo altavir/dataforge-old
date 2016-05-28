@@ -25,10 +25,12 @@ import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -42,12 +44,8 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class GenericAction<T, R> implements Action<T, R> {
 
-//    private Executor executor;
-    //TODO add custom logger and executor factories here;
-    public Logger logger() {
-        //TODO provide from context
-        return LoggerFactory.getLogger(getClass());
-    }
+    private Logger logger;
+    private String parentProcessName;
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("allowParallel", true);
@@ -68,7 +66,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     }
 
     protected void checkInput(DataNode input) {
-        if (!getInputType().isAssignableFrom(input.getClass())) {
+        if (!getInputType().isAssignableFrom(input.type())) {
             throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
                     getName(), getInputType().getName(), input.type().getName()));
         }
@@ -92,14 +90,61 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         }
     }
 
-    protected Executor buildExecutor(Context context, String dataName) {
-        return context.processManager().executor(getName(), dataName);
+    /**
+     * Return the root process name for this action
+     *
+     * @return
+     */
+    protected String getProcessName() {
+        if (parentProcessName != null) {
+            return Name.joinString(parentProcessName, getName());
+        } else {
+            return getName();
+        }
     }
 
-    protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
-        return buildExecutor(context, dataName);
+    public Logger logger() {
+        if (logger == null) {
+            return LoggerFactory.getLogger(getClass());
+        } else {
+            return logger;
+        }
     }
 
+    @Override
+    public Action<T,R> withLogger(Logger logger) {
+        this.logger = logger;
+        return this;
+    }
+
+    @Override
+    public Action<T,R> withParentProcess(String parentProcessName) {
+        this.parentProcessName = parentProcessName;
+        return this;
+    }
+
+    /**
+     * Post a process and return future associated with that process
+     *
+     * @param <U>
+     * @param context
+     * @param subname
+     * @param sup
+     * @return
+     */
+    protected <U> CompletableFuture<U> postProcess(Context context, String subname, Supplier<U> sup) {
+        return context.processManager().
+                <U>post(Name.join(getProcessName(), subname).toString(), sup)
+                .getTask();
+    }
+
+//    protected Executor buildExecutor(Context context, String dataName) {
+//        return context.processManager().executor(getName(), dataName);
+//    }
+//
+//    protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
+//        return buildExecutor(context, dataName);
+//    }
     protected boolean isEmptyInputAllowed() {
         return false;
     }

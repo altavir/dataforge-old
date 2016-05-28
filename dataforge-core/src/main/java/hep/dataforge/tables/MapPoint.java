@@ -19,7 +19,6 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -132,7 +131,7 @@ public class MapPoint implements DataPoint {
     }
 
     public Builder builder() {
-        return new Builder(new HashMap<>(valueMap));
+        return new Builder(new LinkedHashMap<>(valueMap));
     }
 
 //    public MapPoint join(DataPoint point) {
@@ -147,7 +146,7 @@ public class MapPoint implements DataPoint {
         private MapPoint p;
 
         public Builder(DataPoint dp) {
-            p.valueMap = new LinkedHashMap<>(dp.names().getDimension());
+            p = new MapPoint(new LinkedHashMap<>(dp.names().getDimension()));
             for (String name : dp.names()) {
                 p.valueMap.put(name, dp.getValue(name));
             }

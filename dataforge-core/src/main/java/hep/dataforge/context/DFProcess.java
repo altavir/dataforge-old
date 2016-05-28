@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
+import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -115,14 +116,14 @@ public class DFProcess<R> implements Named {
         return taskProperty;
     }
 
-    public void setTask(CompletableFuture<R> task) {
+    protected void setTask(CompletableFuture<R> task) {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
         taskProperty.set(task.whenComplete((Object t, Throwable u) -> {
             isDone.invalidate();
             curProgress.set(curMaxProgress.get());
-            getManager().onProcessFinished(getName());
+//            getManager().onProcessFinished(getName());
         }).whenComplete(this::handle));
         isDone.invalidate();
     }
@@ -138,7 +139,9 @@ public class DFProcess<R> implements Named {
      * @param exception
      */
     protected void handle(Object result, Throwable exception) {
-
+        if (exception != null) {
+            getManager().getContext().getLogger().error("Exception in process execution", exception);
+        }
     }
 
     public DFProcess findProcess(String processName) {
@@ -167,11 +170,11 @@ public class DFProcess<R> implements Named {
         }
     }
 
-    public <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
+    <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
         return addChild(Name.of(childName), future);
     }
 
-    public <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
+    <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
@@ -212,6 +215,12 @@ public class DFProcess<R> implements Named {
         childProcess.totalMaxProgress.addListener((Observable observable) -> {
             totalMaxProgress.invalidate();
         });
+
+        //invalidating isDone in case of child state change
+        childProcess.isDone.addListener(new WeakChangeListener<>(
+                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                    isDone.invalidate();
+                }));
 
         // Revalidate completions
         isDone.invalidate();
@@ -269,20 +278,30 @@ public class DFProcess<R> implements Named {
      * @param progress
      * @param maxProgress
      */
-    public void setProgress(double progress, double maxProgress) {
+    public void setProgress(double progress) {
         this.curProgress.set(progress);
+    }
+
+    public void setMaxProgress(double maxProgress) {
         this.curMaxProgress.set(maxProgress);
     }
 
     /**
-     * Change progress values by given values
+     * Increase progress by given value
      *
      * @param incProgress
      * @param incMaxProgress
      */
-    public void increaseProgress(double incProgress, double incMaxProgress) {
+    public void increaseProgress(double incProgress) {
         this.curProgress.set(this.curProgress.get() + incProgress);
-        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
+//        this.curMaxProgress.set(this.curMaxProgress.get() + incProgress);
+    }
+
+    /**
+     * Set current progress to max progress.
+     */
+    public void setProgressToMax() {
+        this.curProgress.set(this.curMaxProgress.get());
     }
 
     /**
@@ -292,6 +311,7 @@ public class DFProcess<R> implements Named {
      * @return
      */
     public boolean isDone() {
+        isDoneProperty().invalidate();
         return isDoneProperty().get();
     }
 

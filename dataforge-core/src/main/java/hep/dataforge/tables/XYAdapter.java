@@ -64,7 +64,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME),getValueName(Y_ERR_NAME)},
+        return new MapPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME), getValueName(Y_ERR_NAME)},
                 x, y, yErr);
     }
 
@@ -85,7 +85,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     /**
-     * Upper 1-sigma bound on y value
+     * Upper bound on y value
      *
      * @param point
      * @return
@@ -95,13 +95,33 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     /**
-     * Lower 1-sigma bound on y value
+     * Lower bound on y value
      *
      * @param point
      * @return
      */
     public double getYLower(DataPoint point) {
         return point.getDouble(getValueName("yLo"), getY(point).doubleValue() - getYerr(point).doubleValue());
+    }
+
+    /**
+     * Upper bound on x value
+     *
+     * @param point
+     * @return
+     */
+    public double getXUpper(DataPoint point) {
+        return point.getDouble(getValueName("xUp"), getX(point).doubleValue() + getXerr(point).doubleValue());
+    }
+
+    /**
+     * Lower bound on x value
+     *
+     * @param point
+     * @return
+     */
+    public double getXLower(DataPoint point) {
+        return point.getDouble(getValueName("xLo"), getX(point).doubleValue() - getXerr(point).doubleValue());
     }
 
     /**
@@ -147,9 +167,10 @@ public class XYAdapter extends AbstractPointAdapter {
 
     /**
      * Return a default TableFormat corresponding to this adapter
-     * @return 
+     *
+     * @return
      */
-    public TableFormat getFormat(){
+    public TableFormat getFormat() {
         return new TableFormatBuilder()
                 .addNumber(X_NAME)
                 .addNumber(Y_NAME)

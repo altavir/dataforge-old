@@ -7,7 +7,7 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.ValueProviderIndex;
 import java.io.IOException;

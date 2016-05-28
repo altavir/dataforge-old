@@ -29,7 +29,8 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
         Map<String, Pair<Meta, Supplier<R>>> generated = generate(context, actionMeta, log);
         Map<String, Data<R>> resultMap = new HashMap<>();
         generated.forEach((String s, Pair<Meta, Supplier<R>> pair) -> {
-            resultMap.put(s, new ActionResult<>(getOutputType(), log, pair.getValue(), buildExecutor(context, s), pair.getKey()));
+            resultMap.put(s, new ActionResult<>(getOutputType(), log,
+                    postProcess(context, s, pair.getValue()), pair.getKey()));
         });
         return wrap(resultNodeName(), actionMeta, resultMap);
     }
@@ -45,6 +46,4 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
         return Void.class;
     }
 
-    
-    
 }

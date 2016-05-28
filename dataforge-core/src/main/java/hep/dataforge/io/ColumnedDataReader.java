@@ -19,8 +19,6 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.Table;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -37,7 +35,6 @@ import java.util.List;
 public class ColumnedDataReader implements Iterable<DataPoint> {
 
     private DataPointStringIterator reader;
-    private String meta;
 
     /**
      * <p>
@@ -47,9 +44,8 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
      * @param parser a {@link hep.dataforge.tables.PointParser} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public ColumnedDataReader(File file, PointParser parser) throws FileNotFoundException {
-        FileInputStream stream = new FileInputStream(file);
-        this.meta = readMeta(stream);
+    public ColumnedDataReader(InputStream stream, PointParser parser) throws FileNotFoundException {
+
         this.reader = new DataPointStringIterator(stream, parser);
     }
 
@@ -61,9 +57,7 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
      * @param format an array of {@link java.lang.String} objects.
      * @throws java.io.FileNotFoundException if any.
      */
-    public ColumnedDataReader(File file, String[] format) throws FileNotFoundException {
-        FileInputStream stream = new FileInputStream(file);
-        this.meta = readMeta(stream);
+    public ColumnedDataReader(InputStream stream, String... format) throws FileNotFoundException {
         this.reader = new DataPointStringIterator(stream, format);
     }
 
@@ -74,17 +68,13 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
      * @param file a {@link java.io.File} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public ColumnedDataReader(File file) throws FileNotFoundException {
-        Iterator<String> iterator = new LineIterator(file);
+    public ColumnedDataReader(InputStream stream) throws FileNotFoundException {
+        Iterator<String> iterator = new LineIterator(stream);
         if (!iterator.hasNext()) {
             throw new IllegalStateException();
         }
         String headline = iterator.next();
         this.reader = new DataPointStringIterator(iterator, headline);
-    }
-
-    private String readMeta(InputStream stream) {
-        return "";
     }
 
     /**
@@ -107,20 +97,13 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
         return reader;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>meta</code>.</p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    public String getMeta() {
-        return meta;
-    }
-
     public Table toDataSet() {
         List<DataPoint> points = new ArrayList<>();
         for (Iterator<DataPoint> iterator = this.iterator(); iterator.hasNext();) {
-            points.add(iterator.next());
+            DataPoint p = iterator.next();
+            if (p != null) {
+                points.add(p);
+            }
         }
         return new ListTable(points);
     }

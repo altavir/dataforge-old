@@ -30,6 +30,12 @@ import java.util.stream.Collectors;
  */
 public class Configuration extends MuttableMetaNode<Configuration> {
 
+    /**
+     * The meta node or value descriptor tag to mark an element non
+     * configurable. It could be set only once.
+     */
+    public static final String FINAL_TAG = "final";
+
     protected final ReferenceRegistry<ConfigChangeListener> observers = new ReferenceRegistry<>();
 
     /**
@@ -125,19 +131,21 @@ public class Configuration extends MuttableMetaNode<Configuration> {
      * @param annotation
      */
     public void update(Meta annotation) {
-        annotation.getValueNames().stream().forEach((valueName) -> {
-            setValue(valueName, annotation.getValue(valueName));
-        });
+        if (annotation != null) {
+            annotation.getValueNames().stream().forEach((valueName) -> {
+                setValue(valueName, annotation.getValue(valueName));
+            });
 
-        annotation.getNodeNames().stream().forEach((elementName) -> {
-            setNode(elementName,
-                    annotation
-                    .getNodes(elementName)
-                    .stream()
-                    .<Configuration>map((el) -> new Configuration(el))
-                    .collect(Collectors.toList())
-            );
-        });
+            annotation.getNodeNames().stream().forEach((elementName) -> {
+                setNode(elementName,
+                        annotation
+                        .getNodes(elementName)
+                        .stream()
+                        .<Configuration>map((el) -> new Configuration(el))
+                        .collect(Collectors.toList())
+                );
+            });
+        }
     }
 
     @Override

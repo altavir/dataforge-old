@@ -16,12 +16,28 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
+import hep.dataforge.storage.commons.EnvelopeCodes;
 
 /**
  *
  * @author darksnake
  */
 public class FileStorageEnvelopeType extends DefaultEnvelopeType {
+
+    @Override
+    public String description() {
+        return "DataForge file storage envelope";
+    }
+
+    @Override
+    public String getName() {
+        return "hep.dataforge.storage";
+    }
+
+    @Override
+    public short getCode() {
+        return EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
+    }
 
     @Override
     public boolean infiniteMetaAllowed() {
@@ -32,6 +48,5 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
     public boolean infiniteDataAllowed() {
         return true;
     }
- 
-    
+
 }

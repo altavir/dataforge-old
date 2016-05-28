@@ -90,7 +90,7 @@ public class BasicMaskLoader implements Loader {
     }
 
     @Override
-    public Meta targetDescription() {
-        return loader.targetDescription();
+    public Meta destinationMeta() {
+        return loader.destinationMeta();
     }
 }

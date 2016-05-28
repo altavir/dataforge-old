@@ -130,11 +130,11 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     protected void putData(Name name, Data<? extends T> data) {
         if (name.length() == 1) {
             String key = name.toString();
-            uncheckedPutData(key, data);
+            checkedPutData(key, data);
         } else {
             String head = name.getFirst().toString();
             if (this.nodes.containsKey(head)) {
-                this.nodes.get(head).uncheckedPutData(name.cutFirst().toString(), data);
+                this.nodes.get(head).checkedPutData(name.cutFirst().toString(), data);
             } else {
                 DataTree<T> newNode = new DataTree<>(type);
                 newNode.name = head;
@@ -144,14 +144,45 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         }
     }
 
+    protected void putNode(Name name, DataNode<? extends T> node) {
+        if (name.length() == 1) {
+            String key = name.toString();
+            checkedPutNode(key, node);
+        } else {
+            String head = name.getFirst().toString();
+            if (this.nodes.containsKey(head)) {
+                this.nodes.get(head).checkedPutNode(name.cutFirst().toString(), node);
+            } else {
+                DataTree<T> newNode = new DataTree<>(type);
+                newNode.name = head;
+                newNode.putNode(name.cutFirst(), node);
+                this.nodes.put(head, newNode);
+            }
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    protected void checkedPutNode(String key, DataNode node) {
+        if (type().isInstance(node.type())) {
+            if (!this.nodes.containsKey(key)) {
+                this.nodes.put(key, cloneNode(node));
+            } else {
+                throw new RuntimeException("The node with key " + key + " already exists");
+            }
+        } else {
+            throw new RuntimeException("Node does not satisfy class boundary");
+        }
+    }
+
     /**
-     * Unchecked put data method. Throws exception if types are not compatible
+     * Type checked put data method. Throws exception if types are not
+     * compatible
      *
      * @param key
      * @param data
      */
     @SuppressWarnings("unchecked")
-    protected void uncheckedPutData(String key, Data data) {
+    protected void checkedPutData(String key, Data data) {
         if (type().isInstance(data.dataType())) {
             if (!this.data.containsKey(key)) {
                 this.data.put(key, data);
@@ -178,6 +209,18 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
                         .<Pair<String, Data<? extends T>>>map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue())));
 
         return Stream.concat(dataStream, subStream);
+    }
+
+    @Override
+    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
+        return nodes.entrySet().stream().<Pair<String, DataNode<? extends T>>>flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
+            Stream<Pair<String, DataNode<? extends T>>> nodeItself
+                    = Stream.of(new Pair<>(nodeEntry.getKey(), nodeEntry.getValue()));
+            Stream<Pair<String, DataNode<? extends T>>> childStream = nodeEntry.getValue()
+                    .nodeStream().map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue()));
+
+            return Stream.concat(nodeItself, childStream);
+        });
     }
 
     @Override
@@ -286,7 +329,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
          *
          * @param oldTree
          */
-        private Builder(DataTree<T> oldTree) {
+        public Builder(DataTree<T> oldTree) {
             this.tree = new DataTree<>(oldTree);
         }
 
@@ -315,21 +358,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
             return this;
         }
 
-//        public Builder<T> putBranch(Builder<T> builder) {
-//            return putBranch(builder.tree);
-//        }
-//
-//        public Builder<T> putBranch(DataTree<T> node) {
-//            if (tree.type.isAssignableFrom(node.type())) {
-//                DataTree<T> newNode = new DataTree<>(node);
-//                newNode.setParent(tree);
-//                tree.nodes.put(node.getName(), newNode);
-//                return this;
-//            } else {
-//                throw new RuntimeException("Node type not compatible");
-//            }
-//        }
-
         @Override
         public Builder<T> putData(String key, Data<? extends T> data) {
             this.tree.putData(Name.of(key), data);
@@ -338,12 +366,38 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
         @Override
         public Builder<T> putNode(String key, DataNode<? extends T> node) {
-            if (tree.type.isAssignableFrom(node.type())) {
-                this.tree.nodes.put(key, cloneNode(node));
-            } else {
-                throw new RuntimeException("Node type not compatible");
-            }
+            this.tree.putNode(Name.of(key), node);
             return this;
+        }
+
+        @Override
+        public Builder<T> removeNode(String nodeName) {
+            Name theName = Name.of(nodeName);
+            DataTree parentTree;
+            if (theName.length() == 1) {
+                parentTree = tree;
+            } else {
+                parentTree = tree.getNode(theName.cutLast());
+            }
+            if (parentTree != null) {
+                parentTree.nodes.remove(theName.getLast().toString());
+            }
+            return self();
+        }
+
+        @Override
+        public Builder<T> removeData(String dataName) {
+            Name theName = Name.of(dataName);
+            DataTree parentTree;
+            if (theName.length() == 1) {
+                parentTree = tree;
+            } else {
+                parentTree = tree.getNode(theName.cutLast());
+            }
+            if (parentTree != null) {
+                parentTree.data.remove(theName.getLast().toString());
+            }
+            return self();
         }
 
         @Override

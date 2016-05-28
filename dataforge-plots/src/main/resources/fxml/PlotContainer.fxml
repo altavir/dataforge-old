@@ -2,14 +2,16 @@
 
 <?import java.net.URL?>
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ContextMenu?>
 <?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
 
-<fx:root id="AnchorPane" fx:id="root" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@styles/plotcontainer.css" />
     </stylesheets>
@@ -26,11 +28,18 @@
                   </Button>
                </children>
             </StackPane>
-            <VBox minWidth="0.0" prefHeight="200.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+            <VBox fx:id="sideBar" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
                <children>
-                  <AnchorPane fx:id="specialOptionsPane" minWidth="0.0" />
                   <Button fx:id="frameOptionsButton" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#onFrameOptionsClick" text="Frame options" />
-                  <ListView fx:id="plottableslList" maxHeight="1.7976931348623157E308" minWidth="0.0" />
+                  <ListView fx:id="plottableslList" minWidth="0.0" VBox.vgrow="ALWAYS">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#onShowAll" text="Show all" />
+                              <MenuItem mnemonicParsing="false" onAction="#onHideAll" text="Hide all" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></ListView>
                </children>
             </VBox>
         </items>

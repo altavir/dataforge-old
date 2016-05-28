@@ -13,28 +13,39 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Template;
 
 /**
- * A task consisting of sequence of actions
+ * A task consisting of sequence of actions. Using template if it is provided
  *
  * @author Alexander Nozik
  */
-public class ActionTask extends GenericTask {
+public class ActionTask extends TemplateTask {
 
     private final String name;
-//    private Meta actionMeta;
+    private final Template template;
+
+    public ActionTask(String name, Template template) {
+        this.name = name;
+        this.template = template;
+    }
+
+    public ActionTask(String name, Meta template) {
+        this.name = name;
+        this.template = new Template(template);
+    }
 
     public ActionTask(String name) {
         this.name = name;
+        this.template = null;
     }
 
     @Override
     protected TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
-        //TODO add fixed action meta and overrides
         DataNode res = state.getData();
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            res = buildAction(context, actionType).run(context, res, action);
+            res = buildAction(context, actionType).withParentProcess(callback.processName()).run(context, res, action);
             state.setData(actionType, res);
         }
         state.finish(res);
@@ -44,6 +55,11 @@ public class ActionTask extends GenericTask {
     @Override
     public String getName() {
         return name;
+    }
+
+    @Override
+    protected Template getTemplate() {
+        return template;
     }
 
 }

@@ -46,20 +46,20 @@ public class MetaNode<T extends MetaNode> extends Meta {
     /**
      * A static deep copy constructor for immutable annotations
      *
-     * @param annotation
+     * @param meta
      * @return
      */
-    public static MetaNode<MetaNode> from(Meta annotation) {
-        MetaNode<MetaNode> res = new MetaNode<>(annotation.getName());
+    public static MetaNode<MetaNode> from(Meta meta) {
+        MetaNode<MetaNode> res = new MetaNode<>(meta.getName());
 
-        Collection<String> valueNames = annotation.getValueNames();
+        Collection<String> valueNames = meta.getValueNames();
         valueNames.stream().forEach((valueName) -> {
-            res.values.put(valueName, annotation.getValue(valueName));
+            res.values.put(valueName, meta.getValue(valueName));
         });
 
-        Collection<String> nodeNames = annotation.getNodeNames();
+        Collection<String> nodeNames = meta.getNodeNames();
         nodeNames.stream().forEach((elementName) -> {
-            List<MetaNode> item = annotation.getNodes(elementName).stream()
+            List<MetaNode> item = meta.getNodes(elementName).stream()
                     .<MetaNode>map((an) -> from(an))
                     .collect(Collectors.toList());
             res.nodes.put(elementName, new ArrayList<>(item));

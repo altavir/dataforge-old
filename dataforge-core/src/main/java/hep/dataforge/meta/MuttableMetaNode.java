@@ -31,7 +31,7 @@ import java.util.List;
  * @author Alexander Nozik
  */
 @SuppressWarnings("unchecked")
-public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaNode<T> 
+public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaNode<T>
         implements Serializable, GenericBuilder<Meta, T> {
 
     protected T parent;
@@ -75,6 +75,10 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     @Override
     public abstract T self();
 
+    protected T getParent() {
+        return parent;
+    }
+
     /**
      * Add a copy of given meta to the node list with given name. Create a new
      * one if it does not exist
@@ -86,7 +90,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
         if (!isValidElementName(name)) {
             throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", name));
         }
-        
+
         T newNode = transformNode(name, element);
         List<T> list = this.getChildNodeItem(name);
         List<T> oldList = list != null ? new ArrayList<>(list) : null;
@@ -111,7 +115,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * @return
      */
     public T putNode(Meta element) {
-        if(element.isAnonimous()){
+        if (element.isAnonimous()) {
             throw new AnonymousNotAlowedException();
         }
         return putNode(element.getName(), element, true);
@@ -309,7 +313,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * @param name
      */
     protected void setName(String name) {
-        if(parent!= null){
+        if (parent != null) {
             throw new RuntimeException("Can't rename attached node");
         }
         this.name = name;
@@ -340,16 +344,21 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     }
 
     /**
-     * Remove given direct descendant child node if it is present and notify
-     * listeners.
+     * Replace or remove given direct descendant child node if it is present and
+     * notify listeners.
      *
      * @param child
      */
-    public void removeChildNode(T child) {
+    public void replaceChildNode(T child, Meta node) {
         String nodeName = child.getName();
         if (hasNode(nodeName)) {
             List<T> oldNode = getNodes(nodeName);
-            nodes.get(nodeName).remove(child);
+            int index = nodes.get(nodeName).indexOf(child);
+            if (node == null) {
+                nodes.get(nodeName).remove(index);
+            } else {
+                nodes.get(nodeName).set(index, transformNode(child.getName(), node));
+            }
             notifyNodeChanged(nodeName, oldNode, getNodes(nodeName));
         }
     }
@@ -448,7 +457,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     private T transformNode(String name, Meta node) {
         T el = cloneNode(node);
         el.setName(name);
-        el.parent = this;        
+        el.parent = this;
         return el;
     }
 
@@ -514,7 +523,5 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
     public Meta build() {
         return this;
     }
-    
-    
 
 }

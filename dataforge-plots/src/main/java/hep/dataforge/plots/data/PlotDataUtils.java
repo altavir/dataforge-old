@@ -27,35 +27,36 @@ import java.util.stream.Collectors;
 public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
-        List<XYPlottable> plottables = new ArrayList<>(frame.getAll());
+        List<XYPlottable> plottables = new ArrayList<>(frame.plottables());
 
         if (visibleOnly) {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
         }
 
-        Map<Value, DataPoint> points = new LinkedHashMap<>();
+        Map<Value, MapPoint.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
-        
+
         for (XYPlottable pl : plottables) {
             XYAdapter adapter = pl.adapter();
 
             names.add(pl.getName());
-            for (DataPoint point : pl.plotData()) {
+            pl.dataStream().forEach(point -> {
                 Value x = adapter.getX(point);
                 MapPoint.Builder mdp;
                 if (points.containsKey(x)) {
-                    mdp = new MapPoint.Builder(points.get(x));
+                    mdp = points.get(x);
                 } else {
                     mdp = new MapPoint.Builder();
                     mdp.putValue("x", x);
-                    points.put(x, mdp.build());
+                    points.put(x, mdp);
                 }
                 mdp.putValue(pl.getName(), adapter.getY(point));
-            }
+            });
+
         }
         ListTable.Builder res = new ListTable.Builder(TableFormat.fixedWidth(8, names));
-        res.addRows(points.values());
+        res.addRows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }
 }

@@ -398,8 +398,8 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     @Override
     public boolean acceptEnvelope(Envelope envelope) {
-        if (envelope.meta().hasNode(ENVELOPE_TARGET_NODE)) {
-            Meta target = envelope.meta().getNode(ENVELOPE_TARGET_NODE);
+        if (envelope.meta().hasNode(ENVELOPE_DESTINATION_NODE)) {
+            Meta target = envelope.meta().getNode(ENVELOPE_DESTINATION_NODE);
             String targetType = target.getString(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE);
             if (targetType.equals(STORAGE_TARGET_TYPE)) {
                 String targetName = target.getString(TARGET_NAME_KEY);
@@ -414,8 +414,8 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     @Override
-    public Meta targetDescription() {
-        return new MetaBuilder(ENVELOPE_TARGET_NODE)
+    public Meta destinationMeta() {
+        return new MetaBuilder(ENVELOPE_DESTINATION_NODE)
                 .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
                 .putValue(TARGET_NAME_KEY, getName())
                 .build();

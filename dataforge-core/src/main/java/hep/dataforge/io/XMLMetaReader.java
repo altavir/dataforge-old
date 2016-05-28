@@ -29,6 +29,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
+import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 
 /**
  * A default reader for XML represented Meta
@@ -51,7 +52,7 @@ public class XMLMetaReader implements MetaStreamReader {
             if (length < 0) {
                 source = new InputSource(new InputStreamReader(stream, charset.newDecoder()));
             } else {
-                byte[] bytes = new byte[(int)length];
+                byte[] bytes = new byte[(int) length];
                 stream.read(bytes);
                 source = new InputSource(new ByteArrayInputStream(bytes));
             }
@@ -64,14 +65,17 @@ public class XMLMetaReader implements MetaStreamReader {
         }
     }
 
-    private MetaBuilder buildNode(Element element) throws ContentException {
+    private String normalizeName(String str) {
+        return str.replace("_at_", "@");
+    }
 
-        MetaBuilder res = new MetaBuilder(element.getTagName());
+    private MetaBuilder buildNode(Element element) throws ContentException {
+        MetaBuilder res = new MetaBuilder(normalizeName(element.getTagName()));
         List<NamedValue> values = getValues(element);
         List<Element> elements = getElements(element);
 
         for (NamedValue value : values) {
-            res.putValue(value.getName(), value.getSourceValue());
+            res.putValue(normalizeName(value.getName()), value.getSourceValue());
         }
 
         for (Element e : elements) {
@@ -84,7 +88,7 @@ public class XMLMetaReader implements MetaStreamReader {
 
         //записываем значения только если нет наследников
         if (!element.getTextContent().isEmpty() && (element.getElementsByTagName("*").getLength() == 0)) {
-            res.putValue(element.getTagName(), element.getTextContent());
+            res.putValue(normalizeName(element.getTagName()), element.getTextContent());
         }
         //res.putContent(new AnnotatedData("xmlsource", element));
 
@@ -153,6 +157,5 @@ public class XMLMetaReader implements MetaStreamReader {
     public boolean acceptsFile(File file) {
         return file.toString().toLowerCase().endsWith(".xml");
     }
-
 
 }

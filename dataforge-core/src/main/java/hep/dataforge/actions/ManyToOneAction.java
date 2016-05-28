@@ -56,7 +56,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
         //Creating dependency on data
         CompletableFuture<R> future = data.computation()
-                .thenCompose((Void t) -> CompletableFuture.supplyAsync(() -> {
+                .thenCompose((Void t) -> postProcess(context,data.getName(),()-> {
                     beforeGroup(context, log, data);
                     // In this moment, all the data is already calculated
                     Map<String, T> collection = data.dataStream()
@@ -65,7 +65,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                     R res = execute(context, log, data.getName(), collection, meta);
                     afterGroup(context, log, data.getName(), outputMeta, res);
                     return res;
-                }, buildExecutor(context, data.getName())));
+                }));
         return new ActionResult<>(getOutputType(), log, future, outputMeta);
 
     }
@@ -88,7 +88,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                 dataNode.putValue("type", data.dataType().getName());
             }
             if (!data.meta().isEmpty()) {
-                dataNode.putNode(DataFactory.DATA_META_KEY, data.meta());
+                dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());
             }
             builder.putNode(dataNode);
         });

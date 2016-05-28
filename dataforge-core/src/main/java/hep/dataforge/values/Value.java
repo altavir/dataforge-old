@@ -20,10 +20,10 @@ import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -38,7 +38,7 @@ import java.util.List;
  * @version $Id: $Id
  */
 public interface Value extends Comparable<Value>, Serializable {
-    
+
     public static final Value NULL = new NullValue();
 
     /**
@@ -52,7 +52,7 @@ public interface Value extends Comparable<Value>, Serializable {
         if (str == null) {
             return Value.getNull();
         }
-        
+
         try {
             int val = Integer.parseInt(str);
             return of(val);
@@ -129,13 +129,17 @@ public interface Value extends Comparable<Value>, Serializable {
     }
 
     public static Value of(LocalDateTime t) {
-        return new TimeValue(LocalDateTime.from(t));
+        return new TimeValue(t);
     }
 
     public static Value of(Instant t) {
-        return new TimeValue(LocalDateTime.ofInstant(t, ZoneId.systemDefault()));
+        return new TimeValue(t);
     }
 
+    public static Value of(Object... list){
+        return of(Arrays.asList(list));
+    }
+    
     public static Value of(Collection<Object> list) {
         List<Object> l = new ArrayList<>();
         l.addAll(list);
@@ -189,6 +193,8 @@ public interface Value extends Comparable<Value>, Serializable {
             return of((String) obj);
         } else if (obj instanceof Collection) {
             return of((Collection) obj);
+        } else if (obj instanceof Object[]) {
+            return of((Object[]) obj);
         } else {
             //сделать Content обертку?
             throw new RuntimeException("Can not get a Value for " + obj.getClass().getName());

@@ -15,10 +15,18 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.fx.FXUtils;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.io.envelopes.EnvelopeWriter;
+import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.SimpleConfigurable;
+import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -28,31 +36,34 @@ import javafx.collections.ObservableList;
 public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfigurable implements PlotFrame<T> {
 
     protected ObservableList<T> plottables = FXCollections.observableArrayList();
-    private final String name;
 
-    public AbstractPlotFrame(String name, Meta annotation) {
-        this.name = name;
-        super.configure(annotation);
-    }
-
-    public AbstractPlotFrame(String name) {
-        this.name = name;
-    }
-
+//    private String name;
     @Override
     public T get(String name) {
         return plottables.stream().filter(pl -> name.equals(pl.getName())).findFirst().orElse(null);
     }
 
     @Override
-    public ObservableList<T> getAll() {
+    public ObservableList<T> plottables() {
         return FXCollections.unmodifiableObservableList(plottables);
     }
 
     @Override
     public void remove(String plotName) {
         get(plotName).removeListener(this);
-        plottables.removeIf(pl -> pl.getName().equals(plotName));
+        FXUtils.run(() -> {
+            plottables.removeIf(pl -> pl.getName().equals(plotName));
+            updatePlotData(plotName);
+        });
+    }
+
+    @Override
+    public void clear() {
+        plottables.forEach((T pl) -> pl.removeListener(this));
+        FXUtils.run(() -> {
+            plottables.clear();
+            //FIXME remove plottables
+        });
     }
 
     @Override
@@ -79,18 +90,6 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     protected abstract void updatePlotConfig(String name);
 
     @Override
-    public String getName() {
-        if (name == null || name.isEmpty()) {
-            return meta().getString("frameName", "default");
-        } else {
-            return name;
-        }
-    }
-
-//    protected abstract void updatePlot(String name, Descriptor descriptor, Annotation annotation);
-//
-//    protected abstract void updatePlot(Plottable plottable);
-    @Override
     public void notifyDataChanged(String name) {
         updatePlotData(name);
     }
@@ -98,6 +97,30 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public void notifyConfigurationChanged(String name) {
         updatePlotConfig(name);
+    }
+
+    @Override
+    public Envelope wrap() {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        EnvelopeWriter writer = new WrapperEnvelopeType().getWriter();
+        for (Plottable pl : plottables()) {
+            try {
+                writer.write(baos, pl.wrap());
+            } catch (IOException ex) {
+                throw new RuntimeException("Failed to write plotable to envelope", ex);
+            } catch (UnsupportedOperationException uex) {
+                LoggerFactory.getLogger(getClass()).error("Failed to wrap plottable {} becouse wits wrapper is not implemented", pl.getName());
+            }
+        }
+
+        EnvelopeBuilder builder = new EnvelopeBuilder()
+                .setDataType("df.plots.PlotFrame")
+                .putMetaValue(WRAPPED_TYPE_KEY, PLOT_WRAPPER_TYPE)
+                .putMetaValue("plotFrameClass", getClass().getName())
+                .putMetaNode("plotMeta", meta())
+                .setEnvelopeType(DEFAULT_WRAPPER_ENVELOPE_CODE)
+                .setData(baos.toByteArray());
+        return builder.build();
     }
 
 }

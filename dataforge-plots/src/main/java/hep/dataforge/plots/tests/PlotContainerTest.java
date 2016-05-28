@@ -28,7 +28,7 @@ import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
 import java.util.ArrayList;
 import java.util.List;
-import org.apache.commons.math3.analysis.UnivariateFunction;
+import java.util.function.Function;
 
 /**
  *
@@ -42,11 +42,11 @@ public class PlotContainerTest {
     public static void main(String[] args) {
         PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
 
-        JFreeChartFrame frame = new JFreeChartFrame("my plot", null);
+        JFreeChartFrame frame = new JFreeChartFrame();
 
         container.setPlot(frame);
 
-        UnivariateFunction func = (double x1) -> x1 * x1;
+        Function<Double,Double> func = (x1) -> x1 * x1;
 
         PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
 
@@ -60,7 +60,7 @@ public class PlotContainerTest {
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlottableData dataPlot = PlottableData.plot("dataPlot", ds, new XYAdapter("myX", "myXErr", "myY", "myYErr"));
+        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 

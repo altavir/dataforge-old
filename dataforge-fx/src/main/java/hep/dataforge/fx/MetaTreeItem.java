@@ -6,6 +6,7 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import java.util.List;
@@ -22,6 +23,11 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 public class MetaTreeItem extends TreeItem<MetaTree> {
+
+    /**
+     * The tag not to display node or value in configurator
+     */
+    public static final String NO_CONFIGURATOR_TAG = "nocfg";
 
     public MetaTreeItem(Configuration config, NodeDescriptor descriptor) {
         super(new MetaTreeBranch(null, config, descriptor));
@@ -80,36 +86,42 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
                         if (childDescriptor == null && descriptorProvider != null) {
                             childDescriptor = descriptorProvider.apply(childConfig);
                         }
-                        MetaTree childTree;
-                        //if node is list add its index to constructor
-                        if (childConfigs.size() > 1) {
-                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor, i);
-                        } else {
-                            childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                        //Checking if the node to be shown
+                        if (childDescriptor == null || showDescribedNode(childDescriptor)) {
+                            MetaTree childTree;
+                            //if node is list add its index to constructor
+                            if (childConfigs.size() > 1) {
+                                childTree = new MetaTreeBranch(branch, childConfig, childDescriptor, i);
+                            } else {
+                                childTree = new MetaTreeBranch(branch, childConfig, childDescriptor);
+                            }
+                            children.add(new MetaTreeItem(childTree));
                         }
-                        children.add(new MetaTreeItem(childTree));
                     }
                 });
 
                 // adding values with descriptors if available
                 config.getValueNames().stream()
-                        .map((valueName) -> new MetaTreeLeaf(branch, valueName))
-                        .forEach((valueLeaf) -> {
-                            children.add(new MetaTreeItem(valueLeaf));
+                        .forEach((valueName) -> {
+                            MetaTreeLeaf valueLeaf = new MetaTreeLeaf(branch, valueName);
+                            ValueDescriptor childDescriptor = descriptor == null ? null : descriptor.valueDescriptor(valueName);
+                            if (childDescriptor == null || showDescribedValue(childDescriptor)) {
+                                children.add(new MetaTreeItem(valueLeaf));
+                            }
                         });
             }
 
             // adding the rest default value from descriptor. Ignoring the ones allready added
             if (descriptor != null) {
                 descriptor.childrenDescriptors().values().stream()
-                        .filter((nd) -> (config == null || !config.hasNode(nd.getName())))
+                        .filter((nd) -> showDescribedNode(nd) && (config == null || !config.hasNode(nd.getName())))
                         .map((nd) -> new MetaTreeBranch(branch, null, nd))
                         .forEach((childTree) -> {
                             children.add(new MetaTreeItem(childTree));
                         });
 
                 descriptor.valueDescriptors().values().stream()
-                        .filter((vd) -> (config == null || !config.hasValue(vd.getName())))
+                        .filter((vd) -> showDescribedValue(vd) && (config == null || !config.hasValue(vd.getName())))
                         .map((vd) -> new MetaTreeLeaf(branch, vd.getName()))
                         .forEach((childTree) -> {
                             children.add(new MetaTreeItem(childTree));
@@ -118,6 +130,26 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
 
             return children;
         }
+    }
+
+    /**
+     * Condition to show empty described node
+     *
+     * @param nd
+     * @return
+     */
+    protected boolean showDescribedNode(NodeDescriptor nd) {
+        return !nd.tags().contains(NO_CONFIGURATOR_TAG);
+    }
+
+    /**
+     * Condition to show empty described value
+     *
+     * @param vd
+     * @return
+     */
+    protected boolean showDescribedValue(ValueDescriptor vd) {
+        return !vd.tags().contains(NO_CONFIGURATOR_TAG);
     }
 
     public void addBranch(String name) {
@@ -173,7 +205,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
                 ((MetaTreeBranch) this.getParent().getValue()).getNode().removeValue(getValue().getName());
             } else {
                 ((MetaTreeBranch) this.getParent().getValue()).getNode()
-                        .removeChildNode(((MetaTreeBranch) getValue()).getNode());
+                        .replaceChildNode(((MetaTreeBranch) getValue()).getNode(), null);
             }
             if (!getValue().hasDescriptor()) {
                 getParent().getChildren().remove(this);

@@ -47,7 +47,7 @@ class NumberValue implements Value {
         if (obj == null) {
             return false;
         }
-        if (!Number.class.isInstance(obj)) {
+        if (!Value.class.isInstance(obj)) {
             return false;
         }
         return NUMBER_COMPARATOR.compare(value, ((Value) obj).numberValue()) == 0;

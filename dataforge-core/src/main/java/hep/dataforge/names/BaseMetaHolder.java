@@ -10,7 +10,7 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 

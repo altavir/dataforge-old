@@ -7,7 +7,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.PathSyntaxException;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import java.util.Collections;
@@ -16,6 +16,7 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to work with meta
@@ -79,6 +80,11 @@ public class MetaUtils {
      * returned to user. Basically is used to ensure automatic substitutions. If
      * the reference not found in the current annotation scope than the value is
      * returned as-is.
+     * <p>
+     * the notation for template is the following: {@code ${path|def}} where
+     * {@code path} is the path for value in the context and {@code def} is the
+     * default value.
+     * </p>
      *
      * @param val
      * @param contexts a list of contexts to draw value from
@@ -90,15 +96,20 @@ public class MetaUtils {
         }
         if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
             String valStr = val.stringValue();
-            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
+//            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
+            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?\\}").matcher(valStr);
             while (matcher.find()) {
                 String group = matcher.group();
                 String sub = matcher.group("sub");
+                String replacement = matcher.group("def");
                 for (ValueProvider context : contexts) {
                     if (context != null && context.hasValue(sub)) {
-                        valStr = valStr.replace(group, context.getString(sub));
+                        replacement = context.getString(sub);
                         break;
                     }
+                }
+                if (replacement != null) {
+                    valStr = valStr.replace(group, replacement);
                 }
             }
             return Value.of(valStr);

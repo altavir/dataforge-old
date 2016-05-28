@@ -17,11 +17,14 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+import static hep.dataforge.fx.MetaTreeItem.NO_CONFIGURATOR_TAG;
+import static hep.dataforge.meta.Configuration.FINAL_TAG;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
-import java.util.Collection;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Подкласс для рисования двумерных картинок
@@ -31,32 +34,58 @@ import java.util.stream.Collectors;
 @ValueDef(name = "color", info = "The color of line or symbol.")
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "true", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "false", info = "Show symbols for data point.")
-@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
-@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
-@ValueDef(name = "lineType", info = "The type of the line fill.")
-@ValueDef(name = "connectionType", allowed = "[default, step, spline]", info = "The type of conncetion between points.")
+//@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
+//@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
+//@ValueDef(name = "lineType", info = "The type of the line fill.")
+@ValueDef(name = "connectionType", allowed = "[default, step, spline]", def = "default", info = "The type of conncetion between points.")
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
-@NodeDef(name = "adapter", info = "An adapter to interpret the dataset", target = "class::hep.dataforge.tables.XYAdapter")
-public abstract class XYPlottable extends AbstractPlottable implements Plottable {
-    
+@NodeDef(name = "adapter", info = "An adapter to interpret the dataset",
+        target = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
+public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implements Plottable<XYAdapter> {
+
     public XYPlottable(String name) {
         super(name);
-    }    
-
-    public Collection<DataPoint> plotData(Value from, Value to) {
-        return plotData().stream().filter((dp) -> adapter().getX(dp).isBetween(from, to)).collect(Collectors.toList());
     }
 
-    /**
-     * An adapter to interpret points. Could be overridden by custom adapter
-     *
-     * @return
-     */
-    public XYAdapter adapter() {
-        if (meta().hasNode("adapter")) {
-            return new XYAdapter(meta().getNode("adapter"));
+    public XYPlottable(String name, XYAdapter adapter) {
+        super(name, adapter);
+    }
+
+    public Stream<DataPoint> plotData(Value from, Value to) {
+        return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
+    }
+
+    protected Stream<DataPoint> filterXRange(Stream<DataPoint> data, Meta xRange) {
+        Value from = xRange.getValue("from", Value.NULL);
+        Value to = xRange.getValue("to", Value.NULL);
+        if (from != Value.NULL && to != Value.NULL) {
+            return data.filter(point -> adapter().getX(point).isBetween(from, to));
+        } else if (from == Value.NULL && to != Value.NULL) {
+            return data.filter(point -> adapter().getX(point).compareTo(to) < 0);
+        } else if (to == Value.NULL) {
+            return data.filter(point -> adapter().getX(point).compareTo(from) > 0);
         } else {
-            return new XYAdapter();
+            return data;
         }
+    }
+    
+    protected Stream<DataPoint> filterDataStream(Stream<DataPoint> data, Meta cfg){
+        if(cfg.isEmpty()){
+            return data;
+        }
+        if(cfg.hasNode("xRange")){
+            data = filterXRange(data, cfg.getNode("xRange"));
+        }
+        return data;
+    }
+
+    @Override
+    protected XYAdapter buildAdapter(Meta adapterMeta) {
+        return new XYAdapter(adapterMeta);
+    }
+
+    @Override
+    protected XYAdapter defaultAdapter() {
+        return new XYAdapter();
     }
 }

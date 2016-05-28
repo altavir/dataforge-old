@@ -23,9 +23,10 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.NonNull;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  *
@@ -34,7 +35,7 @@ import java.util.List;
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
-public class PlottableData extends XYPlottable {
+public class PlottableData extends XYPlottable{
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
@@ -66,11 +67,9 @@ public class PlottableData extends XYPlottable {
     }
 
     public static PlottableData plot(String name, XYAdapter adapter, boolean showErrors) {
-        MetaBuilder builder = new MetaBuilder("dataPlot")
-                .setNode("adapter", adapter.meta());
-        builder.setValue("showErrors", showErrors);
-        PlottableData plot = new PlottableData(name);
-        plot.setMetaBase(builder.build());
+        MetaBuilder builder = new MetaBuilder("dataPlot").setValue("showErrors", showErrors);
+        PlottableData plot = new PlottableData(name, adapter);
+        plot.configure(builder);
         return plot;
     }
 
@@ -79,28 +78,34 @@ public class PlottableData extends XYPlottable {
         plot.fillData(data);
         return plot;
     }
-    
-    public static PlottableData plot(String name, Meta meta, PointSource data, XYAdapter adapter){
+
+    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, PointSource data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
-        if(!meta.isEmpty()){
+        if (!meta.isEmpty()) {
             plot.configure(meta);
         }
         return plot;
     }
-    
-    public static PlottableData plot(String name, PointSource data, XYAdapter adapter){
+
+    public static PlottableData plot(String name, XYAdapter adapter, PointSource data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
     }
     
+    //TODO replace by ObservableList and allow external modification
 
-    protected List<DataPoint> data;
+    protected List<DataPoint> data= new ArrayList<>();
+    
+    
 
-    protected PlottableData(String name) {
+    public PlottableData(String name) {
         super(name);
-        data = new ArrayList<>();
+    }
+
+    protected PlottableData(String name, XYAdapter adapter) {
+        super(name, adapter);
     }
 
     public void fillData(Iterable<DataPoint> it) {
@@ -111,12 +116,17 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
-//    private static Meta extractMeta(Table data) {
-//        return data.meta().getNode("plot", Meta.empty("plot"));
-//    }
-    @Override
-    public Collection<DataPoint> plotData() {
-        return data;
+    protected void setData(@NonNull List<DataPoint> data) {
+        this.data = data;
     }
 
+    @Override
+    public Stream<DataPoint> dataStream(Meta dataConfiguration) {
+        return filterDataStream(data.stream(), dataConfiguration);
+    }
+
+    @Override
+    public List<DataPoint> data() {
+        return this.data;
+    }
 }

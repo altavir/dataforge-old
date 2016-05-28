@@ -16,18 +16,20 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import java.time.Duration;
 import java.time.Instant;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.stream.Stream;
 
 /**
  * A plottable to display dynamic series with limited number of elements. Both
@@ -51,13 +53,13 @@ public class DynamicPlottable extends XYPlottable {
         return res;
     }
 
-    public DynamicPlottable(String name) {
-        super(name);
-        MetaBuilder builder = new MetaBuilder("plottable")
-                .setValue("adapter.x", "timestamp");
-        setMetaBase(builder.build());
-        this.yName = getConfig().getString("adapter.y", name);
-    }
+//    public DynamicPlottable(String name) {
+//        super(name);
+//        MetaBuilder builder = new MetaBuilder("plottable")
+//                .setValue("adapter.x", "timestamp");
+//        setMetaBase(builder.build());
+//        this.yName = getConfig().getString("adapter.y", name);
+//    }
 
     /**
      * Create dynamic plottable with given y value name (x name is always
@@ -68,11 +70,7 @@ public class DynamicPlottable extends XYPlottable {
      * @param yName
      */
     public DynamicPlottable(String name, String yName) {
-        super(name);
-        MetaBuilder builder = new MetaBuilder("plottable")
-                .setValue("adapter.x", "timestamp")
-                .setValue("adapter.y", yName);
-        setMetaBase(builder.build());
+        super(name, new XYAdapter("timestamp", yName));
         this.yName = yName;
     }
 
@@ -118,8 +116,8 @@ public class DynamicPlottable extends XYPlottable {
     }
 
     @Override
-    public Collection<DataPoint> plotData() {
-        return map.values();
+    public Stream<DataPoint> dataStream(Meta cfg) {
+        return filterDataStream(map.values().stream(), cfg);
     }
 
     public String getYName() {

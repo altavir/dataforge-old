@@ -7,6 +7,8 @@ package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -108,6 +110,19 @@ public class NodeDescriptor extends DescriptorBase implements Named {
     }
 
     /**
+     * A list of tags for this node. Tags used to customize node usage
+     *
+     * @return
+     */
+    public List<String> tags() {
+        if (meta().hasValue("tags")) {
+            return Arrays.asList(meta().getStringArray("tags"));
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+    /**
      * The default meta for this node (could be multiple). Null if not defined
      *
      * @return
@@ -153,7 +168,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
 
     /**
      * The key of the value which is used to display this node in case it is
-     * multiple. By default, the key is empty which means that node index is used.
+     * multiple. By default, the key is empty which means that node index is
+     * used.
      *
      * @return
      */

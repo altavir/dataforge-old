@@ -29,4 +29,12 @@ public interface Configurable {
     Configuration getConfig();
     
     public void configure(Meta config);
+    
+    default void configureValue(String key, Object Value){
+        this.getConfig().setValue(key, Value);
+    }
+    
+    default void configureNode(String key, Meta... node){
+        this.getConfig().setNode(key, node);
+    }    
 }

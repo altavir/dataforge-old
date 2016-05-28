@@ -20,7 +20,7 @@ import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
-import hep.dataforge.navigation.ValueProvider;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.io.Serializable;
 import java.util.Collection;
@@ -36,7 +36,7 @@ import java.util.Objects;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public abstract class Meta extends AbstractProvider implements Named, ValueProvider, Serializable {
+public abstract class Meta extends AbstractProvider implements Named, ValueProvider, Serializable, MetaProvider {
 
     private static final Meta EMPTY = new MetaBuilder("").build();
 
@@ -70,6 +70,11 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     }
 
     public abstract Meta getNode(String path);
+
+    @Override
+    public Meta getMeta(String path) {
+        return getNode(path);
+    }
 
     /**
      * В случае передачи {@code "$all"} или {@code null} в качестве аргумента
@@ -159,9 +164,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     @Override
     public Object provide(String target, Name name) {
         switch (target) {
-            case "value":
+            case VALUE_TARGET:
                 return getValue(name.toString());
-            case "annotation":
+            case META_TARGET:
                 return getNode(name.toString());
             default:
                 throw new TargetNotProvidedException();
@@ -174,9 +179,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     @Override
     public boolean provides(String target, Name name) {
         switch (target) {
-            case "value":
+            case VALUE_TARGET:
                 return hasValue(name.toString());
-            case "annotation":
+            case META_TARGET:
                 return hasNode(name.toString());
             default:
                 return false;
