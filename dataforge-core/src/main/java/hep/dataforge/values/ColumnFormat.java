@@ -6,6 +6,8 @@
 package hep.dataforge.values;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 
 /**
  * Special format for columned text
@@ -13,6 +15,8 @@ import java.math.BigDecimal;
  * @author Alexander Nozik
  */
 public abstract class ColumnFormat implements ValueFormatter {
+
+    private DecimalFormat numberFormat;
 
     /**
      * Get maximum width of column in symbols
@@ -33,6 +37,28 @@ public abstract class ColumnFormat implements ValueFormatter {
         return String.format("%" + getMaxWidth() + "s", val);
     }
 
+    private DecimalFormat getNumberFormat() {
+        if (numberFormat == null) {
+            numberFormat = buildNumberFormat(getMaxWidth());
+        }
+        return numberFormat;
+    }
+
+    protected DecimalFormat buildNumberFormat(int width) {
+        return new DecimalFormat(String.format("0.%sE0#;(-0.%sE0#)", grids(width - 6), grids(width - 7)));
+    }
+
+    protected final String grids(int num) {
+        if (num <= 0) {
+            return "";
+        }
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < num; i++) {
+            b.append("#");
+        }
+        return b.toString();
+    }
+
     private String formatNumber(Number number) {
         BigDecimal bd;
         if (number instanceof BigDecimal) {
@@ -43,17 +69,40 @@ public abstract class ColumnFormat implements ValueFormatter {
             bd = BigDecimal.valueOf(number.doubleValue());
         }
         int maxWidth = getMaxWidth();
-        if (bd.doubleValue() == 0) {
-            return String.format("%" + maxWidth + "s", "0");
+        int digits = significantDigits(bd);
+
+        if (digits < maxWidth - 1) {
+            if (number instanceof Integer) {
+                return String.format("%d", number.intValue());
+            } else {
+                return String.format("%" + (maxWidth - 1) + "f", number.doubleValue());
+            }
+        } else {
+            return getNumberFormat().format(number.doubleValue());
         }
-        int precision = Math.min(maxWidth, significantDigits(bd));
 
-        //FIXME fix number formats!!!
-        return String.format("%" + maxWidth + "." + precision + "g", bd);
-
+//        int precision = maxWidth; // the length of mantissa
+//        
+//        if(number.doubleValue()< 0){
+//            precision--;
+//        }
+//        
+//        bd.
+//        if(number.doubleValue() >= 1){
+//            
+//        }
+//        
+//        if (bd.doubleValue() == 0) {
+//            return String.format("%" + maxWidth + "s", "0");
+//        }
+//        int precision = Math.min(maxWidth, significantDigits(bd));
+//
+//        //FIXME fix number formats!!!
+//        return String.format("%" + maxWidth + "." + precision + "g", bd);
     }
 
     private int significantDigits(BigDecimal input) {
+        input = input.stripTrailingZeros();
         return input.scale() <= 0
                 ? input.precision() + input.scale()
                 : input.precision();
@@ -73,7 +122,7 @@ public abstract class ColumnFormat implements ValueFormatter {
             case NULL:
                 return formatWidth("@null");
             case NUMBER:
-                return formatNumber(val.numberValue());
+                return formatWidth(formatNumber(val.numberValue()));
             case STRING:
                 return formatWidth(val.stringValue());
             case TIME:

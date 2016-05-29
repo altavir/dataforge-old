@@ -69,11 +69,11 @@ public class AnnotationTest {
     public void tearDown() {
     }
 
-    @Test
-    public void testSubst() {
-        System.out.println("Value substitution via AnnotationReader");
-        assertEquals("otherValue", testAnnotation.getString("some"));
-    }
+//    @Test
+//    public void testSubst() {
+//        System.out.println("Value substitution via AnnotationReader");
+//        assertEquals("otherValue", testAnnotation.getString("some"));
+//    }
 
     @Test
     public void testPath() {

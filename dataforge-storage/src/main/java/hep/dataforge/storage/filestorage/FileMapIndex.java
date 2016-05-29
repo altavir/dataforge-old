@@ -54,9 +54,12 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 while (!env.isEof()) {
                     long pos = env.readerPos();
                     String str = env.readLine();
-                    T entry = readEntry(str);
-                    Value indexValue = getIndexedValue(entry);
-                    putToIndex(indexValue, (int) pos);
+                    //skipping comments
+                    if (!str.trim().startsWith("#") && !str.trim().isEmpty()) {
+                        T entry = readEntry(str);
+                        Value indexValue = getIndexedValue(entry);
+                        putToIndex(indexValue, (int) pos);
+                    }
                 }
                 lastIndexedPosition = env.eofPos();
             }
@@ -67,12 +70,12 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             throw new StorageException(ex);
         }
     }
-    
+
     protected abstract String indexFileName();
 
     protected abstract T readEntry(String str);
-    
-    protected boolean needsSave(){
+
+    protected boolean needsSave() {
         return lastIndexedPosition - lastSavedPosition >= 200;
     }
 
@@ -99,7 +102,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         super.invalidate();
     }
 
-    private FileEnvelope getEnvelope(){
+    private FileEnvelope getEnvelope() {
         return envelopeProvider.get();
     }
 
@@ -120,7 +123,6 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 //    private void setContext(Context context) {
 //        this.context = context;
 //    }
-
     /**
      * Load index content from external file
      */
@@ -146,7 +148,8 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 
     /**
      * Save index to default file
-     * @throws StorageException 
+     *
+     * @throws StorageException
      */
     private synchronized void saveIndex() throws StorageException {
         File indexFile = getIndexFile();

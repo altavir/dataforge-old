@@ -94,7 +94,7 @@ public class Template implements Annotated {
      * @param metaProvider
      * @return
      */
-    public static Meta compile(Meta meta, Meta data) {
+    public static Meta compileTemplate(Meta meta, Meta data) {
         return new Template(meta).compile(data);
     }
 

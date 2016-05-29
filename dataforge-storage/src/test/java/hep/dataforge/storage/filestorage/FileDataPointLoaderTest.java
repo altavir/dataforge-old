@@ -72,26 +72,18 @@ public class FileDataPointLoaderTest {
         FileStorage storage = FileStorage.in(dir, null);
 
         PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", TableFormat.forNames(names));
-//(FileDataLoader) storage.createNewFileLoader(StorageTools.buildDataPointLoaderMeta("test", "", names));
 
         System.out.println("push");
         for (int i = 0; i < 100; i++) {
-//            try {
+
             loader.push(new MapPoint(names, i, i * 2, Math.sqrt(i)));
             System.out.printf("Point with number %d loaded%n", i);
-//            } catch (Exception ex) {
-//                System.out.printf("%nPoint with number %d loader failed with message: %n%n", i, ex.getMessage());
-//                ex.printStackTrace();
-//                fail(ex.getMessage());
-//            }
         }
 
         System.out.println("pull");
-        //Index<DataPoint> index = loader.getIndex("key");
-        ValueIndex<DataPoint> index = ((FilePointLoader)loader).getMapIndex("key");
-        DataPoint dp = index.pull(24,26).get(0);
-//        DataPoint dp2 = index.pullOne(Value.of(65536));
-        assertEquals(5d, dp.getValue("sqrt").doubleValue(), 0.001);
+        ValueIndex<DataPoint> index = ((FilePointLoader) loader).getMapIndex("key");
+        DataPoint dp = index.pull(24, 26).get(0);
+        assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
     }
 
 }

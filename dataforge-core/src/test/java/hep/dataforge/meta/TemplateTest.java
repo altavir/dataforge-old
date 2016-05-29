@@ -28,7 +28,7 @@ public class TemplateTest {
         System.out.println("compileTemplate");
         Meta template = new XMLMetaReader().read(getClass().getResourceAsStream("/meta/template.xml"));
         Meta data = new XMLMetaReader().read(getClass().getResourceAsStream("/meta/templateData.xml"));
-        Meta result = Template.compile(template, data);
+        Meta result = Template.compileTemplate(template, data);
         assertEquals(result.getString("someNode.myValue"), "crocodile");
         assertEquals(result.getString("someNode.subNode[0].ggg"), "81.5");
         assertEquals(result.getString("someNode.subNode[1].subNode.subNodeValue"), "ccc");
