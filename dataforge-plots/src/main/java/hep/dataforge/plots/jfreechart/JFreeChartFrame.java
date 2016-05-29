@@ -40,7 +40,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.TimeZone;
 import javafx.application.Platform;
-import javafx.scene.control.MenuItem;
 import javafx.scene.layout.AnchorPane;
 import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartPanel;
@@ -80,47 +79,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     private final JFreeChart chart;
     private final XYPlot plot;
 
-//    private static Action exportAction(JFreeChart t) {
-//        return new AbstractAction("Export JFC") {
-//            @Override
-//            public void actionPerformed(ActionEvent e) {
-//                JFrame frame = new JFrame("Export file location");
-//                JFileChooser fc = new JFileChooser();
-//                FileFilter filter = new FileNameExtensionFilter("JFC files", "jfc");
-//                fc.setFileFilter(filter);
-//
-//                int returnVal = fc.showSaveDialog(frame);
-//                if (returnVal == JFileChooser.APPROVE_OPTION) {
-//                    ObjectOutputStream stream = null;
-//                    try {
-//                        File file = fc.getSelectedFile();
-//
-//                        String fileName = file.toString();
-//                        if (!fileName.endsWith(".jfc")) {
-//                            fileName += ".jfc";
-//                            file = new File(fileName);
-//                        }
-//
-//                        stream = new ObjectOutputStream(new FileOutputStream(file));
-//                        stream.writeObject(t);
-//                        frame.dispose();
-//                    } catch (IOException ex) {
-//                        Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
-//                    } finally {
-//                        if (stream != null) {
-//                            try {
-//                                stream.close();
-//                            } catch (IOException ex) {
-//                                Logger.getLogger(JFreeChartFrame.class.getName()).log(Level.SEVERE, null, ex);
-//                            }
-//                        }
-//                    }
-//                } else {
-//                    frame.dispose();
-//                }
-//            }
-//        };
-//    }
     public JFreeChartFrame() {
         plot = new XYPlot();
         chart = new JFreeChart(plot);
@@ -135,7 +93,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     public JFreeChartFrame display(AnchorPane container) {
         Runnable run = () -> {
             ChartViewer viewer = new ChartViewer(getChart());
-            
+
             FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
 
             container.getChildren().add(viewer);
@@ -293,14 +251,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
     protected synchronized void updatePlotData(String name) {
         //removing data set if necessary
         XYPlottable plottable = get(name);
-        if(plottable == null){
+        if (plottable == null) {
             index.remove(name);
-           run(() -> {
+            run(() -> {
                 plot.setDataset(index.indexOf(name), null);
             });
-           return;
+            return;
         }
-        
+
         if (!index.contains(name)) {
             IntervalXYDataset data = new JFCDataWrapper(plottable);
             index.add(plottable.getName());
@@ -359,18 +317,21 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
             }
 
-            plot.setRenderer(num, render);
-
             Color color = PlotUtils.getAWTColor(meta);
             if (color != null) {
                 render.setSeriesPaint(0, color);
-            } else {
+            }
+
+            render.setSeriesVisible(0, meta.getBoolean("visible", true));
+            plot.setRenderer(num, render);
+
+            // update configuration to default colors
+            if (color == null) {
                 Paint paint = render.lookupSeriesPaint(0);
                 if (paint instanceof Color) {
                     plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
                 }
             }
-            render.setSeriesVisible(0, meta.getBoolean("visible", true));
         });
     }
 

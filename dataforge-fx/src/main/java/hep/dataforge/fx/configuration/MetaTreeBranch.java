@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.configuration;
 
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Configuration;

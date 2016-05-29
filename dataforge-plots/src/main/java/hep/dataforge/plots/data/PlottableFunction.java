@@ -84,10 +84,10 @@ public class PlottableFunction extends XYPlottable {
         //TODO use information from cfg
         return filterDataStream(grid.stream().map(x -> new MapPoint(new String[]{"x", "y"}, x, function.apply(x))), dataConfiguration);
     }
-
-    @Override
-    protected EnvelopeBuilder wrapBuilder() {
-        return super.wrapBuilder().putMetaValue("showErrors", false);
-    }
+//
+//    @Override
+//    protected EnvelopeBuilder wrapBuilder() {
+//        return super.wrapBuilder().putMetaValue("showErrors", false);
+//    }
 
 }

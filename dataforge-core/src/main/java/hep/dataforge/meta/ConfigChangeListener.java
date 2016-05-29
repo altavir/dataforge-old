@@ -46,6 +46,8 @@ public interface ConfigChangeListener {
      * @param newItem the item of elements after change. If null, then item has
      * been removed
      */
-    void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem);
+    default void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem){
+        //do nothing by default
+    }
 
 }

@@ -17,7 +17,7 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import static hep.dataforge.fx.MetaTreeItem.NO_CONFIGURATOR_TAG;
+import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;

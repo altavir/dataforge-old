@@ -6,6 +6,7 @@
 package hep.dataforge.fx;
 
 import javafx.application.Platform;
+import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;

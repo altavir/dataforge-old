@@ -8,7 +8,7 @@ package hep.dataforge.plots.fx;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.fx.FXUtils;
-import hep.dataforge.fx.MetaEditor;
+import hep.dataforge.fx.configuration.MetaEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
@@ -224,7 +224,9 @@ public class PlotContainer implements Initializable {
     }
 
     protected void setupSideBar() {
-        plottableslList.getItems().clear();
+        FXUtils.run(() -> {
+            plottableslList.getItems().clear();
+        });
     }
 
     /**
@@ -287,13 +289,22 @@ public class PlotContainer implements Initializable {
         private HBox content;
         private CheckBox title;
         private Button configButton;
+        /**
+         * Configuration to which this cell is bound
+         */
+        private Configuration config;
 
         @Override
         protected void updateItem(Plottable item, boolean empty) {
             super.updateItem(item, empty);
             if (empty) {
+                if (config != null) {
+                    config.removeObserver(this);
+                }
                 clearContent();
             } else {
+                config = item.getConfig();
+                config.addObserver(this, false);
                 setContent(item);
             }
         }
@@ -301,6 +312,7 @@ public class PlotContainer implements Initializable {
         private void clearContent() {
             setText(null);
             setGraphic(null);
+
         }
 
         private void setContent(Plottable item) {
@@ -316,11 +328,11 @@ public class PlotContainer implements Initializable {
                 content = new HBox(title, space, configButton);
                 HBox.setHgrow(content, Priority.ALWAYS);
                 content.setMaxWidth(Double.MAX_VALUE);
-                Configuration config = item.getConfig();
-                config.addObserver(this, true);
 
+//                title.textProperty().bindBidirectional(new ConfigStringValueProperty(config, "title"));
                 title.setText(config.getString("title", item.getName()));
                 title.setSelected(config.getBoolean("visible", true));
+//                title.selectedProperty().bindBidirectional(new ConfigBooleanValueProperty(config, "visible"));
                 title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
                     config.setValue("visible", newValue);
                 });
@@ -337,14 +349,22 @@ public class PlotContainer implements Initializable {
         }
 
         @Override
-        public void notifyValueChanged(String name, Value oldItem, Value newItem) {
-            if (name.equals("title")) {
-                title.setText(newItem.stringValue());
-            } else if (name.equals("color")) {
-                title.setTextFill(Color.valueOf(newItem.stringValue()));
-            } else if (name.equals("visible")) {
-                title.setSelected(newItem.booleanValue());
-            }
+        public synchronized void notifyValueChanged(String name, Value oldItem, Value newItem) {
+            FXUtils.run(() -> {
+                switch (name) {
+                    case "title":
+                        title.setText(newItem.stringValue());
+                        break;
+                    case "color":
+                        title.setTextFill(Color.valueOf(newItem.stringValue()));
+                        break;
+                    case "visible":
+                        title.setSelected(newItem.booleanValue());
+                        break;
+                    default:
+                        break;
+                }
+            });
         }
 
         @Override

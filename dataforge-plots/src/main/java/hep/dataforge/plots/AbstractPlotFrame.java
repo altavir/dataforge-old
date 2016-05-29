@@ -24,6 +24,7 @@ import hep.dataforge.meta.SimpleConfigurable;
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.util.stream.Collectors;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.slf4j.LoggerFactory;
@@ -49,21 +50,21 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     }
 
     @Override
-    public void remove(String plotName) {
+    public synchronized void remove(String plotName) {
         get(plotName).removeListener(this);
         FXUtils.run(() -> {
-            plottables.removeIf(pl -> pl.getName().equals(plotName));
+            T pl = get(plotName);
+            if (pl != null) {
+                pl.removeListener(this);
+            }
+            plottables.remove(pl);
             updatePlotData(plotName);
         });
     }
 
     @Override
-    public void clear() {
-        plottables.forEach((T pl) -> pl.removeListener(this));
-        FXUtils.run(() -> {
-            plottables.clear();
-            //FIXME remove plottables
-        });
+    public synchronized void clear() {
+        plottables.stream().map(pl -> pl.getName()).collect(Collectors.toList()).stream().forEach(plName -> remove(plName));
     }
 
     @Override

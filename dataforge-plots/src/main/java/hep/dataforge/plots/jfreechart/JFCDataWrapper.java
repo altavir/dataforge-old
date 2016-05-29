@@ -5,9 +5,9 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.plots.PlotStateListener;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Value;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
@@ -22,35 +22,23 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     private final XYAdapter adapter;
     private final Map<Integer, Number> xCache = new ConcurrentHashMap<>();
     private final Map<Integer, Number> yCache = new ConcurrentHashMap<>();
-    private boolean cacheX;
-    private boolean cacheY;
+    private int cacheSize = -1;
+    private boolean cacheXY;
 
     public JFCDataWrapper(XYPlottable plottable) {
         this.plottable = plottable;
         adapter = plottable.adapter();
-        this.cacheX = plottable.meta().getBoolean("JFreeChart.cacheX", false);
-        this.cacheY = plottable.meta().getBoolean("JFreeChart.cacheY", false);
-        //Do not notify plot here since it is automatical
-        plottable.addListener(new PlotStateListener() {
-            @Override
-            public void notifyDataChanged(String name) {
-                clearCache();
-            }
+        this.cacheXY = plottable.meta().getBoolean("JFreeChart.cache", false);
 
-            @Override
-            public void notifyConfigurationChanged(String name) {
-                clearCache();
-                cacheX = plottable.meta().getBoolean("JFreeChart.cacheX", false);
-                cacheY = plottable.meta().getBoolean("JFreeChart.cacheY", false);
+        plottable.getConfig().addObserver((String name, Value oldItem, Value newItem) -> {
+            switch (name) {
+                case "JFreeChart.cache":
+                    cacheXY = newItem.booleanValue();
+                    clearCache();
+                    break;
             }
-        });
+        }, false);
     }
-
-//    public JFCDataWrapper(XYPlottable plottable, boolean cacheX, boolean cacheY) {
-//        this(plottable);
-//        this.cacheX = cacheX;
-//        this.cacheY = cacheY;
-//    }
 
     @Override
     public int getSeriesCount() {
@@ -64,12 +52,19 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     @Override
     public int getItemCount(int i) {
-        return (int) plottable.dataStream().count();
+        if (cacheXY) {
+            if(cacheSize < 0){
+                cacheSize = (int) plottable.dataStream().count();
+            }
+            return cacheSize;
+        } else {
+            return (int) plottable.dataStream().count();
+        }
     }
 
     @Override
     public synchronized Number getX(int i, int i1) {
-        if (cacheX) {
+        if (cacheXY) {
             if (xCache.containsKey(i1)) {
                 return xCache.get(i1);
             } else {
@@ -84,7 +79,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     @Override
     public synchronized Number getY(int i, int i1) {
-        if (cacheY) {
+        if (cacheXY) {
             if (yCache.containsKey(i1)) {
                 return yCache.get(i1);
             } else {

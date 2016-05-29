@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.configuration;
 
 import java.util.Observable;
 import javafx.beans.binding.StringBinding;

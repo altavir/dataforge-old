@@ -11,6 +11,7 @@ import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.navigation.Path;
+import hep.dataforge.utils.CommonUtils;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.io.IOException;
@@ -21,6 +22,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -29,6 +31,8 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 public class DescriptorUtils {
+
+    private static final Map<AnnotatedElement, NodeDescriptor> descriptorCache = CommonUtils.getLRUCache(500);
 
     /**
      * Build Meta that contains all the default nodes and values from given node
@@ -81,8 +85,13 @@ public class DescriptorUtils {
         }
     }
 
+    /**
+     * Build a descriptor for given Class or Method using Java annotations or restore it from cache if it was already used recently
+     * @param element
+     * @return 
+     */
     public static NodeDescriptor buildDescriptor(AnnotatedElement element) {
-        return new NodeDescriptor(buildDescriptorMeta(element));
+        return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e)));
     }
 
     public static MetaBuilder buildDescriptorMeta(AnnotatedElement element) {

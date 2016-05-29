@@ -35,7 +35,7 @@ import java.util.stream.Stream;
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
-public class PlottableData extends XYPlottable{
+public class PlottableData extends XYPlottable {
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
@@ -93,12 +93,9 @@ public class PlottableData extends XYPlottable{
         plot.fillData(data);
         return plot;
     }
-    
-    //TODO replace by ObservableList and allow external modification
 
-    protected List<DataPoint> data= new ArrayList<>();
-    
-    
+    //TODO replace by ObservableList and allow external modification
+    protected List<DataPoint> data = new ArrayList<>();
 
     public PlottableData(String name) {
         super(name);

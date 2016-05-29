@@ -7,7 +7,7 @@ package hep.dataforge.fx.test;
 
 import hep.dataforge.description.DescriptorBuilder;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.fx.MetaEditor;
+import hep.dataforge.fx.configuration.MetaEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;

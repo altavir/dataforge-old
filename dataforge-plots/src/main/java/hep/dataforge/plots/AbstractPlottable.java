@@ -15,10 +15,12 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import static hep.dataforge.io.envelopes.Wrappable.DEFAULT_WRAPPER_ENVELOPE_CODE;
 import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.tables.PointAdapter;
@@ -96,7 +98,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
      * @param config
      */
     @Override
-    protected void applyConfig(Meta config) {
+    protected synchronized void applyConfig(Meta config) {
         getListeners().forEach((l) -> l.notifyConfigurationChanged(getName()));
         //If adapter is not defined, creating new adapter.
         if (this.adapter == null && config.hasNode(ADAPTER_KEY)) {
@@ -130,7 +132,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
                 .putMetaValue(WRAPPED_TYPE_KEY, PLOTTABLE_WRAPPER_TYPE)
                 .putMetaValue("plottableClass", getClass().getName())
                 .putMetaValue("name", getName())
-                .putMetaNode("meta", meta())
+                .putMetaNode("meta", new Laminate(meta()).setDescriptor(DescriptorUtils.buildDescriptor(this)))
                 .setEnvelopeType(DEFAULT_WRAPPER_ENVELOPE_CODE);
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
