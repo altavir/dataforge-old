@@ -7,7 +7,6 @@ package hep.dataforge.values;
 
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
-import java.text.NumberFormat;
 
 /**
  * Special format for columned text
@@ -45,7 +44,7 @@ public abstract class ColumnFormat implements ValueFormatter {
     }
 
     protected DecimalFormat buildNumberFormat(int width) {
-        return new DecimalFormat(String.format("0.%sE0#;(-0.%sE0#)", grids(width - 6), grids(width - 7)));
+        return new DecimalFormat(String.format("0.%sE0#;(-0.%sE0#)", grids(width - 5), grids(width - 6)));
     }
 
     protected final String grids(int num) {

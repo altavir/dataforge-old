@@ -33,7 +33,6 @@ public class BufferedBinary implements Binary {
 
     @Override
     public ReadableByteChannel getChannel() throws IOException {
-        
         return Channels.newChannel(getStream());
     }
 

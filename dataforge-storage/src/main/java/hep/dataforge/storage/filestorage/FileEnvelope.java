@@ -16,7 +16,6 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.Binary;
-import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Tag;
@@ -84,10 +83,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             if (dataSize == INFINITE_DATA_SIZE) {
                 dataSize = getRandomAccess().length() - getDataOffset();
             }
-
             getRandomAccess().seek(getDataOffset());
-
-            return new BufferedBinary(readBlock((int) getDataOffset(), (int) dataSize));
+            return new FileObjectBinary(file, (int) getDataOffset(), (int) dataSize);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -95,17 +92,16 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public Meta meta() {
+        if(meta == null){
+            open();
+        }
         return meta;
     }
 
     @Override
     public Map<String, Value> getProperties() {
         if (properties == null) {
-            try {
-                open();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            open();
         }
         return properties;
 
@@ -300,7 +296,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      *
      * @throws IOException
      */
-    private void open() throws IOException {
+    private void open() {
         try (InputStream stream = getFile().getContent().getInputStream()) {
             LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
             Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
@@ -308,6 +304,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             meta = header.meta();
             dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
             dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
         }
     }
 
@@ -316,11 +314,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      */
     private long getDataOffset() {
         if (dataOffset <= 0) {
-            try {
-                open();
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
-            }
+            open();
         }
         return dataOffset;
     }
