@@ -54,6 +54,15 @@ public class FixedWidthFormatTest {
         System.out.println(shortFormat.format(val));
         assertTrue(shortFormat.format(val).length() == 6);
     }      
+    
+    @Test
+    public void testLargeDouble() {
+        System.out.println("Print 18576.2");
+        ValueFormatter shortFormat = new FixedWidthFormat(6);
+        Value val = Value.of(18576.2);
+        System.out.println(shortFormat.format(val));
+        assertTrue(shortFormat.format(val).length() == 6);
+    }    
 
     /**
      * Test of allowed method, of class FixedWidthFormat.
