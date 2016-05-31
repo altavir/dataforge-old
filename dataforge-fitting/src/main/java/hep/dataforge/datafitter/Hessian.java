@@ -52,7 +52,7 @@ public class Hessian{
         for (int i = 0; i < dim; i++) {
             for (int j = i; j < dim; j++) {
                 UnivariateFunction func = FunctionUtils.getNamedProjectionDerivative(function, fitPars[i], fitPars[j], set);
-                double value = DerivativeCalculator.calculateDerivative(func, set.getValue(fitPars[i]), set.getError(fitPars[j])/2);
+                double value = DerivativeCalculator.calculateDerivative(func, set.getDouble(fitPars[i]), set.getError(fitPars[j])/2);
                 res.setEntry(i, j, value);
                 res.setEntry(j, i, value);                
             }

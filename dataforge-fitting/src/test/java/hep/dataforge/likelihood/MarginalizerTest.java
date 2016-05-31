@@ -15,7 +15,7 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.maths.NamedDoubleArray;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import static java.lang.Math.abs;
 import static java.lang.Math.sqrt;
@@ -30,6 +30,36 @@ import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
+import static java.lang.Math.abs;
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -72,7 +102,7 @@ public class MarginalizerTest {
         NamedMatrix cov = new NamedMatrix(mat, nameList);
         testFunc = new NamedGaussianPDFLog(cov);
         ArrayRealVector vector = new ArrayRealVector(cov.getDimension());
-        NamedDoubleArray zero = new NamedDoubleArray(nameList, vector);
+        NamedVector zero = new NamedVector(nameList, vector);
         RandomGenerator generator = new JDKRandomGenerator();
         generator.setSeed(54321);
         instance = new Marginalizer(cov, testFunc, zero,generator);

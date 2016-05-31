@@ -147,7 +147,7 @@ public class FitState extends FitSource {
      * @return the covariance
      */
     public NamedMatrix getCovariance() {
-        double[] sigmas = this.pars.getParErrors().getValues();
+        double[] sigmas = this.pars.getParErrors().getArray();
         sigmas = ebeMultiply(sigmas, sigmas);
         RealMatrix baseMatrix = new DiagonalMatrix(sigmas);
         NamedMatrix result = new NamedMatrix(baseMatrix, this.pars.namesAsArray());

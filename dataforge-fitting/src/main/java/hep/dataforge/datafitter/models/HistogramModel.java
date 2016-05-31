@@ -18,10 +18,10 @@ package hep.dataforge.datafitter.models;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.FunctionUtils;
 import hep.dataforge.functions.ParametricFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
 import hep.dataforge.tables.DataPoint;
+import hep.dataforge.values.NamedValueSet;
 import static java.lang.Math.log;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
@@ -75,7 +75,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     /** {@inheritDoc} */
     @Override
-    public double disDeriv(String parName, DataPoint point, NamedDoubleSet pars) throws NotDefinedException {
+    public double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             return this.derivValue(parName, adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
         } else {
@@ -85,7 +85,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     /** {@inheritDoc} */
     @Override
-    public double dispersion(DataPoint point, NamedDoubleSet pars) {
+    public double dispersion(DataPoint point, NamedValueSet pars) {
         double res = this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
         if (res < 1) {
             return 1;
@@ -95,7 +95,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     /** {@inheritDoc} */
     @Override
-    public double distance(DataPoint point, NamedDoubleSet pars) {
+    public double distance(DataPoint point, NamedValueSet pars) {
 //        double x = point.binCenter();
         long y = adapter.getCount(point);
         return this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars) - y;
@@ -131,7 +131,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    public double value(double binBegin, double binEnd, NamedDoubleSet set) {
+    public double value(double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = FunctionUtils.getSpectrumFunction(source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
@@ -151,7 +151,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    public double derivValue(String parName, double binBegin, double binEnd, NamedDoubleSet set) {
+    public double derivValue(String parName, double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = FunctionUtils.getSpectrumDerivativeFunction(parName, source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
@@ -163,7 +163,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     /** {@inheritDoc} */
     @Override
-    public double getLogProb(DataPoint point, NamedDoubleSet pars) {
+    public double getLogProb(DataPoint point, NamedValueSet pars) {
         double dist = this.distance(point, pars);
         double disp = this.dispersion(point, pars);
         double base = -log(2 * Math.PI * disp) / 2; // нормировка
@@ -172,7 +172,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     /** {@inheritDoc} */
     @Override
-    public double getLogProbDeriv(String parName, DataPoint point, NamedDoubleSet pars) {
+    public double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) {
         return -this.distance(point, pars) * this.disDeriv(parName, point, pars) / this.dispersion(point, pars);
     }
 

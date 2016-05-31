@@ -46,10 +46,6 @@ public class GlobalContext extends Context {
     private static final GlobalContext instance = new GlobalContext();
     private static final Set<Context> contexts = new HashSet<>();
 
-    static {
-        contexts.add(instance());
-    }
-
     public static GlobalContext instance() {
         return instance;
     }
@@ -69,8 +65,16 @@ public class GlobalContext extends Context {
      *
      * @param context
      */
-    public static void putContext(Context context) {
+    public static void registerContext(Context context) {
         contexts.add(context);
+    }
+
+    /**
+     * Remove context from registry
+     * @param context 
+     */
+    public static void unregisterContext(Context context) {
+        contexts.remove(context);
     }
 
     public static File getFile(String path) {
@@ -175,6 +179,19 @@ public class GlobalContext extends Context {
             dfUserDir.mkdir();
         }
         return dfUserDir;
+    }
+
+    /**
+     * Closing all contexts
+     *
+     * @throws Exception
+     */
+    @Override
+    public void close() throws Exception {
+        for (Context ctx : contexts) {
+            ctx.close();
+        }
+        super.close();
     }
 
 }

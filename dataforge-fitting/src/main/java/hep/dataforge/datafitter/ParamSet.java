@@ -17,10 +17,11 @@ package hep.dataforge.datafitter;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Value;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -38,7 +39,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ParamSet implements NamedDoubleSet {
+public class ParamSet implements NamedValueSet {
 
     @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.datafitter.Param.fromAnnotation")
     @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
@@ -52,7 +53,7 @@ public class ParamSet implements NamedDoubleSet {
             params = cfg.getNodes("param");
             ParamSet set = new ParamSet();
             for (Meta param : params) {
-                set.setPar(Param.fromAnnotation(param));
+                set.setPar(Param.fromMeta(param));
             }
             return set;
         } else {
@@ -103,12 +104,6 @@ public class ParamSet implements NamedDoubleSet {
         }
     }
 
-    /**
-     * <p>
-     * Constructor for ParamSet.</p>
-     *
-     * @param other a {@link hep.dataforge.datafitter.ParamSet} object.
-     */
     public ParamSet(ParamSet other) {
         this.params = new LinkedHashMap<>();
         for (Param par : other.getParams()) {
@@ -116,33 +111,24 @@ public class ParamSet implements NamedDoubleSet {
         }
     }
 
-    /**
-     * <p>
-     * Constructor for ParamSet.</p>
-     */
     public ParamSet() {
         this.params = new LinkedHashMap<>();
     }
 
-    /**
-     * <p>
-     * Constructor for ParamSet.</p>
-     *
-     * @param values a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     */
-    public ParamSet(NamedDoubleSet values) {
+    public ParamSet(NamedValueSet values) {
         this.params = new LinkedHashMap<>(values.names().getDimension());
         for (String name : values.names()) {
-            this.params.put(name, new Param(name, values.getValue(name)));
+            this.params.put(name, new Param(name, values.getDouble(name)));
         }
     }
 
-    /**
-     * <p>
-     * copy.</p>
-     *
-     * @return a {@link hep.dataforge.datafitter.ParamSet} object.
-     */
+    @Override
+    public Value getValue(String path) {
+        return Value.of(getDouble(path));
+    }
+
+    
+    
     public ParamSet copy() {
         return new ParamSet(this);
     }
@@ -173,14 +159,6 @@ public class ParamSet implements NamedDoubleSet {
         return params.size();
     }
 
-    /**
-     * <p>
-     * getError.</p>
-     *
-     * @param str a {@link java.lang.String} object.
-     * @return a double.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
     public double getError(String str) throws NameNotFoundException {
         Param P;
         P = this.getByName(str);
@@ -202,10 +180,10 @@ public class ParamSet implements NamedDoubleSet {
      * getParErrors.</p>
      *
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.maths.NamedDoubleArray} object.
+     * @return a {@link hep.dataforge.maths.NamedVector} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public NamedDoubleArray getParErrors(String... names) throws NameNotFoundException {
+    public NamedVector getParErrors(String... names) throws NameNotFoundException {
         if (names.length == 0) {
             names = this.namesAsArray();
         }
@@ -217,7 +195,7 @@ public class ParamSet implements NamedDoubleSet {
             res[i] = this.getError(names[i]);
 
         }
-        return new NamedDoubleArray(names, res);
+        return new NamedVector(names, res);
     }
 
     /**
@@ -225,10 +203,10 @@ public class ParamSet implements NamedDoubleSet {
      * getParValues.</p>
      *
      * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.maths.NamedDoubleArray} object.
+     * @return a {@link hep.dataforge.maths.NamedVector} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public NamedDoubleArray getParValues(String... names) throws NameNotFoundException {
+    public NamedVector getParValues(String... names) throws NameNotFoundException {
         if (names.length == 0) {
             names = this.namesAsArray();
         }
@@ -237,10 +215,10 @@ public class ParamSet implements NamedDoubleSet {
         double[] res = new double[names.length];
 
         for (int i = 0; i < res.length; i++) {
-            res[i] = this.getValue(names[i]);
+            res[i] = this.getDouble(names[i]);
 
         }
-        return new NamedDoubleArray(names, res);
+        return new NamedVector(names, res);
     }
 
     /**
@@ -280,18 +258,17 @@ public class ParamSet implements NamedDoubleSet {
      * @param str
      */
     @Override
-    public double getValue(String str) throws NameNotFoundException {
-        Param P;
-        P = this.getByName(str);
-        return P.value();
+    public Double getDouble(String str) throws NameNotFoundException {
+        Param p;
+        p = this.getByName(str);
+        return p.value();
     }
 
     /**
      * {@inheritDoc}
      */
-    @Override
-    public double[] getValues(String... names) {
-        return this.getParValues(names).getValues();
+    public double[] getArray(String... names) {
+        return this.getParValues(names).getArray();
     }
 
     /**
@@ -404,12 +381,12 @@ public class ParamSet implements NamedDoubleSet {
      * @return a {@link hep.dataforge.datafitter.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParErrors(NamedDoubleSet errors) throws NameNotFoundException {
+    public ParamSet setParErrors(NamedValueSet errors) throws NameNotFoundException {
         if (!this.names().contains(errors.names())) {
             throw new NameNotFoundException();
         }
         for (String name : errors.names()) {
-            this.setParError(name, errors.getValue(name));
+            this.setParError(name, errors.getDouble(name));
         }
         return this;
     }
@@ -444,13 +421,13 @@ public class ParamSet implements NamedDoubleSet {
      * @return a {@link hep.dataforge.datafitter.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParValues(NamedDoubleSet values) throws NameNotFoundException {
+    public ParamSet setParValues(NamedValueSet values) throws NameNotFoundException {
         if (!this.names().contains(values.names())) {
             throw new NameNotFoundException();
         }
         int i;
         for (String name : values.names()) {
-            this.setParValue(name, values.getValue(name));
+            this.setParValue(name, values.getDouble(name));
         }
         return this;
     }

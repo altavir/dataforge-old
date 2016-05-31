@@ -15,6 +15,7 @@
  */
 package hep.dataforge.names;
 
+import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import static java.lang.System.arraycopy;
 import java.util.ArrayList;

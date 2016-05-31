@@ -32,6 +32,7 @@ import java.io.OutputStream;
 public interface IOManager {
 
     public static final String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
+    public static final String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
     public static final String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
 
     /**
@@ -99,16 +100,33 @@ public interface IOManager {
      * @return a {@link java.io.File} object.
      */
     File getRootDirectory();
+    
+    /**
+     * The working directory for output and temporary files. Is always inside root directory
+     * @return 
+     */
+    default File getWorkDirectory(){
+        String tmpDir = getContext().getString(WORK_DIRECTORY_CONTEXT_KEY, ".dataforge");
+        File work = new File(getRootDirectory(), tmpDir);
+        if(!work.exists()){
+            work.mkdirs();
+        }
+        return work;
+    }
 
     /**
      * The directory for temporary files. This directory could be cleaned up any
-     * moment.
+     * moment. Is always inside root directory.
      *
      * @return
      */
     default File getTmpDirectory() {
-        String tmpDir = getContext().getString(TEMP_DIRECTORY_CONTEXT_KEY, "temp");
-        return new File(getRootDirectory(), tmpDir);
+        String tmpDir = getContext().getString(TEMP_DIRECTORY_CONTEXT_KEY, ".dataforge/.temp");
+        File tmp = new File(getRootDirectory(), tmpDir);
+        if(!tmp.exists()){
+            tmp.mkdirs();
+        }
+        return tmp;
     }
 
     /**

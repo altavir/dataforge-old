@@ -20,8 +20,8 @@ import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>MultivariateGaussianPrior class.</p>
@@ -44,11 +44,11 @@ public class MultivariateGaussianPrior implements NamedFunction {
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NameNotFoundException {
+    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NameNotFoundException {
         if (set.names().contains(derivParName)) {
-            double mean = set.getValue(derivParName);
+            double mean = set.getDouble(derivParName);
             double sigma = set.getError(derivParName);
-            double value = pars.getValue(derivParName);
+            double value = pars.getDouble(derivParName);
             double dif = value - mean;
 
             return -this.value(pars) * dif / sigma / sigma;
@@ -71,13 +71,13 @@ public class MultivariateGaussianPrior implements NamedFunction {
 
     /** {@inheritDoc} */
     @Override
-    public double value(NamedDoubleSet pars) throws NameNotFoundException {
+    public double value(NamedValueSet pars) throws NameNotFoundException {
         double res = 1;
         for (Param par : set.getParams()) {
             
             double mean = par.value();
             double sigma = par.getErr();
-            double value = pars.getValue(par.name());
+            double value = pars.getDouble(par.name());
             double dif = value - mean;
             
             res *= 1 / Math.sqrt(2 * Math.PI) / sigma * Math.exp(-dif * dif / 2 / sigma / sigma);

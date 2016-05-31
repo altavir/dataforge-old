@@ -19,37 +19,18 @@ import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 
-/**
- * <p>Abstract AbstractNamedFunction class.</p>
- *
- * @author Alexander Nozik
- * @version $Id: $Id
- */
+
 public abstract class AbstractNamedFunction extends AbstractNamedSet implements NamedFunction{
 
-    /**
-     * <p>Constructor for AbstractNamedFunction.</p>
-     *
-     * @param names a {@link hep.dataforge.names.Names} object.
-     */
+
     public AbstractNamedFunction(Names names) {
         super(names);
     }
 
-    /**
-     * <p>Constructor for AbstractNamedFunction.</p>
-     *
-     * @param list an array of {@link java.lang.String} objects.
-     */
     public AbstractNamedFunction(String[] list) {
         super(list);
     }
 
-    /**
-     * <p>Constructor for AbstractNamedFunction.</p>
-     *
-     * @param set a {@link hep.dataforge.names.NameSetContainer} object.
-     */
     public AbstractNamedFunction(NameSetContainer set) {
         super(set);
     }

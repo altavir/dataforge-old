@@ -23,7 +23,7 @@ import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.functions.NamedMultiFunction;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
-import hep.dataforge.maths.NamedDoubleArray;
+import hep.dataforge.maths.NamedVector;
 import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import static java.lang.Math.log;
 import org.apache.commons.math3.optim.InitialGuess;
@@ -95,13 +95,13 @@ public class CMFitEngine implements FitEngine {
         String[] fitPars = this.getFitPars(state, task);
         ParamSet pars = state.getParameters().copy();
 
-        NamedDoubleArray subSet = pars.getParValues(fitPars);
+        NamedVector subSet = pars.getParValues(fitPars);
         NamedFunction likeFunc = FunctionUtils.getNamedSubFunction(state.getLogLike(), pars, fitPars);
 
         MultiFunction func = new NamedMultiFunction(likeFunc);
         ObjectiveFunction oFunc;
         MaxEval maxEval = new MaxEval(maxSteps);
-        InitialGuess ig = new InitialGuess(subSet.getValues());
+        InitialGuess ig = new InitialGuess(subSet.getArray());
 
         double[] upBounds = new double[fitPars.length];
         double[] loBounds = new double[fitPars.length];
@@ -118,7 +118,7 @@ public class CMFitEngine implements FitEngine {
         switch (task.getMethodName()) {
             case CM_NELDERMEADSIMPLEX:
                 log.report("Using Nelder Mead Simlex (no derivs).");
-                AbstractSimplex simplex = new NelderMeadSimplex(pars.getParErrors(fitPars).getValues());
+                AbstractSimplex simplex = new NelderMeadSimplex(pars.getParErrors(fitPars).getArray());
                 MultivariateOptimizer nmOptimizer = new SimplexOptimizer(checker);
 
                 oFunc = new ObjectiveFunction(new MultivariateFunctionMappingAdapter(func, loBounds, upBounds));
@@ -130,7 +130,7 @@ public class CMFitEngine implements FitEngine {
                 MultivariateOptimizer CMAESOoptimizer = new CMAESOptimizer(100, Double.NEGATIVE_INFINITY,
                         true, 4, 4, getDefaultRandomGenerator(), false, checker);
 
-                CMAESOptimizer.Sigma sigmas = new CMAESOptimizer.Sigma(pars.getParErrors(fitPars).getValues());
+                CMAESOptimizer.Sigma sigmas = new CMAESOptimizer.Sigma(pars.getParErrors(fitPars).getArray());
                 CMAESOptimizer.PopulationSize popSize
                         = new CMAESOptimizer.PopulationSize((int) (4 + 3 * log(fitPars.length)));
 
@@ -139,7 +139,7 @@ public class CMFitEngine implements FitEngine {
                 break;
         }
 
-        NamedDoubleArray respars = new NamedDoubleArray(fitPars, res.getPoint());
+        NamedVector respars = new NamedVector(fitPars, res.getPoint());
         ParamSet allpars = pars.copy();
         allpars.setParValues(respars);
         FitTaskResult outRes = FitTaskResult.buildResult(state, task, allpars);

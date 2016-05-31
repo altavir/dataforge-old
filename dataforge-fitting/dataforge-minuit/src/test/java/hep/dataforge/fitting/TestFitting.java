@@ -54,7 +54,7 @@ public class TestFitting {
         for (int i = 0; i < runs; i++) {
             Table data = sp.sample(0, 1, 100, -3, 3, num);
             r = GaussianSpectrum.fit(data, allPars, "MINUIT");
-            res[i] = r.getParameters().getValue("pos");
+            res[i] = r.getParameters().getDouble("pos");
             errs[i] = r.getParameters().getError("pos");
             
 //            r.printCovariance(out());

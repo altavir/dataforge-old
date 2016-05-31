@@ -27,6 +27,9 @@ import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
+import static hep.dataforge.io.PrintNamed.printResiduals;
 
 /**
  * <p>

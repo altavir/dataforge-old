@@ -20,9 +20,9 @@ import static hep.dataforge.datafitter.FitTask.TASK_RUN;
 import static hep.dataforge.datafitter.FitTask.TASK_SINGLE;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.maths.MathUtils;
 import static hep.dataforge.maths.MatrixOperations.inverse;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.EigenDecomposition;
@@ -65,9 +65,9 @@ public class QOWFitEngine implements FitEngine {
         ParamSet par1; //текущее решение
 
         log.report("Starting newtonian iteration from: \n\t{}",
-                NamedDoubleSet.toString(par, weight.namesAsArray()));
+                MathUtils.toString(par, weight.namesAsArray()));
 
-        NamedDoubleArray eqvalues = QOWUtils.getEqValues(state, par, weight);//значения функций
+        NamedVector eqvalues = QOWUtils.getEqValues(state, par, weight);//значения функций
 
         dis = eqvalues.getVector().getNorm();// невязка
         log.report("Starting discrepancy is {}", dis);
@@ -87,7 +87,7 @@ public class QOWFitEngine implements FitEngine {
             // здесь должен стоять учет границ параметров
 
             log.report("Parameter values after step are: \n\t{}",
-                    NamedDoubleSet.toString(par1, weight.namesAsArray()));
+                    MathUtils.toString(par1, weight.namesAsArray()));
 
             eqvalues = QOWUtils.getEqValues(state, par1, weight);
             dis1 = eqvalues.getVector().getNorm();// невязка после шага
@@ -114,21 +114,21 @@ public class QOWFitEngine implements FitEngine {
         return par;
     }
 
-    private ParamSet newtonianStep(FitState source, ParamSet par, NamedDoubleArray eqvalues, Weight weight) {
+    private ParamSet newtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
 
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, par, weight));
 
-        RealVector step = invJacob.operate(new ArrayRealVector(eqvalues.getValues()));
-        return par.copy().setParValues(new NamedDoubleArray(weight.namesAsArray(), start.subtract(step)));
+        RealVector step = invJacob.operate(new ArrayRealVector(eqvalues.getArray()));
+        return par.copy().setParValues(new NamedVector(weight.namesAsArray(), start.subtract(step)));
     }
 
-    private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedDoubleArray eqvalues, Weight weight) {
+    private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, weight));
 
-        RealVector step = invJacob.operate(new ArrayRealVector(eqvalues.getValues()));
-        return par.copy().setParValues(new NamedDoubleArray(weight.namesAsArray(), start.subtract(step)));
+        RealVector step = invJacob.operate(new ArrayRealVector(eqvalues.getArray()));
+        return par.copy().setParValues(new NamedVector(weight.namesAsArray(), start.subtract(step)));
     }
 
     /**
@@ -162,7 +162,7 @@ public class QOWFitEngine implements FitEngine {
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
         log.report("The starting weight is: \n\t{}",
-                NamedDoubleSet.toString(curWeight.getTheta()));
+                MathUtils.toString(curWeight.getTheta()));
 
         //Стартовая точка такая же как и параметр веса
         /*Фитирование*/
@@ -193,7 +193,7 @@ public class QOWFitEngine implements FitEngine {
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
         log.report("The starting weight is: \n\t{}",
-                NamedDoubleSet.toString(curWeight.getTheta()));
+                MathUtils.toString(curWeight.getTheta()));
 
 //        ParamSet pars = state.getParameters().copy();
         NamedMatrix covar = getCovariance(state, curWeight);

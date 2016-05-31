@@ -43,7 +43,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Alexander Nozik
  */
-public class Context extends AbstractProvider implements ValueProvider, Reportable, Named {
+public class Context extends AbstractProvider implements ValueProvider, Reportable, Named, AutoCloseable {
 
     private final Report rootLog;
     private final Context parent;
@@ -62,14 +62,18 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      */
     public Context(Context parent, String name, Meta config) {
         this.pm = new PluginManager(this);
-        this.parent = parent;
+        if (parent == null) {
+            this.parent = GlobalContext.instance();
+        } else {
+            this.parent = parent;
+        }
         this.rootLog = new Report(name, parent);
         this.name = name;
         if (config != null) {
             if (config.hasNode("property")) {
-                for (Meta propertyNode : config.getNodes("property")) {
+                config.getNodes("property").stream().forEach((propertyNode) -> {
                     properties.put(propertyNode.getString("key"), propertyNode.getValue("value"));
-                }
+                });
             }
         }
     }
@@ -293,5 +297,15 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
 
     public Map<String, Value> getProperties() {
         return Collections.unmodifiableMap(properties);
+    }
+
+    /**
+     * Free up resources associated with this context
+     *
+     * @throws Exception
+     */
+    @Override
+    public void close() throws Exception {
+        GlobalContext.unregisterContext(this);
     }
 }

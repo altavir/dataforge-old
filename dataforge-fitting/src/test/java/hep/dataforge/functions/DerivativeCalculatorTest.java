@@ -19,7 +19,7 @@ import hep.dataforge.datafitter.ParamSet;
 import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
 import static hep.dataforge.functions.DerivativeCalculator.providesValidDerivative;
 import hep.dataforge.likelihood.NamedGaussianPDFLog;
-import hep.dataforge.maths.NamedDoubleArray;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -30,6 +30,36 @@ import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
+import static hep.dataforge.functions.DerivativeCalculator.calculateDerivative;
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -85,8 +115,8 @@ public class DerivativeCalculatorTest {
         
         
         NamedMatrix cov = new NamedMatrix(matrix, names);
-        NamedDoubleArray values = new NamedDoubleArray(names, zero);
-        NamedDoubleArray errors = new NamedDoubleArray(names, sigmas);
+        NamedVector values = new NamedVector(names, zero);
+        NamedVector errors = new NamedVector(names, sigmas);
         ParamSet set = new ParamSet(names);
         set.setParValues(values);
         set.setParErrors(errors);

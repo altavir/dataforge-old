@@ -27,14 +27,14 @@ import hep.dataforge.functions.ParametricFunction;
 import hep.dataforge.io.PrintNamed;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.MatrixOperations;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -70,9 +70,9 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     }
 
     @Override
-    public double derivValue(String parName, double x, NamedDoubleSet set) {
-        double pos = set.getValue("pos");
-        double w = set.getValue("w");
+    public double derivValue(String parName, double x, NamedValueSet set) {
+        double pos = set.getDouble("pos");
+        double w = set.getDouble("w");
         double dif = x - pos;
         switch (parName) {
             case "pos":
@@ -80,7 +80,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
             case "w":
                 return value(x, set) / w * (dif * dif / w / w - 1);
             case "amp":
-                return value(x, set) / set.getValue("amp");
+                return value(x, set) / set.getDouble("amp");
             default:
                 throw new NameNotFoundException(parName);
         }
@@ -99,7 +99,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         v[0] = w;
         v[1] = pos;
         v[2] = amp;
-        NamedDoubleArray vector = new NamedDoubleArray(list, v);
+        NamedVector vector = new NamedVector(list, v);
         double[] grid = GridCalculator.getUniformUnivariateGrid(a, b, number);
         for (double d : grid) {
             double value = this.value(d, vector);
@@ -112,10 +112,10 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     }
 
     @Override
-    public double value(double x, NamedDoubleSet set) {
-        double pos = set.getValue("pos");
-        double w = set.getValue("w");
-        double amp = set.getValue("amp");
+    public double value(double x, NamedValueSet set) {
+        double pos = set.getDouble("pos");
+        double w = set.getDouble("w");
+        double amp = set.getDouble("amp");
         double dif = x - pos;
         return amp * 1 / Math.sqrt(2 * Math.PI) / w * Math.exp(-dif * dif / 2 / w / w);
     }

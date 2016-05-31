@@ -16,10 +16,10 @@
 package hep.dataforge.functions;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>
@@ -77,9 +77,9 @@ public abstract class AbstractParametricFunction extends AbstractNamedSet implem
      * @param set
      * @return 
      */
-    protected double getValue(String name, NamedDoubleSet set){
+    protected double getValue(String name, NamedValueSet set){
         if(set.names().contains(name)){
-            return set.getValue(name);
+            return set.getDouble(name);
         } else {
             return getDefaultValue(name);
         }

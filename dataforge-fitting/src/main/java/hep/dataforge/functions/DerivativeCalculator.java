@@ -23,6 +23,21 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.FiniteDifferencesDifferentiator;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
 import org.apache.commons.math3.util.Precision;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
+import static java.lang.Math.abs;
 
 /**
  * <p>DerivativeCalculator class.</p>
@@ -48,7 +63,7 @@ public class DerivativeCalculator {
         FiniteDifferencesDifferentiator diff
                 = new FiniteDifferencesDifferentiator(numPoints, par.getErr() / 2.0d, par.getLowerBound(), par.getUpperBound());
         UnivariateDifferentiableFunction derivative = diff.differentiate(projection);
-        DerivativeStructure x = new DerivativeStructure(1, 1, 0, point.getValue(parName));
+        DerivativeStructure x = new DerivativeStructure(1, 1, 0, point.getDouble(parName));
         DerivativeStructure y = derivative.value(x);
         return y.getPartialDerivative(1);
     }

@@ -16,10 +16,10 @@
 package hep.dataforge.datafitter.models;
 
 import hep.dataforge.functions.ParametricFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.NamedValueSet;
 import java.util.function.Function;
 
 /**
@@ -72,7 +72,7 @@ public class WeightedXYModel extends XYModel {
 
     /** {@inheritDoc} */
     @Override
-    public double dispersion(DataPoint point, NamedDoubleSet pars) {
+    public double dispersion(DataPoint point, NamedValueSet pars) {
         return super.dispersion(point, pars)*weightFunction.apply(point);
     }
     

@@ -29,20 +29,20 @@ import static hep.dataforge.io.OutputData.printDataSet;
 import static hep.dataforge.io.PrintFunction.printFunctionSimple;
 import hep.dataforge.likelihood.LogLikelihood;
 import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.NamedValueSet;
 import java.io.PrintWriter;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
 import static java.lang.Math.sqrt;
 import java.util.ArrayList;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
 
 /**
  * <p>
@@ -69,8 +69,8 @@ public class PrintNamed {
      */
     public static void printLike2D(PrintWriter out, String head, FitState res, String par1, String par2, int num1, int num2, double scale) {
 
-        double val1 = res.getParameters().getValue(par1);
-        double val2 = res.getParameters().getValue(par2);
+        double val1 = res.getParameters().getDouble(par1);
+        double val2 = res.getParameters().getDouble(par2);
         double err1 = res.getParameters().getError(par1);
         double err2 = res.getParameters().getError(par2);
 
@@ -85,13 +85,13 @@ public class PrintNamed {
 
         String[] names = {par1, par2};
 
-        ArrayList<NamedDoubleArray> points = new ArrayList<>();
+        ArrayList<NamedVector> points = new ArrayList<>();
 
         for (double x : grid1) {
             vector[0] = x;
             for (double y : grid2) {
                 vector[1] = y;
-                points.add(new NamedDoubleArray(names, vector));
+                points.add(new NamedVector(names, vector));
             }
         }
 
@@ -136,17 +136,17 @@ public class PrintNamed {
         LogLikelihood like = res.getLogLike();
         NamedFunction func = FunctionUtils.getNamedSubFunction(like, res.getParameters(), names);
 
-        double[] vals = res.getParameters().getParValues(names).getValues();
+        double[] vals = res.getParameters().getParValues(names).getArray();
 
         NamedMatrix fullCov = res.getCovariance();
         RealMatrix reducedCov = fullCov.getNamedSubMatrix(names).getMatrix().scalarMultiply(scale);
         MultivariateNormalDistribution distr
                 = new MultivariateNormalDistribution(vals, reducedCov.getData());
 
-        ArrayList<NamedDoubleArray> points = new ArrayList<>();
+        ArrayList<NamedVector> points = new ArrayList<>();
 
         for (int i = 0; i < numpoints; i++) {
-            points.add(new NamedDoubleArray(names, distr.sample()));
+            points.add(new NamedVector(names, distr.sample()));
         }
 
         Table data = getNamedFunctionData(func, points);
@@ -225,7 +225,7 @@ public class PrintNamed {
      * @param b a double.
      * @param numPoints a int.
      */
-    public static void printSpectrum(PrintWriter out, ParametricFunction sp, NamedDoubleSet pars, double a, double b, int numPoints) {
+    public static void printSpectrum(PrintWriter out, ParametricFunction sp, NamedValueSet pars, double a, double b, int numPoints) {
         UnivariateFunction func = FunctionUtils.getSpectrumFunction(sp, pars);
         printFunctionSimple(out, func, a, b, numPoints);
         out.flush();
@@ -241,7 +241,7 @@ public class PrintNamed {
      * @param data a {@link java.lang.Iterable} object.
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
-    public static void printSpectrumResiduals(PrintWriter out, XYModel model, Iterable<DataPoint> data, NamedDoubleSet pars) {
+    public static void printSpectrumResiduals(PrintWriter out, XYModel model, Iterable<DataPoint> data, NamedValueSet pars) {
         printSpectrumResiduals(out, model.getSpectrum(), data, model.getAdapter(), pars);
     }
 
@@ -257,7 +257,7 @@ public class PrintNamed {
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,
-            Iterable<DataPoint> data, XYAdapter adapter, NamedDoubleSet pars) {
+            Iterable<DataPoint> data, XYAdapter adapter, NamedValueSet pars) {
         out.println();// можно тут вставить шапку
         out.printf("%8s\t%8s\t%8s\t%8s\t%8s%n", "x", "data", "error", "fit", "residual");
 

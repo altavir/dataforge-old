@@ -48,7 +48,7 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         if (getContext() == null || getContext().getParent() == null || !context.getParent().provides("actions")) {
             return null;
         } else {
-            return getContext().provide("actions", ActionManager.class);
+            return getContext().getParent().provide("actions", ActionManager.class);
         }
     }
 

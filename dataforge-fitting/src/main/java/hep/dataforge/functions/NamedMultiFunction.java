@@ -16,9 +16,10 @@
 package hep.dataforge.functions;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.MathUtils;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * Универсальная обертка, которая объединяет именованную и обычную функцию.
@@ -32,23 +33,12 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
     private final NamedFunction nFunc;
     private final Names names;
 
-    /**
-     * <p>Constructor for NamedMultiFunction.</p>
-     *
-     * @param names a {@link hep.dataforge.names.Names} object.
-     * @param multiFunc a {@link hep.dataforge.functions.MultiFunction} object.
-     */
     public NamedMultiFunction(Names names, MultiFunction multiFunc) {
         this.names = names;
         this.nFunc = null;
         this.multiFunc = multiFunc;
     }
 
-    /**
-     * <p>Constructor for NamedMultiFunction.</p>
-     *
-     * @param nFunc a {@link hep.dataforge.functions.NamedFunction} object.
-     */
     public NamedMultiFunction(NamedFunction nFunc) {
         this.names = nFunc.names();
         this.nFunc = nFunc;
@@ -57,7 +47,7 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String parName, NamedDoubleSet pars) {
+    public double derivValue(String parName, NamedValueSet pars) {
         if (nFunc != null) {
             return nFunc.derivValue(parName, pars);
         } else {
@@ -67,7 +57,7 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
             if (!names.contains(parName)) {
                 throw new IllegalArgumentException("Wrong derivative parameter name.");
             }
-            return this.multiFunc.derivValue(this.getNumberByName(parName), pars.getValues(this.names().asArray()));
+            return this.multiFunc.derivValue(this.getNumberByName(parName), MathUtils.getDoubleArray(pars, this.names().asArray()));
         }
     }
 
@@ -77,7 +67,7 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
         if (multiFunc != null) {
             return multiFunc.derivValue(n, vector);
         } else {
-            NamedDoubleArray set = new NamedDoubleArray(names.asArray(), vector);
+            NamedVector set = new NamedVector(names.asArray(), vector);
             return nFunc.derivValue(names.asArray()[n], set);
         }
     }
@@ -124,14 +114,14 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
     
     /** {@inheritDoc} */
     @Override
-    public double value(NamedDoubleSet pars) {
+    public double value(NamedValueSet pars) {
         if (nFunc != null) {
             return nFunc.value(pars);
         } else {
             if (!pars.names().contains(names.asArray())) {
                 throw new IllegalArgumentException("Wrong parameter set.");
             }
-            return this.value(pars.getValues(this.names().asArray()));
+            return this.value(MathUtils.getDoubleArray(pars, this.names().asArray()));
         }
     }
     
@@ -141,7 +131,7 @@ public class NamedMultiFunction implements NamedFunction, MultiFunction {
         if (multiFunc != null) {
             return multiFunc.value(vector);
         } else {
-            NamedDoubleArray set = new NamedDoubleArray(names.asArray(), vector);
+            NamedVector set = new NamedVector(names.asArray(), vector);
             return nFunc.value(set);
         }
     }

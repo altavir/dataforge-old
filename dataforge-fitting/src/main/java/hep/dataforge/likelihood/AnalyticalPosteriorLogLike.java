@@ -17,11 +17,11 @@ package hep.dataforge.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
-import static hep.dataforge.names.NamedUtils.areEqual;
 import static java.lang.Math.log;
+import static hep.dataforge.names.NamedUtils.areEqual;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * Конструирует апостериорный логарифм правдоподобия по ковариационной матрице,
@@ -38,10 +38,10 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     /**
      * <p>Constructor for AnalyticalPosteriorLogLike.</p>
      *
-     * @param centralValues a {@link hep.dataforge.maths.NamedDoubleArray} object.
+     * @param centralValues a {@link hep.dataforge.maths.NamedVector} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
      */
-    public AnalyticalPosteriorLogLike(NamedDoubleArray centralValues, NamedMatrix covariance) {
+    public AnalyticalPosteriorLogLike(NamedVector centralValues, NamedMatrix covariance) {
         super(centralValues);
         if (!areEqual(covariance.names(), centralValues.names())) {
             throw new IllegalArgumentException("Different names for centralValues and covariance.");
@@ -52,12 +52,12 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     /**
      * <p>Constructor for AnalyticalPosteriorLogLike.</p>
      *
-     * @param centralValues a {@link hep.dataforge.maths.NamedDoubleArray} object.
+     * @param centralValues a {@link hep.dataforge.maths.NamedVector} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
      * @param priorProb a {@link hep.dataforge.functions.NamedFunction} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public AnalyticalPosteriorLogLike(NamedDoubleArray centralValues, NamedMatrix covariance, NamedFunction priorProb) throws NameNotFoundException {
+    public AnalyticalPosteriorLogLike(NamedVector centralValues, NamedMatrix covariance, NamedFunction priorProb) throws NameNotFoundException {
         this(centralValues, covariance);
         if (!centralValues.names().contains(priorProb.namesAsArray())) {
             throw new IllegalArgumentException("Wrong names for priorProb.");
@@ -67,7 +67,7 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedDoubleSet pars) {
+    public double derivValue(String derivParName, NamedValueSet pars) {
         double res = this.like.derivValue(derivParName, pars);
         if (priorProb != null) {
             res += priorProb.derivValue(derivParName, pars) / priorProb.value(pars);
@@ -88,7 +88,7 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     
     /** {@inheritDoc} */
     @Override
-    public double value(NamedDoubleSet pars) {
+    public double value(NamedValueSet pars) {
         double res = this.like.value(pars);
         if (priorProb != null) {
             res += log(priorProb.value(pars));

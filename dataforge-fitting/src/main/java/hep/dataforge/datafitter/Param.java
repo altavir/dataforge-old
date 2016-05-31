@@ -43,31 +43,17 @@ public class Param {
         name = str;
     }
 
-    /**
-     * <p>
-     * Constructor for Param.</p>
-     *
-     * @param str a {@link java.lang.String} object.
-     * @param value a double.
-     */
     public Param(String str, double value) {
         this(str);
         this.value = value;
     }
 
-    /**
-     * <p>
-     * fromAnnotation.</p>
-     *
-     * @param cfg a {@link hep.dataforge.meta.Meta} object.
-     * @return a {@link hep.dataforge.datafitter.Param} object.
-     */
     @ValueDef(name = "name", required = true, info = "Parameter name.")
     @ValueDef(name = "value", type = "NUMBER", required = true, info = "Parameter value.")
     @ValueDef(name = "err", type = "NUMBER", info = "Parameter error or in general case inversed square root of the weight.")
     @ValueDef(name = "lower", type = "NUMBER", info = "Parameter lower boundary.")
     @ValueDef(name = "upper", type = "NUMBER", info = "Parameter upper boundary.")
-    public static Param fromAnnotation(Meta cfg) {
+    public static Param fromMeta(Meta cfg) {
         String name = cfg.getValue("name").stringValue();
         Param res = new Param(name);
         res.setErr(cfg.getDouble("err", Double.NaN));
@@ -106,12 +92,6 @@ public class Param {
 
     }
 
-    /**
-     * <p>
-     * copy.</p>
-     *
-     * @return a {@link hep.dataforge.datafitter.Param} object.
-     */
     public Param copy() {
         Param res = new Param(this.name);
         res.value = this.value;
@@ -121,53 +101,22 @@ public class Param {
         return res;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>err</code>.</p>
-     *
-     * @return a double.
-     */
     public double getErr() {
         return err;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>lowerBound</code>.</p>
-     *
-     * @return the lowerDomain
-     */
     public Double getLowerBound() {
         return lowerBound;
     }
 
-    /**
-     * <p>
-     * Getter for the field <code>upperBound</code>.</p>
-     *
-     * @return the upperDomain
-     */
     public Double getUpperBound() {
         return upperBound;
     }
 
-    /**
-     * <p>
-     * name.</p>
-     *
-     * @return name of the parameter.
-     */
     public String name() {
         return name;
     }
 
-    /**
-     * <p>
-     * setDomain.</p>
-     *
-     * @param lower a double.
-     * @param upper a double.
-     */
     public void setDomain(double lower, double upper) {
         /*Метод определяет область параметра, попутно проверяя, что она задана
          правильно*/
@@ -179,12 +128,6 @@ public class Param {
         }
     }
 
-    /**
-     * <p>
-     * Setter for the field <code>err</code>.</p>
-     *
-     * @param error a double.
-     */
     public void setErr(double error) {
         /*стандартная ошибка или любая другая величина, несущая этот смысл*/
 //        if(error<0) throw new CoreException("Error for parameter must be positive.");
@@ -207,22 +150,10 @@ public class Param {
         }
     }
 
-    /**
-     * <p>
-     * value.</p>
-     *
-     * @return the value
-     */
     public double value() {
         return value;
     }
 
-    /**
-     * <p>
-     * isConstrained.</p>
-     *
-     * @return a boolean.
-     */
     public boolean isConstrained() {
         return this.lowerBound > Double.NEGATIVE_INFINITY || this.upperBound < Double.POSITIVE_INFINITY;
     }
@@ -246,7 +177,7 @@ public class Param {
             }
 
             digits = Math.max(digits, 1);
-            
+
             if (isConstrained()) {
                 return String.format("'%s'\t= %." + digits + "g \u00b1 %.2g\t(%g,%g)", this.name, this.value, this.err, this.lowerBound, this.upperBound);
             } else {

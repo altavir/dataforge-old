@@ -86,7 +86,7 @@ public class PluginManager implements Encapsulated {
             return plugins.get(name);
         } else if (getParent() != null) {
             getContext().getLogger()
-                    .info("The plugin with name `{}` not found in current context, searching parent context.", name);
+                    .debug("The plugin with name `{}` not found in current context, searching parent context.", name);
             return getParent().getPlugin(name);
         } else {
             throw new NameNotFoundException(name, "Plugin not found");

@@ -15,7 +15,7 @@
  */
 package hep.dataforge.simulation;
 
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.values.NamedValueSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -29,15 +29,15 @@ public interface ParameterGenerator {
      * Generate one
      * @return 
      */
-    NamedDoubleSet generate();
+    NamedValueSet generate();
     
     /**
      * Generate many
      * @param number
      * @return 
      */
-    default List<NamedDoubleSet> generate(int number){
-        return Stream.<NamedDoubleSet>generate(()-> generate())
+    default List<NamedValueSet> generate(int number){
+        return Stream.<NamedValueSet>generate(()-> generate())
                 .limit(number)
                 .parallel()
                 .collect(Collectors.toList());

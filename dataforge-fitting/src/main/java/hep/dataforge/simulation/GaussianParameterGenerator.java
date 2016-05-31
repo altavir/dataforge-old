@@ -16,10 +16,11 @@
 package hep.dataforge.simulation;
 
 import hep.dataforge.datafitter.ParamSet;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.MathUtils;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 
 /**
@@ -44,13 +45,13 @@ public class GaussianParameterGenerator implements ParameterGenerator {
      * @param means
      * @param covariance
      */
-    public GaussianParameterGenerator(NamedDoubleSet means, NamedMatrix covariance) {
+    public GaussianParameterGenerator(NamedValueSet means, NamedMatrix covariance) {
         if (!covariance.names().contains(means.names())) {
             throw new IllegalArgumentException("Covariance names must include average values names");
         }
 
         this.names = means.names();
-        distribution = new MultivariateNormalDistribution(means.getValues(),
+        distribution = new MultivariateNormalDistribution(MathUtils.getDoubleArray(means),
                 covariance.getNamedSubMatrix(names.asArray()).getMatrix().getData());
     }
 
@@ -69,13 +70,13 @@ public class GaussianParameterGenerator implements ParameterGenerator {
         }
 
         this.names = means.names();
-        distribution = new MultivariateNormalDistribution(means.getValues(), matrix.getMatrix().getData());
+        distribution = new MultivariateNormalDistribution(means.getArray(), matrix.getMatrix().getData());
     }
 
     @Override
-    public NamedDoubleSet generate() {
+    public NamedValueSet generate() {
         double[] vector = distribution.sample();
-        return new NamedDoubleArray(names, vector);
+        return new NamedVector(names, vector);
     }
 
 }

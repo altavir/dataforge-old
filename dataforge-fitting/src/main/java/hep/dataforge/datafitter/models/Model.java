@@ -19,12 +19,12 @@ import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  *
@@ -39,7 +39,7 @@ public interface Model extends NameSetContainer, Named, Annotated {
      * @param pars
      * @return
      */
-    double distance(DataPoint point, NamedDoubleSet pars);
+    double distance(DataPoint point, NamedValueSet pars);
 
     /**
      *
@@ -49,7 +49,7 @@ public interface Model extends NameSetContainer, Named, Annotated {
      * @return
      * @throws NotDefinedException
      */
-    double disDeriv(String parName, DataPoint point, NamedDoubleSet pars) throws NotDefinedException;
+    double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
     /**
      * get inversed weight of the point
@@ -58,7 +58,7 @@ public interface Model extends NameSetContainer, Named, Annotated {
      * @param pars
      * @return
      */
-    double dispersion(DataPoint point, NamedDoubleSet pars);
+    double dispersion(DataPoint point, NamedValueSet pars);
 
     /**
      * Provides a ln of probability of obtaining the data point with given
@@ -68,7 +68,7 @@ public interface Model extends NameSetContainer, Named, Annotated {
      * @param pars
      * @return
      */
-    double getLogProb(DataPoint point, NamedDoubleSet pars) throws NotDefinedException;
+    double getLogProb(DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
     /**
      * Модель имеет собственное распределение ошибок
@@ -85,7 +85,7 @@ public interface Model extends NameSetContainer, Named, Annotated {
      * @return
      * @throws NotDefinedException
      */
-    double getLogProbDeriv(String parName, DataPoint point, NamedDoubleSet pars) throws NotDefinedException;
+    double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
     /**
      * Модель возвращает аналитическую производную распределения ошибок

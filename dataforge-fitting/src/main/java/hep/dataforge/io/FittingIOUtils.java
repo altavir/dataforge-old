@@ -17,15 +17,15 @@ package hep.dataforge.io;
 
 import hep.dataforge.datafitter.Param;
 import hep.dataforge.datafitter.ParamSet;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
+import hep.dataforge.values.NamedValueSet;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Locale;
-import static java.util.Locale.setDefault;
 import java.util.Scanner;
 import java.util.logging.Logger;
+import static java.util.Locale.setDefault;
 
 /**
  * Some IOUtils for String operations
@@ -35,14 +35,7 @@ import java.util.logging.Logger;
  */
 public class FittingIOUtils {
 
-    /**
-     * <p>getValueSet.</p>
-     *
-     * @param names a {@link java.lang.String} object.
-     * @param doubles a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     */
-    public static NamedDoubleSet getValueSet(String names, String doubles){
+    public static NamedValueSet getValueSet(String names, String doubles){
         Logger.getAnonymousLogger().warning("Using obsolete input method.");
         setDefault(Locale.ENGLISH);
         int i;
@@ -68,22 +61,16 @@ public class FittingIOUtils {
             }
             values[i] = sc2.nextDouble();
         }
-        NamedDoubleArray set = new NamedDoubleArray(list, values);
+        NamedVector set = new NamedVector(list, values);
         return set;
     }
 
-    /**
-     * <p>printParamSet.</p>
-     *
-     * @param out a {@link java.io.PrintWriter} object.
-     * @param set a {@link hep.dataforge.datafitter.ParamSet} object.
-     */
     public static void printParamSet(PrintWriter out, ParamSet set){
         out.println();
        
-        for (Param param: set.getParams()) {
+        set.getParams().stream().forEach((param) -> {
             out.println(param.toString());
-        }
+        });
     }
     
     /**

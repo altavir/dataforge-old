@@ -13,28 +13,30 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.names;
+package hep.dataforge.values;
 
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.values.Value;
+import hep.dataforge.names.NameSetContainer;
 
 /**
- * <p>
- * NamedValueSet interface.</p>
+ * A value provider with declared ordered list of names
  *
- * @author Alexander Nozik
- * @version $Id: $Id
  */
-public interface NamedValueSet extends NameSetContainer, Cloneable {
+public interface NamedValueSet extends NameSetContainer, ValueProvider {
 
     /**
-     * <p>
-     * getValue.</p>
+     * Faster search for existing values
      *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.values.Value} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
+     * @param path
+     * @return
      */
-    Value getValue(String name) throws NameNotFoundException;
+    @Override
+    default boolean hasValue(String path) {
+        return this.names().contains(path);
+    }
 
+    default Value getValue(int num) {
+        return getValue(this.names().getName(num));
+    }
+    
+    //TODO add helpers to get specific converted values as well as arrays 
 }

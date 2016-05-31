@@ -17,7 +17,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleArray;
+import hep.dataforge.maths.NamedVector;
 import static hep.dataforge.names.NamedUtils.combineNames;
 import hep.dataforge.names.Names;
 import hep.dataforge.tables.DataPoint;
@@ -44,11 +44,11 @@ public class OutputData {
      * @param points a {@link java.util.List} object.
      * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    public static Table getNamedFunctionData(NamedFunction func, List<NamedDoubleArray> points) {
+    public static Table getNamedFunctionData(NamedFunction func, List<NamedVector> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
         ListTable.Builder res = new ListTable.Builder(format);
         Double[] values = new Double[func.getDimension() + 1];
-        for (NamedDoubleArray point : points) {
+        for (NamedVector point : points) {
             for (int j = 0; j < func.getDimension(); j++) {
                 values[j] = point.getVector().getEntry(j);
             }

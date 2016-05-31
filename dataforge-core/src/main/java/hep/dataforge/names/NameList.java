@@ -30,7 +30,8 @@ class NameList implements Names {
     protected ArrayList<String> nameList = new ArrayList<>();
 
     /**
-     * <p>Constructor for NameList.</p>
+     * <p>
+     * Constructor for NameList.</p>
      *
      * @param list a {@link java.lang.String} object.
      */
@@ -43,7 +44,8 @@ class NameList implements Names {
     }
 
     /**
-     * <p>Constructor for NameList.</p>
+     * <p>
+     * Constructor for NameList.</p>
      *
      * @param named a {@link hep.dataforge.names.Names} object.
      */
@@ -56,7 +58,8 @@ class NameList implements Names {
     }
 
     /**
-     * <p>Constructor for NameList.</p>
+     * <p>
+     * Constructor for NameList.</p>
      *
      * @param list a {@link java.lang.Iterable} object.
      * @throws hep.dataforge.exceptions.NamingException if any.
@@ -78,7 +81,8 @@ class NameList implements Names {
     }
 
     /**
-     * <p>addName.</p>
+     * <p>
+     * addName.</p>
      *
      * @param name a {@link java.lang.String} object.
      */
@@ -90,7 +94,9 @@ class NameList implements Names {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(String... names) {
         List<String> list = asList();
@@ -101,7 +107,9 @@ class NameList implements Names {
         return res;
     }
 
-        /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean contains(Names names) {
         List<String> list = asList();
@@ -110,38 +118,51 @@ class NameList implements Names {
             res = res && list.contains(name);
         }
         return res;
-    }    
-    
-        /** {@inheritDoc} */
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getDimension() {
         return nameList.size();
     }
 
-/** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getName(int i) {
         return this.nameList.get(i);
     }
 
-/** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getNumberByName(String str) {
         return nameList.indexOf(str);
     }
 
-/** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Iterator<String> iterator() {
         return this.nameList.iterator();
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String[] asArray() {
         return nameList.toArray(new String[getDimension()]);
     }
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public List<String> asList() {
         return (List<String>) nameList.clone();

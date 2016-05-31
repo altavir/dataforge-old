@@ -15,8 +15,8 @@
  */
 package hep.dataforge.functions;
 
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>NamedSpectrum interface.</p>
@@ -34,7 +34,7 @@ public interface ParametricFunction extends NameSetContainer {
      * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    double derivValue(String parName, double x, NamedDoubleSet set);
+    double derivValue(String parName, double x, NamedValueSet set);
 
     /**
      * <p>value.</p>
@@ -43,7 +43,7 @@ public interface ParametricFunction extends NameSetContainer {
      * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    double value(double x, NamedDoubleSet set);
+    double value(double x, NamedValueSet set);
 
     /**
      * <p>providesDeriv.</p>

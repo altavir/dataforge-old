@@ -15,9 +15,6 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.values.ValueProvider;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

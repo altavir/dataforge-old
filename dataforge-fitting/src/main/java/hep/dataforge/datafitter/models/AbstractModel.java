@@ -19,12 +19,12 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.AbstractNamedFunction;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.NamedMetaHolder;
 import hep.dataforge.names.Names;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>
@@ -78,7 +78,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
         return new AbstractNamedFunction(names) {
 
             @Override
-            public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
                 return disDeriv(derivParName, point, pars);
             }
 
@@ -88,7 +88,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
             }
 
             @Override
-            public double value(NamedDoubleSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return distance(point, pars);
             }
         };
@@ -105,7 +105,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
 
         return new AbstractNamedFunction(names) {
             @Override
-            public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
                 return getLogProbDeriv(derivParName, point, pars);
             }
 
@@ -115,7 +115,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
             }
 
             @Override
-            public double value(NamedDoubleSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return getLogProb(point, pars);
             }
         };

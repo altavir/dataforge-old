@@ -16,9 +16,9 @@
 package hep.dataforge.datafitter;
 
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.AbstractNamedSet;
+import hep.dataforge.values.NamedValueSet;
 import java.util.logging.Logger;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -225,7 +225,7 @@ class QOWUtils {
         return new Array2DRowRealMatrix(res);
     }
 
-    static NamedDoubleArray getEqValues(FitState source, ParamSet set, Weight weight) {
+    static NamedVector getEqValues(FitState source, ParamSet set, Weight weight) {
         return getEqValues(source, set, weight.namesAsArray(), weight);
     }
 
@@ -238,7 +238,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static NamedDoubleArray getEqValues(FitState source, ParamSet set, String[] fitPars, Weight weight) {
+    static NamedVector getEqValues(FitState source, ParamSet set, String[] fitPars, Weight weight) {
 
         double[] res = new double[fitPars.length];
         int i;
@@ -265,7 +265,7 @@ class QOWUtils {
                 res[k] -= prior.derivValue(fitPars[k], set) / prior.value(set);
             }
         }
-        return new NamedDoubleArray(fitPars, res);
+        return new NamedVector(fitPars, res);
     }
 }
 
@@ -283,7 +283,7 @@ class Weight extends AbstractNamedSet {
      */
     private double[] dispersion;
     private FitState source;
-    private NamedDoubleSet theta; // точка, в которой веса вычислены
+    private NamedValueSet theta; // точка, в которой веса вычислены
 
     Weight(FitState source, String[] list) {
         super(list);
@@ -328,7 +328,7 @@ class Weight extends AbstractNamedSet {
      *
      * @return the theta
      */
-    public NamedDoubleSet getTheta() {
+    public NamedValueSet getTheta() {
         if (this.theta == null) {
             throw new IllegalStateException("Update operation for weight is required.");
         }

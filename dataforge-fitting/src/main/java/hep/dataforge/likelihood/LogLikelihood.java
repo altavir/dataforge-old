@@ -22,7 +22,7 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.AbstractNamedFunction;
 import hep.dataforge.functions.FunctionUtils;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.slf4j.LoggerFactory;
 
@@ -37,12 +37,6 @@ public class LogLikelihood extends ScaleableNamedFunction {
 
     private final FitSource source;
 
-    /**
-     * <p>
-     * Constructor for LogLikelihood.</p>
-     *
-     * @param source a {@link hep.dataforge.datafitter.FitSource} object.
-     */
     public LogLikelihood(FitSource source) {
         super(source.getModel());
         this.source = source;
@@ -52,29 +46,21 @@ public class LogLikelihood extends ScaleableNamedFunction {
         }
     }
 
-//    @Override
-//    public boolean contains(String... names) {
-//        return source.getModel().names().contains(names);
-//    }
-    /**
-     * <p>
-     * derivValue.</p>
-     *
-     * @param derivParName a {@link java.lang.String} object.
-     * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @return a double.
-     */
     public double derivValue(String derivParName, ParamSet pars) {
         return source.getLogProbDeriv(derivParName, pars);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NamingException {
+    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
         return derivValue(derivParName, new ParamSet(pars));
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public int getDimension() {
         return source.getModel().getDimension();
@@ -89,7 +75,7 @@ public class LogLikelihood extends ScaleableNamedFunction {
     public NamedFunction getLikelihood() {
         return new AbstractNamedFunction(this) {
             @Override
-            public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
                 return expDeriv(derivParName, pars);
             }
 
@@ -99,48 +85,33 @@ public class LogLikelihood extends ScaleableNamedFunction {
             }
 
             @Override
-            public double value(NamedDoubleSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return expValue(pars);
             }
         };
     }
 
-    /**
-     * <p>
-     * getLogLikelihoodProjection.</p>
-     *
-     * @param axisName a {@link java.lang.String} object.
-     * @param allPar a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction}
-     * object.
-     */
-    public UnivariateFunction getLogLikelihoodProjection(final String axisName, final NamedDoubleSet allPar) {
+    public UnivariateFunction getLogLikelihoodProjection(final String axisName, final NamedValueSet allPar) {
         return FunctionUtils.getNamedProjection(this, axisName, allPar);
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public boolean providesDeriv(String name) {
-        return source.getModel().providesProbDeriv(name);
     }
 
     /**
      * {@inheritDoc}
      */
-    /**
-     * <p>
-     * value.</p>
-     *
-     * @param pars a {@link hep.dataforge.datafitter.ParamSet} object.
-     * @return a double.
-     */
+    @Override
+    public boolean providesDeriv(String name) {
+        return source.getModel().providesProbDeriv(name);
+    }
+
     public double value(ParamSet pars) {
         return source.getLogProb(pars);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double value(NamedDoubleSet pars) throws NamingException {
+    public double value(NamedValueSet pars) throws NamingException {
         return value(new ParamSet(pars));
     }
 

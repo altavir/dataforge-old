@@ -15,8 +15,9 @@
  */
 package hep.dataforge.likelihood;
 
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.ValueProvider;
 import static java.lang.Math.exp;
 import static java.lang.Math.log;
 import static java.lang.Math.pow;
@@ -45,7 +46,7 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
      * @param values a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
      */
-    public NamedGaussianPDFLog(NamedDoubleSet values, NamedMatrix covariance) {
+    public NamedGaussianPDFLog(NamedValueSet values, NamedMatrix covariance) {
         super(covariance);
         this.values = this.getVector(values);
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
@@ -69,9 +70,11 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
         norm = sqrt(det) / pow(2 * Math.PI, this.getDimension() / 2d);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double derivValue(String derivParName, NamedDoubleSet pars) {
+    public double derivValue(String derivParName, NamedValueSet pars) {
         RealVector difVector = getVector(pars).subtract(values);
         RealVector c = this.infoMatrix.getRow(derivParName);
 
@@ -79,9 +82,11 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
         return res;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double expValue(NamedDoubleSet point) {
+    public double expValue(NamedValueSet point) {
         RealVector difVector = getVector(point).subtract(values);
         double expValue = infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
         return norm * exp(-expValue);
@@ -93,30 +98,25 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
      * @param set
      * @return
      */
-    private RealVector getVector(NamedDoubleSet set) {
+    private RealVector getVector(NamedValueSet set) {
         ArrayRealVector vector = new ArrayRealVector(this.getDimension());
         String[] namesArray = namesAsArray();
         for (int i = 0; i < this.getDimension(); i++) {
-            vector.setEntry(i, set.getValue(namesArray[i]));
+            vector.setEntry(i, set.getDouble(namesArray[i]));
         }
         return vector;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesDeriv(String name) {
         return true;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    /**
-     * {@inheritDoc}
-     */
-    /** {@inheritDoc} */
     @Override
-    public double value(NamedDoubleSet pars) {
+    public double value(NamedValueSet pars) {
         RealVector difVector = getVector(pars).subtract(values);
         return log(norm) - infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
     }

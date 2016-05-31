@@ -17,6 +17,7 @@ package hep.dataforge.maths;
 
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -36,8 +37,8 @@ public class NamedMatrix implements NameSetContainer {
      * @param vector
      * @return
      */
-    public static NamedMatrix diagonal(NamedDoubleSet vector) {
-        double[] vectorValues = vector.getValues();
+    public static NamedMatrix diagonal(NamedValueSet vector) {
+        double[] vectorValues = MathUtils.getDoubleArray(vector);
         double[][] values = new double[vectorValues.length][vectorValues.length];
         for (int i = 0; i < vectorValues.length; i++) {
             values[i][i] = vectorValues[i];

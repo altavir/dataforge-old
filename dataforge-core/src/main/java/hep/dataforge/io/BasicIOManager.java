@@ -97,8 +97,12 @@ public class BasicIOManager implements IOManager {
      */
     @Override
     public File getRootDirectory() {
-        String rootDir = getContext().getString(ROOT_DIRECTORY_CONTEXT_KEY, System.getProperty("user.dir"));
-        return new File(rootDir);
+        String rootDir = getContext().getString(ROOT_DIRECTORY_CONTEXT_KEY, System.getProperty("user.home"));
+        File root = new File(rootDir);
+        if (!root.exists()) {
+            root.mkdirs();
+        }
+        return root;
     }
 
     /**
@@ -116,7 +120,7 @@ public class BasicIOManager implements IOManager {
     public void setContext(Context context) {
         this.context = context;
     }
-    
+
     @Override
     public InputStream in(String path) {
         try {

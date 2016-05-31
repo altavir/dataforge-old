@@ -16,10 +16,10 @@
 package hep.dataforge.likelihood;
 
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 import static java.lang.Math.exp;
 
 /**
@@ -60,7 +60,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
      * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    public double expDeriv(String derivName, NamedDoubleSet point) {
+    public double expDeriv(String derivName, NamedValueSet point) {
         return expValue(point)*this.derivValue(derivName, point);
     }
 
@@ -70,7 +70,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
      * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a double.
      */
-    public double expValue(NamedDoubleSet point) {
+    public double expValue(NamedValueSet point) {
         return exp(this.value(point) + scale);
         
     }
@@ -84,12 +84,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
         return scale;
     }
 
-    /**
-     * <p>reScale.</p>
-     *
-     * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     */
-    public void reScale(NamedDoubleSet pars) {
+    public void reScale(NamedValueSet pars) {
         this.scale = -this.value(pars);
     }
 

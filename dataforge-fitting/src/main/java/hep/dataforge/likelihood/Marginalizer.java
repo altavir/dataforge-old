@@ -16,8 +16,7 @@
 package hep.dataforge.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
 import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import hep.dataforge.maths.integration.DistributionSampler;
@@ -27,6 +26,7 @@ import hep.dataforge.maths.integration.Sampler;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.NamedUtils;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -45,7 +45,7 @@ public class Marginalizer implements NameSetContainer {
     private NamedMatrix cov;
     private RandomGenerator generator;
     private ScaleableNamedFunction like;
-    private NamedDoubleArray point;
+    private NamedVector point;
     private final Names names;
 
     /**
@@ -60,7 +60,7 @@ public class Marginalizer implements NameSetContainer {
      * {@link org.apache.commons.math3.random.RandomGenerator} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedDoubleSet point,
+    public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedValueSet point,
             RandomGenerator generator) throws NameNotFoundException {
         this.names = like.names();
         //считаем, что набор параметров определяется функцией
@@ -72,7 +72,7 @@ public class Marginalizer implements NameSetContainer {
         if (!point.names().contains(like.namesAsArray())) {
             throw new NameNotFoundException();
         }
-        this.point = new NamedDoubleArray(point);
+        this.point = new NamedVector(point);
     }
 
     /**
@@ -84,7 +84,7 @@ public class Marginalizer implements NameSetContainer {
      * object.
      * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
      */
-    public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedDoubleSet point) {
+    public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedValueSet point) {
         this(cov, like, point, getDefaultRandomGenerator());
     }
 
@@ -101,7 +101,7 @@ public class Marginalizer implements NameSetContainer {
         if (!cov.names().contains(freePars)) {
             throw new NameNotFoundException();
         }
-        double[] vals = point.getValues(freePars);
+        double[] vals = point.getArray(freePars);
         double[][] mat = cov.getNamedSubMatrix(freePars).getMatrix().getData();
 
         Sampler sampler = new DistributionSampler(generator, vals, mat);
@@ -186,11 +186,11 @@ public class Marginalizer implements NameSetContainer {
 
     private class ExpLikelihood implements MultivariateFunction {
 
-        NamedDoubleArray startingPoint;
+        NamedVector startingPoint;
         String[] freePars;
 
         ExpLikelihood(String[] freePars) {
-            this.startingPoint = new NamedDoubleArray(point);
+            this.startingPoint = new NamedVector(point);
             this.freePars = freePars;
         }
 

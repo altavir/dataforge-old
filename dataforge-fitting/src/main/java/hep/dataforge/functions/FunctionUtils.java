@@ -18,9 +18,9 @@ package hep.dataforge.functions;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.maths.NamedDoubleArray;
-import hep.dataforge.maths.NamedDoubleSet;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
@@ -39,9 +39,9 @@ public class FunctionUtils {
      * @param pars - Точка, вкоторой вычеслено сечение
      * @return a {@link hep.dataforge.functions.Function} object.
      */
-    public static Function getNamedProjection(final NamedFunction nFunc, final String parName, final NamedDoubleSet pars) {
+    public static Function getNamedProjection(final NamedFunction nFunc, final String parName, final NamedValueSet pars) {
         return new Function() {
-            NamedDoubleArray curPars = new NamedDoubleArray(pars);
+            NamedVector curPars = new NamedVector(pars);
 
             @Override
             public double derivValue(double x) throws NotDefinedException {
@@ -71,9 +71,10 @@ public class FunctionUtils {
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
-    public static UnivariateFunction getNamedProjectionDerivative(final NamedFunction nFunc, final String parName, final String derivativeName, final NamedDoubleSet pars) {
+    public static UnivariateFunction getNamedProjectionDerivative(final NamedFunction nFunc, 
+            final String parName, final String derivativeName, final NamedValueSet pars) {
         return new UnivariateFunction() {
-            NamedDoubleArray curPars = new NamedDoubleArray(pars);
+            NamedVector curPars = new NamedVector(pars);
 
             @Override
             public double value(double x) {
@@ -91,9 +92,9 @@ public class FunctionUtils {
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
-    public static UnivariateFunction getNamedProjectionFunction(final NamedFunction nFunc, final String parName, final NamedDoubleSet pars) {
+    public static UnivariateFunction getNamedProjectionFunction(final NamedFunction nFunc, final String parName, final NamedValueSet pars) {
         return new UnivariateFunction() {
-            NamedDoubleArray curPars = new NamedDoubleArray(pars);
+            NamedVector curPars = new NamedVector(pars);
 
             @Override
             public double value(double x) {
@@ -113,7 +114,7 @@ public class FunctionUtils {
      * Если null, то разрешено изменение всех параметров.
      * @return a {@link hep.dataforge.functions.NamedFunction} object.
      */
-    public static NamedFunction getNamedSubFunction(final NamedFunction func, final NamedDoubleSet initPars, String... freePars) {
+    public static NamedFunction getNamedSubFunction(final NamedFunction func, final NamedValueSet initPars, String... freePars) {
         if (!initPars.names().contains(func.namesAsArray())) {
             throw new IllegalArgumentException("InitPars does not cover all of func parameters.");
         }
@@ -124,16 +125,16 @@ public class FunctionUtils {
             names = initPars.names();
         }
         return new AbstractNamedFunction(names) {
-            private final NamedDoubleArray allPars = new NamedDoubleArray(initPars);
+            private final NamedVector allPars = new NamedVector(initPars);
             private final NamedFunction f = func;
 
             @Override
-            public double derivValue(String derivParName, NamedDoubleSet pars) {
+            public double derivValue(String derivParName, NamedValueSet pars) {
                 if (!pars.names().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
                 for (String name : this.names()) {
-                    this.allPars.setValue(name, pars.getValue(name));
+                    this.allPars.setValue(name, pars.getDouble(name));
                 }
                 return f.derivValue(derivParName, allPars);
             }
@@ -144,12 +145,12 @@ public class FunctionUtils {
             }
 
             @Override
-            public double value(NamedDoubleSet pars) {
+            public double value(NamedValueSet pars) {
                 if (!pars.names().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
                 for (String name : this.names()) {
-                    this.allPars.setValue(name, pars.getValue(name));
+                    this.allPars.setValue(name, pars.getDouble(name));
                 }
                 return f.value(allPars);
             }
@@ -164,7 +165,7 @@ public class FunctionUtils {
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
-    public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final NamedDoubleSet pars) {
+    public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final NamedValueSet pars) {
         return (double x) -> s.derivValue(name, x, pars);
     }
 
@@ -175,7 +176,7 @@ public class FunctionUtils {
      * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
-    public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final NamedDoubleSet pars) {
+    public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final NamedValueSet pars) {
         return (double x) -> s.value(x, pars);
     }
 
@@ -190,7 +191,7 @@ public class FunctionUtils {
         return new AbstractNamedFunction(s) {
 
             @Override
-            public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
                 return s.derivValue(derivParName, x, pars);
             }
 
@@ -200,7 +201,7 @@ public class FunctionUtils {
             }
 
             @Override
-            public double value(NamedDoubleSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return s.value(x, pars);
             }
         };

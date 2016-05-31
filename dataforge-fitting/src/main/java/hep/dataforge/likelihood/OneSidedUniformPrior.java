@@ -17,8 +17,8 @@ package hep.dataforge.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.maths.NamedDoubleSet;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>OneSidedUniformPrior class.</p>
@@ -49,11 +49,11 @@ public class OneSidedUniformPrior implements NamedFunction {
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedDoubleSet pars) throws NotDefinedException {
+    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException {
         if (!this.parName.equals(derivParName)) {
             return 0;
         }
-        double parValue = pars.getValue(parName);
+        double parValue = pars.getDouble(parName);
         if (parValue == this.border) {
             if (isLower) {
                 return Double.POSITIVE_INFINITY;
@@ -98,8 +98,8 @@ public class OneSidedUniformPrior implements NamedFunction {
      * В данном случае априорная вероятность не нормирована
      */
     @Override
-    public double value(NamedDoubleSet pars) {
-        double parValue = pars.getValue(parName);
+    public double value(NamedValueSet pars) {
+        double parValue = pars.getDouble(parName);
         if (isLower) {
             if (parValue < border) {
                 return 0;
