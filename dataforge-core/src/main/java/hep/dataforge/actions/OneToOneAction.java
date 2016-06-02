@@ -135,7 +135,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    protected void beforeAction(Context context, String name, T datum, Laminate meta, Reportable log) {
+    protected void beforeAction(Context context, String name, T datum, Laminate meta, Reportable report) {
+        if (context.getBoolean("actions.reportStart", true)) {
+            report.report("Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
+        }
         logger().info("Starting action '{}[{}]'", getName(), name);
     }
 

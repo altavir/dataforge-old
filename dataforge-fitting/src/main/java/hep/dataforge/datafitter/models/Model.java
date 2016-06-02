@@ -30,7 +30,7 @@ import hep.dataforge.values.NamedValueSet;
  *
  * @author Alexander Nozik
  */
-public interface Model extends NameSetContainer, Named, Annotated {
+public interface Model extends NameSetContainer, Annotated {
 
     /**
      * Fit function value minus data point value
@@ -138,4 +138,5 @@ public interface Model extends NameSetContainer, Named, Annotated {
     default public Param getDefaultParameter(String name) {
         throw new NotDefinedException("Default parameter not found");
     }
+
 }

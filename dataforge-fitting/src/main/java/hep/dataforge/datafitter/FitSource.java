@@ -217,10 +217,6 @@ public class FitSource{
         return model.getDimension();
     }
 
-    public String getModelName() {
-        return this.model.getName();
-    }
-
     public Table getDataSet() {
         return dataSet;
     }

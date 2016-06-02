@@ -36,75 +36,32 @@ public class XYModel extends AbstractModel<XYAdapter> {
 
     private final ParametricFunction source;
 
-    /**
-     * <p>
-     * Constructor for XYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction}
-     * object.
-     */
-    public XYModel(String name, ParametricFunction source) {
-        super(name, source, new XYAdapter());
+
+    public XYModel(ParametricFunction source) {
+        super(source, new XYAdapter());
         this.source = source;
     }
 
-    /**
-     * <p>
-     * Constructor for XYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param format a {@link hep.dataforge.tables.XYAdapter} object.
-     */
-    public XYModel(String name, ParametricFunction source, XYAdapter format) {
-        super(name, source, format);
+
+    public XYModel(ParametricFunction source, XYAdapter format) {
+        super(source, format);
         this.source = source;
     }
 
-    /**
-     * <p>
-     * Constructor for XYModel.</p>
-     *
-     * @param source
-     * object.
-     * @param annotation
-     * object.
-     */
+
     public XYModel(ParametricFunction source, Meta annotation) {
-        super(annotation.getName(), source, new XYAdapter(annotation));
+        super(source, new XYAdapter(annotation));
         this.source = source;
     }
 
-    /**
-     * <p>
-     * Constructor for XYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param xName a {@link java.lang.String} object.
-     * @param xErrName a {@link java.lang.String} object.
-     * @param yName a {@link java.lang.String} object.
-     * @param yErrName a {@link java.lang.String} object.
-     */
-    public XYModel(String name, ParametricFunction source, String xName, String xErrName, String yName, String yErrName) {
-        super(name, source, new XYAdapter(xName, yName, xErrName, yErrName));
+
+    public XYModel(ParametricFunction source, String xName, String xErrName, String yName, String yErrName) {
+        super(source, new XYAdapter(xName, yName, xErrName, yErrName));
         this.source = source;
     }
 
-    /**
-     * <p>
-     * Constructor for XYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source
-     * object.
-     * @param xName a {@link java.lang.String} object.
-     * @param yName a {@link java.lang.String} object.
-     * @param yErrName a {@link java.lang.String} object.
-     */
-    public XYModel(String name, ParametricFunction source, String xName, String yName, String yErrName) {
-        super(name, source, new XYAdapter(xName, yName, yErrName));
+    public XYModel(ParametricFunction source, String xName, String yName, String yErrName) {
+        super(source, new XYAdapter(xName, yName, yErrName));
         this.source = source;
     }
 

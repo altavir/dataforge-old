@@ -33,28 +33,13 @@ public class WeightedXYModel extends XYModel {
     
     private final Function<DataPoint, Double> weightFunction;
 
-    /**
-     * <p>Constructor for WeightedXYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param weightFunction a {@link java.util.function.Function} object.
-     */
-    public WeightedXYModel(String name, ParametricFunction source, Function<DataPoint, Double> weightFunction) {
-        super(name, source);
+    public WeightedXYModel(ParametricFunction source, Function<DataPoint, Double> weightFunction) {
+        super(source);
         this.weightFunction = weightFunction;
     }
 
-    /**
-     * <p>Constructor for WeightedXYModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction} object.
-     * @param format a {@link hep.dataforge.tables.XYAdapter} object.
-     * @param weightFunction a {@link java.util.function.Function} object.
-     */
-    public WeightedXYModel(String name, ParametricFunction source, XYAdapter format, Function<DataPoint, Double> weightFunction) {
-        super(name, source, format);
+    public WeightedXYModel(ParametricFunction source, XYAdapter format, Function<DataPoint, Double> weightFunction) {
+        super(source, format);
         this.weightFunction = weightFunction;
     }
 

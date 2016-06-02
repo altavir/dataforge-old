@@ -12,6 +12,7 @@ import ch.qos.logback.core.AppenderBase;
 import hep.dataforge.context.GlobalContext;
 import java.io.PrintStream;
 import java.util.function.BiConsumer;
+import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.apache.commons.io.output.TeeOutputStream;
@@ -68,10 +69,10 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
     }
 
     @Override
-    protected Stage buildStage() {
+    protected Stage buildStage(Parent root) {
         Stage stage = new Stage();
         stage.setTitle("DataForge console");
-        stage.setScene(new Scene(outputPane.getHolder(), 800, 200));
+        stage.setScene(new Scene(root, 800, 200));
         stage.sizeToScene();
 
         return stage;
@@ -123,8 +124,8 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
      */
     public void hookStd() {
         if (!stdHooked) {
-            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getOutputStream(), STD_OUT)));
-            System.setErr(new PrintStream(new TeeOutputStream(outputPane.getOutputStream(), STD_ERR)));
+            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_OUT)));
+            System.setErr(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_ERR)));
             stdHooked = true;
         }
     }
@@ -145,6 +146,11 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
         restoreStd();
         logAppender.stop();
         super.close();
+    }
+
+    @Override
+    protected Parent getRoot() {
+        return outputPane.getRoot();
     }
 
 }

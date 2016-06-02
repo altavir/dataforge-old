@@ -77,9 +77,9 @@ public class EnvelopeProperties {
         return EnvelopeProperties.getMetaType(Value.of(code));
     }
 
-    public static MetaType getMetaType(Value val) {
+    public static synchronized MetaType getMetaType(Value val) {
         for (MetaType mt : loader) {
-            if (mt.getValue().equals(val)) {
+            if (val.equals(mt.getValue())) {
                 return mt;
             }
         }

@@ -27,6 +27,12 @@ import javafx.collections.ObservableMap;
 
 /**
  *
+ * <p>
+ * WARNING! While DFProcess uses JavaFX beans API, it is not run on JavaFX UI
+ * thread. In order to bind variables to UI components, one needs to wrap all UI
+ * calls into Platform.runLater.
+ * </p>
+ *
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
@@ -36,7 +42,7 @@ public class DFProcess<R> implements Named {
 
     private final ObjectProperty<CompletableFuture<R>> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, DFProcess> children = FXCollections.observableHashMap();
+    private final ObservableMap<String, DFProcess> children = FXCollections.<String, DFProcess>observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 
@@ -105,6 +111,15 @@ public class DFProcess<R> implements Named {
 
         this.title = new SimpleStringProperty(name);
         this.message = new SimpleStringProperty("");
+    }
+
+    /**
+     * Unmodifiable map of children
+     *
+     * @return
+     */
+    public ObservableMap<String, DFProcess> getChildren() {
+        return children;//FXCollections.<String, DFProcess>unmodifiableObservableMap(children);
     }
 
     @Override

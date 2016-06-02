@@ -45,21 +45,10 @@ public class ModelManager {
     private final HashMap<String, MetaFactory<Model>> modelList = new HashMap<>();
     private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
 
-    /**
-     * <p>
-     * Constructor for ModelManager.</p>
-     *
-     * @param defaultManager a
-     * {@link hep.dataforge.datafitter.models.ModelManager} object.
-     */
     public ModelManager(ModelManager defaultManager) {
         this.defaultManager = defaultManager;
     }
 
-    /**
-     * <p>
-     * Constructor for ModelManager.</p>
-     */
     public ModelManager() {
     }
 

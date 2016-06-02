@@ -52,7 +52,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public synchronized void remove(String plotName) {
         get(plotName).removeListener(this);
-        FXUtils.run(() -> {
+        FXUtils.runNow(() -> {
             T pl = get(plotName);
             if (pl != null) {
                 pl.removeListener(this);

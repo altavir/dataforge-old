@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import javafx.util.Pair;
 
 /**
- * An action that does not take any input data, only generates output
+ * An action that does not take any input data, only generates output. Each output token is generated separately.
  *
  * @author Alexander Nozik
  */

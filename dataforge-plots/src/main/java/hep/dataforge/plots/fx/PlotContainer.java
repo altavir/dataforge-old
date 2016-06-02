@@ -205,7 +205,7 @@ public class PlotContainer implements Initializable {
      */
     public void setPlot(PlotFrame plot) {
         this.plot = plot;
-        FXUtils.run(() -> {
+        FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
             this.plot.display(plotPane);
             plottableslList.setItems(plot.plottables());
@@ -217,14 +217,14 @@ public class PlotContainer implements Initializable {
      */
     public void removePlot() {
         this.plot = null;
-        FXUtils.run(() -> {
+        FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
             plottableslList.setItems(FXCollections.emptyObservableList());
         });
     }
 
     protected void setupSideBar() {
-        FXUtils.run(() -> {
+        FXUtils.runNow(() -> {
             plottableslList.getItems().clear();
         });
     }
@@ -316,7 +316,7 @@ public class PlotContainer implements Initializable {
         }
 
         private void setContent(Plottable item) {
-            FXUtils.run(() -> {
+            FXUtils.runNow(() -> {
                 setText(null);
 
                 title = new CheckBox();
@@ -350,7 +350,7 @@ public class PlotContainer implements Initializable {
 
         @Override
         public synchronized void notifyValueChanged(String name, Value oldItem, Value newItem) {
-            FXUtils.run(() -> {
+            FXUtils.runNow(() -> {
                 switch (name) {
                     case "title":
                         title.setText(newItem.stringValue());

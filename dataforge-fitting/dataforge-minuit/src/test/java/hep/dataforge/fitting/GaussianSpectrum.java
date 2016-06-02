@@ -48,14 +48,14 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     public static FitState fit(Table data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
-        XYModel model = new XYModel("gaussian", new GaussianSpectrum());
+        XYModel model = new XYModel( new GaussianSpectrum());
         FitState state = new FitState(data, model, pars);
 
         return fm.runTask(state, engine, "run", "pos");
     }
 
     public static void printInvHessian(Table data, ParamSet pars) {
-        XYModel model = new XYModel("gaussian", new GaussianSpectrum());
+        XYModel model = new XYModel(new GaussianSpectrum());
         FitSource fs = new FitSource(data, model);
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
         NamedMatrix hInv = new NamedMatrix(MatrixOperations.inverse(h.getMatrix()), pars.namesAsArray());

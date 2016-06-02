@@ -16,7 +16,6 @@ import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import org.slf4j.LoggerFactory;
 
 /**
  * Utilities to work with meta

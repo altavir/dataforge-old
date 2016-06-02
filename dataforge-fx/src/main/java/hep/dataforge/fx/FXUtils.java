@@ -5,8 +5,8 @@
  */
 package hep.dataforge.fx;
 
+import hep.dataforge.io.reports.ReportEntry;
 import javafx.application.Platform;
-import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Region;
 import javafx.scene.paint.Color;
@@ -32,7 +32,6 @@ public class FXUtils {
                 (ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
                     action.run();
                 });
-
     }
 
     public static String colorToString(Color color) {
@@ -48,7 +47,7 @@ public class FXUtils {
      *
      * @param r
      */
-    public static void run(Runnable r) {
+    public static void runNow(Runnable r) {
         if (Platform.isFxApplicationThread()) {
             r.run();
         } else {

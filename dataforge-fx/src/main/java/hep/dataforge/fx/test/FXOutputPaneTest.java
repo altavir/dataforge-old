@@ -29,7 +29,7 @@ public class FXOutputPaneTest extends Application {
 //        out.appendLine("a\tb\tc");
 //        out.appendLine("aaaaa\tbbb\tccc");
         
-        Scene scene = new Scene(out.getHolder(), 400, 400);
+        Scene scene = new Scene(out.getRoot(), 400, 400);
         
         primaryStage.setTitle("FXOutputPaneTest");
         primaryStage.setScene(scene);

@@ -103,7 +103,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
             AnchorPane.setRightAnchor(viewer, 0d);
         };
 
-        FXUtils.run(run);
+        FXUtils.runNow(run);
 
         return this;
     }

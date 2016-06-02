@@ -138,13 +138,6 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
                 .getTask();
     }
 
-//    protected Executor buildExecutor(Context context, String dataName) {
-//        return context.processManager().executor(getName(), dataName);
-//    }
-//
-//    protected Executor buildExecutor(Context context, Meta meta, String dataName, Object data) {
-//        return buildExecutor(context, dataName);
-//    }
     protected boolean isEmptyInputAllowed() {
         return false;
     }

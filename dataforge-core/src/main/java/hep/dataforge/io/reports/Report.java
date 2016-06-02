@@ -82,16 +82,15 @@ public class Report implements Reportable, Named {
             ReportEntry newEntry = pushTrace(entry, getName());
             getParent().report(newEntry);
         }
-
     }
 
     /**
-     * Add a weak report listener to this  report
+     * Add a weak report listener to this report
      *
      * @param logListener
      */
     public void addReportListener(Consumer<ReportEntry> logListener) {
-        this.listeners.add(logListener);
+        this.listeners.add(logListener, true);
     }
 
     private ReportEntry pushTrace(ReportEntry entry, String toTrace) {

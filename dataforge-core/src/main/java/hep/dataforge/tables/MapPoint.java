@@ -134,16 +134,9 @@ public class MapPoint implements DataPoint {
         return new Builder(new LinkedHashMap<>(valueMap));
     }
 
-//    public MapPoint join(DataPoint point) {
-//        MapPoint res = this.copy();
-//        for (String name : point.namesAsArray()) {
-//            res.putValue(name, point.getValue(name));
-//        }
-//        return res;
-//    }
     public static class Builder implements GenericBuilder<MapPoint, Builder> {
 
-        private MapPoint p;
+        private final MapPoint p;
 
         public Builder(DataPoint dp) {
             p = new MapPoint(new LinkedHashMap<>(dp.names().getDimension()));

@@ -8,6 +8,7 @@ package hep.dataforge.fx;
 import java.util.function.Supplier;
 import javafx.beans.value.ObservableBooleanValue;
 import javafx.beans.value.ObservableValue;
+import javafx.scene.Parent;
 import javafx.scene.control.ToggleButton;
 import javafx.stage.Stage;
 import javafx.stage.Window;
@@ -68,11 +69,13 @@ public abstract class FXFragment implements AutoCloseable {
         };
     }
 
-    protected abstract Stage buildStage();
+    protected abstract Stage buildStage(Parent root);
+    
+    protected abstract Parent getRoot();
 
     public Stage getStage() {
         if (stage == null) {
-            stage = buildStage();
+            stage = buildStage(getRoot());
             stage.setOnShown((WindowEvent event) -> {
                 onShow();
             });

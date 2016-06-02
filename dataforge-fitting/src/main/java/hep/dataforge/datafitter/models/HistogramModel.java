@@ -44,36 +44,19 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     private boolean calculateCountInBin = false;
 
-    /**
-     * <p>
-     * Constructor for HistogramModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction}
-     * object.
-     */
-    public HistogramModel(String name, ParametricFunction source) {
-        super(name, source, new HistogramAdapter());
+    public HistogramModel(ParametricFunction source) {
+        super(source, new HistogramAdapter());
+        this.source = source;
+    }
+
+    public HistogramModel(ParametricFunction source, String binBeginName, String binEndName, String countName) {
+        super(source, new HistogramAdapter(binBeginName, binEndName, countName));
         this.source = source;
     }
 
     /**
-     * <p>
-     * Constructor for HistogramModel.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param source a {@link hep.dataforge.functions.ParametricFunction}
-     * object.
-     * @param binBeginName a {@link java.lang.String} object.
-     * @param binEndName a {@link java.lang.String} object.
-     * @param countName a {@link java.lang.String} object.
+     * {@inheritDoc}
      */
-    public HistogramModel(String name, ParametricFunction source, String binBeginName, String binEndName, String countName) {
-        super(name, source, new HistogramAdapter(binBeginName, binEndName, countName));
-        this.source = source;
-    }
-
-    /** {@inheritDoc} */
     @Override
     public double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
@@ -83,7 +66,9 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double dispersion(DataPoint point, NamedValueSet pars) {
         double res = this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
@@ -93,7 +78,9 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         return res;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double distance(DataPoint point, NamedValueSet pars) {
 //        double x = point.binCenter();
@@ -101,36 +88,14 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         return this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars) - y;
     }
 
-    /**
-     *
-     * <p>
-     * isCalculateCountInBin.</p>
-     *
-     * @return the calculateCountInBin
-     */
     public boolean isCalculateCountInBin() {
         return calculateCountInBin;
     }
 
-    /**
-     * <p>
-     * Setter for the field <code>calculateCountInBin</code>.</p>
-     *
-     * @param calculateCountInBin a boolean.
-     */
     public void setCalculateCountInBin(boolean calculateCountInBin) {
         this.calculateCountInBin = calculateCountInBin;
     }
 
-    /**
-     * <p>
-     * value.</p>
-     *
-     * @param binBegin a double.
-     * @param binEnd a double.
-     * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     * @return a double.
-     */
     public double value(double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = FunctionUtils.getSpectrumFunction(source, set);
@@ -141,16 +106,6 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     }
 
-    /**
-     * <p>
-     * derivValue.</p>
-     *
-     * @param parName a {@link java.lang.String} object.
-     * @param binBegin a double.
-     * @param binEnd a double.
-     * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
-     * @return a double.
-     */
     public double derivValue(String parName, double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = FunctionUtils.getSpectrumDerivativeFunction(parName, source, set);
@@ -161,7 +116,9 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getLogProb(DataPoint point, NamedValueSet pars) {
         double dist = this.distance(point, pars);
@@ -170,25 +127,33 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         return -dist * dist / 2 / disp + base;// Внимание! Тут не хи-квадрат, а логарифм правдоподобия
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) {
         return -this.distance(point, pars) * this.disDeriv(parName, point, pars) / this.dispersion(point, pars);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesDeriv(String name) {
         return source.providesDeriv(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesProb() {
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesProbDeriv(String name) {
         return true;

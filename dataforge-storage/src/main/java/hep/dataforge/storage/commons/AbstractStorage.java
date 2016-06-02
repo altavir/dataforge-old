@@ -315,7 +315,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     /**
-     * return a copy of loader map
+     * map of direct descendants
      *
      * @return
      * @throws StorageException

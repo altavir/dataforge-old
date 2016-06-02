@@ -15,12 +15,12 @@
  */
 package hep.dataforge.meta;
 
-
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 
@@ -34,15 +34,9 @@ import java.util.stream.Collectors;
  */
 public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 
-    private ValueProvider valueContext;
-
+//    private ValueProvider valueContext;
     public MetaBuilder(String name) {
         super(name);
-    }
-
-    public MetaBuilder(String name, ValueProvider context) {
-        super(name);
-        this.valueContext = context;
     }
 
     /**
@@ -64,9 +58,9 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
         });
-        if (annotation instanceof MetaBuilder) {
-            valueContext = ((MetaBuilder) annotation).valueContext;
-        }
+//        if (annotation instanceof MetaBuilder) {
+//            valueContext = ((MetaBuilder) annotation).valueContext;
+//        }
 
     }
 
@@ -97,8 +91,6 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     public MetaBuilder getParent() {
         return super.getParent();
     }
-    
-    
 
     public MetaBuilder setNode(String name, Collection<? extends Meta> elements) {
         if (elements == null || elements.isEmpty()) {
@@ -168,50 +160,47 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return this;
     }
 
-    /**
-     * The transformation which should be performed on each value before it is
-     * returned to user. Basically is used to ensure automatic substitutions. If
-     * the reference not found in the current annotation scope than the value is
-     * returned as-is.
-     *
-     * @param val
-     * @return
-     */
-    protected Value transformValue(Value val) {
-        return MetaUtils.transformValue(val, getValueContext());
-    }
-
-    /**
-     * The value substitution context is inherited
-     *
-     * @return
-     */
-    private ValueProvider getValueContext() {
-        if (this.valueContext != null) {
-            return this.valueContext;
-        } else if (parent != null) {
-            return parent.getValueContext();
-        } else {
-            return null;
-        }
-    }
-
-    public MetaBuilder setContext(ValueProvider context) {
-        this.valueContext = context;
-        return this;
-    }
-
-    /**
-     * Return transformed value
-     *
-     * @param name
-     * @return
-     */
-    @Override
-    public Value getValue(String name) {
-        return Value.of(super.getValue(name).listValue().stream().<Value>map((val) -> transformValue(val)).collect(Collectors.toList()));
-    }
-
+//    /**
+//     * The transformation which should be performed on each value before it is
+//     * returned to user. Basically is used to ensure automatic substitutions. If
+//     * the reference not found in the current annotation scope than the value is
+//     * returned as-is.
+//     *
+//     * @param val
+//     * @return
+//     */
+//    protected Value transformValue(Value val) {
+//        return MetaUtils.transformValue(val, getValueContext());
+//    }
+//    /**
+//     * The value substitution context is inherited
+//     *
+//     * @return
+//     */
+//    private ValueProvider getValueContext() {
+//        if (this.valueContext != null) {
+//            return this.valueContext;
+//        } else if (parent != null) {
+//            return parent.getValueContext();
+//        } else {
+//            return null;
+//        }
+//    }
+//
+//    public MetaBuilder setValueProvider(ValueProvider provider) {
+//        this.valueContext = provider;
+//        return this;
+//    }
+//    /**
+//     * Return transformed value
+//     *
+//     * @param name
+//     * @return
+//     */
+//    @Override
+//    public Value getValue(String name) {
+//        return Value.of(super.getValue(name).listValue().stream().<Value>map((val) -> transformValue(val)).collect(Collectors.toList()));
+//    }
     /**
      * Create an empty child node
      *
@@ -250,17 +239,36 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     }
 
     /**
-     * Recursively apply in-place node transformation to node
+     * Recursively apply node and value transformation to node. If node
+     * transformation creates new node, then new node is returned.
+     * <p>
+     *  The order of transformation is the following:
+     * </p>
+     * <ul>
+     *  <li> Parent node transformation</li>
+     *  <li> Parent node values transformation (using only values after node transformation is applied)</li>
+     *  <li> Children nodes transformation (using only nodes after parent node transformation is applied)</li>
+     * </ul>
+     * 
      *
-     * @param transformation
+     * @param nodeTransform
      * @return
      */
-    public MetaBuilder transform(final UnaryOperator<MetaBuilder> transformation) {
-        MetaBuilder res = transformation.apply(this);
+    public MetaBuilder transform(final UnaryOperator<MetaBuilder> nodeTransform, final BiFunction<String, Value, Value> valueTransform) {
+        MetaBuilder res = nodeTransform.apply(this);
+        res.values.replaceAll(valueTransform);
         res.nodes.values().stream().forEach((item) -> {
-            item.replaceAll((MetaBuilder t) -> t.transform(transformation));
+            item.replaceAll((MetaBuilder t) -> t.transform(nodeTransform, valueTransform));
         });
         return res;
+    }
+    
+    /**
+     * Make a transformation substituting values in place using substitution pattern and given valueProviders
+     * @return 
+     */
+    public MetaBuilder substituteValues(ValueProvider... providers){
+        return transform(UnaryOperator.identity(), (String key, Value val) -> MetaUtils.transformValue(val, providers));
     }
 
 }

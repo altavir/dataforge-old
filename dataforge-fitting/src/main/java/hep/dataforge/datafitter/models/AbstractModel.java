@@ -19,22 +19,22 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.functions.AbstractNamedFunction;
 import hep.dataforge.functions.NamedFunction;
+import hep.dataforge.names.BaseMetaHolder;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.NamedMetaHolder;
 import hep.dataforge.names.Names;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.values.NamedValueSet;
 
 /**
- * <p>
- * Abstract AbstractModel class.</p>
+ * Basic implementation for model
  *
  * @author Alexander Nozik
  * @param <T>
  */
-public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHolder implements Model {
+public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHolder implements Model {
 //TODO add default parameters to model
+
     private final Names names;
 
     /**
@@ -42,14 +42,12 @@ public abstract class AbstractModel<T extends PointAdapter> extends NamedMetaHol
      */
     protected T adapter;
 
-    protected AbstractModel(String name, Names names, T adapter) {
-        super(name);
+    protected AbstractModel(Names names, T adapter) {
         this.adapter = adapter;
         this.names = names;
     }
 
-    protected AbstractModel(String name, NameSetContainer source, T adapter) {
-        super(name);
+    protected AbstractModel(NameSetContainer source, T adapter) {
         this.adapter = adapter;
         this.names = source.names();
     }

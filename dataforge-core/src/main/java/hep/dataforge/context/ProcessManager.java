@@ -41,6 +41,7 @@ public class ProcessManager implements Encapsulated {
         this.context = context;
         if (context.getParent() == null) {
             rootProcess = new DFProcess(this, "");
+            rootProcess.setTitle("ROOT");
         } else {
             rootProcess = context.getParent().processManager().getRootProcess().addChild(context.getName(), null);
         }

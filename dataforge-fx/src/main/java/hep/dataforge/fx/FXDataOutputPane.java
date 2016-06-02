@@ -8,7 +8,7 @@ package hep.dataforge.fx;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import javafx.application.Platform;
+import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
@@ -23,8 +23,7 @@ import org.fxmisc.richtext.ReadOnlyStyledDocument;
  */
 public class FXDataOutputPane {
 
-    private static final int DEFAULT_TAB_STOP_SIZE = 12;
-    private static final int SYMBOL_WIDTH = 8;
+    private static final int DEFAULT_TAB_STOP_SIZE = 15;
 
     private final AnchorPane holder;
     private final InlineCssTextArea textArea;
@@ -44,12 +43,20 @@ public class FXDataOutputPane {
     public FXDataOutputPane() {
         textArea = new InlineCssTextArea();
         textArea.setEditable(false);
-        textArea.setWrapText(true);
+//        textArea.setWrapText(true);
         holder = new AnchorPane(textArea);
         AnchorPane.setBottomAnchor(textArea, 5d);
         AnchorPane.setTopAnchor(textArea, 5d);
         AnchorPane.setLeftAnchor(textArea, 5d);
         AnchorPane.setRightAnchor(textArea, 5d);
+    }
+    
+    public void setWrapText(boolean wrapText){
+        textArea.setWrapText(wrapText);
+    }
+    
+    public BooleanProperty wrapTextProperty(){
+        return textArea.wrapTextProperty();
     }
 
     /**
@@ -57,7 +64,7 @@ public class FXDataOutputPane {
      *
      * @return
      */
-    public AnchorPane getHolder() {
+    public AnchorPane getRoot() {
         return holder;
     }
 
@@ -71,62 +78,68 @@ public class FXDataOutputPane {
 
     private synchronized void append(String text, String style) {
         // Unifying newlines
-        text = text.replace("\r\n", "\n");
-        if (text.contains("\n")) {
-            String[] lines = text.split("\n");
-            for (int i = 0; i < lines.length - 1; i++) {
-                append(lines[i].trim(), style);
-                newline();
+        String t = text.replace("\r\n", "\n");
+
+        FXUtils.runNow(() -> {
+            if (t.contains("\n")) {
+                String[] lines = t.split("\n");
+                for (int i = 0; i < lines.length - 1; i++) {
+                    append(lines[i].trim(), style);
+                    newline();
+                }
+                append(lines[lines.length - 1], style);
+                if (t.endsWith("\n")) {
+                    newline();
+                }
+            } else if (t.contains("\t")) {
+                String[] tabs = t.split("\t");
+                for (int i = 0; i < tabs.length - 1; i++) {
+                    append(tabs[i], style);
+                    tab();
+                }
+                append(tabs[tabs.length - 1], style);
+            } else if (style.isEmpty()) {
+                textArea.appendText(t);
+            } else {
+                textArea.append(ReadOnlyStyledDocument.fromString(t, style));
             }
-            append(lines[lines.length - 1], style);
-            if (text.endsWith("\n")) {
-                newline();
-            }
-            
-//        } else if (text.contains("\t")) {
-//            String[] tabs = text.split("\t");
-//            for (int i = 0; i < tabs.length - 1; i++) {
-//                append(tabs[i], style);
-//                tab();
-//            }
-//            append(tabs[tabs.length - 1], style);
-        } else if (style.isEmpty()) {
-            textArea.appendText(text);
-        } else {
-            textArea.append(ReadOnlyStyledDocument.fromString(text, style));
-        }
+        });
     }
 
-    private synchronized void tab() {
-        currentTab++;
-        textArea.appendText("\t");
-//        double scale = getTabSize() / 4d;
-//        textArea.append(ReadOnlyStyledDocument.fromString("\t", "-fx-scale-x: " + scale));
-//        for (int i = 0; i < getTabSize(); i++) {
-//            textArea.appendText(" ");
-//        }
-        //textArea.append(ReadOnlyStyledDocument.fromString("\t", "-fx-min-width: " + getTabWith()));
+    /**
+     * Append tabulation
+     */
+    public synchronized void tab() {
+        FXUtils.runNow(() -> {
+            currentTab++;
+//        textArea.appendText("\t");
+            for (int i = 0; i < getTabSize(); i++) {
+                textArea.appendText(" ");
+            }
+        });
     }
 
     private int countLines() {
         return (int) textArea.getText().chars().filter((int value) -> value == '\n').count();
     }
 
-    private synchronized void newline() {
-        while (maxLinesProperty.get() > 0 && countLines() >= maxLinesProperty.get()) {
-            //FIXME bad way to counts remove lines
-            textArea.replaceText(0, textArea.getText().indexOf("\n") + 1, "");
-        }
-        currentTab = 0;
-        textArea.appendText("\r\n");
-    }
+    /**
+     * Append newLine
+     */
+    public synchronized void newline() {
+        FXUtils.runNow(() -> {
+            while (maxLinesProperty.get() > 0 && countLines() >= maxLinesProperty.get()) {
+                //FIXME bad way to count and remove lines
+                textArea.replaceText(0, textArea.getText().indexOf("\n") + 1, "");
+            }
+            currentTab = 0;
+            textArea.appendText("\r\n");
 
-    private int getTabWith() {
-        return getTabSize() * SYMBOL_WIDTH;
+        });
     }
 
     private int getTabSize() {
-        return Math.max(getTabStop(currentTab) - textArea.getCaretPosition(), 2);
+        return Math.max(getTabStop(currentTab) - textArea.getCaretColumn(), 2);
     }
 
     private int getTabStop(int num) {
@@ -139,23 +152,21 @@ public class FXDataOutputPane {
         }
     }
 
-    public synchronized void append(String text) {
-        Platform.runLater(() -> {
-            append(text, "");
-        });
+    public void append(String text) {
+        append(text, "");
     }
 
-    public synchronized void appendLine(String line) {
-        Platform.runLater(() -> {
-            append(line.trim(), "");
-            newline();
-        });
+    public void appendColored(String text, String color) {
+        append(text, "-fx-fill: " + color + ";");
     }
 
-    public synchronized void appendStyled(String text, String style) {
-        Platform.runLater(() -> {
-            append(text, style);
-        });
+    public void appendLine(String line) {
+        append(line.trim(), "");
+        newline();
+    }
+
+    public void appendStyled(String text, String style) {
+        append(text, style);
     }
 
     public boolean isEmpty() {
@@ -163,15 +174,11 @@ public class FXDataOutputPane {
     }
 
     public void clear() {
-        Platform.runLater(() -> textArea.clear());
+        FXUtils.runNow(() -> textArea.clear());
     }
 
-    public OutputStream getOutputStream() {
-        return new ByteArrayOutputStream() {
-
-//            private final StringBuilder buffer = new StringBuilder(80);
-//            private final String EOL = "\n";
-//            private final PrintStream printStream = forward == null ? null : new PrintStream(forward);
+    public OutputStream getStream() {
+        return new ByteArrayOutputStream(1024) {
             @Override
             public synchronized void flush() throws IOException {
                 String text = toString();

@@ -66,7 +66,7 @@ public class MetaFileReader {
                 return transform(context, reader.read(new FileInputStream(file), file.length(), encoding));
             }
         }
-        
+
         throw new RuntimeException("Could not find appropriate reader for meta file: " + file.toString());
     }
 
@@ -77,8 +77,7 @@ public class MetaFileReader {
      * @return
      */
     protected MetaBuilder transform(Context context, MetaBuilder builder) {
-        //TODO implement substs
-        return builder.setContext(context);
+        return builder.substituteValues(context);
     }
 
     protected String evaluateSubst(Context context, String subst) {
