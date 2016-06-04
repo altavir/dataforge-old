@@ -6,8 +6,10 @@
 package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
@@ -50,6 +52,10 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         return plottable.getName();
     }
 
+    private List<DataPoint> getData(){
+        return plottable.data();
+    }
+    
     @Override
     public int getItemCount(int i) {
         if (cacheXY) {
@@ -68,7 +74,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
             if (xCache.containsKey(i1)) {
                 return xCache.get(i1);
             } else {
-                Number x = adapter.getX(plottable.data().get(i1)).numberValue();
+                Number x = adapter.getX(getData().get(i1)).numberValue();
                 xCache.put(i1, x);
                 return x;
             }
@@ -83,33 +89,33 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
             if (yCache.containsKey(i1)) {
                 return yCache.get(i1);
             } else {
-                Number y = adapter.getY(plottable.data().get(i1)).numberValue();
+                Number y = adapter.getY(getData().get(i1)).numberValue();
                 yCache.put(i1, y);
                 return y;
             }
         } else {
-            return adapter.getY(plottable.data().get(i1)).numberValue();
+            return adapter.getY(getData().get(i1)).numberValue();
         }
     }
 
     @Override
     public Number getStartX(int i, int i1) {
-        return adapter.getXLower(plottable.data().get(i1));
+        return adapter.getXLower(getData().get(i1));
     }
 
     @Override
     public Number getEndX(int i, int i1) {
-        return adapter.getXUpper(plottable.data().get(i1));
+        return adapter.getXUpper(getData().get(i1));
     }
 
     @Override
     public Number getStartY(int i, int i1) {
-        return adapter.getYLower(plottable.data().get(i1));
+        return adapter.getYLower(getData().get(i1));
     }
 
     @Override
     public Number getEndY(int i, int i1) {
-        return adapter.getYUpper(plottable.data().get(i1));
+        return adapter.getYUpper(getData().get(i1));
     }
 
     public synchronized void clearCache() {

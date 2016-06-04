@@ -17,7 +17,7 @@ package hep.dataforge.plots.tests;
 
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
-import hep.dataforge.plots.data.PlottableFunction;
+import hep.dataforge.plots.data.PlottableXYFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
@@ -46,7 +46,7 @@ public class JFreeFXTest extends Application {
 
         Function<Double,Double> func = (x1) -> x1 * x1;
 
-        PlottableFunction funcPlot = new PlottableFunction("func", func, 0.1, 4, 200);
+        PlottableXYFunction funcPlot = PlottableXYFunction.plotFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 

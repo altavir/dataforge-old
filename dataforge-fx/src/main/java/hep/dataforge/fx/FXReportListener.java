@@ -29,6 +29,7 @@ public class FXReportListener implements Consumer<ReportEntry> {
             pane.appendColored(FORMATTER.format(t.getTime()) + " ", "grey");
             pane.appendColored(t.getTraceString() + ": ", "blue");
             pane.appendColored(t.getMessage(), "black");
+            pane.newline();
         });
     }
 

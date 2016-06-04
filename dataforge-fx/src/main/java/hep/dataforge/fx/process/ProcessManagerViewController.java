@@ -77,7 +77,7 @@ public class ProcessManagerViewController implements Initializable {
 //        res.setGraphic(ProcessViewController.build(proc));
         proc.getChildren().values().stream().forEach(new Consumer<DFProcess>() {
             @Override
-            public void accept(DFProcess child) {
+            public synchronized void accept(DFProcess child) {
                 res.getChildren().add(buildTree(child));
             }
         });
