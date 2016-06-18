@@ -11,6 +11,7 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
 import hep.dataforge.context.GlobalContext;
 import java.io.PrintStream;
+import java.time.Instant;
 import java.util.function.BiConsumer;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -44,10 +45,14 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
                 style = "-fx-color: red";
                 break;
             default:
-                style = "";
+                style = "-fx-color: black";
         }
 
-        pane.appendStyled(eventObject.getFormattedMessage() + "\r\n", style);
+        FXUtils.runNow(() -> {
+            pane.appendColored(Instant.ofEpochMilli(eventObject.getTimeStamp()).toString() + ": ", "gray");
+            pane.appendStyled(eventObject.getFormattedMessage().replace("\n", "\n\t") + "\r\n", style);
+        });
+
     };
 
     private final Appender<ILoggingEvent> logAppender;
@@ -60,7 +65,9 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
         logAppender = new AppenderBase<ILoggingEvent>() {
             @Override
             protected void append(ILoggingEvent eventObject) {
-                loggerFormatter.accept(outputPane, eventObject);
+                synchronized (ConsoleFragment.this) {
+                    loggerFormatter.accept(outputPane, eventObject);
+                }
             }
         };
         logAppender.setName(CONSOLE_LOG_APPENDER_NAME);

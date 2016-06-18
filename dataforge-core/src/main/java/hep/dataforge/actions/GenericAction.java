@@ -72,23 +72,23 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         }
     }
 
-    protected Report buildLog(Context context, Meta meta, Object data) {
-        String logName = getName();
-        if (data != null && data instanceof Named) {
-            logName += "[" + ((Named) data).getName() + "]";
-        }
-        if (data != null && data instanceof ActionResult) {
-            Report actionLog = ((ActionResult) data).log();
-            if (actionLog.getParent() != null) {
-                //Getting parent from previous report
-                return new Report(logName, actionLog.getParent());
-            } else {
-                return new Report(logName, context);
-            }
-        } else {
-            return new Report(logName, context);
-        }
-    }
+//    protected Report buildLog(Context context, Meta meta, String dataName, Object data) {
+//        String logName = String.format("%s.%s", getName(), dataName);
+//        if (data != null && data instanceof Named) {
+//            logName += "[" + ((Named) data).getName() + "]";
+//        }
+//        if (data != null && data instanceof ActionResult) {
+//            Report actionLog = ((ActionResult) data).log();
+//            if (actionLog.getParent() != null) {
+//                //Getting parent from previous report
+//                return new Report(getName(), actionLog.getParent());
+//            } else {
+//                return new Report(logName, context);
+//            }
+//        } else {
+//            return new Report(logName, context);
+//        }
+//    }
 
     /**
      * Return the root process name for this action
@@ -112,13 +112,13 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     }
 
     @Override
-    public Action<T,R> withLogger(Logger logger) {
+    public Action<T, R> withLogger(Logger logger) {
         this.logger = logger;
         return this;
     }
 
     @Override
-    public Action<T,R> withParentProcess(String parentProcessName) {
+    public Action<T, R> withParentProcess(String parentProcessName) {
         this.parentProcessName = parentProcessName;
         return this;
     }

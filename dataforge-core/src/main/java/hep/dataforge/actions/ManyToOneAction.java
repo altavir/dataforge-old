@@ -50,7 +50,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
-        Report log = buildLog(context, data.meta(), data);
+        Report log = new Report(getName(), new Report(data.getName(), context));
         Laminate meta = inputMeta(context, data.meta(), actionMeta);
         Meta outputMeta = outputMeta(data).build();
 

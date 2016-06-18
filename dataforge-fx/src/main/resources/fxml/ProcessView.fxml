@@ -8,29 +8,31 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 
-<HBox fx:id="processBox" alignment="CENTER_LEFT" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.process.ProcessViewController">
+<HBox fx:id="processBox" alignment="CENTER_LEFT" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.process.ProcessViewController">
     <children>
-      <Label fx:id="processTitle" text="root">
-         <padding>
-            <Insets left="10.0" right="10.0" />
-         </padding>
-      </Label>
-      <Pane HBox.hgrow="ALWAYS" />
+        <Label fx:id="processTitle" text="loading...">
+            <padding>
+                <Insets left="10.0" right="10.0" />
+            </padding>
+        </Label>
+        <Pane HBox.hgrow="ALWAYS" />
         <StackPane fx:id="progresssPane">
             <children>
                 <ProgressBar fx:id="progressIndicator" prefWidth="150.0" progress="0.0">
-               <StackPane.margin>
-                  <Insets />
-               </StackPane.margin></ProgressBar>
+                    <StackPane.margin>
+                        <Insets />
+                    </StackPane.margin>
+                </ProgressBar>
                 <Label fx:id="progressLabel" />
             </children>
-         <HBox.margin>
-            <Insets right="5.0" />
-         </HBox.margin>
+            <HBox.margin>
+                <Insets right="5.0" />
+            </HBox.margin>
         </StackPane>
         <Button fx:id="cancelButton" mnemonicParsing="false" text="X">
-         <HBox.margin>
-            <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
-         </HBox.margin></Button>
+            <HBox.margin>
+                <Insets bottom="2.0" left="2.0" right="2.0" top="2.0" />
+            </HBox.margin>
+        </Button>
     </children>
 </HBox>

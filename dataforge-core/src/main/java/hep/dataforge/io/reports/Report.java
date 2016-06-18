@@ -132,7 +132,7 @@ public class Report implements Reportable, Named {
 
     @Override
     public void reportError(String str, Object... parameters) {
-        this.entries.add(new ReportEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
+        Report.this.report(new ReportEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
         logger.error(str, parameters);
     }
 }

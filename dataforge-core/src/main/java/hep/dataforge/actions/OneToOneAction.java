@@ -56,20 +56,34 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
 
-        Report log = buildLog(context, groupMeta, data);
+        Report report = buildReport(context, name, data);
         Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
         //FIXME add error evaluation
         CompletableFuture<R> future = data.getInFuture().
                 thenCompose((T datum) -> {
-                    return postProcess(context, name, () -> transform(context, log, name, meta, datum));
+                    return postProcess(context, name, () -> transform(context, report, name, meta, datum));
                 });
 
-        return new ActionResult(getOutputType(), log, future, outputMeta(name, groupMeta, data));
+        return new ActionResult(getOutputType(), report, future, outputMeta(name, groupMeta, data));
     }
-
-//    public ActionResult<R> runOne(Meta meta, NamedData<T> data) {
-//        return runOne(data.getName(), data, meta);
-//    }
+    
+    
+    protected Report buildReport(Context context, String name, Data<? extends T> data){
+        Reportable parent;
+        if (data != null && data instanceof ActionResult) {
+            Report actionLog = ((ActionResult) data).log();
+            if (actionLog.getParent() != null) {
+                //Getting parent from previous report
+                parent = actionLog.getParent();
+            } else {
+                parent = new Report(name, context);
+            }
+        } else {
+            parent = new Report(name, context);
+        }
+        return new Report(getName(), parent);
+    }
+    
     @Override
     public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
         checkInput(set);

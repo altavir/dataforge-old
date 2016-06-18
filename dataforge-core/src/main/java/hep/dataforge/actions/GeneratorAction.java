@@ -25,7 +25,7 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
     public DataNode<R> run(Context context, DataNode<Void> data, Meta actionMeta) {
-        Report log = buildLog(context, actionMeta, null);
+        Report log = new Report(getName(), context);
         Map<String, Pair<Meta, Supplier<R>>> generated = generate(context, actionMeta, log);
         Map<String, Data<R>> resultMap = new HashMap<>();
         generated.forEach((String s, Pair<Meta, Supplier<R>> pair) -> {
