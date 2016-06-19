@@ -13,22 +13,20 @@ import hep.dataforge.names.Named;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 
 /**
- *
+ * The model for task execution. Is computed without actual task invocation.
  * @author Alexander Nozik
  */
 public class TaskModel implements Named, Annotated {
 
-    private String taskName;
-    private Meta taskMeta;
-    private Set<DataDep> dataDeps = new HashSet<>();
-    private Set<TaskDep> taskDeps = new HashSet<>();
-    private Set<TaskOutput> outs = new LinkedHashSet<>();
+    private final String taskName;
+    private final Meta taskMeta;
+    private final Set<DataDep> dataDeps = new HashSet<>();
+    private final Set<TaskDep> taskDeps = new HashSet<>();
+    private final Set<TaskOutput> outs = new LinkedHashSet<>();
 
     public TaskModel(String taskName, Meta taskMeta) {
         this.taskName = taskName;
@@ -87,6 +85,9 @@ public class TaskModel implements Named, Annotated {
     }
 
     //TODO make meta configurable
+    /**
+     * Data dependency
+     */
     public static class DataDep {
 
         String path;
@@ -118,6 +119,9 @@ public class TaskModel implements Named, Annotated {
 
     }
 
+    /**
+     * Task dependency
+     */
     public class TaskDep {
 
         TaskModel taskModel;
@@ -147,8 +151,10 @@ public class TaskModel implements Named, Annotated {
         }
     }
 
+    /**
+     * Task output
+     */
     public interface TaskOutput {
-
         void accept(ProcessManager.Callback callback, Context context, TaskState state);
     }
 }

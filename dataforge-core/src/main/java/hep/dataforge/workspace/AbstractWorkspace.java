@@ -6,8 +6,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.ProcessManager;
-import hep.dataforge.data.DataTree;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import java.util.HashMap;
@@ -99,19 +97,6 @@ public abstract class AbstractWorkspace implements Workspace {
 //            builder.putNode(taskResult);
 //        }
 //    }
-    @Override
-    public DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model) {
-        DataTree.Builder builder = DataTree.builder();
-        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
-        model.taskDeps().forEach(dep -> {
-            builder.putNode(dep.as(), runTask(dep.taskModel()));
-            callback.increaseProgress(1);
-        });
-        model.dataDeps().forEach(dep -> {
-            builder.putData(dep.as(), getData(dep.path()));
-            callback.increaseProgress(1);
-        });
-        return builder;
-    }
+
 
 }

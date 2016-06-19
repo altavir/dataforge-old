@@ -105,14 +105,14 @@ public interface Workspace extends Encapsulated, MetaProvider {
     Meta getMeta(String name);
 
 
-    /**
-     * Build an input data node for task based on the taskModel using all
-     * necessary checks. Tasks could internally use or override this procedure
-     *
-     * @param model
-     * @return
-     */
-    DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model);
+//    /**
+//     * Build an input data node for task based on the taskModel using all
+//     * necessary checks. Tasks could internally use or override this procedure
+//     *
+//     * @param model
+//     * @return
+//     */
+//    DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model);
 
     public interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
 

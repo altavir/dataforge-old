@@ -19,6 +19,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.DFProcess;
 import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataTree;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -87,8 +88,17 @@ public abstract class GenericTask<T> implements Task<T> {
     }
 
     protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, TaskModel model) {
-        //Use default workspace gathering mechanism. Coule be overriden later
-        return workspace.buildDataNode(callback, model).build();
+        DataTree.Builder builder = DataTree.builder();
+        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
+        model.taskDeps().forEach(dep -> {
+            builder.putNode(dep.as(), workspace.runTask(dep.taskModel()));
+            callback.increaseProgress(1);
+        });
+        model.dataDeps().forEach(dep -> {
+            builder.putData(dep.as(), workspace.getData(dep.path()));
+            callback.increaseProgress(1);
+        });
+        return builder.build();
     }
 
     protected Meta getTaskMeta(Context context, TaskModel model) {
@@ -143,14 +153,15 @@ public abstract class GenericTask<T> implements Task<T> {
      */
     protected void applyDataModels(Workspace workspace, TaskModel model, List<Meta> dataModelList) {
 
-        for (Meta dataModel : dataModelList) {
+        dataModelList.stream().map((dataModel) -> {
             //Iterating over direct data dependancies
             //PENDING replace by DataFactory for unification?
             dataModel.getNodes("data").stream().forEach((dataElement) -> {
                 String dataPath = dataElement.getString("name");
                 model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
             });
-
+            return dataModel;
+        }).forEach((dataModel) -> {
             //Iterating over task dependancies
             dataModel.getNodes("task").stream().forEach((taskElement) -> {
                 String taskName = taskElement.getString("name");
@@ -158,7 +169,7 @@ public abstract class GenericTask<T> implements Task<T> {
                 //Building model with default data construction
                 model.dependsOn(task.generateModel(workspace, taskElement), taskElement.getString("as", taskName));
             });
-        }
+        });
     }
 
 }
