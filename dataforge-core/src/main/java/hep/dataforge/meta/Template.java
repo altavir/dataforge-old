@@ -10,6 +10,7 @@ import hep.dataforge.navigation.Provider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
+import java.util.function.UnaryOperator;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -89,13 +90,22 @@ public class Template implements Annotated {
     /**
      * Build a Meta using given template.
      *
-     * @param meta
+     * @param template
      * @param valueProvider
      * @param metaProvider
      * @return
      */
-    public static Meta compileTemplate(Meta meta, Meta data) {
-        return new Template(meta).compile(data);
+    public static Meta compileTemplate(Meta template, Meta data) {
+        return new Template(template).compile(data);
+    }
+
+    /**
+     * Application of pattern as unary operation
+     * @param template
+     * @return 
+     */
+    public static UnaryOperator<Meta> transformation(Meta template) {
+        return data -> new Template(template).compile(data);
     }
 
 }

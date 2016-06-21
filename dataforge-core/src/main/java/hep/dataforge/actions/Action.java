@@ -35,8 +35,7 @@ public interface Action<T, R> extends Named {
 
     DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta);
 
-    
-    
+   
     default Action<T,R> withLogger(Logger logger) {
         return this;
     }

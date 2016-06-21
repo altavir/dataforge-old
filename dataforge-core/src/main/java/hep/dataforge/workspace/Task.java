@@ -20,22 +20,47 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
 /**
- *
+ * The main building block of "pull" data flow model.
  *
  * @author Alexander Nozik
  * @param <T>
  */
 public interface Task<R> extends Named {
+
     /**
-     * A meta node that is used to add additional dependencies to the task manually
+     * A meta node that is used to add additional dependencies to the task
+     * manually
      */
     public static final String GATHER_NODE_NAME = "@gather";
 
+    /**
+     * Run given task model. Type check expected to be performed before actual calculation.
+     * @param workspace
+     * @param model
+     * @return 
+     */
     DataNode<R> run(Workspace workspace, TaskModel model);
 
-    TaskModel generateModel(Workspace workspace, Meta modelMeta, Meta... dataModel);
+    /**
+     * Generate a model for this task using given configuration. Model
+     * generation does build dependency tree and checks for possible dependency
+     * cycles, but does not perform type checks and does not execute any actions.
+     *
+     * @param workspace
+     * @param taskConfig
+     * @return
+     */
+    TaskModel model(Workspace workspace, Meta taskConfig);
+    //PENDING remove model builder into separate class?
+    //TODO model building could be time consuming for complex task dependencies. Provide lazy generation helper
 
-    default DataNode<R> run(Workspace workspace, Meta modelMeta, Meta... dataModel) {
-        return run(workspace, generateModel(workspace, modelMeta, dataModel));
+    /**
+     * Equals model + run
+     * @param workspace
+     * @param taskConfig
+     * @return 
+     */
+    default DataNode<R> run(Workspace workspace, Meta taskConfig) {
+        return run(workspace, model(workspace, taskConfig));
     }
 }

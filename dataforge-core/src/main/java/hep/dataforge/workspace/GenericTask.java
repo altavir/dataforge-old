@@ -23,8 +23,6 @@ import hep.dataforge.data.DataTree;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import java.util.Arrays;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -130,45 +128,41 @@ public abstract class GenericTask<T> implements Task<T> {
     }
 
     @Override
-    public TaskModel generateModel(Workspace workspace, Meta taskMeta, Meta... dataModels) {
+    public TaskModel model(Workspace workspace, Meta taskMeta) {
         TaskModel model = new TaskModel(getName(), taskMeta);
 
-        List<Meta> dataModelList = Arrays.asList(dataModels);
+        Meta dependacyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
         // Use @gather node for data construction
         if (taskMeta.hasNode(GATHER_NODE_NAME)) {
-            dataModelList.add(taskMeta.getNode(GATHER_NODE_NAME));
+            dependacyMeta = taskMeta.getNode(GATHER_NODE_NAME);
         }
 
-        applyDataModels(workspace, model, dataModelList);
+        applyDataModel(workspace, model, dependacyMeta);
 
         return model;
     }
 
     /**
-     * Construct task dependencies using given data models. Could be overridden.
+     * Construct task dependencies using given dependency model. Could be
+     * extended.
      *
      * @param workspace
      * @param model
      * @param dataModelList
      */
-    protected void applyDataModels(Workspace workspace, TaskModel model, List<Meta> dataModelList) {
-
-        dataModelList.stream().map((dataModel) -> {
-            //Iterating over direct data dependancies
-            //PENDING replace by DataFactory for unification?
-            dataModel.getNodes("data").stream().forEach((dataElement) -> {
-                String dataPath = dataElement.getString("name");
-                model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
-            });
-            return dataModel;
-        }).forEach((dataModel) -> {
-            //Iterating over task dependancies
-            dataModel.getNodes("task").stream().forEach((taskElement) -> {
-                String taskName = taskElement.getString("name");
-                Task task = workspace.getTask(taskName);
-                //Building model with default data construction
-                model.dependsOn(task.generateModel(workspace, taskElement), taskElement.getString("as", taskName));
-            });
+    private void applyDataModel(Workspace workspace, TaskModel model, Meta dataModel) {
+        //Iterating over direct data dependancies
+        //PENDING replace by DataFactory for unification?
+        dataModel.getNodes("data").stream().forEach((dataElement) -> {
+            String dataPath = dataElement.getString("name");
+            model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
+        });
+        //Iterating over task dependancies
+        dataModel.getNodes("task").stream().forEach((taskElement) -> {
+            String taskName = taskElement.getString("name");
+            Task task = workspace.getTask(taskName);
+            //Building model with default data construction
+            model.dependsOn(task.model(workspace, taskElement), taskElement.getString("as", taskName));
         });
     }
 
