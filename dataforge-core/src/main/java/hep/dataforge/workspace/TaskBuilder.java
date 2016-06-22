@@ -23,7 +23,7 @@ import java.util.function.UnaryOperator;
 import javafx.util.Pair;
 
 /**
- * A builder for custom task. does not ensure type safety.
+ * A builder for custom task. Does not ensure type safety.
  *
  * @author Alexander Nozik
  */
@@ -131,7 +131,6 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     }
 
     public interface ModelTransformation {
-
         void apply(Workspace workspace, Meta taskMeta, TaskModel model);
     }
 

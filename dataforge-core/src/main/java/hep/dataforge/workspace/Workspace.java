@@ -18,11 +18,9 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.GlobalContext;
-import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.data.DataTree;
 import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaProvider;
@@ -103,16 +101,6 @@ public interface Workspace extends Encapsulated, MetaProvider {
      */
     @Override
     Meta getMeta(String name);
-
-
-//    /**
-//     * Build an input data node for task based on the taskModel using all
-//     * necessary checks. Tasks could internally use or override this procedure
-//     *
-//     * @param model
-//     * @return
-//     */
-//    DataTree.Builder buildDataNode(ProcessManager.Callback callback, TaskModel model);
 
     public interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
 
