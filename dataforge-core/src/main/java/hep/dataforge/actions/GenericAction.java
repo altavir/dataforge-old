@@ -52,9 +52,6 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     /**
      * Wrap result of single or separate executions into DataNode
      *
-     * @param singleLog an individual report for this result. Could be null;
-     * @param singleMeta an individual meta for this result. Could be null;
-     * @param singleResult
      * @return
      */
     protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>> result) {
@@ -243,7 +240,6 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     /**
      * Create default OuputStream for given Action and given name
      *
-     * @param action a {@link hep.dataforge.actions.Action} object.
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */

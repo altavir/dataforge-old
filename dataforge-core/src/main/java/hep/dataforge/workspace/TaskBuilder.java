@@ -10,6 +10,8 @@ import static hep.dataforge.actions.ActionUtils.ACTION_NODE_KEY;
 import static hep.dataforge.actions.ActionUtils.ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.buildAction;
+
+import hep.dataforge.actions.GenericAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.ProcessManager;
 import hep.dataforge.data.Data;
@@ -20,6 +22,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.MetaFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javafx.util.Pair;
@@ -54,8 +57,23 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
         return self();
     }
 
+    /**
+     * Perform an action using given meta as a template and actual task meta as template data
+     * @param action
+     * @param actionMeta
+     * @return
+     */
     public TaskBuilder doLast(Action action, Meta actionMeta) {
         return doLast(action, (ctx, meta) -> Template.compileTemplate(actionMeta, meta));
+    }
+
+    /**
+     * Perform action without meta
+     * @param action
+     * @return
+     */
+    public TaskBuilder doLast(Action action){
+        return doLast(action, (ctx, meta) -> Meta.empty());
     }
 
     /**
@@ -115,7 +133,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     
     /**
      * Add dependency on data group using given pattern
-     * @param dataName
+     * @param pattern
      * @return 
      */
     public TaskBuilder dependsOnData(Predicate<Pair<String,Data<?>>> pattern){
