@@ -12,6 +12,7 @@ import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.buildAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.ProcessManager;
+import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
@@ -19,6 +20,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.MetaFactory;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javafx.util.Pair;
 
@@ -79,7 +81,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param transformation
      * @return
      */
-    public TaskBuilder transformModel(ModelTransformation transformation) {
+    public TaskBuilder dependencyRule(ModelTransformation transformation) {
         this.modelTransformations.add(transformation);
         return self();
     }
@@ -92,18 +94,38 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @return 
      */
     public TaskBuilder dependsOnTask(String taskName, String as, UnaryOperator<Meta> metaTransformation) {
-        return transformModel((Workspace workspace, Meta taskMeta, TaskModel model) -> {
+        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
             Meta depMeta = metaTransformation.apply(taskMeta);
             workspace.getTask(taskName).model(workspace, depMeta);
             model.dependsOn(workspace.getTask(taskName).model(workspace, depMeta), as);
         });
     }
     
+    /**
+     * Add dependency on specific data. Name patterns are not allowed
+     * @param dataName
+     * @param as
+     * @return 
+     */
     public TaskBuilder dependsOnData(String dataName, String as){
-        return transformModel((Workspace workspace, Meta taskMeta, TaskModel model) -> {
+        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
             model.dependsOnData(dataName, as);
         });
     }
+    
+    /**
+     * Add dependency on data group using given pattern
+     * @param dataName
+     * @return 
+     */
+    public TaskBuilder dependsOnData(Predicate<Pair<String,Data<?>>> pattern){
+        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
+            workspace.getDataStage().dataStream()
+                    .filter(pattern)
+                    .forEach(pair -> model.dependsOnData(pair.getKey()));
+        });
+    }
+    
 
     /**
      * apply action configuration from meta node
@@ -112,7 +134,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param actionsMeta
      * @return
      */
-    public TaskBuilder applyActionMeta(Context context, Meta actionsMeta) {
+    public TaskBuilder fromMeta(Context context, Meta actionsMeta) {
         actionsMeta.getNodes(ACTION_NODE_KEY).stream().forEach((action) -> {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             doLast(buildAction(context, actionType), action);

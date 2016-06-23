@@ -53,7 +53,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
      *
      * @return
      */
-    default DataNode getDataStage() {
+    default DataNode<Object> getDataStage() {
         return getStage(DATA_STAGE_NAME);
     }
 
