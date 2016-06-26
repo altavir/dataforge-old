@@ -34,7 +34,7 @@ import javafx.util.Pair;
  */
 public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
 
-    private String name;
+    private String name = "@default";
     /**
      * A list of actions inside task
      */
@@ -44,10 +44,16 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      */
     private final List<ModelTransformation> modelTransformations = new ArrayList<>();
 
+
+    public TaskBuilder setName(String name) {
+        this.name = name;
+        return self();
+    }
+
     /**
      * Lazy action initialization from context ActionManager
      *
-     * @param action
+     * @param actionName
      * @param metaBuilder
      * @return
      */
@@ -59,7 +65,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     /**
      * Lazy action initialization from Class default constructor
      *
-     * @param action
+     * @param actionClass
      * @param metaBuilder
      * @return
      */
