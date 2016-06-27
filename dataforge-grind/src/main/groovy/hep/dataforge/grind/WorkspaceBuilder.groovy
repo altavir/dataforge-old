@@ -98,6 +98,29 @@ class WorkspaceBuilder {
         builder.loadTask(taskSpec.build());
     }
 
+//    def task(String taskName){
+//        Task task = Class.forName(taskName).newInstance();
+//        builder.loadTask(task);
+//    }
+
+    /**
+     * Load task instance
+     * @param task
+     * @return
+     */
+    def task(Task task){
+        builder.loadTask(task);
+    }
+
+    /**
+     * Load task by class
+     * @param taskClass
+     * @return
+     */
+    def task(Class<Task> taskClass){
+        builder.loadTask(taskClass.newInstance());
+    }
+
     private class TaskSpec extends TaskBuilder {
 
     }
