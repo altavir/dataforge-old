@@ -17,8 +17,8 @@ package hep.dataforge.datafitter;
 
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.functions.NamedFunction;
+import hep.dataforge.io.FittingIOUtils;
 import static hep.dataforge.io.FittingIOUtils.printParamSet;
-import static hep.dataforge.io.PrintNamed.printNamedMatrix;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
@@ -189,7 +189,7 @@ public class FitState extends FitSource {
         if (covariance != null) {
             out.println();
             out.println("Correlation marix:");
-            printNamedMatrix(out, getCorrelationMatrix());
+            FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
         }
         if (this.interval != null) {
             this.interval.print(out);
@@ -218,7 +218,7 @@ public class FitState extends FitSource {
             out.println();
             out.printf("%n***COVARIANCE***%n");
 
-            printNamedMatrix(out, getCovariance());
+            FittingIOUtils.printNamedMatrix(out, getCovariance());
 
         }
     }

@@ -21,15 +21,11 @@ import hep.dataforge.context.GlobalContext;
 import hep.dataforge.datafitter.models.Model;
 import hep.dataforge.datafitter.models.ModelManager;
 import hep.dataforge.datafitter.models.XYModel;
-import hep.dataforge.io.PrintNamed;
-import static hep.dataforge.io.PrintNamed.printResiduals;
+import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
-import static hep.dataforge.io.PrintNamed.printResiduals;
-import static hep.dataforge.io.PrintNamed.printResiduals;
-import static hep.dataforge.io.PrintNamed.printResiduals;
 
 /**
  * <p>
@@ -158,9 +154,9 @@ public class FitManager implements Encapsulated {
             case "residuals":
                 writer.printf("%n***RESIDUALS***%n");
                 if (state.getModel() instanceof XYModel) {
-                    PrintNamed.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getDataSet(), state.getParameters());
+                    FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getDataSet(), state.getParameters());
                 } else {
-                    printResiduals(writer, state);
+                    FittingIOUtils.printResiduals(writer, state);
                 }
                 return new FitTaskResult(state, FitTaskResult.emptyTask("residuals"));
             default:

@@ -15,8 +15,8 @@
  */
 package hep.dataforge.datafitter;
 
+import hep.dataforge.io.FittingIOUtils;
 import static hep.dataforge.io.FittingIOUtils.printParamSet;
-import static hep.dataforge.io.PrintNamed.printNamedMatrix;
 import hep.dataforge.maths.NamedMatrix;
 import java.io.PrintWriter;
 
@@ -141,7 +141,7 @@ public class FitTaskResult extends FitState {
         if (covariance != null) {
             out.println();
             out.println("Corellation marix:");
-            printNamedMatrix(out, getCorrelationMatrix());
+            FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
         }
         if (this.getIntervalEstimate() != null) {
             this.getIntervalEstimate().print(out);

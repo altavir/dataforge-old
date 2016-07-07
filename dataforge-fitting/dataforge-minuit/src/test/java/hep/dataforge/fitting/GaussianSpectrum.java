@@ -24,7 +24,7 @@ import hep.dataforge.datafitter.ParamSet;
 import hep.dataforge.datafitter.models.XYModel;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.functions.ParametricFunction;
-import hep.dataforge.io.PrintNamed;
+import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.MatrixOperations;
 import hep.dataforge.maths.NamedVector;
@@ -59,7 +59,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         FitSource fs = new FitSource(data, model);
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
         NamedMatrix hInv = new NamedMatrix(MatrixOperations.inverse(h.getMatrix()), pars.namesAsArray());
-        PrintNamed.printNamedMatrix(out(), hInv);
+        FittingIOUtils.printNamedMatrix(out(), hInv);
     }
     private final RandomGenerator rnd;
 
