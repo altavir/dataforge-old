@@ -76,7 +76,7 @@ public class ProcessManagerViewController implements Initializable {
         FXUtils.runNow(() -> processTreeView.setRoot(buildTree(manager.getRootProcess())));
     }
 
-    private TreeItem<DFProcess> buildTree(DFProcess proc) {
+    private synchronized TreeItem<DFProcess> buildTree(DFProcess proc) {
         TreeItem<DFProcess> res = new TreeItem<>(proc);
         res.setExpanded(true);
 //        res.setGraphic(ProcessViewController.build(proc));

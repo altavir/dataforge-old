@@ -18,14 +18,9 @@ package hep.dataforge.datafitter.models;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Meta;
 
-/**
- * <p>ModelDescriptor class.</p>
- *
- * @author Alexander Nozik
- * @version $Id: $Id
- */
 public class ModelDescriptor extends NodeDescriptor{
-
+    
+    
     public ModelDescriptor(Meta description) {
         super(description);
     }
