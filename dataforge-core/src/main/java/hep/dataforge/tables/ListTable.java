@@ -238,12 +238,23 @@ public class ListTable implements Table {
          * @param e a {@link hep.dataforge.tables.DataPoint} object.
          * @throws hep.dataforge.exceptions.NamingException if any.
          */
-        public Builder addRow(DataPoint e) throws NamingException {
+        public Builder row(DataPoint e) throws NamingException {
             table.addRow(e);
             return this;
         }
+        
+        /**
+         * Add new point constructed from a list of objects using current table format
+         * @param values
+         * @return
+         * @throws NamingException 
+         */
+        public Builder row(Object... values) throws NamingException {
+            table.addRow(new MapPoint(table.format.namesAsArray(), values));
+            return this;
+        }
 
-        public Builder addRows(Iterable<? extends DataPoint> points) {
+        public Builder rows(Iterable<? extends DataPoint> points) {
             table.addRows(points);
             return this;
         }

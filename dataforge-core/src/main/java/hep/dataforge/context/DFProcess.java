@@ -118,7 +118,7 @@ public class DFProcess<R> implements Named {
      *
      * @return
      */
-    public ObservableMap<String, DFProcess> getChildren() {
+    public synchronized ObservableMap<String, DFProcess> getChildren() {
         return children;//FXCollections.<String, DFProcess>unmodifiableObservableMap(children);
     }
 

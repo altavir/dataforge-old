@@ -68,7 +68,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
             }
 
             while (dpReader.hasNext()) {
-                fileData.addRow(dpReader.next());
+                fileData.row(dpReader.next());
             }
 
         } catch (IOException ex) {

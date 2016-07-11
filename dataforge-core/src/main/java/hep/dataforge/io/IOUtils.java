@@ -29,6 +29,9 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import static java.util.regex.Pattern.compile;
 import java.util.stream.Collectors;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
+import static java.util.regex.Pattern.compile;
 
 /**
  * <p>
@@ -117,7 +120,7 @@ public class IOUtils {
         }
         ListTable.Builder res = new ListTable.Builder(names);
         for (DataPoint dp : reader) {
-            res.addRow(dp);
+            res.row(dp);
         }
         return res.build();
     }

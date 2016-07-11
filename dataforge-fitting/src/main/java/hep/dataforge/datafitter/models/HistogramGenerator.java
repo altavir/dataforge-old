@@ -26,6 +26,9 @@ import static java.lang.Math.sqrt;
 import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
+import static java.lang.Double.isNaN;
 
 /**
  * Генератор наборов данных для спектров. На входе требуется набор данных,
@@ -67,7 +70,7 @@ public class HistogramGenerator implements Generator {
     public Table generateData(Iterable<DataPoint> config) {
         ListTable.Builder res = new ListTable.Builder(Histogram.names);
         for (Iterator<DataPoint> it = config.iterator(); it.hasNext();) {
-            res.addRow(this.generateDataPoint(it.next()));
+            res.row(this.generateDataPoint(it.next()));
 
         }
         return res.build();
@@ -137,7 +140,7 @@ public class HistogramGenerator implements Generator {
         for (int i = 0; i < binNumber; i++) {
             bin = new HistogramBin(a, b, 0);
             bin = this.generateDataPoint(bin);
-            res.addRow(bin);
+            res.row(bin);
             a = b;
             b += step;
         }

@@ -106,7 +106,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
             double error = Math.sqrt(value);
             double randValue = Math.max(0, rnd.nextGaussian() * error + value);
             DataPoint p = factory.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
-            data.addRow(p);
+            data.row(p);
         }
         return data.build();
     }

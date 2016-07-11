@@ -56,7 +56,7 @@ public class PlotDataUtils {
 
         }
         ListTable.Builder res = new ListTable.Builder(TableFormat.fixedWidth(8, names));
-        res.addRows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
+        res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }
 }

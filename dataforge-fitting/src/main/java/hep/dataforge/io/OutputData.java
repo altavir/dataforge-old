@@ -54,7 +54,7 @@ public class OutputData {
             }
             values[values.length - 1] = func.value(point);
             DataPoint dp = new MapPoint(format, values);
-            res.addRow(dp);
+            res.row(dp);
         }
         return res.build();
     }
@@ -75,7 +75,7 @@ public class OutputData {
             values[0] = points[i];
             values[1] = func.value(points[i]);
             DataPoint dp = new MapPoint(format, values);
-            res.addRow(dp);
+            res.row(dp);
         }
         return res.build();
     }
