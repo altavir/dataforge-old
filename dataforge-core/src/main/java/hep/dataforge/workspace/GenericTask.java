@@ -87,14 +87,10 @@ public abstract class GenericTask<T> implements Task<T> {
 
     protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, TaskModel model) {
         DataTree.Builder builder = DataTree.builder();
-        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
-        model.taskDeps().forEach(dep -> {
-            builder.putNode(dep.as(), workspace.runTask(dep.taskModel()));
-            callback.increaseProgress(1);
-        });
-        model.dataDeps().forEach(dep -> {
-            builder.putData(dep.as(), workspace.getData(dep.path()));
-            callback.increaseProgress(1);
+        callback.setMaxProgress(model.dependencies().size());
+        model.dependencies().forEach(dep -> {
+            dep.apply(builder, workspace);
+            callback.increaseProgress(1.0);
         });
         return builder.build();
     }
@@ -155,7 +151,7 @@ public abstract class GenericTask<T> implements Task<T> {
         //PENDING replace by DataFactory for unification?
         dataModel.getNodes("data").stream().forEach((dataElement) -> {
             String dataPath = dataElement.getString("name");
-            model.dependsOnData(dataPath, dataElement.getString("as", dataPath));
+            model.data(dataPath, dataElement.getString("as", dataPath));
         });
         //Iterating over task dependancies
         dataModel.getNodes("task").stream().forEach((taskElement) -> {

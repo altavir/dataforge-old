@@ -169,7 +169,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      */
     public TaskBuilder data(String dataName, String as) {
         return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
-            model.dependsOnData(dataName, as);
+            model.data(dataName, as);
         });
     }
 
@@ -183,7 +183,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
         return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
             workspace.getDataStage().dataStream()
                     .filter(predicate)
-                    .forEach(pair -> model.dependsOnData(pair.getKey()));
+                    .forEach(pair -> model.data(pair.getKey()));
         });
     }
 
