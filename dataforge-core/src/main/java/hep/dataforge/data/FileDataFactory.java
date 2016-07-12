@@ -11,6 +11,7 @@ import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import static hep.dataforge.utils.NamingUtils.wildcardMatch;
 import hep.dataforge.values.Value;
 import java.io.File;
 import java.util.Arrays;
@@ -31,8 +32,6 @@ public class FileDataFactory extends DataFactory<Binary> {
     public FileDataFactory() {
         super(Binary.class);
     }
-    
-    
 
     @Override
     protected void buildChildren(Context context, DataTree.Builder<Binary> builder, DataFilter filter, Meta dataConfig) {
@@ -62,8 +61,8 @@ public class FileDataFactory extends DataFactory<Binary> {
             });
         }
     }
-    
-    public static Data<Binary> buildFileData(Context context, String filePath, Meta meta){
+
+    public static Data<Binary> buildFileData(Context context, String filePath, Meta meta) {
         return buildFileData(context.io().getFile(filePath), meta);
     }
 
@@ -106,7 +105,7 @@ public class FileDataFactory extends DataFactory<Binary> {
     private List<File> listFiles(Context context, File parentFile, Meta fileNode) {
         String path = fileNode.getString("path");
         return Arrays.asList(parentFile.listFiles((File dir, String name)
-                -> dir.equals(parentFile) && name.matches(path.replace("?", ".?").replace("*", ".*?"))));
+                -> dir.equals(parentFile) && wildcardMatch(path, name)));
 
     }
 

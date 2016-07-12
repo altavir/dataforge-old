@@ -16,6 +16,7 @@
 package hep.dataforge.utils;
 
 import hep.dataforge.exceptions.NamingException;
+import java.util.function.Predicate;
 
 /**
  * TODO сменить название
@@ -26,7 +27,8 @@ import hep.dataforge.exceptions.NamingException;
 public class NamingUtils {
 
     /**
-     * <p>getMainName.</p>
+     * <p>
+     * getMainName.</p>
      *
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.lang.String} object.
@@ -37,7 +39,8 @@ public class NamingUtils {
     }
 
     /**
-     * <p>getSubName.</p>
+     * <p>
+     * getSubName.</p>
      *
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.lang.String} object.
@@ -52,7 +55,8 @@ public class NamingUtils {
     }
 
     /**
-     * <p>parseArray.</p>
+     * <p>
+     * parseArray.</p>
      *
      * @param array a {@link java.lang.String} object.
      * @return an array of {@link java.lang.String} objects.
@@ -76,7 +80,8 @@ public class NamingUtils {
     }
 
     /**
-     * <p>buildArray.</p>
+     * <p>
+     * buildArray.</p>
      *
      * @param array an array of {@link java.lang.String} objects.
      * @return a {@link java.lang.String} object.
@@ -94,12 +99,22 @@ public class NamingUtils {
     }
 
     /**
-     * <p>parseName.</p>
+     * <p>
+     * parseName.</p>
      *
      * @param name a {@link java.lang.String} object.
      * @return an array of {@link java.lang.String} objects.
      */
     public static String[] parseName(String name) {
         return name.trim().split(".");
+    }
+
+    public static boolean wildcardMatch(String mask, String str) {
+        return str.matches(mask.replace("?", ".?").replace("*", ".*?"));
+    }
+
+    public static Predicate<String> wildcardMatchCondition(String mask) {
+        String pattern = mask.replace("?", ".?").replace("*", ".*?");
+        return str -> str.matches(pattern);
     }
 }
