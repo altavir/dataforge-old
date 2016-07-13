@@ -41,9 +41,9 @@ import org.slf4j.LoggerFactory;
 public abstract class GenericTask<T> implements Task<T> {
 
     @Override
-    public DataNode<T> run(TaskModel m) {
-        //apply model transformation to include specific dependancies for this task
-        TaskModel model = buildModel(m);
+    public DataNode<T> run(TaskModel model) {
+        //validate model
+        validate(model);
         Workspace workspace = model.getWorkspace();
         ProcessManager manager = workspace.getContext().processManager();
         // root process for this task
@@ -83,6 +83,11 @@ public abstract class GenericTask<T> implements Task<T> {
         return resultTask.join();
     }
 
+    @Override
+    public void validate(TaskModel model) {
+        //TODO add validation here
+    }
+
     /**
      * Apply model transformation to include custom dependencies or change
      * existing ones.
@@ -90,21 +95,23 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param context
      * @param model
      */
-    protected TaskModel buildModel(TaskModel model) {
-        return model.copy();
+    protected TaskModel transformModel(TaskModel model) {
+        return model;
     }
 
     /**
-     * Build new TaskModel and apply specific model transformation for this task.
+     * Build new TaskModel and apply specific model transformation for this
+     * task.
+     *
      * @param workspace
      * @param taskConfig
-     * @return 
+     * @return
      */
     @Override
-    public TaskModel buildModel(Workspace workspace, Meta taskConfig) {
-        return buildModel(new TaskModel(workspace, getName(), taskConfig));
-    }    
-    
+    public TaskModel build(Workspace workspace, Meta taskConfig) {
+        return transformModel(new TaskModel(workspace, getName(), taskConfig));
+    }
+
     public Logger getLogger() {
         //TODO replace by context logger
         return LoggerFactory.getLogger(getName());

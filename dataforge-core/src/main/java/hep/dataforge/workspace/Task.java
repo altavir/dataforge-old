@@ -34,6 +34,22 @@ public interface Task<R> extends Named {
     public static final String GATHER_NODE_NAME = "@gather";
 
     /**
+     * Build a model for this task
+     *
+     * @param workspace
+     * @param taskConfig
+     * @return
+     */
+    TaskModel build(Workspace workspace, Meta taskConfig);
+    
+    /**
+     * Check if the model is valid and is acceptable by the task. Throw exception if not.
+     * @param model
+     * @return 
+     */
+    void validate(TaskModel model);
+
+    /**
      * Run given task model. Type check expected to be performed before actual
      * calculation.
      *
@@ -44,21 +60,13 @@ public interface Task<R> extends Named {
     DataNode<R> run(TaskModel model);
 
     /**
-     * Build new TaskModel and apply specific model transformation for this task.
-     * @param workspace
-     * @param taskConfig
-     * @return 
-     */
-    TaskModel buildModel(Workspace workspace, Meta taskConfig);
-
-    /**
-     * Equals model + run
+     * Equals build + run
      *
      * @param workspace
      * @param taskConfig
      * @return
      */
     default DataNode<R> run(Workspace workspace, Meta taskConfig) {
-        return run(buildModel(workspace, taskConfig));
+        return run(build(workspace, taskConfig));
     }
 }

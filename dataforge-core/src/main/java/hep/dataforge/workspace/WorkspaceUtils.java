@@ -49,7 +49,7 @@ public class WorkspaceUtils {
             String taskName = taskElement.getString("name");
             Task task = workspace.getTask(taskName);
             //Building model with default data construction
-            model.dependsOn(task.buildModel(workspace, taskElement), taskElement.getString("as", taskName));
+            model.dependsOn(task.build(workspace, taskElement), taskElement.getString("as", taskName));
         });
     }
 

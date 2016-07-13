@@ -153,10 +153,11 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @return
      */
     public TaskBuilder dependsOn(String taskName, String as, UnaryOperator<Meta> metaTransformation) {
-        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
-            Meta depMeta = metaTransformation.apply(taskMeta);
-            workspace.getTask(taskName).buildModel(workspace, depMeta);
-            model.dependsOn(workspace.getTask(taskName).buildModel(workspace, depMeta), as);
+        return dependencyRule((TaskModel model) -> {
+            Workspace workspace = model.getWorkspace();
+            Meta depMeta = metaTransformation.apply(model.meta());
+            workspace.getTask(taskName).build(workspace, depMeta);
+            model.dependsOn(workspace.getTask(taskName).build(workspace, depMeta), as);
         });
     }
 
@@ -168,7 +169,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @return
      */
     public TaskBuilder data(String dataName, String as) {
-        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
+        return dependencyRule((TaskModel model) -> {
             model.data(dataName, as);
         });
     }
@@ -180,8 +181,8 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @return
      */
     public TaskBuilder data(Predicate<Pair<String, Data<?>>> predicate) {
-        return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
-            workspace.getDataStage().dataStream()
+        return dependencyRule((TaskModel model) -> {
+            model.getWorkspace().getDataStage().dataStream()
                     .filter(predicate)
                     .forEach(pair -> model.data(pair.getKey()));
         });
@@ -227,7 +228,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
 
     public interface ModelTransformation {
 
-        void apply(Workspace workspace, Meta taskMeta, TaskModel model);
+        void apply(TaskModel model);
     }
 
     private class CustomTask extends GenericTask {
@@ -247,6 +248,17 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
             return state;
         }
 
+        @Override
+        protected TaskModel transformModel(TaskModel model) {
+            super.transformModel(model);
+            modelTransformations.stream().forEach(dep -> {
+                dep.apply(model);
+            });
+            return model;
+        }
+
+        
+        
 //        @Override
 //        public TaskModel model(Workspace workspace, Meta taskMeta) {
 //            TaskModel model = super.model(workspace, taskMeta);

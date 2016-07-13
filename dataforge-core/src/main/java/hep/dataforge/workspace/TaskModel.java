@@ -64,7 +64,6 @@ public class TaskModel implements Named, Annotated {
         return new TaskModel(workspace, taskName, taskMeta, deps, outs);
     }
     
-    
     /**
      * An ordered collection of dependencies
      *
