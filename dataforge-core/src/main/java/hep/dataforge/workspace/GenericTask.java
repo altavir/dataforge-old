@@ -41,7 +41,10 @@ import org.slf4j.LoggerFactory;
 public abstract class GenericTask<T> implements Task<T> {
 
     @Override
-    public DataNode<T> run(Workspace workspace, TaskModel model) {
+    public DataNode<T> run(TaskModel m) {
+        //apply model transformation to include specific dependancies for this task
+        TaskModel model = buildModel(m);
+        Workspace workspace = model.getWorkspace();
         ProcessManager manager = workspace.getContext().processManager();
         // root process for this task
         final DFProcess taskProcess = manager.post(getName() + "_" + model.hashCode());
@@ -80,6 +83,28 @@ public abstract class GenericTask<T> implements Task<T> {
         return resultTask.join();
     }
 
+    /**
+     * Apply model transformation to include custom dependencies or change
+     * existing ones.
+     *
+     * @param context
+     * @param model
+     */
+    protected TaskModel buildModel(TaskModel model) {
+        return model.copy();
+    }
+
+    /**
+     * Build new TaskModel and apply specific model transformation for this task.
+     * @param workspace
+     * @param taskConfig
+     * @return 
+     */
+    @Override
+    public TaskModel buildModel(Workspace workspace, Meta taskConfig) {
+        return buildModel(new TaskModel(workspace, getName(), taskConfig));
+    }    
+    
     public Logger getLogger() {
         //TODO replace by context logger
         return LoggerFactory.getLogger(getName());
@@ -122,44 +147,4 @@ public abstract class GenericTask<T> implements Task<T> {
         workspace.updateStage(getName(), state.getResult());
         return state.getResult();
     }
-
-    @Override
-    public TaskModel model(Workspace workspace, Meta taskMeta) {
-        TaskModel model = new TaskModel(getName(), taskMeta);
-
-        Meta dependacyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
-        // Use @gather node for data construction
-        if (taskMeta.hasNode(GATHER_NODE_NAME)) {
-            dependacyMeta = taskMeta.getNode(GATHER_NODE_NAME);
-        }
-
-        applyDataModel(workspace, model, dependacyMeta);
-
-        return model;
-    }
-
-    /**
-     * Construct task dependencies using given dependency model. Could be
-     * extended.
-     *
-     * @param workspace
-     * @param model
-     * @param dataModelList
-     */
-    private void applyDataModel(Workspace workspace, TaskModel model, Meta dataModel) {
-        //Iterating over direct data dependancies
-        //PENDING replace by DataFactory for unification?
-        dataModel.getNodes("data").stream().forEach((dataElement) -> {
-            String dataPath = dataElement.getString("name");
-            model.data(dataPath, dataElement.getString("as", dataPath));
-        });
-        //Iterating over task dependancies
-        dataModel.getNodes("task").stream().forEach((taskElement) -> {
-            String taskName = taskElement.getString("name");
-            Task task = workspace.getTask(taskName);
-            //Building model with default data construction
-            model.dependsOn(task.model(workspace, taskElement), taskElement.getString("as", taskName));
-        });
-    }
-
 }

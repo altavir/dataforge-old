@@ -155,8 +155,8 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     public TaskBuilder dependsOn(String taskName, String as, UnaryOperator<Meta> metaTransformation) {
         return dependencyRule((Workspace workspace, Meta taskMeta, TaskModel model) -> {
             Meta depMeta = metaTransformation.apply(taskMeta);
-            workspace.getTask(taskName).model(workspace, depMeta);
-            model.dependsOn(workspace.getTask(taskName).model(workspace, depMeta), as);
+            workspace.getTask(taskName).buildModel(workspace, depMeta);
+            model.dependsOn(workspace.getTask(taskName).buildModel(workspace, depMeta), as);
         });
     }
 
@@ -247,14 +247,14 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
             return state;
         }
 
-        @Override
-        public TaskModel model(Workspace workspace, Meta taskMeta) {
-            TaskModel model = super.model(workspace, taskMeta);
-            modelTransformations.stream().forEach(dep -> {
-                dep.apply(workspace, taskMeta, model);
-            });
-            return model;
-        }
+//        @Override
+//        public TaskModel model(Workspace workspace, Meta taskMeta) {
+//            TaskModel model = super.model(workspace, taskMeta);
+//            modelTransformations.stream().forEach(dep -> {
+//                dep.apply(workspace, taskMeta, model);
+//            });
+//            return model;
+//        }
 
         @Override
         public String getName() {

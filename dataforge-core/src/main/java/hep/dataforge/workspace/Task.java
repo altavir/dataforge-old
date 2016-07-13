@@ -34,33 +34,31 @@ public interface Task<R> extends Named {
     public static final String GATHER_NODE_NAME = "@gather";
 
     /**
-     * Run given task model. Type check expected to be performed before actual calculation.
+     * Run given task model. Type check expected to be performed before actual
+     * calculation.
+     *
      * @param workspace
      * @param model
-     * @return 
+     * @return
      */
-    DataNode<R> run(Workspace workspace, TaskModel model);
+    DataNode<R> run(TaskModel model);
 
     /**
-     * Generate a model for this task using given configuration. Model
-     * generation does build dependency tree and checks for possible dependency
-     * cycles, but does not perform type checks and does not execute any actions.
+     * Build new TaskModel and apply specific model transformation for this task.
+     * @param workspace
+     * @param taskConfig
+     * @return 
+     */
+    TaskModel buildModel(Workspace workspace, Meta taskConfig);
+
+    /**
+     * Equals model + run
      *
      * @param workspace
      * @param taskConfig
      * @return
      */
-    TaskModel model(Workspace workspace, Meta taskConfig);
-    //PENDING remove model builder into separate class?
-    //TODO model building could be time consuming for complex task dependencies. Provide lazy generation helper
-
-    /**
-     * Equals model + run
-     * @param workspace
-     * @param taskConfig
-     * @return 
-     */
     default DataNode<R> run(Workspace workspace, Meta taskConfig) {
-        return run(workspace, model(workspace, taskConfig));
+        return run(buildModel(workspace, taskConfig));
     }
 }

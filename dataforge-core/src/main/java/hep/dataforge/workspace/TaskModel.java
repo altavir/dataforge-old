@@ -30,16 +30,41 @@ import javafx.util.Pair;
  */
 public class TaskModel implements Named, Annotated {
 
+    private final Workspace workspace;
     private final String taskName;
     private final Meta taskMeta;
-    private final Set<Dependency> deps = new LinkedHashSet<>();
-    private final Set<TaskOutput> outs = new LinkedHashSet<>();
+    private final Set<Dependency> deps;
+    private final Set<TaskOutput> outs;
 
-    public TaskModel(String taskName, Meta taskMeta) {
+    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps, Set<TaskOutput> outs) {
+        this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
+        this.deps = deps;
+        this.outs = outs;
     }
 
+    public TaskModel(Workspace workspace, String taskName, Meta taskMeta) {
+        this.workspace = workspace;
+        this.taskName = taskName;
+        this.taskMeta = taskMeta;
+        deps = new LinkedHashSet<>();
+        outs = new LinkedHashSet<>();
+    }
+
+    public Workspace getWorkspace() {
+        return workspace;
+    }
+
+    /**
+     * Shallow copy
+     * @return 
+     */
+    public TaskModel copy(){
+        return new TaskModel(workspace, taskName, taskMeta, deps, outs);
+    }
+    
+    
     /**
      * An ordered collection of dependencies
      *
@@ -107,7 +132,7 @@ public class TaskModel implements Named, Annotated {
      * @param as
      */
     public void dependsOn(String taskName, Meta taskMeta, String as) {
-        dependsOn(new TaskModel(taskName, taskMeta), as);
+        dependsOn(new TaskModel(workspace, taskName, taskMeta), as);
     }
 
     /**

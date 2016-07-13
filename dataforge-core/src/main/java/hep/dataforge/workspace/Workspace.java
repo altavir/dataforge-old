@@ -81,7 +81,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
     }
 
     default <T> DataNode<T> runTask(TaskModel model) {
-        return this.<T>getTask(model.getName()).run(this, model);
+        return this.<T>getTask(model.getName()).run(model);
     }
 
     /**
