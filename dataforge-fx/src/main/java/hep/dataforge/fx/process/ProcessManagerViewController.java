@@ -5,8 +5,8 @@
  */
 package hep.dataforge.fx.process;
 
-import hep.dataforge.context.DFProcess;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.Work;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.CommonUtils;
 import java.io.IOException;
@@ -32,7 +32,7 @@ import javafx.scene.layout.BorderPane;
  */
 public class ProcessManagerViewController implements Initializable {
 
-    public static BorderPane build(ProcessManager manager) {
+    public static BorderPane build(WorkManager manager) {
         try {
             FXMLLoader loader = new FXMLLoader(manager.getClass().getResource("/fxml/ProcessManagerView.fxml"));
             BorderPane p = loader.load();
@@ -44,20 +44,20 @@ public class ProcessManagerViewController implements Initializable {
         }
     }
 
-    private ProcessManager manager;
-    private final Map<DFProcess, Parent> processNodeCache = CommonUtils.<DFProcess, Parent>getLRUCache(400);
+    private WorkManager manager;
+    private final Map<Work, Parent> processNodeCache = CommonUtils.<Work, Parent>getLRUCache(400);
 
     @FXML
-    private TreeView<DFProcess> processTreeView;
+    private TreeView<Work> processTreeView;
 
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        processTreeView.setCellFactory((TreeView<DFProcess> param) -> new TreeCell<DFProcess>() {
+        processTreeView.setCellFactory((TreeView<Work> param) -> new TreeCell<Work>() {
             @Override
-            public void updateItem(DFProcess item, boolean empty) {
+            public void updateItem(Work item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -71,25 +71,25 @@ public class ProcessManagerViewController implements Initializable {
         });
     }
 
-    public void setManager(ProcessManager manager) {
+    public void setManager(WorkManager manager) {
         this.manager = manager;
-        FXUtils.runNow(() -> processTreeView.setRoot(buildTree(manager.getRootProcess())));
+        FXUtils.runNow(() -> processTreeView.setRoot(buildTree(manager.getRoot())));
     }
 
-    private synchronized TreeItem<DFProcess> buildTree(DFProcess proc) {
-        TreeItem<DFProcess> res = new TreeItem<>(proc);
+    private synchronized TreeItem<Work> buildTree(Work proc) {
+        TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
 //        res.setGraphic(ProcessViewController.build(proc));
-        proc.getChildren().values().stream().forEach(new Consumer<DFProcess>() {
+        proc.getChildren().values().stream().forEach(new Consumer<Work>() {
             @Override
-            public synchronized void accept(DFProcess child) {
+            public synchronized void accept(Work child) {
                 res.getChildren().add(buildTree(child));
             }
         });
 
-        proc.getChildren().addListener(new MapChangeListener<String, DFProcess>() {
+        proc.getChildren().addListener(new MapChangeListener<String, Work>() {
             @Override
-            public void onChanged(MapChangeListener.Change<? extends String, ? extends DFProcess> change) {
+            public void onChanged(MapChangeListener.Change<? extends String, ? extends Work> change) {
                 Platform.runLater(() -> {
                     if (change.wasAdded()) {
                         res.getChildren().add(buildTree(change.getValueAdded()));

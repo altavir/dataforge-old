@@ -6,7 +6,7 @@
 package hep.dataforge.fx.process;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.fx.FXFragment;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
@@ -22,7 +22,7 @@ import javafx.stage.Stage;
  */
 public class ProcessManagerFragment extends FXFragment {
 
-    private ProcessManager manager;
+    private WorkManager manager;
     private final AnchorPane root = new AnchorPane();
 
     /**
@@ -32,14 +32,14 @@ public class ProcessManagerFragment extends FXFragment {
      * @return
      */
     public static ProcessManagerFragment attachToContext(Context context) {
-        ProcessManager manager = context.processManager();
+        WorkManager manager = context.workManager();
         return new ProcessManagerFragment(manager);
     }
 
     public ProcessManagerFragment() {
     }
 
-    public ProcessManagerFragment(ProcessManager manager) {
+    public ProcessManagerFragment(WorkManager manager) {
         this.manager = manager;
     }
 
@@ -54,7 +54,7 @@ public class ProcessManagerFragment extends FXFragment {
         return stage;
     }
 
-    public void setManager(@NonNull ProcessManager manager) {
+    public void setManager(@NonNull WorkManager manager) {
         this.manager = manager;
         FXUtils.runNow(() -> {
             root.getChildren().clear();
@@ -67,7 +67,7 @@ public class ProcessManagerFragment extends FXFragment {
         });
     }
 
-    public ProcessManager getManager() {
+    public WorkManager getManager() {
         return manager;
     }
 

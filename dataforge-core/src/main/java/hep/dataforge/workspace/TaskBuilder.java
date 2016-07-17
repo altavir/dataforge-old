@@ -13,7 +13,7 @@ import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.buildAction;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
@@ -234,12 +234,12 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     private class CustomTask extends GenericTask {
 
         @Override
-        protected TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
+        protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
             DataNode res = state.getData();
             for (Pair<Function<Context, Action>, MetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
                 Meta actionMeta = pair.getValue().build(context, config);
-                res = action.withParentProcess(callback.processName()).run(res, actionMeta);
+                res = action.withParentProcess(callback.workName()).run(res, actionMeta);
                 if (actionMeta.hasValue("stageName")) {
                     state.setData(actionMeta.getString("stageName"), res);
                 }

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.work.WorkManager;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
@@ -50,7 +51,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     private final String name;
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final PluginManager pm;
-    protected ProcessManager processManager = null;
+    protected WorkManager processManager = null;
     protected IOManager io = null;
 
     /**
@@ -177,19 +178,19 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         return this.pm;
     }
 
-    public ProcessManager processManager() {
+    public WorkManager workManager() {
         if (this.processManager == null) {
             if (getParent() != null) {
-                return getParent().processManager();
+                return getParent().workManager();
             } else {
-                return GlobalContext.instance().processManager();
+                return GlobalContext.instance().workManager();
             }
         } else {
             return processManager;
         }
     }
 
-    public void setProcessManager(ProcessManager manager) {
+    public void setProcessManager(WorkManager manager) {
         manager.setContext(this);
         this.processManager = manager;
     }

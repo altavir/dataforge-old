@@ -6,7 +6,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
@@ -88,8 +88,8 @@ public class TaskModel implements Named, Annotated {
      * @param consumer
      */
     public void out(BiConsumer<Context, TaskState> consumer) {
-        TaskOutput out = (ProcessManager.Callback callback, Context context, TaskState state) -> {
-            callback.getManager().post(callback.processName() + ".output", () -> consumer.accept(context, state));
+        TaskOutput out = (WorkManager.Callback callback, Context context, TaskState state) -> {
+            callback.getManager().post(callback.workName() + ".output", () -> consumer.accept(context, state));
         };
         this.outs.add(out);
     }
@@ -271,6 +271,6 @@ public class TaskModel implements Named, Annotated {
      */
     public interface TaskOutput {
 
-        void accept(ProcessManager.Callback callback, Context context, TaskState state);
+        void accept(WorkManager.Callback callback, Context context, TaskState state);
     }
 }

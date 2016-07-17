@@ -5,7 +5,7 @@
  */
 package hep.dataforge.fx.process;
 
-import hep.dataforge.context.DFProcess;
+import hep.dataforge.work.Work;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
 import java.io.IOException;
@@ -31,7 +31,7 @@ import javafx.scene.paint.Color;
  */
 public class ProcessViewController implements Initializable {
 
-    public static Parent build(DFProcess proc) {
+    public static Parent build(Work proc) {
         try {
             FXMLLoader loader = new FXMLLoader(proc.getClass().getResource("/fxml/ProcessView.fxml"));
             Parent p = loader.load();
@@ -43,7 +43,7 @@ public class ProcessViewController implements Initializable {
         }
     }
 
-    private DFProcess process;
+    private Work process;
 
     @FXML
     private HBox processBox;
@@ -66,11 +66,11 @@ public class ProcessViewController implements Initializable {
         // TODO
     }
 
-    public DFProcess getProcess() {
+    public Work getProcess() {
         return process;
     }
 
-    public void setProcess(@NonNull DFProcess process) {
+    public void setProcess(@NonNull Work process) {
         this.process = process;
         Platform.runLater(() -> {
             processTitle.setText(process.getTitle());
@@ -101,7 +101,7 @@ public class ProcessViewController implements Initializable {
 
     }
 
-    private void updateProgress(DFProcess process) {
+    private void updateProgress(Work process) {
         FXUtils.runNow(() -> {
             double progress = process.getProgress();
             double maxProgress = process.getMaxProgress();

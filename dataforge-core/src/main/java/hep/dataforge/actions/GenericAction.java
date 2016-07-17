@@ -141,7 +141,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      * @return
      */
     protected <U> CompletableFuture<U> postProcess(String subname, Supplier<U> sup) {
-        return getContext().processManager().
+        return getContext().workManager().
                 <U>post(Name.join(getProcessName(), subname).toString(), sup)
                 .getTask();
     }

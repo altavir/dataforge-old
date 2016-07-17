@@ -16,8 +16,8 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.DFProcess;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.Work;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.io.reports.Report;
@@ -45,9 +45,9 @@ public abstract class GenericTask<T> implements Task<T> {
         //validate model
         validate(model);
         Workspace workspace = model.getWorkspace();
-        ProcessManager manager = workspace.getContext().processManager();
+        WorkManager manager = workspace.getContext().workManager();
         // root process for this task
-        final DFProcess taskProcess = manager.post(getName() + "_" + model.hashCode());
+        final Work taskProcess = manager.post(getName() + "_" + model.hashCode());
 
         CompletableFuture<TaskState> gatherTask = manager.<TaskState>post(Name.join(taskProcess.getName(), "gather").toString(),
                 callback -> {
@@ -117,7 +117,7 @@ public abstract class GenericTask<T> implements Task<T> {
         return LoggerFactory.getLogger(getName());
     }
 
-    protected DataNode gather(ProcessManager.Callback callback, Workspace workspace, TaskModel model) {
+    protected DataNode gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
         DataTree.Builder builder = DataTree.builder();
         callback.setMaxProgress(model.dependencies().size());
         model.dependencies().forEach(dep -> {
@@ -138,7 +138,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @param config
      */
-    protected abstract TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config);
+    protected abstract TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config);
 
     /**
      * Generating finish and storing it in workspace.
@@ -150,7 +150,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @return
      */
     @SuppressWarnings("unchecked")
-    protected DataNode<T> result(ProcessManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
+    protected DataNode<T> result(WorkManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
         workspace.updateStage(getName(), state.getResult());
         return state.getResult();
     }

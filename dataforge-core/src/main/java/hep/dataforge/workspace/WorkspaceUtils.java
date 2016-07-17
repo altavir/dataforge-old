@@ -5,7 +5,7 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.workspace.Task.GATHER_NODE_NAME;
@@ -16,7 +16,7 @@ import static hep.dataforge.workspace.Task.GATHER_NODE_NAME;
  */
 public class WorkspaceUtils {
 
-//    public static DataTree.Builder gather(ProcessManager.Callback callback, Workspace workspace, TaskModel model) {
+//    public static DataTree.Builder gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
 //        DataTree.Builder builder = DataTree.builder();
 //        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
 //        model.taskDeps().forEach(dep -> {

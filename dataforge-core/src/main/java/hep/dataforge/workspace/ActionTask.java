@@ -10,7 +10,7 @@ import static hep.dataforge.actions.ActionUtils.ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
 import static hep.dataforge.actions.ActionUtils.buildAction;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.ProcessManager;
+import hep.dataforge.work.WorkManager;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
@@ -41,11 +41,11 @@ public class ActionTask extends TemplateTask {
     }
 
     @Override
-    protected TaskState transform(ProcessManager.Callback callback, Context context, TaskState state, Meta config) {
+    protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
         DataNode res = state.getData();
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            res = buildAction(context, actionType).withParentProcess(callback.processName()).run(res, action);
+            res = buildAction(context, actionType).withParentProcess(callback.workName()).run(res, action);
             state.setData(actionType, res);
         }
         state.finish(res);

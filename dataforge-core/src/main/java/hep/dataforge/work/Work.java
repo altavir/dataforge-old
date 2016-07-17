@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.context;
+package hep.dataforge.work;
 
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Name;
@@ -28,21 +28,21 @@ import javafx.collections.ObservableMap;
 /**
  *
  * <p>
- * WARNING! While DFProcess uses JavaFX beans API, it is not run on JavaFX UI
- * thread. In order to bind variables to UI components, one needs to wrap all UI
- * calls into Platform.runLater.
- * </p>
+ WARNING! While Work uses JavaFX beans API, it is not run on JavaFX UI
+ thread. In order to bind variables to UI components, one needs to wrap all UI
+ calls into Platform.runLater.
+ </p>
  *
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class DFProcess<R> implements Named {
+public class Work<R> implements Named {
 
     private final String name;
 
     private final ObjectProperty<CompletableFuture<R>> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, DFProcess> children = FXCollections.<String, DFProcess>observableHashMap();
+    private final ObservableMap<String, Work> children = FXCollections.<String, Work>observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 
@@ -70,9 +70,9 @@ public class DFProcess<R> implements Named {
     /**
      * The manager to which this process is attached
      */
-    private final ProcessManager manager;
+    private final WorkManager manager;
 
-    public DFProcess(ProcessManager manager, String name) {
+    public Work(WorkManager manager, String name) {
         this.name = name;
         this.manager = manager;
         this.curProgress = new SimpleDoubleProperty(-1);
@@ -105,7 +105,7 @@ public class DFProcess<R> implements Named {
             @Override
             protected boolean computeValue() {
                 return (taskProperty.get() == null || taskProperty.get().isDone())
-                        && children.values().stream().allMatch((DFProcess p) -> p.isDone());
+                        && children.values().stream().allMatch((Work p) -> p.isDone());
             }
         };
 
@@ -118,8 +118,8 @@ public class DFProcess<R> implements Named {
      *
      * @return
      */
-    public synchronized ObservableMap<String, DFProcess> getChildren() {
-        return children;//FXCollections.<String, DFProcess>unmodifiableObservableMap(children);
+    public synchronized ObservableMap<String, Work> getChildren() {
+        return children;//FXCollections.<String, Work>unmodifiableObservableMap(children);
     }
 
     @Override
@@ -138,7 +138,7 @@ public class DFProcess<R> implements Named {
         taskProperty.set(task.whenComplete((Object t, Throwable u) -> {
             isDone.invalidate();
             curProgress.set(curMaxProgress.get());
-//            getManager().onProcessFinished(getName());
+//            getManager().onFinished(getName());
         }).whenComplete(this::handle));
         isDone.invalidate();
     }
@@ -159,7 +159,7 @@ public class DFProcess<R> implements Named {
         }
     }
 
-    public DFProcess findProcess(String processName) {
+    public Work findProcess(String processName) {
         return findProcess(Name.of(processName));
     }
 
@@ -170,7 +170,7 @@ public class DFProcess<R> implements Named {
      * @param processName
      * @return null if process not found
      */
-    public DFProcess findProcess(Name processName) {
+    public Work findProcess(Name processName) {
         if (processName.entry().isEmpty()) {
             return this;
         }
@@ -185,15 +185,15 @@ public class DFProcess<R> implements Named {
         }
     }
 
-    <T> DFProcess<T> addChild(String childName, CompletableFuture<T> future) {
+    <T> Work<T> addChild(String childName, CompletableFuture<T> future) {
         return addChild(Name.of(childName), future);
     }
 
-    <T> DFProcess<T> addChild(Name childName, CompletableFuture<T> future) {
+    <T> Work<T> addChild(Name childName, CompletableFuture<T> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
-            DFProcess childProcess;
+            Work childProcess;
             if (children.containsKey(childName.getFirst().toString())) {
                 childProcess = children.get(childName.getFirst().toString());
             } else {
@@ -210,13 +210,13 @@ public class DFProcess<R> implements Named {
      * @param childName a name of child process without path notation
      * @param future could be null
      */
-    protected <T> DFProcess<T> addDirectChild(String childName, CompletableFuture<T> future) {
+    protected <T> Work<T> addDirectChild(String childName, CompletableFuture<T> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
-        DFProcess childProcess = new DFProcess(getManager(), Name.join(getName(), childName).toString());
-        getManager().onProcessStarted(childProcess.getName());
+        Work childProcess = new Work(getManager(), Name.join(getName(), childName).toString());
+        getManager().onStarted(childProcess.getName());
         if (future != null) {
             childProcess.setTask(future);
         }
@@ -339,7 +339,7 @@ public class DFProcess<R> implements Named {
         if (this.taskProperty.get() != null) {
             this.taskProperty.get().cancel(interrupt);
         }
-        this.children.values().forEach((DFProcess p) -> p.cancel(interrupt));
+        this.children.values().forEach((Work p) -> p.cancel(interrupt));
     }
 
     /**
@@ -353,13 +353,13 @@ public class DFProcess<R> implements Named {
                 .collect(Collectors.toList())) {
             this.children.remove(childName);
         }
-        this.children.forEach((String procName, DFProcess proc) -> proc.cleanup());
+        this.children.forEach((String procName, Work proc) -> proc.cleanup());
     }
 
     /**
      * @return the manager
      */
-    public ProcessManager getManager() {
+    public WorkManager getManager() {
         return manager;
     }
 }

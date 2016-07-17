@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.work.WorkManager;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
@@ -111,12 +112,12 @@ public class GlobalContext extends Context {
     }
 
     @Override
-    public ProcessManager processManager() {
+    public WorkManager workManager() {
         if (processManager == null) {
-            this.processManager = new ProcessManager();
+            this.processManager = new WorkManager();
             this.processManager.setContext(this);
         }
-        return super.processManager();
+        return super.workManager();
     }
 
     @Override
