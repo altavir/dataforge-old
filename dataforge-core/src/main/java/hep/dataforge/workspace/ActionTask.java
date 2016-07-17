@@ -45,7 +45,7 @@ public class ActionTask extends TemplateTask {
         DataNode res = state.getData();
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            res = buildAction(context, actionType).withParentProcess(callback.processName()).run(context, res, action);
+            res = buildAction(context, actionType).withParentProcess(callback.processName()).run(res, action);
             state.setData(actionType, res);
         }
         state.finish(res);

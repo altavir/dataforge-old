@@ -21,6 +21,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatter;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -36,7 +37,7 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable implements Table {
+public class ListTable implements Table, Serializable {
 
     private final ArrayList<DataPoint> data = new ArrayList<>();
 

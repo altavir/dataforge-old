@@ -74,7 +74,7 @@ public class MINUITPlugin extends BasicPlugin {
     }
 
     @Override
-    public void detach(Context context) {
+    public void detach() {
         clearStaticLog();
     }
 

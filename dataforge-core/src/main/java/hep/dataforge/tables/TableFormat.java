@@ -26,6 +26,10 @@ import hep.dataforge.names.Names;
 import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
 import hep.dataforge.values.ValueType;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -39,9 +43,9 @@ import java.util.stream.Collectors;
  */
 @NodeDef(name = "column", multiple = true, info = "A column format")
 @NodeDef(name = "defaultColumn", info = "Default column format")
-public class TableFormat implements Annotated, NameSetContainer {
+public class TableFormat implements Annotated, NameSetContainer, Serializable {
 
-    private final Meta meta;
+    private Meta meta;
     private Names names;
     private final Map<String, ValueFormatter> formats = new HashMap<>();
 
@@ -197,6 +201,14 @@ public class TableFormat implements Annotated, NameSetContainer {
     @Override
     public Meta meta() {
         return meta;
+    }
+
+    private void writeObject(ObjectOutputStream out) throws IOException{
+        out.writeObject(this.meta());
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException{
+        this.meta = (Meta) in.readObject();
     }
 
 }

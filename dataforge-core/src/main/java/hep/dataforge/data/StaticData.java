@@ -9,7 +9,7 @@ import hep.dataforge.names.BaseMetaHolder;
 import java.util.concurrent.CompletableFuture;
 
 /**
- *
+ * Statically generated data. It still uses lazy interface to ensure following calculation steps are made on demand only.
  * @author Alexander Nozik
  */
 public class StaticData<T> extends BaseMetaHolder implements Data<T> {
@@ -30,7 +30,7 @@ public class StaticData<T> extends BaseMetaHolder implements Data<T> {
         if (object == null) {
             throw new IllegalArgumentException("Data in DataSource could not be null");
         }
-        
+
         this.object = object;
         this.type = type;
     }
@@ -41,13 +41,13 @@ public class StaticData<T> extends BaseMetaHolder implements Data<T> {
     }
 
     @Override
-    public T get(){
+    public T get() {
         return object;
     }
 
     @Override
     public CompletableFuture<T> getInFuture() {
-        return CompletableFuture.completedFuture(object);
+        return CompletableFuture.supplyAsync(() -> object);
     }
 
     @Override

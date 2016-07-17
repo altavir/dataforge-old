@@ -22,6 +22,8 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.workspace.identity.Identity;
+import hep.dataforge.workspace.identity.StringIdentity;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -84,7 +86,7 @@ public class ActionUtils {
 
     public static DataNode runAction(Context context, DataNode data, Meta actionMeta) {
         String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-        return buildAction(context, actionType).run(context, data, actionMeta);
+        return buildAction(context, actionType).run(data, actionMeta);
     }
 
     public static Action buildAction(Context context, String actionType) {
@@ -94,17 +96,29 @@ public class ActionUtils {
         } else {
             res = ActionManager.buildFrom(context).getAction(actionType);
         }
-        return res;
+        return res.withContext(context);
     }
 
-    public static class SequenceAction implements Action {
+    public static class SequenceAction extends GenericAction {
 
         @Override
-        public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
+        public DataNode run(DataNode data, Meta sequenceMeta) {
             DataNode res = data;
+//            DataCache cache = null;
+//            //Set data cache if it is defined in context
+//            if (getContext().getBoolean("enableCache", false)) {
+//                cache = CachePlugin.buildFrom(getContext()).getCache();
+//            }
+
+            Identity id = new StringIdentity(getContext().getName());
             for (Meta actionMeta : sequenceMeta.getNodes(ACTION_NODE_KEY)) {
+                id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-                res = buildAction(context, actionType).run(context, res, actionMeta);
+                res = buildAction(getContext(), actionType).run(res, actionMeta);
+//                if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
+//                    //FIXME add context identity here
+//                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
+//                }
             }
             return res;
         }
@@ -113,5 +127,6 @@ public class ActionUtils {
         public String getName() {
             return SEQUENCE_ACTION_TYPE;
         }
+
     }
 }

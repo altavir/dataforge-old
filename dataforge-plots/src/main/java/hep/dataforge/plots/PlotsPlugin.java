@@ -33,7 +33,7 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
     }
 
     @Override
-    public void detach(Context context) {
+    public void detach() {
 
     }
 

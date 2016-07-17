@@ -62,12 +62,12 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Context context, Reportable log, String name, Laminate meta, Table input) {
+    protected FitState execute(Reportable log, String name, Laminate meta, Table input) {
         FitManager fm;
-        if (context.provides("fitting")) {
-            fm = context.provide("fitting", FitPlugin.class).getFitManager();
+        if (getContext().provides("fitting")) {
+            fm = getContext().provide("fitting", FitPlugin.class).getFitManager();
         } else {
-            fm = new FitManager(context);
+            fm = new FitManager(getContext());
         }
 
         List<FitTask> tasks = buildTaskList(meta);
@@ -77,8 +77,8 @@ public class FitAction extends OneToOneAction<Table, FitState> {
             throw new ContentException("No fit tasks defined");
         }
 
-        FitState res = buildInitialState(context, meta, input, fm);
-        PrintWriter writer = new PrintWriter(buildActionOutput(context, name));
+        FitState res = buildInitialState(meta, input, fm);
+        PrintWriter writer = new PrintWriter(buildActionOutput(name));
 
         for (FitTask task : tasks) {
             res = fm.runTask(res, task, writer, log);
@@ -87,15 +87,15 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         return res;
     }
 
-    private FitState buildInitialState(Context context, Laminate meta, Table input, FitManager fm) {
+    private FitState buildInitialState(Laminate meta, Table input, FitManager fm) {
         Model model;
 
         ModelManager mm = fm.getModelManager();
 
         if (meta.hasNode(MODEL_PATH)) {
-            model = mm.buildModel(context, meta.getNode(MODEL_PATH));
+            model = mm.buildModel(getContext(), meta.getNode(MODEL_PATH));
         } else {
-            model = mm.buildModel(context, meta.getString(MODEL_PATH));
+            model = mm.buildModel(getContext(), meta.getString(MODEL_PATH));
         }
 
         ParamSet params;

@@ -7,7 +7,6 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -24,28 +23,16 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  */
 @PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
-public class ActionManager extends BasicPlugin implements Encapsulated {
+public class ActionManager extends BasicPlugin {
 
     public static ActionManager buildFrom(Context context) {
         return (ActionManager) context.pluginManager().getPlugin("actions");
     }
 
-    private Context context;
-
-    @Override
-    public void attach(Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public void detach(Context context) {
-        this.context = null;
-    }
-
     private final Map<String, Action> actionMap = new HashMap<>();
 
     protected ActionManager getParent() {
-        if (getContext() == null || getContext().getParent() == null || !context.getParent().provides("actions")) {
+        if (getContext() == null || getContext().getParent() == null || !getContext().getParent().provides("actions")) {
             return null;
         } else {
             return getContext().getParent().provide("actions", ActionManager.class);
@@ -124,12 +111,5 @@ public class ActionManager extends BasicPlugin implements Encapsulated {
         return list;
     }
 
-    /**
-     * @return the context
-     */
-    @Override
-    public Context getContext() {
-        return context;
-    }
  
 }

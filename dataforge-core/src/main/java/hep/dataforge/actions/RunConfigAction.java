@@ -38,15 +38,15 @@ public class RunConfigAction extends GenericAction {
      * @return
      */
     @Override
-    public DataNode run(Context context, DataNode input, Meta actionMeta) {
+    public DataNode run(DataNode input, Meta actionMeta) {
         Meta cfg;
 
-        Meta meta = inputMeta(context, input.meta(), actionMeta);
+        Meta meta = inputMeta(input.meta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = new Context(context, contextName);
+        Context ac = new Context(getContext(), contextName);
         if (meta.hasValue("configFile")) {
-            File cfgFile = context.io().getFile(meta.getString("configFile"));
+            File cfgFile = getContext().io().getFile(meta.getString("configFile"));
             try {
                 cfg = MetaFileReader.instance().read(ac, cfgFile, null);
             } catch (IOException | ParseException ex) {

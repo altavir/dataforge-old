@@ -29,7 +29,7 @@ import hep.dataforge.storage.filestorage.FileStorage;
  * @author darksnake
  */
 @PluginDef(name = "storage", group = "hep.dataforge", description = "Basic DataForge storage plugin")
-public class StorageManager extends BasicPlugin implements Encapsulated {
+public class StorageManager extends BasicPlugin {
 
     /**
      * Get storage manager from given context. Attach new storage manager to
@@ -45,19 +45,6 @@ public class StorageManager extends BasicPlugin implements Encapsulated {
         return context.provide("storage", StorageManager.class);
     }
 
-    private Context context;
-
-//    private final ReferenceRegistry<Storage> storageCache = new ReferenceRegistry<>();
-    @Override
-    public void attach(Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public void detach(Context context) {
-        this.context = null;
-    }
-
     /**
      * Return blank file storage in current working directory
      *
@@ -66,7 +53,7 @@ public class StorageManager extends BasicPlugin implements Encapsulated {
      */
     public Storage getDefaultStorage() {
         try {
-            return FileStorage.in(context.io().getRootDirectory(), null);
+            return FileStorage.in(getContext().io().getRootDirectory(), null);
         } catch (StorageException ex) {
             throw new RuntimeException("Can't initialize default storage", ex);
         }
@@ -76,11 +63,6 @@ public class StorageManager extends BasicPlugin implements Encapsulated {
         Storage res = StorageFactory.buildStorage(getContext(), config);
 //        storageCache.add(res);
         return res;
-    }
-
-    @Override
-    public Context getContext() {
-        return context;
     }
 
 }

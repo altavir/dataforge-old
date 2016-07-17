@@ -25,6 +25,8 @@ import hep.dataforge.meta.SimpleConfigurable;
  * @author Alexander Nozik
  */
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
+    
+    private Context context;
 
     public BasicPlugin() {
         super.configure(getDefinition());
@@ -86,5 +88,22 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     public void startGlobal() {
         GlobalContext.instance().loadPlugin(this);
     }
+
+    @Override
+    public void attach(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public void detach() {
+        this.context = null;
+    }
+
+    @Override
+    public final Context getContext() {
+        return context;
+    }
+    
+    
 
 }

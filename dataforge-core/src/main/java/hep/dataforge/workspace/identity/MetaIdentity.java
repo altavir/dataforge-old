@@ -48,10 +48,7 @@ public class MetaIdentity implements Identity {
             return false;
         }
         final MetaIdentity other = (MetaIdentity) obj;
-        if (!Objects.equals(this.meta, other.meta)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.meta, other.meta);
     }
 
     @Override

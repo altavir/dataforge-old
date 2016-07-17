@@ -84,12 +84,12 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     }
 
     @Override
-    protected Table execute(Context context, Reportable log, String name, Laminate meta, Table input) {
+    protected Table execute(Reportable log, String name, Laminate meta, Table input) {
         //initializing plot plugin if necessary
-        if (!context.provides("plots")) {
-            context.loadPlugin(new PlotsPlugin());
+        if (!getContext().provides("plots")) {
+            getContext().loadPlugin(new PlotsPlugin());
         }
-        PlotHolder holder = (PlotsPlugin) context.pluginManager().getPlugin("plots");
+        PlotHolder holder = (PlotsPlugin) getContext().pluginManager().getPlugin("plots");
 
         PlotFrame frame;
 
@@ -105,15 +105,15 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         frame.add(PlottableData.plot(name, meta, adapter, input));
 
         if (meta.hasNode("snapshot")) {
-            snapshot(context, name, frame, meta.getNode("snapshot"));
+            snapshot(name, frame, meta.getNode("snapshot"));
         } else if (meta.getBoolean("snapshot", false)) {
-            snapshot(context, name, frame, MetaBuilder.buildEmpty("snapshot"));
+            snapshot(name, frame, MetaBuilder.buildEmpty("snapshot"));
         }
 
         if (meta.hasNode("serialize")) {
-            serialize(context, name, frame, meta.getNode("serialize"));
+            serialize(name, frame, meta.getNode("serialize"));
         } else if (meta.getBoolean("serialize", false)) {
-            serialize(context, name, frame, MetaBuilder.buildEmpty("serialize"));
+            serialize(name, frame, MetaBuilder.buildEmpty("serialize"));
         }
 
         return input;
@@ -123,25 +123,25 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
-    protected void afterAction(Context context, String name, Table res, Laminate meta) {
+    protected void afterAction(String name, Table res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
         snapshotTasks.values().stream().forEach((r) -> r.run());
         snapshotTasks.clear();
         serializeTasks.values().stream().forEach((r) -> r.run());
         serializeTasks.clear();
-        super.afterAction(context, name, res, meta);
+        super.afterAction(name, res, meta);
     }
 
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
     @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(Context context, String plotName, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void snapshot(String plotName, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", plotName) + ".png";
             snapshotTasks.put(fileName, () -> {
                 logger().info("Saving plot snapshot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(context, fileName);
+                OutputStream stream = buildActionOutput(fileName);
                 jfcFrame.toPNG(stream, snapshotCfg);
             });
         } else {
@@ -150,13 +150,13 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     }
 
     @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(Context context, String plotName, PlotFrame frame, Meta snapshotCfg) {
+    private synchronized void serialize(String plotName, PlotFrame frame, Meta snapshotCfg) {
         if (frame instanceof JFreeChartFrame) {
             JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
             String fileName = snapshotCfg.getString("name", plotName) + ".jfc";
             serializeTasks.put(fileName, () -> {
                 logger().info("Saving serialized plot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(context, fileName);
+                OutputStream stream = buildActionOutput(fileName);
                 try {
                     ObjectOutputStream ostr = new ObjectOutputStream(stream);
                     ostr.writeObject(jfcFrame.getChart());

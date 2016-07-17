@@ -18,7 +18,6 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 /**
  * A piece of data which is basically calculated asynchronously
@@ -29,12 +28,8 @@ import java.util.concurrent.ExecutionException;
  */
 public interface Data<T> extends Annotated {
 
-    default T get(){
-        try {
-            return getInFuture().get();
-        } catch (InterruptedException | ExecutionException ex) {
-            throw new RuntimeException("Data evaluation failed", ex);
-        }
+    default T get() {
+        return getInFuture().join();
     }
 
     /**
@@ -50,7 +45,7 @@ public interface Data<T> extends Annotated {
      * @return
      */
     Class<? super T> dataType();
-    
+
     default boolean isValid() {
         return !getInFuture().isCancelled();
     }

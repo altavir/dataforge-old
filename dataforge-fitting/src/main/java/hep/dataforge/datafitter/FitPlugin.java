@@ -44,10 +44,10 @@ public class FitPlugin extends BasicPlugin {
     }
 
     @Override
-    public void detach(Context context) {
+    public void detach() {
         fitManager = null;
-        ActionManager.buildFrom(context).unRegisterAction(FitAction.FIT_ACTION_NAME);
-
+        ActionManager.buildFrom(getContext()).unRegisterAction(FitAction.FIT_ACTION_NAME);
+        super.detach();
     }
 
     /**

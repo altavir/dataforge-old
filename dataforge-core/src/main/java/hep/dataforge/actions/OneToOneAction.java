@@ -15,8 +15,6 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
@@ -50,25 +48,25 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @param actionMeta
      * @return
      */
-    protected ActionResult<R> runOne(Context context, String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
+    protected ActionResult<R> runOne(String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
         if (!this.getInputType().isAssignableFrom(data.dataType())) {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
 
-        Report report = buildReport(context, name, data);
-        Laminate meta = inputMeta(context, data, groupMeta, actionMeta);
+        Report report = buildReport(name, data);
+        Laminate meta = inputMeta(data, groupMeta, actionMeta);
         //FIXME add error evaluation
+
         CompletableFuture<R> future = data.getInFuture().
                 thenCompose((T datum) -> {
-                    return postProcess(context, name, () -> transform(context, report, name, meta, datum));
+                    return postProcess(name, () -> transform(report, name, meta, datum));
                 });
 
         return new ActionResult(getOutputType(), report, future, outputMeta(name, groupMeta, data));
     }
-    
-    
-    protected Report buildReport(Context context, String name, Data<? extends T> data){
+
+    protected Report buildReport(String name, Data<? extends T> data) {
         Reportable parent;
         if (data != null && data instanceof ActionResult) {
             Report actionLog = ((ActionResult) data).log();
@@ -76,16 +74,16 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                 //Getting parent from previous report
                 parent = actionLog.getParent();
             } else {
-                parent = new Report(name, context);
+                parent = new Report(name, getContext());
             }
         } else {
-            parent = new Report(name, context);
+            parent = new Report(name, getContext());
         }
         return new Report(getName(), parent);
     }
-    
+
     @Override
-    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+    public DataNode<R> run(DataNode<T> set, Meta actionMeta) {
         checkInput(set);
         if (set.isEmpty()) {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
@@ -98,7 +96,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
         return wrap(set.getName(), set.meta(),
                 stream.collect(Collectors.toMap(entry -> entry.getKey(),
-                        entry -> runOne(context, entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
+                        entry -> runOne(entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
     }
 
     /**
@@ -110,10 +108,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @param input input data
      * @return
      */
-    private R transform(Context context, Reportable log, String name, Laminate inputMeta, T input) {
-        beforeAction(context, name, input, inputMeta, log);
-        R res = execute(context, log, name, inputMeta, input);
-        afterAction(context, name, res, inputMeta);
+    private R transform(Reportable log, String name, Laminate inputMeta, T input) {
+        beforeAction(name, input, inputMeta, log);
+        R res = execute(log, name, inputMeta, input);
+        afterAction(name, res, inputMeta);
         return res;
     }
 
@@ -125,11 +123,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public R simpleRun(T input, Meta... metaLayers) {
-        Context context = GlobalContext.instance();
-        return transform(context, new Report("simpleRun", context), "simpleRun", inputMeta(context, metaLayers), input);
+        return transform(new Report("simpleRun", getContext()), "simpleRun", inputMeta(metaLayers), input);
     }
 
-    protected abstract R execute(Context context, Reportable log, String name, Laminate inputMeta, T input);
+    protected abstract R execute(Reportable log, String name, Laminate inputMeta, T input);
 
     /**
      * Build output meta for given data. This meta is calculated on action call
@@ -145,12 +142,12 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         return data.meta();
     }
 
-    protected void afterAction(Context context, String name, R res, Laminate meta) {
+    protected void afterAction(String name, R res, Laminate meta) {
         logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    protected void beforeAction(Context context, String name, T datum, Laminate meta, Reportable report) {
-        if (context.getBoolean("actions.reportStart", true)) {
+    protected void beforeAction(String name, T datum, Laminate meta, Reportable report) {
+        if (getContext().getBoolean("actions.reportStart", true)) {
             report.report("Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
         }
         logger().info("Starting action '{}[{}]'", getName(), name);

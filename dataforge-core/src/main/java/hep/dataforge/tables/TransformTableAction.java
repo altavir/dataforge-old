@@ -42,7 +42,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
      * @return
      */
     @Override
-    protected Table execute(Context context, Reportable log, String name, Laminate meta, Table input) {
+    protected Table execute(Reportable log, String name, Laminate meta, Table input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
         Table res;

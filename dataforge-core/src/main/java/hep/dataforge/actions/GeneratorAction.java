@@ -24,18 +24,18 @@ import javafx.util.Pair;
 public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
-    public DataNode<R> run(Context context, DataNode<Void> data, Meta actionMeta) {
-        Report log = new Report(getName(), context);
-        Map<String, Pair<Meta, Supplier<R>>> generated = generate(context, actionMeta, log);
+    public DataNode<R> run(DataNode<Void> data, Meta actionMeta) {
+        Report log = new Report(getName(), getContext());
+        Map<String, Pair<Meta, Supplier<R>>> generated = generate(actionMeta, log);
         Map<String, Data<R>> resultMap = new HashMap<>();
         generated.forEach((String s, Pair<Meta, Supplier<R>> pair) -> {
             resultMap.put(s, new ActionResult<>(getOutputType(), log,
-                    postProcess(context, s, pair.getValue()), pair.getKey()));
+                    postProcess(s, pair.getValue()), pair.getKey()));
         });
         return wrap(resultNodeName(), actionMeta, resultMap);
     }
 
-    protected abstract Map<String, Pair<Meta, Supplier<R>>> generate(Context context, Meta meta, Reportable log);
+    protected abstract Map<String, Pair<Meta, Supplier<R>>> generate(Meta meta, Reportable log);
 
     protected String resultNodeName() {
         return "";

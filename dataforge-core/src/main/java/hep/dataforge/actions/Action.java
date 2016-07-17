@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
@@ -31,9 +32,9 @@ import org.slf4j.Logger;
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
  */
-public interface Action<T, R> extends Named {
+public interface Action<T, R> extends Named, Encapsulated {
 
-    DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta);
+    DataNode<R> run(DataNode<T> data, Meta actionMeta);
 
    
     default Action<T,R> withLogger(Logger logger) {
@@ -41,6 +42,10 @@ public interface Action<T, R> extends Named {
     }
 
     default Action<T,R> withParentProcess(String parentProcessName) {
+        return this;
+    }
+    
+    default Action<T,R> withContext(Context context) {
         return this;
     }
 }

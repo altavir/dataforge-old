@@ -7,7 +7,6 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.NamedMetaFactory;
@@ -18,21 +17,9 @@ import hep.dataforge.utils.ReferenceRegistry;
  * @author Alexander Nozik
  */
 @PluginDef(name = "device", group = "hep.dataforge", description = "Basic DataForge storage plugin")
-public class DeviceManager extends BasicPlugin implements Encapsulated {
+public class DeviceManager extends BasicPlugin{
 
     private ReferenceRegistry<Device> devices;
-    //TODO move it to Basic plugin and check fro plugin reattachment
-    private Context context;
-
-    @Override
-    public void attach(Context context) {
-        this.context = context;
-    }
-
-    @Override
-    public void detach(Context context) {
-        this.context = null;
-    }
 
     /**
      * Create and register new device instance using basic (name, context, meta)
@@ -81,10 +68,4 @@ public class DeviceManager extends BasicPlugin implements Encapsulated {
 //    public <T extends Connection> T createConnection(NamedMetaFactory<T> factory, String name, Meta meta) {
 //        return factory.build(name, getContext(), meta);
 //    }
-
-    @Override
-    public Context getContext() {
-        return this.context;
-    }
-
 }

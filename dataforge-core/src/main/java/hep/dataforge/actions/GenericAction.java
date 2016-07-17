@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
@@ -44,7 +45,9 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     private Logger logger;
     private String parentProcessName;
+    private Context context = GlobalContext.instance();
 
+    //PENDING move Context to Action object variable
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("allowParallel", true);
     }
@@ -84,7 +87,6 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 //            return new Report(logName, context);
 //        }
 //    }
-
     /**
      * Return the root process name for this action
      *
@@ -118,6 +120,17 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return this;
     }
 
+    @Override
+    public Action<T, R> withContext(Context context) {
+        this.context = context;
+        return this;
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
+    }
+
     /**
      * Post a process and return future associated with that process
      *
@@ -127,8 +140,8 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      * @param sup
      * @return
      */
-    protected <U> CompletableFuture<U> postProcess(Context context, String subname, Supplier<U> sup) {
-        return context.processManager().
+    protected <U> CompletableFuture<U> postProcess(String subname, Supplier<U> sup) {
+        return getContext().processManager().
                 <U>post(Name.join(getProcessName(), subname).toString(), sup)
                 .getTask();
     }
@@ -213,25 +226,25 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      * @param actionMeta
      * @return
      */
-    protected Laminate inputMeta(Context context, Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
+    protected Laminate inputMeta(Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
         return new Laminate(input.meta(), nodeMeta, actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Context context, Meta... meta) {
+    protected Laminate inputMeta(Meta... meta) {
         return new Laminate(meta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
+    protected Laminate inputMeta(Meta nodeMeta, Meta actionMeta) {
         return new Laminate(nodeMeta, actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Context context, Meta actionMeta) {
+    protected Laminate inputMeta(Meta actionMeta) {
         return new Laminate(actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
@@ -243,7 +256,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(Context context, String name) {
+    public OutputStream buildActionOutput(String name) {
         return context.io().out(getName(), name);
     }
 }

@@ -16,6 +16,7 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NamingException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -25,7 +26,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-class NameList implements Names {
+class NameList implements Names, Serializable {
 
     protected ArrayList<String> nameList = new ArrayList<>();
 

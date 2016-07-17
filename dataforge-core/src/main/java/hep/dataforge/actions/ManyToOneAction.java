@@ -15,7 +15,6 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
@@ -41,40 +40,40 @@ import javafx.util.Pair;
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     @Override
-    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+    public DataNode<R> run(DataNode<T> set, Meta actionMeta) {
         checkInput(set);
-        List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
+        List<DataNode<T>> groups = buildGroups(set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
-        groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));
+        groups.forEach((group) -> results.put(group.getName(), runGroup(group, actionMeta)));
         return wrap(set.getName(), set.meta(), results);
     }
 
-    public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
-        Report log = new Report(getName(), new Report(data.getName(), context));
-        Laminate meta = inputMeta(context, data.meta(), actionMeta);
+    public ActionResult<R> runGroup(DataNode<T> data, Meta actionMeta) {
+        Report log = new Report(getName(), new Report(data.getName(), getContext()));
+        Laminate meta = inputMeta(data.meta(), actionMeta);
         Meta outputMeta = outputMeta(data).build();
 
         //Creating dependency on data
         CompletableFuture<R> future = data.computation()
-                .thenCompose((Void t) -> postProcess(context,data.getName(),()-> {
-                    beforeGroup(context, log, data);
+                .thenCompose((Void t) -> postProcess(data.getName(), () -> {
+                    beforeGroup(log, data);
                     // In this moment, all the data is already calculated
                     Map<String, T> collection = data.dataStream()
                             .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
                     //.<T>map(item -> item.getValue().get()).collect(Collectors.toList());
-                    R res = execute(context, log, data.getName(), collection, meta);
-                    afterGroup(context, log, data.getName(), outputMeta, res);
+                    R res = execute(log, data.getName(), collection, meta);
+                    afterGroup(log, data.getName(), outputMeta, res);
                     return res;
                 }));
         return new ActionResult<>(getOutputType(), log, future, outputMeta);
 
     }
 
-    protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
-        return GroupBuilder.byAnnotation(inputMeta(context, input.meta(), actionMeta)).group(input);
+    protected List<DataNode<T>> buildGroups(DataNode<T> input, Meta actionMeta) {
+        return GroupBuilder.byAnnotation(inputMeta(input.meta(), actionMeta)).group(input);
     }
 
-    protected abstract R execute(Context context, Reportable log, String nodeName, Map<String, T> input, Meta meta);
+    protected abstract R execute(Reportable log, String nodeName, Map<String, T> input, Meta meta);
 
     protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder("node")
@@ -101,7 +100,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param input
      */
-    protected void beforeGroup(Context context, Reportable log, DataNode<? extends T> input) {
+    protected void beforeGroup(Reportable log, DataNode<? extends T> input) {
 
     }
 
@@ -111,7 +110,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param log
      * @param output
      */
-    protected void afterGroup(Context context, Reportable log, String groupName, Meta outputMeta, R output) {
+    protected void afterGroup(Reportable log, String groupName, Meta outputMeta, R output) {
 
     }
 

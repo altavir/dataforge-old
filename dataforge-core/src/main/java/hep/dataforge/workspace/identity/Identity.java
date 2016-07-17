@@ -15,6 +15,9 @@
  */
 package hep.dataforge.workspace.identity;
 
+import hep.dataforge.meta.Meta;
+import java.io.Serializable;
+
 /**
  * A marker interface that designates some object with could call {@code equals}
  * on another Identity and check if both correspond to the same state. Identity
@@ -22,7 +25,7 @@ package hep.dataforge.workspace.identity;
  *
  * @author Alexander Nozik
  */
-public interface Identity {
+public interface Identity extends Serializable, Comparable<Identity> {
 
     /**
      * The string representation of this identity. Usually a hash code
@@ -31,5 +34,29 @@ public interface Identity {
      */
     @Override
     String toString();
+    
+    /**
+     * Return a joined identity.
+     * @param ids
+     * @return 
+     */
+    default Identity and(Identity id){
+        return new CombinedIdentity(this, id);
+    }
+    
+    default Identity and(String str){
+        return and(new StringIdentity(str));
+    }
+    
+    default Identity and(Meta meta){
+        return and(new MetaIdentity(meta));
+    }    
+
+    @Override
+    public default int compareTo(Identity o) {
+        return Integer.compare(this.hashCode(), o.hashCode());
+    }
+    
+    
 
 }

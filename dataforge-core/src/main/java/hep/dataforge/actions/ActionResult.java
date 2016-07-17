@@ -19,8 +19,6 @@ import hep.dataforge.data.Data;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Supplier;
 
 /**
  * The asynchronous result of the action

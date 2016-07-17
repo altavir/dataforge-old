@@ -6,7 +6,6 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.actions.GeneratorAction;
-import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
@@ -25,8 +24,8 @@ import javafx.util.Pair;
 public class InitStorageAction extends GeneratorAction<Storage> {
 
     @Override
-    protected Map<String, Pair<Meta, Supplier<Storage>>> generate(Context context, Meta meta, Reportable log) {
-        return Collections.singletonMap("", new Pair<>(meta, () -> StorageManager.buildFrom(context).buildStorage(meta)));
+    protected Map<String, Pair<Meta, Supplier<Storage>>> generate(Meta meta, Reportable log) {
+        return Collections.singletonMap("", new Pair<>(meta, () -> StorageManager.buildFrom(getContext()).buildStorage(meta)));
     }
 
 }

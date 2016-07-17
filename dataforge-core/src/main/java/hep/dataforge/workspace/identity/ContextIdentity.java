@@ -10,5 +10,9 @@ import hep.dataforge.context.Context;
 
 public class ContextIdentity implements Identity {
     Context context;
+
+    public ContextIdentity(Context context) {
+        this.context = context;
+    }
     
 }

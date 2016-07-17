@@ -187,9 +187,9 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
         }
 
         @Override
-        public Builder<T> putData(String key, Data<? extends T> data) {
+        public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
             if (type.isAssignableFrom(data.dataType())) {
-                if (!dataMap.containsKey(key)) {
+                if (replace || !dataMap.containsKey(key)) {
                     dataMap.put(key, data);
                 } else {
                     throw new RuntimeException("The data with key " + key + " already exists");

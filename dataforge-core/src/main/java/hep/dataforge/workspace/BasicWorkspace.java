@@ -88,7 +88,7 @@ public class BasicWorkspace extends AbstractWorkspace {
                 if (w.stages.containsKey(DATA_STAGE_NAME)) {
                     getContext().getLogger().warn("Overriding non-empty data node during workspace data fill");
                 }
-                w.stages.put(DATA_STAGE_NAME, new DataTree.Builder<>(DataTree.cloneNode(datanode)));
+                w.stages.put(DATA_STAGE_NAME, new DataTree.Builder<>(datanode));
             } else {
                 getDataStage().putNode(name, datanode);
             }

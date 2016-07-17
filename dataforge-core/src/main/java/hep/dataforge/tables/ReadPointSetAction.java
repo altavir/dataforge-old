@@ -43,7 +43,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
      * @return
      */
     @Override
-    protected Table execute(Context context, Reportable log, String name, Laminate meta, InputStream source) {
+    protected Table execute(Reportable log, String name, Laminate meta, InputStream source) {
         ListTable.Builder fileData;
 
         String encoding = meta.getString("encoding", "UTF-8");

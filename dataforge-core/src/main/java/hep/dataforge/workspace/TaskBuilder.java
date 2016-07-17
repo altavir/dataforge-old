@@ -239,7 +239,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
             for (Pair<Function<Context, Action>, MetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
                 Meta actionMeta = pair.getValue().build(context, config);
-                res = action.withParentProcess(callback.processName()).run(context, res, actionMeta);
+                res = action.withParentProcess(callback.processName()).run(res, actionMeta);
                 if (actionMeta.hasValue("stageName")) {
                     state.setData(actionMeta.getString("stageName"), res);
                 }

@@ -13,6 +13,8 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.function.Function;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 
@@ -127,18 +129,18 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param name
      * @param data
      */
-    protected void putData(Name name, Data<? extends T> data) {
+    protected void putData(Name name, Data<? extends T> data, boolean replace) {
         if (name.length() == 1) {
             String key = name.toString();
-            checkedPutData(key, data);
+            checkedPutData(key, data, replace);
         } else {
             String head = name.getFirst().toString();
             if (this.nodes.containsKey(head)) {
-                this.nodes.get(head).checkedPutData(name.cutFirst().toString(), data);
+                this.nodes.get(head).checkedPutData(name.cutFirst().toString(), data, replace);
             } else {
                 DataTree<T> newNode = new DataTree<>(type);
                 newNode.name = head;
-                newNode.putData(name.cutFirst(), data);
+                newNode.putData(name.cutFirst(), data, replace);
                 this.nodes.put(head, newNode);
             }
         }
@@ -182,9 +184,9 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param data
      */
     @SuppressWarnings("unchecked")
-    protected void checkedPutData(String key, Data data) {
-        if (type().isInstance(data.dataType())) {
-            if (!this.data.containsKey(key)) {
+    protected void checkedPutData(String key, Data data, boolean allowReplace) {
+        if (type().isAssignableFrom(data.dataType())) {
+            if (!this.data.containsKey(key) || allowReplace) {
                 this.data.put(key, data);
             } else {
                 throw new RuntimeException("The data with key " + key + " already exists");
@@ -325,12 +327,12 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         private final DataTree<T> tree;
 
         /**
-         * Create copy-builder for a dataTree. Does not change initial tree
+         * Create copy-builder for a DataNode. Does not change initial node
          *
-         * @param oldTree
+         * @param node
          */
-        public Builder(DataTree<T> oldTree) {
-            this.tree = new DataTree<>(oldTree);
+        public Builder(DataNode<T> node) {
+            this.tree = cloneNode(node);
         }
 
         private Builder(Class<T> type) {
@@ -359,8 +361,8 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         }
 
         @Override
-        public Builder<T> putData(String key, Data<? extends T> data) {
-            this.tree.putData(Name.of(key), data);
+        public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
+            this.tree.putData(Name.of(key), data, replace);
             return this;
         }
 

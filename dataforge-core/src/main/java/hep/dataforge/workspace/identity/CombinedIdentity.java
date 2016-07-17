@@ -15,24 +15,25 @@
  */
 package hep.dataforge.workspace.identity;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.Objects;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * An Identity object allowing to combine many identities into one
  * @author Alexander Nozik
  */
 public class CombinedIdentity implements Identity {
-    private List<Identity> ids;
+    private Set<Identity> ids;
 
-    public CombinedIdentity(List<Identity> ids) {
-        this.ids = new ArrayList<>(ids);
+    public CombinedIdentity(Collection<Identity> ids) {
+        this.ids = new TreeSet<>(ids);
     }
 
     public CombinedIdentity(Identity... ids) {
-        this.ids = Arrays.asList(ids);
+        this(Arrays.asList(ids));
     }
 
     @Override
@@ -42,17 +43,14 @@ public class CombinedIdentity implements Identity {
         }
         
         if(this.ids.size() == 1){
-            return Objects.equals(obj, ids.get(0));
+            return Objects.equals(obj, ids.stream().findFirst().get());
         }
         
         if (getClass() != obj.getClass()) {
             return false;
         }
         final CombinedIdentity other = (CombinedIdentity) obj;
-        if (!Objects.equals(this.ids, other.ids)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.ids, other.ids);
     }
 
     @Override

@@ -25,7 +25,7 @@ import hep.dataforge.names.Named;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Annotated, Named {
+public interface Plugin extends Annotated, Named, Encapsulated {
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -51,7 +51,7 @@ public interface Plugin extends Annotated, Named {
      *
      * @param context
      */
-    void detach(Context context);
+    void detach();
 
     /**
      * Get tag for this plugin

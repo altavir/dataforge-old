@@ -41,7 +41,7 @@ import org.slf4j.LoggerFactory;
  */
 public class ParamSet implements NamedValueSet {
 
-    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.datafitter.Param.fromAnnotation")
+    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.datafitter.Param.fromMeta")
     @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
     public static ParamSet fromAnnotation(Meta cfg) {
         if (cfg.hasNode("params")) {
