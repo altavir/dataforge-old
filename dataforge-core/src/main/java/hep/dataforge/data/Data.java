@@ -28,8 +28,8 @@ import java.util.concurrent.CompletableFuture;
  */
 public interface Data<T> extends Annotated {
 
-    default T get() {
-        return getInFuture().join();
+    default T getNow() {
+        return get().join();
     }
 
     /**
@@ -37,7 +37,7 @@ public interface Data<T> extends Annotated {
      *
      * @return
      */
-    CompletableFuture<T> getInFuture();
+    CompletableFuture<T> get();
 
     /**
      * Data type. Should be defined before data is calculated.
@@ -47,7 +47,7 @@ public interface Data<T> extends Annotated {
     Class<? super T> dataType();
 
     default boolean isValid() {
-        return !getInFuture().isCancelled();
+        return !get().isCancelled() && !get().isCompletedExceptionally();
     }
 
     @Override

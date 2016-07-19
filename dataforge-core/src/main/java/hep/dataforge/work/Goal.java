@@ -5,46 +5,36 @@
  */
 package hep.dataforge.work;
 
-import java.util.Map;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 /**
+ * A simple link in computation chain
  *
  * @author Alexander Nozik
  */
-public interface Goal {
+public interface Goal<T> {
 
     /**
-     * Bind the result of dependency goal with name {@code source} to this goal input slot
-     * {@code tatget}
+     * Bind the output slot of given goal to input slot of this goal
      *
      * @param goal
-     * @param source
-     * @param target
+     * @param outputSlot
+     * @param inputSlot
      */
-    void bind(Goal dependency, String source, String target);
-
-//    /**
-//     * Notify this goal that its dependency with name {@code target} is computed
-//     * with result
-//     *
-//     * @param target
-//     * @param result
-//     */
-//    void notifyResult(String target, Object result);
-//
-//    /**
-//     * Notify this goal that its dependency with name {@code target} failed with
-//     * exception
-//     *
-//     * @param target
-//     * @param exception
-//     */
-//    void notifyError(String target, Exception exception);
+    void bindInput(Goal dependency, String inputSlot);
 
     /**
-     * Compute this goal using its dependencies and notify all bound goals. If
-     * computation is started return it.
+     * Start this goal computation. Triggers start of dependent goals
      */
-    Future<Map<String, Object>> run();
+    void start();
+
+
+    /**
+     * Get goal result for given slot. Does not trigger goal computation.
+     * Canceling this future aborts all subsequent goals
+     *
+     * @return
+     */
+    CompletableFuture<T> result();
+
 }

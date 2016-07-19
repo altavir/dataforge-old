@@ -127,7 +127,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      */
     default CompletableFuture<Void> computation() {
         CompletableFuture<?>[] futures = this.dataStream()
-                .<CompletableFuture>map(item -> item.getValue().getInFuture())
+                .<CompletableFuture>map(item -> item.getValue().get())
                 .toArray((int value) -> new CompletableFuture[value]);
         return CompletableFuture.allOf(futures);
     }

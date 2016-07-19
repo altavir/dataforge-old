@@ -68,7 +68,7 @@ public class ActionResult<R> implements Data<R> {
     }
 
     @Override
-    public CompletableFuture<R> getInFuture() {
+    public CompletableFuture<R> get() {
         return future;
     }
 

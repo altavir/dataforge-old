@@ -59,8 +59,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
                     beforeGroup(log, data);
                     // In this moment, all the data is already calculated
                     Map<String, T> collection = data.dataStream()
-                            .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
-                    //.<T>map(item -> item.getValue().get()).collect(Collectors.toList());
+                            .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().getNow()));
+                    //.<T>map(item -> item.getValue().getNow()).collect(Collectors.toList());
                     R res = execute(log, data.getName(), collection, meta);
                     afterGroup(log, data.getName(), outputMeta, res);
                     return res;

@@ -30,7 +30,7 @@ public class LazyData<T> implements Data<T> {
     }
 
     @Override
-    public CompletableFuture<T> getInFuture() {
+    public CompletableFuture<T> get() {
         return future;
     }
 

@@ -59,7 +59,7 @@ public class ActionController {
     }
 
     public <R> Data<R> hold(Data<R> data) {
-        return new LazyData<>(data.dataType(), hold(data.getInFuture()));
+        return new LazyData<>(data.dataType(), hold(data.get()));
     }
 
     public <R> DataNode<R> hold(DataNode<R> node) {

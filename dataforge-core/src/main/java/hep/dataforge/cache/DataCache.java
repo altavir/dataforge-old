@@ -77,32 +77,32 @@ public abstract class DataCache {
         }
 
         @Override
-        public CompletableFuture<T> getInFuture() {
+        public CompletableFuture<T> get() {
             if (contains(id)) {
                 try {
                     getLogger().debug("Restoring cached data with id '{}'", id.toString());
                     return CompletableFuture.completedFuture(DataCache.this.<T>restore(id));
                 } catch (DataCacheException ex) {
                     getLogger().error("Failed to restore data with id '{}' from cache", id.toString());
-                    return theData.getInFuture();
+                    return theData.get();
                 }
             } else {
-                return theData.getInFuture().thenApplyAsync(result -> store(id, result));
+                return theData.get().thenApplyAsync(result -> store(id, result));
             }
         }
 
         @Override
-        public T get() {
+        public T getNow() {
             if (contains(id)) {
                 try {
                     getLogger().debug("Restoring cached data with id '{}'", id.toString());
                     return DataCache.this.<T>restore(id);
                 } catch (DataCacheException ex) {
                     getLogger().error("Failed to restore data with id '{}' from cache", id.toString());
-                    return theData.get();
+                    return theData.getNow();
                 }
             } else {
-                return getInFuture().join();
+                return get().join();
             }
         }
 

@@ -58,7 +58,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         Laminate meta = inputMeta(data, groupMeta, actionMeta);
         //FIXME add error evaluation
 
-        CompletableFuture<R> future = data.getInFuture().
+        CompletableFuture<R> future = data.get().
                 thenCompose((T datum) -> {
                     return postProcess(name, () -> transform(report, name, meta, datum));
                 });

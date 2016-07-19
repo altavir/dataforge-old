@@ -41,12 +41,12 @@ public class StaticData<T> extends BaseMetaHolder implements Data<T> {
     }
 
     @Override
-    public T get() {
+    public T getNow() {
         return object;
     }
 
     @Override
-    public CompletableFuture<T> getInFuture() {
+    public CompletableFuture<T> get() {
         return CompletableFuture.supplyAsync(() -> object);
     }
 
