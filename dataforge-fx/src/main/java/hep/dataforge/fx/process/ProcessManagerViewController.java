@@ -5,10 +5,10 @@
  */
 package hep.dataforge.fx.process;
 
-import hep.dataforge.work.Work;
-import hep.dataforge.work.WorkManager;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.CommonUtils;
+import hep.dataforge.work.Work;
+import hep.dataforge.work.WorkManager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -76,14 +76,16 @@ public class ProcessManagerViewController implements Initializable {
         FXUtils.runNow(() -> processTreeView.setRoot(buildTree(manager.getRoot())));
     }
 
-    private synchronized TreeItem<Work> buildTree(Work proc) {
+    private TreeItem<Work> buildTree(Work proc) {
         TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
 //        res.setGraphic(ProcessViewController.build(proc));
         proc.getChildren().values().stream().forEach(new Consumer<Work>() {
             @Override
-            public synchronized void accept(Work child) {
-                res.getChildren().add(buildTree(child));
+            public void accept(Work child) {
+                synchronized (ProcessManagerViewController.this) {
+                    res.getChildren().add(buildTree(child));
+                }
             }
         });
 
@@ -91,13 +93,14 @@ public class ProcessManagerViewController implements Initializable {
             @Override
             public void onChanged(MapChangeListener.Change<? extends String, ? extends Work> change) {
                 Platform.runLater(() -> {
-                    if (change.wasAdded()) {
-                        res.getChildren().add(buildTree(change.getValueAdded()));
+                    synchronized (ProcessManagerViewController.this) {
+                        if (change.wasAdded()) {
+                            res.getChildren().add(buildTree(change.getValueAdded()));
+                        }
+                        if (change.wasRemoved()) {
+                            res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
+                        }
                     }
-                    if (change.wasRemoved()) {
-                        res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
-                    }
-
                 });
             }
         });
