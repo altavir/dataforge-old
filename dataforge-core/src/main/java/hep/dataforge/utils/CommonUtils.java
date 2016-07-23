@@ -8,6 +8,7 @@ package hep.dataforge.utils;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.concurrent.CancellationException;
 
 /**
  *
@@ -28,5 +29,14 @@ public class CommonUtils {
                 return super.size() > maxItems;
             }
         });
+    }
+    
+    /**
+     * Check if current thread is interrupted and throw exception if it is
+     */
+    public static void checkThread(){
+        if(Thread.currentThread().isInterrupted()){
+            throw new CancellationException();
+        }
     }
 }

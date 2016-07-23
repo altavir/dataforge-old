@@ -3,41 +3,40 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.work;
+package hep.dataforge.computation;
 
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
 import java.util.stream.Collectors;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import java.util.stream.Stream;
 
 /**
  *
  * @author Alexander Nozik
  * @param <T>
  */
-public abstract class AbstractGoal<T> implements Goal<T> {
+public abstract class MultiInputGoal<T> extends AbstractGoal<T> {
 
     //TODO replace RuntimeExceptions with specific exceptions
     public static String DEFAULT_SLOT = "";
 
     private final Map<String, Binding> bindings = new HashMap<>();
-    private final CompletableFuture<T> result = new GoalResult<>();
-    private final ExecutorService executor;
-    private Future<?> computation;
 
-    public AbstractGoal(ExecutorService executor) {
-        this.executor = executor;
+    public MultiInputGoal(ExecutorService executor) {
+        super(executor);
     }
 
-    @Override
-    public void bindInput(Goal dependency, String inputSlot) {
+    /**
+     * Bind the output slot of given goal to input slot of this goal
+     *
+     * @param dependency
+     * @param inputSlot
+     */
+    protected void bindInput(Goal dependency, String inputSlot) {
         if (!this.bindings.containsKey(inputSlot)) {
             createBinding(inputSlot, Object.class);
         }
@@ -57,55 +56,9 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         this.bindings.put(slot, new ListBinding(type));
     }
 
-    protected Logger getLogger() {
-        return LoggerFactory.getLogger(getClass());
-    }
-
     @Override
-    public synchronized void start() {
-        if (!isStarted()) {
-            this.computation = executor.submit(() -> {
-                try {
-                    Map<String, ?> data = gatherData();
-                    //check if goal is already complete externally
-                    if (!result.isDone()) {
-                        this.result.complete(compute(data));
-                    } else {
-                        getLogger().warn("Goal already complete");
-                    }
-                } catch (Exception ex) {
-                    if (!result.isDone()) {
-                        this.result.completeExceptionally(ex);
-                    } else {
-                        getLogger().warn("Goal already complete");
-                    }
-                }
-            });
-        }
-    }
-
-    /**
-     * Abort internal computation process without canceling result. Use with care
-     */
-    protected void abort() {
-        if(isStarted()){
-            this.computation.cancel(true);
-            this.computation = null;
-        }
-    }
-
-    protected boolean isStarted() {
-        return this.computation != null;
-    }
-
-    /**
-     * Abort current computation if it is in progress and set result.
-     * Useful for caching purposes.
-     * @param result 
-     */
-    protected synchronized final void complete(T result) {
-        abort();
-        this.result.complete(result);
+    protected T compute() throws Exception {
+        return compute(gatherData());
     }
 
     protected Map<String, ?> gatherData() {
@@ -119,12 +72,16 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         return data;
     }
 
-    protected abstract T compute(Map<String, ?> data);
-
     @Override
-    public CompletableFuture<T> result() {
-        return result;
+    public Stream<Goal> depencencies() {
+        Stream<Goal> res = Stream.empty();
+        for (Binding bnd : this.bindings.values()) {
+            res = Stream.concat(res, bnd.dependencies());
+        }
+        return res;
     }
+
+    protected abstract T compute(Map<String, ?> data);
 
     protected interface Binding<T> {
 
@@ -138,6 +95,8 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         boolean isBound();
 
         void bind(Goal goal);
+
+        Stream<Goal> dependencies();
     }
 
     protected class SimpleBinding<T> implements Binding<T> {
@@ -172,6 +131,12 @@ public abstract class AbstractGoal<T> implements Goal<T> {
             }
             this.goal = goal;
         }
+
+        @Override
+        public Stream<Goal> dependencies() {
+            return Stream.concat(Stream.of(goal), goal.depencencies());
+        }
+
     }
 
     protected class ListBinding<T> implements Binding<Set<T>> {
@@ -206,16 +171,11 @@ public abstract class AbstractGoal<T> implements Goal<T> {
             this.goals.add(goal);
         }
 
-    }
-    
-    protected class GoalResult<T> extends CompletableFuture<T>{
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            if(mayInterruptIfRunning){
-                abort();
-            }
-            return super.cancel(mayInterruptIfRunning); 
+        public Stream<Goal> dependencies() {
+            return goals.stream().flatMap(g -> Stream.concat(Stream.of(g), g.depencencies()));
         }
+
     }
 
 }

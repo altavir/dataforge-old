@@ -3,10 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.process;
+package hep.dataforge.fx.work;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.work.WorkManager;
+import hep.dataforge.computation.WorkManager;
 import hep.dataforge.fx.FXFragment;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
@@ -20,7 +20,7 @@ import javafx.stage.Stage;
  *
  * @author Alexander Nozik
  */
-public class ProcessManagerFragment extends FXFragment {
+public class WorkManagerFragment extends FXFragment {
 
     private WorkManager manager;
     private final AnchorPane root = new AnchorPane();
@@ -31,15 +31,15 @@ public class ProcessManagerFragment extends FXFragment {
      * @param context
      * @return
      */
-    public static ProcessManagerFragment attachToContext(Context context) {
+    public static WorkManagerFragment attachToContext(Context context) {
         WorkManager manager = context.workManager();
-        return new ProcessManagerFragment(manager);
+        return new WorkManagerFragment(manager);
     }
 
-    public ProcessManagerFragment() {
+    public WorkManagerFragment() {
     }
 
-    public ProcessManagerFragment(WorkManager manager) {
+    public WorkManagerFragment(WorkManager manager) {
         this.manager = manager;
     }
 
@@ -58,7 +58,7 @@ public class ProcessManagerFragment extends FXFragment {
         this.manager = manager;
         FXUtils.runNow(() -> {
             root.getChildren().clear();
-            BorderPane node = ProcessManagerViewController.build(manager);
+            BorderPane node = WorkManagerViewController.build(manager);
             AnchorPane.setBottomAnchor(node, 0d);
             AnchorPane.setTopAnchor(node, 0d);
             AnchorPane.setLeftAnchor(node, 0d);

@@ -15,16 +15,15 @@
  */
 package hep.dataforge.actions;
 
+import hep.dataforge.computation.PipeGoal;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import java.util.concurrent.CompletableFuture;
+import hep.dataforge.names.Name;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import javafx.util.Pair;
 
 /**
  * A template to build actions that reflect strictly one to one content
@@ -53,17 +52,19 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
-
+        //FIXME add report manager instead of transmitting report
         Report report = buildReport(name, data);
         Laminate meta = inputMeta(data, groupMeta, actionMeta);
-        //FIXME add error evaluation
+        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(meta),
+                input -> {
+                    Thread.currentThread().setName(Name.joinString(getWorkName(), name));
+                    return transform(report, name, meta, input);
+                }
+        );
 
-        CompletableFuture<R> future = data.get().
-                thenCompose((T datum) -> {
-                    return postProcess(name, () -> transform(report, name, meta, datum));
-                });
+        workListener().submit(name, goal.result());
 
-        return new ActionResult(getOutputType(), report, future, outputMeta(name, groupMeta, data));
+        return new ActionResult<>(report, goal, outputMeta(name, groupMeta, data), getOutputType());
     }
 
     protected Report buildReport(String name, Data<? extends T> data) {
@@ -89,13 +90,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
         }
 
-        Stream<Pair<String, Data<? extends T>>> stream = set.dataStream();
-        if (isParallelExecutionAllowed(actionMeta)) {
-            stream = stream.parallel();
-        }
-
         return wrap(set.getName(), set.meta(),
-                stream.collect(Collectors.toMap(entry -> entry.getKey(),
+                set.dataStream().collect(Collectors.toMap(entry -> entry.getKey(),
                         entry -> runOne(entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
     }
 
@@ -123,7 +119,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public R simpleRun(T input, Meta... metaLayers) {
-        return transform(new Report("simpleRun", getContext()), "simpleRun", inputMeta(metaLayers), input);
+        return transform(new Report(getName(), getContext()), "simpleRun", inputMeta(metaLayers), input);
     }
 
     protected abstract R execute(Reportable log, String name, Laminate inputMeta, T input);

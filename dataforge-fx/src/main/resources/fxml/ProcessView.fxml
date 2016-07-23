@@ -8,7 +8,7 @@
 <?import javafx.scene.layout.Pane?>
 <?import javafx.scene.layout.StackPane?>
 
-<HBox fx:id="processBox" alignment="CENTER_LEFT" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.process.ProcessViewController">
+<HBox fx:id="processBox" alignment="CENTER_LEFT" xmlns="http://javafx.com/javafx/8.0.60" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.work.WorkViewController">
     <children>
         <Label fx:id="processTitle" text="loading...">
             <padding>

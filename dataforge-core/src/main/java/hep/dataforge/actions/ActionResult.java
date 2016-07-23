@@ -18,7 +18,7 @@ package hep.dataforge.actions;
 import hep.dataforge.data.Data;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
-import java.util.concurrent.CompletableFuture;
+import hep.dataforge.computation.Goal;
 
 /**
  * The asynchronous result of the action
@@ -26,68 +26,16 @@ import java.util.concurrent.CompletableFuture;
  * @author Alexander Nozik
  * @param <R>
  */
-public class ActionResult<R> implements Data<R> {
+public class ActionResult<R> extends Data<R> {
 
     private final Report log;
-    private final CompletableFuture<R> future;
-    private final Class<R> type;
-    private final Meta meta;
 
-//    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor) {
-//        this.log = log;
-//        this.type = type;
-//        this.future = CompletableFuture.supplyAsync(supplier, executor);
-//        this.meta = Meta.empty();
-//    }
-//    
-//    public ActionResult(Class<R> type, Report log, Supplier<R> supplier, Executor executor, Meta meta) {
-//        this.log = log;
-//        this.type = type;
-//        this.future = CompletableFuture.supplyAsync(supplier, executor);
-//        this.meta = meta;
-//    }    
-
-    public ActionResult(Class<R> type, Report log, CompletableFuture<R> future) {
+    public ActionResult(Report log, Goal<R> goal, Meta meta, Class<R> type) {
+        super(goal, meta, type);
         this.log = log;
-        this.type = type;
-        this.future = future;
-        this.meta = Meta.empty();        
     }
-
-    public ActionResult(Class<R> type, Report log, CompletableFuture<R> future, Meta meta) {
-        this.log = log;
-        this.future = future;
-        this.type = type;
-        this.meta = meta;
-    }
-    
-    
 
     public Report log() {
         return log;
     }
-
-    @Override
-    public CompletableFuture<R> get() {
-        return future;
-    }
-
-    @Override
-    public Class<R> dataType() {
-        return type;
-    }
-
-    @Override
-    public Meta meta() {
-        return meta;
-    }
-//
-//    public ActionResult<R> setMeta(@NotNull Meta meta) {
-//        if (this.meta != null) {
-//            throw new RuntimeException("Meta for ActionResult is already set");
-//        } else {
-//            this.meta = meta;
-//        }
-//        return this;
-//    }
 }

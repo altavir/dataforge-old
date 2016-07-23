@@ -3,9 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.process;
+package hep.dataforge.fx.work;
 
-import hep.dataforge.work.Work;
+import hep.dataforge.computation.Work;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
 import java.io.IOException;
@@ -29,13 +29,13 @@ import javafx.scene.paint.Color;
  *
  * @author Alexander Nozik
  */
-public class ProcessViewController implements Initializable {
+public class WorkViewController implements Initializable {
 
     public static Parent build(Work proc) {
         try {
             FXMLLoader loader = new FXMLLoader(proc.getClass().getResource("/fxml/ProcessView.fxml"));
             Parent p = loader.load();
-            ProcessViewController controller = loader.getController();
+            WorkViewController controller = loader.getController();
             controller.setProcess(proc);
             return p;
         } catch (IOException ex) {
@@ -97,12 +97,14 @@ public class ProcessViewController implements Initializable {
                 onDone();
             }
         });
-        cancelButton.setOnAction(event -> this.process.cancel(true));
+        cancelButton.setOnAction(event -> {
+            this.process.cancel(true);
+        });
 
     }
 
     private void updateProgress(Work process) {
-        FXUtils.runNow(() -> {
+        Platform.runLater(() -> {
             double progress = process.getProgress();
             double maxProgress = process.getMaxProgress();
             if (progress > 0) {
@@ -117,7 +119,7 @@ public class ProcessViewController implements Initializable {
     }
 
     private void onDone() {
-        FXUtils.runNow(() -> {
+        Platform.runLater(() -> {
             cancelButton.setDisable(true);
             processTitle.setTextFill(Color.GREY);
             progressLabel.setText("COMPLETE");

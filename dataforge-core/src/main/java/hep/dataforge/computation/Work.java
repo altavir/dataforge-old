@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.work;
+package hep.dataforge.computation;
 
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Name;
@@ -28,10 +28,10 @@ import javafx.collections.ObservableMap;
 /**
  *
  * <p>
- WARNING! While Work uses JavaFX beans API, it is not run on JavaFX UI
- thread. In order to bind variables to UI components, one needs to wrap all UI
- calls into Platform.runLater.
- </p>
+ * WARNING! While Work uses JavaFX beans API, it is not run on JavaFX UI thread.
+ * In order to bind variables to UI components, one needs to wrap all UI calls
+ * into Platform.runLater.
+ * </p>
  *
  * @author Alexander Nozik
  */
@@ -119,7 +119,7 @@ public class Work<R> implements Named {
      * @return
      */
     public synchronized ObservableMap<String, Work> getChildren() {
-        return children;//FXCollections.<String, Work>unmodifiableObservableMap(children);
+        return children;
     }
 
     @Override
@@ -135,11 +135,12 @@ public class Work<R> implements Named {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
-        taskProperty.set(task.whenComplete((Object t, Throwable u) -> {
+        task.whenComplete((Object t, Throwable u) -> {
             isDone.invalidate();
             curProgress.set(curMaxProgress.get());
-//            getManager().onFinished(getName());
-        }).whenComplete(this::handle));
+            handle(t, u);
+        });
+        taskProperty.set(task);
         isDone.invalidate();
     }
 

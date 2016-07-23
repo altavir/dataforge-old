@@ -3,13 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.work;
+package hep.dataforge.computation;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.names.Name;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -20,10 +18,10 @@ import java.util.function.Supplier;
  *
  * @author Alexander Nozik
  */
-public class WorkManager implements Encapsulated {
+public class WorkManager implements Encapsulated, WorkListener {
 
     /**
-     * root process map
+     * root process
      */
     private Work root;
 
@@ -32,7 +30,8 @@ public class WorkManager implements Encapsulated {
      */
     private Context context;
 
-    protected ExecutorService executor;
+    protected ExecutorService parallelExecutor;
+    protected ExecutorService singleThreadExecutor;
 
     @Override
     public Context getContext() {
@@ -62,19 +61,6 @@ public class WorkManager implements Encapsulated {
     }
 
     /**
-     * A public executor for process with given name. Any submitted command is
-     * posted to the root process automatically
-     *
-     * @param processName
-     * @return
-     */
-    public Executor executor(String... processName) {
-        return (Runnable command) -> {
-            post(Name.join(processName).toString(), command);
-        };
-    }
-
-    /**
      * Internal execution method. By default uses new thread for every new
      * process.
      *
@@ -82,12 +68,12 @@ public class WorkManager implements Encapsulated {
      * @param runnable
      */
     protected void execute(String processName, Runnable runnable) {
-        getExecutor(processName).execute(() -> {
+        parallelExecutor().execute(() -> {
             Thread.currentThread().setName(processName);
             runnable.run();
         });
-    }    
-    
+    }
+
     /**
      * Post a runnable to the process manager as a started process
      *
@@ -96,11 +82,11 @@ public class WorkManager implements Encapsulated {
      * @return
      */
     public Work post(String processName, Runnable runnable) {
-        return post(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
+        return submit(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 
     public <U> Work<U> post(String processName, Supplier<U> sup) {
-        return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
+        return submit(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
     }
 
     public Work post(String processName, Consumer<Callback> con) {
@@ -123,41 +109,45 @@ public class WorkManager implements Encapsulated {
     }
 
     /**
-     * WARNING. Task comes with its own executor
+     * WARNING. Task comes with its own parallelExecutor
      *
      * @param <U>
      * @param processName
      * @param task
      * @return
      */
-    protected synchronized <U> Work<U> post(String processName, CompletableFuture<U> task) {
+    @Override
+    public synchronized <U> Work<U> submit(String processName, CompletableFuture<U> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
-        CompletableFuture future = task
-                .whenComplete((U res, Throwable ex) -> {
-                    onFinished(processName);
-                    if (res != null) {
-                        onResult(processName, res);
-                    }
-                    if (ex != null) {
-                        onException(processName, ex);
-                    }
-                });
-        return build(processName, future);
+        return build(processName, task);
     }
 
     /**
-     * Get executor for given process name. By default uses one thread pool
-     * executor for all processes
+     * Get parallelExecutor for given process name. By default uses one thread
+     * pool parallelExecutor for all processes
      *
      * @param processName
      * @return
      */
-    protected Executor getExecutor(String processName) {
-        if (this.executor == null) {
-            getContext().getLogger().info("Initializing executor");
-            this.executor = Executors.newWorkStealingPool();
+    public ExecutorService parallelExecutor() {
+        if (this.parallelExecutor == null) {
+            getContext().getLogger().info("Initializing parallel executor");
+            this.parallelExecutor = Executors.newWorkStealingPool();
         }
-        return executor;
+        return parallelExecutor;
+    }
+
+    /**
+     * An executor for tasks that do not allow parallelization
+     *
+     * @return
+     */
+    public ExecutorService singleThreadExecutor() {
+        if (this.singleThreadExecutor == null) {
+            getContext().getLogger().info("Initializing single thread executor");
+            this.singleThreadExecutor = Executors.newSingleThreadExecutor();
+        }
+        return singleThreadExecutor;
     }
 
     /**
@@ -178,34 +168,12 @@ public class WorkManager implements Encapsulated {
         getContext().getLogger().debug("Process '{}' finished", processName);
         update(processName, p -> p.setProgressToMax());
         synchronized (this) {
-            if (root.isDone() && executor != null) {
-                executor.shutdown();
-                executor = null;
+            if (root.isDone() && parallelExecutor != null) {
+                parallelExecutor.shutdown();
+                parallelExecutor = null;
                 getContext().getLogger().info("All processes complete. Shuting executor down");
             }
         }
-    }
-
-    /**
-     * This method is called internally on process exception
-     *
-     * @param processName
-     * @param exception
-     */
-    protected void onException(String processName, Throwable exception) {
-        getContext().getLogger().error(String.format("Process '%s' finished with exception: %s", processName, exception.getMessage()),
-                exception);
-    }
-
-    /**
-     * This method is called internally on process successful finish with result
-     * (null result does not count)
-     *
-     * @param processName
-     * @param result
-     */
-    protected void onResult(String processName, Object result) {
-        getContext().getLogger().debug("Process '{}' produced a result: {}", processName, result);
     }
 
     private synchronized void update(String processName, Consumer<Work> consumer) {
@@ -234,6 +202,75 @@ public class WorkManager implements Encapsulated {
     public void cleanup() {
         if (root != null) {
             this.root.cleanup();
+        }
+    }
+
+    /**
+     * Set current progress
+     *
+     * @param processName
+     * @param progress
+     */
+    @Override
+    public void setProgress(String processName, double progress) {
+        update(processName, w -> w.setProgress(progress));
+    }
+
+    /**
+     * Set max Progress
+     *
+     * @param processName
+     * @param progress
+     */
+    @Override
+    public void setMaxProgress(String processName, double progress) {
+        update(processName, w -> w.setMaxProgress(progress));
+    }
+
+    /**
+     * notify process finished (set current progress to max)
+     *
+     * @param processName
+     */
+    @Override
+    public void finish(String processName) {
+        update(processName, w -> w.setProgressToMax());
+    }
+
+    /**
+     * Set process title
+     *
+     * @param processName
+     * @param title
+     */
+    @Override
+    public void updateTitle(String processName, String title) {
+        update(processName, w -> w.setTitle(title));
+    }
+
+    /**
+     * Set Process message
+     *
+     * @param processName
+     * @param message
+     */
+    @Override
+    public void updateMessage(String processName, String message) {
+        update(processName, w -> w.setMessage(message));
+    }
+    
+    /**
+     * terminate all works and shutdown executors
+     */
+    public void shutdown(){
+        this.root.cancel(true);
+        if(parallelExecutor!= null){
+            parallelExecutor.shutdownNow();
+            parallelExecutor = null;
+        }
+        if(singleThreadExecutor!= null){
+            singleThreadExecutor.shutdownNow();
+            singleThreadExecutor = null;
         }
     }
 

@@ -17,6 +17,8 @@ package hep.dataforge.data;
 
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.computation.Goal;
+import hep.dataforge.computation.StaticGoal;
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -26,10 +28,43 @@ import java.util.concurrent.CompletableFuture;
  * @version $Id: $Id
  * @param <T>
  */
-public interface Data<T> extends Annotated {
+public class Data<T> implements Annotated {
+    
+    public static <T> Data<T> buildStatic(T content, Meta meta){
+        return new Data(new StaticGoal(content),meta, content.getClass());
+    }
+    
+    public static <T> Data<T> buildStatic(T content){
+        return buildStatic(content, Meta.empty());
+    }    
+    
+    private final Goal<T> goal;
+    private final Meta meta;
+    private final Class<T> type;
 
-    default T getNow() {
-        return get().join();
+    public Data(Goal<T> goal, Meta meta, Class<T> type) {
+        this.goal = goal;
+        this.meta = meta;
+        this.type = type;
+    }
+    
+    public Data(Goal<T> goal, Class<T> type) {
+        this.goal = goal;
+        this.meta = Meta.empty();
+        this.type = type;
+    }    
+
+    public Goal<T> getGoal() {
+        return goal;
+    }
+
+    /**
+     * Compute underlying goal and return sync result.
+     * @return 
+     */
+    public T get() {
+        goal.start();
+        return goal.result().join();
     }
 
     /**
@@ -37,22 +72,26 @@ public interface Data<T> extends Annotated {
      *
      * @return
      */
-    CompletableFuture<T> get();
+    public CompletableFuture<T> getInFuture(){
+        return goal.result();
+    }
 
     /**
      * Data type. Should be defined before data is calculated.
      *
      * @return
      */
-    Class<? super T> dataType();
+    public Class<T> dataType(){
+        return type;
+    }
 
-    default boolean isValid() {
-        return !get().isCancelled() && !get().isCompletedExceptionally();
+    public boolean isValid() {
+        return !getInFuture().isCancelled() && !getInFuture().isCompletedExceptionally();
     }
 
     @Override
-    public default Meta meta() {
-        return Meta.empty();
+    public Meta meta() {
+        return meta;
     }
 
 }

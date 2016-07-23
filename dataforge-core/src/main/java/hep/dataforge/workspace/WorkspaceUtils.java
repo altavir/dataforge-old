@@ -5,7 +5,7 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.work.WorkManager;
+import hep.dataforge.computation.WorkManager;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
 import static hep.dataforge.workspace.Task.GATHER_NODE_NAME;

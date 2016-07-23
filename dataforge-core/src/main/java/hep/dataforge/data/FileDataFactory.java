@@ -67,11 +67,10 @@ public class FileDataFactory extends DataFactory<Binary> {
     }
 
     private static Data<Binary> buildFileData(File file, Meta meta) {
-        StaticData<Binary> fileData = new StaticData(new FileBinary(file));
         MetaBuilder mb = new MetaBuilder(meta);
         mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());
         mb.putValue(FILE_NAME_KEY, file.getName());
-        fileData.setMeta(mb.build());
+        Data<Binary> fileData = Data.buildStatic(new FileBinary(file), mb.build());
         return fileData;
     }
 

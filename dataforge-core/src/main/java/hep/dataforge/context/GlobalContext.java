@@ -15,7 +15,7 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.work.WorkManager;
+import hep.dataforge.computation.WorkManager;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;

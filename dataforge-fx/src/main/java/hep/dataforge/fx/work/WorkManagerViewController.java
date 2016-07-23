@@ -3,12 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.process;
+package hep.dataforge.fx.work;
 
-import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.CommonUtils;
-import hep.dataforge.work.Work;
-import hep.dataforge.work.WorkManager;
+import hep.dataforge.computation.Work;
+import hep.dataforge.computation.WorkManager;
 import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
@@ -30,13 +29,13 @@ import javafx.scene.layout.BorderPane;
  *
  * @author Alexander Nozik
  */
-public class ProcessManagerViewController implements Initializable {
+public class WorkManagerViewController implements Initializable {
 
     public static BorderPane build(WorkManager manager) {
         try {
             FXMLLoader loader = new FXMLLoader(manager.getClass().getResource("/fxml/ProcessManagerView.fxml"));
             BorderPane p = loader.load();
-            ProcessManagerViewController controller = loader.getController();
+            WorkManagerViewController controller = loader.getController();
             controller.setManager(manager);
             return p;
         } catch (IOException ex) {
@@ -65,7 +64,7 @@ public class ProcessManagerViewController implements Initializable {
                 } else {
                     setText("");
                     //caching processes to insure no drawing lags
-                    setGraphic(processNodeCache.computeIfAbsent(item, p -> ProcessViewController.build(p)));
+                    setGraphic(processNodeCache.computeIfAbsent(item, p -> WorkViewController.build(p)));
                 }
             }
         });
@@ -73,17 +72,18 @@ public class ProcessManagerViewController implements Initializable {
 
     public void setManager(WorkManager manager) {
         this.manager = manager;
-        FXUtils.runNow(() -> processTreeView.setRoot(buildTree(manager.getRoot())));
+        Platform.runLater(() -> processTreeView.setRoot(buildTree(manager.getRoot())));
     }
 
+    //FXME concurrent modification
     private TreeItem<Work> buildTree(Work proc) {
         TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
-//        res.setGraphic(ProcessViewController.build(proc));
+//        res.setGraphic(WorkViewController.build(proc));
         proc.getChildren().values().stream().forEach(new Consumer<Work>() {
             @Override
             public void accept(Work child) {
-                synchronized (ProcessManagerViewController.this) {
+                synchronized (WorkManagerViewController.this) {
                     res.getChildren().add(buildTree(child));
                 }
             }
@@ -93,13 +93,11 @@ public class ProcessManagerViewController implements Initializable {
             @Override
             public void onChanged(MapChangeListener.Change<? extends String, ? extends Work> change) {
                 Platform.runLater(() -> {
-                    synchronized (ProcessManagerViewController.this) {
-                        if (change.wasAdded()) {
-                            res.getChildren().add(buildTree(change.getValueAdded()));
-                        }
-                        if (change.wasRemoved()) {
-                            res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
-                        }
+                    if (change.wasAdded()) {
+                        res.getChildren().add(buildTree(change.getValueAdded()));
+                    }
+                    if (change.wasRemoved()) {
+                        res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
                     }
                 });
             }

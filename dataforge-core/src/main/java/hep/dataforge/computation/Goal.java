@@ -3,25 +3,23 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.work;
+package hep.dataforge.computation;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
 /**
- * A simple link in computation chain
+ * A simple link in a computation chain
  *
  * @author Alexander Nozik
  */
 public interface Goal<T> {
-
+   
     /**
-     * Bind the output slot of given goal to input slot of this goal
-     *
-     * @param goal
-     * @param outputSlot
-     * @param inputSlot
+     * A stream of all bound direct dependencies
+     * @return 
      */
-    void bindInput(Goal dependency, String inputSlot);
+    Stream<Goal> depencencies();
 
     /**
      * Start this goal computation. Triggers start of dependent goals
@@ -36,5 +34,15 @@ public interface Goal<T> {
      * @return
      */
     CompletableFuture<T> result();
+    
+    /**
+     * Start and get sync result
+     * @return
+     * @throws Exception 
+     */
+    default T get() throws Exception{
+        start();
+        return result().get();
+    }
 
 }

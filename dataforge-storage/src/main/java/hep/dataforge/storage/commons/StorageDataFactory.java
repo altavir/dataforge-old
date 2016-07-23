@@ -10,7 +10,6 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataFilter;
 import hep.dataforge.data.DataTree;
-import hep.dataforge.data.StaticData;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
@@ -33,7 +32,8 @@ public class StorageDataFactory extends DataFactory<Loader> {
         Storage storage = StorageManager.buildFrom(context).buildStorage(meta);
         Stream<Pair<String, Loader>> stream = StorageUtils.loaderStream(storage);
         stream.forEach(pair -> {
-            Data<Loader> datum = new StaticData<>(pair.getValue());
+            //TODO add meta nodes from input meta
+            Data<Loader> datum = Data.buildStatic(pair.getValue(), Meta.empty());
             if (filter.acceptData(pair.getKey(), datum)) {
                 builder.putData(pair.getKey(), datum);
             }

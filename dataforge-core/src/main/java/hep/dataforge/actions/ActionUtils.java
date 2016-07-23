@@ -15,6 +15,8 @@
  */
 package hep.dataforge.actions;
 
+import hep.dataforge.cache.CachePlugin;
+import hep.dataforge.cache.DataCache;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
@@ -23,6 +25,7 @@ import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.workspace.identity.Identity;
+import hep.dataforge.workspace.identity.MetaIdentity;
 import hep.dataforge.workspace.identity.StringIdentity;
 import java.io.IOException;
 import java.text.ParseException;
@@ -104,21 +107,21 @@ public class ActionUtils {
         @Override
         public DataNode run(DataNode data, Meta sequenceMeta) {
             DataNode res = data;
-//            DataCache cache = null;
-//            //Set data cache if it is defined in context
-//            if (getContext().getBoolean("enableCache", false)) {
-//                cache = CachePlugin.buildFrom(getContext()).getCache();
-//            }
+            DataCache cache = null;
+            //Set data cache if it is defined in context
+            if (getContext().getBoolean("enableCache", false)) {
+                cache = CachePlugin.buildFrom(getContext()).getCache();
+            }
 
             Identity id = new StringIdentity(getContext().getName());
             for (Meta actionMeta : sequenceMeta.getNodes(ACTION_NODE_KEY)) {
                 id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
                 res = buildAction(getContext(), actionType).run(res, actionMeta);
-//                if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
-//                    //FIXME add context identity here
-//                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
-//                }
+                if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
+                    //FIXME add context identity here
+                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
+                }
             }
             return res;
         }

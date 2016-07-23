@@ -5,6 +5,7 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.computation.GoalGroup;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
@@ -13,6 +14,7 @@ import hep.dataforge.utils.GenericBuilder;
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 
@@ -106,18 +108,11 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     int size();
 
     /**
-     * Force start data computation for all data
+     * Force start data computation for all data and wait for completion
      */
-    default DataNode<T> compute() {
-        computation().join();
+    default DataNode<T> compute() throws Exception {
+        nodeGoal().get();
         return this;
-    }
-
-    /**
-     * Cancel all data computation
-     */
-    default void cancel() {
-        computation().cancel(true);
     }
 
     /**
@@ -125,11 +120,9 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      *
      * @return
      */
-    default CompletableFuture<Void> computation() {
-        CompletableFuture<?>[] futures = this.dataStream()
-                .<CompletableFuture>map(item -> item.getValue().get())
-                .toArray((int value) -> new CompletableFuture[value]);
-        return CompletableFuture.allOf(futures);
+    default GoalGroup nodeGoal() {
+        return new GoalGroup(this.dataStream()
+                .map(entry -> entry.getValue().getGoal()).collect(Collectors.toList()));
     }
 
     public interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B> {
@@ -174,7 +167,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
             if (!type().isInstance(staticData)) {
                 throw new IllegalArgumentException("The data mast be instance of " + type().getName());
             }
-            return putData(new NamedStaticData<>(key, staticData, type()));
+            return putData(NamedData.buildStatic(key, staticData, Meta.empty()));
         }
     }
 

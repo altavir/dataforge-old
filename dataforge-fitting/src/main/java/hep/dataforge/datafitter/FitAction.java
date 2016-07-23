@@ -26,6 +26,7 @@ import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.Table;
+import hep.dataforge.utils.CommonUtils;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -80,6 +81,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         PrintWriter writer = new PrintWriter(buildActionOutput(name));
 
         for (FitTask task : tasks) {
+            CommonUtils.checkThread();// check if action is cacneled
             res = fm.runTask(res, task, writer, log);
         }
         log.getReport().print(writer);

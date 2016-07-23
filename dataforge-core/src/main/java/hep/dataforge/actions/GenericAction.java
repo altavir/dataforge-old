@@ -28,10 +28,11 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Supplier;
+import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import hep.dataforge.computation.WorkListener;
+import hep.dataforge.computation.WorkListenerDelegate;
 
 /**
  * A basic implementation of Action interface
@@ -47,7 +48,6 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     private String parentProcessName;
     private Context context = GlobalContext.instance();
 
-    //PENDING move Context to Action object variable
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("allowParallel", true);
     }
@@ -65,34 +65,32 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     protected void checkInput(DataNode input) {
         if (!getInputType().isAssignableFrom(input.type())) {
+            //FIXME add specific exception
             throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
                     getName(), getInputType().getName(), input.type().getName()));
         }
     }
 
-//    protected Report buildLog(Context context, Meta meta, String dataName, Object data) {
-//        String logName = String.format("%s.%s", getName(), dataName);
-//        if (data != null && data instanceof Named) {
-//            logName += "[" + ((Named) data).getName() + "]";
-//        }
-//        if (data != null && data instanceof ActionResult) {
-//            Report actionLog = ((ActionResult) data).log();
-//            if (actionLog.getParent() != null) {
-//                //Getting parent from previous report
-//                return new Report(getName(), actionLog.getParent());
-//            } else {
-//                return new Report(logName, context);
-//            }
-//        } else {
-//            return new Report(logName, context);
-//        }
-//    }
+    /**
+     * Get common singleThreadExecutor for this action
+     *
+     * @return
+     */
+    protected ExecutorService executor(Meta meta) {
+        if(isParallelExecutionAllowed(meta)){
+            return getContext().workManager().parallelExecutor();
+        } else {
+            return getContext().workManager().singleThreadExecutor();
+        }
+        
+    }
+
     /**
      * Return the root process name for this action
      *
      * @return
      */
-    protected String getProcessName() {
+    protected String getWorkName() {
         if (parentProcessName != null) {
             return Name.joinString(parentProcessName, getName());
         } else {
@@ -102,7 +100,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     public Logger logger() {
         if (logger == null) {
-            return LoggerFactory.getLogger(getClass());
+            return LoggerFactory.getLogger("action::" + getName());
         } else {
             return logger;
         }
@@ -131,21 +129,11 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return context;
     }
 
-    /**
-     * Post a process and return future associated with that process
-     *
-     * @param <U>
-     * @param context
-     * @param subname
-     * @param sup
-     * @return
-     */
-    protected <U> CompletableFuture<U> postProcess(String subname, Supplier<U> sup) {
-        return getContext().workManager().
-                <U>post(Name.join(getProcessName(), subname).toString(), sup)
-                .getTask();
+    protected WorkListener workListener(){
+        //PENDING make it variable to avoid multiple initialization
+        return new WorkListenerDelegate(getContext().workManager(), getWorkName());
     }
-
+    
     protected boolean isEmptyInputAllowed() {
         return false;
     }

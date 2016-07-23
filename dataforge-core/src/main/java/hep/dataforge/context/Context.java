@@ -15,7 +15,7 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.work.WorkManager;
+import hep.dataforge.computation.WorkManager;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
@@ -307,6 +307,10 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      */
     @Override
     public void close() throws Exception {
+        //stopping all works in this context
+        if (this.processManager != null) {
+            processManager.shutdown();
+        }
         GlobalContext.unregisterContext(this);
     }
 }
