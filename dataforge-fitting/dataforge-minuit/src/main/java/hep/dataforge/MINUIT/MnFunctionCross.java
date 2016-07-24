@@ -15,8 +15,8 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.datafitter.MINUITPlugin;
-import hep.dataforge.functions.MultiFunction;
+import hep.dataforge.fitting.MINUITPlugin;
+import hep.dataforge.fitting.parametric.MultiFunction;
 
 
 /**

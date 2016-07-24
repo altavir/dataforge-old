@@ -16,7 +16,6 @@
 package hep.dataforge.io;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.functions.NamedFunction;
 import hep.dataforge.maths.NamedVector;
 import static hep.dataforge.names.NamedUtils.combineNames;
 import hep.dataforge.names.Names;
@@ -28,6 +27,7 @@ import hep.dataforge.tables.Table;
 import java.io.PrintWriter;
 import java.util.List;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import hep.dataforge.fitting.parametric.ParametricValue;
 
 /**
  * Формирование и печать наборов данных
@@ -40,11 +40,11 @@ public class OutputData {
     /**
      * <p>getNamedFunctionData.</p>
      *
-     * @param func a {@link hep.dataforge.functions.NamedFunction} object.
+     * @param func a {@link hep.dataforge.fitting.parametric.ParametricValue} object.
      * @param points a {@link java.util.List} object.
      * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    public static Table getNamedFunctionData(NamedFunction func, List<NamedVector> points) {
+    public static Table getNamedFunctionData(ParametricValue func, List<NamedVector> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
         ListTable.Builder res = new ListTable.Builder(format);
         Double[] values = new Double[func.getDimension() + 1];

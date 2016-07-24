@@ -15,8 +15,8 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.datafitter.MINUITPlugin;
-import hep.dataforge.functions.MultiFunction;
+import hep.dataforge.fitting.MINUITPlugin;
+import hep.dataforge.fitting.parametric.MultiFunction;
 
 /**
  * API class for Minos error analysis (asymmetric errors). Minimization has to
@@ -34,7 +34,7 @@ public class MnMinos {
     /**
      * construct from FCN + minimum
      *
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
      */
     public MnMinos(MultiFunction fcn, FunctionMinimum min) {
@@ -46,7 +46,7 @@ public class MnMinos {
      *
      * @param stra a int.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnMinos(MultiFunction fcn, FunctionMinimum min, int stra) {
         this(fcn, min, new MnStrategy(stra));
@@ -57,7 +57,7 @@ public class MnMinos {
      *
      * @param stra a {@link hep.dataforge.MINUIT.MnStrategy} object.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnMinos(MultiFunction fcn, FunctionMinimum min, MnStrategy stra) {
         theFCN = fcn;

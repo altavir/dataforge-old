@@ -15,7 +15,7 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.functions.MultiFunction;
+import hep.dataforge.fitting.parametric.MultiFunction;
 import java.util.List;
 
 /**
@@ -59,7 +59,7 @@ public abstract class MnApplication {
     /**
      * <p>MultiFunction.</p>
      *
-     * @return a {@link hep.dataforge.functions.MultiFunction} object.
+     * @return a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MultiFunction MultiFunction() {
         return theFCN;

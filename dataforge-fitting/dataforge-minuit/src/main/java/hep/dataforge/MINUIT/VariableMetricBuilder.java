@@ -15,7 +15,7 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.datafitter.MINUITPlugin;
+import hep.dataforge.fitting.MINUITPlugin;
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.math3.linear.RealVector;

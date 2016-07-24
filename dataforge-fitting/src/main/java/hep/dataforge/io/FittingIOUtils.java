@@ -15,19 +15,18 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.datafitter.FitState;
-import hep.dataforge.datafitter.Param;
-import hep.dataforge.datafitter.ParamSet;
-import hep.dataforge.datafitter.models.Model;
-import hep.dataforge.datafitter.models.XYModel;
-import hep.dataforge.functions.Function;
-import hep.dataforge.functions.FunctionUtils;
-import hep.dataforge.functions.NamedFunction;
-import hep.dataforge.functions.ParametricFunction;
+import hep.dataforge.fitting.FitState;
+import hep.dataforge.fitting.Param;
+import hep.dataforge.fitting.ParamSet;
+import hep.dataforge.fitting.models.Model;
+import hep.dataforge.fitting.models.XYModel;
+import hep.dataforge.fitting.parametric.Function;
+import hep.dataforge.fitting.parametric.FunctionUtils;
+import hep.dataforge.fitting.parametric.ParametricFunction;
 import static hep.dataforge.io.OutputData.getNamedFunctionData;
 import static hep.dataforge.io.OutputData.printDataSet;
 import static hep.dataforge.io.PrintFunction.printFunctionSimple;
-import hep.dataforge.likelihood.LogLikelihood;
+import hep.dataforge.fitting.likelihood.LogLikelihood;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
@@ -48,6 +47,28 @@ import static java.util.Locale.setDefault;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import hep.dataforge.fitting.parametric.ParametricValue;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
+import static java.lang.Math.max;
+import static java.lang.Math.min;
+import static java.util.Locale.setDefault;
 
 /**
  * Some IOUtils for fitting module
@@ -162,7 +183,7 @@ public class FittingIOUtils {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param head a {@link java.lang.String} object.
-     * @param res a {@link hep.dataforge.datafitter.FitState} object.
+     * @param res a {@link hep.dataforge.fitting.FitState} object.
      * @param par1 a {@link java.lang.String} object.
      * @param par2 a {@link java.lang.String} object.
      * @param num1 a int.
@@ -181,7 +202,7 @@ public class FittingIOUtils {
 
         LogLikelihood like = res.getLogLike();
         like.reScale(res.getParameters());
-        NamedFunction func = FunctionUtils.getNamedSubFunction(like.getLikelihood(), res.getParameters(), par1, par2);
+        ParametricValue func = FunctionUtils.getNamedSubFunction(like.getLikelihood(), res.getParameters(), par1, par2);
 
         double[] vector = new double[2];
 
@@ -217,7 +238,7 @@ public class FittingIOUtils {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param head a {@link java.lang.String} object.
-     * @param res a {@link hep.dataforge.datafitter.FitState} object.
+     * @param res a {@link hep.dataforge.fitting.FitState} object.
      * @param numpoints a int.
      * @param scale a double.
      * @param names a {@link java.lang.String} object.
@@ -226,7 +247,7 @@ public class FittingIOUtils {
 
         assert names.length > 0;
         LogLikelihood like = res.getLogLike();
-        NamedFunction func = FunctionUtils.getNamedSubFunction(like, res.getParameters(), names);
+        ParametricValue func = FunctionUtils.getNamedSubFunction(like, res.getParameters(), names);
 
         double[] vals = res.getParameters().getParValues(names).getArray();
 

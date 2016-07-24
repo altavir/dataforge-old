@@ -15,7 +15,7 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.functions.MultiFunction;
+import hep.dataforge.fitting.parametric.MultiFunction;
 import hep.dataforge.maths.Domain;
 import hep.dataforge.maths.UniformRandomVectorGenerator;
 import static hep.dataforge.utils.ArgumentChecker.checkEqualDimensions;
@@ -94,7 +94,7 @@ public class PrintFunction {
      * Использует
      *
      * @param out a {@link java.io.PrintWriter} object.
-     * @param func a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param func a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param dom a {@link hep.dataforge.maths.Domain} object.
      * @param numpoints - Количество вызовов функции
      */
@@ -122,7 +122,7 @@ public class PrintFunction {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param head a {@link java.lang.String} object.
-     * @param func a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param func a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param points a {@link java.util.List} object.
      */
     public static void printMultiFunction(PrintWriter out, String head, MultiFunction func, List<double[]> points){

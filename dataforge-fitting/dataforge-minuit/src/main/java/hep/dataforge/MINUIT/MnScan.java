@@ -15,7 +15,7 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.functions.MultiFunction;
+import hep.dataforge.fitting.parametric.MultiFunction;
 import java.util.List;
 
 
@@ -37,7 +37,7 @@ public class MnScan extends MnApplication {
      *
      * @param err an array of double.
      * @param par an array of double.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnScan(MultiFunction fcn, double[] par, double[] err) {
         this(fcn, par, err, DEFAULT_STRATEGY);
@@ -48,7 +48,7 @@ public class MnScan extends MnApplication {
      *
      * @param stra a int.
      * @param err an array of double.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param par an array of double.
      */
     public MnScan(MultiFunction fcn, double[] par, double[] err, int stra) {
@@ -61,7 +61,7 @@ public class MnScan extends MnApplication {
      *
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @param par an array of double.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnScan(MultiFunction fcn, double[] par, MnUserCovariance cov) {
         this(fcn, par, cov, DEFAULT_STRATEGY);
@@ -73,7 +73,7 @@ public class MnScan extends MnApplication {
      *
      * @param stra a int.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param par an array of double.
      */
     public MnScan(MultiFunction fcn, double[] par, MnUserCovariance cov, int stra) {
@@ -84,7 +84,7 @@ public class MnScan extends MnApplication {
      * construct from MultiFunction + MnUserParameters with default
      * strategy
      *
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      */
     public MnScan(MultiFunction fcn, MnUserParameters par) {
@@ -96,7 +96,7 @@ public class MnScan extends MnApplication {
      *
      * @param stra a int.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnScan(MultiFunction fcn, MnUserParameters par, int stra) {
         this(fcn, new MnUserParameterState(par), new MnStrategy(stra));
@@ -108,7 +108,7 @@ public class MnScan extends MnApplication {
      *
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnScan(MultiFunction fcn, MnUserParameters par, MnUserCovariance cov) {
         this(fcn, par, cov, DEFAULT_STRATEGY);
@@ -119,7 +119,7 @@ public class MnScan extends MnApplication {
      *
      * @param stra a int.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      */
     public MnScan(MultiFunction fcn, MnUserParameters par, MnUserCovariance cov, int stra) {
@@ -131,7 +131,7 @@ public class MnScan extends MnApplication {
      *
      * @param str a {@link hep.dataforge.MINUIT.MnStrategy} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
-     * @param fcn a {@link hep.dataforge.functions.MultiFunction} object.
+     * @param fcn a {@link hep.dataforge.fitting.parametric.MultiFunction} object.
      */
     public MnScan(MultiFunction fcn, MnUserParameterState par, MnStrategy str) {
         super(fcn, par, str);

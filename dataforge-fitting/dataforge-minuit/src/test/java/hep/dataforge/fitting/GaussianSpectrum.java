@@ -16,14 +16,9 @@
 package hep.dataforge.fitting;
 
 import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.datafitter.FitManager;
-import hep.dataforge.datafitter.FitSource;
-import hep.dataforge.datafitter.FitState;
-import hep.dataforge.datafitter.Hessian;
-import hep.dataforge.datafitter.ParamSet;
-import hep.dataforge.datafitter.models.XYModel;
+import hep.dataforge.fitting.models.XYModel;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.functions.ParametricFunction;
+import hep.dataforge.fitting.parametric.ParametricFunction;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.MatrixOperations;

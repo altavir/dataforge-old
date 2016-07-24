@@ -31,17 +31,10 @@ public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
 
     int sampleSizeStep = 500;
 
-    /**
-     * <p>Constructor for MonteCarloIntegrator.</p>
-     */
+
     public MonteCarloIntegrator() {
     }
 
-    /**
-     * <p>Constructor for MonteCarloIntegrator.</p>
-     *
-     * @param sampleSizeStep a int.
-     */
     public MonteCarloIntegrator(int sampleSizeStep) {
         this.sampleSizeStep = sampleSizeStep;
     }

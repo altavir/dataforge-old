@@ -7,8 +7,6 @@ package hep.dataforge.computation;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +19,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     private final ExecutorService executor;
     private CompletableFuture<?> computation;
     private final CompletableFuture<T> result = new GoalResult<>();
+    private Thread thread;
 
     public AbstractGoal(ExecutorService executor) {
         this.executor = executor;
@@ -35,7 +34,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         if (!isStarted()) {
             //start all dependencies so they will occupy threads
             computation = CompletableFuture
-                    .allOf(depencencies() 
+                    .allOf(depencencies()
                             .map(dep -> {
                                 dep.start();//starting all dependencies
                                 return dep.result();
@@ -43,7 +42,9 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             .toArray(num -> new CompletableFuture[num]))
                     .thenAcceptAsync(v -> {
                         try {
+                            thread = Thread.currentThread();
                             this.result.complete(compute());
+                            thread = null;
                         } catch (Exception ex) {
                             this.result.completeExceptionally(ex);
                         }
@@ -65,6 +66,9 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         if (isStarted()) {
             //FIXME this method actually not working
             this.computation.cancel(true);
+            if(thread != null){
+                thread.interrupt();
+            }
         }
     }
 

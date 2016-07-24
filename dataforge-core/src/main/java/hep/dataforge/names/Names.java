@@ -27,42 +27,16 @@ import java.util.List;
  */
 public interface Names extends Iterable<String> {
 
-    /**
-     * <p>of.</p>
-     *
-     * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.names.Names} object.
-     */
     public static Names of(String... names) {
         return new NameList(names);
     }
-
-    /**
-     * <p>of.</p>
-     *
-     * @param names a {@link java.lang.Iterable} object.
-     * @return a {@link hep.dataforge.names.Names} object.
-     */
     public static Names of(Iterable<String> names) {
         return new NameList(names);
     }
-
-    /**
-     * <p>of.</p>
-     *
-     * @param names a {@link hep.dataforge.names.Names} object.
-     * @return a {@link hep.dataforge.names.Names} object.
-     */
     public static Names of(Names names) {
         return new NameList(names);
     }
 
-    /**
-     * <p>of.</p>
-     *
-     * @param set a {@link hep.dataforge.names.NameSetContainer} object.
-     * @return a {@link hep.dataforge.names.Names} object.
-     */
     public static Names of(NameSetContainer set) {
         return new NameList(set.names());
     }
