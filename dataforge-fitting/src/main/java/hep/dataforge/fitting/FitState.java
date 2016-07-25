@@ -101,7 +101,7 @@ public class FitState extends FitSource {
     /**
      * Creates new FitState object based on this one and returns its Builder.
      *
-     * @return a {@link hep.dataforge.datafitter.FitState.Builder} object.
+     * @return a {@link hep.dataforge.fitting.FitState.Builder} object.
      */
     public Builder edit() {
         return new Builder(this);

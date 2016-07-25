@@ -42,11 +42,11 @@ import java.util.List;
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
-        target = "method::hep.dataforge.datafitter.models.ModelManager.buildModel")
+        target = "method::hep.dataforge.fitting.models.ModelManager.buildModel")
 @NodeDef(name = "params", required = true,
         info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
         + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
-        target = "method::hep.dataforge.datafitter.ParamSet.fromAnnotation")
+        target = "method::hep.dataforge.fitting.ParamSet.fromAnnotation")
 @NodeDef(name = "task", multiple = true, info = "Fit tasks")
 public class FitAction extends OneToOneAction<Table, FitState> {
 

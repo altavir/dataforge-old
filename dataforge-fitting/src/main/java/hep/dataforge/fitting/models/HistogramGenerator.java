@@ -160,7 +160,7 @@ public class HistogramGenerator implements Generator {
     /**
      * <p>setGeneratorType.</p>
      *
-     * @param type a {@link hep.dataforge.datafitter.models.HistogramGenerator.GeneratorType} object.
+     * @param type a {@link hep.dataforge.fitting.models.HistogramGenerator.GeneratorType} object.
      */
     public void setGeneratorType(GeneratorType type) {
         this.genType = type;
