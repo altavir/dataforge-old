@@ -58,11 +58,8 @@ public abstract class AbstractParametric extends AbstractNamedSet {
      * @return
      */
     protected double getParameter(String name, NamedValueSet set) {
-        if (set.names().contains(name)) {
-            return set.getDouble(name);
-        } else {
-            return getDefaultParameter(name);
-        }
+        //FIXME add default value
+        return set.getDouble(name);
     }    
     
 }
