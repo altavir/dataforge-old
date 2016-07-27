@@ -19,18 +19,18 @@ import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
 /**
- * <p>MonteCarloIntegrator class.</p>
+ * <p>
+ * MonteCarloIntegrator class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
+public class MonteCarloIntegrator implements Integrator<MonteCarloIntegrand> {
 
     private static final int DEFAULT_MAX_CALLS = 100000;
     private static final double DEFAULT_MIN_RELATIVE_ACCURACY = 1e-3;
 
     int sampleSizeStep = 500;
-
 
     public MonteCarloIntegrator() {
     }
@@ -39,20 +39,25 @@ public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
         this.sampleSizeStep = sampleSizeStep;
     }
 
-    /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
-    public Predicate<Integrand> getDefaultStopingCondition() {
-        return (Integrand t) -> t.getEvaluations() > DEFAULT_MAX_CALLS || t.getRelativeAccuracy() < DEFAULT_MIN_RELATIVE_ACCURACY;
+    public Predicate<MonteCarloIntegrand> getDefaultStopingCondition() {
+        return (t) -> t.getNumCalls() > DEFAULT_MAX_CALLS || t.getRelativeAccuracy() < DEFAULT_MIN_RELATIVE_ACCURACY;
     }
 
     /**
      * Integration with fixed sample size
      *
-     * @param function a {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
+     * @param function a
+     * {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
      * @param sampler a {@link hep.dataforge.maths.integration.Sampler} object.
      * @param sampleSize a int.
-     * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
+     * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand}
+     * object.
      */
     public MonteCarloIntegrand evaluate(MultivariateFunction function, Sampler sampler, int sampleSize) {
         return evaluate(new MonteCarloIntegrand(function, sampler), sampleSize);
@@ -67,7 +72,7 @@ public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
         }
 
         double oldValue = integrand.getValue();
-        int oldCalls = integrand.getEvaluations();
+        int oldCalls = integrand.getNumCalls();
         double value;
         if (Double.isNaN(oldValue)) {
             value = res / sampleSizeStep;
@@ -75,24 +80,24 @@ public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
             value = (oldValue * oldCalls + res) / (sampleSizeStep + oldCalls);
         }
 
-        int evaluations = integrand.getEvaluations() + sampleSizeStep;
-        int itertations = integrand.getIterations() + 1;
+        int evaluations = integrand.getNumCalls() + sampleSizeStep;
 
-        double absoluteAccuracy = Double.POSITIVE_INFINITY;
-        double relativeAccuracy = Double.POSITIVE_INFINITY;
+        double accuracy = Double.POSITIVE_INFINITY;
 
         if (!Double.isNaN(oldValue)) {
-            absoluteAccuracy = Math.abs(value - oldValue);
-            relativeAccuracy = Math.abs(absoluteAccuracy / value);
+            accuracy = Math.abs(value - oldValue);
         }
 
-        return new MonteCarloIntegrand(integrand, absoluteAccuracy, relativeAccuracy, itertations, evaluations, value);
+        return new MonteCarloIntegrand(integrand, evaluations, value, accuracy);
     }
 
-    /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
-    public MonteCarloIntegrand evaluate(MonteCarloIntegrand integrand, Predicate<Integrand> condition) {
+    public MonteCarloIntegrand evaluate(MonteCarloIntegrand integrand, Predicate<MonteCarloIntegrand> condition) {
         MonteCarloIntegrand res = integrand;
         while (!condition.test(res)) {
             res = makeStep(res);
@@ -103,12 +108,14 @@ public class MonteCarloIntegrator extends Integrator<MonteCarloIntegrand> {
     /**
      * Integration with fixed maximum sample size
      *
-     * @param integrand a {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
+     * @param integrand a
+     * {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
      * @param sampleSize a int.
-     * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
+     * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand}
+     * object.
      */
     public MonteCarloIntegrand evaluate(MonteCarloIntegrand integrand, int sampleSize) {
-        return MonteCarloIntegrator.this.evaluate(integrand, ((Integrand t) -> t.getEvaluations() >= sampleSize));
+        return MonteCarloIntegrator.this.evaluate(integrand, ((t) -> t.getNumCalls() >= sampleSize));
     }
 
 }

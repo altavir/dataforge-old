@@ -112,8 +112,8 @@ public class Marginalizer implements NameSetContainer {
         * при желании потом можно перенормировать обратно
          */
         Integrand res = integrator.evaluate(expLike, sampler, maxCalls);///exp(like.getScale());
-        LoggerFactory.getLogger(getClass()).info("Marginalization complete with {} calls and relative accuracy {}",
-                res.getEvaluations(), res.getRelativeAccuracy());
+        LoggerFactory.getLogger(getClass()).info("Marginalization complete with {} calls",
+                res.getNumCalls());
         return res.getValue();
     }
 

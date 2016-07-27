@@ -18,13 +18,14 @@ package hep.dataforge.maths.integration;
 import java.util.function.Predicate;
 
 /**
- * <p>Abstract Integrator class.</p>
+ * <p>
+ * Abstract Integrator class.</p>
  *
  * @author Alexander Nozik
  * @param <T>
  * @version $Id: $Id
  */
-public abstract class Integrator<T extends Integrand> {
+public interface Integrator<T extends Integrand> {
 
     /**
      * Integrate with default stopping condition for this integrator
@@ -32,20 +33,20 @@ public abstract class Integrator<T extends Integrand> {
      * @param integrand a T object.
      * @return a T object.
      */
-    public T evaluate(T integrand) {
+    default T evaluate(T integrand) {
         return Integrator.this.evaluate(integrand, getDefaultStopingCondition());
     }
-    
+
     /**
      * Helper method for single integration
      *
      * @param integrand a T object.
      * @return a {@link java.lang.Double} object.
      */
-    public Double integrate(T integrand){
+    default Double integrate(T integrand) {
         return evaluate(integrand).getValue();
     }
-    
+
     /**
      * Integrate with supplied stopping condition
      *
@@ -53,12 +54,14 @@ public abstract class Integrator<T extends Integrand> {
      * @param condition a {@link java.util.function.Predicate} object.
      * @return a T object.
      */
-    public abstract T evaluate(T integrand, Predicate<Integrand> condition);
+    T evaluate(T integrand, Predicate<T> condition);
 
     /**
      * Get default stopping condition for this integrator
      *
      * @return a {@link java.util.function.Predicate} object.
      */
-    public abstract Predicate<Integrand> getDefaultStopingCondition();
+    default Predicate<T> getDefaultStopingCondition() {
+        return t -> true;
+    }
 }

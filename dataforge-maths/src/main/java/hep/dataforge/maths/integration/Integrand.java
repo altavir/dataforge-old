@@ -28,20 +28,6 @@ package hep.dataforge.maths.integration;
 public interface Integrand {
 
     /**
-     * Absolute accuracy of last integration. By default equals +inf;
-     * TODO remove or replace accuracy values
-     * @return a double.
-     */
-    double getAbsoluteAccuracy();
-
-    /**
-     * Relative accuracy of last integration. By default equals +inf;
-     *
-     * @return a double.
-     */
-    double getRelativeAccuracy();
-
-    /**
      * The current calculated value. equals Double.NaN if no successful
      * iterations were made so far
      *
@@ -50,19 +36,11 @@ public interface Integrand {
     Double getValue();
 
     /**
-     * the number of integrator calls on this integrand and/ or number of
-     * iterations inside integrator if it is iterative
+     * the number of calls of function
      *
      * @return a int.
      */
-    int getIterations();
-
-    /**
-     * the number of evaluations of function
-     *
-     * @return a int.
-     */
-    int getEvaluations();
+    int getNumCalls();
 
     /**
      * the dimension of function

@@ -28,14 +28,6 @@ import java.util.List;
  */
 public class GridCalculator {
 
-    /**
-     * <p>getUniformUnivariateGrid.</p>
-     *
-     * @param a a double.
-     * @param b a double.
-     * @param numpoints a int.
-     * @return an array of double.
-     */
     public static double[] getUniformUnivariateGrid(double a, double b, int numpoints) {
         assert b > a;
         assert numpoints > 1;
@@ -47,14 +39,6 @@ public class GridCalculator {
         return res;
     }
 
-    /**
-     * <p>getUniformUnivariateGrid.</p>
-     *
-     * @param a a double.
-     * @param b a double.
-     * @param step a double.
-     * @return an array of double.
-     */
     public static double[] getUniformUnivariateGrid(double a, double b, double step) {
         return getUniformUnivariateGrid(a, b, (int) ((b - a) / step));
     }
@@ -67,6 +51,11 @@ public class GridCalculator {
         return grid;
     }
     
+    /**
+     * Create grid with new node in each center of interval of the old grid
+     * @param grid
+     * @return 
+     */
     public static List<Double> doubleGrid(List<Double> grid){
         Collections.sort(grid);
         List<Double> doubleGrid = new ArrayList<>();

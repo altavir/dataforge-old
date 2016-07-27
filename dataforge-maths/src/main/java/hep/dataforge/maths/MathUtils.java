@@ -7,6 +7,8 @@ package hep.dataforge.maths;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.values.NamedValueSet;
+import org.apache.commons.math3.analysis.BivariateFunction;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  *
@@ -49,5 +51,37 @@ public class MathUtils {
             res += name + ":" + set.getDouble(name);
         }
         return res + "]";
+    }
+
+    /**
+     * calculate function on grid
+     *
+     * @param func
+     * @param grid
+     * @return
+     */
+    public static double[] calculateFunction(UnivariateFunction func, double[] grid) {
+        double[] res = new double[grid.length];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = func.value(grid[i]);
+        }
+        return res;
+    }
+
+    /**
+     * Calculate bivariate function on grid
+     * @param func
+     * @param xGrid
+     * @param yGrid
+     * @return 
+     */
+    public static double[][] calculateFunction(BivariateFunction func, double[] xGrid, double[] yGrid) {
+        double[][] res = new double[xGrid.length][yGrid.length];
+        for (int i = 0; i < xGrid.length; i++) {
+            for (int j = 0; j < yGrid.length; j++) {
+                res[i][j] = func.value(xGrid[i],yGrid[j]);
+            }
+        }
+        return res;
     }
 }

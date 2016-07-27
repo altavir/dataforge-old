@@ -25,7 +25,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  * @param <T> Integrand type for supplied univariate integrator
  * @version $Id: $Id
  */
-public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extends UnivariateIntegrator<UnivariateIntegrand> {
+public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extends UnivariateIntegrator<T> {
 
     private final UnivariateIntegrator<T> integrator;
 
@@ -41,7 +41,7 @@ public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extend
     /** {@inheritDoc}
      * @return  */
     @Override
-    public Predicate<Integrand> getDefaultStopingCondition() {
+    public Predicate<T> getDefaultStopingCondition() {
         return integrator.getDefaultStopingCondition();
     }
 
@@ -52,35 +52,39 @@ public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extend
         return integrator.init(function, lower, upper);
     }
 
-    /** {@inheritDoc}
-     * @return  */
+//    /** {@inheritDoc}
+//     * @return  */
+//    @Override
+//    public T evaluate(T integrand, Predicate<T> condition) {
+//        T firstResult = integrator.init(integrand, condition);
+//        T nextResult = integrator.evaluate(firstResult, condition);
+//
+//        double dif = Math.abs(nextResult.getValue() - firstResult.getValue());
+//        double relDif = dif / Math.abs(firstResult.getValue());
+//        
+//        // No improvement. Returning last result
+//        if(dif == 0){
+//            return nextResult;
+//        }
+//        
+//        UnivariateIntegrand res = new UnivariateIntegrand(nextResult, dif,
+//                relDif, nextResult.getNumCalls(), nextResult.getValue());
+//
+//        while (!condition.test(res)) {
+//            firstResult = nextResult;
+//            nextResult = integrator.evaluate(firstResult, condition);
+//            dif = Math.abs(nextResult.getValue() - firstResult.getValue());
+//            relDif = dif / Math.abs(firstResult.getValue());
+//
+//            res = new UnivariateIntegrand(nextResult, dif,
+//                    relDif, nextResult.getIterations(), nextResult.getNumCalls(), nextResult.getValue());
+//        }
+//
+//        return res;
+//    }
+
     @Override
-    public UnivariateIntegrand evaluate(UnivariateIntegrand integrand, Predicate<Integrand> condition) {
-        T firstResult = integrator.init(integrand, condition);
-        T nextResult = integrator.evaluate(firstResult, condition);
-
-        double dif = Math.abs(nextResult.getValue() - firstResult.getValue());
-        double relDif = dif / Math.abs(firstResult.getValue());
-        
-        // No improvement. Returning last result
-        if(dif == 0){
-            return nextResult;
-        }
-        
-        UnivariateIntegrand res = new UnivariateIntegrand(nextResult, dif,
-                relDif, nextResult.getIterations(), nextResult.getEvaluations(), nextResult.getValue());
-
-        while (!condition.test(res)) {
-            firstResult = nextResult;
-            nextResult = integrator.evaluate(firstResult, condition);
-            dif = Math.abs(nextResult.getValue() - firstResult.getValue());
-            relDif = dif / Math.abs(firstResult.getValue());
-
-            res = new UnivariateIntegrand(nextResult, dif,
-                    relDif, nextResult.getIterations(), nextResult.getEvaluations(), nextResult.getValue());
-        }
-
-        return res;
+    public T evaluate(T integrand, Predicate<T> condition) {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
-
 }

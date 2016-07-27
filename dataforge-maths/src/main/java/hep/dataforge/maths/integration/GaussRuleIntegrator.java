@@ -27,7 +27,7 @@ import org.apache.commons.math3.util.Pair;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class GaussRuleIntegrator extends UnivariateIntegrator<UnivariateIntegrand> {
+public class GaussRuleIntegrator extends UnivariateIntegrator<CMIntegrand> {
 
     private static final GaussIntegratorFactory factory = new GaussIntegratorFactory();
     private final int numpoints;
@@ -56,24 +56,24 @@ public class GaussRuleIntegrator extends UnivariateIntegrator<UnivariateIntegran
     /** {@inheritDoc}
      * @return  */
     @Override
-    public Predicate<Integrand> getDefaultStopingCondition() {
-        return (Integrand t) -> true;
+    public Predicate<CMIntegrand> getDefaultStopingCondition() {
+        return (t) -> true;
     }
 
     /** {@inheritDoc}
      * @return  */
     @Override
-    protected UnivariateIntegrand init(UnivariateFunction function, Double lower, Double upper) {
-        return new UnivariateIntegrand(function, lower, upper);
+    protected CMIntegrand init(UnivariateFunction function, Double lower, Double upper) {
+        return new CMIntegrand(function, lower, upper);
     }
 
     /** {@inheritDoc}
      * @return  */
     @Override
-    public UnivariateIntegrand evaluate(UnivariateIntegrand integrand, Predicate<Integrand> condition) {
+    public CMIntegrand evaluate(CMIntegrand integrand, Predicate<CMIntegrand> condition) {
         GaussIntegrator integrator = getIntegrator(integrand.getLower(), integrand.getUpper());
         double res = integrator.integrate(integrand.getFunction());
-        return new UnivariateIntegrand(integrand, integrand.getAbsoluteAccuracy(), integrand.getRelativeAccuracy(), 1, numpoints, res);
+        return new CMIntegrand(integrand, integrand.getAbsoluteAccuracy(), integrand.getRelativeAccuracy(), 1, numpoints, res);
     }
 
     private GaussIntegrator getIntegrator(double lower, double upper) {

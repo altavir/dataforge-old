@@ -203,12 +203,27 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      */
     public abstract Collection<String> getNodeNames();
 
+    /**
+     * Return a child node with given name or default if child node not found
+     * @param path
+     * @param def
+     * @return 
+     */
     public Meta getNode(String path, Meta def) {
         if (this.hasNode(path)) {
             return getNode(path);
         } else {
             return def;
         }
+    }
+    
+    /**
+     * Return a child node with given name or empty node if child node not found
+     * @param path
+     * @return 
+     */
+    public Meta getNodeOrEmpty(String path) {
+        return getNode(path, Meta.empty());
     }
 
     @Override

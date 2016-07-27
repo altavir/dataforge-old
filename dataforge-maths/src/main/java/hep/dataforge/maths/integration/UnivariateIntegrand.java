@@ -18,12 +18,13 @@ package hep.dataforge.maths.integration;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
- * <p>UnivariateIntegrand class.</p>
+ * <p>
+ * UnivariateIntegrand class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class UnivariateIntegrand extends AbstractIntegrand {
+public class UnivariateIntegrand implements Integrand {
 
     private final UnivariateFunction function;
     /*
@@ -31,16 +32,10 @@ public class UnivariateIntegrand extends AbstractIntegrand {
      */
     private Double lower;
     private Double upper;
+    private Double value;
+    private int numCalls;
 
-    /**
-     * <p>Constructor for UnivariateIntegrand.</p>
-     *
-     * @param function a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     */
     public UnivariateIntegrand(UnivariateFunction function, Double lower, Double upper) {
-        super();
         this.function = function;
         if (lower >= upper) {
             throw new IllegalArgumentException("Wrong bounds for integrand");
@@ -49,68 +44,52 @@ public class UnivariateIntegrand extends AbstractIntegrand {
         this.upper = upper;
     }
 
-    /**
-     * <p>Constructor for UnivariateIntegrand.</p>
-     *
-     * @param integrand a {@link hep.dataforge.maths.integration.UnivariateIntegrand} object.
-     * @param absoluteAccuracy a double.
-     * @param relativeAccuracy a double.
-     * @param iterations a int.
-     * @param evaluations a int.
-     * @param value a {@link java.lang.Double} object.
-     */
-    public UnivariateIntegrand(UnivariateIntegrand integrand, double absoluteAccuracy, double relativeAccuracy, int iterations, int evaluations, Double value) {
-        super(absoluteAccuracy, relativeAccuracy, iterations, evaluations, value);
+    public UnivariateIntegrand(UnivariateIntegrand integrand, int numCalls, Double value) {
+        //TODO check value
+        this.value = value;
+        this.numCalls = numCalls + integrand.numCalls;
         this.function = integrand.getFunction();
         if (integrand.getLower() >= integrand.getUpper()) {
             throw new IllegalArgumentException("Wrong bounds for integrand");
         }
         this.lower = integrand.getLower();
-        this.upper = integrand.getUpper();         
+        this.upper = integrand.getUpper();
     }
 
-    /** {@inheritDoc}
-     * @return  */
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
     public int getDimension() {
         return 1;
     }
 
-    /**
-     * <p>getFunctionValue.</p>
-     *
-     * @param x a double.
-     * @return a double.
-     */
     public double getFunctionValue(double x) {
         return function.value(x);
     }
 
-    /**
-     * <p>Getter for the field <code>function</code>.</p>
-     *
-     * @return the function
-     */
     public UnivariateFunction getFunction() {
         return function;
     }
 
-    /**
-     * <p>Getter for the field <code>lower</code>.</p>
-     *
-     * @return the lower
-     */
     public Double getLower() {
         return lower;
     }
 
-    /**
-     * <p>Getter for the field <code>upper</code>.</p>
-     *
-     * @return the upper
-     */
     public Double getUpper() {
         return upper;
+    }
+
+    @Override
+    public Double getValue() {
+        return value;
+    }
+
+    @Override
+    public int getNumCalls() {
+        return numCalls;
     }
 
 }

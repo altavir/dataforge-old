@@ -25,73 +25,37 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  * @param <T>
  * @version $Id: $Id
  */
-public abstract class UnivariateIntegrator<T extends UnivariateIntegrand> extends Integrator<T> {
-    
+public abstract class UnivariateIntegrator<T extends UnivariateIntegrand> implements Integrator<T> {
+
     /**
-     * Create initial Integrand for given function and borders. This method is required to initialize any
+     * Create initial Integrand for given function and borders. This method is
+     * required to initialize any
      *
-     * @param function a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
+     * @param function a
+     * {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      * @param lower a {@link java.lang.Double} object.
      * @param upper a {@link java.lang.Double} object.
      * @return a T object.
      */
     protected abstract T init(UnivariateFunction function, Double lower, Double upper);
-    
-    /**
-     * <p>evaluate.</p>
-     *
-     * @param function a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     * @return a T object.
-     */
-    public T evaluate(UnivariateFunction function, Double lower, Double upper){
+
+    public T evaluate(UnivariateFunction function, Double lower, Double upper) {
         return evaluate(UnivariateIntegrator.this.init(function, lower, upper));
     }
-    
-    /**
-     * <p>integrate.</p>
-     *
-     * @param function a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     * @return a {@link java.lang.Double} object.
-     */
-    public Double integrate(UnivariateFunction function, Double lower, Double upper){
+
+    public Double integrate(UnivariateFunction function, Double lower, Double upper) {
         return evaluate(function, lower, upper).getValue();
     }
-    
-    /**
-     * <p>evaluate.</p>
-     *
-     * @param condition a {@link java.util.function.Predicate} object.
-     * @param function a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     * @return a T object.
-     */
-    public T evaluate(Predicate<Integrand> condition, UnivariateFunction function, Double lower, Double upper){
-        return evaluate(UnivariateIntegrator.this.init(function, lower, upper),condition);
-    }    
-    
-    /**
-     * <p>init.</p>
-     *
-     * @param integrand a {@link hep.dataforge.maths.integration.UnivariateIntegrand} object.
-     * @return a T object.
-     */
-    public T init(UnivariateIntegrand integrand){
-        return UnivariateIntegrator.this.evaluate(integrand.getFunction(), integrand.getLower(), integrand.getUpper());
+
+    public T evaluate(Predicate<T> condition, UnivariateFunction function, Double lower, Double upper) {
+        return evaluate(init(function, lower, upper), condition);
     }
-    
-    /**
-     * <p>init.</p>
-     *
-     * @param integrand a {@link hep.dataforge.maths.integration.UnivariateIntegrand} object.
-     * @param condition a {@link java.util.function.Predicate} object.
-     * @return a T object.
-     */
-    public T init(UnivariateIntegrand integrand, Predicate<Integrand> condition){
+
+    public T init(UnivariateIntegrand integrand) {
+        return evaluate(integrand.getFunction(), integrand.getLower(), integrand.getUpper());
+    }
+
+    public T init(UnivariateIntegrand integrand, Predicate<T> condition) {
         return evaluate(condition, integrand.getFunction(), integrand.getLower(), integrand.getUpper());
-    }    
+    }
 }

@@ -18,120 +18,80 @@ package hep.dataforge.maths.integration;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 
 /**
- * <p>MonteCarloIntegrand class.</p>
+ * <p>
+ * MonteCarloIntegrand class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MonteCarloIntegrand extends AbstractIntegrand{
+public class MonteCarloIntegrand implements Integrand {
 
     private final MultivariateFunction function;
     private final Sampler sampler;
+    private Double value;
+    private int numCalls;
+    private double accuracy;
 
-//    private List<Double> previousResults;
-    
-    /**
-     * <p>Constructor for MonteCarloIntegrand.</p>
-     *
-     * @param integrand a {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
-     * @param absoluteAccuracy a double.
-     * @param relativeAccuracy a double.
-     * @param iterations a int.
-     * @param evaluations a int.
-     * @param value a {@link java.lang.Double} object.
-     */
-    public MonteCarloIntegrand(MonteCarloIntegrand integrand, double absoluteAccuracy, double relativeAccuracy, int iterations, int evaluations, Double value) {
-        super(absoluteAccuracy, relativeAccuracy, iterations, evaluations, value);
+    public MonteCarloIntegrand(MonteCarloIntegrand integrand, int numCalls, Double value, double accuracy) {
+        this.numCalls = numCalls;
+        this.value = value;
         this.function = integrand.getFunction();
         this.sampler = integrand.getSampler();
-//        previousResults = new ArrayList<>();
-//        previousResults.add(value);        
-    }    
-    
-    /**
-     * <p>Constructor for MonteCarloIntegrand.</p>
-     *
-     * @param function a {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
-     * @param sampler a {@link hep.dataforge.maths.integration.Sampler} object.
-     * @param absoluteAccuracy a double.
-     * @param relativeAccuracy a double.
-     * @param iterations a int.
-     * @param evaluations a int.
-     * @param value a {@link java.lang.Double} object.
-     */
-    public MonteCarloIntegrand(MultivariateFunction function, Sampler sampler, double absoluteAccuracy, double relativeAccuracy, int iterations, int evaluations, Double value) {
-        super(absoluteAccuracy, relativeAccuracy, iterations, evaluations, value);
-        this.function = function;
-        this.sampler = sampler;
-//        previousResults = new ArrayList<>();
-//        previousResults.add(value);
+        this.accuracy = accuracy;
     }
 
-    /**
-     * <p>Constructor for MonteCarloIntegrand.</p>
-     *
-     * @param function a {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
-     * @param sampler a {@link hep.dataforge.maths.integration.Sampler} object.
-     */
+    public MonteCarloIntegrand(MultivariateFunction function, Sampler sampler, int numCalls, Double value, double accuracy) {
+        this.numCalls = numCalls;
+        this.value = value;
+        this.function = function;
+        this.sampler = sampler;
+        this.accuracy = accuracy;
+    }
+
     public MonteCarloIntegrand(MultivariateFunction function, Sampler sampler) {
         super();
         this.function = function;
         this.sampler = sampler;
-//        previousResults = new ArrayList<>();
     }
-    
-    
-    
-    
-    /** {@inheritDoc}
-     * @return  */
+
+    /**
+     * {@inheritDoc}
+     *
+     * @return
+     */
     @Override
     public int getDimension() {
         return getSampler().getDimension();
     }
 
-    /**
-     * <p>getFunctionValue.</p>
-     *
-     * @param x an array of double.
-     * @return a double.
-     */
-    public double getFunctionValue(double[] x){
+    public double getFunctionValue(double[] x) {
         return function.value(x);
     }
 
-//    /**
-//     * @return the previousResults
-//     */
-//    public List<Double> getPreviousResults() {
-//        return previousResults;
-//    }
-//    
-    /**
-     * <p>getSample.</p>
-     *
-     * @return a {@link hep.dataforge.maths.integration.Sample} object.
-     */
-    public Sample getSample(){
+    public Sample getSample() {
         return sampler.nextSample();
     }
-    
-    /**
-     * <p>Getter for the field <code>function</code>.</p>
-     *
-     * @return the function
-     */
+
     public MultivariateFunction getFunction() {
         return function;
     }
 
-    /**
-     * <p>Getter for the field <code>sampler</code>.</p>
-     *
-     * @return the sampler
-     */
     public Sampler getSampler() {
         return sampler;
     }
-    
+
+    @Override
+    public Double getValue() {
+        return value;
+    }
+
+    @Override
+    public int getNumCalls() {
+        return numCalls;
+    }
+
+    double getRelativeAccuracy() {
+        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    }
+
 }

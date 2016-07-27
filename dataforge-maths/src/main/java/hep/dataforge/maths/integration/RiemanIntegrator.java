@@ -49,8 +49,8 @@ public class RiemanIntegrator extends UnivariateIntegrator<UnivariateIntegrand> 
      * @return
      */
     @Override
-    public Predicate<Integrand> getDefaultStopingCondition() {
-        return (Integrand t) -> true;
+    public Predicate<UnivariateIntegrand> getDefaultStopingCondition() {
+        return (t) -> true;
     }
 
     /**
@@ -69,7 +69,7 @@ public class RiemanIntegrator extends UnivariateIntegrator<UnivariateIntegrand> 
      * @return
      */
     @Override
-    public UnivariateIntegrand evaluate(UnivariateIntegrand integrand, Predicate<Integrand> condition) {
+    public UnivariateIntegrand evaluate(UnivariateIntegrand integrand, Predicate<UnivariateIntegrand> condition) {
         double[] grid = GridCalculator.getUniformUnivariateGrid(integrand.getLower(), integrand.getUpper(), numpoints);
         double res = 0;
 
@@ -78,12 +78,12 @@ public class RiemanIntegrator extends UnivariateIntegrator<UnivariateIntegrand> 
         double prevX;
         double nextX;
 
-        for (int i = 0; i < grid.length-1; i++) {
+        for (int i = 0; i < grid.length - 1; i++) {
             prevX = grid[i];
             nextX = grid[i + 1];
             res += f.value(prevX) * (nextX - prevX);
         }
 
-        return new UnivariateIntegrand(integrand, integrand.getAbsoluteAccuracy(), integrand.getRelativeAccuracy(), 1, numpoints, res);
+        return new UnivariateIntegrand(integrand, numpoints, res);
     }
 }
