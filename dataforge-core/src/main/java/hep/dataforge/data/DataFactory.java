@@ -20,7 +20,6 @@ import static hep.dataforge.data.DataFactory.*;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaFactory;
 
 /**
  * A factory for data tree
@@ -31,7 +30,7 @@ import hep.dataforge.utils.MetaFactory;
 @NodeDef(name = NODE_KEY)
 @ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
-public abstract class DataFactory<T> implements MetaFactory<DataNode> {
+public abstract class DataFactory<T> {
 
     public static final String NODE_META_KEY = "meta";
     public static final String NODE_TYPE_KEY = "type";
@@ -44,7 +43,6 @@ public abstract class DataFactory<T> implements MetaFactory<DataNode> {
         this.baseType = baseType;
     }
 
-    @Override
     public DataNode<T> build(Context context, Meta dataConfig) {
         return builder(context, dataConfig).build();
     }

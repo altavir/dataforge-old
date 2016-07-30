@@ -8,8 +8,11 @@ package hep.dataforge.maths;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.maths.functions.UnivariateFunctionDispatcher;
+import hep.dataforge.maths.functions.FunctionDispatcher;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.MetaFactory;
+import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
@@ -24,9 +27,31 @@ public class MathPlugin extends BasicPlugin {
         return plugin;
     }
 
-    private final UnivariateFunctionDispatcher univariateFactory = new UnivariateFunctionDispatcher();
+    private final FunctionDispatcher<UnivariateFunction> univariateFactory = new FunctionDispatcher<>();
+    private final FunctionDispatcher<BivariateFunction> bivariateFactory = new FunctionDispatcher<>();
 
     public UnivariateFunction buildUnivariateFunction(Meta meta) {
         return univariateFactory.build(meta);
     }
+
+    public void registerUnivariate(String type, MetaFactory<UnivariateFunction> factory) {
+        this.univariateFactory.addFactory(type, factory);
+    }
+
+    public BivariateFunction buildBivariateFunction(Meta meta) {
+        return bivariateFactory.build(meta);
+    }
+
+    public BivariateFunction buildBivariateFunction(String type) {
+        return bivariateFactory.build(new MetaBuilder("").setValue("type", type));
+    }
+
+    public void registerBivariate(String type, MetaFactory<BivariateFunction> factory) {
+        this.bivariateFactory.addFactory(type, factory);
+    }
+
+    public void registerBivariate(String type, BivariateFunction function) {
+        this.bivariateFactory.addFactory(type, meta -> function);
+    }
+
 }

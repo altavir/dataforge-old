@@ -5,17 +5,29 @@
  */
 package hep.dataforge.storage.commons;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.utils.MetaFactory;
 
 /**
  * The type of storage with meta builder
+ *
  * @author Alexander Nozik
  */
-public interface StorageType extends MetaFactory<Storage> {
+public interface StorageType {
+
     /**
      * The type of the storage
-     * @return 
+     *
+     * @return
      */
     String type();
+
+    /**
+     * Build storage
+     * @param context
+     * @param meta
+     * @return 
+     */
+    Storage build(Context context, Meta meta);
 }

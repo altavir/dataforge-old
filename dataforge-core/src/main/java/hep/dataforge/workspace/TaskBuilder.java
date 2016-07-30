@@ -19,13 +19,13 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
 import hep.dataforge.utils.GenericBuilder;
-import hep.dataforge.utils.MetaFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import javafx.util.Pair;
+import hep.dataforge.utils.ContextMetaFactory;
 
 /**
  * A builder for custom task. Does not ensure type safety.
@@ -38,7 +38,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     /**
      * A list of actions inside task
      */
-    private final List<Pair<Function<Context, Action>, MetaFactory<Meta>>> actions = new ArrayList<>();
+    private final List<Pair<Function<Context, Action>, ContextMetaFactory<Meta>>> actions = new ArrayList<>();
     /**
      * Transformations of TaskModel
      */
@@ -57,7 +57,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(String actionName, MetaFactory<Meta> metaBuilder) {
+    public TaskBuilder doLast(String actionName, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> ActionManager.buildFrom(ctx).getAction(actionName), metaBuilder));
         return self();
     }
@@ -69,7 +69,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(Class<? extends Action> actionClass, MetaFactory<Meta> metaBuilder) {
+    public TaskBuilder doLast(Class<? extends Action> actionClass, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> {
             try {
                 return actionClass.newInstance();
@@ -88,7 +88,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(Action action, MetaFactory<Meta> metaBuilder) {
+    public TaskBuilder doLast(Action action, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> action, metaBuilder));
         return self();
     }
@@ -122,7 +122,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doFirst(Action action, MetaFactory<Meta> metaBuilder) {
+    public TaskBuilder doFirst(Action action, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(0, new Pair<>(ctx -> action, metaBuilder));
         return self();
     }
@@ -236,7 +236,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
         @Override
         protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
             DataNode res = state.getData();
-            for (Pair<Function<Context, Action>, MetaFactory<Meta>> pair : actions) {
+            for (Pair<Function<Context, Action>, ContextMetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
                 Meta actionMeta = pair.getValue().build(context, config);
                 res = action.withParentProcess(callback.workName()).run(res, actionMeta);

@@ -7,20 +7,21 @@ package hep.dataforge.maths.functions;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.MetaFactory;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  * A factory combining other factories by type
+ *
  * @author Alexander Nozik
  */
-public class UnivariateFunctionDispatcher implements UnivariateFunctionFactory {
+public class FunctionDispatcher<T> implements MetaFactory<T> {
 
-    private final Map<String, UnivariateFunctionFactory> factoryMap = new HashMap<>();
+    private final Map<String, MetaFactory<T>> factoryMap = new HashMap<>();
 
     @Override
-    public UnivariateFunction build(Meta meta) {
+    public T build(Meta meta) {
         String type = meta.getString("type", "");
         if (factoryMap.containsKey(type)) {
             return factoryMap.get(type).build(meta);
@@ -29,7 +30,7 @@ public class UnivariateFunctionDispatcher implements UnivariateFunctionFactory {
         }
     }
 
-    public synchronized UnivariateFunctionDispatcher addFactory(String type, UnivariateFunctionFactory factory) {
+    public synchronized FunctionDispatcher addFactory(String type, MetaFactory<T> factory) {
         this.factoryMap.put(type, factory);
         return this;
     }

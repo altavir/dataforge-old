@@ -5,14 +5,14 @@
  */
 package hep.dataforge.fitting.models;
 
-import hep.dataforge.utils.MetaFactory;
+import hep.dataforge.utils.ContextMetaFactory;
 
 /**
  *
  * @author Alexander Nozik
  */
 @FunctionalInterface
-public interface ModelFactory extends MetaFactory<Model> {
+public interface ModelFactory extends ContextMetaFactory<Model> {
     default ModelDescriptor descriptor(){
         return null;
     }

@@ -19,10 +19,10 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaFactory;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import hep.dataforge.utils.ContextMetaFactory;
 
 /**
  * The library of available models
@@ -42,7 +42,7 @@ public class ModelManager {
 
     private ModelManager defaultManager;
 
-    private final HashMap<String, MetaFactory<Model>> modelList = new HashMap<>();
+    private final HashMap<String, ContextMetaFactory<Model>> modelList = new HashMap<>();
     private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
 
     public ModelManager(ModelManager defaultManager) {
@@ -52,11 +52,11 @@ public class ModelManager {
     public ModelManager() {
     }
 
-    public void addModel(String name, MetaFactory<Model> mf) {
+    public void addModel(String name, ContextMetaFactory<Model> mf) {
         modelList.put(name.toLowerCase(), mf);
     }
 
-    public void addModel(String name, MetaFactory<Model> mf, ModelDescriptor descriptor) {
+    public void addModel(String name, ContextMetaFactory<Model> mf, ModelDescriptor descriptor) {
         modelList.put(name.toLowerCase(), mf);
         descriptorList.put(name.toLowerCase(), descriptor);
     }
@@ -74,7 +74,7 @@ public class ModelManager {
     @ValueDef(name = "modelName", info = "The name of the preloaded model to use.")
     public Model buildModel(Context context, Meta a) {
         String modelName = a.getString(MODEL_NAME);
-        MetaFactory<Model> factory = modelList.get(modelName.toLowerCase());
+        ContextMetaFactory<Model> factory = modelList.get(modelName.toLowerCase());
         if (factory == null) {
             if (defaultManager == null) {
                 throw new NameNotFoundException(modelName);
@@ -86,7 +86,7 @@ public class ModelManager {
     }
 
     public Model buildModel(Context context, String name) throws NameNotFoundException {
-        MetaFactory<Model> factory = modelList.get(name.toLowerCase());
+        ContextMetaFactory<Model> factory = modelList.get(name.toLowerCase());
         if (factory == null) {
             if (defaultManager == null) {
                 throw new NameNotFoundException(name);

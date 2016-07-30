@@ -21,7 +21,6 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
-import javafx.beans.value.WeakChangeListener;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
 
@@ -140,6 +139,11 @@ public class Work<R> implements Named {
             curProgress.set(curMaxProgress.get());
             handle(t, u);
         });
+
+        if (task.isDone()) {
+            curProgress.set(curMaxProgress.get());
+        }
+
         taskProperty.set(task);
         isDone.invalidate();
     }
@@ -233,10 +237,9 @@ public class Work<R> implements Named {
         });
 
         //invalidating isDone in case of child state change
-        childProcess.isDone.addListener(new WeakChangeListener<>(
-                (ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    isDone.invalidate();
-                }));
+        childProcess.isDone.addListener((Observable observable) -> {
+            isDone.invalidate();
+        });
 
         // Revalidate completions
         isDone.invalidate();

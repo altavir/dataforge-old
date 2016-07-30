@@ -45,8 +45,6 @@ public interface Workspace extends Encapsulated, MetaProvider {
     default Data getData(String dataPath) {
         return getDataStage().getData(dataPath);
     }
-    
-    
 
     /**
      * Get the whole data tree

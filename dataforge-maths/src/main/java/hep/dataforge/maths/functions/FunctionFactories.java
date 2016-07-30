@@ -5,16 +5,18 @@
  */
 package hep.dataforge.maths.functions;
 
+import hep.dataforge.utils.MetaFactory;
 import hep.dataforge.values.Value;
 import java.util.List;
+import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class UnivariateFunctionFactories {
+public class FunctionFactories {
 
-    public static UnivariateFunctionFactory parabola() {
+    public static MetaFactory<UnivariateFunction> parabola() {
         return meta -> {
             double a = meta.getDouble("a", 1);
             double b = meta.getDouble("b", 0);
@@ -23,7 +25,7 @@ public class UnivariateFunctionFactories {
         };
     }
 
-    public static UnivariateFunctionFactory polynomial() {
+    public static MetaFactory<UnivariateFunction> polynomial() {
         return meta -> {
             List<Value> coefs = meta.getValue("coef").listValue();
             return x -> {

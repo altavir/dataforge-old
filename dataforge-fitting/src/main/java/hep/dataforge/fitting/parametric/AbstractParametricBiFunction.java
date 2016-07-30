@@ -32,5 +32,5 @@ public abstract class AbstractParametricBiFunction extends AbstractParametric im
             throw new NotDefinedException();
         }
     }
-
+    
 }
