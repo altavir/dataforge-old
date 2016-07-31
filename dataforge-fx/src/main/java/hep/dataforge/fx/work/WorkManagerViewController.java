@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
@@ -36,14 +35,13 @@ public class WorkManagerViewController implements Initializable {
             FXMLLoader loader = new FXMLLoader(manager.getClass().getResource("/fxml/ProcessManagerView.fxml"));
             BorderPane p = loader.load();
             WorkManagerViewController controller = loader.getController();
-            controller.setManager(manager);
+            controller.setRoot(manager.getRoot());
             return p;
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    private WorkManager manager;
     private final Map<Work, Parent> processNodeCache = CommonUtils.<Work, Parent>getLRUCache(400);
 
     @FXML
@@ -70,36 +68,25 @@ public class WorkManagerViewController implements Initializable {
         });
     }
 
-    public void setManager(WorkManager manager) {
-        this.manager = manager;
-        Platform.runLater(() -> processTreeView.setRoot(buildTree(manager.getRoot())));
+    public void setRoot(Work<?> rootWork) {
+        TreeItem<Work> root = buildTree(rootWork);
+        Platform.runLater(() -> processTreeView.setRoot(root));
     }
 
     //FXME concurrent modification
-    private TreeItem<Work> buildTree(Work proc) {
+    private TreeItem<Work> buildTree(Work<?> proc) {
         TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
-//        res.setGraphic(WorkViewController.build(proc));
-        proc.getChildren().values().stream().forEach(new Consumer<Work>() {
-            @Override
-            public void accept(Work child) {
-                synchronized (WorkManagerViewController.this) {
-                    res.getChildren().add(buildTree(child));
-                }
-            }
+        proc.getChildren().values().stream().forEach((Work child) -> {
+            res.getChildren().add(buildTree(child));
         });
 
-        proc.getChildren().addListener(new MapChangeListener<String, Work>() {
-            @Override
-            public void onChanged(MapChangeListener.Change<? extends String, ? extends Work> change) {
-                Platform.runLater(() -> {
-                    if (change.wasAdded()) {
-                        res.getChildren().add(buildTree(change.getValueAdded()));
-                    }
-                    if (change.wasRemoved()) {
-                        res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
-                    }
-                });
+        proc.getChildren().addListener((MapChangeListener.Change<? extends String, ? extends Work> change) -> {
+            if (change.wasAdded()) {
+                res.getChildren().add(buildTree(change.getValueAdded()));
+            }
+            if (change.wasRemoved()) {
+                res.getChildren().removeIf(item -> item.getValue().equals(change.getValueRemoved()));
             }
         });
 

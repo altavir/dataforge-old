@@ -117,7 +117,7 @@ public class Work<R> implements Named {
      *
      * @return
      */
-    public synchronized ObservableMap<String, Work> getChildren() {
+    public ObservableMap<String, Work> getChildren() {
         return children;
     }
 

@@ -61,8 +61,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     return transform(report, name, meta, input);
                 }
         );
-
-        workListener().submit(name, goal.result());
+        //PENDING a bit ugly solution
+        goal.onStart(() -> workListener().submit(name, goal.result()));
 
         return new ActionResult<>(report, goal, outputMeta(name, groupMeta, data), getOutputType());
     }

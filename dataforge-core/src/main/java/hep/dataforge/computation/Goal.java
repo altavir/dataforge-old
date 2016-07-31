@@ -14,10 +14,11 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public interface Goal<T> {
-   
+
     /**
      * A stream of all bound direct dependencies
-     * @return 
+     *
+     * @return
      */
     Stream<Goal> depencencies();
 
@@ -26,7 +27,6 @@ public interface Goal<T> {
      */
     void start();
 
-
     /**
      * Get goal result for given slot. Does not trigger goal computation.
      * Canceling this future aborts all subsequent goals
@@ -34,15 +34,26 @@ public interface Goal<T> {
      * @return
      */
     CompletableFuture<T> result();
-    
+
     /**
      * Start and get sync result
+     *
      * @return
-     * @throws Exception 
+     * @throws Exception
      */
-    default T get() throws Exception{
+    default T get() throws Exception {
         start();
         return result().get();
+    }
+
+    /**
+     * Complete this goal externally with given result. May or may not cancel
+     * current execution
+     *
+     * @param result
+     */
+    default void complete(T result) {
+        result().complete(result);
     }
 
 }

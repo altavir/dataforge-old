@@ -55,7 +55,6 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         Report log = new Report(getName(), new Report(data.getName(), getContext()));
         Meta outputMeta = outputMeta(data).build();
         Goal<R> goal = new ManyToOneGoal(data, actionMeta, outputMeta, log);
-        workListener().submit(data.getName(), goal.result());
         return new ActionResult<>(log, goal, outputMeta, getOutputType());
     }
 
@@ -137,6 +136,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         protected R compute() throws Exception {
             Laminate meta = inputMeta(data.meta(), actionMeta);
             Thread.currentThread().setName(Name.joinString(getWorkName(), data.getName()));
+            workListener().submit(data.getName(), this.result());
             beforeGroup(log, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()

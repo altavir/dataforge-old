@@ -59,7 +59,7 @@ public class LocalFileDataCache extends DataCache {
     }
 
     private File cacheDir() {
-        if(!cacheDir.exists()){
+        if (!cacheDir.exists()) {
             cacheDir.mkdirs();
         }
         return cacheDir;
@@ -107,6 +107,14 @@ public class LocalFileDataCache extends DataCache {
     @Override
     protected boolean contains(Identity id) {
         return lruCache.containsKey(id) || fileMap.containsKey(id);
+    }
+
+    @Override
+    protected void invalidate(Identity id) {
+        lruCache.remove(id);
+        if (fileMap.containsKey(id)) {
+            fileMap.get(id).delete();
+        }
     }
 
 }
