@@ -12,7 +12,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 /**
  *
@@ -81,28 +80,37 @@ public class WorkManager implements Encapsulated, WorkListener {
      * @param runnable
      * @return
      */
-    public Work post(String processName, Runnable runnable) {
-        return submit(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
+    public Work submit(String processName, Runnable runnable) {
+        return WorkManager.this.submit(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
+//
+//    public <U> Work<U> post(String processName, Supplier<U> sup) {
+//        return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
+//    }
 
-    public <U> Work<U> post(String processName, Supplier<U> sup) {
-        return submit(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
-    }
-
-    public Work post(String processName, Consumer<Callback> con) {
+    public Work submit(String processName, Consumer<Callback> con) {
         Callback callback = callback(processName);
-        return post(processName, () -> con.accept(callback));
+        return WorkManager.this.submit(processName, () -> con.accept(callback));
     }
 
-    public <U> Work<U> post(String processName, Function<Callback, U> func) {
-        Callback callback = callback(processName);
-        return post(processName, () -> func.apply(callback));
-    }
-
-    public <U> Work<U> post(String processName) {
+    public Work submit(String processName) {
         getContext().getLogger().debug("Posting empty process with name '{}' to the process manager", processName);
         return build(processName, null);
     }
+    
+    /**
+     * Post the task to the manager and return corresponding future;
+     * @param <U>
+     * @param processName
+     * @param func
+     * @return 
+     */
+    public <U> CompletableFuture<U> post(String processName, Function<Callback, U> func) {
+        Callback callback = callback(processName);
+        CompletableFuture<U> future = CompletableFuture.supplyAsync(()->func.apply(callback));
+        submit(processName, future);
+        return future;
+    }    
 
     public Callback callback(String processName) {
         return new Callback(this, processName);
@@ -117,7 +125,7 @@ public class WorkManager implements Encapsulated, WorkListener {
      * @return
      */
     @Override
-    public synchronized <U> Work<U> submit(String processName, CompletableFuture<U> task) {
+    public synchronized Work submit(String processName, CompletableFuture<?> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
         return build(processName, task);
     }
@@ -166,14 +174,12 @@ public class WorkManager implements Encapsulated, WorkListener {
      */
     protected void onFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
-        update(processName, p -> p.setProgressToMax());
-        synchronized (this) {
-            if (root.isDone() && parallelExecutor != null) {
-                parallelExecutor.shutdown();
-                parallelExecutor = null;
-                getContext().getLogger().info("All processes complete. Shuting executor down");
-            }
+        if (root.isDone() && parallelExecutor != null) {
+            parallelExecutor.shutdown();
+            parallelExecutor = null;
+            getContext().getLogger().info("All processes complete. Shuting executor down");
         }
+
     }
 
     private synchronized void update(String processName, Consumer<Work> consumer) {
@@ -258,17 +264,17 @@ public class WorkManager implements Encapsulated, WorkListener {
     public void updateMessage(String processName, String message) {
         update(processName, w -> w.setMessage(message));
     }
-    
+
     /**
      * terminate all works and shutdown executors
      */
-    public void shutdown(){
+    public void shutdown() {
         this.root.cancel(true);
-        if(parallelExecutor!= null){
+        if (parallelExecutor != null) {
             parallelExecutor.shutdownNow();
             parallelExecutor = null;
         }
-        if(singleThreadExecutor!= null){
+        if (singleThreadExecutor != null) {
             singleThreadExecutor.shutdownNow();
             singleThreadExecutor = null;
         }

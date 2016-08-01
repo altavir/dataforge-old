@@ -68,13 +68,13 @@ public class WorkManagerViewController implements Initializable {
         });
     }
 
-    public void setRoot(Work<?> rootWork) {
+    public void setRoot(Work rootWork) {
         TreeItem<Work> root = buildTree(rootWork);
         Platform.runLater(() -> processTreeView.setRoot(root));
     }
 
     //FXME concurrent modification
-    private TreeItem<Work> buildTree(Work<?> proc) {
+    private TreeItem<Work> buildTree(Work proc) {
         TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
         proc.getChildren().values().stream().forEach((Work child) -> {

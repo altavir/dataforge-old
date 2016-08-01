@@ -61,5 +61,5 @@ public interface WorkListener {
      * @param processName
      * @param task
      */
-    <U> Work<U> submit(String processName, CompletableFuture<U> task);
+    Work submit(String processName, CompletableFuture<?> task);
 }

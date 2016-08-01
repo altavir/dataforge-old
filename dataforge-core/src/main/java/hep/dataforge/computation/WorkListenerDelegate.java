@@ -49,7 +49,7 @@ public class WorkListenerDelegate implements WorkListener {
     }
 
     @Override
-    public <U> Work<U> submit(String processName, CompletableFuture<U> task) {
+    public Work submit(String processName, CompletableFuture<?> task) {
         return manager.submit(makeName(processName), task);
     }
     

@@ -35,11 +35,11 @@ import javafx.collections.ObservableMap;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class Work<R> implements Named {
+public class Work implements Named {
 
     private final String name;
 
-    private final ObjectProperty<CompletableFuture<R>> taskProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<CompletableFuture<?>> taskProperty = new SimpleObjectProperty<>();
 
     private final ObservableMap<String, Work> children = FXCollections.<String, Work>observableHashMap();
 
@@ -74,7 +74,7 @@ public class Work<R> implements Named {
     public Work(WorkManager manager, String name) {
         this.name = name;
         this.manager = manager;
-        this.curProgress = new SimpleDoubleProperty(-1);
+        this.curProgress = new SimpleDoubleProperty(0);
 
         totalProgress = new DoubleBinding() {
             @Override
@@ -86,7 +86,7 @@ public class Work<R> implements Named {
         totalMaxProgress = new DoubleBinding() {
             @Override
             protected double computeValue() {
-                return getProgress();
+                return getMaxProgress();
             }
         };
 
@@ -94,7 +94,7 @@ public class Work<R> implements Named {
             totalProgress.invalidate();
         });
 
-        this.curMaxProgress = new SimpleDoubleProperty(1);
+        this.curMaxProgress = new SimpleDoubleProperty(0);
 
         curMaxProgress.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
             totalMaxProgress.invalidate();
@@ -126,42 +126,31 @@ public class Work<R> implements Named {
         return name;
     }
 
-    public ObjectProperty<CompletableFuture<R>> taskProperty() {
+    public ObjectProperty<CompletableFuture<?>> taskProperty() {
         return taskProperty;
     }
 
-    protected void setTask(CompletableFuture<R> task) {
+    protected void setTask(CompletableFuture<?> task) {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
-        task.whenComplete((Object t, Throwable u) -> {
+        getManager().onStarted(getName());
+//        if (task.isDone()) {
+//            curProgress.set(curMaxProgress.get());
+//        }
+
+        task.whenCompleteAsync((res, ex) -> {
+            curProgress.set(curMaxProgress.get());
             isDone.invalidate();
-            curProgress.set(curMaxProgress.get());
-            handle(t, u);
+            getManager().onFinished(getName());
         });
-
-        if (task.isDone()) {
-            curProgress.set(curMaxProgress.get());
-        }
-
+        
         taskProperty.set(task);
         isDone.invalidate();
     }
 
-    public CompletableFuture<R> getTask() {
+    public CompletableFuture<?> getTask() {
         return taskProperty.get();
-    }
-
-    /**
-     * Handle task result. By default does nothing. Reserved for extensions
-     *
-     * @param result
-     * @param exception
-     */
-    protected void handle(Object result, Throwable exception) {
-        if (exception != null) {
-            getManager().getContext().getLogger().error("Exception in process execution", exception);
-        }
     }
 
     public Work findProcess(String processName) {
@@ -190,11 +179,11 @@ public class Work<R> implements Named {
         }
     }
 
-    <T> Work<T> addChild(String childName, CompletableFuture<T> future) {
+    Work addChild(String childName, CompletableFuture<?> future) {
         return addChild(Name.of(childName), future);
     }
 
-    <T> Work<T> addChild(Name childName, CompletableFuture<T> future) {
+    Work addChild(Name childName, CompletableFuture<?> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
@@ -215,13 +204,12 @@ public class Work<R> implements Named {
      * @param childName a name of child process without path notation
      * @param future could be null
      */
-    protected <T> Work<T> addDirectChild(String childName, CompletableFuture<T> future) {
+    protected Work addDirectChild(String childName, CompletableFuture<?> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
         Work childProcess = new Work(getManager(), Name.join(getName(), childName).toString());
-        getManager().onStarted(childProcess.getName());
         if (future != null) {
             childProcess.setTask(future);
         }
@@ -350,13 +338,11 @@ public class Work<R> implements Named {
      * Remove completed processes
      */
     public synchronized void cleanup() {
-        for (String childName : children.entrySet()
+        children.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().isDone())
                 .map(entry -> entry.getKey())
-                .collect(Collectors.toList())) {
-            this.children.remove(childName);
-        }
+                .collect(Collectors.toList()).stream().forEach((childName) -> this.children.remove(childName));
         this.children.forEach((String procName, Work proc) -> proc.cleanup());
     }
 

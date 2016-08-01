@@ -47,14 +47,14 @@ public abstract class GenericTask<T> implements Task<T> {
         Workspace workspace = model.getWorkspace();
         WorkManager manager = workspace.getContext().workManager();
         // root process for this task
-        final Work taskProcess = manager.post(getName() + "_" + model.hashCode());
+        final Work taskProcess = manager.submit(getName() + "_" + model.hashCode());
 
         CompletableFuture<TaskState> gatherTask = manager.<TaskState>post(Name.join(taskProcess.getName(), "gather").toString(),
                 callback -> {
                     getLogger().info("Starting gathering phase");
                     Report report = new Report(getName(), workspace.getContext().getReport());
                     return new TaskState(gather(callback, workspace, model), report);
-                }).getTask();
+                });
 
         CompletableFuture<TaskState> transformTask = gatherTask
                 .thenCompose((TaskState state) -> manager.<TaskState>post(Name.join(taskProcess.getName(), "transform").toString(),
@@ -67,7 +67,7 @@ public abstract class GenericTask<T> implements Task<T> {
                                 result.finish();
                             }
                             return result;
-                        }).getTask());
+                        }));
 
         CompletableFuture<DataNode<T>> resultTask = transformTask
                 .thenCompose((TaskState state) -> manager.<DataNode<T>>post(Name.join(taskProcess.getName(), "result").toString(),
@@ -78,7 +78,7 @@ public abstract class GenericTask<T> implements Task<T> {
                             });
                             getLogger().info("Starting result phase");
                             return result(callback, workspace, state, model);
-                        }).getTask());
+                        }));
 
         return resultTask.join();
     }

@@ -89,7 +89,7 @@ public class TaskModel implements Named, Annotated {
      */
     public void out(BiConsumer<Context, TaskState> consumer) {
         TaskOutput out = (WorkManager.Callback callback, Context context, TaskState state) -> {
-            callback.getManager().post(callback.workName() + ".output", () -> consumer.accept(context, state));
+            callback.getManager().submit(callback.workName() + ".output", () -> consumer.accept(context, state));
         };
         this.outs.add(out);
     }
