@@ -149,9 +149,9 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param config
      * @return
      */
-    @SuppressWarnings("unchecked")
     protected DataNode<T> result(WorkManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
         workspace.updateStage(getName(), state.getResult());
-        return state.getResult();
+        //FIXME check for type cast
+        return (DataNode<T>) state.getResult();
     }
 }

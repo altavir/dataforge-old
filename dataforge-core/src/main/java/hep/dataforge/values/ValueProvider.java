@@ -18,6 +18,7 @@ package hep.dataforge.values;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.navigation.Path;
 import hep.dataforge.navigation.Provider;
+import java.util.List;
 
 public interface ValueProvider {
 
@@ -111,5 +112,14 @@ public interface ValueProvider {
         } else {
             return def;
         }
+    }
+
+    default String[] getStringArray(String name) {
+        List<Value> vals = getValue(name).listValue();
+        String[] res = new String[vals.size()];
+        for (int i = 0; i < res.length; i++) {
+            res[i] = vals.get(i).stringValue();
+        }
+        return res;
     }
 }

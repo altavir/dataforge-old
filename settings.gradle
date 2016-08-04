@@ -7,8 +7,8 @@ include ':dataforge-fx' // gui tools using JavaFx
 
 include ':dataforge-grind' // groovy wrapper
 
-include ':dataforge-fitting' // fitting tools
-include ':dataforge-fitting:dataforge-minuit' // MINUIT plugin for fitting
+include ':dataforge-stat' // fitting tools
+include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting
 
 include ':dataforge-control' // tools for measurement and control applications
 include ':dataforge-storage' // storage module

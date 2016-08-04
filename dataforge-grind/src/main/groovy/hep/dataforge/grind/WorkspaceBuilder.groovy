@@ -8,10 +8,11 @@ package hep.dataforge.grind
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
+import hep.dataforge.meta.Meta
+import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.TaskBuilder
 import hep.dataforge.workspace.Workspace
-import hep.dataforge.workspace.BasicWorkspace
 
 /**
  *
@@ -81,7 +82,7 @@ class WorkspaceBuilder {
     }
 
     private class DataSpec {
-        def file(String name, String path, Closure fileMeta) {
+        def file(String name, String path, Closure<Meta> fileMeta) {
             def metaSpec = new GrindMetaBuilder()
             def metaExec = fileMeta.rehydrate(metaSpec, this, this);
             metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
@@ -90,6 +91,12 @@ class WorkspaceBuilder {
         //TODO extends data specification
     }
 
+    /**
+     * Build new task using task builder
+     * @param taskName
+     * @param cl
+     * @return
+     */
     def task(String taskName, Closure cl) {
         def taskSpec = new TaskSpec();
         def code = cl.rehydrate(taskSpec, this, this);
@@ -98,26 +105,23 @@ class WorkspaceBuilder {
         builder.loadTask(taskSpec.build());
     }
 
-//    def task(String taskName){
-//        Task task = Class.forName(taskName).newInstance();
-//        builder.loadTask(task);
-//    }
+    def wrapTask
 
     /**
-     * Load task instance
+     * load existing task
      * @param task
      * @return
      */
-    def task(Task task){
+    def loadTask(Task task) {
         builder.loadTask(task);
     }
 
     /**
-     * Load task by class
+     * Load existing task by class
      * @param taskClass
      * @return
      */
-    def task(Class<Task> taskClass){
+    def loadTask(Class<Task> taskClass) {
         builder.loadTask(taskClass.newInstance());
     }
 

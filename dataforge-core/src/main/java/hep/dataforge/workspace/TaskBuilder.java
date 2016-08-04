@@ -257,17 +257,6 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
             return model;
         }
 
-        
-        
-//        @Override
-//        public TaskModel model(Workspace workspace, Meta taskMeta) {
-//            TaskModel model = super.model(workspace, taskMeta);
-//            modelTransformations.stream().forEach(dep -> {
-//                dep.apply(workspace, taskMeta, model);
-//            });
-//            return model;
-//        }
-
         @Override
         public String getName() {
             return name;

@@ -78,6 +78,18 @@ public interface Workspace extends Encapsulated, MetaProvider {
         return this.<T>getTask(taskName).run(this, config);
     }
 
+    /**
+     * Run task using meta previously stored in workspace
+     *
+     * @param <T>
+     * @param taskName
+     * @param target
+     * @return
+     */
+    default <T> DataNode<T> runTask(String taskName, String target) {
+        return runTask(taskName, getMeta(target));
+    }
+
     default <T> DataNode<T> runTask(TaskModel model) {
         return this.<T>getTask(model.getName()).run(model);
     }
@@ -150,6 +162,10 @@ public interface Workspace extends Encapsulated, MetaProvider {
         }
 
         B loadMeta(String name, Meta meta);
+        
+        default B loadMeta(Meta meta){
+            return loadMeta(meta.getName(), meta);
+        }
 
         B loadTask(Task task);
 

@@ -13,7 +13,7 @@ import hep.dataforge.navigation.Provider;
 import hep.dataforge.utils.GenericBuilder;
 import java.util.Collection;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javafx.util.Pair;
@@ -35,6 +35,23 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
 
     public static DataNode empty() {
         return new EmptyDataNode<>("", Object.class);
+    }
+
+    /**
+     * A data node wrapping single data
+     *
+     * @param <T>
+     * @param dataName
+     * @param data
+     * @param nodeMeta
+     * @return
+     */
+    public static <T> DataNode<T> of(String dataName, Data<T> data, Meta nodeMeta) {
+        return DataSet.builder(data.dataType())
+                .setName(dataName)
+                .setMeta(nodeMeta)
+                .putData(dataName, data)
+                .build();
     }
 
     /**
@@ -78,6 +95,26 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     Stream<Pair<String, Data<? extends T>>> dataStream();
+
+    /**
+     * Iterate other all data pieces
+     *
+     * @param consumer
+     */
+    default void forEach(BiConsumer<String, Data<? extends T>> consumer) {
+        dataStream().forEach(pair -> consumer.accept(pair.getKey(), pair.getValue()));
+    }
+
+    /**
+     * Iterate other all data pieces with given type
+     *
+     * @param type
+     * @param consumer
+     */
+    default <R> void forEachWithType(Class<R> type, BiConsumer<String, Data<R>> consumer) {
+        dataStream().filter(pair -> type.isAssignableFrom(pair.getValue().dataType()))
+                .forEach(pair -> consumer.accept(pair.getKey(), (Data<R>) pair.getValue()));
+    }
 
     /**
      * Named recursive node stream

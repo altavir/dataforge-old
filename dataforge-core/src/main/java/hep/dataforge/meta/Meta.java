@@ -85,15 +85,6 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      */
     public abstract List<? extends Meta> getNodes(String name);
 
-    public String[] getStringArray(String name) {
-        List<Value> vals = getValue(name).listValue();
-        String[] res = new String[vals.size()];
-        for (int i = 0; i < res.length; i++) {
-            res[i] = vals.get(i).stringValue();
-        }
-        return res;
-    }
-
     /**
      * {@inheritDoc}
      *

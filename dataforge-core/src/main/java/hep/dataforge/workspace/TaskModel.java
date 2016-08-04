@@ -58,12 +58,13 @@ public class TaskModel implements Named, Annotated {
 
     /**
      * Shallow copy
-     * @return 
+     *
+     * @return
      */
-    public TaskModel copy(){
+    public TaskModel copy() {
         return new TaskModel(workspace, taskName, taskMeta, deps, outs);
     }
-    
+
     /**
      * An ordered collection of dependencies
      *
@@ -121,6 +122,15 @@ public class TaskModel implements Named, Annotated {
      */
     public void dependsOn(TaskModel model) {
         dependsOn(model, model.getName());
+    }
+
+    /**
+     * dependsOn(new TaskModel(workspace, taskName, taskMeta))
+     * @param taskName
+     * @param taskMeta 
+     */
+    public void dependsOn(String taskName, Meta taskMeta) {
+        dependsOn(new TaskModel(workspace, taskName, taskMeta));
     }
 
     /**

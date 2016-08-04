@@ -53,18 +53,19 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
         //FIXME add report manager instead of transmitting report
-        Report report = buildReport(name, data);
+        String resultName = getResultName(name, actionMeta);
+        Report report = buildReport(resultName, data);
         Laminate meta = inputMeta(data, groupMeta, actionMeta);
         PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(meta),
                 input -> {
-                    Thread.currentThread().setName(Name.joinString(getWorkName(), name));
-                    return transform(report, name, meta, input);
+                    Thread.currentThread().setName(Name.joinString(getWorkName(), resultName));
+                    return transform(report, resultName, meta, input);
                 }
         );
         //PENDING a bit ugly solution
-        goal.onStart(() -> workListener().submit(name, goal.result()));
+        goal.onStart(() -> workListener().submit(resultName, goal.result()));
 
-        return new ActionResult<>(report, goal, outputMeta(name, groupMeta, data), getOutputType());
+        return new ActionResult<>(report, goal, outputMeta(resultName, groupMeta, data), getOutputType());
     }
 
     protected Report buildReport(String name, Data<? extends T> data) {
@@ -93,6 +94,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         return wrap(set.getName(), set.meta(),
                 set.dataStream().collect(Collectors.toMap(entry -> entry.getKey(),
                         entry -> runOne(entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
+    }
+
+    protected String getResultName(String dataName, Meta actionMeta) {
+        return actionMeta.getString("@resultName", dataName);
     }
 
     /**

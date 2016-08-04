@@ -58,8 +58,8 @@ subprojects {
 def toDeploy = [
         ":dataforge-core",
         ":dataforge-maths",
-        ":dataforge-fitting",
-        ":dataforge-fitting:dataforge-minuit",
+        ":dataforge-stat",
+        ":dataforge-stat:dataforge-minuit",
         ":dataforge-plots",
         ":dataforge-storage",
         ":dataforge-control"
@@ -68,7 +68,7 @@ def toDeploy = [
 def toDocument = [
         ":dataforge-core",
         ":dataforge-maths",
-        ":dataforge-fitting",
+        ":dataforge-stat",
         ":dataforge-plots",
         ":dataforge-storage",
 ]

@@ -186,6 +186,10 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
             return this;
         }
 
+        public Map<String, Data<? extends T>> getDataMap() {
+            return dataMap;
+        }
+
         @Override
         public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
             if (type.isAssignableFrom(data.dataType())) {

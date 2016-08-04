@@ -50,7 +50,7 @@ public class TaskState implements Reportable {
         this.report = report;
     }
 
-    public DataNode getData(String stage) {
+    public DataNode<?> getData(String stage) {
         return stages.get(stage);
     }
 
@@ -59,11 +59,11 @@ public class TaskState implements Reportable {
      *
      * @return
      */
-    public DataNode getData() {
+    public DataNode<?> getData() {
         return getData(INITAIL_DATA_STAGE);
     }
 
-    public DataNode getResult() {
+    public DataNode<?> getResult() {
         return result;
     }
 

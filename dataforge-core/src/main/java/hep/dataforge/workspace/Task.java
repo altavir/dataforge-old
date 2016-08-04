@@ -23,7 +23,7 @@ import hep.dataforge.names.Named;
  * The main building block of "pull" data flow model.
  *
  * @author Alexander Nozik
- * @param <T>
+ * @param <R>
  */
 public interface Task<R> extends Named {
 
@@ -53,7 +53,6 @@ public interface Task<R> extends Named {
      * Run given task model. Type check expected to be performed before actual
      * calculation.
      *
-     * @param workspace
      * @param model
      * @return
      */
