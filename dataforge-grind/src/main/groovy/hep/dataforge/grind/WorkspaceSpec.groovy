@@ -15,14 +15,14 @@ import hep.dataforge.workspace.TaskBuilder
 import hep.dataforge.workspace.Workspace
 
 /**
- *
+ * A DSL helper to build workspace
  * @author Alexander Nozik
  */
-class WorkspaceBuilder {
+class WorkspaceSpec {
     Workspace.Builder builder = BasicWorkspace.builder();
 
     /**
-     * set context for the workspace
+     * build context for the workspace using
      */
     def context(Closure cl) {
         def contextSpec = new ContextSpec();
@@ -34,40 +34,52 @@ class WorkspaceBuilder {
 
     private class ContextSpec {
         String name = "workspace";
-        String parent = GlobalContext.instance();
-        Map properties;
+        String parent = GlobalContext.instance().getName();
+        Map properties = new HashMap();
+        Map<String, Meta> pluginMap = new HashMap<>();
 
         Context build() {
             Context res = new Context(GlobalContext.getContext(parent), name)
             properties.each { key, value -> res.putValue(key, value) }
+            pluginMap.forEach { key, meta -> res.pluginManager().loadPlugin(key).configure(meta) }
             return res;
         }
 
         def properties(Closure cl) {
-            def spec = new PropertySetSpec();
+            def spec = [:]//new PropertySetSpec();
             def code = cl.rehydrate(spec, this, this);
             code.resolveStrategy = Closure.DELEGATE_ONLY;
             code();
-            properties.putAll(spec.build());
+            properties.putAll(spec);
         }
 
-        //TODO add plugin spec
-    }
+        def plugin(String key) {
+            pluginMap.put(key, Meta.empty())
+        }
 
-    /**
-     * Specification to add property sets
-     */
-    private class PropertySetSpec {
-        private def storage = [:]
-
-        def propertyMissing(String name, value) { storage[name] = value }
-
-        def propertyMissing(String name) { storage[name] }
-
-        def build() {
-            return storage;
+        def plugin(String key, Closure cl) {
+            pluginMap.put(key, GrindUtils.buildMeta(cl))
         }
     }
+
+//    /**
+//     * Specification to add property sets
+//     */
+//    private class PropertySetSpec {
+//        Map storage = [:]
+//
+//        Object propertyMissing(String name, Object value) {
+//            storage[name] = value
+//        }
+//
+//        Object propertyMissing(String name) {
+//            storage[name]
+//        }
+//
+//        def build() {
+//            return storage;
+//        }
+//    }
 
     /**
      * Set workspace data
@@ -82,17 +94,14 @@ class WorkspaceBuilder {
     }
 
     private class DataSpec {
-        def file(String name, String path, Closure<Meta> fileMeta) {
-            def metaSpec = new GrindMetaBuilder()
-            def metaExec = fileMeta.rehydrate(metaSpec, this, this);
-            metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
-            builder.putFile(name, path, metaExec())
+        def file(String name, String path, Closure fileMeta) {
+            builder.putFile(name, path, GrindUtils.buildMeta(fileMeta));
         }
         //TODO extends data specification
     }
 
     /**
-     * Build new task using task builder
+     * Define new task using task builder
      * @param taskName
      * @param cl
      * @return
@@ -104,8 +113,6 @@ class WorkspaceBuilder {
         code();
         builder.loadTask(taskSpec.build());
     }
-
-    def wrapTask
 
     /**
      * load existing task

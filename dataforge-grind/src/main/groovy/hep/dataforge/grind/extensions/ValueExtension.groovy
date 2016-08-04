@@ -15,6 +15,23 @@ import java.time.Instant
  * @author Alexander Nozik
  */
 class ValueExtension {
+    static{
+        def oldAsType = Value.metaClass.getMetaMethod("asType", [Class] as Class[])
+        Value.metaClass.asType = { Class type ->
+            if(type.isAssignableFrom(String.class)){
+                return delegate.stringValue();
+            } else if(type.isAssignableFrom(Number.class)){
+                return delegate.numberValue();
+            } else if(type.isAssignableFrom(Boolean.class)){
+                return delegate.booleanValue();
+            } else if(type.isAssignableFrom(Instant.class)){
+                return delegate.timeValue();
+            } else {
+                return oldAsType.invoke(delegate, [type] as Class[]);
+            }
+        }
+    }
+
     static Value plus(final Value self, Object obj){
         return plus(self, Value.of(obj))
     }
@@ -95,17 +112,7 @@ class ValueExtension {
     }    
     
     static Object asType(final Value self, Class cl){
-        if(cl.isAssignableFrom(String.class)){
-            return self.stringValue();
-        } else if(cl.isAssignableFrom(Number.class)){
-            return self.numberValue();
-        } else if(cl.isAssignableFrom(Boolean.class)){
-            return self.booleanValue();
-        } else if(cl.isAssignableFrom(Instant.class)){
-            return self.timeValue();
-        } else {
-            return self;
-        }
+
     }
     
     static equals(final Value self, Object obj){

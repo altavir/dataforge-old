@@ -49,7 +49,6 @@ public interface Plugin extends Annotated, Named, Encapsulated {
      * plugins. This method should be called only via PluginManager to avoid
      * dependency issues.
      *
-     * @param context
      */
     void detach();
 

@@ -5,7 +5,7 @@ import spock.lang.Specification
 /**
  * Created by darksnake on 04-Aug-16.
  */
-class WorkspaceBuilderTest extends Specification {
+class WorkspaceSpecTest extends Specification {
     def "Test meta builder delegation"() {
         given:
             def closure = {

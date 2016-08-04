@@ -15,6 +15,7 @@ import hep.dataforge.meta.Template;
  * @author Alexander Nozik
  * @param <T>
  */
+@Deprecated
 public abstract class TemplateTask<T> extends GenericTask<T> {
 
     @Override

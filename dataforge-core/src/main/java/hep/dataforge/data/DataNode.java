@@ -11,11 +11,13 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
 import hep.dataforge.utils.GenericBuilder;
+
 import java.util.Collection;
 import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
 import javafx.util.Pair;
 
 /**
@@ -63,6 +65,16 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     Data<? extends T> getData(String name);
 
     /**
+     * Compute specific Data. Blocking operation
+     *
+     * @param name
+     * @return
+     */
+    default T compute(String name) {
+        return getData(name).get();
+    }
+
+    /**
      * Get default data fragment. Access first data element in this node if it
      * is not present. Useful for single data nodes.
      *
@@ -83,7 +95,6 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * {@code <nodename>.}. Child node inherits meta from parent node. In case
      * both nodes have meta, it is merged.
      *
-     * @param <N>
      * @param nodeName
      * @return
      */
