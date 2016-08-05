@@ -15,119 +15,108 @@ import java.time.Instant
  * @author Alexander Nozik
  */
 class ValueExtension {
-    static{
-        def oldAsType = Value.metaClass.getMetaMethod("asType", [Class] as Class[])
-        Value.metaClass.asType = { Class type ->
-            if(type.isAssignableFrom(String.class)){
-                return delegate.stringValue();
-            } else if(type.isAssignableFrom(Number.class)){
-                return delegate.numberValue();
-            } else if(type.isAssignableFrom(Boolean.class)){
-                return delegate.booleanValue();
-            } else if(type.isAssignableFrom(Instant.class)){
-                return delegate.timeValue();
-            } else {
-                return oldAsType.invoke(delegate, [type] as Class[]);
-            }
-        }
-    }
 
-    static Value plus(final Value self, Object obj){
+//    static {
+//        setup()
+//    }
+
+//    static setup() {
+//        def oldAsType = Object.metaClass.getMetaMethod("asType", [Class] as Class[])
+//        Value.metaClass.asType = { Class type ->
+//            if (type.isAssignableFrom(String)) {
+//                return delegate.stringValue();
+//            } else if (type.isAssignableFrom(double) || type.isAssignableFrom(Double)) {
+//                return delegate.doubleValue();
+//            } else if (type.isAssignableFrom(int) || type.isAssignableFrom(Integer)) {
+//                return delegate.intValue();
+//            } else if (type.isAssignableFrom(Number)) {
+//                return delegate.numberValue();
+//            } else if (type.isAssignableFrom(Boolean)) {
+//                return delegate.booleanValue();
+//            } else if (type.isAssignableFrom(Instant)) {
+//                return delegate.timeValue();
+//            } else {
+//                return oldAsType.invoke(delegate, [type] as Class[]);
+//            }
+//        }
+//    }
+
+    static Value plus(final Value self, Object obj) {
         return plus(self, Value.of(obj))
     }
-    
-    static Value plus(final Value self, Value other){
-        switch(self.valueType()){
-        case ValueType.NUMBER:
-            return Value.of(self.numberValue() + other.numberValue());
-        case ValueType.STRING:
-            return Value.of(self.stringValue() + other.stringValue());
-        case ValueType.TIME:
-            //TODO implement
-            throw new RuntimeException("Time plus operator is not yet supported")
-        case ValueType.BOOLEAN:
-            //TODO implement
-            throw new RuntimeException("Boolean plus operator is not yet supported")
-        case ValueType.NULL:
-            return other;
+
+    static Value plus(final Value self, Value other) {
+        switch (self.valueType()) {
+            case ValueType.NUMBER:
+                return Value.of(self.numberValue() + other.numberValue());
+            case ValueType.STRING:
+                return Value.of(self.stringValue() + other.stringValue());
+            case ValueType.TIME:
+                //TODO implement
+                throw new RuntimeException("Time plus operator is not yet supported")
+            case ValueType.BOOLEAN:
+                //TODO implement
+                throw new RuntimeException("Boolean plus operator is not yet supported")
+            case ValueType.NULL:
+                return other;
         }
     }
-    
-    static Value minus(final Value self, Object obj){
+
+    static Value minus(final Value self, Object obj) {
         return minus(self, Value.of(obj))
     }
-    
-    static Value minus(final Value self, Value other){
-        switch(self.valueType()){
-        case ValueType.NUMBER:
-            return Value.of(self.numberValue() - other.numberValue());
-        case ValueType.STRING:
-            return Value.of(self.stringValue() - other.stringValue());
-        case ValueType.TIME:
-            //TODO implement
-            throw new RuntimeException("Time plus operator is not yet supported")
-        case ValueType.BOOLEAN:
-            //TODO implement
-            throw new RuntimeException("Boolean plus operator is not yet supported")
-        case ValueType.NULL:
-            return negative(other);
+
+    static Value minus(final Value self, Value other) {
+        switch (self.valueType()) {
+            case ValueType.NUMBER:
+                return Value.of(self.numberValue() - other.numberValue());
+            case ValueType.STRING:
+                return Value.of(self.stringValue() - other.stringValue());
+            case ValueType.TIME:
+                //TODO implement
+                throw new RuntimeException("Time plus operator is not yet supported")
+            case ValueType.BOOLEAN:
+                //TODO implement
+                throw new RuntimeException("Boolean plus operator is not yet supported")
+            case ValueType.NULL:
+                return negative(other);
         }
     }
-    
-    
-    static Value negative(final Value self){
-        switch(self.valueType()){
-        case ValueType.NUMBER:
-            return Value.of(-self.numberValue());
-        case ValueType.STRING:
-            throw new RuntimeException("Can't negate String value")
-        case ValueType.TIME:
-            throw new RuntimeException("Can't negate time value")
-        case ValueType.BOOLEAN:
-            return Value.of(!self.booleanValue());
-        case ValueType.NULL:
-            return self;
+
+
+    static Value negative(final Value self) {
+        switch (self.valueType()) {
+            case ValueType.NUMBER:
+                return Value.of(-self.numberValue());
+            case ValueType.STRING:
+                throw new RuntimeException("Can't negate String value")
+            case ValueType.TIME:
+                throw new RuntimeException("Can't negate time value")
+            case ValueType.BOOLEAN:
+                return Value.of(!self.booleanValue());
+            case ValueType.NULL:
+                return self;
         }
-    }    
-    
-    static Value multiply(final Value self, Object obj){
+    }
+
+    static Value multiply(final Value self, Object obj) {
         return multiply(self, Value.of(obj))
     }
-    
-    static Value multiply(final Value self, Value other){
-        switch(self.valueType()){
-        case ValueType.NUMBER:
-            return Value.of(self.numberValue() * other.numberValue());
-        case ValueType.STRING:
-            return Value.of(self.stringValue() * other.intValue());
-        case ValueType.TIME:
-            //TODO implement
-            throw new RuntimeException("Time multiply operator is not yet supported")
-        case ValueType.BOOLEAN:
-            //TODO implement
-            throw new RuntimeException("Boolean multiply operator is not yet supported")
-        case ValueType.NULL:
-            return negate(other);
-        }
-    }    
-    
-    static Object asType(final Value self, Class cl){
 
-    }
-    
-    static equals(final Value self, Object obj){
-        if(obj instanceof Number){
-            return self.numberValue() == obj
-        } else if(obj instanceof String){
-            return self.stringValue() == obj
-        } else if(obj instanceof Boolean){
-            return self.booleanValue() == obj
-        } else if(obj instanceof Instant){
-            return self.timeValue() == obj
-        } else if(obj == null){
-            return self.valueType() == ValueType.NULL;
-        } else {
-            return false
+    static Value multiply(final Value self, Value other) {
+        switch (self.valueType()) {
+            case ValueType.NUMBER:
+                return Value.of(self.numberValue() * other.numberValue());
+            case ValueType.STRING:
+                return Value.of(self.stringValue() * other.intValue());
+            case ValueType.TIME:
+                //TODO implement
+                throw new RuntimeException("Time multiply operator is not yet supported")
+            case ValueType.BOOLEAN:
+                //TODO implement
+                throw new RuntimeException("Boolean multiply operator is not yet supported")
+            case ValueType.NULL:
+                return negate(other);
         }
     }
 }

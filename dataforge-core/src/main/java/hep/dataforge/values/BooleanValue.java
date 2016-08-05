@@ -16,13 +16,13 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
+
 import java.time.Instant;
 
 /**
- *
  * @author Alexander Nozik
  */
-class BooleanValue implements Value {
+class BooleanValue extends AbstractValue {
 
     public static Value TRUE = new BooleanValue(true);
     public static Value FALSE = new BooleanValue(false);
@@ -56,12 +56,12 @@ class BooleanValue implements Value {
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
+        } else if (obj instanceof Value) {
+            final Value other = (Value) obj;
+            return this.booleanValue() == other.booleanValue();
+        } else {
+            return super.equals(obj);
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final BooleanValue other = (BooleanValue) obj;
-        return this.value == other.value;
     }
 
     private final boolean value;

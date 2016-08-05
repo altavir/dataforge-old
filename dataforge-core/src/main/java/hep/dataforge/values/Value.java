@@ -279,4 +279,5 @@ public interface Value extends Comparable<Value>, Serializable {
     default boolean isList() {
         return false;
     }
+
 }

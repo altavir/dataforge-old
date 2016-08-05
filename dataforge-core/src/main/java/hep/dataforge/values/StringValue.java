@@ -29,7 +29,7 @@ import java.util.Objects;
  *
  * @author Alexander Nozik
  */
-class StringValue implements Value {
+class StringValue extends AbstractValue {
 
     /**
      * {@inheritDoc}
@@ -48,12 +48,12 @@ class StringValue implements Value {
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
+        } else if (obj instanceof Value) {
+            final Value other = (Value) obj;
+            return this.stringValue() == other.stringValue();
+        } else {
+            return super.equals(obj);
         }
-        if (getClass() != obj.getClass()) {
-            return false;
-        }
-        final StringValue other = (StringValue) obj;
-        return Objects.equals(this.value, other.value);
     }
 
     private final String value;

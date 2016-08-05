@@ -25,7 +25,7 @@ import java.util.Objects;
  *
  * @author Alexander Nozik
  */
-class NumberValue implements Value {
+class NumberValue extends AbstractValue {
 
     public static final NumberComparator NUMBER_COMPARATOR = new NumberComparator();
 
@@ -46,11 +46,12 @@ class NumberValue implements Value {
     public boolean equals(Object obj) {
         if (obj == null) {
             return false;
+        } else if (obj instanceof Value) {
+            final Value other = (Value) obj;
+            return this.numberValue() == other.numberValue();
+        } else {
+            return super.equals(obj);
         }
-        if (!Value.class.isInstance(obj)) {
-            return false;
-        }
-        return NUMBER_COMPARATOR.compare(value, ((Value) obj).numberValue()) == 0;
     }
 
     private final Number value;
