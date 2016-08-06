@@ -1,5 +1,6 @@
 package hep.dataforge.grind
 
+import hep.dataforge.meta.Meta
 import spock.lang.Specification
 
 /**
@@ -22,7 +23,24 @@ class WorkspaceSpecTest extends Specification {
             metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
             def res = metaExec()
         then:
-            println res.getString("otherChildNode.grandChildNode.grandChildValue")
+//            println res.getString("otherChildNode.grandChildNode.grandChildValue")
             res.getBoolean("childNode.childValue");
+    }
+
+    def "Test meta from string"() {
+        given:
+        String metaStr = """
+                myMeta(myPar: "val", myOtherPar: 28) {
+                    childNode(childValue: true)
+                    otherChildNode {
+                        grandChildNode(grandChildValue: 88.6)
+                    }
+                }
+        """
+        when:
+            Meta meta = GrindUtils.buildMeta(metaStr);
+        then:
+            meta.getName() == "myMeta"
+            meta.getDouble("otherChildNode.grandChildNode.grandChildValue") == 88.6
     }
 }

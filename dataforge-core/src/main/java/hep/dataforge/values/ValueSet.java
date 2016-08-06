@@ -93,15 +93,6 @@ public class ValueSet implements Value {
     }
 
     @Override
-    public int compareTo(Value o) {
-        if (values.size() > 0) {
-            return values.get(0).compareTo(o);
-        } else {
-            return -1;
-        }
-    }
-
-    @Override
     public List<Value> listValue() {
         return this.values;
     }

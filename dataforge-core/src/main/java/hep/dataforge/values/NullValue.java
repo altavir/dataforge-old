@@ -80,16 +80,5 @@ class NullValue implements Value {
         return ValueType.NULL;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int compareTo(Value o) {
-        if (o.valueType() == ValueType.NULL) {
-            return 0;
-        } else {
-            return -1;
-        }
-    }
 
 }

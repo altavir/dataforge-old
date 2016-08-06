@@ -27,7 +27,7 @@ import java.util.Objects;
  */
 class NumberValue extends AbstractValue {
 
-    public static final NumberComparator NUMBER_COMPARATOR = new NumberComparator();
+
 
     /**
      * {@inheritDoc}
@@ -84,14 +84,6 @@ class NumberValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Value o) {
-        return NUMBER_COMPARATOR.compare(this.value, o.numberValue());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Number numberValue() {
         return value;
     }
@@ -130,47 +122,4 @@ class NumberValue extends AbstractValue {
         return stringValue();
     }
 
-    public static class NumberComparator implements Comparator<Number> {
-
-        @Override
-        public int compare(final Number x, final Number y) {
-            if (isSpecial(x) || isSpecial(y)) {
-                return Double.compare(x.doubleValue(), y.doubleValue());
-            } else {
-                return toBigDecimal(x).compareTo(toBigDecimal(y));
-            }
-        }
-
-        private static boolean isSpecial(final Number x) {
-            boolean specialDouble = x instanceof Double
-                    && (Double.isNaN((Double) x) || Double.isInfinite((Double) x));
-            boolean specialFloat = x instanceof Float
-                    && (Float.isNaN((Float) x) || Float.isInfinite((Float) x));
-            return specialDouble || specialFloat;
-        }
-
-        private static BigDecimal toBigDecimal(final Number number) {
-            if (number instanceof BigDecimal) {
-                return (BigDecimal) number;
-            }
-            if (number instanceof BigInteger) {
-                return new BigDecimal((BigInteger) number);
-            }
-            if (number instanceof Byte || number instanceof Short
-                    || number instanceof Integer || number instanceof Long) {
-                return new BigDecimal(number.longValue());
-            }
-            if (number instanceof Float || number instanceof Double) {
-                return new BigDecimal(number.doubleValue());
-            }
-
-            try {
-                return new BigDecimal(number.toString());
-            } catch (final NumberFormatException e) {
-                throw new RuntimeException("The given number (\"" + number
-                        + "\" of class " + number.getClass().getName()
-                        + ") does not have a parsable string representation", e);
-            }
-        }
-    }
 }

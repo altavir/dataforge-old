@@ -23,9 +23,9 @@ import hep.dataforge.io.XMLMetaWriter
  *
  * @author Alexander Nozik
  */
-class GrindAnnotationBuilderSpec extends Specification {
+class GrindMetaBuilderSpec extends Specification {
 
-    def "Check annotation reading"(){
+    def "Check meta building"(){
         when:
         Meta root = new GrindMetaBuilder().root(someValue: "some text here"){
             childNode(childNodeValue:["some","other", "text", "here"], something: 18)
@@ -41,7 +41,6 @@ class GrindAnnotationBuilderSpec extends Specification {
         then:
         println new XMLMetaWriter().writeString(root,null)
         root.getInt("otherChildNode.grandChildNode.a") == 22
-
     }
 	
 }

@@ -25,6 +25,8 @@ import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.stream.Collectors;
+
+import hep.dataforge.names.Named;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.slf4j.LoggerFactory;
@@ -64,7 +66,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
 
     @Override
     public synchronized void clear() {
-        plottables.stream().map(pl -> pl.getName()).collect(Collectors.toList()).stream().forEach(plName -> remove(plName));
+        plottables.stream().map(Named::getName).collect(Collectors.toList()).stream().forEach(plName -> remove(plName));
     }
 
     @Override
@@ -103,7 +105,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     @Override
     public Envelope wrap() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        EnvelopeWriter writer = new WrapperEnvelopeType().getWriter();
+        EnvelopeWriter<Envelope> writer = new WrapperEnvelopeType().getWriter();
         for (Plottable pl : plottables()) {
             try {
                 writer.write(baos, pl.wrap());

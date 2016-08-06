@@ -20,12 +20,14 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
+
 import java.util.List;
 import java.util.function.Predicate;
 
 /**
  * <p>
- Filtering class.</p>
+ * Filtering class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -53,12 +55,12 @@ public class Filtering {
      * Both could be infinite.
      *
      * @param valueName a {@link java.lang.String} object.
-     * @param a a {@link hep.dataforge.values.Value} object.
-     * @param b a {@link hep.dataforge.values.Value} object.
+     * @param a         a {@link hep.dataforge.values.Value} object.
+     * @param b         a {@link hep.dataforge.values.Value} object.
      * @return a {@link java.util.function.Predicate} object.
      */
     public static Predicate<DataPoint> getValueCondition(final String valueName, final Value a, final Value b) {
-        if (a.compareTo(b) >= 0) {
+        if (ValueUtils.compare(a, b) >= 0) {
             throw new IllegalArgumentException();
         }
         return (DataPoint dp) -> {
@@ -66,7 +68,7 @@ public class Filtering {
                 return false;
             } else {
                 try {
-                    return (dp.getValue(valueName).compareTo(a) >= 0) && (dp.getValue(valueName).compareTo(b) <= 0);
+                    return (ValueUtils.isBetween(dp.getValue(valueName),a,b));
                 } catch (NameNotFoundException ex) {
                     //Считаем, что если такого имени нет, то тест автоматически провален
                     return false;

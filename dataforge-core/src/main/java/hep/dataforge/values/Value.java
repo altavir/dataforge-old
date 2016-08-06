@@ -37,9 +37,9 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Value extends Comparable<Value>, Serializable {
+public interface Value extends Serializable {
 
-    public static final Value NULL = new NullValue();
+    Value NULL = new NullValue();
 
     /**
      * Create Value from String using closest match conversion
@@ -47,7 +47,7 @@ public interface Value extends Comparable<Value>, Serializable {
      * @param str a {@link java.lang.String} object.
      * @return a {@link hep.dataforge.values.Value} object.
      */
-    public static Value of(String str) {
+    static Value of(String str) {
         //Trying to get integer
         if (str == null) {
             return Value.getNull();
@@ -94,7 +94,7 @@ public interface Value extends Comparable<Value>, Serializable {
         return new StringValue(str);
     }
 
-    public static Value of(String[] strings) {
+    static Value of(String[] strings) {
         List<Value> values = new ArrayList<>();
         for (String str : strings) {
             values.add(Value.of(str));
@@ -108,40 +108,40 @@ public interface Value extends Comparable<Value>, Serializable {
      * @param b a boolean.
      * @return a {@link hep.dataforge.values.Value} object.
      */
-    public static Value of(boolean b) {
+    static Value of(boolean b) {
         return BooleanValue.ofBoolean(b);
     }
 
-    public static Value of(double d) {
+    static Value of(double d) {
         return new NumberValue(d);
     }
 
-    public static Value of(int i) {
+    static Value of(int i) {
         return new NumberValue(i);
     }
 
-    public static Value of(long l) {
+    static Value of(long l) {
         return new NumberValue(l);
     }
 
-    public static Value of(BigDecimal bd) {
+    static Value of(BigDecimal bd) {
         return new NumberValue(bd);
     }
 
-    public static Value of(LocalDateTime t) {
+    static Value of(LocalDateTime t) {
         return new TimeValue(t);
     }
 
-    public static Value of(Instant t) {
+    static Value of(Instant t) {
         return new TimeValue(t);
     }
 
-    public static Value of(Object... list){
+    static Value of(Object... list){
         return of(Arrays.asList(list));
     }
     
-    public static Value of(Collection<Object> list) {
-        List<Object> l = new ArrayList<>();
+    static Value of(Collection list) {
+        List l = new ArrayList<>();
         l.addAll(list);
         if (l.isEmpty()) {
             return getNull();
@@ -152,7 +152,7 @@ public interface Value extends Comparable<Value>, Serializable {
         }
     }
 
-    public static Value of(Value... list) {
+    static Value of(Value... list) {
         switch (list.length) {
             case 0:
                 return getNull();
@@ -163,7 +163,7 @@ public interface Value extends Comparable<Value>, Serializable {
         }
     }
 
-    public static Value getNull() {
+    static Value getNull() {
         return NULL;
     }
 
@@ -174,7 +174,7 @@ public interface Value extends Comparable<Value>, Serializable {
      * @param obj a {@link java.lang.Object} object.
      * @return a {@link hep.dataforge.values.Value} object.
      */
-    public static Value of(Object obj) {
+    static Value of(Object obj) {
         if (obj == null) {
             return Value.NULL;
         }
@@ -192,7 +192,7 @@ public interface Value extends Comparable<Value>, Serializable {
         } else if (obj instanceof String) {
             return of((String) obj);
         } else if (obj instanceof Collection) {
-            return of((Collection) obj);
+            return of((Collection<Object>) obj);
         } else if (obj instanceof Object[]) {
             return of((Object[]) obj);
         } else {
@@ -242,19 +242,6 @@ public interface Value extends Comparable<Value>, Serializable {
     String stringValue();
 
     ValueType valueType();
-
-    /**
-     * Checks if given value is between {@code val1} and {@code val1}. Could
-     * throw ValueConversionException if value conversion is not possible.
-     *
-     * @param val1
-     * @param val2
-     * @return
-     */
-    default boolean isBetween(Value val1, Value val2) {
-        return (compareTo(val1) > 0 && compareTo(val2) < 0)
-                || (compareTo(val2) > 0 && compareTo(val1) < 0);
-    }
 
     /**
      * Return list of values representation of current value. If value is

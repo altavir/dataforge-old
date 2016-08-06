@@ -10,12 +10,18 @@ import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import javafx.util.Pair;
+
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 /**
  * Utilities to work with meta
@@ -137,6 +143,57 @@ public class MetaUtils {
             throw new NamingException("No list element with given index");
         }
         return Collections.singletonList(nodeList.get(num));
+    }
+
+    /**
+     * A stream containing pairs
+     *
+     * @param prefix
+     * @return
+     */
+    private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node) {
+        return Stream.concat(Stream.of(new Pair<>(prefix, node)),
+                node.getNodeNames().stream().flatMap(nodeName -> {
+                    List<? extends Meta> metaList = node.getNodes(nodeName);
+                    String nodePrefix;
+                    if (prefix == null || prefix.isEmpty()) {
+                        nodePrefix = nodeName;
+                    } else {
+                        nodePrefix = prefix + "." + nodeName;
+                    }
+                    if (metaList.size() == 1) {
+                        return nodeStream(nodePrefix, metaList.get(0));
+                    } else {
+                        return IntStream.range(0, metaList.size()).boxed()
+                                .flatMap(i -> {
+                                    String subPrefix = String.format("%s[%d]", nodePrefix, i);
+                                    Meta subNode = metaList.get(i);
+                                    return nodeStream(subPrefix, subNode);
+                                });
+                    }
+                })
+        );
+    }
+
+    public static Stream<Pair<String, Meta>> nodeStream(Meta node) {
+        return nodeStream("", node);
+    }
+
+    public static Stream<Pair<String, Value>> valueStream(Meta node) {
+        return nodeStream(node).flatMap((Pair<String, Meta> entry) -> {
+            String key = entry.getKey();
+            Meta childMeta = entry.getValue();
+            return childMeta.getValueNames().stream()
+                    .map((String valueName) -> {
+                        String prefix;
+                        if (key.isEmpty()) {
+                            prefix = "";
+                        } else {
+                            prefix = key + ".";
+                        }
+                        return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
+                    });
+        });
     }
 
 }

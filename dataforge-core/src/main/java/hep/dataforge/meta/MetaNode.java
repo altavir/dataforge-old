@@ -18,6 +18,7 @@ package hep.dataforge.meta;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -27,6 +28,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
+
 import javafx.util.Pair;
 
 /**
@@ -249,40 +251,43 @@ public class MetaNode<T extends MetaNode> extends Meta {
         }
     }
 
-    /**
-     * A stream containing pairs
-     *
-     * @param prefix
-     * @return
-     */
-    protected Stream<Pair<String, T>> nodeStream(String prefix) {
-        return Stream.concat(Stream.of(new Pair<String, T>(prefix, (T) MetaNode.this)),
-                nodes.entrySet().stream().<Pair<String, T>>flatMap((Map.Entry<String, List<T>> entry) -> {
-                    String nodePrefix;
-                    if (prefix == null || prefix.isEmpty()) {
-                        nodePrefix = entry.getKey();
-                    } else {
-                        nodePrefix = prefix + "." + entry.getKey();
-                    }
-                    return IntStream.range(0, entry.getValue().size())
-                            .mapToObj((int i) -> new Pair<>(String.format("%s[%d]", nodePrefix, i), entry.getValue().get(i)))
-                            .flatMap((Pair<String, T> item) -> item.getValue().nodeStream(item.getKey()));
-                })
-        );
-    }
-
-    public Stream<Pair<String, T>> nodeStream() {
-        return nodeStream("");
-    }
-
-    public Stream<Pair<String, Value>> valueStream() {
-        return nodeStream().<Pair<String, Value>>flatMap((Pair<String, T> entry) -> entry.getValue().values.entrySet().stream()
-                .<Pair<String, Value>>map(new Function<Map.Entry<String, Value>, Pair<String, Value>>() {
-                    @Override
-                    public Pair<String, Value> apply(Map.Entry<String, Value> valueItem) {
-                        return new Pair<>(entry.getKey() + "." + valueItem.getKey(), valueItem.getValue());
-                    }
-                }));
-    }
+//    /**
+//     * A stream containing pairs
+//     *
+//     * @param prefix
+//     * @return
+//     */
+//    private Stream<Pair<String, T>> nodeStream(String prefix) {
+//        return Stream.concat(Stream.of(new Pair<>(prefix, this)),
+//                this.getNodeNames().stream().flatMap(nodeName -> {
+//                    List<? extends T> metaList = this.getNodes(nodeName);
+//                    String nodePrefix;
+//                    if (prefix == null || prefix.isEmpty()) {
+//                        nodePrefix = nodeName;
+//                    } else {
+//                        nodePrefix = prefix + "." + nodeName;
+//                    }
+//                    return IntStream.range(0, metaList.size()).boxed()
+//                            .flatMap(i -> {
+//                                String subPrefix = String.format("%s[%d]", nodePrefix, i);
+//                                T subNode = metaList.get(i);
+//                                return nodeStream(subPrefix, subNode);
+//                            });
+//                })
+//        );
+//    }
+//
+//    public Stream<Pair<String, T>> nodeStream() {
+//        return nodeStream("");
+//    }
+//
+//    public Stream<Pair<String, Value>> valueStream() {
+//        return nodeStream().flatMap((Pair<String, T> entry) -> {
+//            String key = entry.getKey();
+//            Meta childMeta = entry.getValue();
+//            return childMeta.getValueNames().stream()
+//                    .map((String valueName) -> new Pair<>(key + "." + valueName, childMeta.getValue(valueName)));
+//        });
+//    }
 
 }

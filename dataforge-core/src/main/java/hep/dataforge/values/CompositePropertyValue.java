@@ -61,11 +61,6 @@ public class CompositePropertyValue implements Value {
     }
 
     @Override
-    public int compareTo(Value t) {
-        return Integer.compare(this.code, t.intValue());
-    }
-
-    @Override
     public int hashCode() {
         int hash = 7;
         hash = 79 * hash + this.code;

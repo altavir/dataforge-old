@@ -55,14 +55,6 @@ public class NamedValue implements Named, Value {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Value o) {
-        return value.compareTo(o);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Number numberValue() {
         return value.numberValue();
     }

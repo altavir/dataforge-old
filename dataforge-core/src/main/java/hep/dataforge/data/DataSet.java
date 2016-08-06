@@ -11,6 +11,7 @@ import hep.dataforge.navigation.AbstractProvider;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
@@ -58,7 +59,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     @Override
     public Stream<Pair<String, Data<? extends T>>> dataStream() {
         return dataMap.entrySet().stream()
-                .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<? extends T>> entry)
+                .map((Map.Entry<String, Data<? extends T>> entry)
                         -> new Pair<>(entry.getKey(), entry.getValue()));
     }
 
@@ -84,14 +85,14 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
             if (str.isEmpty()) {
                 return new Pair<>("", DataSet.this);
             } else {
-                return new Pair<>(str, getNode(str));
+                return new Pair<>(str, getNode(str).get());
             }
         });
     }
 
     @Override
-    public Data<? extends T> getData(String name) {
-        return dataMap.get(name);
+    public Optional<Data<? extends T>> getData(String name) {
+        return Optional.ofNullable(dataMap.get(name));
     }
 
     @Override
@@ -143,7 +144,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public DataNode<? extends T> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> getNode(String nodeName) {
         Builder<T> builder = new Builder<>(type)
                 .setName(nodeName)
                 .setMeta(meta());
@@ -152,9 +153,9 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                 .filter((Pair<String, Data<? extends T>> pair) -> pair.getKey().startsWith(prefix))
                 .forEach((Pair<String, Data<? extends T>> pair) -> builder.putData(pair.getKey(), pair.getValue()));
         if (builder.dataMap.size() > 0) {
-            return builder.build();
+            return Optional.of(builder.build());
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 

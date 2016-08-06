@@ -9,6 +9,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.navigation.Path;
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.stream.Stream;
 import javafx.util.Pair;
 
@@ -24,8 +25,8 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Data<? extends T> getData(String name) {
-        throw new NameNotFoundException(name);
+    public Optional<Data<? extends T>> getData(String name) {
+        return Optional.empty();
     }
 
     @Override
@@ -56,8 +57,8 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public DataNode<? extends T> getNode(String nodeName) {
-        return null;
+    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+        return Optional.empty();
     }
 
     @Override

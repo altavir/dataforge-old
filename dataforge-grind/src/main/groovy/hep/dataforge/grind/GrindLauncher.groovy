@@ -41,6 +41,10 @@ class GrindLauncher {
         return buildWorkspace(source()).build();
     }
 
+    DataNode runTask(String taskName, Meta meta) {
+        return buildWorkspace().runTask(taskName, meta);
+    }
+
     /**
      * Run task with given name and meta built from closure
      * @param taskName
@@ -61,6 +65,14 @@ class GrindLauncher {
         Workspace ws = buildWorkspace();
         Meta taskMeta = ws.hasMeta(taskName) ? ws.getMeta(taskName) : Meta.empty();
         return ws.runTask(taskName, taskMeta);
+    }
+
+    DataNode run(String input) {
+        if(!input.contains("(")&& !input.contains("{")){
+            return runTask(input)
+        }
+        Meta meta = GrindUtils.buildMeta(input);
+        return runTask(meta.getName(), meta);
     }
 
 }

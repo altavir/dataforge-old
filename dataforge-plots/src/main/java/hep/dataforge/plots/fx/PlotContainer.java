@@ -224,9 +224,7 @@ public class PlotContainer implements Initializable {
     }
 
     protected void setupSideBar() {
-        FXUtils.runNow(() -> {
-            plottableslList.getItems().clear();
-        });
+        FXUtils.runNow(() -> plottableslList.getItems().clear());
     }
 
     /**
@@ -246,9 +244,7 @@ public class PlotContainer implements Initializable {
             stage.setHeight(400);
             stage.setWidth(400);
             stage.setTitle(header);
-            stage.setOnCloseRequest((WindowEvent event) -> {
-                configWindows.remove(config);
-            });
+            stage.setOnCloseRequest((WindowEvent event) -> configWindows.remove(config));
             stage.initOwner(root.getScene().getWindow());
             configWindows.put(config, stage);
         }

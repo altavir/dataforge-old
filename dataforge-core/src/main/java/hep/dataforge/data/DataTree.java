@@ -9,13 +9,10 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.UnaryOperator;
+
+import java.util.*;
 import java.util.stream.Stream;
+
 import javafx.util.Pair;
 
 /**
@@ -106,17 +103,17 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Data<? extends T> getData(String dataName) {
-        return getData(Name.of(dataName));
+    public Optional<Data<? extends T>> getData(String dataName) {
+        return Optional.ofNullable(getData(Name.of(dataName)));
     }
 
-    public Data<? extends T> getData(Name dataName) {
+    protected Data<? extends T> getData(Name dataName) {
         if (dataName.length() == 1) {
             return data.get(dataName.toString());
         } else {
             DataNode<? extends T> node = getNode(dataName.cutLast());
             if (node != null) {
-                return node.getData(dataName.getLast().toString());
+                return node.getData(dataName.getLast().toString()).get();
             } else {
                 return null;
             }
@@ -215,7 +212,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
     @Override
     public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
-        return nodes.entrySet().stream().<Pair<String, DataNode<? extends T>>>flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
+        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
             Stream<Pair<String, DataNode<? extends T>>> nodeItself
                     = Stream.of(new Pair<>(nodeEntry.getKey(), nodeEntry.getValue()));
             Stream<Pair<String, DataNode<? extends T>>> childStream = nodeEntry.getValue()
@@ -241,16 +238,16 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public DataTree<? extends T> getNode(String nodeName) {
-        return getNode(Name.of(nodeName));
+    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+        return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 
-    public DataTree<? extends T> getNode(Name nodeName) {
+    protected DataTree<? extends T> getNode(Name nodeName) {
         String child = nodeName.getFirst().toString();
         if (nodeName.length() == 1) {
             return nodes.get(nodeName.toString());
         } else if (this.nodes.containsKey(child)) {
-            return this.nodes.get(child).getNode(nodeName.cutFirst().toString());
+            return this.nodes.get(child).getNode(nodeName.cutFirst());
         } else {
             return null;
         }
@@ -258,7 +255,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
     @Override
     public Iterator<Data<? extends T>> iterator() {
-        return dataStream().<Data<? extends T>>map(it -> it.getValue()).iterator();
+        return dataStream().<Data<? extends T>>map(Pair::getValue).iterator();
     }
 
     @Override

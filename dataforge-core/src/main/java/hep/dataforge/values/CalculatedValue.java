@@ -76,9 +76,5 @@ public class CalculatedValue implements Value {
         return type;
     }
 
-    @Override
-    public int compareTo(Value o) {
-        return getValue().compareTo(o);
-    }
 
 }

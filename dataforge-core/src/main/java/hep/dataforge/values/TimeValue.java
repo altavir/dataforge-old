@@ -83,14 +83,6 @@ class TimeValue implements Value {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Value o) {
-        return this.value.compareTo(o.timeValue());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Number numberValue() {
         return value.toEpochMilli();
     }

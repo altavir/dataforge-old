@@ -43,7 +43,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default Data getData(String dataPath) {
-        return getDataStage().getData(dataPath);
+        return getDataStage().getData(dataPath).get();
     }
 
     /**

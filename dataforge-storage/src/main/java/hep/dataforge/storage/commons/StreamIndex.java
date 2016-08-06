@@ -7,6 +7,8 @@ package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
@@ -36,14 +38,14 @@ public abstract class StreamIndex<K, T> implements ValueIndex<T>, Iterable<K> {
 
     @Override
     public List<T> pull(Value from, Value to) throws StorageException {
-        return pull(k -> getIndexedValue(k).isBetween(from, to));
+        return pull(k -> ValueUtils.isBetween(k, from, to));
     }
 
     @Override
     public List<T> pull(Value from, Value to, int maxItems) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .<T>map(k -> transform(k))
-                .filter(t -> getIndexedValue(t).isBetween(from, to))
+                .filter(t -> ValueUtils.isBetween(getIndexedValue(t), from, to))
                 .limit(maxItems)
                 .collect(Collectors.toList());
     }

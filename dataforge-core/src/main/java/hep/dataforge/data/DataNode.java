@@ -6,19 +6,20 @@
 package hep.dataforge.data;
 
 import hep.dataforge.computation.GoalGroup;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
 import hep.dataforge.utils.GenericBuilder;
+import javafx.util.Pair;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javafx.util.Pair;
 
 /**
  * A universal data container
@@ -27,15 +28,15 @@ import javafx.util.Pair;
  */
 public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotated, Provider {
 
-    public static final String DATA_TARGET = "data";
-    public static final String NODE_TARGET = "node";
-    public static final String DEFAULT_DATA_FRAGMENT_NAME = "";
+    String DATA_TARGET = "data";
+    String NODE_TARGET = "node";
+    String DEFAULT_DATA_FRAGMENT_NAME = "";
 
-    public static <T> DataNode<T> empty(String name, Class<T> type) {
+    static <T> DataNode<T> empty(String name, Class<T> type) {
         return new EmptyDataNode<>(name, type);
     }
 
-    public static DataNode empty() {
+    static DataNode empty() {
         return new EmptyDataNode<>("", Object.class);
     }
 
@@ -48,7 +49,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @param nodeMeta
      * @return
      */
-    public static <T> DataNode<T> of(String dataName, Data<T> data, Meta nodeMeta) {
+    static <T> DataNode<T> of(String dataName, Data<T> data, Meta nodeMeta) {
         return DataSet.builder(data.dataType())
                 .setName(dataName)
                 .setMeta(nodeMeta)
@@ -62,7 +63,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @param name
      * @return
      */
-    Data<? extends T> getData(String name);
+    Optional<Data<? extends T>> getData(String name);
 
     /**
      * Compute specific Data. Blocking operation
@@ -71,7 +72,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     default T compute(String name) {
-        return getData(name).get();
+        return getData(name).orElseThrow(()-> new NameNotFoundException(name)).get();
     }
 
     /**
@@ -81,11 +82,11 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     default Data<? extends T> getData() {
-        Data<? extends T> res = getData(DEFAULT_DATA_FRAGMENT_NAME);
+        Data<? extends T> res = getData(DEFAULT_DATA_FRAGMENT_NAME).get();
         if (res != null) {
             return res;
         } else {
-            return dataStream().findFirst().orElse(null).getValue();
+            return dataStream().findFirst().orElseThrow(()->new RuntimeException("Data node is empty")).getValue();
         }
     }
 
@@ -98,7 +99,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @param nodeName
      * @return
      */
-    DataNode<? extends T> getNode(String nodeName);
+    Optional<DataNode<? extends T>> getNode(String nodeName);
 
     /**
      * Named dataStream of data elements including subnodes if they are present
@@ -158,7 +159,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     /**
      * Force start data computation for all data and wait for completion
      */
-    default DataNode<T> compute() throws Exception {
+    default DataNode<T> computeAll() throws Exception {
         nodeGoal().get();
         return this;
     }

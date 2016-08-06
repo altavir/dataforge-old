@@ -90,14 +90,6 @@ class StringValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Value o) {
-        return this.value.compareTo(o.stringValue());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Number numberValue() {
         try {
             return NumberFormat.getInstance().parse(value);

@@ -73,7 +73,7 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      *
      * @return
      */
-    ObservableList<? extends T> plottables();
+    ObservableList<T> plottables();
 
     
     /**

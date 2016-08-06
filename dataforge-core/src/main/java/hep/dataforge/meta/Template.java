@@ -53,8 +53,8 @@ public class Template implements Annotated {
      */
     public Meta compile(ValueProvider valueProvider, MetaProvider metaProvider) {
         MetaBuilder res = new MetaBuilder(meta());
-        res.nodeStream().forEach(pair -> {
-            MetaBuilder node = pair.getValue();
+        MetaUtils.nodeStream(res).forEach(pair -> {
+            MetaBuilder node = (MetaBuilder) pair.getValue();
             if (node.hasValue("@include")) {
                 String includePath = pair.getValue().getString("@include");
                 if (metaProvider.hasMeta(includePath)) {
@@ -70,7 +70,7 @@ public class Template implements Annotated {
             }
         });
 
-        res.valueStream().forEach(pair -> {
+        MetaUtils.valueStream(res).forEach(pair -> {
             Value val = pair.getValue();
             if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
                 res.setValue(pair.getKey(), transformValue(val, valueProvider, def));
@@ -91,8 +91,6 @@ public class Template implements Annotated {
      * Build a Meta using given template.
      *
      * @param template
-     * @param valueProvider
-     * @param metaProvider
      * @return
      */
     public static Meta compileTemplate(Meta template, Meta data) {

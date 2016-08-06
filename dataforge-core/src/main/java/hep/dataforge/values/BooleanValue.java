@@ -82,14 +82,6 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public int compareTo(Value o) {
-        return Boolean.compare(value, o.booleanValue());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
     public Number numberValue() {
         if (value) {
             return 1;

@@ -321,7 +321,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
 
         stream.filter((entry) -> type.isInstance(entry.getKey())).<T>map((entry) -> (T) entry.getKey())
-                .forEach((con) -> action.accept(con));
+                .forEach(action::accept);
     }
 
     @Override

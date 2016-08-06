@@ -17,13 +17,17 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+
 import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
+
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
+
 import java.util.stream.Stream;
 
 /**
@@ -59,21 +63,21 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implement
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);
         if (from != Value.NULL && to != Value.NULL) {
-            return data.filter(point -> adapter().getX(point).isBetween(from, to));
+            return data.filter(point -> ValueUtils.isBetween(adapter().getX(point), from, to));
         } else if (from == Value.NULL && to != Value.NULL) {
-            return data.filter(point -> adapter().getX(point).compareTo(to) < 0);
+            return data.filter(point -> ValueUtils.compare(adapter().getX(point), to) < 0);
         } else if (to == Value.NULL) {
-            return data.filter(point -> adapter().getX(point).compareTo(from) > 0);
+            return data.filter(point -> ValueUtils.compare(adapter().getX(point), from) > 0);
         } else {
             return data;
         }
     }
-    
-    protected Stream<DataPoint> filterDataStream(Stream<DataPoint> data, Meta cfg){
-        if(cfg.isEmpty()){
+
+    protected Stream<DataPoint> filterDataStream(Stream<DataPoint> data, Meta cfg) {
+        if (cfg.isEmpty()) {
             return data;
         }
-        if(cfg.hasNode("xRange")){
+        if (cfg.hasNode("xRange")) {
             data = filterXRange(data, cfg.getNode("xRange"));
         }
         return data;

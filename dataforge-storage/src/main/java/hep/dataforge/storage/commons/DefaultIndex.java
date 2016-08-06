@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
+
+import hep.dataforge.values.ValueUtils;
 import javafx.util.Pair;
 
 /**
@@ -60,7 +62,7 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
     @Override
     public List<T> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> Value.of(pair.getKey()).isBetween(from, to))
+                .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
                 .<T>map(pair -> pair.getValue())
                 .collect(Collectors.toList());   
     }
@@ -68,7 +70,7 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
     @Override
     public List<T> pull(Value from, Value to, int maxItems) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> Value.of(pair.getKey()).isBetween(from, to))
+                .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
                 .limit(maxItems)
                 .<T>map(pair -> pair.getValue())
                 .collect(Collectors.toList());        
