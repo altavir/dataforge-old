@@ -21,6 +21,9 @@ import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
+
+import hep.dataforge.workspace.identity.Identity;
+import hep.dataforge.workspace.identity.MetaIdentity;
 import javafx.util.Pair;
 
 /**
@@ -174,6 +177,11 @@ public class TaskModel implements Named, Annotated {
     public void data(String mask, String as) {
         //FIXME make smart name transformation here
         data(mask, str -> as);
+    }
+
+    public Identity getIdentity(){
+        //FIXME make more complex identity
+        return new MetaIdentity(meta());
     }
 
     /**

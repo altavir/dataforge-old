@@ -8,36 +8,38 @@ package hep.dataforge.workspace;
 import hep.dataforge.computation.WorkManager;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
-import static hep.dataforge.workspace.Task.GATHER_NODE_NAME;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class WorkspaceUtils {
 
+    /**
+     * A meta node that is used to add additional dependencies to the task
+     * manually
+     */
+    public static final String GATHER_NODE_NAME = "@gather";
+
 //    public static DataTree.Builder gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
 //        DataTree.Builder builder = DataTree.builder();
 //        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
-//        model.taskDeps().forEach(dep -> {
+//        model.taskDeps().forEachData(dep -> {
 //            builder.putNode(dep.placementRule(), workspace.runTask(dep.model()));
 //            callback.increaseProgress(1);
 //        });
-//        model.dataDeps().forEach(dep -> {
+//        model.dataDeps().forEachData(dep -> {
 //            builder.putData(dep.as(), workspace.getData(dep.path()));
 //            callback.increaseProgress(1);
 //        });
 //        return builder;
 //    }
+
     /**
-     * Construct task dependencies using given dependency model. Could be
-     * extended.
+     * Construct task dependencies using given dependency model.
      *
-     * @param workspace
      * @param model
-     * @param dataModelList
      */
-    public static void applyDataModel(Workspace workspace, TaskModel model, Meta dataModel) {
+    public static TaskModel applyDataModel(TaskModel model, Meta dataModel) {
         //Iterating over direct data dependancies
         //PENDING replace by DataFactory for unification?
         dataModel.getNodes("data").stream().forEach((dataElement) -> {
@@ -47,24 +49,32 @@ public class WorkspaceUtils {
         //Iterating over task dependancies
         dataModel.getNodes("task").stream().forEach((taskElement) -> {
             String taskName = taskElement.getString("name");
-            Task task = workspace.getTask(taskName);
+            Task task = model.getWorkspace().getTask(taskName);
             //Building model with default data construction
-            model.dependsOn(task.build(workspace, taskElement), taskElement.getString("as", taskName));
+            model.dependsOn(task.build(model.getWorkspace(), taskElement), taskElement.getString("as", taskName));
         });
+        return model;
     }
 
-    //PENDING move to TaskModel constructor?
     public static TaskModel createDefaultModel(Workspace workspace, String taskName, Meta taskMeta) {
         TaskModel model = new TaskModel(workspace, taskName, taskMeta);
 
-        Meta dependacyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
+        Meta dependencyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
         // Use @gather node for data construction
         if (taskMeta.hasNode(GATHER_NODE_NAME)) {
-            dependacyMeta = taskMeta.getNode(GATHER_NODE_NAME);
+            dependencyMeta = taskMeta.getNode(GATHER_NODE_NAME);
         }
 
-        applyDataModel(workspace, model, dependacyMeta);
+        return  applyDataModel(model, dependencyMeta);
+    }
 
-        return model;
+    public static DataTree.Builder gather(WorkManager.Callback callback, TaskModel model) {
+        DataTree.Builder builder = DataTree.builder();
+        callback.setMaxProgress(model.dependencies().size());
+        model.dependencies().forEach(dep -> {
+            dep.apply(builder, model.getWorkspace());
+            callback.increaseProgress(1.0);
+        });
+        return builder;
     }
 }

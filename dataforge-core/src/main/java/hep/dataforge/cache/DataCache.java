@@ -63,7 +63,7 @@ public abstract class DataCache {
         node.dataStream().forEach(pair -> cacheData(pair.getValue(), identityFactory.apply(pair.getKey(), pair.getValue())));
         return node;
 //        DataTree.Builder<T> builder = new DataTree.Builder<>(node);
-//        node.dataStream().forEach(pair -> {
+//        node.dataStream().forEachData(pair -> {
 //            Identity id = identityFactory.apply(pair.getKey(), pair.getValue());
 //            builder.putData(pair.getKey(), cacheData(pair.getValue(), id), true);
 //        });

@@ -20,7 +20,7 @@ import hep.dataforge.meta.Template;
  *
  * @author Alexander Nozik
  */
-public class ActionTask extends TemplateTask {
+public class ActionTask extends GenericTask {
 
     private final String name;
     private final Template template;
@@ -55,11 +55,6 @@ public class ActionTask extends TemplateTask {
     @Override
     public String getName() {
         return name;
-    }
-
-    @Override
-    protected Template getTemplate() {
-        return template;
     }
 
 }

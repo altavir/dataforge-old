@@ -40,7 +40,6 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
      *
-     * @param context
      * @param name
      * @param groupMeta
      * @param data

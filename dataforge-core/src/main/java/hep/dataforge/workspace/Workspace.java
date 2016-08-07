@@ -75,7 +75,19 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default <T> DataNode<T> runTask(String taskName, Meta config) {
-        return this.<T>getTask(taskName).run(this, config);
+        Task<T> task = getTask(taskName);
+        TaskModel model = task.build(this,config);
+        return runTask(model);
+    }
+
+    /**
+     * Use config root node name as task name
+     * @param config
+     * @param <T>
+     * @return
+     */
+    default <T> DataNode<T> runTask(Meta config) {
+        return runTask(config.getName(),config);
     }
 
     /**

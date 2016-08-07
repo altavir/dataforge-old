@@ -5,14 +5,17 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.cache.CachePlugin;
+import hep.dataforge.cache.DataCache;
 import hep.dataforge.context.Context;
+import hep.dataforge.data.DataNode;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- *
  * @author Alexander Nozik
  */
 public abstract class AbstractWorkspace implements Workspace {
@@ -20,10 +23,11 @@ public abstract class AbstractWorkspace implements Workspace {
     private Context context;
     protected final Map<String, Task> tasks = new HashMap<>();
     protected final Map<String, Meta> metas = new HashMap<>();
+    private DataCache cache;
 
     @Override
     public <T> Task<T> getTask(String taskName) {
-        if(! tasks.containsKey(taskName)){
+        if (!tasks.containsKey(taskName)) {
             throw new NameNotFoundException(taskName);
         }
         return tasks.get(taskName);
@@ -41,10 +45,22 @@ public abstract class AbstractWorkspace implements Workspace {
 
     protected void setContext(Context context) {
         this.context = context;
+        this.cache = CachePlugin.buildFrom(context).getCache();
+    }
+
+    @Override
+    public <T> DataNode<T> runTask(TaskModel model) {
+        Task<T> task = getTask(model.getName());
+        //Cache result if cache is available and caching is not blocked
+        if (cache != null && !model.meta().getBoolean("@noCache", false)) {
+            return cache.cacheNode(task.run(model), model.getIdentity());
+        } else {
+            return task.run(model);
+        }
     }
 
 
-//    /**
+    //    /**
 //     * Gathering of dependencies from workspace
 //     *
 //     * @param executor
@@ -56,10 +72,10 @@ public abstract class AbstractWorkspace implements Workspace {
 //    @NodeDef(name = "task", multiple = true, info = "Task dependecy element from workspace")
 //    protected DataTree.Builder gather(ProcessManager.Callback callback, Workspace workspace, Meta gatherConfig) {
 //        DataTree.Builder builder = DataTree.builder();
-//        gatherConfig.getNodes("data").stream().forEach((dataElement) -> {
+//        gatherConfig.getNodes("data").stream().forEachData((dataElement) -> {
 //            gatherData(builder, workspace, dataElement);
 //        });
-//        gatherConfig.getNodes("task").stream().forEach((dataElement) -> {
+//        gatherConfig.getNodes("task").stream().forEachData((dataElement) -> {
 //            gatherTask(builder, workspace, dataElement);
 //        });
 //

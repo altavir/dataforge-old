@@ -11,7 +11,6 @@ import hep.dataforge.context.GlobalContext
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Task
-import hep.dataforge.workspace.TaskBuilder
 import hep.dataforge.workspace.Workspace
 
 /**
@@ -132,8 +131,5 @@ class WorkspaceSpec {
         builder.loadTask(taskClass.newInstance());
     }
 
-    private class TaskSpec extends TaskBuilder {
-
-    }
 }
 

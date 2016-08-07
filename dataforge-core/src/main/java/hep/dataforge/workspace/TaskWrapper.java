@@ -10,6 +10,10 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
 
 
+/**
+ * A task that wraps other task, but uses a template to transform meta
+ * @param <R>
+ */
 public class TaskWrapper<R> implements Task<R> {
     
     private final String name;

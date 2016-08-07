@@ -27,6 +27,8 @@ import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import static hep.dataforge.workspace.WorkspaceUtils.gather;
+
 /**
  * A generic implementation of task with 4 phases:
  * <ul>
@@ -49,15 +51,15 @@ public abstract class GenericTask<T> implements Task<T> {
         // root process for this task
         final Work taskProcess = manager.submit(getName() + "_" + model.hashCode());
 
-        CompletableFuture<TaskState> gatherTask = manager.<TaskState>post(Name.join(taskProcess.getName(), "gather").toString(),
+        CompletableFuture<TaskState> gatherTask = manager.post(Name.join(taskProcess.getName(), "gather").toString(),
                 callback -> {
-                    getLogger().info("Starting gathering phase");
+                    getLogger().debug("Starting gathering phase");
                     Report report = new Report(getName(), workspace.getContext().getReport());
-                    return new TaskState(gather(callback, workspace, model), report);
+                    return new TaskState(gather(callback, model).build(), report);
                 });
 
         CompletableFuture<TaskState> transformTask = gatherTask
-                .thenCompose((TaskState state) -> manager.<TaskState>post(Name.join(taskProcess.getName(), "transform").toString(),
+                .thenCompose((TaskState state) -> manager.post(Name.join(taskProcess.getName(), "transform").toString(),
                         callback -> {
                             getLogger().info("Starting transformation phase");
                             TaskState result = transform(callback, workspace.getContext(),
@@ -70,7 +72,7 @@ public abstract class GenericTask<T> implements Task<T> {
                         }));
 
         CompletableFuture<DataNode<T>> resultTask = transformTask
-                .thenCompose((TaskState state) -> manager.<DataNode<T>>post(Name.join(taskProcess.getName(), "result").toString(),
+                .thenCompose((TaskState state) -> manager.post(Name.join(taskProcess.getName(), "result").toString(),
                         callback -> {
                             getLogger().info("Starting report phase");
                             model.outs().forEach(reporter -> {
@@ -92,7 +94,6 @@ public abstract class GenericTask<T> implements Task<T> {
      * Apply model transformation to include custom dependencies or change
      * existing ones.
      *
-     * @param context
      * @param model
      */
     protected TaskModel transformModel(TaskModel model) {
@@ -109,22 +110,12 @@ public abstract class GenericTask<T> implements Task<T> {
      */
     @Override
     public TaskModel build(Workspace workspace, Meta taskConfig) {
-        return transformModel(new TaskModel(workspace, getName(), taskConfig));
+        return transformModel(WorkspaceUtils.createDefaultModel(workspace, getName(), taskConfig));
     }
 
     public Logger getLogger() {
         //TODO replace by context logger
         return LoggerFactory.getLogger(getName());
-    }
-
-    protected DataNode gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
-        DataTree.Builder builder = DataTree.builder();
-        callback.setMaxProgress(model.dependencies().size());
-        model.dependencies().forEach(dep -> {
-            dep.apply(builder, workspace);
-            callback.increaseProgress(1.0);
-        });
-        return builder.build();
     }
 
     protected Meta getTaskMeta(Context context, TaskModel model) {
@@ -134,7 +125,6 @@ public abstract class GenericTask<T> implements Task<T> {
     /**
      * The main task body
      *
-     * @param executor
      * @param state
      * @param config
      */
@@ -143,10 +133,8 @@ public abstract class GenericTask<T> implements Task<T> {
     /**
      * Generating finish and storing it in workspace.
      *
-     * @param executor
      * @param workspace
      * @param state
-     * @param config
      * @return
      */
     protected DataNode<T> result(WorkManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {

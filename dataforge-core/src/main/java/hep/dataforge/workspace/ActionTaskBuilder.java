@@ -32,7 +32,7 @@ import hep.dataforge.utils.ContextMetaFactory;
  *
  * @author Alexander Nozik
  */
-public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
+public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder> {
 
     private String name = "@default";
     /**
@@ -45,7 +45,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     private final List<ModelTransformation> modelTransformations = new ArrayList<>();
 
 
-    public TaskBuilder setName(String name) {
+    public ActionTaskBuilder setName(String name) {
         this.name = name;
         return self();
     }
@@ -57,7 +57,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(String actionName, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder doLast(String actionName, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> ActionManager.buildFrom(ctx).getAction(actionName), metaBuilder));
         return self();
     }
@@ -69,7 +69,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(Class<? extends Action> actionClass, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder doLast(Class<? extends Action> actionClass, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> {
             try {
                 return actionClass.newInstance();
@@ -88,7 +88,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doLast(Action action, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder doLast(Action action, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> action, metaBuilder));
         return self();
     }
@@ -101,7 +101,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param actionMeta
      * @return
      */
-    public TaskBuilder doLast(Action action, Meta actionMeta) {
+    public ActionTaskBuilder doLast(Action action, Meta actionMeta) {
         return doLast(action, (ctx, meta) -> Template.compileTemplate(actionMeta, meta));
     }
 
@@ -111,7 +111,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param action
      * @return
      */
-    public TaskBuilder doLast(Action action) {
+    public ActionTaskBuilder doLast(Action action) {
         return doLast(action, (ctx, meta) -> Meta.empty());
     }
 
@@ -122,12 +122,12 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaBuilder
      * @return
      */
-    public TaskBuilder doFirst(Action action, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder doFirst(Action action, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(0, new Pair<>(ctx -> action, metaBuilder));
         return self();
     }
 
-    public TaskBuilder doFirst(Action action, Meta actionMeta) {
+    public ActionTaskBuilder doFirst(Action action, Meta actionMeta) {
         return doFirst(action, (ctx, meta) -> Template.compileTemplate(actionMeta, meta));
     }
 
@@ -139,7 +139,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param transformation
      * @return
      */
-    public TaskBuilder dependencyRule(ModelTransformation transformation) {
+    public ActionTaskBuilder dependencyRule(ModelTransformation transformation) {
         this.modelTransformations.add(transformation);
         return self();
     }
@@ -152,7 +152,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param metaTransformation a transformation to extract dependency meta
      * @return
      */
-    public TaskBuilder dependsOn(String taskName, String as, UnaryOperator<Meta> metaTransformation) {
+    public ActionTaskBuilder dependsOn(String taskName, String as, UnaryOperator<Meta> metaTransformation) {
         return dependencyRule((TaskModel model) -> {
             Workspace workspace = model.getWorkspace();
             Meta depMeta = metaTransformation.apply(model.meta());
@@ -168,7 +168,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param as
      * @return
      */
-    public TaskBuilder data(String dataName, String as) {
+    public ActionTaskBuilder data(String dataName, String as) {
         return dependencyRule((TaskModel model) -> {
             model.data(dataName, as);
         });
@@ -180,7 +180,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param predicate
      * @return
      */
-    public TaskBuilder data(Predicate<Pair<String, Data<?>>> predicate) {
+    public ActionTaskBuilder data(Predicate<Pair<String, Data<?>>> predicate) {
         return dependencyRule((TaskModel model) -> {
             model.getWorkspace().getDataStage().dataStream()
                     .filter(predicate)
@@ -193,7 +193,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param namePattern
      * @return 
      */
-    public TaskBuilder data(String... namePattern) {
+    public ActionTaskBuilder data(String... namePattern) {
         Predicate<Pair<String, Data<?>>> pattern = pair -> false;
         for (String n : namePattern) {
             pattern = pattern.or(pair -> pair.getKey().matches(n.replace("?", ".?").replace("*", ".*?")));
@@ -208,7 +208,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
      * @param actionsMeta
      * @return
      */
-    public TaskBuilder fromMeta(Context context, Meta actionsMeta) {
+    public ActionTaskBuilder fromMeta(Context context, Meta actionsMeta) {
         actionsMeta.getNodes(ACTION_NODE_KEY).stream().forEach((action) -> {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             doLast(buildAction(context, actionType), action);
@@ -217,7 +217,7 @@ public class TaskBuilder implements GenericBuilder<Task, TaskBuilder> {
     }
 
     @Override
-    public TaskBuilder self() {
+    public ActionTaskBuilder self() {
         return this;
     }
 

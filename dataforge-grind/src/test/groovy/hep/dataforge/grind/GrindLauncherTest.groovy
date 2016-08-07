@@ -12,7 +12,7 @@ class GrindLauncherTest extends Specification {
         GrindLauncher launcher = new GrindLauncher().from { this.getClass().getResource('/workspace/workspace.groovy').toURI() }
         when:
         DataNode res = launcher.run("testTask")
-        res.forEachWithType(Object){key,value -> println("${key}: ${value.get()}")}
+        res.forEachDataWithType(Object){ key, value -> println("${key}: ${value.get()}")}
         then:
         res.compute("a") == 4;
     }
@@ -22,8 +22,8 @@ class GrindLauncherTest extends Specification {
         GrindLauncher launcher = new GrindLauncher().from { this.getClass().getResource('/workspace/workspace.groovy').toURI() }
         when:
         DataNode res = launcher.run("testTask{childNode(metaValue: 18); otherChildNode(val: false)}")
-        res.forEachWithType(Object){key,value -> println("${key}: ${value.get()}")}
+        res.forEachDataWithType(Object){ key, value -> println("${key}: ${value.get()}")}
         then:
-        res.compute("meta.childNode.metaValue") as Double == 18
+        res.compute("meta.childNode.metaValue") == 18
     }
 }

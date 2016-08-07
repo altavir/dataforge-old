@@ -113,7 +113,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      *
      * @param consumer
      */
-    default void forEach(BiConsumer<String, Data<? extends T>> consumer) {
+    default void forEachData(BiConsumer<String, Data<? extends T>> consumer) {
         dataStream().forEach(pair -> consumer.accept(pair.getKey(), pair.getValue()));
     }
 
@@ -123,7 +123,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @param type
      * @param consumer
      */
-    default <R> void forEachWithType(Class<R> type, BiConsumer<String, Data<R>> consumer) {
+    default <R> void forEachDataWithType(Class<R> type, BiConsumer<String, Data<R>> consumer) {
         dataStream().filter(pair -> type.isAssignableFrom(pair.getValue().dataType()))
                 .forEach(pair -> consumer.accept(pair.getKey(), (Data<R>) pair.getValue()));
     }
