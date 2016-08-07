@@ -46,7 +46,7 @@ class GrindLauncher {
     }
 
     /**
-     * Run task with given name and meta built from closure
+     * Run task with given name and meta built from action
      * @param taskName
      * @param metaClosure
      * @return
