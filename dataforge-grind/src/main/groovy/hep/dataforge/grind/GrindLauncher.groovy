@@ -51,7 +51,7 @@ class GrindLauncher {
      * @param metaClosure
      * @return
      */
-    DataNode runTask(String taskName, Closure metaClosure) {
+    DataNode runTask(String taskName, @DelegatesTo(GrindMetaBuilder) Closure metaClosure) {
         return buildWorkspace().runTask(taskName, GrindUtils.buildMeta(metaClosure));
     }
 
@@ -67,6 +67,11 @@ class GrindLauncher {
         return ws.runTask(taskName, taskMeta);
     }
 
+    /**
+     * Run
+     * @param input
+     * @return
+     */
     DataNode run(String input) {
         if(!input.contains("(")&& !input.contains("{")){
             return runTask(input)

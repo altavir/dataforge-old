@@ -56,7 +56,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
                 .putData(dataName, data)
                 .build();
     }
-
+    
     /**
      * Get Data with given Name or null if name not present
      *

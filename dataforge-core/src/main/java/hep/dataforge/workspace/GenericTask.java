@@ -19,7 +19,6 @@ import hep.dataforge.context.Context;
 import hep.dataforge.computation.Work;
 import hep.dataforge.computation.WorkManager;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.data.DataTree;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;

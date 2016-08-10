@@ -4,37 +4,24 @@ import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
 import hep.dataforge.io.reports.Reportable
 import hep.dataforge.meta.Laminate
-import hep.dataforge.meta.Meta
 
 /**
  * Created by darksnake on 07-Aug-16.   
  */
 class GrindOneToOneAction extends OneToOneAction {
-    public static GrindOneToOneAction build(Closure triFunction) {
+    public static GrindOneToOneAction build(@DelegatesTo(OneToOneCallable) Closure triFunction) {
         def res = new GrindOneToOneAction(triFunction)
         return res;
     }
 
-//    public static GrindOneToOneAction build(BiFunction<Meta, Object, Object> biFunction) {
-//        def res = new GrindOneToOneAction()
-//        res.action = { String name, Meta meta, Object input -> biFunction.apply(meta, input) };
-//        return res;
-//    }
-//
-//    public static GrindOneToOneAction build(Function<Object, Object> function) {
-//        def res = new GrindOneToOneAction()
-//        res.action = { String name, Meta meta, Object input -> function.apply(input) };
-//        return res;
-//    }
-
     Closure action;
     Map params = ["name": "@dynamic"];
 
-    GrindOneToOneAction(Closure action) {
+    GrindOneToOneAction(@DelegatesTo(OneToOneCallable) Closure action) {
         this.action = action
     }
 
-    GrindOneToOneAction(Map params, Closure action) {
+    GrindOneToOneAction(Map params, @DelegatesTo(OneToOneCallable) Closure action) {
         this.action = action
         this.params.putAll(params)
     }

@@ -14,35 +14,38 @@ import hep.dataforge.computation.WorkManager;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
+import java.util.function.UnaryOperator;
 
 /**
- * A task consisting of sequence of actions. Using template if it is provided
+ * A task consisting of sequence of actions. Using template if it is provided.
+ * The sequence is defined on flight using provided meta.
  *
  * @author Alexander Nozik
  */
-public class ActionTask extends GenericTask {
+public class TemplateTask extends GenericTask {
 
     private final String name;
-    private final Template template;
+    private final UnaryOperator<Meta> template;
 
-    public ActionTask(String name, Template template) {
+    public TemplateTask(String name, Template template) {
         this.name = name;
         this.template = template;
     }
 
-    public ActionTask(String name, Meta template) {
+    public TemplateTask(String name, Meta template) {
         this.name = name;
         this.template = new Template(template);
     }
 
-    public ActionTask(String name) {
+    public TemplateTask(String name) {
         this.name = name;
-        this.template = null;
+        this.template = UnaryOperator.identity();
     }
 
     @Override
     protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
         DataNode res = state.getData();
+        config = template.apply(config);
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             res = buildAction(context, actionType).withParentProcess(callback.workName()).run(res, action);

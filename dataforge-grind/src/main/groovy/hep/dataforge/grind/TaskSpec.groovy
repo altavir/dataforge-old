@@ -4,6 +4,7 @@ import groovy.transform.CompileStatic
 import hep.dataforge.actions.Action
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.Template
 import hep.dataforge.workspace.GatherTask
 import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.TaskModel
@@ -27,12 +28,29 @@ class TaskSpec {
         this.name = name
     }
 
-    TaskSpec(Workspace workspace, String name, Map map) {
-        this.name = name;
-        if (map.containsKey("prototype")) {
-            prototype = workspace.getTask(map["prototype"].toString());
-        }
+    def prototype(Task proto, Closure template) {
+        this.prototype = proto;
+        trans = new Template(GrindUtils.buildMeta { template });
     }
+
+    def prototype(Task proto) {
+        this.prototype = proto;
+    }
+
+    def prototype(Class<Task> proto, Closure template) {
+        prototype(proto.newInstance(), template);
+    }
+
+    def prototype(Class<Task> proto) {
+        prototype(proto.newInstance());
+    }
+
+//    def action(Map params, Closure action){
+//        switch (params.getOrDefault("type","pipe")){
+//            case "pipe":
+//
+//        }
+//    }
 
     DynamicTask build() {
         return new DynamicTask();

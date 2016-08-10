@@ -2,7 +2,6 @@ package hep.dataforge.grind
 
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataSet
-import hep.dataforge.meta.Meta
 import spock.lang.Specification
 
 /**

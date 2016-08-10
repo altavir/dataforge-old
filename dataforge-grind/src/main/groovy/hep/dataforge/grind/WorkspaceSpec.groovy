@@ -61,25 +61,6 @@ class WorkspaceSpec {
         }
     }
 
-//    /**
-//     * Specification to add property sets
-//     */
-//    private class PropertySetSpec {
-//        Map storage = [:]
-//
-//        Object propertyMissing(String name, Object value) {
-//            storage[name] = value
-//        }
-//
-//        Object propertyMissing(String name) {
-//            storage[name]
-//        }
-//
-//        def build() {
-//            return storage;
-//        }
-//    }
-
     /**
      * Set workspace data
      * @param cl
@@ -93,7 +74,7 @@ class WorkspaceSpec {
     }
 
     private class DataSpec {
-        def file(String name, String path, Closure fileMeta) {
+        def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
             builder.putFile(name, path, GrindUtils.buildMeta(fileMeta));
         }
         //TODO extends data specification
@@ -105,8 +86,8 @@ class WorkspaceSpec {
      * @param cl
      * @return
      */
-    def task(String taskName, Closure cl) {
-        def taskSpec = new TaskSpec();
+    def task(String taskName, @DelegatesTo(TaskSpec) Closure cl) {
+        def taskSpec = new TaskSpec(taskName);
         def code = cl.rehydrate(taskSpec, this, this);
         code.resolveStrategy = Closure.DELEGATE_ONLY;
         code();
