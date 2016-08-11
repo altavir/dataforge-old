@@ -196,8 +196,7 @@ public interface Value extends Serializable {
         } else if (obj instanceof Object[]) {
             return of((Object[]) obj);
         } else {
-            //сделать Content обертку?
-            throw new RuntimeException("Can not get a Value for " + obj.getClass().getName());
+            return of(obj.toString());
         }
     }
 

@@ -36,6 +36,7 @@ class WorkspaceSpec {
         String parent = GlobalContext.instance().getName();
         Map properties = new HashMap();
         Map<String, Meta> pluginMap = new HashMap<>();
+        String homeDir;
 
         Context build() {
             Context res = new Context(GlobalContext.getContext(parent), name)
@@ -58,6 +59,10 @@ class WorkspaceSpec {
 
         def plugin(String key, Closure cl) {
             pluginMap.put(key, GrindUtils.buildMeta(cl))
+        }
+
+        def home(String path){
+
         }
     }
 
@@ -110,6 +115,19 @@ class WorkspaceSpec {
      */
     def loadTask(Class<Task> taskClass) {
         builder.loadTask(taskClass.newInstance());
+    }
+
+    /**
+     * Load meta using grind meta builder
+     * @param closure
+     * @return
+     */
+    def meta(Closure closure) {
+        this.builder.loadMeta(GrindUtils.buildMeta(closure));
+    }
+
+    def meta(String name, Closure closure) {
+        this.builder.loadMeta(name, GrindUtils.buildMeta(closure));
     }
 
 }

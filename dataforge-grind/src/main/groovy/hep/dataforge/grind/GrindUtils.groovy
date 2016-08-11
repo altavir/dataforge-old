@@ -12,7 +12,7 @@ class GrindUtils {
         def metaSpec = new GrindMetaBuilder()
         def metaExec = cl.rehydrate(metaSpec, this, this);
         metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
-        return metaExec
+        return metaExec()
     }
 
     public static MetaBuilder buildMeta(String input){

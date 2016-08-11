@@ -41,7 +41,6 @@ public interface IOManager {
      *
      * @param stage
      * @param name
-     * @param type
      * @return
      */
     OutputStream out(Name stage, Name name);

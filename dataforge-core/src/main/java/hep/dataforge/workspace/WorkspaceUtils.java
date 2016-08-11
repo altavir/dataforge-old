@@ -42,17 +42,21 @@ public class WorkspaceUtils {
     public static TaskModel applyDataModel(TaskModel model, Meta dataModel) {
         //Iterating over direct data dependancies
         //PENDING replace by DataFactory for unification?
-        dataModel.getNodes("data").stream().forEach((dataElement) -> {
-            String dataPath = dataElement.getString("name");
-            model.data(dataPath, dataElement.getString("as", dataPath));
-        });
+        if (dataModel.hasNode("data")) {
+            dataModel.getNodes("data").stream().forEach((dataElement) -> {
+                String dataPath = dataElement.getString("name");
+                model.data(dataPath, dataElement.getString("as", dataPath));
+            });
+        }
         //Iterating over task dependancies
-        dataModel.getNodes("task").stream().forEach((taskElement) -> {
-            String taskName = taskElement.getString("name");
-            Task task = model.getWorkspace().getTask(taskName);
-            //Building model with default data construction
-            model.dependsOn(task.build(model.getWorkspace(), taskElement), taskElement.getString("as", taskName));
-        });
+        if (dataModel.hasNode("task")) {
+            dataModel.getNodes("task").stream().forEach((taskElement) -> {
+                String taskName = taskElement.getString("name");
+                Task task = model.getWorkspace().getTask(taskName);
+                //Building model with default data construction
+                model.dependsOn(task.build(model.getWorkspace(), taskElement), taskElement.getString("as", taskName));
+            });
+        }
         return model;
     }
 
@@ -65,7 +69,7 @@ public class WorkspaceUtils {
             dependencyMeta = taskMeta.getNode(GATHER_NODE_NAME);
         }
 
-        return  applyDataModel(model, dependencyMeta);
+        return applyDataModel(model, dependencyMeta);
     }
 
     public static DataTree.Builder gather(WorkManager.Callback callback, TaskModel model) {

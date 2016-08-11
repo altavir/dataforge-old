@@ -17,6 +17,10 @@ class GrindLauncher {
         return this;
     }
 
+    GrindLauncher inside(Closure source) {
+
+    }
+
     /**
      * Create workspace builder using WorkspaceSpec
      * @param input
@@ -57,7 +61,7 @@ class GrindLauncher {
 
     DataNode runTask(String taskName, String target) {
         Workspace ws = buildWorkspace();
-        Meta taskMeta = ws.hasMeta(target);
+        Meta taskMeta = ws.hasMeta(target) ? ws.getMeta(target) : Meta.empty();
         return ws.runTask(taskName, taskMeta);
     }
 
@@ -73,7 +77,7 @@ class GrindLauncher {
      * @return
      */
     DataNode run(String input) {
-        if(!input.contains("(")&& !input.contains("{")){
+        if (!input.contains("(") && !input.contains("{")) {
             return runTask(input)
         }
         Meta meta = GrindUtils.buildMeta(input);
