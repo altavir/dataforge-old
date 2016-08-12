@@ -1,5 +1,6 @@
 package hep.dataforge.grind
 
+import groovy.transform.CompileStatic
 import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.Workspace
@@ -8,12 +9,23 @@ import org.codehaus.groovy.control.CompilerConfiguration
 /**
  * Created by darksnake on 04-Aug-16.
  */
+@CompileStatic
 class GrindLauncher {
 
-    private Closure source = { new File("workspace.groovy") }
+    private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
 
-    GrindLauncher from(Closure source) {
-        this.source = source
+    GrindLauncher from(File file) {
+        this.source = { file.newReader() }
+        return this;
+    }
+
+    GrindLauncher from(Reader reader) {
+        this.source = { reader }
+        return this;
+    }
+
+    GrindLauncher from(String str) {
+        this.source = { new StringReader(str) }
         return this;
     }
 
@@ -26,11 +38,11 @@ class GrindLauncher {
      * @param input
      * @return
      */
-    Workspace.Builder buildWorkspace(Object input) {
+    Workspace.Builder getBuilder() {
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = DelegatingScript.class.name
         def shell = new GroovyShell(this.class.classLoader, compilerConfiguration)
-        def script = shell.parse(input);
+        DelegatingScript script = shell.parse(source()) as DelegatingScript;
         WorkspaceSpec spec = new WorkspaceSpec()
         script.setDelegate(spec)
         script.run()
@@ -42,7 +54,7 @@ class GrindLauncher {
      * @return
      */
     Workspace buildWorkspace() {
-        return buildWorkspace(source()).build();
+        return getBuilder().build();
     }
 
     DataNode runTask(String taskName, Meta meta) {

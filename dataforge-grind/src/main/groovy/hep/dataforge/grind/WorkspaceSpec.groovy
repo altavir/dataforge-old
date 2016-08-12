@@ -6,6 +6,7 @@
 
 package hep.dataforge.grind
 
+import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.meta.Meta
@@ -17,6 +18,7 @@ import hep.dataforge.workspace.Workspace
  * A DSL helper to build workspace
  * @author Alexander Nozik
  */
+@CompileStatic
 class WorkspaceSpec {
     Workspace.Builder builder = BasicWorkspace.builder();
 
@@ -36,12 +38,11 @@ class WorkspaceSpec {
         String parent = GlobalContext.instance().getName();
         Map properties = new HashMap();
         Map<String, Meta> pluginMap = new HashMap<>();
-        String homeDir;
 
         Context build() {
             Context res = new Context(GlobalContext.getContext(parent), name)
-            properties.each { key, value -> res.putValue(key, value) }
-            pluginMap.forEach { key, meta -> res.pluginManager().loadPlugin(key).configure(meta) }
+            properties.each { key, value -> res.putValue(key.toString(), value) }
+            pluginMap.forEach { String key, Meta meta -> res.pluginManager().loadPlugin(key.toString()).configure(meta) }
             return res;
         }
 
@@ -61,8 +62,8 @@ class WorkspaceSpec {
             pluginMap.put(key, GrindUtils.buildMeta(cl))
         }
 
-        def home(String path){
-
+        def rootDir(String path) {
+            properties.put("rootDir", path);
         }
     }
 
@@ -127,8 +128,24 @@ class WorkspaceSpec {
     }
 
     def meta(String name, Closure closure) {
-        this.builder.loadMeta(name, GrindUtils.buildMeta(closure));
+        this.builder.loadMeta(GrindUtils.buildMeta(name, closure));
     }
+
+//    private class MetaSpec {
+//        String name
+//
+//        def methodMissing(String methodName) {
+//            this.name = methodName
+//        }
+//
+//        def call(Closure closure) {
+//            if (name) {
+//                builder.loadMeta(name, GrindUtils.buildMeta(closure));
+//            } else {
+//                throw new RuntimeException("Meta name not provided");
+//            }
+//        }
+//    }
 
 }
 

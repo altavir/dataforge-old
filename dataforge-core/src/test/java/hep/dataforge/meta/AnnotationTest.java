@@ -16,12 +16,9 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
-import org.junit.After;
-import org.junit.AfterClass;
+import org.junit.*;
+
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  *
@@ -71,7 +68,7 @@ public class AnnotationTest {
 
 //    @Test
 //    public void testSubst() {
-//        System.out.println("Value substitution via AnnotationReader");
+//        System.onComplete.println("Value substitution via AnnotationReader");
 //        assertEquals("otherValue", testAnnotation.getString("some"));
 //    }
 

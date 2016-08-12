@@ -15,10 +15,10 @@
  */
 package hep.dataforge.actions;
 
+import hep.dataforge.computation.Goal;
 import hep.dataforge.data.Data;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.computation.Goal;
 
 /**
  * The asynchronous result of the action
@@ -31,7 +31,7 @@ public class ActionResult<R> extends Data<R> {
     private final Report log;
 
     public ActionResult(Report log, Goal<R> goal, Meta meta, Class<R> type) {
-        super(goal, meta, type);
+        super(goal, type, meta);
         this.log = log;
     }
 

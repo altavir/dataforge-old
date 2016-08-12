@@ -17,28 +17,28 @@ package hep.dataforge.actions;
 
 import hep.dataforge.computation.AbstractGoal;
 import hep.dataforge.computation.Goal;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import javafx.util.Pair;
 
 /**
  * Action with multiple input data pieces but single output
  *
- * @author Alexander Nozik
  * @param <T>
  * @param <R>
+ * @author Alexander Nozik
  */
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
@@ -77,10 +77,9 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         MetaBuilder builder = new MetaBuilder("node")
                 .putValue("name", input.getName())
                 .putValue("type", input.type().getName());
-        input.dataStream().forEach((Pair<String, Data<? extends T>> item) -> {
+        input.dataStream().forEach((NamedData<? extends T> data) -> {
             MetaBuilder dataNode = new MetaBuilder("data")
-                    .putValue("name", item.getKey());
-            Data<? extends T> data = item.getValue();
+                    .putValue("name", data.getName());
             if (!data.dataType().equals(input.type())) {
                 dataNode.putValue("type", data.dataType().getName());
             }
@@ -128,8 +127,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         @Override
-        public Stream<Goal> depencencies() {
-            return data.nodeGoal().depencencies();
+        public Stream<Goal> dependencies() {
+            return data.nodeGoal().dependencies();
         }
 
         @Override
@@ -140,7 +139,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             beforeGroup(log, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()
-                    .collect(Collectors.toMap(item -> item.getKey(), item -> item.getValue().get()));
+                    .collect(Collectors.toMap(data -> data.getName(), data -> data.get()));
             R res = execute(log, data.getName(), collection, meta);
             afterGroup(log, data.getName(), outputMeta, res);
             return res;

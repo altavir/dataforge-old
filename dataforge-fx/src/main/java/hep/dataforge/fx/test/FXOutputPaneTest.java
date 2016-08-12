@@ -15,32 +15,32 @@ import javafx.stage.Stage;
  * @author Alexander Nozik
  */
 public class FXOutputPaneTest extends Application {
-    
-    @Override
-    public void start(Stage primaryStage) {
-        
-        FXDataOutputPane out = new FXDataOutputPane();
-        out.setMaxLines(5);
-        
-        for (int i = 0; i < 12; i++) {
-            out.appendLine("my text number " + i);
-        }
-        
-//        out.appendLine("a\tb\tc");
-//        out.appendLine("aaaaa\tbbb\tccc");
-        
-        Scene scene = new Scene(out.getRoot(), 400, 400);
-        
-        primaryStage.setTitle("FXOutputPaneTest");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
         launch(args);
+    }
+
+    @Override
+    public void start(Stage primaryStage) {
+
+        FXDataOutputPane out = new FXDataOutputPane();
+        out.setMaxLines(5);
+
+        for (int i = 0; i < 12; i++) {
+            out.appendLine("my text number " + i);
+        }
+
+//        onComplete.appendLine("a\tb\tc");
+//        onComplete.appendLine("aaaaa\tbbb\tccc");
+
+        Scene scene = new Scene(out.getRoot(), 400, 400);
+
+        primaryStage.setTitle("FXOutputPaneTest");
+        primaryStage.setScene(scene);
+        primaryStage.show();
     }
     
 }

@@ -17,17 +17,15 @@ package hep.dataforge.io;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedVector;
-import static hep.dataforge.names.NamedUtils.combineNames;
 import hep.dataforge.names.Names;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.PointSource;
-import hep.dataforge.tables.Table;
+import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.tables.*;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 import java.io.PrintWriter;
 import java.util.List;
-import org.apache.commons.math3.analysis.UnivariateFunction;
-import hep.dataforge.stat.parametric.ParametricValue;
+
+import static hep.dataforge.names.NamedUtils.combineNames;
 
 /**
  * Формирование и печать наборов данных
@@ -116,7 +114,7 @@ public class OutputData {
 //            if(printTags){
 //                Set<String> tags = dataPoint.getTags();
 //                for (String tag : tags) {
-//                    out.printf("%s\t", tag);
+//                    onComplete.printf("%s\t", tag);
 //                }
 //            }
             out.printf("\b%n");

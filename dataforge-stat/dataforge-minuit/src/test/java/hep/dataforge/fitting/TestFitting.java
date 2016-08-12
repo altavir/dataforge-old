@@ -15,11 +15,12 @@
  */
 package hep.dataforge.fitting;
 
+import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.MINUITPlugin;
 import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.stat.fit.FitState;
-import static hep.dataforge.context.GlobalContext.out;
 import hep.dataforge.tables.Table;
+
+import static hep.dataforge.context.GlobalContext.out;
 
 /**
  *
@@ -56,12 +57,12 @@ public class TestFitting {
             r = GaussianSpectrum.fit(data, allPars, "MINUIT");
             res[i] = r.getParameters().getDouble("pos");
             errs[i] = r.getParameters().getError("pos");
-            
-//            r.printCovariance(out());
+
+//            r.printCovariance(onComplete());
 //            GaussianSpectrum.printInvHessian(data, allPars);
         }
 
-//        r.print(Out.out);
+//        r.print(Out.onComplete);
         out().println();
         double meanerr = 0;
         double meanval = 0;

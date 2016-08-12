@@ -5,25 +5,30 @@
  */
 package hep.dataforge.computation;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.function.BiConsumer;
+
 /**
- *
  * @author Alexander Nozik
  */
 public abstract class AbstractGoal<T> implements Goal<T> {
 
     private final ExecutorService executor;
+    private final CompletableFuture<T> result;
+    private final List<Runnable> onStartHooks = new ArrayList<>();
+    private final List<BiConsumer<? super T, ? super Throwable>> onCompleteHooks = new ArrayList<>();
     private CompletableFuture<?> computation;
-    private final CompletableFuture<T> result = new GoalResult<>();
-    private Runnable onStart;
     private Thread thread;
 
     public AbstractGoal(ExecutorService executor) {
         this.executor = executor;
+        result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
     }
 
     protected Logger getLogger() {
@@ -35,18 +40,17 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         if (!isStarted()) {
             //start all dependencies so they will occupy threads
             computation = CompletableFuture
-                    .allOf(depencencies()
+                    .allOf(dependencies()
                             .map(dep -> {
                                 dep.start();//starting all dependencies
                                 return dep.result();
                             })
-                            .toArray(num -> new CompletableFuture[num]))
+                            .<CompletableFuture<?>>toArray(num -> new CompletableFuture[num]))
                     .thenAcceptAsync(v -> {
                         try {
                             thread = Thread.currentThread();
-                            if(onStart!= null){
-                                onStart.run();
-                            }
+                            //trigger start hooks
+                            onStartHooks.forEach(action -> action.run());
                             this.result.complete(compute());
                             thread = null;
                         } catch (Exception ex) {
@@ -59,9 +63,13 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     public ExecutorService getExecutor() {
         return executor;
     }
-    
-    public void onStart(Runnable run){
-        this.onStart = run;
+
+    public synchronized void onStart(Runnable hook) {
+        this.onStartHooks.add(hook);
+    }
+
+    public synchronized void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
+        this.onCompleteHooks.add(hook);
     }
 
     protected abstract T compute() throws Exception;
@@ -102,7 +110,20 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         return result;
     }
 
-    protected class GoalResult<T> extends CompletableFuture<T> {
+    protected class GoalResult extends CompletableFuture<T> {
+
+        @Override
+        public boolean complete(T value) {
+            onCompleteHooks.forEach(hook -> hook.accept(value, null));
+            return super.complete(value);
+        }
+
+        @Override
+        public boolean completeExceptionally(Throwable ex) {
+            onCompleteHooks.forEach(hook -> hook.accept(null, ex));
+            return super.completeExceptionally(ex);
+        }
+
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {

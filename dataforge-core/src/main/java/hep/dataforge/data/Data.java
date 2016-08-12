@@ -15,10 +15,11 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.computation.Goal;
 import hep.dataforge.computation.StaticGoal;
+import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Meta;
+
 import java.util.concurrent.CompletableFuture;
 
 /**
@@ -30,29 +31,28 @@ import java.util.concurrent.CompletableFuture;
  */
 public class Data<T> implements Annotated {
     
-    public static <T> Data<T> buildStatic(T content, Meta meta){
-        return new Data(new StaticGoal(content),meta, content.getClass());
-    }
-    
-    public static <T> Data<T> buildStatic(T content){
-        return buildStatic(content, Meta.empty());
-    }    
-    
     private final Goal<T> goal;
     private final Meta meta;
     private final Class<T> type;
 
-    public Data(Goal<T> goal, Meta meta, Class<T> type) {
+    public Data(Goal<T> goal, Class<T> type, Meta meta) {
         this.goal = goal;
         this.meta = meta;
         this.type = type;
     }
-    
     public Data(Goal<T> goal, Class<T> type) {
         this.goal = goal;
         this.meta = Meta.empty();
         this.type = type;
-    }    
+    }
+
+    public static <T> Data<T> buildStatic(T content, Meta meta) {
+        return new Data(new StaticGoal(content), content.getClass(), meta);
+    }
+
+    public static <T> Data<T> buildStatic(T content) {
+        return buildStatic(content, Meta.empty());
+    }
 
     public Goal<T> getGoal() {
         return goal;

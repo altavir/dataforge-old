@@ -8,21 +8,17 @@ package hep.dataforge.computation;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  *
@@ -130,6 +126,10 @@ public class Work implements Named {
         return taskProperty;
     }
 
+    public CompletableFuture<?> getTask() {
+        return taskProperty.get();
+    }
+
     protected void setTask(CompletableFuture<?> task) {
         if (this.taskProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
@@ -144,13 +144,9 @@ public class Work implements Named {
             isDone.invalidate();
             getManager().onFinished(getName());
         });
-        
+
         taskProperty.set(task);
         isDone.invalidate();
-    }
-
-    public CompletableFuture<?> getTask() {
-        return taskProperty.get();
     }
 
     public Work findProcess(String processName) {
@@ -243,12 +239,20 @@ public class Work implements Named {
         return titleProperty().get();
     }
 
+    public void setTitle(String title) {
+        this.titleProperty().set(title);
+    }
+
     public StringProperty messageProperty() {
         return message;
     }
 
     public String getMessage() {
         return messageProperty().get();
+    }
+
+    public void setMessage(String message) {
+        this.messageProperty().set(message);
     }
 
     public ObservableDoubleValue progressProperty() {
@@ -263,41 +267,31 @@ public class Work implements Named {
         return curProgress.get() + children.values().stream().mapToDouble(it -> it.getProgress()).sum();
     }
 
-    public double getMaxProgress() {
-        return curMaxProgress.get() + children.values().stream().mapToDouble(it -> it.getMaxProgress()).sum();
-    }
-
-    public BooleanBinding isDoneProperty() {
-        return isDone;
-    }
-
-    public void setMessage(String message) {
-        this.messageProperty().set(message);
-    }
-
-    public void setTitle(String title) {
-        this.titleProperty().set(title);
-    }
-
     /**
      * Set progress values to given values
      *
      * @param progress
-     * @param maxProgress
      */
     public void setProgress(double progress) {
         this.curProgress.set(progress);
+    }
+
+    public double getMaxProgress() {
+        return curMaxProgress.get() + children.values().stream().mapToDouble(it -> it.getMaxProgress()).sum();
     }
 
     public void setMaxProgress(double maxProgress) {
         this.curMaxProgress.set(maxProgress);
     }
 
+    public BooleanBinding isDoneProperty() {
+        return isDone;
+    }
+
     /**
      * Increase progress by given value
      *
      * @param incProgress
-     * @param incMaxProgress
      */
     public void increaseProgress(double incProgress) {
         this.curProgress.set(this.curProgress.get() + incProgress);
@@ -351,5 +345,9 @@ public class Work implements Named {
      */
     public WorkManager getManager() {
         return manager;
+    }
+
+    public WorkManager.Callback callback() {
+        return getManager().callback(this.getName());
     }
 }

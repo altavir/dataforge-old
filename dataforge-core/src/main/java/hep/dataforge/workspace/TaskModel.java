@@ -6,25 +6,24 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.computation.WorkManager;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
+import hep.dataforge.workspace.identity.Identity;
+import hep.dataforge.workspace.identity.MetaIdentity;
+
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
-
-import hep.dataforge.workspace.identity.Identity;
-import hep.dataforge.workspace.identity.MetaIdentity;
-import javafx.util.Pair;
 
 /**
  * The model for task execution. Is computed without actual task invocation.
@@ -37,9 +36,9 @@ public class TaskModel implements Named, Annotated {
     private final String taskName;
     private final Meta taskMeta;
     private final Set<Dependency> deps;
-    private final Set<TaskOutput> outs;
+    private final Set<OutputHook> outs;
 
-    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps, Set<TaskOutput> outs) {
+    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps, Set<OutputHook> outs) {
         this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
@@ -82,18 +81,18 @@ public class TaskModel implements Named, Annotated {
      *
      * @return
      */
-    public Collection<TaskOutput> outs() {
+    public Collection<OutputHook> outs() {
         return outs;
     }
 
     /**
-     * Add output action to task model. Order matters.
+     * Add output action to task completion
      *
      * @param consumer
      */
-    public void out(BiConsumer<Context, TaskState> consumer) {
-        TaskOutput out = (WorkManager.Callback callback, Context context, TaskState state) -> {
-            callback.getManager().submit(callback.workName() + ".output", () -> consumer.accept(context, state));
+    public void onComplete(Consumer<DataNode> consumer) {
+        OutputHook out = (Context context, TaskState state) -> {
+            state.getResult().onComplete((node) -> consumer.accept(node));
         };
         this.outs.add(out);
     }
@@ -129,8 +128,9 @@ public class TaskModel implements Named, Annotated {
 
     /**
      * dependsOn(new TaskModel(workspace, taskName, taskMeta))
+     *
      * @param taskName
-     * @param taskMeta 
+     * @param taskMeta
      */
     public void dependsOn(String taskName, Meta taskMeta) {
         dependsOn(new TaskModel(workspace, taskName, taskMeta));
@@ -179,7 +179,7 @@ public class TaskModel implements Named, Annotated {
         data(mask, str -> as);
     }
 
-    public Identity getIdentity(){
+    public Identity getIdentity() {
         //FIXME make more complex identity
         return new MetaIdentity(meta());
     }
@@ -200,6 +200,13 @@ public class TaskModel implements Named, Annotated {
     }
 
     /**
+     * Task output
+     */
+    public interface OutputHook {
+        void accept(Context context, TaskState state);
+    }
+
+    /**
      * Data dependency
      */
     static class DataDependency implements Dependency {
@@ -207,20 +214,20 @@ public class TaskModel implements Named, Annotated {
         /**
          * The gathering function for data
          */
-        private final Function<Workspace, Stream<Pair<String, Data<?>>>> gatherer;
+        private final Function<Workspace, Stream<NamedData<?>>> gatherer;
 
         /**
          * The rule to transform from workspace data name to DataTree path
          */
         private final UnaryOperator<String> pathTransformationRule;
 
-        public DataDependency(Function<Workspace, Stream<Pair<String, Data<?>>>> gatherer, UnaryOperator<String> rule) {
+        public DataDependency(Function<Workspace, Stream<NamedData<?>>> gatherer, UnaryOperator<String> rule) {
             this.gatherer = gatherer;
             this.pathTransformationRule = rule;
         }
 
         public DataDependency(String mask, UnaryOperator<String> rule) {
-            this.gatherer = (w) -> w.getDataStage().dataStream().filter(pair -> NamingUtils.wildcardMatch(mask, pair.getKey()));
+            this.gatherer = (w) -> w.getDataStage().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName()));
             this.pathTransformationRule = rule;
         }
 
@@ -233,7 +240,7 @@ public class TaskModel implements Named, Annotated {
         @Override
         public void apply(DataTree.Builder tree, Workspace workspace) {
             gatherer.apply(workspace)
-                    .forEach(pair -> tree.putData(pathTransformationRule.apply(pair.getKey()), pair.getValue()));
+                    .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
         }
     }
 
@@ -282,13 +289,5 @@ public class TaskModel implements Named, Annotated {
         public void apply(DataTree.Builder tree, Workspace workspace) {
             placementRule.accept(tree, workspace.runTask(taskModel));
         }
-    }
-
-    /**
-     * Task output
-     */
-    public interface TaskOutput {
-
-        void accept(WorkManager.Callback callback, Context context, TaskState state);
     }
 }

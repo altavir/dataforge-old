@@ -30,7 +30,7 @@ public class GeneratorGoal<T> extends AbstractGoal<T> {
     }
 
     @Override
-    public Stream<Goal> depencencies() {
+    public Stream<Goal> dependencies() {
         return Stream.empty();
     }
 

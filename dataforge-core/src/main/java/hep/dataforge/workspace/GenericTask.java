@@ -15,14 +15,12 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.computation.Work;
 import hep.dataforge.computation.WorkManager;
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Name;
-import java.util.concurrent.CompletableFuture;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +32,7 @@ import static hep.dataforge.workspace.WorkspaceUtils.gather;
  * <li>gathering</li>
  * <li>transformation</li>
  * <li>reporting</li>
- * <li>finish generation</li>
+ * <li>result generation</li>
  * </ul>
  *
  * @author Alexander Nozik
@@ -46,42 +44,38 @@ public abstract class GenericTask<T> implements Task<T> {
         //validate model
         validate(model);
         Workspace workspace = model.getWorkspace();
-        WorkManager manager = workspace.getContext().workManager();
-        // root process for this task
-        final Work taskProcess = manager.submit(getName() + "_" + model.hashCode());
 
-        CompletableFuture<TaskState> gatherTask = manager.post(Name.join(taskProcess.getName(), "gather").toString(),
-                callback -> {
-                    getLogger().debug("Starting gathering phase");
-                    Report report = new Report(getName(), workspace.getContext().getReport());
-                    return new TaskState(gather(callback, model).build(), report);
-                });
+//        CompletableFuture<Void> process = new CompletableFuture<>();
+        Work taskProcess = workspace.getContext().workManager().submit(getName() + "_" + model.hashCode());
+        WorkManager.Callback callback = taskProcess.callback();
 
-        CompletableFuture<TaskState> transformTask = gatherTask
-                .thenCompose((TaskState state) -> manager.post(Name.join(taskProcess.getName(), "transform").toString(),
-                        callback -> {
-                            getLogger().info("Starting transformation phase");
-                            TaskState result = transform(callback, workspace.getContext(),
-                                    state, getTaskMeta(workspace.getContext(), model));
-                            if (!result.isFinished) {
-                                getLogger().warn("Task state is not finilized. Using last applyied state as a result");
-                                result.finish();
-                            }
-                            return result;
-                        }));
+        getLogger().debug("Starting gathering phase");
+        callback.updateTitle(getName());
+        callback.updateMessage("Gathering...");
 
-        CompletableFuture<DataNode<T>> resultTask = transformTask
-                .thenCompose((TaskState state) -> manager.post(Name.join(taskProcess.getName(), "result").toString(),
-                        callback -> {
-                            getLogger().info("Starting report phase");
-                            model.outs().forEach(reporter -> {
-                                reporter.accept(callback, workspace.getContext(), state);
-                            });
-                            getLogger().info("Starting result phase");
-                            return result(callback, workspace, state, model);
-                        }));
+        Report report = new Report(getName(), workspace.getContext().getReport());
+        TaskState state = new TaskState(gather(callback, model).build(), report);
 
-        return resultTask.join();
+        getLogger().debug("Starting transformation phase");
+        callback.updateMessage("Data transformation...");
+        transform(callback, workspace.getContext(), state, getTaskMeta(workspace.getContext(), model));
+        if (!state.isFinished) {
+            getLogger().warn("Task state is not finalized. Using last applied state as a result");
+            state.finish();
+        }
+
+        model.outs().forEach(reporter -> {
+            reporter.accept(workspace.getContext(), state);
+        });
+
+        getLogger().debug("Starting result phase");
+
+        callback.updateMessage("Task result generation...");
+        DataNode<T> res = result(workspace, state, model);
+
+        callback.updateMessage("Complete");
+//        process.complete(null);
+        return res;
     }
 
     @Override
@@ -127,7 +121,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @param config
      */
-    protected abstract TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config);
+    protected abstract void transform(WorkManager.Callback callback, Context context, TaskState state, Meta config);
 
     /**
      * Generating finish and storing it in workspace.
@@ -136,7 +130,7 @@ public abstract class GenericTask<T> implements Task<T> {
      * @param state
      * @return
      */
-    protected DataNode<T> result(WorkManager.Callback callback, Workspace workspace, TaskState state, TaskModel model) {
+    protected DataNode<T> result(Workspace workspace, TaskState state, TaskModel model) {
         workspace.updateStage(getName(), state.getResult());
         //FIXME check for type cast
         return (DataNode<T>) state.getResult();

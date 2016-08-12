@@ -5,26 +5,51 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Named;
 import hep.dataforge.computation.Goal;
 import hep.dataforge.computation.StaticGoal;
+import hep.dataforge.meta.Laminate;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
+import hep.dataforge.names.Named;
 
 /**
+ * A data with name
  *
  * @author Alexander Nozik
  */
 public class NamedData<T> extends Data<T> implements Named {
 
-    public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
-        return new NamedData(name, new StaticGoal(content), meta, content.getClass());
-    }
-
     private final String name;
 
-    public NamedData(String name, Goal<T> goal, Meta meta, Class<T> type) {
-        super(goal, meta, type);
+    public NamedData(String name, Goal<T> goal, Class<T> type, Meta meta) {
+        super(goal, type, meta);
         this.name = name;
+    }
+
+    public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
+        return new NamedData(name, new StaticGoal(content), content.getClass(), meta);
+    }
+
+    /**
+     * Wrap existing data using name and layers of external meta if it is available
+     *
+     * @param name
+     * @param data
+     * @param externalMeta
+     * @param <T>
+     * @return
+     */
+    public static <T> NamedData<T> wrap(String name, Data<T> data, Meta... externalMeta) {
+        Laminate newMeta = new Laminate(data.meta());
+        for (Meta m : externalMeta) {
+            newMeta.addLayer(m);
+        }
+        return new NamedData<T>(name, data.getGoal(), data.dataType(), newMeta);
+    }
+
+    public static <T> NamedData<T> wrap(Name name, Data<T> data, Laminate externalMeta) {
+        Laminate newMeta = externalMeta.addFirstLayer(data.meta());
+        return new NamedData<T>(name.toString(), data.getGoal(), data.dataType(), newMeta);
     }
 
     @Override
@@ -32,4 +57,12 @@ public class NamedData<T> extends Data<T> implements Named {
         return name;
     }
 
+    /**
+     * Return unnamed data corresponding to this named one
+     *
+     * @return
+     */
+    public Data<T> anonymize() {
+        return new Data<T>(this.getGoal(), this.dataType(), this.meta());
+    }
 }

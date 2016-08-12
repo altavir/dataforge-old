@@ -15,17 +15,17 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-import javafx.util.Pair;
 
 /**
  * The class to build groups of content with annotation defined rules
@@ -49,8 +49,8 @@ public class GroupBuilder {
             public <T> List<DataNode<T>> group(DataNode<T> input) {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
-                input.dataStream().forEach((Pair<String, Data<? extends T>> entry) -> {
-                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(entry.getValue()))
+                input.forEach((NamedData<? extends T> data) -> {
+                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(data))
                             .getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
                         DataSet.Builder<T> builder = DataSet.builder();
@@ -58,10 +58,10 @@ public class GroupBuilder {
                         //PENDING share meta here?
                         map.put(tagValue, builder);
                     }
-                    map.get(tagValue).putData(entry.getKey(), entry.getValue());
+                    map.get(tagValue).putData(data);
                 });
 
-                return map.values().stream().<DataNode<T>>map(item->item.build()).collect(Collectors.toList());
+                return map.values().stream().<DataNode<T>>map(item -> item.build()).collect(Collectors.toList());
             }
         };
     }

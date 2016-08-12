@@ -10,16 +10,17 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
-import java.io.StringWriter;
-import java.util.HashMap;
-import java.util.Map;
+import org.slf4j.LoggerFactory;
+import ratpack.handling.Context;
+import ratpack.handling.Handler;
+
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-import org.slf4j.LoggerFactory;
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
+import java.io.StringWriter;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A handler to evaluate Google visualization library requests to point loaders
@@ -36,37 +37,6 @@ public class PointLoaderDataHandler implements Handler {
 
     public PointLoaderDataHandler(PointLoader loader) {
         this.loader = loader;
-    }
-
-    @Override
-    public void handle(Context ctx) throws Exception {
-        String tq = ctx.getRequest().getQueryParams().get("tq");
-        String tqx = ctx.getRequest().getQueryParams().get("tqx");
-        Map<String, String> params = getRequestParams(tqx);
-
-        String rqid = params.get("reqId");
-        String out = params.getOrDefault("out", "json");
-        String responseHandler = params.getOrDefault("responseHandler", "google.visualization.Query.setResponse");
-        if (!out.equals("json")) {
-            //render error
-        }
-
-        ctx.getResponse().contentType("text/json");
-
-        JsonObject response = Json.createObjectBuilder()
-                .add("status", "ok")
-                .add("reqId", rqid)
-                .add("table", makeTable(loader, buildQuery(tq)))
-                .build();
-
-        ctx.render(wrapResponse(response, responseHandler));
-    }
-
-    private String wrapResponse(JsonObject response, String responseHandler) {
-        StringWriter writer = new StringWriter();
-        Json.createWriter(writer).writeObject(response);
-
-        return String.format("%s(%s)", responseHandler, writer.toString());
     }
 
     public static JsonObjectBuilder makeTable(PointLoader loader, Meta query) {
@@ -143,5 +113,36 @@ public class PointLoaderDataHandler implements Handler {
             }
         }
         return map;
+    }
+
+    @Override
+    public void handle(Context ctx) throws Exception {
+        String tq = ctx.getRequest().getQueryParams().get("tq");
+        String tqx = ctx.getRequest().getQueryParams().get("tqx");
+        Map<String, String> params = getRequestParams(tqx);
+
+        String rqid = params.get("reqId");
+        String out = params.getOrDefault("onComplete", "json");
+        String responseHandler = params.getOrDefault("responseHandler", "google.visualization.Query.setResponse");
+        if (!out.equals("json")) {
+            //render error
+        }
+
+        ctx.getResponse().contentType("text/json");
+
+        JsonObject response = Json.createObjectBuilder()
+                .add("status", "ok")
+                .add("reqId", rqid)
+                .add("table", makeTable(loader, buildQuery(tq)))
+                .build();
+
+        ctx.render(wrapResponse(response, responseHandler));
+    }
+
+    private String wrapResponse(JsonObject response, String responseHandler) {
+        StringWriter writer = new StringWriter();
+        Json.createWriter(writer).writeObject(response);
+
+        return String.format("%s(%s)", responseHandler, writer.toString());
     }
 }

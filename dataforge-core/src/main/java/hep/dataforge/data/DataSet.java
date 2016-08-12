@@ -8,13 +8,12 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
-import java.util.Iterator;
+import org.slf4j.LoggerFactory;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
-import javafx.util.Pair;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple static representation of DataNode
@@ -23,6 +22,18 @@ import org.slf4j.LoggerFactory;
  * @param <T>
  */
 public class DataSet<T> extends AbstractProvider implements DataNode<T> {
+
+    private final String name;
+    private final Meta meta;
+    private final Class<T> type;
+    private final Map<String, Data<? extends T>> dataMap;
+
+    protected DataSet(String name, Meta meta, Class<T> type, Map<String, Data<? extends T>> dataMap) {
+        this.name = name;
+        this.meta = meta;
+        this.type = type;
+        this.dataMap = dataMap;
+    }
 
     /**
      * The builder bound by type of data
@@ -44,51 +55,39 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
         return new Builder<>(Object.class);
     }
 
-    private final String name;
-    private final Meta meta;
-    private final Class<T> type;
-    private final Map<String, Data<? extends T>> dataMap;
-
-    protected DataSet(String name, Meta meta, Class<T> type, Map<String, Data<? extends T>> dataMap) {
-        this.name = name;
-        this.meta = meta;
-        this.type = type;
-        this.dataMap = dataMap;
-    }
-
     @Override
-    public Stream<Pair<String, Data<? extends T>>> dataStream() {
+    public Stream<NamedData<? extends T>> dataStream() {
         return dataMap.entrySet().stream()
                 .map((Map.Entry<String, Data<? extends T>> entry)
-                        -> new Pair<>(entry.getKey(), entry.getValue()));
+                        -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
     }
 
-    /**
-     * {@inheritDoc }
-     * <p>
-     * Not very effective for flat data set
-     * </p>
-     *
-     * @return
-     */
-    @Override
-    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
-        return dataStream().map((pair) -> {
-            Name dataName = Name.of(pair.getKey());
-            if (dataName.length() > 1) {
-                return dataName.cutLast().toString();
-
-            } else {
-                return "";
-            }
-        }).distinct().map((String str) -> {
-            if (str.isEmpty()) {
-                return new Pair<>("", DataSet.this);
-            } else {
-                return new Pair<>(str, getNode(str).get());
-            }
-        });
-    }
+//    /**
+//     * {@inheritDoc }
+//     * <p>
+//     * Not very effective for flat data set
+//     * </p>
+//     *
+//     * @return
+//     */
+//    @Override
+//    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
+//        return dataStream().map(data -> {
+//            Name dataName = Name.of(pair.getKey());
+//            if (dataName.length() > 1) {
+//                return dataName.cutLast().toString();
+//
+//            } else {
+//                return "";
+//            }
+//        }).distinct().map((String str) -> {
+//            if (str.isEmpty()) {
+//                return new Pair<>("", DataSet.this);
+//            } else {
+//                return new Pair<>(str, getNode(str).get());
+//            }
+//        });
+//    }
 
     @Override
     public Optional<Data<? extends T>> getData(String name) {
@@ -98,11 +97,6 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     @Override
     public Class<T> type() {
         return type;
-    }
-
-    @Override
-    public Iterator<Data<? extends T>> iterator() {
-        return dataMap.values().iterator();
     }
 
     @Override
@@ -150,8 +144,8 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                 .setMeta(meta());
         String prefix = nodeName + ".";
         dataStream()
-                .filter((Pair<String, Data<? extends T>> pair) -> pair.getKey().startsWith(prefix))
-                .forEach((Pair<String, Data<? extends T>> pair) -> builder.putData(pair.getKey(), pair.getValue()));
+                .filter(data -> data.getName().startsWith(prefix))
+                .forEach(data -> builder.putData(data));
         if (builder.dataMap.size() > 0) {
             return Optional.of(builder.build());
         } else {
@@ -161,10 +155,10 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
 
     public static class Builder<T> implements DataNode.Builder<T, DataSet<T>, Builder<T>> {
 
-        private String name = "";
-        private Meta meta = Meta.empty();
         private final Class<T> type;
         private final Map<String, Data<? extends T>> dataMap = new LinkedHashMap<>();
+        private String name = "";
+        private Meta meta = Meta.empty();
 
         private Builder(Class<T> type) {
             this.type = type;
@@ -212,7 +206,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                         + "Node meta could be lost. Consider using DataTree instead.");
             }
             //PENDING rewrap data including meta?
-            node.dataStream().forEach(pair -> putData(pair.getKey(), pair.getValue()));
+            node.dataStream().forEach(data -> putData(data));
             return self();
         }
 

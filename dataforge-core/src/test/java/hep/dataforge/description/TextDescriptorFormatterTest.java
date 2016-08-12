@@ -32,7 +32,7 @@ public class TextDescriptorFormatterTest {
 //     */
 //    @Test
 //    public void testPrintDescription() {
-//        System.out.println("showDescription");
+//        System.onComplete.println("showDescription");
 //        Descriptor descriptor = null;
 //        TextDescriptorFormatter instance = null;
 //        instance.showDescription(descriptor);

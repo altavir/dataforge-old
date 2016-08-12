@@ -7,6 +7,7 @@ package hep.dataforge.computation;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -19,18 +20,16 @@ import java.util.function.Function;
  */
 public class WorkManager implements Encapsulated, WorkListener {
 
+    protected ExecutorService parallelExecutor;
+    protected ExecutorService singleThreadExecutor;
     /**
      * root process
      */
     private Work root;
-
     /**
      * A context for this process manager
      */
     private Context context;
-
-    protected ExecutorService parallelExecutor;
-    protected ExecutorService singleThreadExecutor;
 
     @Override
     public Context getContext() {
@@ -119,7 +118,6 @@ public class WorkManager implements Encapsulated, WorkListener {
     /**
      * WARNING. Task comes with its own parallelExecutor
      *
-     * @param <U>
      * @param processName
      * @param task
      * @return
@@ -134,7 +132,6 @@ public class WorkManager implements Encapsulated, WorkListener {
      * Get parallelExecutor for given process name. By default uses one thread
      * pool parallelExecutor for all processes
      *
-     * @param processName
      * @return
      */
     public ExecutorService parallelExecutor() {
@@ -175,9 +172,9 @@ public class WorkManager implements Encapsulated, WorkListener {
     protected void onFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
         if (root.isDone() && parallelExecutor != null) {
-            parallelExecutor.shutdown();
-            parallelExecutor = null;
-            getContext().getLogger().info("All processes complete. Shuting executor down");
+//            parallelExecutor.shutdown();
+//            parallelExecutor = null;
+            getContext().getLogger().info("All processes complete.");
         }
 
     }

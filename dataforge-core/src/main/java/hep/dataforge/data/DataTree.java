@@ -10,10 +10,11 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.navigation.AbstractProvider;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
-
-import javafx.util.Pair;
 
 /**
  * A tree data structure
@@ -21,6 +22,33 @@ import javafx.util.Pair;
  * @author Alexander Nozik
  */
 public class DataTree<T> extends AbstractProvider implements DataNode<T> {
+
+    private final Class<T> type;
+    private final Map<String, DataTree<? extends T>> nodes = new HashMap<>();
+    private final Map<String, Data<T>> data = new HashMap<>();
+    private String name = "";
+    private Meta meta = Meta.empty();
+    private DataTree<? super T> parent;
+
+    private DataTree(Class<T> type) {
+        this.type = type;
+    }
+
+    /**
+     * Shallow copy-constructor
+     *
+     * @param tree
+     */
+    private DataTree(DataTree<T> tree) {
+        this.type = tree.type;
+//        this.parent = tree.parent;
+        this.meta = tree.meta;
+        this.name = tree.name;
+        nodes.forEach((String key, DataTree<? extends T> tree1) -> {
+            nodes.put(key, new DataTree<>(tree1));
+        });
+        this.data.putAll(tree.data);
+    }
 
     public static <T> Builder<T> builder(Class<T> type) {
         return new Builder(type);
@@ -57,32 +85,26 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         }
     }
 
-    private String name = "";
-    private Meta meta = Meta.empty();
-    private final Class<T> type;
-
-    private DataTree<? super T> parent;
-    private final Map<String, DataTree<? extends T>> nodes = new HashMap<>();
-    private final Map<String, Data<T>> data = new HashMap<>();
-
-    private DataTree(Class<T> type) {
-        this.type = type;
-    }
-
     /**
-     * Shallow copy-constructor
+     * A conversion of node to DataTree including deep copy
      *
-     * @param tree
+     * @param <T>
+     * @param node
+     * @return
      */
-    private DataTree(DataTree<T> tree) {
-        this.type = tree.type;
-//        this.parent = tree.parent;
-        this.meta = tree.meta;
-        this.name = tree.name;
-        nodes.forEach((String key, DataTree<? extends T> tree1) -> {
-            nodes.put(key, new DataTree<>(tree1));
-        });
-        this.data.putAll(tree.data);
+    public static <T> DataTree<T> cloneNode(DataNode<T> node) {
+        if (node instanceof DataTree) {
+            return new DataTree<>((DataTree<T>) node);
+        } else {
+            DataTree.Builder<T> builder = DataTree.builder(node.type());
+            builder.setName(node.getName());
+            builder.setMeta(node.meta());
+            node.dataStream().forEach(d -> {
+                builder.putData(d);
+                //FIXME use internal node meta
+            });
+            return builder.build();
+        }
     }
 
     /**
@@ -194,32 +216,38 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Stream<Pair<String, Data<? extends T>>> dataStream() {
-        Stream<Pair<String, Data<? extends T>>> dataStream = data.entrySet()
+    public Stream<NamedData<? extends T>> dataStream() {
+        return dataStream(null, new Laminate(meta()));
+    }
+//    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
+//        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
+//            Stream<Pair<String, DataNode<? extends T>>> nodeItself
+//                    = Stream.of(new Pair<>(nodeEntry.getKey(), nodeEntry.getValue()));
+//            Stream<Pair<String, DataNode<? extends T>>> childStream = nodeEntry.getValue()
+//                    .nodeStream().map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue()));
+//
+//            return Stream.concat(nodeItself, childStream);
+//        });
+//    }
+
+    private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta) {
+        Stream<NamedData<? extends T>> dataStream = data.entrySet()
                 .stream()
-                .<Pair<String, Data<? extends T>>>map((Map.Entry<String, Data<T>> entry)
-                        -> new Pair<>(entry.getKey(), entry.getValue()));
+                .map((Map.Entry<String, Data<T>> entry) -> {
+                            Name dataName = nodeName == null ? Name.of(entry.getKey()) : nodeName.append(entry.getKey());
+                            return NamedData.wrap(dataName, entry.getValue(), nodeMeta);
+                        }
+                );
 
         // iterating over nodes including node name into dataStream
-        Stream<Pair<String, Data<? extends T>>> subStream = nodes.entrySet()
+        Stream<NamedData<? extends T>> subStream = nodes.entrySet()
                 .stream()
-                .<Pair<String, Data<? extends T>>>flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry)
-                        -> nodeEntry.getValue().dataStream()
-                        .<Pair<String, Data<? extends T>>>map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue())));
-
+                .flatMap(nodeEntry -> {
+                    Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());
+                    return nodeEntry.getValue()
+                            .dataStream(subNodeName, nodeMeta.addFirstLayer(nodeEntry.getValue().meta()));
+                });
         return Stream.concat(dataStream, subStream);
-    }
-
-    @Override
-    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
-        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
-            Stream<Pair<String, DataNode<? extends T>>> nodeItself
-                    = Stream.of(new Pair<>(nodeEntry.getKey(), nodeEntry.getValue()));
-            Stream<Pair<String, DataNode<? extends T>>> childStream = nodeEntry.getValue()
-                    .nodeStream().map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue()));
-
-            return Stream.concat(nodeItself, childStream);
-        });
     }
 
     @Override
@@ -251,11 +279,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         } else {
             return null;
         }
-    }
-
-    @Override
-    public Iterator<Data<? extends T>> iterator() {
-        return dataStream().<Data<? extends T>>map(Pair::getValue).iterator();
     }
 
     @Override
@@ -294,28 +317,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
                 return getData(name);
             default:
                 return null;
-        }
-    }
-
-    /**
-     * A conversion of node to DataTree including deep copy
-     *
-     * @param <T>
-     * @param node
-     * @return
-     */
-    public static <T> DataTree<T> cloneNode(DataNode<T> node) {
-        if (node instanceof DataTree) {
-            return new DataTree<>((DataTree<T>) node);
-        } else {
-            DataTree.Builder<T> builder = DataTree.builder(node.type());
-            builder.setName(node.getName());
-            builder.setMeta(node.meta());
-            node.dataStream().forEach(pair -> {
-                builder.putData(pair.getKey(), pair.getValue());
-                //FIXME use internal node meta
-            });
-            return builder.build();
         }
     }
 

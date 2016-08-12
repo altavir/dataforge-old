@@ -1,5 +1,6 @@
 package hep.dataforge.grind
 
+import groovy.transform.CompileStatic
 import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
 import hep.dataforge.io.reports.Reportable
@@ -8,6 +9,7 @@ import hep.dataforge.meta.Laminate
 /**
  * Created by darksnake on 07-Aug-16.   
  */
+@CompileStatic
 class GrindOneToOneAction extends OneToOneAction {
     public static GrindOneToOneAction build(@DelegatesTo(OneToOneCallable) Closure triFunction) {
         def res = new GrindOneToOneAction(triFunction)

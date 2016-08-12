@@ -21,6 +21,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatter;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -53,6 +54,39 @@ public class ListTable implements Table, Serializable {
     }
 
     /**
+     * Проверяет, что все точки соответствуют формату
+     *
+     * @param format a {@link hep.dataforge.tables.TableFormat} object.
+     * @param points a {@link java.lang.Iterable} object.
+     */
+    public ListTable(TableFormat format, Iterable<DataPoint> points) {
+        this.format = format;
+        if (points != null) {
+            addRows(points);
+        }
+    }
+
+    public ListTable(TableFormat format, Stream<DataPoint> points) {
+        this.format = format;
+        if (points != null) {
+            addRows(points.collect(Collectors.toList()));
+        }
+    }
+
+    /**
+     * Проверяет, что все точки соответствуют формату
+     *
+     * @param points a {@link java.util.List} object.
+     */
+    public ListTable(List<DataPoint> points) {
+        if (points.isEmpty()) {
+            throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
+        }
+        this.format = TableFormat.forPoint(points.get(0));
+        addRows(points);
+    }
+
+    /**
      * Если formatter == null, то могут быть любые точки
      *
      * @param e a {@link hep.dataforge.tables.DataPoint} object.
@@ -72,46 +106,9 @@ public class ListTable implements Table, Serializable {
         }
     }
 
-    /**
-     * Проверяет, что все точки соответствуют формату
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param format a {@link hep.dataforge.tables.TableFormat} object.
-     * @param points a {@link java.lang.Iterable} object.
-     */
-    public ListTable(TableFormat format, Iterable<DataPoint> points) {
-        this.format = format;
-        if (points != null) {
-            addRows(points);
-        }
-    }
-
-    public ListTable(TableFormat format, Stream<DataPoint> points) {
-        this.format = format;
-        if (points != null) {
-            addRows(points.collect(Collectors.toList()));
-        }
-    }
-
     @Override
     public Table transform(UnaryOperator<Stream<DataPoint>> streamTransform) {
         return new ListTable(getFormat(), streamTransform.apply(stream()));
-    }
-
-    /**
-     * Проверяет, что все точки соответствуют формату
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param points a {@link java.util.List} object.
-     */
-    public ListTable(List<DataPoint> points) {
-        if (points.isEmpty()) {
-            throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
-        }
-        this.format = TableFormat.forPoint(points.get(0));
-        addRows(points);
     }
 
     /**
@@ -144,7 +141,7 @@ public class ListTable implements Table, Serializable {
     /**
      * {@inheritDoc}
      *
-     * @param name
+     * @param columnName
      * @return
      */
     @Override
@@ -243,12 +240,13 @@ public class ListTable implements Table, Serializable {
             table.addRow(e);
             return this;
         }
-        
+
         /**
          * Add new point constructed from a list of objects using current table format
+         *
          * @param values
          * @return
-         * @throws NamingException 
+         * @throws NamingException
          */
         public Builder row(Object... values) throws NamingException {
             table.addRow(new MapPoint(table.format.namesAsArray(), values));

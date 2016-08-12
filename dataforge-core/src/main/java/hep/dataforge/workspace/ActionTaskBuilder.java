@@ -7,25 +7,23 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.actions.Action;
 import hep.dataforge.actions.ActionManager;
-import static hep.dataforge.actions.ActionUtils.ACTION_NODE_KEY;
-import static hep.dataforge.actions.ActionUtils.ACTION_TYPE;
-import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
-import static hep.dataforge.actions.ActionUtils.buildAction;
-
-import hep.dataforge.context.Context;
 import hep.dataforge.computation.WorkManager;
-import hep.dataforge.data.Data;
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
+import hep.dataforge.utils.ContextMetaFactory;
 import hep.dataforge.utils.GenericBuilder;
+import javafx.util.Pair;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
-import javafx.util.Pair;
-import hep.dataforge.utils.ContextMetaFactory;
+
+import static hep.dataforge.actions.ActionUtils.*;
 
 /**
  * A builder for custom task. Does not ensure type safety.
@@ -34,7 +32,6 @@ import hep.dataforge.utils.ContextMetaFactory;
  */
 public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder> {
 
-    private String name = "@default";
     /**
      * A list of actions inside task
      */
@@ -43,7 +40,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * Transformations of TaskModel
      */
     private final List<ModelTransformation> modelTransformations = new ArrayList<>();
-
+    private String name = "@default";
 
     public ActionTaskBuilder setName(String name) {
         this.name = name;
@@ -180,23 +177,24 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param predicate
      * @return
      */
-    public ActionTaskBuilder data(Predicate<Pair<String, Data<?>>> predicate) {
+    public ActionTaskBuilder data(Predicate<NamedData<?>> predicate) {
         return dependencyRule((TaskModel model) -> {
             model.getWorkspace().getDataStage().dataStream()
                     .filter(predicate)
-                    .forEach(pair -> model.data(pair.getKey()));
+                    .forEach(data -> model.data(data.getName()));
         });
     }
 
     /**
      * Add all data with name matching any of presented patterns. Patterns could contain ? and * wildcards
+     *
      * @param namePattern
-     * @return 
+     * @return
      */
     public ActionTaskBuilder data(String... namePattern) {
-        Predicate<Pair<String, Data<?>>> pattern = pair -> false;
+        Predicate<NamedData<?>> pattern = pair -> false;
         for (String n : namePattern) {
-            pattern = pattern.or(pair -> pair.getKey().matches(n.replace("?", ".?").replace("*", ".*?")));
+            pattern = pattern.or(data -> data.getName().matches(n.replace("?", ".?").replace("*", ".*?")));
         }
         return data(pattern);
     }
@@ -204,7 +202,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
     /**
      * apply action configuration from meta node
      *
-     * @param context - context used for action building
+     * @param context     - context used for action building
      * @param actionsMeta
      * @return
      */
@@ -234,7 +232,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
     private class CustomTask extends GenericTask {
 
         @Override
-        protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
+        protected void transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
             DataNode res = state.getData();
             for (Pair<Function<Context, Action>, ContextMetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
@@ -245,7 +243,6 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
                 }
             }
             state.finish(res);
-            return state;
         }
 
         @Override

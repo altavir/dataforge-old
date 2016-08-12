@@ -5,15 +5,11 @@
  */
 package hep.dataforge.cache;
 
+import hep.dataforge.names.Named;
 import hep.dataforge.utils.CommonUtils;
 import hep.dataforge.workspace.identity.Identity;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+
+import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
@@ -92,7 +88,13 @@ public class LocalFileDataCache extends DataCache {
     protected <T> T store(Identity id, T data) {
         lruCache.put(id, data);
         if (data instanceof Serializable) {
-            File file = new File(cacheDir(), id.toString());
+            String fileName = data.getClass().getSimpleName();
+            if (data instanceof Named) {
+                fileName += "[" + ((Named) data).getName() + "]";
+            }
+            fileName += id.hashCode() + ".dfcache";
+
+            File file = new File(cacheDir(), fileName);
             try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
                 oos.writeObject(data);
                 fileMap.put(id, file);

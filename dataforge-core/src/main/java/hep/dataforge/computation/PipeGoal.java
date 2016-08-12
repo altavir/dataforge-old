@@ -33,7 +33,7 @@ public class PipeGoal<S, T> extends AbstractGoal<T> {
     }
 
     @Override
-    public Stream<Goal> depencencies() {
+    public Stream<Goal> dependencies() {
         return Stream.of(source);
     }
 

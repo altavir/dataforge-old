@@ -12,12 +12,13 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
 import hep.dataforge.utils.GenericBuilder;
-import javafx.util.Pair;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,7 +27,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotated, Provider {
+public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Annotated, Provider {
 
     String DATA_TARGET = "data";
     String NODE_TARGET = "node";
@@ -56,7 +57,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
                 .putData(dataName, data)
                 .build();
     }
-    
+
     /**
      * Get Data with given Name or null if name not present
      *
@@ -72,7 +73,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      * @return
      */
     default T compute(String name) {
-        return getData(name).orElseThrow(()-> new NameNotFoundException(name)).get();
+        return getData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
     }
 
     /**
@@ -86,7 +87,7 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
         if (res != null) {
             return res;
         } else {
-            return dataStream().findFirst().orElseThrow(()->new RuntimeException("Data node is empty")).getValue();
+            return dataStream().findFirst().orElseThrow(() -> new RuntimeException("Data node is empty"));
         }
     }
 
@@ -102,38 +103,39 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
     Optional<DataNode<? extends T>> getNode(String nodeName);
 
     /**
-     * Named dataStream of data elements including subnodes if they are present
+     * Named dataStream of data elements including subnodes if they are present.
+     * Meta of each data is supposed to be laminate containing node meta.
      *
      * @return
      */
-    Stream<Pair<String, Data<? extends T>>> dataStream();
+    Stream<NamedData<? extends T>> dataStream();
 
     /**
-     * Iterate other all data pieces
+     * Iterate other all data pieces using given predicate
      *
      * @param consumer
      */
-    default void forEachData(BiConsumer<String, Data<? extends T>> consumer) {
-        dataStream().forEach(pair -> consumer.accept(pair.getKey(), pair.getValue()));
+    default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<? extends T>> consumer) {
+        dataStream().filter(predicate).forEach(d -> consumer.accept(d));
     }
 
     /**
-     * Iterate other all data pieces with given type
+     * Iterate other all data pieces with given type with type check
      *
      * @param type
      * @param consumer
      */
-    default <R> void forEachDataWithType(Class<R> type, BiConsumer<String, Data<R>> consumer) {
-        dataStream().filter(pair -> type.isAssignableFrom(pair.getValue().dataType()))
-                .forEach(pair -> consumer.accept(pair.getKey(), (Data<R>) pair.getValue()));
+    default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
+        dataStream().filter(d -> type.isAssignableFrom(d.dataType()))
+                .forEach(d -> consumer.accept((NamedData<R>) d));
     }
 
-    /**
-     * Named recursive node stream
-     *
-     * @return
-     */
-    Stream<Pair<String, DataNode<? extends T>>> nodeStream();
+//    /**
+//     * Named recursive node stream
+//     *
+//     * @return
+//     */
+//    Stream<Pair<String, DataNode<? extends T>>> nodeStream();
 
     /**
      * Get border type for this DataNode
@@ -171,7 +173,16 @@ public interface DataNode<T> extends Iterable<Data<? extends T>>, Named, Annotat
      */
     default GoalGroup nodeGoal() {
         return new GoalGroup(this.dataStream()
-                .map(entry -> entry.getValue().getGoal()).collect(Collectors.toList()));
+                .map(entry -> entry.getGoal()).collect(Collectors.toList()));
+    }
+
+    default void onComplete(Consumer<DataNode<T>> consumer) {
+        nodeGoal().onComplete((res, err) -> consumer.accept(DataNode.this));
+    }
+
+    @Override
+    default Iterator<NamedData<? extends T>> iterator() {
+        return dataStream().iterator();
     }
 
     public interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B> {

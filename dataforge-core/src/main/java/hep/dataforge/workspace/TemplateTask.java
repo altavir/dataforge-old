@@ -5,16 +5,15 @@
  */
 package hep.dataforge.workspace;
 
-import static hep.dataforge.actions.ActionUtils.ACTION_NODE_KEY;
-import static hep.dataforge.actions.ActionUtils.ACTION_TYPE;
-import static hep.dataforge.actions.ActionUtils.SEQUENCE_ACTION_TYPE;
-import static hep.dataforge.actions.ActionUtils.buildAction;
-import hep.dataforge.context.Context;
 import hep.dataforge.computation.WorkManager;
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
+
 import java.util.function.UnaryOperator;
+
+import static hep.dataforge.actions.ActionUtils.*;
 
 /**
  * A task consisting of sequence of actions. Using template if it is provided.
@@ -43,7 +42,7 @@ public class TemplateTask extends GenericTask {
     }
 
     @Override
-    protected TaskState transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
+    protected void transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
         DataNode res = state.getData();
         config = template.apply(config);
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
@@ -52,7 +51,6 @@ public class TemplateTask extends GenericTask {
             state.setData(actionType, res);
         }
         state.finish(res);
-        return state;
     }
 
     @Override

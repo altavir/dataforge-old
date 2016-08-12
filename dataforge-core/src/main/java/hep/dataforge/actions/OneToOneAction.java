@@ -18,20 +18,22 @@ package hep.dataforge.actions;
 import hep.dataforge.computation.PipeGoal;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+
 import java.util.stream.Collectors;
 
 /**
  * A template to build actions that reflect strictly one to one content
  * transformations
  *
- * @author Alexander Nozik
  * @param <T>
  * @param <R>
+ * @author Alexander Nozik
  * @version $Id: $Id
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
@@ -40,21 +42,19 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
      *
-     * @param name
-     * @param groupMeta
      * @param data
      * @param actionMeta
      * @return
      */
-    protected ActionResult<R> runOne(String name, Data<? extends T> data, Meta groupMeta, Meta actionMeta) {
+    protected ActionResult<R> runOne(NamedData<? extends T> data, Meta actionMeta) {
         if (!this.getInputType().isAssignableFrom(data.dataType())) {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
                     getName(), getInputType().getName(), data.dataType().getName()));
         }
         //FIXME add report manager instead of transmitting report
-        String resultName = getResultName(name, actionMeta);
+        String resultName = getResultName(data.getName(), actionMeta);
         Report report = buildReport(resultName, data);
-        Laminate meta = inputMeta(data, groupMeta, actionMeta);
+        Laminate meta = inputMeta(data.meta(), actionMeta);
         PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(meta),
                 input -> {
                     Thread.currentThread().setName(Name.joinString(getWorkName(), resultName));
@@ -64,7 +64,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         //PENDING a bit ugly solution
         goal.onStart(() -> workListener().submit(resultName, goal.result()));
 
-        return new ActionResult<>(report, goal, outputMeta(resultName, groupMeta, data), getOutputType());
+        return new ActionResult<>(report, goal, outputMeta(data, meta), getOutputType());
     }
 
     protected Report buildReport(String name, Data<? extends T> data) {
@@ -91,8 +91,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         return wrap(set.getName(), set.meta(),
-                set.dataStream().collect(Collectors.toMap(entry -> entry.getKey(),
-                        entry -> runOne(entry.getKey(), entry.getValue(), set.meta(), actionMeta))));
+                set.dataStream().collect(Collectors.toMap(data -> data.getName(),
+                        data -> runOne(data, actionMeta))));
     }
 
     protected String getResultName(String dataName, Meta actionMeta) {
@@ -100,12 +100,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     /**
-     *
-     * @param log report for this evaluation
-     * @param name name of the input item
+     * @param log       report for this evaluation
+     * @param name      name of the input item
      * @param inputMeta combined meta for this evaluation. Includes data meta,
-     * group meta and action meta
-     * @param input input data
+     *                  group meta and action meta
+     * @param input     input data
      * @return
      */
     private R transform(Reportable log, String name, Laminate inputMeta, T input) {
@@ -133,12 +132,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * (no lazy calculations). By default output meta is the same as input data
      * meta.
      *
-     * @param name
      * @param inputMeta
      * @param data
      * @return
      */
-    protected Meta outputMeta(String name, Meta inputMeta, Data<? extends T> data) {
+    protected Meta outputMeta(NamedData<? extends T> data, Meta inputMeta) {
         return data.meta();
     }
 

@@ -7,11 +7,12 @@ package hep.dataforge.cache;
 
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.data.DataTree;
+import hep.dataforge.data.NamedData;
 import hep.dataforge.workspace.identity.Identity;
-import java.util.function.BiFunction;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.function.Function;
 
 /**
  * A storage for cached data. Data is cached on first call and then restored on
@@ -38,7 +39,7 @@ public abstract class DataCache {
                 getLogger().error("Failed to restore data with id '{}' from cache", id.toString());
             }
         } else {
-            data.getInFuture().whenCompleteAsync((res, ex) -> {
+            data.getGoal().onComplete((res, ex) -> {
                 if (res != null) {
                     getLogger().debug("Caching data with id '{}'", id.toString());
                     store(id, res);
@@ -59,8 +60,8 @@ public abstract class DataCache {
      * @param identityFactory
      * @return
      */
-    public <T> DataNode<T> cacheNode(DataNode<T> node, BiFunction<String, Data<? extends T>, Identity> identityFactory) {
-        node.dataStream().forEach(pair -> cacheData(pair.getValue(), identityFactory.apply(pair.getKey(), pair.getValue())));
+    public <T> DataNode<T> cacheNode(DataNode<T> node, Function<NamedData<? extends T>, Identity> identityFactory) {
+        node.forEach(data -> cacheData(data, identityFactory.apply(data)));
         return node;
 //        DataTree.Builder<T> builder = new DataTree.Builder<>(node);
 //        node.dataStream().forEachData(pair -> {
@@ -71,7 +72,7 @@ public abstract class DataCache {
     }
 
     public <T> DataNode<T> cacheNode(DataNode<T> node, Identity identity) {
-        return cacheNode(node, (name, data) -> identity.and(name));
+        return cacheNode(node, data -> identity.and(data.getName()));
     }
 
     /**
@@ -134,11 +135,11 @@ public abstract class DataCache {
 //        }
 //
 //        @Override
-//        public Stream<Goal> depencencies() {
+//        public Stream<Goal> dependencies() {
 //            if (contains(id)) {
 //                return Stream.empty();
 //            } else {
-//                return goal.depencencies();
+//                return goal.dependencies();
 //            }
 //        }
 //

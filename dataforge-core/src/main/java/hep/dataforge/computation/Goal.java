@@ -6,6 +6,7 @@
 package hep.dataforge.computation;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
@@ -20,7 +21,7 @@ public interface Goal<T> {
      *
      * @return
      */
-    Stream<Goal> depencencies();
+    Stream<Goal> dependencies();
 
     /**
      * Start this goal computation. Triggers start of dependent goals
@@ -56,4 +57,8 @@ public interface Goal<T> {
         result().complete(result);
     }
 
+
+    void onStart(Runnable hook);
+
+    void onComplete(BiConsumer<? super T, ? super Throwable> hook);
 }

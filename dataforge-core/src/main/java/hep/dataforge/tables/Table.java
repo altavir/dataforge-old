@@ -17,25 +17,25 @@ package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
-
-import static hep.dataforge.tables.Filtering.getTagCondition;
-import static hep.dataforge.tables.Filtering.getValueCondition;
-
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 
+import java.io.Serializable;
 import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static hep.dataforge.tables.Filtering.getTagCondition;
+import static hep.dataforge.tables.Filtering.getValueCondition;
+
 /**
  * An immutable table of values
  *
  * @author Alexander Nozik
  */
-public interface Table extends PointSource {
+public interface Table extends PointSource, Serializable {
 
     DataPoint getRow(int i);
 
