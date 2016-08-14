@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -312,11 +313,12 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      *
      * @param name
      */
-    protected void setName(String name) {
+    protected T setName(String name) {
         if (parent != null) {
             throw new RuntimeException("Can't rename attached node");
         }
         this.name = name;
+        return self();
     }
 
     /**
@@ -325,7 +327,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      *
      * @param path
      */
-    public void removeNode(String path) {
+    public T removeNode(String path) {
         if (hasNode(path)) {
             List<T> oldNode = getNodes(path);
 
@@ -341,6 +343,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
 
             notifyNodeChanged(path, oldNode, null);
         }
+        return self();
     }
 
     /**

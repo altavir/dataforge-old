@@ -15,6 +15,8 @@
  */
 package hep.dataforge.actions;
 
+import hep.dataforge.computation.WorkListener;
+import hep.dataforge.computation.WorkListenerDelegate;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
@@ -23,30 +25,32 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import java.io.OutputStream;
-import java.util.Map;
-import java.util.concurrent.ExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.computation.WorkListener;
-import hep.dataforge.computation.WorkListenerDelegate;
+
+import java.io.OutputStream;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
 
 /**
  * A basic implementation of Action interface
  *
- * @author Alexander Nozik
- * @version $Id: $Id
  * @param <T>
  * @param <R>
+ * @author Alexander Nozik
+ * @version $Id: $Id
  */
 public abstract class GenericAction<T, R> implements Action<T, R> {
 
     private Logger logger;
     private String parentProcessName;
     private Context context = GlobalContext.instance();
+    private Map<String, Report> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("allowParallel", true);
@@ -77,12 +81,12 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      * @return
      */
     protected ExecutorService executor(Meta meta) {
-        if(isParallelExecutionAllowed(meta)){
+        if (isParallelExecutionAllowed(meta)) {
             return getContext().workManager().parallelExecutor();
         } else {
             return getContext().workManager().singleThreadExecutor();
         }
-        
+
     }
 
     /**
@@ -129,11 +133,11 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return context;
     }
 
-    protected WorkListener workListener(){
+    protected WorkListener workListener() {
         //PENDING make it variable to avoid multiple initialization
         return new WorkListenerDelegate(getContext().workManager(), getWorkName());
     }
-    
+
     protected boolean isEmptyInputAllowed() {
         return false;
     }
@@ -162,7 +166,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Берет имя из описания действия. Если аннотация отсутсвует, то
      * используется имя контента
      *
@@ -246,5 +250,20 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      */
     public OutputStream buildActionOutput(String name) {
         return context.io().out(getName(), name);
+    }
+
+    protected Report getReport(String reportName) {
+        return this.reportCache.computeIfAbsent(reportName, (n) -> {
+            Report parent = new Report(n, getContext());
+            return new Report(getName(), parent);
+        });
+    }
+
+    protected void setReport(String name, Report report) {
+        this.reportCache.put(name, report);
+    }
+
+    protected void report(String reportName, String entry, Object... params) {
+        getReport(reportName).report(entry, params);
     }
 }

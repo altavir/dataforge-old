@@ -15,43 +15,40 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.stat.models.Model;
 import hep.dataforge.io.FittingIOUtils;
-import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.stat.models.Model;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.Table;
-import java.io.PrintWriter;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
+
+import java.io.PrintWriter;
+import java.io.Serializable;
+
+import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 /**
  * This class combine the information required to fit data. The key elements are
- Table, Model and initial ParamSet. Additionally, one can provide
- covariance matrix, prior probability, fit history etc. To simplify
- construction of FitState use FitStateBuilder
+ * Table, Model and initial ParamSet. Additionally, one can provide
+ * covariance matrix, prior probability, fit history etc. To simplify
+ * construction of FitState use FitStateBuilder
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 //TODO добавить параметры по-умолчанию в модель
-public class FitState extends FitSource {
-
-    public static Builder builder() {
-        return new Builder();
-    }
+public class FitState extends FitSource implements Serializable {
 
     /**
      *
      */
     protected final NamedMatrix covariance;
-
     /**
      *
      */
     protected final IntervalEstimate interval;
-
     /**
      *
      */
@@ -68,18 +65,16 @@ public class FitState extends FitSource {
      * <p>
      * Constructor for FitState.</p>
      *
-     * @param name a {@link java.lang.String} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param dataSet a {@link hep.dataforge.tables.Table} object.
-     * @param model a {@link hep.dataforge.stat.models.Model} object.
-     * @param pars a {@link hep.dataforge.stat.fit.ParamSet} object.
+     * @param dataSet    a {@link hep.dataforge.tables.Table} object.
+     * @param model      a {@link hep.dataforge.stat.models.Model} object.
+     * @param pars       a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
-     * @param interval a {@link hep.dataforge.stat.fit.IntervalEstimate}
-     * object.
-     * @param prior a {@link hep.dataforge.stat.parametric.ParametricValue} object.
+     * @param interval   a {@link hep.dataforge.stat.fit.IntervalEstimate}
+     *                   object.
+     * @param prior      a {@link hep.dataforge.stat.parametric.ParametricValue} object.
      */
     public FitState(Table dataSet, Model model, ParamSet pars,
-            NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
+                    NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
         super(dataSet, model, prior);
         this.covariance = covariance;
         this.interval = interval;
@@ -96,6 +91,10 @@ public class FitState extends FitSource {
         this.covariance = state.covariance;
         this.pars = state.pars;
         this.interval = state.interval;
+    }
+
+    public static Builder builder() {
+        return new Builder();
     }
 
     /**
@@ -228,31 +227,26 @@ public class FitState extends FitSource {
      */
     public static class Builder {
 
-        NamedMatrix covariance;
-
         /**
          *
          */
         protected Table dataSet;
-
         /**
          *
          */
         protected IntervalEstimate interval;
-
         /**
          *
          */
         protected Model model;
-
         /**
          *
          */
         protected ParamSet pars;
+        NamedMatrix covariance;
         ParametricValue prior;
 
         /**
-         *
          * @param state
          */
         public Builder(FitState state) {
@@ -302,7 +296,7 @@ public class FitState extends FitSource {
          * <p>
          * Setter for the field <code>covariance</code>.</p>
          *
-         * @param cov a {@link hep.dataforge.maths.NamedMatrix} object.
+         * @param cov          a {@link hep.dataforge.maths.NamedMatrix} object.
          * @param updateErrors a boolean.
          * @return
          */
@@ -322,7 +316,6 @@ public class FitState extends FitSource {
         }
 
         /**
-         *
          * @param priorDistribution
          * @return
          */
@@ -332,7 +325,6 @@ public class FitState extends FitSource {
         }
 
         /**
-         *
          * @param intervalEstimate
          * @return
          */
@@ -342,7 +334,6 @@ public class FitState extends FitSource {
         }
 
         /**
-         *
          * @return
          */
         public FitState build() {

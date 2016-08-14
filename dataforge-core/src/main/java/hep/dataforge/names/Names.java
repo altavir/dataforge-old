@@ -16,6 +16,8 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,7 +27,7 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Names extends Iterable<String> {
+public interface Names extends Iterable<String>, Serializable {
 
     public static Names of(String... names) {
         return new NameList(names);

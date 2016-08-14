@@ -32,6 +32,11 @@ public class EmptyDataNode<T> implements DataNode<T> {
         return Stream.empty();
     }
 
+    @Override
+    public Stream<DataNode<? extends T>> nodeStream() {
+        return Stream.empty();
+    }
+
 
     @Override
     public Class<T> type() {

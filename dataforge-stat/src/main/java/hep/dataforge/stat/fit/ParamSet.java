@@ -22,12 +22,10 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Scanner;
 import org.slf4j.LoggerFactory;
+
+import java.io.Serializable;
+import java.util.*;
 
 /**
  * Реализация набора параметров, которая будет потом использоваться в Result,
@@ -39,44 +37,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ParamSet implements NamedValueSet {
-
-    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.fitting.Param.fromMeta")
-    @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
-    public static ParamSet fromAnnotation(Meta cfg) {
-        if (cfg.hasNode("params")) {
-            cfg = cfg.getNode("params");
-        }
-
-        if (cfg.hasNode("param")) {
-            List<? extends Meta> params;
-            params = cfg.getNodes("param");
-            ParamSet set = new ParamSet();
-            for (Meta param : params) {
-                set.setPar(Param.fromMeta(param));
-            }
-            return set;
-        } else {
-            //Возрвщвем пустой лист. Нужно для совместимости со значениями параметров по-умолчанию
-            return new ParamSet();
-        }
-    }
-
-    /**
-     * Read parameter set from lines using 'name'	= value ± error	(lower,upper)
-     * syntax
-     *
-     * @param str a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     */
-    public static ParamSet fromString(String str) {
-        Scanner scan = new Scanner(str);
-        ParamSet set = new ParamSet();
-        while (scan.hasNextLine()) {
-            set.setPar(Param.fromString(scan.nextLine()));
-        }
-        return set;
-    }
+public class ParamSet implements NamedValueSet, Serializable {
 
     private final HashMap<String, Param> params;
 
@@ -120,6 +81,43 @@ public class ParamSet implements NamedValueSet {
         for (String name : values.names()) {
             this.params.put(name, new Param(name, values.getDouble(name)));
         }
+    }
+
+    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
+    @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
+    public static ParamSet fromMeta(Meta cfg) {
+        if (cfg.hasNode("params")) {
+            cfg = cfg.getNode("params");
+        }
+
+        if (cfg.hasNode("param")) {
+            List<? extends Meta> params;
+            params = cfg.getNodes("param");
+            ParamSet set = new ParamSet();
+            for (Meta param : params) {
+                set.setPar(Param.fromMeta(param));
+            }
+            return set;
+        } else {
+            //Возрвщвем пустой лист. Нужно для совместимости со значениями параметров по-умолчанию
+            return new ParamSet();
+        }
+    }
+
+    /**
+     * Read parameter set from lines using 'name'	= value ± error	(lower,upper)
+     * syntax
+     *
+     * @param str a {@link java.lang.String} object.
+     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
+     */
+    public static ParamSet fromString(String str) {
+        Scanner scan = new Scanner(str);
+        ParamSet set = new ParamSet();
+        while (scan.hasNextLine()) {
+            set.setPar(Param.fromString(scan.nextLine()));
+        }
+        return set;
     }
 
     @Override
@@ -377,7 +375,7 @@ public class ParamSet implements NamedValueSet {
     /**
      * method to set all parameter errors.
      *
-     * @param errors a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param errors
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
@@ -417,7 +415,7 @@ public class ParamSet implements NamedValueSet {
     /**
      * method to set all parameter values.
      *
-     * @param values a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param values
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */

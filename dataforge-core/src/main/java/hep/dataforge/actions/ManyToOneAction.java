@@ -20,13 +20,12 @@ import hep.dataforge.computation.Goal;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,26 +51,28 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     public ActionResult<R> runGroup(DataNode<T> data, Meta actionMeta) {
-        Report log = new Report(getName(), new Report(data.getName(), getContext()));
         Meta outputMeta = outputMeta(data).build();
-        Goal<R> goal = new ManyToOneGoal(data, actionMeta, outputMeta, log);
-        return new ActionResult<>(log, goal, outputMeta, getOutputType());
+        Goal<R> goal = new ManyToOneGoal(data, actionMeta, outputMeta);
+        return new ActionResult<>(getReport(data.getName()), goal, outputMeta, getOutputType());
     }
 
     protected List<DataNode<T>> buildGroups(DataNode<T> input, Meta actionMeta) {
-        return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
+        if (actionMeta.hasNode("byValue")) {
+            return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
+        } else {
+            return Collections.singletonList(input);
+        }
     }
 
     /**
      * Perform actual calculation
      *
-     * @param log
      * @param nodeName
      * @param input
      * @param meta
      * @return
      */
-    protected abstract R execute(Reportable log, String nodeName, Map<String, T> input, Meta meta);
+    protected abstract R execute(String nodeName, Map<String, T> input, Meta meta);
 
     protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder("node")
@@ -94,20 +95,18 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     /**
      * An action to be performed before each group evaluation
      *
-     * @param log
      * @param input
      */
-    protected void beforeGroup(Reportable log, DataNode<? extends T> input) {
+    protected void beforeGroup(DataNode<? extends T> input) {
 
     }
 
     /**
      * An action to be performed after each group evaluation
      *
-     * @param log
      * @param output
      */
-    protected void afterGroup(Reportable log, String groupName, Meta outputMeta, R output) {
+    protected void afterGroup(String groupName, Meta outputMeta, R output) {
 
     }
 
@@ -116,14 +115,12 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         private final DataNode<T> data;
         private final Meta actionMeta;
         private final Meta outputMeta;
-        private final Report log;
 
-        public ManyToOneGoal(DataNode<T> data, Meta actionMeta, Meta outputMeta, Report log) {
+        public ManyToOneGoal(DataNode<T> data, Meta actionMeta, Meta outputMeta) {
             super(executor(actionMeta));
             this.data = data;
             this.actionMeta = actionMeta;
             this.outputMeta = outputMeta;
-            this.log = log;
         }
 
         @Override
@@ -136,12 +133,12 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             Laminate meta = inputMeta(data.meta(), actionMeta);
             Thread.currentThread().setName(Name.joinString(getWorkName(), data.getName()));
             workListener().submit(data.getName(), this.result());
-            beforeGroup(log, data);
+            beforeGroup(data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()
                     .collect(Collectors.toMap(data -> data.getName(), data -> data.get()));
-            R res = execute(log, data.getName(), collection, meta);
-            afterGroup(log, data.getName(), outputMeta, res);
+            R res = execute(data.getName(), collection, meta);
+            afterGroup(data.getName(), outputMeta, res);
             return res;
         }
 

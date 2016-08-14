@@ -16,17 +16,17 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.stat.models.Model;
-import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
-import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.stat.models.Model;
+import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.Table;
 import hep.dataforge.utils.CommonUtils;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,11 +42,11 @@ import java.util.List;
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
-        target = "method::hep.dataforge.fitting.models.ModelManager.buildModel")
+        target = "method::hep.dataforge.stat.models.ModelManager.buildModel")
 @NodeDef(name = "params", required = true,
         info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
-        + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
-        target = "method::hep.dataforge.fitting.ParamSet.fromAnnotation")
+                + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
+        target = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
 @NodeDef(name = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitState> {
 
@@ -62,7 +62,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Reportable log, String name, Laminate meta, Table input) {
+    protected FitState execute(String name, Laminate meta, Table input) {
         FitManager fm;
         if (getContext().provides("fitting")) {
             fm = getContext().provide("fitting", FitPlugin.class).getFitManager();
@@ -82,9 +82,9 @@ public class FitAction extends OneToOneAction<Table, FitState> {
 
         for (FitStage task : stages) {
             CommonUtils.checkThread();// check if action is cacneled
-            res = fm.runTask(res, task, writer, log);
+            res = fm.runTask(res, task, writer, getReport(name));
         }
-        log.getReport().print(writer);
+        getReport(name).print(writer);
         return res;
     }
 
@@ -104,21 +104,21 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         //updating parameters for each laminate 
         params = new ParamSet();
         meta.layersInverse().stream().forEach((layer) -> {
-            params.updateFrom(ParamSet.fromAnnotation(layer));
+            params.updateFrom(ParamSet.fromMeta(layer));
         });
 
         return new FitState(input, model, params);
 
     }
 
-    private List<FitStage> buildStageList(Meta annotation) {
+    private List<FitStage> buildStageList(Meta meta) {
         List<FitStage> list = new ArrayList<>();
-        if (annotation.hasNode(STAGE_KEY)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
-            annotation.getNodes(STAGE_KEY).stream().forEach((an) -> {
+        if (meta.hasNode(STAGE_KEY)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
+            meta.getNodes(STAGE_KEY).stream().forEach((an) -> {
                 list.add(new FitStage(an));
             });
         } else { // если и там нет, то считаем что имеется всего одна задача и она зашифрована в а аннотациях
-            list.add(new FitStage(annotation));
+            list.add(new FitStage(meta));
 
         }
 

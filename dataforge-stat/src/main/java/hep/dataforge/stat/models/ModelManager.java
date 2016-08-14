@@ -19,10 +19,11 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.ContextMetaFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import hep.dataforge.utils.ContextMetaFactory;
 
 /**
  * The library of available models
@@ -39,11 +40,9 @@ public class ModelManager {
      * Constant <code>MODEL_NAME="name"</code>
      */
     public static String MODEL_NAME = "modelName";
-
-    private ModelManager defaultManager;
-
     private final HashMap<String, ContextMetaFactory<Model>> modelList = new HashMap<>();
     private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
+    private ModelManager defaultManager;
 
     public ModelManager(ModelManager defaultManager) {
         this.defaultManager = defaultManager;
@@ -71,7 +70,7 @@ public class ModelManager {
         return descriptorList;
     }
 
-    @ValueDef(name = "modelName", info = "The name of the preloaded model to use.")
+    @ValueDef(name = "modelName", info = "The name of the pre-loaded model to use.")
     public Model buildModel(Context context, Meta a) {
         String modelName = a.getString(MODEL_NAME);
         ContextMetaFactory<Model> factory = modelList.get(modelName.toLowerCase());

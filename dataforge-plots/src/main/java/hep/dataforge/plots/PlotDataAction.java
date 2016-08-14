@@ -16,11 +16,9 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -28,13 +26,14 @@ import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.LoggerFactory;
 
 /**
  * Аннотация действия может содержать несколько различных описаний рамки. При
@@ -66,6 +65,9 @@ import org.slf4j.LoggerFactory;
 
 public class PlotDataAction extends OneToOneAction<Table, Table> {
 
+    private final Map<String, Runnable> snapshotTasks = new HashMap<>();
+    private final Map<String, Runnable> serializeTasks = new HashMap<>();
+
     private Meta findFrameDescription(Meta meta, String name) {
         //TODO сделать тут возможность подстановки стилей?
         List<? extends Meta> frameDescriptions = meta.getNodes("plotFrame");
@@ -84,7 +86,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     }
 
     @Override
-    protected Table execute(Reportable log, String name, Laminate meta, Table input) {
+    protected Table execute(String name, Laminate meta, Table input) {
         //initializing plot plugin if necessary
         if (!getContext().provides("plots")) {
             getContext().loadPlugin(new PlotsPlugin());
@@ -118,9 +120,6 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
 
         return input;
     }
-
-    private final Map<String, Runnable> snapshotTasks = new HashMap<>();
-    private final Map<String, Runnable> serializeTasks = new HashMap<>();
 
     @Override
     protected void afterAction(String name, Table res, Laminate meta) {

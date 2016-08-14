@@ -53,21 +53,21 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
         //FIXME add report manager instead of transmitting report
         String resultName = getResultName(data.getName(), actionMeta);
-        Report report = buildReport(resultName, data);
+        buildReport(resultName, data);
         Laminate meta = inputMeta(data.meta(), actionMeta);
         PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(meta),
                 input -> {
                     Thread.currentThread().setName(Name.joinString(getWorkName(), resultName));
-                    return transform(report, resultName, meta, input);
+                    return transform(resultName, meta, input);
                 }
         );
         //PENDING a bit ugly solution
         goal.onStart(() -> workListener().submit(resultName, goal.result()));
 
-        return new ActionResult<>(report, goal, outputMeta(data, meta), getOutputType());
+        return new ActionResult<>(getReport(resultName), goal, outputMeta(data, meta), getOutputType());
     }
 
-    protected Report buildReport(String name, Data<? extends T> data) {
+    protected void buildReport(String name, Data<? extends T> data) {
         Reportable parent;
         if (data != null && data instanceof ActionResult) {
             Report actionLog = ((ActionResult) data).log();
@@ -77,10 +77,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             } else {
                 parent = new Report(name, getContext());
             }
-        } else {
-            parent = new Report(name, getContext());
+            setReport(name, new Report(getName(), parent));
         }
-        return new Report(getName(), parent);
     }
 
     @Override
@@ -100,16 +98,15 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     /**
-     * @param log       report for this evaluation
      * @param name      name of the input item
      * @param inputMeta combined meta for this evaluation. Includes data meta,
      *                  group meta and action meta
      * @param input     input data
      * @return
      */
-    private R transform(Reportable log, String name, Laminate inputMeta, T input) {
-        beforeAction(name, input, inputMeta, log);
-        R res = execute(log, name, inputMeta, input);
+    private R transform(String name, Laminate inputMeta, T input) {
+        beforeAction(name, input, inputMeta);
+        R res = execute(name, inputMeta, input);
         afterAction(name, res, inputMeta);
         return res;
     }
@@ -122,10 +119,10 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public R simpleRun(T input, Meta... metaLayers) {
-        return transform(new Report(getName(), getContext()), "simpleRun", inputMeta(metaLayers), input);
+        return transform("simpleRun", inputMeta(metaLayers), input);
     }
 
-    protected abstract R execute(Reportable log, String name, Laminate inputMeta, T input);
+    protected abstract R execute(String name, Laminate inputMeta, T input);
 
     /**
      * Build output meta for given data. This meta is calculated on action call
@@ -144,9 +141,9 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         logger().info("Action '{}[{}]' is finished", getName(), name);
     }
 
-    protected void beforeAction(String name, T datum, Laminate meta, Reportable report) {
+    protected void beforeAction(String name, T datum, Laminate meta) {
         if (getContext().getBoolean("actions.reportStart", true)) {
-            report.report("Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
+            report(name, "Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
         }
         logger().info("Starting action '{}[{}]'", getName(), name);
     }

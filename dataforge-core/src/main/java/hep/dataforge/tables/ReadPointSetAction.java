@@ -16,14 +16,13 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
-import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
+
 import java.io.IOException;
 import java.io.InputStream;
 
@@ -43,7 +42,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
      * @return
      */
     @Override
-    protected Table execute(Reportable log, String name, Laminate meta, InputStream source) {
+    protected Table execute(String name, Laminate meta, InputStream source) {
         ListTable.Builder fileData;
 
         String encoding = meta.getString("encoding", "UTF-8");

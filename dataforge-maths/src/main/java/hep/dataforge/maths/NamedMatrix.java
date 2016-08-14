@@ -23,33 +23,19 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
+import java.io.Serializable;
+
 /**
  * Square named matrix. Не обязательно симметричная, но обзательно квадратная.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedMatrix implements NameSetContainer {
+public class NamedMatrix implements NameSetContainer, Serializable {
 
-    /**
-     * Create diagonal named matrix from given named double set
-     *
-     * @param vector
-     * @return
-     */
-    public static NamedMatrix diagonal(NamedValueSet vector) {
-        double[] vectorValues = MathUtils.getDoubleArray(vector);
-        double[][] values = new double[vectorValues.length][vectorValues.length];
-        for (int i = 0; i < vectorValues.length; i++) {
-            values[i][i] = vectorValues[i];
-        }
-        return new NamedMatrix(values, vector.namesAsArray());
-    }
-
+    private final Names names;
     //TODO заменить на массив
     private Array2DRowRealMatrix mat;
-    private final Names names;
-
     /**
      * <p>
      * Constructor for NamedMatrix.</p>
@@ -84,6 +70,21 @@ public class NamedMatrix implements NameSetContainer {
             throw new DimensionMismatchException(values.length, names.length);
         }
         this.mat = new Array2DRowRealMatrix(values, true);
+    }
+
+    /**
+     * Create diagonal named matrix from given named double set
+     *
+     * @param vector
+     * @return
+     */
+    public static NamedMatrix diagonal(NamedValueSet vector) {
+        double[] vectorValues = MathUtils.getDoubleArray(vector);
+        double[][] values = new double[vectorValues.length][vectorValues.length];
+        for (int i = 0; i < vectorValues.length; i++) {
+            values[i][i] = vectorValues[i];
+        }
+        return new NamedMatrix(values, vector.namesAsArray());
     }
 
     /**

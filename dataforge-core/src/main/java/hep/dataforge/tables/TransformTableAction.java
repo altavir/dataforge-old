@@ -16,15 +16,15 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
-import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
-import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import static hep.dataforge.tables.Filtering.buildConditionSet;
+
 import java.util.function.Predicate;
+
+import static hep.dataforge.tables.Filtering.buildConditionSet;
 
 /**
  * Table transformation action
@@ -42,7 +42,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
      * @return
      */
     @Override
-    protected Table execute(Reportable log, String name, Laminate meta, Table input) {
+    protected Table execute(String name, Laminate meta, Table input) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
         Table res;

@@ -83,12 +83,8 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default Data<? extends T> getData() {
-        Data<? extends T> res = getData(DEFAULT_DATA_FRAGMENT_NAME).get();
-        if (res != null) {
-            return res;
-        } else {
-            return dataStream().findFirst().orElseThrow(() -> new RuntimeException("Data node is empty"));
-        }
+        return getData(DEFAULT_DATA_FRAGMENT_NAME)
+                .orElse(dataStream().findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
     }
 
     /**
@@ -130,12 +126,12 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
                 .forEach(d -> consumer.accept((NamedData<R>) d));
     }
 
-//    /**
-//     * Named recursive node stream
-//     *
-//     * @return
-//     */
-//    Stream<Pair<String, DataNode<? extends T>>> nodeStream();
+    /**
+     * Named recursive node stream. Each node has composite name and Laminate meta including all higher nodes information
+     *
+     * @return
+     */
+    Stream<DataNode<? extends T>> nodeStream();
 
     /**
      * Get border type for this DataNode

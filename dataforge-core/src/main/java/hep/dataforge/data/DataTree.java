@@ -39,13 +39,13 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      *
      * @param tree
      */
-    private DataTree(DataTree<T> tree) {
+    private DataTree(DataTree<T> tree, String as) {
         this.type = tree.type;
 //        this.parent = tree.parent;
         this.meta = tree.meta;
-        this.name = tree.name;
-        nodes.forEach((String key, DataTree<? extends T> tree1) -> {
-            nodes.put(key, new DataTree<>(tree1));
+        this.name = as;
+        tree.nodes.forEach((String key, DataTree<? extends T> tree1) -> {
+            nodes.put(key, new DataTree<>(tree1, key));
         });
         this.data.putAll(tree.data);
     }
@@ -92,12 +92,12 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param node
      * @return
      */
-    public static <T> DataTree<T> cloneNode(DataNode<T> node) {
+    public static <T> DataTree<T> cloneNode(DataNode<T> node, String as) {
         if (node instanceof DataTree) {
-            return new DataTree<>((DataTree<T>) node);
+            return new DataTree<>((DataTree<T>) node, as);
         } else {
             DataTree.Builder<T> builder = DataTree.builder(node.type());
-            builder.setName(node.getName());
+            builder.setName(as);
             builder.setMeta(node.meta());
             node.dataStream().forEach(d -> {
                 builder.putData(d);
@@ -186,7 +186,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     protected void checkedPutNode(String key, DataNode node) {
         if (type().isInstance(node.type())) {
             if (!this.nodes.containsKey(key)) {
-                this.nodes.put(key, cloneNode(node));
+                this.nodes.put(key, cloneNode(node, key));
             } else {
                 throw new RuntimeException("The node with key " + key + " already exists");
             }
@@ -216,19 +216,27 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
+    public Stream<DataNode<? extends T>> nodeStream() {
+        return nodeStream(Name.of(getName()), new Laminate(meta()));
+    }
+
+    private Stream<DataNode<? extends T>> nodeStream(Name parentName, Laminate parentMeta) {
+        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
+            Stream<DataNode<? extends T>> nodeItself = Stream.of(new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta));
+
+            Name childName = parentName.append(nodeEntry.getKey());
+            Laminate childMeta = parentMeta.addFirstLayer(nodeEntry.getValue().meta());
+            Stream<DataNode<? extends T>> childStream = nodeEntry.getValue().nodeStream(childName, childMeta).map(n -> n);
+
+            return Stream.concat(nodeItself, childStream);
+        });
+    }
+
+
+    @Override
     public Stream<NamedData<? extends T>> dataStream() {
         return dataStream(null, new Laminate(meta()));
     }
-//    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
-//        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
-//            Stream<Pair<String, DataNode<? extends T>>> nodeItself
-//                    = Stream.of(new Pair<>(nodeEntry.getKey(), nodeEntry.getValue()));
-//            Stream<Pair<String, DataNode<? extends T>>> childStream = nodeEntry.getValue()
-//                    .nodeStream().map(it -> new Pair<>(nodeEntry.getKey() + "." + it.getKey(), it.getValue()));
-//
-//            return Stream.concat(nodeItself, childStream);
-//        });
-//    }
 
     private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta) {
         Stream<NamedData<? extends T>> dataStream = data.entrySet()
@@ -330,7 +338,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
          * @param node
          */
         public Builder(DataNode<T> node) {
-            this.tree = cloneNode(node);
+            this.tree = cloneNode(node, node.getName());
         }
 
         private Builder(Class<T> type) {

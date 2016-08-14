@@ -14,7 +14,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.workspace.identity.Identity;
-import hep.dataforge.workspace.identity.MetaIdentity;
+import hep.dataforge.workspace.identity.StringIdentity;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -32,6 +32,7 @@ import java.util.stream.Stream;
  */
 public class TaskModel implements Named, Annotated {
 
+    //TODO implement builder chain
     private final Workspace workspace;
     private final String taskName;
     private final Meta taskMeta;
@@ -133,7 +134,7 @@ public class TaskModel implements Named, Annotated {
      * @param taskMeta
      */
     public void dependsOn(String taskName, Meta taskMeta) {
-        dependsOn(new TaskModel(workspace, taskName, taskMeta));
+        dependsOn(taskName, taskMeta, "");
     }
 
     /**
@@ -144,7 +145,7 @@ public class TaskModel implements Named, Annotated {
      * @param as
      */
     public void dependsOn(String taskName, Meta taskMeta, String as) {
-        dependsOn(new TaskModel(workspace, taskName, taskMeta), as);
+        dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
     }
 
     /**
@@ -181,7 +182,7 @@ public class TaskModel implements Named, Annotated {
 
     public Identity getIdentity() {
         //FIXME make more complex identity
-        return new MetaIdentity(meta());
+        return new StringIdentity(getName()).and(meta());
     }
 
     /**
@@ -258,16 +259,20 @@ public class TaskModel implements Named, Annotated {
         /**
          * The rule to attach dependency data to data node when it is calculated
          */
-        BiConsumer<DataTree.Builder, DataNode> placementRule;
+        BiConsumer<DataTree.Builder, DataNode<?>> placementRule;
 
-        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder, DataNode> rule) {
+        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder, DataNode<?>> rule) {
             this.taskModel = taskModel;
             this.placementRule = rule;
         }
 
         public TaskDependency(TaskModel taskModel, String as) {
             this.taskModel = taskModel;
-            this.placementRule = (DataTree.Builder tree, DataNode result) -> tree.putNode(as, result);
+            if (as.isEmpty()) {
+                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> result.dataStream().forEach(data -> tree.putData(data));
+            } else {
+                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> tree.putNode(as, result);
+            }
         }
 
         /**

@@ -10,6 +10,8 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.Template
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.Workspace
@@ -129,6 +131,22 @@ class WorkspaceSpec {
 
     def meta(String name, Closure closure) {
         this.builder.loadMeta(GrindUtils.buildMeta(name, closure));
+    }
+
+    def meta(Meta meta) {
+        this.builder.loadMeta(meta);
+    }
+
+    MetaBuilder buildMeta(String name, Closure closure) {
+        return GrindUtils.buildMeta(name, closure);
+    }
+
+    Meta compileMeta(Meta template, Meta data) {
+        return Template.compileTemplate(template, data);
+    }
+
+    Meta compileMeta(Meta template, Closure cl) {
+        return compileMeta(template, buildMeta("", cl));
     }
 
 //    private class MetaSpec {

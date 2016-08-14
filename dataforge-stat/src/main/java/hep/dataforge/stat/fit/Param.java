@@ -17,6 +17,8 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
+
+import java.io.Serializable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -26,11 +28,11 @@ import java.util.regex.Pattern;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Param {
+public class Param implements Serializable {
 
+    private final String name; //Название параметра
     private double err = Double.NaN;
     private double lowerBound = Double.NEGATIVE_INFINITY; // Область, в которой параметр может существовать.
-    private final String name; //Название параметра
     private double upperBound = Double.POSITIVE_INFINITY;
     private double value = Double.NaN; //значение параметра
 
@@ -105,6 +107,13 @@ public class Param {
         return err;
     }
 
+    public void setErr(double error) {
+        /*стандартная ошибка или любая другая величина, несущая этот смысл*/
+//        if(error<0) throw new CoreException("Error for parameter must be positive.");
+        assert error >= 0 : "Error for parameter must be positive.";
+        err = error;
+    }
+
     public Double getLowerBound() {
         return lowerBound;
     }
@@ -126,13 +135,6 @@ public class Param {
         if (getUpperBound() <= getLowerBound()) {
             throw new RuntimeException("Wrong domain.");
         }
-    }
-
-    public void setErr(double error) {
-        /*стандартная ошибка или любая другая величина, несущая этот смысл*/
-//        if(error<0) throw new CoreException("Error for parameter must be positive.");
-        assert error >= 0 : "Error for parameter must be positive.";
-        err = error;
     }
 
     /**

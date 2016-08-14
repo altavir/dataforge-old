@@ -16,6 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import java.io.PrintWriter;
+import java.io.Serializable;
 
 /**
  * Interface for representing special errors or fit information e.g. assymetrical
@@ -24,7 +25,7 @@ import java.io.PrintWriter;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface IntervalEstimate{
+public interface IntervalEstimate extends Serializable {
 
     /**
      * <p>print.</p>

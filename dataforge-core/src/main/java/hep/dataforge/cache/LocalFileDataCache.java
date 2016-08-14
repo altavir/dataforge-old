@@ -86,6 +86,7 @@ public class LocalFileDataCache extends DataCache {
 
     @Override
     protected <T> T store(Identity id, T data) {
+        //TODO add prefix here
         lruCache.put(id, data);
         if (data instanceof Serializable) {
             String fileName = data.getClass().getSimpleName();

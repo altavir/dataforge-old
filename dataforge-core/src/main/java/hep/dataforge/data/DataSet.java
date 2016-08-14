@@ -18,8 +18,8 @@ import java.util.stream.Stream;
 /**
  * A simple static representation of DataNode
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 public class DataSet<T> extends AbstractProvider implements DataNode<T> {
 
@@ -62,32 +62,31 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                         -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
     }
 
-//    /**
-//     * {@inheritDoc }
-//     * <p>
-//     * Not very effective for flat data set
-//     * </p>
-//     *
-//     * @return
-//     */
-//    @Override
-//    public Stream<Pair<String, DataNode<? extends T>>> nodeStream() {
-//        return dataStream().map(data -> {
-//            Name dataName = Name.of(pair.getKey());
-//            if (dataName.length() > 1) {
-//                return dataName.cutLast().toString();
-//
-//            } else {
-//                return "";
-//            }
-//        }).distinct().map((String str) -> {
-//            if (str.isEmpty()) {
-//                return new Pair<>("", DataSet.this);
-//            } else {
-//                return new Pair<>(str, getNode(str).get());
-//            }
-//        });
-//    }
+    /**
+     * {@inheritDoc }
+     * <p>
+     * Not very effective for flat data set
+     * </p>
+     *
+     * @return
+     */
+    @Override
+    public Stream<DataNode<? extends T>> nodeStream() {
+        return dataStream().map(data -> {
+            Name dataName = Name.of(data.getName());
+            if (dataName.length() > 1) {
+                return dataName.cutLast().toString();
+            } else {
+                return "";
+            }
+        }).distinct().map((String str) -> {
+            if (str.isEmpty()) {
+                return DataSet.this;
+            } else {
+                return new NodeWrapper<>(getNode(str).get(), str, meta());
+            }
+        });
+    }
 
     @Override
     public Optional<Data<? extends T>> getData(String name) {

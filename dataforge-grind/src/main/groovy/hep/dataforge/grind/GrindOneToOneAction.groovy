@@ -49,9 +49,9 @@ class GrindOneToOneAction extends OneToOneAction {
     }
 
     @Override
-    protected Object execute(Reportable log, String name, Laminate meta, Object input) {
+    protected Object execute(String name, Laminate meta, Object input) {
         if (action != null) {
-            return new OneToOneCallable(log,name,meta,input).execute(action);
+            return new OneToOneCallable(getReport(name), name, meta, input).execute(action);
         } else {
             return input;
         }
@@ -71,8 +71,8 @@ class GrindOneToOneAction extends OneToOneAction {
             this.input = input
         }
 
-        Object execute(Closure closure){
-            Closure rehydrated = closure.rehydrate(this,null,null);
+        Object execute(Closure closure) {
+            Closure rehydrated = closure.rehydrate(this, null, null);
             rehydrated.setResolveStrategy(Closure.DELEGATE_ONLY);
             return rehydrated.run();
         }
