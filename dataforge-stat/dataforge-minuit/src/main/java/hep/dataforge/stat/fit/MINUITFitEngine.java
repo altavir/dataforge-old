@@ -15,29 +15,14 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.stat.fit.FitStage;
-import hep.dataforge.stat.fit.FitTaskResult;
-import hep.dataforge.stat.fit.FitEngine;
-import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.stat.fit.FitState;
-import hep.dataforge.MINUIT.FunctionMinimum;
-import hep.dataforge.MINUIT.MinosError;
-import hep.dataforge.MINUIT.MnApplication;
-import hep.dataforge.MINUIT.MnHesse;
-import hep.dataforge.MINUIT.MnMigrad;
-import hep.dataforge.MINUIT.MnMinimize;
-import hep.dataforge.MINUIT.MnMinos;
-import hep.dataforge.MINUIT.MnSimplex;
-import hep.dataforge.MINUIT.MnUserCovariance;
-import hep.dataforge.MINUIT.MnUserParameterState;
+import hep.dataforge.MINUIT.*;
 import hep.dataforge.context.GlobalContext;
-import static hep.dataforge.stat.fit.FitStage.TASK_COVARIANCE;
-import static hep.dataforge.stat.fit.FitStage.TASK_RUN;
-import static hep.dataforge.stat.fit.FitStage.TASK_SINGLE;
-import hep.dataforge.stat.parametric.MultiFunction;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.stat.parametric.MultiFunction;
+
+import static hep.dataforge.stat.fit.FitStage.*;
 
 /**
  * <p>
@@ -268,8 +253,7 @@ public class MINUITFitEngine implements FitEngine {
                     valid = false;
                 }
             }
-            MINOSResult minosErrors = new MINOSResult(fitPars);
-            minosErrors.setAssimetricalErrors(errl, errp);
+            MINOSResult minosErrors = new MINOSResult(fitPars, errl, errp);
             newState.setInterval(minosErrors);
         }
 

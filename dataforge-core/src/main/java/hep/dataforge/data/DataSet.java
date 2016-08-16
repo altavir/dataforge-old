@@ -186,7 +186,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
 
         @Override
         public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
-            if (type.isAssignableFrom(data.dataType())) {
+            if (type.isAssignableFrom(data.type())) {
                 if (replace || !dataMap.containsKey(key)) {
                     dataMap.put(key, data);
                 } else {

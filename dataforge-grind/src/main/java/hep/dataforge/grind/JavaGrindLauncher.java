@@ -13,6 +13,11 @@ public class JavaGrindLauncher {
         return new GrindLauncher().from(file).buildWorkspace();
     }
 
+
+    public static Workspace buildWorkspace(File file, Class<? extends WorkspaceSpec> specClass) {
+        return new GrindLauncher().from(file).with(specClass).buildWorkspace();
+    }
+
     public static MetaBuilder buildMeta(String input) {
         return GrindUtils.buildMeta(input);
     }

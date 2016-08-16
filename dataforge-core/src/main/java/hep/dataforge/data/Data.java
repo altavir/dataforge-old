@@ -81,7 +81,7 @@ public class Data<T> implements Annotated {
      *
      * @return
      */
-    public Class<T> dataType(){
+    public Class<T> type() {
         return type;
     }
 

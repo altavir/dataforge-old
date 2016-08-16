@@ -44,12 +44,12 @@ public class NamedData<T> extends Data<T> implements Named {
         for (Meta m : externalMeta) {
             newMeta.addLayer(m);
         }
-        return new NamedData<T>(name, data.getGoal(), data.dataType(), newMeta);
+        return new NamedData<T>(name, data.getGoal(), data.type(), newMeta);
     }
 
     public static <T> NamedData<T> wrap(Name name, Data<T> data, Laminate externalMeta) {
         Laminate newMeta = externalMeta.addFirstLayer(data.meta());
-        return new NamedData<T>(name.toString(), data.getGoal(), data.dataType(), newMeta);
+        return new NamedData<T>(name.toString(), data.getGoal(), data.type(), newMeta);
     }
 
     @Override
@@ -63,6 +63,6 @@ public class NamedData<T> extends Data<T> implements Named {
      * @return
      */
     public Data<T> anonymize() {
-        return new Data<T>(this.getGoal(), this.dataType(), this.meta());
+        return new Data<T>(this.getGoal(), this.type(), this.meta());
     }
 }

@@ -15,9 +15,10 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.stat.fit.IntervalEstimate;
-import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.Names;
+import hep.dataforge.values.Value;
+import javafx.util.Pair;
+
 import java.io.PrintWriter;
 
 /**
@@ -26,27 +27,38 @@ import java.io.PrintWriter;
  * @author Darksnake
  * @version $Id: $Id
  */
-public class MINOSResult extends AbstractNamedSet implements IntervalEstimate {
+public class MINOSResult implements IntervalEstimate {
 
     private double[] errl;
     private double[] errp;
+    private String[] names;
 
-    /**
-     * <p>Constructor for MINOSResult.</p>
-     *
-     * @param named a {@link hep.dataforge.names.Names} object.
-     */
-    public MINOSResult(Names named) {
-        super(named);
-    }
 
     /**
      * <p>Constructor for MINOSResult.</p>
      *
      * @param list an array of {@link java.lang.String} objects.
      */
-    public MINOSResult(String[] list) {
-        super(list);
+    public MINOSResult(String[] list, double[] errl, double[] errp) {
+        this.names = list;
+        this.errl = errl;
+        this.errp = errp;
+    }
+
+    @Override
+    public Names names() {
+        return Names.of(names);
+    }
+
+    @Override
+    public Pair<Value, Value> getInterval(String parName) {
+        int index = names().getNumberByName(parName);
+        return new Pair<>(Value.of(errl[index]), Value.of(errp[index]));
+    }
+
+    @Override
+    public double getCL() {
+        return 0.68;
     }
 
     /** {@inheritDoc} */
@@ -76,14 +88,4 @@ public class MINOSResult extends AbstractNamedSet implements IntervalEstimate {
         }
     }
 
-    /**
-     * <p>setAssimetricalErrors.</p>
-     *
-     * @param errl an array of double.
-     * @param errp the errp to set
-     */
-    public void setAssimetricalErrors(double[] errl, double[] errp) {
-        this.errp = errp.clone();
-        this.errl = errl.clone();
-    }
 }

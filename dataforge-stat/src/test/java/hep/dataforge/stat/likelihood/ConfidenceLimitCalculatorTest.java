@@ -15,17 +15,14 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.stat.likelihood.BayesianConfidenceLimit;
-import hep.dataforge.stat.likelihood.ConfidenceLimitCalculator;
-import java.io.PrintWriter;
+import hep.dataforge.stat.fit.IntervalEstimate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.function.Gaussian;
-import org.junit.After;
-import org.junit.AfterClass;
+import org.junit.*;
+
+import java.io.PrintWriter;
+
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  *
@@ -41,6 +38,13 @@ public class ConfidenceLimitCalculatorTest {
     /**
      *
      */
+    public ConfidenceLimitCalculatorTest() {
+
+    }
+
+    /**
+     *
+     */
     @BeforeClass
     public static void setUpClass() {
     }
@@ -50,13 +54,6 @@ public class ConfidenceLimitCalculatorTest {
      */
     @AfterClass
     public static void tearDownClass() {
-    }
-
-    /**
-     *
-     */
-    public ConfidenceLimitCalculatorTest() {
-        
     }
 
     /**
@@ -92,7 +89,7 @@ public class ConfidenceLimitCalculatorTest {
     @Test
     public void testGetLimis() {
         ConfidenceLimitCalculator instance = new ConfidenceLimitCalculator(gaussian, a, b, 30);
-        BayesianConfidenceLimit limit = instance.getLimits();
+        IntervalEstimate limit = instance.getEstimate("pos");
         limit.print(new PrintWriter(System.out,true));
     }
 }

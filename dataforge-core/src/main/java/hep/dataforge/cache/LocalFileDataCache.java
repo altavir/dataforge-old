@@ -101,7 +101,7 @@ public class LocalFileDataCache extends DataCache {
                 fileMap.put(id, file);
                 saveCacheMap();
             } catch (IOException ex) {
-                getLogger().error("Failed to write cacheble data with id '{}' to file with message: {}", id.toString(), ex.getMessage());
+                getLogger().error("Failed to write data with id '{}' to file with message: {}", id.toString(), ex.getMessage());
             }
         }
         return data;

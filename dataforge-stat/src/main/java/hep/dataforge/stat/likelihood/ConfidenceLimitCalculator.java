@@ -15,9 +15,10 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import static hep.dataforge.stat.parametric.FunctionCaching.cacheUnivariateFunction;
 import hep.dataforge.maths.integration.IntegratorFactory;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
+import hep.dataforge.stat.fit.BasicIntervalEstimate;
+import hep.dataforge.stat.fit.IntervalEstimate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure;
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction;
@@ -25,6 +26,8 @@ import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 import org.apache.commons.math3.analysis.solvers.PegasusSolver;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.util.Pair;
+
+import static hep.dataforge.stat.parametric.FunctionCaching.cacheUnivariateFunction;
 
 /**
  * <p>ConfidenceLimitCalculator class.</p>
@@ -160,8 +163,8 @@ public class ConfidenceLimitCalculator {
      *
      * @return
      */
-    BayesianConfidenceLimit getLimits() {
-        BayesianConfidenceLimit result = new BayesianConfidenceLimit();
+    IntervalEstimate getEstimate(String parName) {
+        BasicIntervalEstimate result = new BasicIntervalEstimate(0.95);
         Pair<Double, Double> interval95 = this.get95CLCentralinterval();
         double delta = interval95.getSecond() - interval95.getFirst();
         if (interval95.getFirst() <= a + 0.025 / 0.95 * delta) {
@@ -169,7 +172,7 @@ public class ConfidenceLimitCalculator {
         } else if (interval95.getFirst() >= b - 0.025 / 0.95 * delta) {
             interval95 = this.get95CLLowerLimit();
         }
-        result.add(0.95, interval95);
+        result.put(parName, 0.95, interval95.getFirst(), interval95.getSecond());
 
         Pair<Double, Double> interval90 = this.get90CLCentralinterval();
         delta = interval90.getSecond() - interval90.getFirst();
@@ -178,7 +181,7 @@ public class ConfidenceLimitCalculator {
         } else if (interval90.getFirst() >= b - 0.05 / 0.9 * delta) {
             interval90 = this.get90CLLowerLimit();
         }
-        result.add(0.90, interval90);
+        result.put(parName, 0.90, interval90.getFirst(), interval90.getSecond());
         return result;
     }
 

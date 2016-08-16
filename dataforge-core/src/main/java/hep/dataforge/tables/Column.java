@@ -19,7 +19,10 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
+
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * колонка однородных значений
@@ -28,11 +31,21 @@ import java.util.List;
  * @version $Id: $Id
  */
 public interface Column extends Iterable<Value>, Annotated {
-    
-    default ValueFormatter formatter(){
+
+    default ValueFormatter formatter() {
         return ValueFormatFactory.build(meta());
     }
+
     Value get(int n);
+
     List<Value> asList();
-    
+
+    int size();
+
+    @Override
+    default Iterator<Value> iterator() {
+        return stream().iterator();
+    }
+
+    Stream<Value> stream();
 }

@@ -13,14 +13,15 @@ import org.codehaus.groovy.control.CompilerConfiguration
 class GrindLauncher {
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
+    private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
 
     GrindLauncher from(File file) {
         this.source = { file.newReader() }
         return this;
     }
 
-    GrindLauncher from(Reader reader) {
-        this.source = { reader }
+    GrindLauncher from(Closure<? extends Reader> readerSup) {
+        this.source = readerSup
         return this;
     }
 
@@ -29,9 +30,14 @@ class GrindLauncher {
         return this;
     }
 
-    GrindLauncher inside(Closure source) {
-
+    GrindLauncher with(Class<? extends WorkspaceSpec> specClass) {
+        this.spec = specClass
+        return this;
     }
+
+//    GrindLauncher inside(Closure source) {
+//
+//    }
 
     /**
      * Create workspace builder using WorkspaceSpec
@@ -40,13 +46,17 @@ class GrindLauncher {
      */
     Workspace.Builder getBuilder() {
         def compilerConfiguration = new CompilerConfiguration()
-        compilerConfiguration.scriptBaseClass = DelegatingScript.class.name
-        def shell = new GroovyShell(this.class.classLoader, compilerConfiguration)
-        DelegatingScript script = shell.parse(source()) as DelegatingScript;
-        WorkspaceSpec spec = new WorkspaceSpec()
-        script.setDelegate(spec)
-        script.run()
-        return spec.builder;
+        compilerConfiguration.scriptBaseClass = spec.name
+        def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
+        Script script = shell.parse(source()) as WorkspaceSpec;
+        return script.run() as Workspace.Builder;
+    }
+
+    private def runInContext(Object context, String script) {
+        Closure cl = (Closure) new GroovyShell().evaluate("{->$script}")
+        cl.delegate = context
+        cl.resolveStrategy = Closure.DELEGATE_FIRST
+        cl()
     }
 
     /**

@@ -6,6 +6,7 @@
 package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
+
 import java.util.function.BiPredicate;
 
 /**
@@ -47,7 +48,7 @@ public class DataFilter {
         }
         String compiledPattern = namePattern.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
         BiPredicate<String, Data> predicate = ((name, data)
-                -> name.matches(compiledPattern) && limitingType.isAssignableFrom(data.dataType()));
+                -> name.matches(compiledPattern) && limitingType.isAssignableFrom(data.type()));
         includeData(predicate);
     }
 

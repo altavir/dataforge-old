@@ -15,17 +15,21 @@
  */
 package hep.dataforge.stat.fit;
 
+import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.values.Value;
+import javafx.util.Pair;
+
 import java.io.PrintWriter;
 import java.io.Serializable;
 
 /**
- * Interface for representing special errors or fit information e.g. assymetrical
+ * Interface for representing special errors or fit information e.g. asymmetrical
  * errors or confidence intervals
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface IntervalEstimate extends Serializable {
+public interface IntervalEstimate extends Serializable, NameSetContainer {
 
     /**
      * <p>print.</p>
@@ -33,5 +37,28 @@ public interface IntervalEstimate extends Serializable {
      * @param out a {@link java.io.PrintWriter} object.
      */
     void print(PrintWriter out);
+
+    /**
+     * Get univariate interval estimate for given parameter with default confidence limit
+     *
+     * @param parName
+     * @return
+     */
+    public Pair<Value, Value> getInterval(String parName);
+
+    default Value gerLowerBound(String parName) {
+        return getInterval(parName).getKey();
+    }
+
+    default Value gerUpperBound(String parName) {
+        return getInterval(parName).getValue();
+    }
+
+    /**
+     * get the default confidence limit
+     *
+     * @return
+     */
+    public double getCL();
     
 }

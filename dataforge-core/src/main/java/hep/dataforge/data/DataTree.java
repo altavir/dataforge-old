@@ -204,7 +204,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      */
     @SuppressWarnings("unchecked")
     protected void checkedPutData(String key, Data data, boolean allowReplace) {
-        if (type().isAssignableFrom(data.dataType())) {
+        if (type().isAssignableFrom(data.type())) {
             if (!this.data.containsKey(key) || allowReplace) {
                 this.data.put(key, data);
             } else {

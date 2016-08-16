@@ -5,16 +5,17 @@
  */
 package hep.dataforge.meta;
 
-import static hep.dataforge.meta.MetaUtils.transformValue;
-
 import hep.dataforge.navigation.Provider;
+import hep.dataforge.values.MapValueProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
+import org.slf4j.LoggerFactory;
 
+import java.util.Map;
 import java.util.function.UnaryOperator;
 
-import org.slf4j.LoggerFactory;
+import static hep.dataforge.meta.MetaUtils.transformValue;
 
 /**
  * @author Alexander Nozik
@@ -41,6 +42,20 @@ public class Template implements Annotated, UnaryOperator<Meta> {
         this.def = def;
     }
 
+    /**
+     * Build a Meta using given template.
+     *
+     * @param template
+     * @return
+     */
+    public static MetaBuilder compileTemplate(Meta template, Meta data) {
+        return new Template(template).compile(data);
+    }
+
+    public static MetaBuilder compileTemplate(Meta template, Map<String, Object> data) {
+        return new Template(template).compile(new MapValueProvider(data), null);
+    }
+
     @Override
     public Meta meta() {
         return template;
@@ -53,13 +68,13 @@ public class Template implements Annotated, UnaryOperator<Meta> {
      * @param metaProvider
      * @return
      */
-    public Meta compile(ValueProvider valueProvider, MetaProvider metaProvider) {
+    public MetaBuilder compile(ValueProvider valueProvider, MetaProvider metaProvider) {
         MetaBuilder res = new MetaBuilder(meta());
         MetaUtils.nodeStream(res).forEach(pair -> {
             MetaBuilder node = (MetaBuilder) pair.getValue();
             if (node.hasValue("@include")) {
                 String includePath = pair.getValue().getString("@include");
-                if (metaProvider.hasMeta(includePath)) {
+                if (metaProvider != null && metaProvider.hasMeta(includePath)) {
                     MetaBuilder parent = node.getParent();
                     parent.replaceChildNode(node, metaProvider.getMeta(includePath));
                 } else if (def.hasNode(includePath)) {
@@ -81,22 +96,13 @@ public class Template implements Annotated, UnaryOperator<Meta> {
         return res;
     }
 
-    public Meta compile(Provider provider) {
+    public MetaBuilder compile(Provider provider) {
         return compile(ValueProvider.buildFrom(provider), MetaProvider.buildFrom(provider));
     }
 
     @Override
-    public Meta apply(Meta data) {
+    public MetaBuilder apply(Meta data) {
         return compile(data, data);
     }
 
-    /**
-     * Build a Meta using given template.
-     *
-     * @param template
-     * @return
-     */
-    public static Meta compileTemplate(Meta template, Meta data) {
-        return new Template(template).compile(data);
-    }
 }

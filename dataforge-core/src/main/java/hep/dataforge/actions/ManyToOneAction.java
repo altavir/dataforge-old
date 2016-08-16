@@ -81,8 +81,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         input.dataStream().forEach((NamedData<? extends T> data) -> {
             MetaBuilder dataNode = new MetaBuilder("data")
                     .putValue("name", data.getName());
-            if (!data.dataType().equals(input.type())) {
-                dataNode.putValue("type", data.dataType().getName());
+            if (!data.type().equals(input.type())) {
+                dataNode.putValue("type", data.type().getName());
             }
             if (!data.meta().isEmpty()) {
                 dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());

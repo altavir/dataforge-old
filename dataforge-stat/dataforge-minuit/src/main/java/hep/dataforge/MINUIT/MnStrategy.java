@@ -40,13 +40,13 @@ package hep.dataforge.MINUIT;
  * reliably.
  * <p>In addition all constants set in MnStrategy can be changed individually by
  * the user, e.g. the number of iteration cycles in the numerical gradient.
- *
+ * <p>
  * <p>
  * Acts on: Migrad (behavioural), Minos (lowers strategy by 1 for Minos-own
  * minimization), Hesse (iterations), Numerical2PDerivative (iterations)
  *
- * @version $Id$
  * @author Darksnake
+ * @version $Id$
  */
 public class MnStrategy {
     private int theGradNCyc;
@@ -54,7 +54,7 @@ public class MnStrategy {
     private double theGradTlrStp;
     private int theHessGradNCyc;
     //default strategy
-        private int theHessNCyc;
+    private int theHessNCyc;
     private double theHessTlrG2;
     private double theHessTlrStp;
     private int theStrategy;
@@ -67,6 +67,7 @@ public class MnStrategy {
     }
 
     //user defined strategy (0, 1, >=2)
+
     /**
      * Creates a MnStrategy object with the user specified strategy.
      *

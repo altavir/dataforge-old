@@ -49,7 +49,7 @@ public abstract class DataCache {
         return data;
 //        
 //        Goal<T> cachedGoal = new CachedGoal<>(data.getGoal(),id);
-//        return new Data<>(cachedGoal,data.meta(),data.dataType());
+//        return new Data<>(cachedGoal,data.meta(),data.type());
     }
 
     /**

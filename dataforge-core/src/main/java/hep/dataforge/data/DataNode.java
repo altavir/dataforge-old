@@ -51,7 +51,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     static <T> DataNode<T> of(String dataName, Data<T> data, Meta nodeMeta) {
-        return DataSet.builder(data.dataType())
+        return DataSet.builder(data.type())
                 .setName(dataName)
                 .setMeta(nodeMeta)
                 .putData(dataName, data)
@@ -65,6 +65,15 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     Optional<Data<? extends T>> getData(String name);
+
+    default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
+        Data<? extends T> data = getData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
+        if (type.isAssignableFrom(data.type())) {
+            return (Data<R>) data;
+        } else {
+            throw new RuntimeException(String.format("Type check failed: expected %s but found %s", type.getName(), data.type().getName()));
+        }
+    }
 
     /**
      * Compute specific Data. Blocking operation
@@ -99,6 +108,28 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
     Optional<DataNode<? extends T>> getNode(String nodeName);
 
     /**
+     * Get the node assuming it have specific type with type check
+     *
+     * @param nodeName
+     * @param type
+     * @param <R>
+     * @return
+     */
+    default <R> DataNode<R> getCheckedNode(String nodeName, Class<R> type) {
+        DataNode<? extends T> node;
+        if (nodeName.isEmpty()) {
+            node = this;
+        } else {
+            node = getNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
+        }
+        if (type.isAssignableFrom(node.type())) {
+            return (DataNode<R>) node;
+        } else {
+            throw new RuntimeException(String.format("Type check failed: expected %s but found %s", type.getName(), node.type().getName()));
+        }
+    }
+
+    /**
      * Named dataStream of data elements including subnodes if they are present.
      * Meta of each data is supposed to be laminate containing node meta.
      *
@@ -122,7 +153,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param consumer
      */
     default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
-        dataStream().filter(d -> type.isAssignableFrom(d.dataType()))
+        dataStream().filter(d -> type.isAssignableFrom(d.type()))
                 .forEach(d -> consumer.accept((NamedData<R>) d));
     }
 

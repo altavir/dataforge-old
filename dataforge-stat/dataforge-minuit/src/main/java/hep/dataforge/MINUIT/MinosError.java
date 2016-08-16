@@ -18,8 +18,8 @@ package hep.dataforge.MINUIT;
 /**
  * <p>MinosError class.</p>
  *
- * @version $Id$
  * @author Darksnake
+ * @version $Id$
  */
 public class MinosError {
     private MnCross theLower;
@@ -150,50 +150,52 @@ public class MinosError {
     /**
      * <p>range.</p>
      *
-     * @return a {@link hep.dataforge.maths.Range} object.
+     * @return
      */
     public Range range() {
         return new Range(lower(), upper());
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return MnPrint.toString(this);
     }
 
-        /**
-         * <p>upper.</p>
-         *
-         * @return a double.
-         */
+    /**
+     * <p>upper.</p>
+     *
+     * @return a double.
+     */
     public double upper() {
         return upperState().error(parameter()) * (1. + theUpper.value());
     }
 
-        /**
-         * <p>upperNewMin.</p>
-         *
-         * @return a boolean.
-         */
+    /**
+     * <p>upperNewMin.</p>
+     *
+     * @return a boolean.
+     */
     public boolean upperNewMin() {
         return theUpper.newMinimum();
     }
 
-        /**
-         * <p>upperState.</p>
-         *
-         * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
-         */
+    /**
+     * <p>upperState.</p>
+     *
+     * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
+     */
     public MnUserParameterState upperState() {
         return theUpper.state();
     }
 
-        /**
-         * <p>upperValid.</p>
-         *
-         * @return a boolean.
-         */
+    /**
+     * <p>upperValid.</p>
+     *
+     * @return a boolean.
+     */
     public boolean upperValid() {
         return theUpper.isValid();
     }

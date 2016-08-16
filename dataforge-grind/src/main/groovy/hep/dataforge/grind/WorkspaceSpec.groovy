@@ -12,6 +12,7 @@ import hep.dataforge.context.GlobalContext
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.Template
+import hep.dataforge.values.MapValueProvider
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.Workspace
@@ -21,7 +22,7 @@ import hep.dataforge.workspace.Workspace
  * @author Alexander Nozik
  */
 @CompileStatic
-class WorkspaceSpec {
+class WorkspaceSpec extends Script {
     Workspace.Builder builder = BasicWorkspace.builder();
 
     /**
@@ -33,6 +34,11 @@ class WorkspaceSpec {
         code.resolveStrategy = Closure.DELEGATE_ONLY;
         code();
         builder.setContext(contextSpec.build());
+    }
+
+    @Override
+    Object run() {
+        return builder;
     }
 
     private class ContextSpec {
@@ -83,7 +89,7 @@ class WorkspaceSpec {
 
     private class DataSpec {
         def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            builder.putFile(name, path, GrindUtils.buildMeta(fileMeta));
+            WorkspaceSpec.this.builder.putFile(name, path, GrindUtils.buildMeta(fileMeta));
         }
         //TODO extends data specification
     }
@@ -116,7 +122,7 @@ class WorkspaceSpec {
      * @param taskClass
      * @return
      */
-    def loadTask(Class<Task> taskClass) {
+    def loadTask(Class<? extends Task> taskClass) {
         builder.loadTask(taskClass.newInstance());
     }
 
@@ -126,7 +132,16 @@ class WorkspaceSpec {
      * @return
      */
     def meta(Closure closure) {
-        this.builder.loadMeta(GrindUtils.buildMeta(closure));
+        MetaSpec spec = new MetaSpec();
+        def code = closure.rehydrate(spec, this, this);
+        code.resolveStrategy = Closure.DELEGATE_FIRST;
+        code();
+    }
+
+    private class MetaSpec {
+        def methodMissing(String methodName, Closure par) {
+            WorkspaceSpec.this.builder.loadMeta(GrindUtils.buildMeta(methodName, par));
+        }
     }
 
     def meta(String name, Closure closure) {
@@ -137,33 +152,49 @@ class WorkspaceSpec {
         this.builder.loadMeta(meta);
     }
 
+    def meta(String name, Meta template, Map map) {
+        this.builder.loadMeta(compileMeta(template, map).rename(name));
+    }
+
+    /**
+     * Build meta(Builder) using builder but do not add it to workspace
+     * @param name
+     * @param closure
+     * @return
+     */
     MetaBuilder buildMeta(String name, Closure closure) {
         return GrindUtils.buildMeta(name, closure);
     }
 
-    Meta compileMeta(Meta template, Meta data) {
+    /**
+     * Complile meta using template and given meta as a data source
+     * @param template
+     * @param data
+     * @return
+     */
+    MetaBuilder compileMeta(Meta template, Meta data) {
         return Template.compileTemplate(template, data);
     }
 
-    Meta compileMeta(Meta template, Closure cl) {
+    MetaBuilder compileMeta(Meta template, Closure cl) {
         return compileMeta(template, buildMeta("", cl));
     }
 
-//    private class MetaSpec {
-//        String name
-//
-//        def methodMissing(String methodName) {
-//            this.name = methodName
-//        }
-//
-//        def call(Closure closure) {
-//            if (name) {
-//                builder.loadMeta(name, GrindUtils.buildMeta(closure));
-//            } else {
-//                throw new RuntimeException("Meta name not provided");
-//            }
-//        }
-//    }
+    MetaBuilder compileMeta(Meta template, Map map) {
+        return Template.compileTemplate(template, map);
+    }
+
+    /**
+     * Use map as a value provider and given meta as meta provider
+     * @param template
+     * @param map
+     * @param cl
+     * @return
+     */
+    MetaBuilder compileMeta(Meta template, Map map, Closure cl) {
+        Template tmp = new Template(template);
+        return tmp.compile(new MapValueProvider(map), buildMeta("", cl));
+    }
 
 }
 

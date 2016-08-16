@@ -47,9 +47,9 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     protected ActionResult<R> runOne(NamedData<? extends T> data, Meta actionMeta) {
-        if (!this.getInputType().isAssignableFrom(data.dataType())) {
+        if (!this.getInputType().isAssignableFrom(data.type())) {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
-                    getName(), getInputType().getName(), data.dataType().getName()));
+                    getName(), getInputType().getName(), data.type().getName()));
         }
         //FIXME add report manager instead of transmitting report
         String resultName = getResultName(data.getName(), actionMeta);

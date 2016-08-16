@@ -19,9 +19,10 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
+
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 /**
  * A simple immutable Column implementation using list of values
@@ -71,15 +72,18 @@ public class ListColumn implements Column {
         return values.get(n);
     }
 
-    /** {@inheritDoc} */
     @Override
-    public Iterator<Value> iterator() {
-        return values.iterator();
+    public Stream<Value> stream() {
+        return values.stream();
     }
 
     @Override
     public Meta meta() {
         return columnMeta;
     }
-    
+
+    @Override
+    public int size() {
+        return values.size();
+    }
 }

@@ -166,13 +166,18 @@ public class ListTable implements Table, Serializable {
             }
 
             @Override
-            public Iterator<Value> iterator() {
-                throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+            public Stream<Value> stream() {
+                return ListTable.this.stream().map(point -> point.getValue(columnName));
             }
 
             @Override
             public Meta meta() {
                 return getFormat().getColumnMeta(columnName);
+            }
+
+            @Override
+            public int size() {
+                return ListTable.this.size();
             }
         };
     }

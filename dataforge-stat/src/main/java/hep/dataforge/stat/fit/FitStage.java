@@ -19,8 +19,11 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
-import static hep.dataforge.stat.fit.FitAction.STAGE_KEY;
+
+import java.io.Serializable;
 import java.util.Arrays;
+
+import static hep.dataforge.stat.fit.FitAction.STAGE_KEY;
 
 /**
  * <p>
@@ -29,7 +32,7 @@ import java.util.Arrays;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class FitStage implements Annotated, Named {
+public class FitStage implements Annotated, Named, Serializable {
 
     /**
      * Constant <code>TASK_RUN="fit"</code>

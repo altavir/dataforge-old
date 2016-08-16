@@ -19,6 +19,7 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.Table;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -70,7 +71,7 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
         return reader;
     }
 
-    public Table toDataSet() {
+    public Table toTable() {
         List<DataPoint> points = new ArrayList<>();
         for (DataPoint p : this) {
             if (p != null) {
