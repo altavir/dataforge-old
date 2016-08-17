@@ -12,6 +12,15 @@ import org.codehaus.groovy.control.CompilerConfiguration
 @CompileStatic
 class GrindLauncher {
 
+    static Workspace buildWorkspace(File file, Class spec){
+        return new GrindLauncher().from(file).with(spec).buildWorkspace();
+    }
+
+    static Workspace buildWorkspace(File file){
+        return new GrindLauncher().from(file).buildWorkspace();
+    }
+
+
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
 
@@ -50,13 +59,6 @@ class GrindLauncher {
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
         Script script = shell.parse(source()) as WorkspaceSpec;
         return script.run() as Workspace.Builder;
-    }
-
-    private def runInContext(Object context, String script) {
-        Closure cl = (Closure) new GroovyShell().evaluate("{->$script}")
-        cl.delegate = context
-        cl.resolveStrategy = Closure.DELEGATE_FIRST
-        cl()
     }
 
     /**

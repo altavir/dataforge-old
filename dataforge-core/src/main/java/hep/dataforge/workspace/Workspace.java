@@ -22,6 +22,7 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaProvider;
 import hep.dataforge.utils.GenericBuilder;
@@ -72,22 +73,31 @@ public interface Workspace extends Encapsulated, MetaProvider {
      *
      * @param taskName
      * @param config
+     * @param overlay usegiven meta as overaly for existing meta with the same name
      * @return
      */
-    default <T> DataNode<T> runTask(String taskName, Meta config) {
+    default <T> DataNode<T> runTask(String taskName, Meta config, boolean overlay) {
         Task<T> task = getTask(taskName);
-        TaskModel model = task.build(this,config);
+        if (overlay && hasMeta(config.getName())) {
+            config = new Laminate(config, getMeta(config.getName()));
+        }
+        TaskModel model = task.build(this, config);
         return runTask(model);
+    }
+
+    default <T> DataNode<T> runTask(String taskName, Meta config) {
+        return this.runTask(taskName, config, false);
     }
 
     /**
      * Use config root node name as task name
+     *
      * @param config
      * @param <T>
      * @return
      */
     default <T> DataNode<T> runTask(Meta config) {
-        return runTask(config.getName(),config);
+        return runTask(config.getName(), config);
     }
 
     /**
@@ -174,8 +184,8 @@ public interface Workspace extends Encapsulated, MetaProvider {
         }
 
         B loadMeta(String name, Meta meta);
-        
-        default B loadMeta(Meta meta){
+
+        default B loadMeta(Meta meta) {
             return loadMeta(meta.getName(), meta);
         }
 
