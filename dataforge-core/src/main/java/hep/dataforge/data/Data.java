@@ -63,7 +63,7 @@ public class Data<T> implements Annotated {
      * @return 
      */
     public T get() {
-        goal.start();
+        goal.run();
         return goal.result().join();
     }
 

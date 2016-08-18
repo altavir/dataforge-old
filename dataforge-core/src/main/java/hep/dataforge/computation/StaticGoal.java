@@ -5,8 +5,6 @@
  */
 package hep.dataforge.computation;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 
@@ -16,12 +14,11 @@ import java.util.stream.Stream;
  * @param <T>
  * @author Alexander Nozik
  */
-public class StaticGoal<T> implements Goal<T> {
+public class StaticGoal<T> extends AbstractGoal<T> {
+    private final T result;
 
-    private final CompletableFuture<T> future;
-
-    public StaticGoal(T res) {
-        this.future = CompletableFuture.completedFuture(res);
+    public StaticGoal(T result) {
+        this.result = result;
     }
 
     @Override
@@ -30,24 +27,40 @@ public class StaticGoal<T> implements Goal<T> {
     }
 
     @Override
-    public void start() {
-        // does nothing
+    protected T compute() throws Exception {
+        return result;
     }
 
-    @Override
-    public CompletableFuture<T> result() {
-        return future;
-    }
-
-    @Override
-    public void onStart(Runnable hook) {
-        //this goal never starts
-    }
-
-    @Override
-    public void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
-        //run immediately on separate thread
-        new Thread(() -> hook.accept(future.join(), null)).start();
-
-    }
+//    private final CompletableFuture<T> future;
+//
+//    public StaticGoal(T res) {
+//        this.future = CompletableFuture.completedFuture(res);
+//    }
+//
+//    @Override
+//    public Stream<Goal> dependencies() {
+//        return Stream.empty();
+//    }
+//
+//    @Override
+//    public void run() {
+//        // does nothing
+//    }
+//
+//    @Override
+//    public CompletableFuture<T> result() {
+//        return future;
+//    }
+//
+//    @Override
+//    public void onStart(Runnable hook) {
+//        //this goal never starts
+//    }
+//
+//    @Override
+//    public void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
+//        //run immediately on separate thread
+//        new Thread(() -> hook.accept(future.join(), null)).start();
+//
+//    }
 }

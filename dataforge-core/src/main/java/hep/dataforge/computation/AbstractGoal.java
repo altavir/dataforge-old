@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ForkJoinPool;
 import java.util.function.BiConsumer;
 
 /**
@@ -31,18 +32,23 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
     }
 
+    public AbstractGoal() {
+        this.executor = ForkJoinPool.commonPool();
+        result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
+    }
+
     protected Logger getLogger() {
         return LoggerFactory.getLogger(getClass());
     }
 
     @Override
-    public synchronized void start() {
+    public synchronized void run() {
         if (!isStarted()) {
             //start all dependencies so they will occupy threads
             computation = CompletableFuture
                     .allOf(dependencies()
                             .map(dep -> {
-                                dep.start();//starting all dependencies
+                                dep.run();//starting all dependencies
                                 return dep.result();
                             })
                             .<CompletableFuture<?>>toArray(num -> new CompletableFuture[num]))
@@ -52,9 +58,10 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             //trigger start hooks
                             onStartHooks.forEach(action -> action.run());
                             this.result.complete(compute());
-                            thread = null;
                         } catch (Exception ex) {
                             this.result.completeExceptionally(ex);
+                        } finally {
+                            thread = null;
                         }
                     }, executor);
         }
@@ -100,9 +107,9 @@ public abstract class AbstractGoal<T> implements Goal<T> {
      * @param result
      */
     @Override
-    public final synchronized void complete(T result) {
+    public final synchronized boolean complete(T result) {
         abort();
-        this.result.complete(result);
+        return this.result.complete(result);
     }
 
     @Override

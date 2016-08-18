@@ -5,7 +5,7 @@
  */
 package hep.dataforge.computation;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
@@ -14,7 +14,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface Goal<T> {
+public interface Goal<T> extends RunnableFuture<T> {
 
     /**
      * A stream of all bound direct dependencies
@@ -26,7 +26,7 @@ public interface Goal<T> {
     /**
      * Start this goal computation. Triggers start of dependent goals
      */
-    void start();
+    void run();
 
     /**
      * Get goal result for given slot. Does not trigger goal computation.
@@ -40,11 +40,30 @@ public interface Goal<T> {
      * Start and get sync result
      *
      * @return
-     * @throws Exception
      */
-    default T get() throws Exception {
-        start();
+    default T get() throws ExecutionException, InterruptedException {
+        run();
         return result().get();
+    }
+
+    @Override
+    default boolean cancel(boolean mayInterruptIfRunning) {
+        return result().cancel(mayInterruptIfRunning);
+    }
+
+    @Override
+    default boolean isCancelled() {
+        return result().isCancelled();
+    }
+
+    @Override
+    default boolean isDone() {
+        return result().isDone();
+    }
+
+    @Override
+    default T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        return result().get(timeout, unit);
     }
 
     /**
@@ -53,8 +72,8 @@ public interface Goal<T> {
      *
      * @param result
      */
-    default void complete(T result) {
-        result().complete(result);
+    default boolean complete(T result) {
+        return result().complete(result);
     }
 
 
