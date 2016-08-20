@@ -20,9 +20,9 @@ import java.util.Map;
  */
 public abstract class AbstractWorkspace implements Workspace {
 
-    private Context context;
     protected final Map<String, Task> tasks = new HashMap<>();
     protected final Map<String, Meta> metas = new HashMap<>();
+    private Context context;
     private DataCache cache;
 
     @Override
@@ -48,6 +48,10 @@ public abstract class AbstractWorkspace implements Workspace {
         this.cache = CachePlugin.buildFrom(context).getCache();
     }
 
+//    public Meta getCachePolicy() {
+//        return getMeta("@cachePolicy");
+//    }
+
     @Override
     public <T> DataNode<T> runTask(TaskModel model) {
         Task<T> task = getTask(model.getName());
@@ -58,61 +62,4 @@ public abstract class AbstractWorkspace implements Workspace {
             return task.run(model);
         }
     }
-
-
-    //    /**
-//     * Gathering of dependencies from workspace
-//     *
-//     * @param executor
-//     * @param workspace
-//     * @param gatherConfig
-//     * @return
-//     */
-//    @NodeDef(name = "data", multiple = true, info = "Data dependency element from workspace")
-//    @NodeDef(name = "task", multiple = true, info = "Task dependecy element from workspace")
-//    protected DataTree.Builder gather(ProcessManager.Callback callback, Workspace workspace, Meta gatherConfig) {
-//        DataTree.Builder builder = DataTree.builder();
-//        gatherConfig.getNodes("data").stream().forEachData((dataElement) -> {
-//            gatherData(builder, workspace, dataElement);
-//        });
-//        gatherConfig.getNodes("task").stream().forEachData((dataElement) -> {
-//            gatherTask(builder, workspace, dataElement);
-//        });
-//
-//        return builder;
-//    }
-//
-//    @ValueDef(name = "path", required = true)
-//    @ValueDef(name = "as")
-//    protected void gatherData(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
-//        String dataPath = dataElement.getString("path");
-//        Data data = workspace.getData(dataPath);
-//        builder.putData(dataElement.getString("as", dataPath), data);
-//    }
-//
-//    @ValueDef(name = "name", required = true)
-//    @ValueDef(name = "as")
-//    @NodeDef(name = "meta")
-//    protected void gatherTask(DataTree.Builder builder, Workspace workspace, Meta dataElement) {
-//        String taskName = dataElement.getString("name");
-//        Meta taskMeta;
-//        if (dataElement.hasNode("meta")) {
-//            if (dataElement.hasValue("meta.from")) {
-//                taskMeta = workspace.getMeta(dataElement.getString("meta.from"));
-//            } else {
-//                taskMeta = dataElement.getNode("meta");
-//            }
-//        } else {
-//            taskMeta = null;
-//        }
-//        //TODO check cyclic dependacies
-//        DataNode taskResult = workspace.runTask(taskName, taskMeta);
-//        if (dataElement.hasValue("as")) {
-//            builder.putNode(dataElement.getString("as"), taskResult);
-//        } else {
-//            builder.putNode(taskResult);
-//        }
-//    }
-
-
 }

@@ -16,10 +16,11 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.values.Value;
+
 import java.util.ArrayList;
-import java.util.HashSet;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * Настраиваемое правило объединения аннотаций
@@ -27,20 +28,17 @@ import java.util.Set;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ConfigurableMergeRule extends MergeRule {
-
-    private final Set<String> valueToJoin;
-    private final Set<String> elementsToJoin;
+public class ConfigurableMergeRule extends CustomMergeRule {
 
     /**
      * <p>Constructor for ConfigurableMergeRule.</p>
      *
-     * @param valueToJoin a {@link java.util.Set} object.
+     * @param valueToJoin    a {@link java.util.Set} object.
      * @param elementsToJoin a {@link java.util.Set} object.
      */
-    public ConfigurableMergeRule(Set<String> valueToJoin, Set<String> elementsToJoin) {
-        this.valueToJoin = valueToJoin;
-        this.elementsToJoin = elementsToJoin;
+    public ConfigurableMergeRule(Collection<String> valueToJoin, Collection<String> elementsToJoin) {
+        setValueMerger(valueToJoin);
+        setMetaMerger(elementsToJoin);
     }
 
     /**
@@ -48,9 +46,8 @@ public class ConfigurableMergeRule extends MergeRule {
      *
      * @param toJoin a {@link java.util.Set} object.
      */
-    public ConfigurableMergeRule(Set<String> toJoin) {
-        this.valueToJoin = toJoin;
-        this.elementsToJoin = toJoin;
+    public ConfigurableMergeRule(Collection<String> toJoin) {
+        this(toJoin, toJoin);
     }
 
     /**
@@ -59,43 +56,11 @@ public class ConfigurableMergeRule extends MergeRule {
      * @param toJoin a {@link java.lang.String} object.
      */
     public ConfigurableMergeRule(String... toJoin) {
-        this.valueToJoin = new HashSet<>();
-        this.elementsToJoin = new HashSet<>();
-        for(String name: toJoin){
-            valueToJoin.add(name);
-            elementsToJoin.add(name);
-        }
-    }
-    
-    
-
-    /** {@inheritDoc} */
-    @Override
-    protected ListMergeRule<Meta> elementsMerger() {
-        return (String name, List<? extends Meta> first, List<? extends Meta> second) -> {
-            //Объединяем, если элемент в списке на объединение
-            if (elementsToJoin.contains(name)) {
-                List<Meta> list = new ArrayList<>();
-                list.addAll(first);
-                list.addAll(second);
-                return list;
-            } else {
-                // если не в списке, то заменяем
-                return first;
-            }
-        };
+        this(Arrays.asList(toJoin));
     }
 
-    /** {@inheritDoc} */
-    @Override
-    protected String mergeName(String mainName, String secondName) {
-        return mainName;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected ListMergeRule<Value> valuesMerger() {
-        return (String name, List<? extends Value> first, List<? extends Value> second) -> {
+    private void setValueMerger(Collection<String> valueToJoin) {
+        this.valueMerger = (String name, List<? extends Value> first, List<? extends Value> second) -> {
             //Объединяем, если элемент в списке на объединение
             if (valueToJoin.contains(name)) {
                 List<Value> list = new ArrayList<>();
@@ -107,5 +72,29 @@ public class ConfigurableMergeRule extends MergeRule {
             }
         };
     }
+
+    private void setMetaMerger(Collection<String> metaToJoin) {
+        this.elementMerger = (String name, List<? extends Meta> first, List<? extends Meta> second) -> {
+            //Объединяем, если элемент в списке на объединение
+            if (metaToJoin.contains(name)) {
+                List<Meta> list = new ArrayList<>();
+                list.addAll(first);
+                list.addAll(second);
+                return list;
+            } else {
+                // если не в списке, то заменяем
+                return first;
+            }
+        };
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected String mergeName(String mainName, String secondName) {
+        return mainName;
+    }
+
 
 }

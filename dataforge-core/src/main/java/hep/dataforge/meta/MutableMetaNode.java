@@ -32,14 +32,22 @@ import java.util.List;
  * @author Alexander Nozik
  */
 @SuppressWarnings("unchecked")
-public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaNode<T>
+public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNode<T>
         implements Serializable, GenericBuilder<Meta, T> {
 
     protected T parent;
 
-    public MuttableMetaNode(String name) {
+    public MutableMetaNode(String name) {
         super(name);
         this.parent = null;
+    }
+
+    public Name getFullName() {
+        if (parent == null) {
+            return Name.of(getName());
+        } else {
+            return Name.join(parent.getFullName(), Name.of(getName()));
+        }
     }
 
     /**
@@ -85,7 +93,7 @@ public abstract class MuttableMetaNode<T extends MuttableMetaNode> extends MetaN
      * one if it does not exist
      *
      * @param element
-     * @param notify notify listeners
+     * @param notify  notify listeners
      */
     public T putNode(String name, Meta element, boolean notify) {
         if (!isValidElementName(name)) {

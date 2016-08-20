@@ -17,6 +17,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -28,7 +29,7 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-public class Configuration extends MuttableMetaNode<Configuration> {
+public class Configuration extends MutableMetaNode<Configuration> {
 
     /**
      * The meta node or value descriptor tag to mark an element non

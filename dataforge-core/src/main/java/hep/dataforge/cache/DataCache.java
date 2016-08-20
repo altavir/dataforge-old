@@ -5,6 +5,7 @@
  */
 package hep.dataforge.cache;
 
+import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
@@ -12,6 +13,7 @@ import hep.dataforge.workspace.identity.Identity;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 /**
@@ -39,17 +41,21 @@ public abstract class DataCache {
                 getLogger().error("Failed to restore data with id '{}' from cache", id.toString());
             }
         } else {
-            data.getGoal().onComplete((res, ex) -> {
-                if (res != null) {
-                    getLogger().debug("Caching data with id '{}'", id.toString());
-                    store(id, res);
-                }
-            });
+            data.getGoal().result().thenAcceptAsync(res -> {
+                getLogger().debug("Caching data with id '{}'", id.toString());
+                store(id, res);
+            }, executor());
+
         }
         return data;
-//        
-//        Goal<T> cachedGoal = new CachedGoal<>(data.getGoal(),id);
-//        return new Data<>(cachedGoal,data.meta(),data.type());
+    }
+
+    /**
+     * Executor for caching. Could be overridden
+     * @return
+     */
+    protected Executor executor() {
+        return GlobalContext.dispatchThreadExecutor();
     }
 
     /**
@@ -112,50 +118,4 @@ public abstract class DataCache {
     protected Logger getLogger() {
         return LoggerFactory.getLogger(getClass());
     }
-
-//    protected class CachedGoal<T> implements Goal<T> {
-//
-//        private final Goal<T> goal;
-//        private final Identity id;
-//        private final CompletableFuture<T> future;
-//
-//        public CachedGoal(Goal<T> goal, Identity id) {
-//            this.goal = goal;
-//            this.id = id;
-//            future = goal.result().thenApplyAsync(res -> {
-//                store(id, res);
-//                return res;
-//            });
-//        }
-//
-//        @Override
-//        public Stream<Goal> dependencies() {
-//            if (contains(id)) {
-//                return Stream.empty();
-//            } else {
-//                return goal.dependencies();
-//            }
-//        }
-//
-//        @Override
-//        public void start() {
-//            if (contains(id)) {
-//                try {
-//                    getLogger().debug("Restoring cached data with id '{}'", id.toString());
-//                    future.complete(restore(id));
-//                } catch (DataCacheException ex) {
-//                    getLogger().error("Failed to restore data with id '{}' from cache", id.toString());
-//                    goal.start();
-//                }
-//            } else {
-//                goal.start();
-//            }
-//        }
-//
-//        @Override
-//        public CompletableFuture<T> result() {
-//            return future;
-//        }
-//
-//    }
 }

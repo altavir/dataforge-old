@@ -1,0 +1,121 @@
+/*
+ * Copyright 2015 Alexander Nozik.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package hep.dataforge.grind.extensions
+
+import hep.dataforge.grind.GrindUtils
+import hep.dataforge.meta.JoinRule
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.Template
+import hep.dataforge.values.MapValueProvider
+import hep.dataforge.values.NamedValue
+
+/**
+ * Created by darksnake on 20-Aug-16.
+ */
+class MetaBuilderExtension {
+    static MetaBuilder plus(final Meta self, MetaBuilder other) {
+        return new JoinRule().merge(self, other);
+    }
+
+    static MetaBuilder plus(final Meta self, NamedValue other) {
+        return new MetaBuilder(self).putValue(other.getName(), other);
+    }
+
+    /**
+     * Put a mixed map of nodes and values into new meta based on existing one
+     * @param self
+     * @param map
+     * @return
+     */
+    static MetaBuilder plus(final Meta self, Map<String, Object> map) {
+        MetaBuilder res = new MetaBuilder(self);
+        map.forEach { key, value ->
+            if (value instanceof Meta) {
+                res.putNode(key, value);
+            } else {
+                res.putValue(key, value)
+            }
+        }
+        return res;
+    }
+
+    static MetaBuilder leftShift(final MetaBuilder self, MetaBuilder other) {
+        return new MetaBuilder(self).putNode(other);
+    }
+
+    static MetaBuilder leftShift(final MetaBuilder self, NamedValue other) {
+        return new MetaBuilder(self).putValue(other.getName(), other);
+    }
+
+    static MetaBuilder leftShift(final MetaBuilder self, Map<String, Object> map) {
+        map.forEach { key, value ->
+            if (value instanceof Meta) {
+                self.putNode(key, value);
+            } else {
+                self.putValue(key, value)
+            }
+        }
+        return self;
+    }
+
+    /**
+     * Update existing builder using closure
+     * @param self
+     * @param cl
+     * @return
+     */
+    static MetaBuilder update(final MetaBuilder self, Closure cl) {
+        return self.update(GrindUtils.buildMeta { cl })
+    }
+
+    /**
+     * Create a new builder and update it from closure (existing one not changed)
+     * @param self
+     * @param cl
+     * @return
+     */
+    static MetaBuilder transform(final Meta self, Closure cl) {
+        return new MetaBuilder(self).update(GrindUtils.buildMeta { cl })
+    }
+
+    /**
+     * Compile new builder using self as a template
+     * @param self
+     * @param dataSource
+     * @return
+     */
+    static MetaBuilder compile(final Meta self, Meta dataSource) {
+        return Template.compileTemplate(self, dataSource);
+    }
+
+    static MetaBuilder compile(final Meta self, Map<String, Object> dataMap) {
+        return Template.compileTemplate(self, dataMap);
+    }
+
+    /**
+     * Use map as a value provider and given meta as meta provider
+     * @param template
+     * @param map
+     * @param cl
+     * @return
+     */
+    static MetaBuilder compile(final Meta self, Map<String, Object> map, Closure cl) {
+        Template tmp = new Template(self);
+        return tmp.compile(new MapValueProvider(map), GrindUtils.buildMeta("", cl));
+    }
+}

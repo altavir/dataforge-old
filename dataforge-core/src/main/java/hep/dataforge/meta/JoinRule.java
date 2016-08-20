@@ -15,7 +15,9 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,32 +29,28 @@ import java.util.List;
  */
 public class JoinRule extends MergeRule {
 
-    /** {@inheritDoc} */
-    @Override
-    protected ListMergeRule<Meta> elementsMerger() {
-        return (String name, List<? extends Meta> first, List<? extends Meta> second) -> {
-            List<Meta> list = new ArrayList<>();
-            list.addAll(first);
-            list.addAll(second);
-            return list;
-        };
-    }
-
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String mergeName(String mainName, String secondName) {
         return mainName;
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected ListMergeRule<Value> valuesMerger() {
-        return (String name, List<? extends Value> first, List<? extends Value> second) -> {
-            List<Value> list = new ArrayList<>();
-            list.addAll(first);
-            list.addAll(second);
-            return list;
-
-        };
+    protected Value mergeValues(Name valueName, Value first, Value second) {
+        List<Value> list = new ArrayList<>();
+        list.addAll(first.listValue());
+        list.addAll(second.listValue());
+        return Value.of(list);
     }
+
+    @Override
+    protected List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes) {
+        List<Meta> list = new ArrayList<>();
+        list.addAll(mainNodes);
+        list.addAll(secondaryNodes);
+        return list;
+    }
+
 }

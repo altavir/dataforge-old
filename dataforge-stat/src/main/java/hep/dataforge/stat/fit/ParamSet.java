@@ -19,18 +19,22 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.*;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Scanner;
 
 /**
  * Реализация набора параметров, которая будет потом использоваться в Result,
  * Fitter и Spectrum
- *
+ * <p>
  * Подразумевается, что ParamSet обязательно содержит помимо значения хотя бы
  * ошибку.
  *
@@ -87,21 +91,31 @@ public class ParamSet implements NamedValueSet, Serializable {
     @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
     public static ParamSet fromMeta(Meta cfg) {
         if (cfg.hasNode("params")) {
-            cfg = cfg.getNode("params");
-        }
+            Meta params = cfg.getNode("params");
 
-        if (cfg.hasNode("param")) {
-            List<? extends Meta> params;
-            params = cfg.getNodes("param");
             ParamSet set = new ParamSet();
-            for (Meta param : params) {
-                set.setPar(Param.fromMeta(param));
-            }
+            MetaUtils.nodeStream(params).forEach(entry -> {
+                set.setPar(Param.fromMeta(entry.getValue()));
+            });
+
             return set;
         } else {
-            //Возрвщвем пустой лист. Нужно для совместимости со значениями параметров по-умолчанию
             return new ParamSet();
         }
+
+
+//        if (cfg.hasNode("param")) {
+//            List<? extends Meta> params;
+//            params = cfg.getNodes("param");
+//            ParamSet set = new ParamSet();
+//            for (Meta param : params) {
+//                set.setPar(Param.fromMeta(param));
+//            }
+//            return set;
+//        } else {
+//            //Возрвщвем пустой лист. Нужно для совместимости со значениями параметров по-умолчанию
+//            return new ParamSet();
+//        }
     }
 
     /**
@@ -125,8 +139,7 @@ public class ParamSet implements NamedValueSet, Serializable {
         return Value.of(getDouble(path));
     }
 
-    
-    
+
     public ParamSet copy() {
         return new ParamSet(this);
     }
@@ -251,8 +264,9 @@ public class ParamSet implements NamedValueSet, Serializable {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Метод возвращает значение параметра с именем str
+     *
      * @param str
      */
     @Override
@@ -272,7 +286,7 @@ public class ParamSet implements NamedValueSet, Serializable {
     /**
      * Searches set for a parameter with the same name and replaces it. Only
      * link is replaced, use {@code copy} to make a deep copy.
-     *
+     * <p>
      * In case name not found adds a new parameter
      *
      * @param input a {@link hep.dataforge.stat.fit.Param} object.
@@ -287,7 +301,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * <p>
      * setPar.</p>
      *
-     * @param name a {@link java.lang.String} object.
+     * @param name  a {@link java.lang.String} object.
      * @param value a double.
      * @param error a double.
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
@@ -313,7 +327,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * <p>
      * setPar.</p>
      *
-     * @param name a {@link java.lang.String} object.
+     * @param name  a {@link java.lang.String} object.
      * @param value a double.
      * @param error a double.
      * @param lower a {@link java.lang.Double} object.
@@ -342,7 +356,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * <p>
      * setParDomain.</p>
      *
-     * @param name a {@link java.lang.String} object.
+     * @param name  a {@link java.lang.String} object.
      * @param lower a {@link java.lang.Double} object.
      * @param upper a {@link java.lang.Double} object.
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
@@ -360,7 +374,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * <p>
      * setParError.</p>
      *
-     * @param name a {@link java.lang.String} object.
+     * @param name  a {@link java.lang.String} object.
      * @param value a double.
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
@@ -393,7 +407,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * <p>
      * setParValue.</p>
      *
-     * @param name parameter name.
+     * @param name  parameter name.
      * @param value a double.
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      */

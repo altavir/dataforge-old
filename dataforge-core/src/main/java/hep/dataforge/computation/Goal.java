@@ -79,5 +79,8 @@ public interface Goal<T> extends RunnableFuture<T> {
 
     void onStart(Runnable hook);
 
-    void onComplete(BiConsumer<? super T, ? super Throwable> hook);
+    default void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
+        //TODO replace by some default command thread executor
+        this.result().whenCompleteAsync(hook, command -> new Thread(command).start());
+    }
 }

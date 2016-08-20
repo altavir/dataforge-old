@@ -50,13 +50,13 @@ public class Param implements Serializable {
         this.value = value;
     }
 
-    @ValueDef(name = "name", required = true, info = "Parameter name.")
+    @ValueDef(name = "name", info = "Parameter name. If not defined, then npde name is used.")
     @ValueDef(name = "value", type = "NUMBER", required = true, info = "Parameter value.")
     @ValueDef(name = "err", type = "NUMBER", info = "Parameter error or in general case inversed square root of the weight.")
     @ValueDef(name = "lower", type = "NUMBER", info = "Parameter lower boundary.")
     @ValueDef(name = "upper", type = "NUMBER", info = "Parameter upper boundary.")
     public static Param fromMeta(Meta cfg) {
-        String name = cfg.getValue("name").stringValue();
+        String name = cfg.getString("name", cfg.getName());
         Param res = new Param(name);
         res.setErr(cfg.getDouble("err", Double.NaN));
         res.setDomain(cfg.getDouble("lower", Double.NEGATIVE_INFINITY),

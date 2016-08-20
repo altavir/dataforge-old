@@ -15,7 +15,9 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+
 import java.util.List;
 
 /**
@@ -26,13 +28,6 @@ import java.util.List;
  */
 class DefaultMergeRule extends MergeRule {
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    protected ListMergeRule<Meta> elementsMerger() {
-        return (String name, List<? extends Meta> first, List<? extends Meta> second) -> first;
-    }
 
     /**
      * {@inheritDoc}
@@ -42,12 +37,14 @@ class DefaultMergeRule extends MergeRule {
         return mainName;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    protected ListMergeRule<Value> valuesMerger() {
-        return (String name, List<? extends Value> first, List<? extends Value> second) -> first;
+    protected Value mergeValues(Name valueName, Value first, Value second) {
+        return first;
     }
 
+    @Override
+    protected List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes) {
+        return mainNodes;
+    }
 }

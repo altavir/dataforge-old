@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ForkJoinPool;
-import java.util.function.BiConsumer;
 
 /**
  * @author Alexander Nozik
@@ -23,7 +22,6 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     private final ExecutorService executor;
     private final CompletableFuture<T> result;
     private final List<Runnable> onStartHooks = new ArrayList<>();
-    private final List<BiConsumer<? super T, ? super Throwable>> onCompleteHooks = new ArrayList<>();
     private CompletableFuture<?> computation;
     private Thread thread;
 
@@ -75,9 +73,6 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         this.onStartHooks.add(hook);
     }
 
-    public synchronized void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
-        this.onCompleteHooks.add(hook);
-    }
 
     protected abstract T compute() throws Exception;
 
@@ -118,19 +113,6 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     }
 
     protected class GoalResult extends CompletableFuture<T> {
-
-        @Override
-        public boolean complete(T value) {
-            onCompleteHooks.forEach(hook -> hook.accept(value, null));
-            return super.complete(value);
-        }
-
-        @Override
-        public boolean completeExceptionally(Throwable ex) {
-            onCompleteHooks.forEach(hook -> hook.accept(null, ex));
-            return super.completeExceptionally(ex);
-        }
-
 
         @Override
         public boolean cancel(boolean mayInterruptIfRunning) {

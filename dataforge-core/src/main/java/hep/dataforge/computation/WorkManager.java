@@ -171,11 +171,9 @@ public class WorkManager implements Encapsulated, WorkListener {
      */
     protected void onFinished(String processName) {
         getContext().getLogger().debug("Process '{}' finished", processName);
-        if (root.isDone() && parallelExecutor != null) {
-//            parallelExecutor.shutdown();
-//            parallelExecutor = null;
-            getContext().getLogger().info("All processes complete.");
-        }
+//        if (root.isDone() && parallelExecutor != null) {
+//            getContext().getLogger().info("All processes complete.");
+//        }
 
     }
 

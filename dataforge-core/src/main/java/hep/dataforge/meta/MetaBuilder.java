@@ -15,8 +15,9 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -32,9 +33,9 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
+public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
 
-//    private ValueProvider valueContext;
+    //    private ValueProvider valueContext;
     public MetaBuilder(String name) {
         super(name);
     }
@@ -67,6 +68,7 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
 //    protected MetaBuilder(String name, MetaBuilder parent) {
 //        super(name, parent);
 //    }
+
     /**
      * return an immutable annotation base on this builder
      *
@@ -140,19 +142,19 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
     /**
      * Update this annotation with new Annotation
      *
-     * @param annotation a {@link hep.dataforge.meta.MetaBuilder} object.
-     * @param valueMerger a {@link hep.dataforge.meta.ListMergeRule} object.
+     * @param annotation    a {@link hep.dataforge.meta.MetaBuilder} object.
+     * @param valueMerger   a {@link hep.dataforge.meta.ListMergeRule} object.
      * @param elementMerger a {@link hep.dataforge.meta.ListMergeRule} object.
      * @return a {@link hep.dataforge.meta.MetaBuilder} object.
      */
     public MetaBuilder update(Meta annotation,
-            ListMergeRule<Value> valueMerger,
-            ListMergeRule<Meta> elementMerger) {
-        return new CustomMergeRule(valueMerger, elementMerger).merge(annotation, this);
+                              ListMergeRule<Value> valueMerger,
+                              ListMergeRule<Meta> elementMerger) {
+        return new CustomMergeRule(valueMerger, elementMerger).mergeInPlace(annotation, this);
     }
 
     public MetaBuilder update(MetaBuilder annotation) {
-        return MergeRule.replace(annotation, this);
+        return new DefaultMergeRule().mergeInPlace(annotation, this);
     }
 
     @Override
@@ -160,47 +162,6 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         return this;
     }
 
-//    /**
-//     * The transformation which should be performed on each value before it is
-//     * returned to user. Basically is used to ensure automatic substitutions. If
-//     * the reference not found in the current annotation scope than the value is
-//     * returned as-is.
-//     *
-//     * @param val
-//     * @return
-//     */
-//    protected Value transformValue(Value val) {
-//        return MetaUtils.transformValue(val, getValueContext());
-//    }
-//    /**
-//     * The value substitution context is inherited
-//     *
-//     * @return
-//     */
-//    private ValueProvider getValueContext() {
-//        if (this.valueContext != null) {
-//            return this.valueContext;
-//        } else if (parent != null) {
-//            return parent.getValueContext();
-//        } else {
-//            return null;
-//        }
-//    }
-//
-//    public MetaBuilder setValueProvider(ValueProvider provider) {
-//        this.valueContext = provider;
-//        return this;
-//    }
-//    /**
-//     * Return transformed value
-//     *
-//     * @param name
-//     * @return
-//     */
-//    @Override
-//    public Value getValue(String name) {
-//        return Value.of(super.getValue(name).listValue().stream().<Value>map((val) -> transformValue(val)).collect(Collectors.toList()));
-//    }
     /**
      * Create an empty child node
      *
@@ -242,14 +203,13 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
      * Recursively apply node and value transformation to node. If node
      * transformation creates new node, then new node is returned.
      * <p>
-     *  The order of transformation is the following:
+     * The order of transformation is the following:
      * </p>
      * <ul>
-     *  <li> Parent node transformation</li>
-     *  <li> Parent node values transformation (using only values after node transformation is applied)</li>
-     *  <li> Children nodes transformation (using only nodes after parent node transformation is applied)</li>
+     * <li> Parent node transformation</li>
+     * <li> Parent node values transformation (using only values after node transformation is applied)</li>
+     * <li> Children nodes transformation (using only nodes after parent node transformation is applied)</li>
      * </ul>
-     * 
      *
      * @param nodeTransform
      * @return
@@ -262,12 +222,13 @@ public class MetaBuilder extends MuttableMetaNode<MetaBuilder> {
         });
         return res;
     }
-    
+
     /**
      * Make a transformation substituting values in place using substitution pattern and given valueProviders
-     * @return 
+     *
+     * @return
      */
-    public MetaBuilder substituteValues(ValueProvider... providers){
+    public MetaBuilder substituteValues(ValueProvider... providers) {
         return transform(UnaryOperator.identity(), (String key, Value val) -> MetaUtils.transformValue(val, providers));
     }
 

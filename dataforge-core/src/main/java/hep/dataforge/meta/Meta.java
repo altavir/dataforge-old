@@ -20,8 +20,9 @@ import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
+
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;

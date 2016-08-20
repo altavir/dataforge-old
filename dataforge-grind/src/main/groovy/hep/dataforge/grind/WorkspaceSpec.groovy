@@ -11,8 +11,6 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.Template
-import hep.dataforge.values.MapValueProvider
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.Workspace
@@ -152,9 +150,9 @@ class WorkspaceSpec extends Script {
         this.builder.loadMeta(meta);
     }
 
-    def meta(String name, Meta template, Map map) {
-        this.builder.loadMeta(compileMeta(template, map).rename(name));
-    }
+//    def meta(String name, Meta template, Map map) {
+//        this.builder.loadMeta(template.compile(map).rename(name));
+//    }
 
     /**
      * Build meta(Builder) using builder but do not add it to workspace
@@ -164,36 +162,6 @@ class WorkspaceSpec extends Script {
      */
     MetaBuilder buildMeta(String name, Closure closure) {
         return GrindUtils.buildMeta(name, closure);
-    }
-
-    /**
-     * Complile meta using template and given meta as a data source
-     * @param template
-     * @param data
-     * @return
-     */
-    MetaBuilder compileMeta(Meta template, Meta data) {
-        return Template.compileTemplate(template, data);
-    }
-
-    MetaBuilder compileMeta(Meta template, Closure cl) {
-        return compileMeta(template, buildMeta("", cl));
-    }
-
-    MetaBuilder compileMeta(Meta template, Map map) {
-        return Template.compileTemplate(template, map);
-    }
-
-    /**
-     * Use map as a value provider and given meta as meta provider
-     * @param template
-     * @param map
-     * @param cl
-     * @return
-     */
-    MetaBuilder compileMeta(Meta template, Map map, Closure cl) {
-        Template tmp = new Template(template);
-        return tmp.compile(new MapValueProvider(map), buildMeta("", cl));
     }
 
 }

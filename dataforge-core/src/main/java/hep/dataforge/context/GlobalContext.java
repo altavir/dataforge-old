@@ -15,12 +15,12 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.computation.WorkManager;
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.actions.RunConfigAction;
+import hep.dataforge.computation.WorkManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
@@ -28,12 +28,15 @@ import hep.dataforge.io.reports.ReportEntry;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
-import org.slf4j.LoggerFactory;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * Глобальный контекст. Хранит не только глобальные настройки, но и
@@ -46,6 +49,31 @@ public class GlobalContext extends Context {
 
     private static final GlobalContext instance = new GlobalContext();
     private static final Set<Context> contexts = new HashSet<>();
+    private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
+        Thread res = new Thread(r, "DF_DISPATCH");
+//        res.setDaemon(false);
+        res.setPriority(Thread.MAX_PRIORITY);
+        return res;
+    });
+
+    private GlobalContext() {
+        super("df");
+        Locale.setDefault(Locale.US);
+        ActionManager actions = new ActionManager();
+        loadPlugin(actions);
+        actions.registerAction(TransformTableAction.class);
+        actions.registerAction(ReadPointSetAction.class);
+        actions.registerAction(RunConfigAction.class);
+    }
+
+    /**
+     * A single thread executor for DataForge messages dispatch. No heavy calculations should be done on this thread
+     *
+     * @return
+     */
+    public static ExecutorService dispatchThreadExecutor() {
+        return dispatchThreadExecutor;
+    }
 
     public static GlobalContext instance() {
         return instance;
@@ -72,7 +100,8 @@ public class GlobalContext extends Context {
 
     /**
      * Remove context from registry
-     * @param context 
+     *
+     * @param context
      */
     public static void unregisterContext(Context context) {
         contexts.remove(context);
@@ -84,16 +113,6 @@ public class GlobalContext extends Context {
 
     public static PrintWriter out() {
         return new PrintWriter(instance.io().out());
-    }
-
-    private GlobalContext() {
-        super("df");
-        Locale.setDefault(Locale.US);
-        ActionManager actions = new ActionManager();
-        loadPlugin(actions);
-        actions.registerAction(TransformTableAction.class);
-        actions.registerAction(ReadPointSetAction.class);
-        actions.registerAction(RunConfigAction.class);
     }
 
     @Override
@@ -192,6 +211,7 @@ public class GlobalContext extends Context {
         for (Context ctx : contexts) {
             ctx.close();
         }
+        dispatchThreadExecutor.shutdown();
         super.close();
     }
 

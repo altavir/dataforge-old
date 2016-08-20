@@ -15,7 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+
+import java.util.List;
 
 /**
  * <p>CustomMergeRule class.</p>
@@ -24,37 +27,39 @@ import hep.dataforge.values.Value;
  * @version $Id: $Id
  */
 public class CustomMergeRule extends MergeRule {
-    
-    private ListMergeRule<Value> valueMerger;
-    private ListMergeRule<Meta> elementMerger;
+
+    protected ListMergeRule<Value> valueMerger;
+    protected ListMergeRule<Meta> elementMerger;
 
     /**
      * <p>Constructor for CustomMergeRule.</p>
      *
-     * @param itemMerger a {@link hep.dataforge.meta.ListMergeRule} object.
+     * @param itemMerger    a {@link hep.dataforge.meta.ListMergeRule} object.
      * @param elementMerger a {@link hep.dataforge.meta.ListMergeRule} object.
      */
     public CustomMergeRule(ListMergeRule<Value> itemMerger, ListMergeRule<Meta> elementMerger) {
         this.valueMerger = itemMerger;
         this.elementMerger = elementMerger;
     }
-    
-    /** {@inheritDoc} */
+
+    protected CustomMergeRule() {
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     protected String mergeName(String mainName, String secondName) {
         return mainName;
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected ListMergeRule<Value> valuesMerger() {
-        return valueMerger;
+    protected Value mergeValues(Name valueName, Value first, Value second) {
+        return Value.of(valueMerger.merge(valueName.toString(), first.listValue(), second.listValue()));
     }
 
-    /** {@inheritDoc} */
     @Override
-    protected ListMergeRule<Meta> elementsMerger() {
-        return elementMerger;
+    protected List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes) {
+        return elementMerger.merge(nodeName.toString(), mainNodes, secondaryNodes);
     }
-    
 }

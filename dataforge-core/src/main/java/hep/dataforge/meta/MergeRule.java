@@ -15,9 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
-import java.util.ArrayList;
-import java.util.Collection;
+
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -32,7 +33,7 @@ public abstract class MergeRule {
      * Правило объединения по-умолчанию. Подразумевается простая замена всех
      * совподающих элементов.
      *
-     * @return 
+     * @return
      */
     public static MergeRule getDefault() {
         return new DefaultMergeRule();
@@ -42,8 +43,8 @@ public abstract class MergeRule {
      * Возвращает правило объединения в котором элементы, входящие в список
      * объединяются, а остальные заменяются
      *
-     * @param toJoin 
-     * @return 
+     * @param toJoin
+     * @return
      */
     public static MergeRule getConfigured(String... toJoin) {
         return new ConfigurableMergeRule(toJoin);
@@ -52,9 +53,9 @@ public abstract class MergeRule {
     /**
      * Выполняет объединение с заменой всех совподающих элементов
      *
-     * @param main 
-     * @param second 
-     * @return 
+     * @param main
+     * @param second
+     * @return
      */
     public static MetaBuilder replace(Meta main, Meta second) {
         return getDefault().merge(main, second);
@@ -63,7 +64,7 @@ public abstract class MergeRule {
     /**
      * Выполняет объединение с объединением всех списков
      *
-     * @param main a {@link hep.dataforge.meta.Meta} object.
+     * @param main   a {@link hep.dataforge.meta.Meta} object.
      * @param second a {@link hep.dataforge.meta.Meta} object.
      * @return a {@link hep.dataforge.meta.Meta} object.
      */
@@ -75,51 +76,50 @@ public abstract class MergeRule {
      * Метод, объединяющий две аннотации. Порядок имеет значение. Первая
      * аннотация является основной, вторая запасной
      *
-     * @param main 
+     * @param main
      * @param second
-     * @return 
+     * @return
      */
     public MetaBuilder merge(Meta main, Meta second) {
-        MetaBuilder builder = new MetaBuilder(mergeName(main.getName(), second.getName()));
+        return mergeInPlace(main, new MetaBuilder(second));
+    }
 
-        Collection<String> secondValues = second.getValueNames();
-        Collection<String> mainValues = main.getValueNames();
+    /**
+     * Apply changes from main Meta to meta builder in place
+     *
+     * @param main
+     * @param builder
+     * @return
+     */
+    public MetaBuilder mergeInPlace(Meta main, MetaBuilder builder) {
+        //MetaBuilder builder = new MetaBuilder(mergeName(main.getName(), second.getName()));
+        builder.rename(mergeName(main.getName(), builder.getName()));
 
-        // Сначала копирум все значения второй аннотации, которых нет в первой
-        for (String name : secondValues) {
-            if (!mainValues.contains(name)) {
-                builder = writeValue(builder, name, second.getValue(name));
-            }
-        }
-        // Копируем все значения первой аннотации, объединяя их по необходимости
-        for (String name : mainValues) {
-            if (!secondValues.contains(name)) {
-                builder = writeValue(builder, name, main.getValue(name));
+        // Overriding values
+        for (String valueName : main.getValueNames()) {
+            if (!builder.hasValue(valueName)) {
+                builder = writeValue(builder, valueName, main.getValue(valueName));
             } else {
-                List<Value> item = new ArrayList<>(valuesMerger()
-                        .merge(name, main.getValue(name).listValue(), second.getValue(name).listValue()));
-                builder = writeValue(builder, name, Value.of(item));
+                builder = writeValue(builder, valueName, mergeValues(Name.join(builder.getFullName(), Name.of(valueName)),
+                        main.getValue(valueName), builder.getValue(valueName)));
             }
         }
 
-        // То же самое для элементов
-        Collection<String> secondElements = second.getNodeNames();
-        Collection<String> mainElements = main.getNodeNames();
-
-        // Сначала копирум все значения второй аннотации, которых нет в первой
-        for (String name : secondElements) {
-            if (!mainElements.contains(name)) {
-                builder = writeElement(builder, name, second.getNodes(name));
-            }
-        }
-
-        // Копируем все значения первой аннотации, объединяя их по необходимости
-        for (String name : mainElements) {
-            if (!secondElements.contains(name)) {
-                builder = writeElement(builder, name, main.getNodes(name));
+        // Overriding nodes
+        for (String nodeName : main.getNodeNames()) {
+            if (!builder.hasNode(nodeName)) {
+                builder = writeElement(builder, nodeName, main.getNodes(nodeName));
             } else {
-                List<? extends Meta> item = elementsMerger().merge(name, main.getNodes(name), second.getNodes(name));
-                builder = writeElement(builder, name, item);
+                List<? extends Meta> mainNodes = main.getNodes(nodeName);
+                List<? extends Meta> secondNodes = builder.getNodes(nodeName);
+                if (mainNodes.size() == 1 && secondNodes.size() == 1) {
+                    writeElement(builder, nodeName, Collections.singletonList(merge(mainNodes.get(0), secondNodes.get(0))));
+                } else {
+                    //TODO apply smart merging rule for lists?
+                    List<? extends Meta> item = mergeNodes(Name.join(builder.getFullName(),
+                            Name.of(nodeName)), mainNodes, secondNodes);
+                    builder = writeElement(builder, nodeName, item);
+                }
             }
         }
 
@@ -128,9 +128,21 @@ public abstract class MergeRule {
 
     protected abstract String mergeName(String mainName, String secondName);
 
-    protected abstract ListMergeRule<Value> valuesMerger();
+    /**
+     * @param valueName full name of the value relative to root
+     * @param first
+     * @param second
+     * @return
+     */
+    protected abstract Value mergeValues(Name valueName, Value first, Value second);
 
-    protected abstract ListMergeRule<Meta> elementsMerger();
+    /**
+     * @param nodeName       full name of the node relative to root
+     * @param mainNodes
+     * @param secondaryNodes
+     * @return
+     */
+    protected abstract List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes);
 
     protected MetaBuilder writeValue(MetaBuilder builder, String name, Value item) {
         return builder.setValue(name, item);
