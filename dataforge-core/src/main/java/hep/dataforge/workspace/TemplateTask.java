@@ -5,7 +5,7 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.computation.WorkManager;
+import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
@@ -21,7 +21,7 @@ import static hep.dataforge.actions.ActionUtils.*;
  *
  * @author Alexander Nozik
  */
-public class TemplateTask extends GenericTask {
+public class TemplateTask extends MultiStageTask {
 
     private final String name;
     private final UnaryOperator<Meta> template;
@@ -42,7 +42,7 @@ public class TemplateTask extends GenericTask {
     }
 
     @Override
-    protected void transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
+    protected void transform(ProgressCallback callback, Context context, MultiStageTaskState state, Meta config) {
         DataNode res = state.getData();
         config = template.apply(config);
         for (Meta action : config.getNodes(ACTION_NODE_KEY)) {

@@ -15,10 +15,12 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import java.io.File;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.VFS;
+
+import java.io.File;
+import java.net.URI;
 
 /**
  *
@@ -51,10 +53,14 @@ public class VFSUtils {
     public static FileObject getRemoteFile(String ip, int port, String login, String password, String path) throws FileSystemException {
         //sftp://[ username[: password]@] hostname[: port][ relative-path]
         String uriStr = String.format("sftp://%s:%s@%s:%d/%s", login, password, ip, port, path);
-        return getRemoteFile(uriStr);
+        return getFile(uriStr);
     }
 
-    public static FileObject getRemoteFile(String uri) throws FileSystemException {
+    public static FileObject getFile(String uri) throws FileSystemException {
+        return VFS.getManager().resolveFile(uri);
+    }
+
+    public static FileObject getFile(URI uri) throws FileSystemException {
         return VFS.getManager().resolveFile(uri);
     }
 }

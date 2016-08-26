@@ -50,13 +50,18 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                                 return dep.result();
                             })
                             .<CompletableFuture<?>>toArray(num -> new CompletableFuture[num]))
-                    .thenAcceptAsync(v -> {
+                    .whenCompleteAsync((res, err) -> {
+                        if (err != null) {
+                            this.result.completeExceptionally(err);
+                        }
+
                         try {
                             thread = Thread.currentThread();
                             //trigger start hooks
                             onStartHooks.forEach(action -> action.run());
                             this.result.complete(compute());
                         } catch (Exception ex) {
+//                            getLogger().error("Exception while executing goal", ex);
                             this.result.completeExceptionally(ex);
                         } finally {
                             thread = null;

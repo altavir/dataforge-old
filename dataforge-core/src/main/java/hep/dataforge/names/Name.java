@@ -15,7 +15,12 @@
  */
 package hep.dataforge.names;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * <p>
@@ -37,9 +42,11 @@ public interface Name {
     /**
      * Constant <code>NAME_TOKEN_SEPARATOR="."</code>
      */
-    public static final String NAME_TOKEN_SEPARATOR = ".";
+    String NAME_TOKEN_SEPARATOR = ".";
 
-    public static final String NAMESPACE_SEPARATOR = ":";
+    String NAMESPACE_SEPARATOR = ":";
+
+    Name EMPTY = new EmptyName();
 
     /**
      * The length of Name produced from given string
@@ -47,11 +54,15 @@ public interface Name {
      * @param name
      * @return
      */
-    public static int lengthOf(String name) {
+    static int lengthOf(String name) {
         return Name.of(name).length();
     }
 
-    public static Name of(String str) {
+    static Name of(String str) {
+        if (str.isEmpty()) {
+            return EMPTY;
+        }
+
         String namespace;
         String name;
         int nsIndex = str.indexOf(NAMESPACE_SEPARATOR);
@@ -62,6 +73,7 @@ public interface Name {
             namespace = "";
             name = str;
         }
+
         String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса ([^\[\]\.]+(?:\[[^\]]*\])?)*
         if (tokens.length == 1) {
             return new NameToken(namespace, name);
@@ -70,7 +82,7 @@ public interface Name {
             for (String token : tokens) {
                 list.add(new NameToken(namespace, token));
             }
-            return new NamePath(list);
+            return of(list);
         }
     }
 
@@ -80,8 +92,14 @@ public interface Name {
      * @param segments
      * @return a {@link hep.dataforge.names.Name} object.
      */
-    public static Name join(String... segments) {
-        LinkedList<NameToken> list = new LinkedList<>();
+    static Name join(String... segments) {
+        if (segments.length == 0) {
+            return EMPTY;
+        } else if (segments.length == 1) {
+            return new NameToken("", segments[0]);
+        }
+
+        List<NameToken> list = new ArrayList<>();
         for (String segment : segments) {
             if (!segment.isEmpty()) {
                 Name segmentName = of(segment);
@@ -92,35 +110,52 @@ public interface Name {
                 }
             }
         }
-        return new NamePath(list);
+        return of(list);
     }
 
-    public static String joinString(String... segments) {
+    static String joinString(String... segments) {
         return join(segments).toString();
     }
 
-    public static Name join(Name... segments) {
-        LinkedList<NameToken> list = new LinkedList<>();
+    static Name join(Name... segments) {
+        if (segments.length == 0) {
+            return EMPTY;
+        } else if (segments.length == 1) {
+            return segments[0];
+        }
+
+        List<NameToken> list = new ArrayList<>();
         for (Name segmentName : segments) {
-            if (segmentName instanceof NameToken) {
+            if (segmentName == EMPTY) {
+                //do nothing
+            } else if (segmentName instanceof NameToken) {
                 list.add((NameToken) segmentName);
             } else {
                 list.addAll(((NamePath) segmentName).getNames());
             }
         }
-        return new NamePath(list);
+        return of(list);
     }
 
-    public static Name of(Iterable<String> tokens) {
-        LinkedList<NameToken> list = new LinkedList<>();
-        for (String token : tokens) {
-            list.add(new NameToken("", token));
+    static Name of(Iterable<String> tokens) {
+        return of(StreamSupport.stream(tokens.spliterator(), false)
+                .filter(str -> !str.isEmpty())
+                .map(token -> new NameToken("", token)).collect(Collectors.toList()));
+    }
+
+    static Name of(Collection<NameToken> tokens) {
+        if (tokens.size() == 0) {
+            return EMPTY;
+        } else if (tokens.size() == 1) {
+            return tokens.stream().findFirst().get();
+        } else {
+            LinkedList<NameToken> list = new LinkedList<>();
+            list.addAll(tokens);
+            return new NamePath(list);
         }
-        return new NamePath(list);
     }
 
     /**
-     *
      * The name as a String including query but ignoring namespace
      *
      * @return

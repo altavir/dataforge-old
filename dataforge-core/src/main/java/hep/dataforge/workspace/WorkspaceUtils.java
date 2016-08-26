@@ -5,7 +5,7 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.computation.WorkManager;
+import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
 
@@ -72,7 +72,7 @@ public class WorkspaceUtils {
         return applyDataModel(model, dependencyMeta);
     }
 
-    public static DataTree.Builder gather(WorkManager.Callback callback, TaskModel model) {
+    public static DataTree.Builder gather(ProgressCallback callback, TaskModel model) {
         DataTree.Builder builder = DataTree.builder();
         callback.setMaxProgress(model.dependencies().size());
         model.dependencies().forEach(dep -> {

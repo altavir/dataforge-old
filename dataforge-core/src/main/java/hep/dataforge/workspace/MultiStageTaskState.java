@@ -18,6 +18,7 @@ package hep.dataforge.workspace;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -26,7 +27,7 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class TaskState implements Reportable {
+public class MultiStageTaskState implements Reportable {
 
     private static final String INITAIL_DATA_STAGE = "@data";
 
@@ -34,18 +35,17 @@ public class TaskState implements Reportable {
      * list of stages results
      */
     private final Map<String, DataNode> stages = new LinkedHashMap<>();
+    boolean isFinished = false;
     /**
      * final finish of task
      */
     private DataNode result;
-    boolean isFinished = false;
-
     private Report report;
 
-    private TaskState() {
+    private MultiStageTaskState() {
     }
 
-    public TaskState(DataNode data, Report report) {
+    public MultiStageTaskState(DataNode data, Report report) {
         this.stages.put(INITAIL_DATA_STAGE, data);
         this.report = report;
     }
@@ -67,7 +67,7 @@ public class TaskState implements Reportable {
         return result;
     }
 
-    public TaskState setData(String stage, DataNode data) {
+    public MultiStageTaskState setData(String stage, DataNode data) {
         if (isFinished) {
             throw new IllegalStateException("Can't edit task state after result is finalized");
         } else {
@@ -77,7 +77,7 @@ public class TaskState implements Reportable {
         }
     }
 
-    public synchronized TaskState finish(DataNode result) {
+    public synchronized MultiStageTaskState finish(DataNode result) {
         if (isFinished) {
             throw new IllegalStateException("Can't edit task state after result is finalized");
         } else {
@@ -87,7 +87,7 @@ public class TaskState implements Reportable {
         }
     }
 
-    public TaskState finish() {
+    public MultiStageTaskState finish() {
         this.isFinished = true;
         return this;
     }

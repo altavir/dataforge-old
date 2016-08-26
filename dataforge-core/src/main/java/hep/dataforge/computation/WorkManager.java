@@ -87,8 +87,8 @@ public class WorkManager implements Encapsulated, WorkListener {
 //        return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
 //    }
 
-    public Work submit(String processName, Consumer<Callback> con) {
-        Callback callback = callback(processName);
+    public Work submit(String processName, Consumer<ProgressCallback> con) {
+        ProgressCallback callback = callback(processName);
         return WorkManager.this.submit(processName, () -> con.accept(callback));
     }
 
@@ -104,15 +104,15 @@ public class WorkManager implements Encapsulated, WorkListener {
      * @param func
      * @return 
      */
-    public <U> CompletableFuture<U> post(String processName, Function<Callback, U> func) {
-        Callback callback = callback(processName);
+    public <U> CompletableFuture<U> post(String processName, Function<ProgressCallback, U> func) {
+        ProgressCallback callback = callback(processName);
         CompletableFuture<U> future = CompletableFuture.supplyAsync(()->func.apply(callback));
         submit(processName, future);
         return future;
-    }    
+    }
 
-    public Callback callback(String processName) {
-        return new Callback(this, processName);
+    public ProgressCallback callback(String processName) {
+        return new ProgressCallback(this, processName);
     }
 
     /**
@@ -177,7 +177,7 @@ public class WorkManager implements Encapsulated, WorkListener {
 
     }
 
-    private synchronized void update(String processName, Consumer<Work> consumer) {
+    public synchronized void update(String processName, Consumer<Work> consumer) {
         Work p = root.findProcess(processName);
         if (p != null) {
             consumer.accept(p);
@@ -275,58 +275,4 @@ public class WorkManager implements Encapsulated, WorkListener {
         }
     }
 
-    /**
-     * A process manager callback
-     */
-    public static class Callback {
-
-        private final WorkManager manager;
-        private final String workName;
-
-        public Callback(WorkManager manager, String processName) {
-            this.manager = manager;
-            this.workName = processName;
-        }
-
-        public WorkManager getManager() {
-            return manager;
-        }
-
-        public String workName() {
-            return workName;
-        }
-
-        public Work work() {
-            return getManager().find(workName());
-        }
-
-        public void update(Consumer<Work> consumer) {
-            getManager().update(workName(), consumer);
-        }
-
-        public void setProgress(double progress) {
-            update(p -> p.setProgress(progress));
-        }
-
-        public void setProgressToMax() {
-            update(p -> p.setProgressToMax());
-        }
-
-        public void setMaxProgress(double progress) {
-            update(p -> p.setMaxProgress(progress));
-        }
-
-        public void increaseProgress(double incProgress) {
-            update(p -> p.increaseProgress(incProgress));
-        }
-
-        public void updateTitle(String title) {
-            update(p -> p.setTitle(title));
-        }
-
-        public void updateMessage(String message) {
-            update(p -> p.setMessage(message));
-        }
-
-    }
 }

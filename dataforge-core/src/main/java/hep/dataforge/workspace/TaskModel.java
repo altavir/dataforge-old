@@ -20,7 +20,6 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -59,6 +58,10 @@ public class TaskModel implements Named, Annotated {
         return workspace;
     }
 
+    public Context getContext() {
+        return getWorkspace().getContext();
+    }
+
     /**
      * Shallow copy
      *
@@ -89,13 +92,10 @@ public class TaskModel implements Named, Annotated {
     /**
      * Add output action to task completion
      *
-     * @param consumer
+     * @param hook
      */
-    public void onComplete(Consumer<DataNode> consumer) {
-        OutputHook out = (Context context, TaskState state) -> {
-            state.getResult().onComplete((node) -> consumer.accept(node));
-        };
-        this.outs.add(out);
+    public void onComplete(OutputHook hook) {
+        this.outs.add(hook);
     }
 
     @Override
@@ -203,8 +203,8 @@ public class TaskModel implements Named, Annotated {
     /**
      * Task output
      */
-    public interface OutputHook {
-        void accept(Context context, TaskState state);
+    public interface OutputHook extends BiConsumer<Context, DataNode<?>> {
+
     }
 
     /**
@@ -228,7 +228,7 @@ public class TaskModel implements Named, Annotated {
         }
 
         public DataDependency(String mask, UnaryOperator<String> rule) {
-            this.gatherer = (w) -> w.getDataStage().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName()));
+            this.gatherer = (w) -> w.getData().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName()));
             this.pathTransformationRule = rule;
         }
 

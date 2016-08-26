@@ -217,7 +217,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
     @Override
     public Stream<DataNode<? extends T>> nodeStream() {
-        return nodeStream(Name.of(getName()), new Laminate(meta()));
+        return nodeStream(Name.EMPTY, new Laminate(meta()));
     }
 
     private Stream<DataNode<? extends T>> nodeStream(Name parentName, Laminate parentMeta) {

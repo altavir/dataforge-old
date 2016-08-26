@@ -9,6 +9,7 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
+import hep.dataforge.data.Data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.workspace.BasicWorkspace
@@ -81,15 +82,31 @@ class WorkspaceSpec extends Script {
     def data(Closure cl) {
         def spec = new DataSpec();
         def code = cl.rehydrate(spec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_ONLY;
+        code.resolveStrategy = Closure.DELEGATE_FIRST;
         code();
     }
 
     private class DataSpec {
         def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            WorkspaceSpec.this.builder.putFile(name, path, GrindUtils.buildMeta(fileMeta));
+            WorkspaceSpec.this.builder.loadFile(name, path, GrindUtils.buildMeta(fileMeta));
         }
-        //TODO extends data specification
+
+        def file(String name, String path) {
+            WorkspaceSpec.this.builder.loadFile(name, path);
+        }
+
+        /**
+         * Put a static resource as data
+         * @param name
+         * @param path
+         * @return
+         */
+        def resource(String name, String path) {
+            URI uri = URI.create(path)
+            WorkspaceSpec.this.builder.loadData(name, Data.buildStatic(uri));
+        }
+
+        //TODO extend data specification
     }
 
     /**
@@ -101,7 +118,7 @@ class WorkspaceSpec extends Script {
     def task(String taskName, @DelegatesTo(TaskSpec) Closure cl) {
         def taskSpec = new TaskSpec(taskName);
         def code = cl.rehydrate(taskSpec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_ONLY;
+        code.resolveStrategy = Closure.DELEGATE_FIRST;
         code();
         builder.loadTask(taskSpec.build());
     }
@@ -111,7 +128,7 @@ class WorkspaceSpec extends Script {
      * @param task
      * @return
      */
-    def loadTask(Task task) {
+    def task(Task task) {
         builder.loadTask(task);
     }
 
@@ -120,7 +137,7 @@ class WorkspaceSpec extends Script {
      * @param taskClass
      * @return
      */
-    def loadTask(Class<? extends Task> taskClass) {
+    def task(Class<? extends Task> taskClass) {
         builder.loadTask(taskClass.newInstance());
     }
 
@@ -162,6 +179,12 @@ class WorkspaceSpec extends Script {
      */
     MetaBuilder buildMeta(String name, Closure closure) {
         return GrindUtils.buildMeta(name, closure);
+    }
+
+    MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
+        MetaBuilder res = GrindUtils.buildMeta(name, closure);
+        values.forEach { key, value -> res.setValue(key.toString(), value) }
+        return res;
     }
 
 }

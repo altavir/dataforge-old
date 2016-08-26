@@ -7,7 +7,7 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.actions.Action;
 import hep.dataforge.actions.ActionManager;
-import hep.dataforge.computation.WorkManager;
+import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
@@ -54,7 +54,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param metaBuilder
      * @return
      */
-    public ActionTaskBuilder doLast(String actionName, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder action(String actionName, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> ActionManager.buildFrom(ctx).getAction(actionName), metaBuilder));
         return self();
     }
@@ -66,7 +66,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param metaBuilder
      * @return
      */
-    public ActionTaskBuilder doLast(Class<? extends Action> actionClass, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder action(Class<? extends Action> actionClass, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> {
             try {
                 return actionClass.newInstance();
@@ -85,7 +85,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param metaBuilder
      * @return
      */
-    public ActionTaskBuilder doLast(Action action, ContextMetaFactory<Meta> metaBuilder) {
+    public ActionTaskBuilder action(Action action, ContextMetaFactory<Meta> metaBuilder) {
         actions.add(new Pair<>(ctx -> action, metaBuilder));
         return self();
     }
@@ -98,8 +98,8 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param actionMeta
      * @return
      */
-    public ActionTaskBuilder doLast(Action action, Meta actionMeta) {
-        return doLast(action, (ctx, meta) -> Template.compileTemplate(actionMeta, meta));
+    public ActionTaskBuilder action(Action action, Meta actionMeta) {
+        return action(action, (ctx, meta) -> Template.compileTemplate(actionMeta, meta));
     }
 
     /**
@@ -108,8 +108,8 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @param action
      * @return
      */
-    public ActionTaskBuilder doLast(Action action) {
-        return doLast(action, (ctx, meta) -> Meta.empty());
+    public ActionTaskBuilder action(Action action) {
+        return action(action, (ctx, meta) -> Meta.empty());
     }
 
     /**
@@ -179,7 +179,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      */
     public ActionTaskBuilder data(Predicate<NamedData<?>> predicate) {
         return dependencyRule((TaskModel model) -> {
-            model.getWorkspace().getDataStage().dataStream()
+            model.getWorkspace().getData().dataStream()
                     .filter(predicate)
                     .forEach(data -> model.data(data.getName()));
         });
@@ -209,7 +209,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
     public ActionTaskBuilder fromMeta(Context context, Meta actionsMeta) {
         actionsMeta.getNodes(ACTION_NODE_KEY).stream().forEach((action) -> {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            doLast(buildAction(context, actionType), action);
+            action(buildAction(context, actionType), action);
         });
         return self();
     }
@@ -229,10 +229,10 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
         void apply(TaskModel model);
     }
 
-    private class CustomTask extends GenericTask {
+    private class CustomTask extends MultiStageTask {
 
         @Override
-        protected void transform(WorkManager.Callback callback, Context context, TaskState state, Meta config) {
+        protected void transform(ProgressCallback callback, Context context, MultiStageTaskState state, Meta config) {
             DataNode res = state.getData();
             for (Pair<Function<Context, Action>, ContextMetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);

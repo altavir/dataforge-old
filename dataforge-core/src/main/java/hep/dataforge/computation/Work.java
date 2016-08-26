@@ -347,7 +347,7 @@ public class Work implements Named {
         return manager;
     }
 
-    public WorkManager.Callback callback() {
+    public ProgressCallback callback() {
         return getManager().callback(this.getName());
     }
 }

@@ -19,18 +19,13 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.InputStream;
+
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
-import static java.util.regex.Pattern.compile;
 import java.util.stream.Collectors;
-import static java.util.regex.Pattern.compile;
-import static java.util.regex.Pattern.compile;
+
 import static java.util.regex.Pattern.compile;
 
 /**
@@ -42,13 +37,6 @@ import static java.util.regex.Pattern.compile;
  */
 public class IOUtils {
 
-    /**
-     * <p>
-     * parse.</p>
-     *
-     * @param line a {@link java.lang.String} object.
-     * @return an array of {@link java.lang.String} objects.
-     */
     public static String[] parse(String line) {
         Scanner scan = new Scanner(line);
         ArrayList<String> tokens = new ArrayList<>();
@@ -71,48 +59,16 @@ public class IOUtils {
 
     }
 
-//    public static ListTable readColumnedData(File input, String... names) {
-//        return readColumnedData(null, input, names);
-//    }
-//
-//    public static ListTable readColumnedData(String name, File input, String... names) throws FileNotFoundException {
-//        ColumnedDataReader reader;
-//        if (names.length > 0) {
-//            reader = new ColumnedDataReader(input, names);
-//        } else {
-//            reader = new ColumnedDataReader(input);
-//        }
-//        ListTable res = new ListTable(name, names);
-//        for (DataPoint dp : reader) {
-//            res.addRow(dp);
-//        }
-//        return res;
-//    }
-    /**
-     * <p>
-     * readColumnedData.</p>
-     *
-     * @param fileName a {@link java.lang.String} object.
-     * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.tables.ListTable} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public static Table readColumnedData(String fileName, String... names) throws FileNotFoundException {
         return readColumnedData(new File(fileName), names);
     }
 
-    /**
-     * <p>
-     * readColumnedData.</p>
-     *
-     * @param file a {@link java.io.File} object.
-     * @param names a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.tables.ListTable} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public static Table readColumnedData(File file, String... names) throws FileNotFoundException {
+        return readColumnedData(new FileInputStream(file));
+    }
+
+    public static Table readColumnedData(InputStream stream, String... names) {
         ColumnedDataReader reader;
-        InputStream stream = new FileInputStream(file);
         if (names.length == 0) {
             reader = new ColumnedDataReader(stream);
         } else {
@@ -125,14 +81,6 @@ public class IOUtils {
         return res.build();
     }
 
-        /**
-     * Format header string for text representation
-     * <p>
-     * TODO move to utils
-     * </p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
     public static String formatCaption(TableFormat format) {
         return "#f" + format.names()
                 .asList()
@@ -140,15 +88,7 @@ public class IOUtils {
                 .map((name) -> format.getValueFormat(name).formatString(format.getTitle(name)))
                 .collect(Collectors.joining("\t"));
     }
-    
-    /**
-     * <p>
-     * readFileMask.</p>
-     *
-     * @param workDir a {@link java.io.File} object.
-     * @param mask a {@link java.lang.String} object.
-     * @return an array of {@link java.io.File} objects.
-     */
+
     public static File[] readFileMask(File workDir, String mask) {
         File dir;
         String newMask;
@@ -166,13 +106,6 @@ public class IOUtils {
         return dir.listFiles(new RegexFilter(regex));
     }
 
-    /**
-     * <p>getFile.</p>
-     *
-     * @param file a {@link java.io.File} object.
-     * @param path a {@link java.lang.String} object.
-     * @return a {@link java.io.File} object.
-     */
     public static File getFile(File file, String path) {
         File f = new File(path);
 

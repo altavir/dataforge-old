@@ -15,7 +15,6 @@
  */
 package hep.dataforge.names;
 
-import hep.dataforge.exceptions.NamingException;
 import java.util.Objects;
 
 /**
@@ -47,12 +46,12 @@ class NameToken implements Name {
 
     @Override
     public Name cutFirst() {
-        throw new NamingException("Can not cut name token");
+        return Name.EMPTY;
     }
 
     @Override
     public Name cutLast() {
-        throw new NamingException("Can not cut name token");
+        return Name.EMPTY;
     }
 
     @Override

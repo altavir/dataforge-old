@@ -44,7 +44,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default Data getData(String dataPath) {
-        return getDataStage().getData(dataPath).get();
+        return getData().getData(dataPath).get();
     }
 
     /**
@@ -52,18 +52,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
      *
      * @return
      */
-    default DataNode<Object> getDataStage() {
-        return getStage(DATA_STAGE_NAME);
-    }
-
-    /**
-     * Get specific stage
-     *
-     * @param <T>
-     * @param stageName
-     * @return
-     */
-    <T> DataNode<T> getStage(String stageName);
+    DataNode<Object> getData();
 
     <T> Task<T> getTask(String taskName);
 
@@ -117,15 +106,6 @@ public interface Workspace extends Encapsulated, MetaProvider {
     }
 
     /**
-     * Update existing or create new stage
-     *
-     * @param <T>
-     * @param data
-     * @return
-     */
-    <T> DataNode<T> updateStage(String stage, DataNode<T> data);
-
-    /**
      * Get a predefined meta with given name
      *
      * @param name
@@ -175,12 +155,12 @@ public interface Workspace extends Encapsulated, MetaProvider {
             return loadData(name, factory.build(getContext(), dataConfig));
         }
 
-        default B putFile(String dataName, String filePath, Meta meta) {
+        default B loadFile(String dataName, String filePath, Meta meta) {
             return loadData(dataName, FileDataFactory.buildFileData(getContext(), filePath, meta));
         }
 
-        default B putFile(String dataName, String filePath) {
-            return putFile(dataName, filePath, null);
+        default B loadFile(String dataName, String filePath) {
+            return loadFile(dataName, filePath, Meta.empty());
         }
 
         B loadMeta(String name, Meta meta);
