@@ -13,6 +13,8 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.navigation.Path;
 import hep.dataforge.utils.CommonUtils;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -23,7 +25,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import org.slf4j.LoggerFactory;
 
 /**
  * Tools to work with descriptors
@@ -87,11 +88,20 @@ public class DescriptorUtils {
 
     /**
      * Build a descriptor for given Class or Method using Java annotations or restore it from cache if it was already used recently
+     *
      * @param element
-     * @return 
+     * @return
      */
     public static NodeDescriptor buildDescriptor(AnnotatedElement element) {
         return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e)));
+    }
+
+    public static NodeDescriptor buildDescriptor(String name, AnnotatedElement element) {
+        if (name == null || name.isEmpty()) {
+            return buildDescriptor(element);
+        } else {
+            return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e).setValue("name", name)));
+        }
     }
 
     public static MetaBuilder buildDescriptorMeta(AnnotatedElement element) {

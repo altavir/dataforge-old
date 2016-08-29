@@ -27,6 +27,8 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaProvider;
 import hep.dataforge.utils.GenericBuilder;
 
+import java.util.stream.Stream;
+
 /**
  * A place to store tasks and their results
  *
@@ -55,6 +57,13 @@ public interface Workspace extends Encapsulated, MetaProvider {
     DataNode<Object> getData();
 
     <T> Task<T> getTask(String taskName);
+
+    /**
+     * The stream of available tasks
+     *
+     * @return
+     */
+    Stream<Task> getTasks();
 
     /**
      * Check task dependencies and run it with given configuration or load

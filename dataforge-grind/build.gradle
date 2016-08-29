@@ -5,4 +5,8 @@ dependencies{
     compile project(':dataforge-core')
     //compile project(':dataforge-maths')
     compile project(':dataforge-plots')
+
+    // https://mvnrepository.com/artifact/jline/jline
+    compile group: 'jline', name: 'jline', version: '2.14.2'
+
 }

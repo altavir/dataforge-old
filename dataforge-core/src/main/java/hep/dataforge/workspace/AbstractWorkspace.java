@@ -14,6 +14,7 @@ import hep.dataforge.meta.Meta;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * @author Alexander Nozik
@@ -31,6 +32,11 @@ public abstract class AbstractWorkspace implements Workspace {
             throw new NameNotFoundException(taskName);
         }
         return tasks.get(taskName);
+    }
+
+    @Override
+    public Stream<Task> getTasks() {
+        return tasks.values().stream();
     }
 
     @Override

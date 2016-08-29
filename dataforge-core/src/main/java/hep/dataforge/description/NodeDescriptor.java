@@ -7,11 +7,8 @@ package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 
 /**
  * Descriptor for meta node. Could contain additional information for viewing
@@ -152,7 +149,7 @@ public class NodeDescriptor extends DescriptorBase implements Named {
      */
     @Override
     public String getName() {
-        return meta().getString("name", "");
+        return meta().getString("name", meta().getName());
     }
 
     /**

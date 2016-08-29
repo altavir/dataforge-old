@@ -16,19 +16,19 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
+import hep.dataforge.description.Described;
+import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
 /**
  * The main building block of "pull" data flow model.
  *
- * @author Alexander Nozik
  * @param <R>
+ * @author Alexander Nozik
  */
-public interface Task<R> extends Named {
-
-
-
+public interface Task<R> extends Named, Described {
     /**
      * Build a model for this task
      *
@@ -37,11 +37,12 @@ public interface Task<R> extends Named {
      * @return
      */
     TaskModel build(Workspace workspace, Meta taskConfig);
-    
+
     /**
      * Check if the model is valid and is acceptable by the task. Throw exception if not.
+     *
      * @param model
-     * @return 
+     * @return
      */
     void validate(TaskModel model);
 
@@ -63,5 +64,10 @@ public interface Task<R> extends Named {
      */
     default DataNode<R> run(Workspace workspace, Meta taskConfig) {
         return run(build(workspace, taskConfig));
+    }
+
+    @Override
+    default NodeDescriptor getDescriptor() {
+        return DescriptorUtils.buildDescriptor(getName(), getClass());
     }
 }

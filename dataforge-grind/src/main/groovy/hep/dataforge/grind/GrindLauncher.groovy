@@ -2,6 +2,7 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.data.DataNode
+import hep.dataforge.description.TextDescriptorFormatter
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -12,17 +13,18 @@ import org.codehaus.groovy.control.CompilerConfiguration
 @CompileStatic
 class GrindLauncher {
 
-    static Workspace buildWorkspace(File file, Class spec){
-        return new GrindLauncher().from(file).with(spec).buildWorkspace();
+    static Workspace buildWorkspace(File file, Class spec) {
+        return new GrindLauncher().from(file).withSpec(spec).buildWorkspace();
     }
 
-    static Workspace buildWorkspace(File file){
+    static Workspace buildWorkspace(File file) {
         return new GrindLauncher().from(file).buildWorkspace();
     }
 
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
+    private PrintStream out = System.out;
 
     GrindLauncher from(File file) {
         this.source = { file.newReader() }
@@ -39,7 +41,7 @@ class GrindLauncher {
         return this;
     }
 
-    GrindLauncher with(Class<? extends WorkspaceSpec> specClass) {
+    GrindLauncher withSpec(Class<? extends WorkspaceSpec> specClass) {
         this.spec = specClass
         return this;
     }
@@ -53,7 +55,7 @@ class GrindLauncher {
      * @param input
      * @return
      */
-    Workspace.Builder getBuilder() {
+    private Workspace.Builder getBuilder() {
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = spec.name
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
@@ -69,8 +71,12 @@ class GrindLauncher {
         return getBuilder().build();
     }
 
+    private DataNode runInWorkspace(Workspace workspace, String taskName, Meta meta) {
+        return workspace.runTask(taskName, meta).computeAll();
+    }
+
     DataNode runTask(String taskName, Meta meta) {
-        return buildWorkspace().runTask(taskName, meta);
+        return runInWorkspace(buildWorkspace(), taskName, meta);
     }
 
     /**
@@ -86,17 +92,17 @@ class GrindLauncher {
     DataNode runTask(String taskName, String target) {
         Workspace ws = buildWorkspace();
         Meta taskMeta = ws.hasMeta(target) ? ws.getMeta(target) : Meta.empty();
-        return ws.runTask(taskName, taskMeta);
+        return runInWorkspace(ws, taskName, taskMeta);
     }
 
     DataNode runTask(String taskName) {
         Workspace ws = buildWorkspace();
         Meta taskMeta = ws.hasMeta(taskName) ? ws.getMeta(taskName) : Meta.empty();
-        return ws.runTask(taskName, taskMeta);
+        return runInWorkspace(ws, taskName, taskMeta);
     }
 
     /**
-     * Run
+     * Smart run method
      * @param input
      * @return
      */
@@ -106,6 +112,17 @@ class GrindLauncher {
         }
         Meta meta = GrindUtils.buildMeta(input);
         return runTask(meta.getName(), meta);
+    }
+
+    /**
+     * Display a list of available tasks
+     */
+    def tasks() {
+        Workspace ws = buildWorkspace();
+        TextDescriptorFormatter formatter = new TextDescriptorFormatter(out);
+        ws.getTasks().forEach {
+            formatter.showDescription(it.name, it.descriptor);
+        }
     }
 
 }
