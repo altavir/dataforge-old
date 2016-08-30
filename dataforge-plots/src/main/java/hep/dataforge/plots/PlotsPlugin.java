@@ -19,13 +19,16 @@ import hep.dataforge.meta.Meta;
  */
 @PluginDef(name = "plots", group = "hep.dataforge", description = "Basic plottiong plugin")
 public class PlotsPlugin extends BasicPlugin implements PlotHolder {
-    
-    public static PlotsPlugin buildFrom(Context context){
-        PlotsPlugin plugin = context.provide("plots", PlotsPlugin.class);
-        return plugin;
-    }
 
     PlotHolder plotHolderDelegate = new DefaultPlotHolder();
+
+    public static PlotsPlugin buildFrom(Context context){
+        if (context.provides("plots")) {
+            return context.provide("plots", PlotsPlugin.class);
+        } else {
+            return context.pluginManager().loadPlugin(new PlotsPlugin());
+        }
+    }
 
     @Override
     public void attach(Context context) {

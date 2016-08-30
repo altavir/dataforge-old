@@ -16,6 +16,7 @@
 package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -26,25 +27,23 @@ import java.util.Map;
  */
 public class PluginManager implements Encapsulated {
 
+    private final Map<String, Plugin> plugins = new HashMap<>();
+    /**
+     * A context for this plugin manager
+     */
+    private final Context context;
     /**
      * A class path resolver
      */
     private PluginResolver pluginResolver = new ClassPathPluginResolver();
 
-    private final Map<String, Plugin> plugins = new HashMap<>();
-
-    /**
-     * A context for this plugin manager
-     */
-    private final Context context;
+    public PluginManager(Context context) {
+        this.context = context;
+    }
 
     @Override
     public Context getContext() {
         return this.context;
-    }
-
-    public PluginManager(Context context) {
-        this.context = context;
     }
 
     protected PluginManager getParent() {
@@ -64,7 +63,7 @@ public class PluginManager implements Encapsulated {
     }
 
     public boolean hasPlugin(String name) {
-        return plugins.containsKey(name);
+        return plugins.containsKey(name) || (getParent() != null && getParent().hasPlugin(name));
     }
 
     public boolean hasPlugin(VersionTag tag) {
@@ -101,7 +100,7 @@ public class PluginManager implements Encapsulated {
         return loadPlugin(plugin);
     }
 
-    public Plugin loadPlugin(Plugin plugin) {
+    public <T extends Plugin> T loadPlugin(T plugin) {
         for (VersionTag tag : plugin.dependsOn()) {
             //If dependency not loaded
             if (!hasPlugin(tag)) {

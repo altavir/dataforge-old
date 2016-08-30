@@ -10,14 +10,15 @@ import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 
 /**
  *
@@ -46,12 +47,12 @@ public class FXPlotUtils {
     /**
      * Display plot container in a separate stage window
      *
-     * @param titile
+     * @param title
      * @param width
      * @param height
      * @return
      */
-    public static PlotContainer displayContainer(String titile, double width, double height) {
+    public static PlotContainer displayContainer(String title, double width, double height) {
         PlotContainerHolder containerHolder = new PlotContainerHolder();
 
         RootApplication.show(() -> {
@@ -61,7 +62,7 @@ public class FXPlotUtils {
             PlotContainer container = new PlotContainer();
             containerHolder.setContainer(container);
             Scene scene = new Scene(container.getRoot(), width, height);
-            stage.setTitle(titile);
+            stage.setTitle(title);
             stage.setScene(scene);
             return stage;
         });

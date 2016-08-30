@@ -25,7 +25,7 @@ import hep.dataforge.meta.SimpleConfigurable;
  * @author Alexander Nozik
  */
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
-    
+
     private Context context;
 
     public BasicPlugin() {
@@ -51,7 +51,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     protected void applyConfig(Meta config) {
 
     }
-    
+
     @Override
     public VersionTag[] dependsOn() {
         if (meta().hasValue("dependsOn")) {
@@ -103,7 +103,6 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     public final Context getContext() {
         return context;
     }
-    
-    
+
 
 }

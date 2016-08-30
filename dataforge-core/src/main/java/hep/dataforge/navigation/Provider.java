@@ -31,6 +31,14 @@ public interface Provider {
         return this.provide(Path.of(path));
     }
 
+    /**
+     * Type checked provide
+     *
+     * @param path
+     * @param type
+     * @param <T>
+     * @return
+     */
     default <T> T provide(String path, Class<T> type) {
         return provide(Path.of(path), type);
     }

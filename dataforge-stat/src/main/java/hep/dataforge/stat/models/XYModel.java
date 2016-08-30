@@ -16,11 +16,12 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.NamedValueSet;
+
 import static java.lang.Math.log;
 import static java.lang.Math.sqrt;
 
@@ -38,7 +39,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
 
 
     public XYModel(ParametricFunction source) {
-        super(source, new XYAdapter());
+        super(source, XYAdapter.DEFAULT_ADAPTER);
         this.source = source;
     }
 

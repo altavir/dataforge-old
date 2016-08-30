@@ -15,10 +15,10 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.computation.WorkManager;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
+import hep.dataforge.computation.WorkManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
@@ -29,8 +29,9 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
+
 import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
@@ -46,10 +47,10 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class Context extends AbstractProvider implements ValueProvider, Reportable, Named, AutoCloseable {
 
+    protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final Report rootLog;
     private final Context parent;
     private final String name;
-    protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final PluginManager pm;
     protected WorkManager processManager = null;
     protected IOManager io = null;
@@ -190,10 +191,10 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         }
     }
 
-    public void setProcessManager(WorkManager manager) {
-        manager.setContext(this);
-        this.processManager = manager;
-    }
+//    public void setProcessManager(WorkManager manager) {
+//        manager.setContext(this);
+//        this.processManager = manager;
+//    }
 
     /**
      * {@inheritDoc}

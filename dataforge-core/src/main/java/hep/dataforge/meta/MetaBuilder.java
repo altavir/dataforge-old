@@ -21,6 +21,7 @@ import hep.dataforge.values.ValueProvider;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
         Collection<String> elementNames = annotation.getNodeNames();
         elementNames.stream().forEach((elementName) -> {
             List<MetaBuilder> item = annotation.getNodes(elementName).stream()
-                    .<MetaBuilder>map((an) -> new MetaBuilder(an))
+                    .map((an) -> new MetaBuilder(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
         });
@@ -155,6 +156,17 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
 
     public MetaBuilder update(MetaBuilder annotation) {
         return new DefaultMergeRule().mergeInPlace(annotation, this);
+    }
+
+    /**
+     * Update values (replacing existing ones) from map
+     *
+     * @param values
+     * @return
+     */
+    public MetaBuilder update(Map<String, Object> values) {
+        values.forEach((key, value) -> setValue(key, value));
+        return self();
     }
 
     @Override

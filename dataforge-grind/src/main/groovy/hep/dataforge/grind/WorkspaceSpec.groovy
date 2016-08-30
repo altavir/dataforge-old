@@ -22,7 +22,8 @@ import hep.dataforge.workspace.Workspace
  */
 @CompileStatic
 class WorkspaceSpec extends Script {
-    Workspace.Builder builder = BasicWorkspace.builder();
+    private final Workspace.Builder builder = BasicWorkspace.builder();
+    Context parentContext = GlobalContext.instance();
 
     /**
      * build context for the workspace using
@@ -42,12 +43,11 @@ class WorkspaceSpec extends Script {
 
     private class ContextSpec {
         String name = "workspace";
-        String parent = GlobalContext.instance().getName();
         Map properties = new HashMap();
         Map<String, Meta> pluginMap = new HashMap<>();
 
         Context build() {
-            Context res = new Context(GlobalContext.getContext(parent), name)
+            Context res = new Context(WorkspaceSpec.this.parentContext, name)
             properties.each { key, value -> res.putValue(key.toString(), value) }
             pluginMap.forEach { String key, Meta meta -> res.pluginManager().loadPlugin(key.toString()).configure(meta) }
             return res;

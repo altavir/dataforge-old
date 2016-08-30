@@ -16,7 +16,7 @@
 package hep.dataforge.context;
 
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Configurable;
 import hep.dataforge.names.Named;
 
 /**
@@ -25,7 +25,7 @@ import hep.dataforge.names.Named;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Annotated, Named, Encapsulated {
+public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -69,12 +69,12 @@ public interface Plugin extends Annotated, Named, Encapsulated {
         return getTag().name();
     }
 
-    /**
-     * Set config for this plugin and attach changes
-     *
-     * @param config
-     */
-    void configure(Meta config);
+//    /**
+//     * Set config for this plugin and attach changes
+//     *
+//     * @param config
+//     */
+//    void configure(Meta config);
 
     public default String name() {
         return getTag().getFullName();

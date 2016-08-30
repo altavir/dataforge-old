@@ -28,20 +28,8 @@ import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Container;
-import java.awt.Paint;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
-import javax.swing.SwingUtilities;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -63,22 +51,28 @@ import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
+
 /**
- *
  * @author Alexander Nozik
  */
 public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
+    private final JFreeChart chart;
+    private final XYPlot plot;
     /**
      * Index mapping names to datasets
      */
     List<String> index = new ArrayList<>();
-
-    private boolean swingMode = false;
-
-    private final JFreeChart chart;
-    private final XYPlot plot;
-
+    private Mode mode = Mode.NONE;
     public JFreeChartFrame() {
         plot = new XYPlot();
         chart = new JFreeChart(plot);
@@ -91,6 +85,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 
     @Override
     public JFreeChartFrame display(AnchorPane container) {
+        mode = Mode.JAVAFX;
         Runnable run = () -> {
             ChartViewer viewer = new ChartViewer(getChart());
 
@@ -104,30 +99,30 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         };
 
         FXUtils.runNow(run);
-
         return this;
     }
 
     public JFreeChartFrame display(Container panel) {
+        mode = Mode.SWING;
         ChartPanel cp = new ChartPanel(getChart());
 //        cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
 
         panel.add(cp);
         panel.revalidate();
         panel.repaint();
-        swingMode = true;
         return this;
     }
 
     private void run(Runnable run) {
-        if (swingMode) {
+        if (mode == Mode.NONE || Platform.isFxApplicationThread()) {
+            //run immediately
+            run.run();
+        } else if (mode == Mode.SWING) {
             if (SwingUtilities.isEventDispatchThread()) {
                 run.run();
             } else {
                 SwingUtilities.invokeLater(run);
             }
-        } else if (Platform.isFxApplicationThread()) {
-            run.run();
         } else {
             Platform.runLater(run);
         }
@@ -309,8 +304,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
 //            plottables.entrySet().stream().forEach((entry) -> {
 //                titleMap.put(entry.getKey(), entry.getValue().getConfig().getString("title", entry.getKey()));
 //            });
-//            
-//            
+//
+//
 //            render.setLegendItemLabelGenerator(new LabelGenerator(titleMap));
             double thickness = PlotUtils.getThickness(meta);
             if (thickness > 0) {
@@ -335,21 +330,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
         });
     }
 
-    private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
-
-        private final Map<String, String> titleMap;
-
-        public LabelGenerator(Map<String, String> titleMap) {
-            this.titleMap = titleMap;
-        }
-
-        @Override
-        public String generateLabel(XYDataset dataset, int series) {
-            return titleMap.get(dataset.getSeriesKey(series).toString());
-        }
-
-    }
-
     /**
      * Take a snapshot of plot frame and save it in a given OutputStream
      *
@@ -366,5 +346,26 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable {
                 LoggerFactory.getLogger(getClass()).error("IO error during image encoding", ex);
             }
         });
+    }
+
+    private enum Mode {
+        SWING, // Swing UI thread mode
+        JAVAFX, // JavaFX UI thread mode
+        NONE // current thread mode
+    }
+
+    private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
+
+        private final Map<String, String> titleMap;
+
+        public LabelGenerator(Map<String, String> titleMap) {
+            this.titleMap = titleMap;
+        }
+
+        @Override
+        public String generateLabel(XYDataset dataset, int series) {
+            return titleMap.get(dataset.getSeriesKey(series).toString());
+        }
+
     }
 }

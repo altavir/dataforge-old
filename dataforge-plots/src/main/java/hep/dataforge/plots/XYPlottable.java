@@ -17,10 +17,6 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-
-import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
-import static hep.dataforge.meta.Configuration.FINAL_TAG;
-
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
@@ -29,6 +25,9 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 
 import java.util.stream.Stream;
+
+import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
+import static hep.dataforge.meta.Configuration.FINAL_TAG;
 
 /**
  * Подкласс для рисования двумерных картинок
@@ -90,6 +89,6 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implement
 
     @Override
     protected XYAdapter defaultAdapter() {
-        return new XYAdapter();
+        return XYAdapter.DEFAULT_ADAPTER;
     }
 }

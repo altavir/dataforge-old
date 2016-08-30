@@ -27,14 +27,16 @@ public interface Configurable {
      * @return
      */
     Configuration getConfig();
-    
-    public void configure(Meta config);
-    
-    default void configureValue(String key, Object Value){
+
+    Configurable configure(Meta config);
+
+    default Configurable configureValue(String key, Object Value) {
         this.getConfig().setValue(key, Value);
+        return this;
     }
-    
-    default void configureNode(String key, Meta... node){
+
+    default Configurable configureNode(String key, Meta... node) {
         this.getConfig().setNode(key, node);
+        return this;
     }    
 }

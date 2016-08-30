@@ -1,18 +1,31 @@
 package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
+import hep.dataforge.context.Context
+import hep.dataforge.context.GlobalContext
+import hep.dataforge.grind.plots.PlotHelper
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 /**
+ * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
  */
 @CompileStatic
 class GrindShell {
     //TODO encapsulate launcher
+    @Lazy
     GrindLauncher launcher = new GrindLauncher()
+    @Lazy
+    PlotHelper plot = new PlotHelper(context);
     private GroovyShell shell;
+    private Context context = GlobalContext.instance();
     //ConsoleReader console = new ConsoleReader(System.in,System.out);
+
+    GrindShell(Context context) {
+        this();
+        this.context = context
+    }
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -22,6 +35,7 @@ class GrindShell {
         configuration.addCompilationCustomizers(importCustomizer);
         Binding binding = new Binding();
         binding.setProperty("df", launcher);
+        binding.setProperty("plt", plot);
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
     }
 

@@ -19,17 +19,13 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
+import javafx.beans.property.*;
+import javafx.beans.value.ObservableValue;
+
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Stream;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.ObjectProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 
 /**
  * A class for dynamic function values calculation for plot
@@ -38,27 +34,15 @@ import javafx.beans.value.ObservableValue;
  */
 public class PlottableXYFunction extends XYPlottable {
 
-    public static PlottableXYFunction plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
-        PlottableXYFunction p = new PlottableXYFunction(name);
-        p.setFunction(function);
-        p.setXRange(from, to, false);
-        p.setDensity(numPoints, false);
-        return p;
-    }
-
     private static final int DEFAULT_NODES_NUMBER = 200;
-
     private final NavigableMap<Double, Double> cache = new TreeMap<>();
     private final ObjectProperty<Function<Double, Double>> function = new SimpleObjectProperty();
-
     private final DoubleProperty lo = new SimpleDoubleProperty();
     private final DoubleProperty hi = new SimpleDoubleProperty();
     private final IntegerProperty density = new SimpleIntegerProperty(DEFAULT_NODES_NUMBER);
-
     /**
      *
      * @param name
-     * @param function
      */
     public PlottableXYFunction(String name) {
         super(name);
@@ -68,6 +52,14 @@ public class PlottableXYFunction extends XYPlottable {
                 Function<Double, Double> oldValue, Function<Double, Double> newValue) -> {
             invalidateCache();
         });
+    }
+
+    public static PlottableXYFunction plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
+        PlottableXYFunction p = new PlottableXYFunction(name);
+        p.setFunction(function);
+        p.setXRange(from, to, false);
+        p.setDensity(numPoints, false);
+        return p;
     }
 
     public void setFunction(Function<Double, Double> function) {
@@ -91,7 +83,6 @@ public class PlottableXYFunction extends XYPlottable {
      *
      * @param from lower range boundary
      * @param to upper range boundary
-     * @param numPoints number of calculated points in range
      * @param notify notify listeners
      */
     public void setXRange(double from, double to, boolean notify) {
@@ -122,9 +113,6 @@ public class PlottableXYFunction extends XYPlottable {
      *
      * If function is not set or desired density not positive does nothing.
      *
-     * @param from
-     * @param to
-     * @param nodes
      */
     protected void validateCache() {
         if (function.get() == null && density.get() > 0) {

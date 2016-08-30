@@ -17,9 +17,17 @@ class GrindUtils {
         return metaExec() as MetaBuilder
     }
 
+    public static MetaBuilder buildMeta(Map values, Closure cl) {
+        return buildMeta(cl).update(values);
+    }
+
     public static MetaBuilder buildMeta(String nodeName, Closure cl) {
         def metaSpec = new GrindMetaBuilder()
         metaSpec.invokeMethod(nodeName, cl) as MetaBuilder
+    }
+
+    public static MetaBuilder buildMeta(String nodeName, Map values, Closure cl) {
+        return buildMeta(nodeName, cl).update(values);
     }
 
     public static MetaBuilder buildMeta(String input) {

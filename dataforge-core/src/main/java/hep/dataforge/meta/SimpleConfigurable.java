@@ -16,6 +16,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.values.Value;
+
 import java.util.List;
 
 /**
@@ -136,9 +137,10 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      * @param config
      */
     @Override
-    public void configure(Meta config) {
+    public Configurable configure(Meta config) {
         //Check and correct input configuration
         getConfig().update(config);
         applyConfig(getConfig());
+        return this;
     }
 }

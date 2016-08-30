@@ -17,17 +17,14 @@
 package hep.dataforge.grind.extensions
 
 import hep.dataforge.grind.GrindUtils
-import hep.dataforge.meta.JoinRule
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.Template
+import hep.dataforge.meta.*
 import hep.dataforge.values.MapValueProvider
 import hep.dataforge.values.NamedValue
 
 /**
  * Created by darksnake on 20-Aug-16.
  */
-class MetaBuilderExtension {
+class MetaExtension {
     static MetaBuilder plus(final Meta self, MetaBuilder other) {
         return new JoinRule().merge(self, other);
     }
@@ -117,5 +114,17 @@ class MetaBuilderExtension {
     static MetaBuilder compile(final Meta self, Map<String, Object> map, Closure cl) {
         Template tmp = new Template(self);
         return tmp.compile(new MapValueProvider(map), GrindUtils.buildMeta("", cl));
+    }
+
+    static Configurable configure(final Configurable self, Closure configuration) {
+        self.configure(GrindUtils.buildMeta("config") { configuration });
+    }
+
+    static Configurable configure(final Configurable self, Map values, Closure configuration) {
+        self.configure(GrindUtils.buildMeta("config", values) { configuration });
+    }
+
+    static Configurable setAt(final Configurable self, String key, Object value) {
+        self.configureValue(key, value);
     }
 }

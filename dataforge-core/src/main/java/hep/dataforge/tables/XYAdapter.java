@@ -33,12 +33,14 @@ import hep.dataforge.values.Value;
 @ValueDef(name = "yErr", def = "yErr", info = "Y error value name")
 public class XYAdapter extends AbstractPointAdapter {
 
+    public static final XYAdapter DEFAULT_ADAPTER = new XYAdapter();
+
     public static final String X_NAME = "x";
     public static final String Y_NAME = "y";
     public static final String X_ERR_NAME = "xErr";
     public static final String Y_ERR_NAME = "yErr";
 
-    public XYAdapter() {
+    protected XYAdapter() {
     }
 
     public XYAdapter(Meta meta) {
