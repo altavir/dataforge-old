@@ -2,6 +2,7 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
 
 /**
@@ -38,5 +39,17 @@ class GrindUtils {
         GrindMetaBuilder builder = new GrindMetaBuilder();
         script.setDelegate(builder)
         return script.run() as MetaBuilder
+    }
+
+    static Workspace buildWorkspace(File file, Class spec) {
+        return new GrindLauncher().from(file).withSpec(spec).buildWorkspace();
+    }
+
+    static Workspace buildWorkspace(File file) {
+        return new GrindLauncher().from(file).buildWorkspace();
+    }
+
+    static Workspace buildWorkspace(String file) {
+        return new GrindLauncher().from(file).buildWorkspace();
     }
 }

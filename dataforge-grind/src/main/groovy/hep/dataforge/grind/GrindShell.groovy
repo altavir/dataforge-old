@@ -13,19 +13,8 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
  */
 @CompileStatic
 class GrindShell {
-    //TODO encapsulate launcher
-    @Lazy
-    GrindLauncher launcher = new GrindLauncher()
-    @Lazy
-    PlotHelper plot = new PlotHelper(context);
+    private Binding binding = new Binding();
     private GroovyShell shell;
-    private Context context = GlobalContext.instance();
-    //ConsoleReader console = new ConsoleReader(System.in,System.out);
-
-    GrindShell(Context context) {
-        this();
-        this.context = context
-    }
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -33,15 +22,33 @@ class GrindShell {
 
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
-        Binding binding = new Binding();
-        binding.setProperty("df", launcher);
-        binding.setProperty("plt", plot);
+        binding.setProperty("buildWorkspace", { String fileName -> new GrindLauncher().from(new File(fileName)).buildWorkspace() })
+        binding.setProperty("context", GlobalContext.instance())
+        binding.setProperty("plt", new PlotHelper(GlobalContext.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
+    }
+
+    def setContext(Context context) {
+        bind("context", context);
+        PlotHelper plot = new PlotHelper(context);
+        bind("plt", plot);
+    }
+
+    def bind(String key, Object value) {
+        binding.setProperty(key, value)
     }
 
 
     String eval(String expression) {
         return shell.evaluate(expression);
+    }
+
+    def println(String str) {
+        System.out.println(str)
+    }
+
+    def print(String str) {
+        System.out.print(str)
     }
 
     def start() {
@@ -65,7 +72,9 @@ class GrindShell {
                 break;
             }
             try {
-                println(eval(expression));
+                if (expression != null) {
+                    println(eval(expression));
+                }
             } catch (Exception ex) {
                 ex.printStackTrace(System.out);
             }

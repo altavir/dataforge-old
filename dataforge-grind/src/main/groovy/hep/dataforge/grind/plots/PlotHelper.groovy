@@ -31,7 +31,7 @@ import java.util.function.Function
  * Created by darksnake on 30-Aug-16.
  */
 class PlotHelper {
-    static final DEFAULT_FRAME = "default";
+    static final String DEFAULT_FRAME = "default";
     PlotHolder holder;
 
     PlotHelper(Context context) {
@@ -40,19 +40,19 @@ class PlotHelper {
 
 
     def configure(String frame, Closure config) {
-        holder.getPlotFrame(frame).configure { config };
+        holder.getPlotFrame(frame).configure(config);
     }
 
     def configure(Closure config) {
-        holder.getPlotFrame(DEFAULT_FRAME).configure { config };
+        holder.getPlotFrame(DEFAULT_FRAME).configure(config);
     }
 
     def configure(String frame, Map values, Closure config) {
-        holder.getPlotFrame(frame).configure(values) { config };
+        holder.getPlotFrame(frame).configure(values, config);
     }
 
     def configure(Map values, Closure config) {
-        holder.getPlotFrame(DEFAULT_FRAME).configure(values) { config };
+        holder.getPlotFrame(DEFAULT_FRAME).configure(values, config);
     }
 
     /**
@@ -60,15 +60,20 @@ class PlotHelper {
      * @param parameters
      * @param function
      */
-    XYPlottable plot(Map parameters, Function<Double, Double> function) {
+    XYPlottable plot(Map parameters, Closure<Double> function) {
         String frameName = parameters.get("frame", DEFAULT_FRAME)
-        String pltName = parameters.get("name", "function");
-        double from = parameters.get("from", 0d);
-        double to = parameters.get("tu", 1d);
-        double numPoints = parameters.get("numPoints", 100);
-        def res = PlottableXYFunction.plotFunction(pltName, function, from, to, numPoints);
+        String pltName = parameters.get("name", "function_${function.hashCode()}");
+        double from = parameters.get("from", 0d) as Double;
+        double to = parameters.get("to", 1d) as Double;
+        int numPoints = parameters.get("numPoints", 100) as Integer;
+        Function<Double, Double> func = { Double x -> function.call(x) as Double } as Function
+        PlottableXYFunction res = PlottableXYFunction.plotFunction(pltName, func, from, to, numPoints);
         holder.getPlotFrame(frameName).add(res)
         return res;
+    }
+
+    XYPlottable plot(Closure<Double> function) {
+        return plot([:], function);
     }
 
     XYPlottable plot(double[] x, double[] y, String name = "data", String frame = DEFAULT_FRAME) {
@@ -83,14 +88,14 @@ class PlotHelper {
         return res;
     }
 
-    XYPlottable plot(Map dataMap, String name = "data", String frame = DEFAULT_FRAME) {
-        double[] x = [];
-        double[] y = [];
+    XYPlottable plot(Map<Number, Number> dataMap, String name = "data", String frame = DEFAULT_FRAME) {
+        def x = [];
+        def y = [];
         dataMap.forEach { k, v ->
-            x << k
-            y << v
+            x << (k as double)
+            y << (v as double)
         }
-        return plot(x, y, pltName, frameName);
+        return plot(x, y, name, frame);
     }
 
     XYPlottable plot(PointSource source, XYAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "", String frame = DEFAULT_FRAME) {

@@ -13,15 +13,6 @@ import org.codehaus.groovy.control.CompilerConfiguration
 @CompileStatic
 class GrindLauncher {
 
-    static Workspace buildWorkspace(File file, Class spec) {
-        return new GrindLauncher().from(file).withSpec(spec).buildWorkspace();
-    }
-
-    static Workspace buildWorkspace(File file) {
-        return new GrindLauncher().from(file).buildWorkspace();
-    }
-
-
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
     private PrintStream out = System.out;
