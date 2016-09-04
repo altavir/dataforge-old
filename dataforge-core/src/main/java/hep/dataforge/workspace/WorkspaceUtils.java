@@ -20,7 +20,7 @@ public class WorkspaceUtils {
      */
     public static final String GATHER_NODE_NAME = "@gather";
 
-//    public static DataTree.Builder gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
+//    public static DataTree.Builder gather(TaskManager.Callback callback, Workspace workspace, TaskModel model) {
 //        DataTree.Builder builder = DataTree.builder();
 //        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
 //        model.taskDeps().forEachData(dep -> {

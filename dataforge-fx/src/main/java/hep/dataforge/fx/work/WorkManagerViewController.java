@@ -5,13 +5,9 @@
  */
 package hep.dataforge.fx.work;
 
+import hep.dataforge.computation.Task;
+import hep.dataforge.computation.TaskManager;
 import hep.dataforge.utils.CommonUtils;
-import hep.dataforge.computation.Work;
-import hep.dataforge.computation.WorkManager;
-import java.io.IOException;
-import java.net.URL;
-import java.util.Map;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
@@ -23,6 +19,11 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.TreeView;
 import javafx.scene.layout.BorderPane;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 /**
  * FXML Controller class
  *
@@ -30,7 +31,11 @@ import javafx.scene.layout.BorderPane;
  */
 public class WorkManagerViewController implements Initializable {
 
-    public static BorderPane build(WorkManager manager) {
+    private final Map<Task, Parent> processNodeCache = CommonUtils.<Task, Parent>getLRUCache(400);
+    @FXML
+    private TreeView<Task> processTreeView;
+
+    public static BorderPane build(TaskManager manager) {
         try {
             FXMLLoader loader = new FXMLLoader(manager.getClass().getResource("/fxml/ProcessManagerView.fxml"));
             BorderPane p = loader.load();
@@ -42,19 +47,14 @@ public class WorkManagerViewController implements Initializable {
         }
     }
 
-    private final Map<Work, Parent> processNodeCache = CommonUtils.<Work, Parent>getLRUCache(400);
-
-    @FXML
-    private TreeView<Work> processTreeView;
-
     /**
      * Initializes the controller class.
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        processTreeView.setCellFactory((TreeView<Work> param) -> new TreeCell<Work>() {
+        processTreeView.setCellFactory((TreeView<Task> param) -> new TreeCell<Task>() {
             @Override
-            public void updateItem(Work item, boolean empty) {
+            public void updateItem(Task item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -68,20 +68,20 @@ public class WorkManagerViewController implements Initializable {
         });
     }
 
-    public void setRoot(Work rootWork) {
-        TreeItem<Work> root = buildTree(rootWork);
+    public void setRoot(Task rootTask) {
+        TreeItem<Task> root = buildTree(rootTask);
         Platform.runLater(() -> processTreeView.setRoot(root));
     }
 
     //FXME concurrent modification
-    private TreeItem<Work> buildTree(Work proc) {
-        TreeItem<Work> res = new TreeItem<>(proc);
+    private TreeItem<Task> buildTree(Task proc) {
+        TreeItem<Task> res = new TreeItem<>(proc);
         res.setExpanded(true);
-        proc.getChildren().values().stream().forEach((Work child) -> {
+        proc.getChildren().values().stream().forEach((Task child) -> {
             res.getChildren().add(buildTree(child));
         });
 
-        proc.getChildren().addListener((MapChangeListener.Change<? extends String, ? extends Work> change) -> {
+        proc.getChildren().addListener((MapChangeListener.Change<? extends String, ? extends Task> change) -> {
             if (change.wasAdded()) {
                 res.getChildren().add(buildTree(change.getValueAdded()));
             }

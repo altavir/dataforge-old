@@ -6,6 +6,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
@@ -19,7 +20,9 @@ import hep.dataforge.workspace.identity.StringIdentity;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -90,11 +93,11 @@ public class TaskModel implements Named, Annotated {
     }
 
     /**
-     * Add output action to task completion
+     * handle result using
      *
      * @param hook
      */
-    public void onComplete(OutputHook hook) {
+    public void handle(OutputHook hook) {
         this.outs.add(hook);
     }
 
@@ -201,10 +204,12 @@ public class TaskModel implements Named, Annotated {
     }
 
     /**
-     * Task output
+     * Task output handler
      */
-    public interface OutputHook extends BiConsumer<Context, DataNode<?>> {
-
+    public interface OutputHook<T> extends Consumer<DataNode<T>>, Encapsulated {
+        default Executor getExecutor() {
+            return getContext().taskManager().singleThreadExecutor();
+        }
     }
 
     /**

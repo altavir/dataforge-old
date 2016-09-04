@@ -18,7 +18,7 @@ package hep.dataforge.context;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
-import hep.dataforge.computation.WorkManager;
+import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
@@ -52,7 +52,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     private final Context parent;
     private final String name;
     private final PluginManager pm;
-    protected WorkManager processManager = null;
+    protected TaskManager taskManager = null;
     protected IOManager io = null;
 
     /**
@@ -179,21 +179,21 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         return this.pm;
     }
 
-    public WorkManager workManager() {
-        if (this.processManager == null) {
+    public TaskManager taskManager() {
+        if (this.taskManager == null) {
             if (getParent() != null) {
-                return getParent().workManager();
+                return getParent().taskManager();
             } else {
-                return GlobalContext.instance().workManager();
+                return GlobalContext.instance().taskManager();
             }
         } else {
-            return processManager;
+            return taskManager;
         }
     }
 
-//    public void setProcessManager(WorkManager manager) {
+//    public void setProcessManager(TaskManager manager) {
 //        manager.setContext(this);
-//        this.processManager = manager;
+//        this.taskManager = manager;
 //    }
 
     /**
@@ -309,8 +309,8 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     @Override
     public void close() throws Exception {
         //stopping all works in this context
-        if (this.processManager != null) {
-            processManager.shutdown();
+        if (this.taskManager != null) {
+            taskManager.shutdown();
         }
         GlobalContext.unregisterContext(this);
     }

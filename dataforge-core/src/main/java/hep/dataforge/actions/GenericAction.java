@@ -15,8 +15,8 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.computation.WorkListener;
-import hep.dataforge.computation.WorkListenerDelegate;
+import hep.dataforge.computation.TaskListener;
+import hep.dataforge.computation.TaskListenerDelegate;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
@@ -82,9 +82,9 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      */
     protected ExecutorService executor(Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return getContext().workManager().parallelExecutor();
+            return getContext().taskManager().parallelExecutor();
         } else {
-            return getContext().workManager().singleThreadExecutor();
+            return getContext().taskManager().singleThreadExecutor();
         }
 
     }
@@ -133,9 +133,9 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return context;
     }
 
-    protected WorkListener workListener() {
+    protected TaskListener workListener() {
         //PENDING make it variable to avoid multiple initialization
-        return new WorkListenerDelegate(getContext().workManager(), getWorkName());
+        return new TaskListenerDelegate(getContext().taskManager(), getWorkName());
     }
 
     protected boolean isEmptyInputAllowed() {

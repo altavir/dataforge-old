@@ -6,10 +6,11 @@
 package hep.dataforge.fx;
 
 import hep.dataforge.context.GlobalContext;
-import java.util.function.Supplier;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+
+import java.util.function.Supplier;
 
 /**
  * The root application for all separate javafx windows. It does not have its
@@ -19,11 +20,11 @@ import javafx.stage.Stage;
  */
 public class RootApplication extends Application {
 
-    private static final InstanceHolder holder = new InstanceHolder();
+    private static InstanceHolder holder;
 
     public static RootApplication instance() {
         synchronized (GlobalContext.instance()) {
-            if (holder.isEmpty()) {
+            if (holder == null) {
                 startup();
             }
             return holder.getInstance();
@@ -31,8 +32,9 @@ public class RootApplication extends Application {
     }
 
     public static Stage primaryStage() {
+
         synchronized (GlobalContext.instance()) {
-            if (holder.isEmpty()) {
+            if (holder == null) {
                 startup();
             }
             return holder.getStage();
@@ -40,12 +42,16 @@ public class RootApplication extends Application {
     }
 
     public static void startup() {
-        new Thread(() -> launch()).start();
+        holder = new InstanceHolder();
+        new Thread(() -> {
+            launch();
+        }).start();
     }
 
     /**
      * Show new Stage in a separate window. Supplier should not show window, only construct stage.
-     * @param sup 
+     *
+     * @param sup
      */
     public static void show(Supplier<Stage> sup) {
         Stage primaStage = primaryStage();

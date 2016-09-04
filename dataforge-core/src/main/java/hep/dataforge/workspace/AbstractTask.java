@@ -17,7 +17,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.computation.ProgressCallback;
-import hep.dataforge.computation.Work;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
@@ -29,7 +28,7 @@ import static hep.dataforge.workspace.WorkspaceUtils.gather;
 /**
  * Created by darksnake on 21-Aug-16.
  */
-public abstract class AbstractTask<R> implements Task<R> {
+public abstract class AbstractTask<R> implements hep.dataforge.workspace.Task {
 
     @Override
     public DataNode<R> run(TaskModel model) {
@@ -37,7 +36,7 @@ public abstract class AbstractTask<R> implements Task<R> {
         validate(model);
         Context context = model.getWorkspace().getContext();
 
-        Work taskProcess = context.workManager().submit(getName() + "_" + model.hashCode());
+        hep.dataforge.computation.Task taskProcess = context.taskManager().submit(getName() + "_" + model.hashCode());
         ProgressCallback callback = taskProcess.callback();
 
         callback.updateTitle(getName());
@@ -49,7 +48,7 @@ public abstract class AbstractTask<R> implements Task<R> {
         DataNode<R> output = run(model, callback, input);
 
         model.outs().forEach(reporter -> {
-            reporter.accept(context, output);
+            output.handle(reporter.getExecutor(), reporter);
         });
 
         callback.updateMessage("Complete");

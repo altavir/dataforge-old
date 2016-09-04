@@ -23,14 +23,9 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
-import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
-import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -53,14 +48,14 @@ import java.util.Map;
         info = "Defines the parameter which should be used as a frame name for this plot. The value is supposed to be a String, but in practice could be any type which could be converted to a String.")
 @NodeDef(name = "plotFrame", multiple = true,
         info = "The description of plot frame", target = "class::hep.dataforge.plots.XYPlotFrame")
-@NodeDef(name = "snapshot", info = "Save plot shapshots to file",
-        target = "method::hep.dataforge.plots.PlotDataAction.snapshot")
-@NodeDef(name = "serialize", info = "Serialize plot to file",
-        target = "method::hep.dataforge.plots.PlotDataAction.serialize")
-@ValueDef(name = "snapshot", type = "BOOLEAN", def = "false",
-        info = "Save plot shapshots to file with default parameters")
-@ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
-        info = "Serialize plot to file with default parameters")
+//@NodeDef(name = "snapshot", info = "Save plot shapshots to file",
+//        target = "method::hep.dataforge.plots.PlotDataAction.snapshot")
+//@NodeDef(name = "serialize", info = "Serialize plot to file",
+//        target = "method::hep.dataforge.plots.PlotDataAction.serialize")
+//@ValueDef(name = "snapshot", type = "BOOLEAN", def = "false",
+//        info = "Save plot shapshots to file with default parameters")
+//@ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
+//        info = "Serialize plot to file with default parameters")
 @NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.tables.XYAdapter")
 
 public class PlotDataAction extends OneToOneAction<Table, Table> {
@@ -106,17 +101,17 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
 
         frame.add(PlottableData.plot(name, meta, adapter, input));
 
-        if (meta.hasNode("snapshot")) {
-            snapshot(name, frame, meta.getNode("snapshot"));
-        } else if (meta.getBoolean("snapshot", false)) {
-            snapshot(name, frame, MetaBuilder.buildEmpty("snapshot"));
-        }
-
-        if (meta.hasNode("serialize")) {
-            serialize(name, frame, meta.getNode("serialize"));
-        } else if (meta.getBoolean("serialize", false)) {
-            serialize(name, frame, MetaBuilder.buildEmpty("serialize"));
-        }
+//        if (meta.hasNode("snapshot")) {
+//            snapshot(name, frame, meta.getNode("snapshot"));
+//        } else if (meta.getBoolean("snapshot", false)) {
+//            snapshot(name, frame, MetaBuilder.buildEmpty("snapshot"));
+//        }
+//
+//        if (meta.hasNode("serialize")) {
+//            serialize(name, frame, meta.getNode("serialize"));
+//        } else if (meta.getBoolean("serialize", false)) {
+//            serialize(name, frame, MetaBuilder.buildEmpty("serialize"));
+//        }
 
         return input;
     }
@@ -124,48 +119,38 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     @Override
     protected void afterAction(String name, Table res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
-        snapshotTasks.values().stream().forEach((r) -> r.run());
-        snapshotTasks.clear();
-        serializeTasks.values().stream().forEach((r) -> r.run());
-        serializeTasks.clear();
+//        snapshotTasks.values().stream().forEach((r) -> r.run());
+//        snapshotTasks.clear();
+//        serializeTasks.values().stream().forEach((r) -> r.run());
+//        serializeTasks.clear();
         super.afterAction(name, res, meta);
     }
 
-    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
-    @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void snapshot(String plotName, PlotFrame frame, Meta snapshotCfg) {
-        if (frame instanceof JFreeChartFrame) {
-            JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
-            String fileName = snapshotCfg.getString("name", plotName) + ".png";
-            snapshotTasks.put(fileName, () -> {
-                logger().info("Saving plot snapshot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
-                jfcFrame.toPNG(stream, snapshotCfg);
-            });
-        } else {
-            logger().error("The plot frame does not provide snapshot capabilities. Ignoring 'snapshot' option.");
-        }
-    }
-
-    @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
-    private synchronized void serialize(String plotName, PlotFrame frame, Meta snapshotCfg) {
-        if (frame instanceof JFreeChartFrame) {
-            JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
-            String fileName = snapshotCfg.getString("name", plotName) + ".jfc";
-            serializeTasks.put(fileName, () -> {
-                logger().info("Saving serialized plot to file: {}", fileName);
-                OutputStream stream = buildActionOutput(fileName);
-                try {
-                    ObjectOutputStream ostr = new ObjectOutputStream(stream);
-                    ostr.writeObject(jfcFrame.getChart());
-                } catch (IOException ex) {
-                    LoggerFactory.getLogger(getClass()).error("IO error during serialization", ex);
-                }
-            });
-
-        } else {
-            logger().error("The plot frame does not provide serialization capabilities.");
-        }
-    }
+//    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
+//    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
+//    @ValueDef(name = "name", info = "The name of snapshot file or ouputstream (provided by context). By default equals frame name.")
+//    private synchronized void snapshot(String plotName, PlotFrame frame, Meta snapshotCfg) {
+//        frame.snapshot(snapshotCfg);
+//    }
+//
+//    @ValueDef(name = "name", info = "The name of serialization file or ouputstream (provided by context). By default equals frame name.")
+//    private synchronized void serialize(String plotName, PlotFrame frame, Meta snapshotCfg) {
+//        if (frame instanceof JFreeChartFrame) {
+//            JFreeChartFrame jfcFrame = (JFreeChartFrame) frame;
+//            String fileName = snapshotCfg.getString("name", plotName) + ".jfc";
+//            serializeTasks.put(fileName, () -> {
+//                logger().info("Saving serialized plot to file: {}", fileName);
+//                OutputStream stream = buildActionOutput(fileName);
+//                try {
+//                    ObjectOutputStream ostr = new ObjectOutputStream(stream);
+//                    ostr.writeObject(jfcFrame.getChart());
+//                } catch (IOException ex) {
+//                    LoggerFactory.getLogger(getClass()).error("IO error during serialization", ex);
+//                }
+//            });
+//
+//        } else {
+//            logger().error("The plot frame does not provide serialization capabilities.");
+//        }
+//    }
 }

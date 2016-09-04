@@ -28,7 +28,7 @@ public class GatherTask implements Task {
     @Override
     public DataNode run(TaskModel model) {
         try {
-            return model.getWorkspace().getContext().workManager()
+            return model.getWorkspace().getContext().taskManager()
                     .post(getName() + "_" + model.hashCode(), callback -> WorkspaceUtils.gather(callback, model).build())
                     .get();
         } catch (Exception e) {

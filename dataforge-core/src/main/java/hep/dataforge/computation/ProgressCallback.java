@@ -23,15 +23,15 @@ import java.util.function.Consumer;
  */
 public class ProgressCallback {
 
-    private final WorkManager manager;
+    private final TaskManager manager;
     private final String workName;
 
-    public ProgressCallback(WorkManager manager, String processName) {
+    public ProgressCallback(TaskManager manager, String processName) {
         this.manager = manager;
         this.workName = processName;
     }
 
-    public WorkManager getManager() {
+    public TaskManager getManager() {
         return manager;
     }
 
@@ -39,11 +39,11 @@ public class ProgressCallback {
         return workName;
     }
 
-    public Work work() {
+    public Task work() {
         return getManager().find(workName());
     }
 
-    public void update(Consumer<Work> consumer) {
+    public void update(Consumer<Task> consumer) {
         getManager().update(workName(), consumer);
     }
 

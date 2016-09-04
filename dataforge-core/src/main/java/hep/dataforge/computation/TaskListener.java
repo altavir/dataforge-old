@@ -13,7 +13,7 @@ import java.util.concurrent.CompletableFuture;
  *
  * @author Alexander Nozik
  */
-public interface WorkListener {
+public interface TaskListener {
 
     /**
      * Set current progress
@@ -61,5 +61,5 @@ public interface WorkListener {
      * @param processName
      * @param task
      */
-    Work submit(String processName, CompletableFuture<?> task);
+    Task submit(String processName, CompletableFuture<?> task);
 }

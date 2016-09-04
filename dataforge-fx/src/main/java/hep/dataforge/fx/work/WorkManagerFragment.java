@@ -5,8 +5,8 @@
  */
 package hep.dataforge.fx.work;
 
+import hep.dataforge.computation.TaskManager;
 import hep.dataforge.context.Context;
-import hep.dataforge.computation.WorkManager;
 import hep.dataforge.fx.FXFragment;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
@@ -22,8 +22,15 @@ import javafx.stage.Stage;
  */
 public class WorkManagerFragment extends FXFragment {
 
-    private WorkManager manager;
     private final AnchorPane root = new AnchorPane();
+    private TaskManager manager;
+
+    public WorkManagerFragment() {
+    }
+
+    public WorkManagerFragment(TaskManager manager) {
+        this.manager = manager;
+    }
 
     /**
      * Build new FXProcessManager, attach it to context and create window for it
@@ -32,15 +39,8 @@ public class WorkManagerFragment extends FXFragment {
      * @return
      */
     public static WorkManagerFragment attachToContext(Context context) {
-        WorkManager manager = context.workManager();
+        TaskManager manager = context.taskManager();
         return new WorkManagerFragment(manager);
-    }
-
-    public WorkManagerFragment() {
-    }
-
-    public WorkManagerFragment(WorkManager manager) {
-        this.manager = manager;
     }
 
     @Override
@@ -54,7 +54,11 @@ public class WorkManagerFragment extends FXFragment {
         return stage;
     }
 
-    public void setManager(@NonNull WorkManager manager) {
+    public TaskManager getManager() {
+        return manager;
+    }
+
+    public void setManager(@NonNull TaskManager manager) {
         this.manager = manager;
         FXUtils.runNow(() -> {
             root.getChildren().clear();
@@ -65,10 +69,6 @@ public class WorkManagerFragment extends FXFragment {
             AnchorPane.setRightAnchor(node, 0d);
             root.getChildren().add(node);
         });
-    }
-
-    public WorkManager getManager() {
-        return manager;
     }
 
     @Override

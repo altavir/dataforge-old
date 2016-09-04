@@ -6,15 +6,16 @@
 package hep.dataforge.computation;
 
 import hep.dataforge.names.Name;
+
 import java.util.concurrent.CompletableFuture;
 
 
-public class WorkListenerDelegate implements WorkListener {
-    
-    private final WorkManager manager;
+public class TaskListenerDelegate implements TaskListener {
+
+    private final TaskManager manager;
     private final String rootWork;
 
-    public WorkListenerDelegate(WorkManager manager, String rootWork) {
+    public TaskListenerDelegate(TaskManager manager, String rootWork) {
         this.manager = manager;
         this.rootWork = rootWork;
     }
@@ -49,7 +50,7 @@ public class WorkListenerDelegate implements WorkListener {
     }
 
     @Override
-    public Work submit(String processName, CompletableFuture<?> task) {
+    public Task submit(String processName, CompletableFuture<?> task) {
         return manager.submit(makeName(processName), task);
     }
     

@@ -1,0 +1,10 @@
+description = 'jFreeChart plugin'
+
+dependencies {
+    //JFreeChart dependancies
+    compile 'org.jfree:fxgraphics2d:1.3'
+    compile fileTree(dir: 'libs', include: ['*.jar'])
+
+    compile(project(':dataforge-fx')) { transitive = false }
+    compile project(':dataforge-plots')
+}

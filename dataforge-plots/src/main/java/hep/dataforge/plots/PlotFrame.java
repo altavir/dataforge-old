@@ -18,8 +18,10 @@ package hep.dataforge.plots;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Meta;
 import javafx.collections.ObservableList;
-import javafx.scene.layout.AnchorPane;
+
+import java.io.OutputStream;
 
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
@@ -77,9 +79,11 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
 
     
     /**
-     * Display plot in JavaFx container
-     * @param container 
+     * Generate a snapshot
+     * @param config
      */
-    PlotFrame<T> display(AnchorPane container);
+    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
+    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
+    void snapshot(OutputStream stream, Meta config);
     
 }

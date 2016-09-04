@@ -20,33 +20,31 @@ import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.SnapshotResult;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.scene.layout.AnchorPane;
+import javafx.util.Callback;
 import org.slf4j.LoggerFactory;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 /**
- *
  * @author Alexander Nozik
  */
-public class FXLineChartFrame extends XYPlotFrame {
+public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlottable> {
 
     LineChart<Number, Number> chart;
 
-//    public FXLineChartFrame(String name, Meta annotation, LineChart<Number, Number> chart) {
-//        super.setName(name);
-//        this.chart = chart;
-//        super.configure(annotation);
-//    }
     /**
      * Вставить и растянуть на всю ширину
-     *
-     * @param name
-     * @param pane
-     * @param annotation
      */
     public FXLineChartFrame() {
         this.chart = new LineChart<>(new NumberAxis(), new NumberAxis());
@@ -112,13 +110,28 @@ public class FXLineChartFrame extends XYPlotFrame {
     }
 
     @Override
-    public FXLineChartFrame display(AnchorPane container) {
+    public void display(AnchorPane container) {
         AnchorPane.setTopAnchor(chart, 0d);
         AnchorPane.setBottomAnchor(chart, 0d);
         AnchorPane.setRightAnchor(chart, 0d);
         AnchorPane.setLeftAnchor(chart, 0d);
         container.getChildren().add(chart);
-        return this;
     }
 
+    @Override
+    public void snapshot(OutputStream stream, Meta config) {
+        //FIXME fix method to actually use parameters
+        this.chart.snapshot(new Callback<SnapshotResult, Void>() {
+            @Override
+            public Void call(SnapshotResult result) {
+                BufferedImage bImage = SwingFXUtils.fromFXImage(result.getImage(), null);
+                try {
+                    ImageIO.write(bImage, "png", stream);
+                } catch (IOException e) {
+                    LoggerFactory.getLogger(getClass()).error("Failed to write image", e);
+                }
+                return null;
+            }
+        }, null, null);
+    }
 }

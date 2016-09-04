@@ -18,31 +18,30 @@ package hep.dataforge.plots.tests;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableXYFunction;
+import hep.dataforge.plots.fx.FXPlotUtils;
+import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.Table;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.*;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
-import javafx.application.Application;
-import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
-import javafx.stage.Stage;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class JFreeFXTest extends Application {
+public class PlotContainerTest {
 
-    @Override
-    public void start(Stage primaryStage) {
-        AnchorPane root = new AnchorPane();
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
 
-        JFreeChartFrame frame = new JFreeChartFrame().display(root);
+        JFreeChartFrame frame = new JFreeChartFrame();
+
+        container.setPlot(frame);
 
         Function<Double,Double> func = (x1) -> x1 * x1;
 
@@ -58,24 +57,11 @@ public class JFreeFXTest extends Application {
         data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
 
-        frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
+        frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 
         frame.add(dataPlot);
-
-        Scene scene = new Scene(root, 800, 600);
-
-        primaryStage.setTitle("my plot");
-        primaryStage.setScene(scene);
-        primaryStage.show();
-    }
-
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
     }
 
 }

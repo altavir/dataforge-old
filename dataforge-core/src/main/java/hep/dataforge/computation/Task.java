@@ -31,13 +31,13 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class Work implements Named {
+public class Task implements Named {
 
     private final String name;
 
     private final ObjectProperty<CompletableFuture<?>> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, Work> children = FXCollections.<String, Work>observableHashMap();
+    private final ObservableMap<String, Task> children = FXCollections.<String, Task>observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 
@@ -65,9 +65,9 @@ public class Work implements Named {
     /**
      * The manager to which this process is attached
      */
-    private final WorkManager manager;
+    private final TaskManager manager;
 
-    public Work(WorkManager manager, String name) {
+    public Task(TaskManager manager, String name) {
         this.name = name;
         this.manager = manager;
         this.curProgress = new SimpleDoubleProperty(0);
@@ -100,7 +100,7 @@ public class Work implements Named {
             @Override
             protected boolean computeValue() {
                 return (taskProperty.get() == null || taskProperty.get().isDone())
-                        && children.values().stream().allMatch((Work p) -> p.isDone());
+                        && children.values().stream().allMatch((Task p) -> p.isDone());
             }
         };
 
@@ -113,7 +113,7 @@ public class Work implements Named {
      *
      * @return
      */
-    public ObservableMap<String, Work> getChildren() {
+    public ObservableMap<String, Task> getChildren() {
         return children;
     }
 
@@ -149,7 +149,7 @@ public class Work implements Named {
         isDone.invalidate();
     }
 
-    public Work findProcess(String processName) {
+    public Task findProcess(String processName) {
         return findProcess(Name.of(processName));
     }
 
@@ -160,7 +160,7 @@ public class Work implements Named {
      * @param processName
      * @return null if process not found
      */
-    public Work findProcess(Name processName) {
+    public Task findProcess(Name processName) {
         if (processName.entry().isEmpty()) {
             return this;
         }
@@ -175,15 +175,15 @@ public class Work implements Named {
         }
     }
 
-    Work addChild(String childName, CompletableFuture<?> future) {
+    Task addChild(String childName, CompletableFuture<?> future) {
         return addChild(Name.of(childName), future);
     }
 
-    Work addChild(Name childName, CompletableFuture<?> future) {
+    Task addChild(Name childName, CompletableFuture<?> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
-            Work childProcess;
+            Task childProcess;
             if (children.containsKey(childName.getFirst().toString())) {
                 childProcess = children.get(childName.getFirst().toString());
             } else {
@@ -200,12 +200,12 @@ public class Work implements Named {
      * @param childName a name of child process without path notation
      * @param future could be null
      */
-    protected Work addDirectChild(String childName, CompletableFuture<?> future) {
+    protected Task addDirectChild(String childName, CompletableFuture<?> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
             throw new RuntimeException("Triyng to replace existing running process with the same name.");
         }
 
-        Work childProcess = new Work(getManager(), Name.join(getName(), childName).toString());
+        Task childProcess = new Task(getManager(), Name.join(getName(), childName).toString());
         if (future != null) {
             childProcess.setTask(future);
         }
@@ -325,7 +325,7 @@ public class Work implements Named {
         if (this.taskProperty.get() != null) {
             this.taskProperty.get().cancel(interrupt);
         }
-        this.children.values().forEach((Work p) -> p.cancel(interrupt));
+        this.children.values().forEach((Task p) -> p.cancel(interrupt));
     }
 
     /**
@@ -337,13 +337,13 @@ public class Work implements Named {
                 .filter(entry -> entry.getValue().isDone())
                 .map(entry -> entry.getKey())
                 .collect(Collectors.toList()).stream().forEach((childName) -> this.children.remove(childName));
-        this.children.forEach((String procName, Work proc) -> proc.cleanup());
+        this.children.forEach((String procName, Task proc) -> proc.cleanup());
     }
 
     /**
      * @return the manager
      */
-    public WorkManager getManager() {
+    public TaskManager getManager() {
         return manager;
     }
 

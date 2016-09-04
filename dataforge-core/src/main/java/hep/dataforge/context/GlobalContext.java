@@ -20,7 +20,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.actions.RunConfigAction;
-import hep.dataforge.computation.WorkManager;
+import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
@@ -131,12 +131,12 @@ public class GlobalContext extends Context {
     }
 
     @Override
-    public WorkManager workManager() {
-        if (processManager == null) {
-            this.processManager = new WorkManager();
-            this.processManager.setContext(this);
+    public TaskManager taskManager() {
+        if (taskManager == null) {
+            this.taskManager = new TaskManager();
+            this.taskManager.setContext(this);
         }
-        return super.workManager();
+        return super.taskManager();
     }
 
     @Override

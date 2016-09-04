@@ -5,12 +5,9 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.computation.Work;
+import hep.dataforge.computation.Task;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.utils.NonNull;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ResourceBundle;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -24,6 +21,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.ResourceBundle;
+
 /**
  * FXML Controller class
  *
@@ -31,20 +32,7 @@ import javafx.scene.paint.Color;
  */
 public class WorkViewController implements Initializable {
 
-    public static Parent build(Work proc) {
-        try {
-            FXMLLoader loader = new FXMLLoader(proc.getClass().getResource("/fxml/ProcessView.fxml"));
-            Parent p = loader.load();
-            WorkViewController controller = loader.getController();
-            controller.setProcess(proc);
-            return p;
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    private Work process;
-
+    private Task process;
     @FXML
     private HBox processBox;
     @FXML
@@ -58,6 +46,18 @@ public class WorkViewController implements Initializable {
     @FXML
     private Label progressLabel;
 
+    public static Parent build(Task proc) {
+        try {
+            FXMLLoader loader = new FXMLLoader(proc.getClass().getResource("/fxml/ProcessView.fxml"));
+            Parent p = loader.load();
+            WorkViewController controller = loader.getController();
+            controller.setProcess(proc);
+            return p;
+        } catch (IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+
     /**
      * Initializes the controller class.
      */
@@ -66,11 +66,11 @@ public class WorkViewController implements Initializable {
         // TODO
     }
 
-    public Work getProcess() {
+    public Task getProcess() {
         return process;
     }
 
-    public void setProcess(@NonNull Work process) {
+    public void setProcess(@NonNull Task process) {
         this.process = process;
         Platform.runLater(() -> {
             processTitle.setText(process.getTitle());
@@ -103,7 +103,7 @@ public class WorkViewController implements Initializable {
 
     }
 
-    private void updateProgress(Work process) {
+    private void updateProgress(Task process) {
         Platform.runLater(() -> {
             double progress = process.getProgress();
             double maxProgress = process.getMaxProgress();

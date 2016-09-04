@@ -15,17 +15,16 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 
 /**
- *
  * @author Alexander Nozik
  */
-public class WorkManager implements Encapsulated, WorkListener {
+public class TaskManager implements Encapsulated, TaskListener {
 
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;
     /**
      * root process
      */
-    private Work root;
+    private Task root;
     /**
      * A context for this process manager
      */
@@ -39,22 +38,22 @@ public class WorkManager implements Encapsulated, WorkListener {
     public void setContext(Context context) {
         this.context = context;
         if (context.getParent() == null) {
-            root = new Work(this, "");
+            root = new Task(this, "");
             root.setTitle("ROOT");
         } else {
-            root = context.getParent().workManager().getRoot().addChild(context.getName(), null);
+            root = context.getParent().taskManager().getRoot().addChild(context.getName(), null);
         }
     }
 
-    protected Work build(String processName, CompletableFuture future) {
+    protected Task build(String processName, CompletableFuture future) {
         return root.addChild(processName, future);
     }
 
-    public Work find(String processName) {
+    public Task find(String processName) {
         return root.findProcess(processName);
     }
 
-    public Work getRoot() {
+    public Task getRoot() {
         return root;
     }
 
@@ -79,34 +78,35 @@ public class WorkManager implements Encapsulated, WorkListener {
      * @param runnable
      * @return
      */
-    public Work submit(String processName, Runnable runnable) {
-        return WorkManager.this.submit(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
+    public Task submit(String processName, Runnable runnable) {
+        return TaskManager.this.submit(processName, CompletableFuture.runAsync(runnable, (Runnable command) -> execute(processName, command)));
     }
 //
 //    public <U> Work<U> post(String processName, Supplier<U> sup) {
 //        return post(processName, CompletableFuture.supplyAsync(sup, (Runnable command) -> execute(processName, command)));
 //    }
 
-    public Work submit(String processName, Consumer<ProgressCallback> con) {
+    public Task submit(String processName, Consumer<ProgressCallback> con) {
         ProgressCallback callback = callback(processName);
-        return WorkManager.this.submit(processName, () -> con.accept(callback));
+        return TaskManager.this.submit(processName, () -> con.accept(callback));
     }
 
-    public Work submit(String processName) {
+    public Task submit(String processName) {
         getContext().getLogger().debug("Posting empty process with name '{}' to the process manager", processName);
         return build(processName, null);
     }
-    
+
     /**
      * Post the task to the manager and return corresponding future;
+     *
      * @param <U>
      * @param processName
      * @param func
-     * @return 
+     * @return
      */
     public <U> CompletableFuture<U> post(String processName, Function<ProgressCallback, U> func) {
         ProgressCallback callback = callback(processName);
-        CompletableFuture<U> future = CompletableFuture.supplyAsync(()->func.apply(callback));
+        CompletableFuture<U> future = CompletableFuture.supplyAsync(() -> func.apply(callback));
         submit(processName, future);
         return future;
     }
@@ -123,7 +123,7 @@ public class WorkManager implements Encapsulated, WorkListener {
      * @return
      */
     @Override
-    public synchronized Work submit(String processName, CompletableFuture<?> task) {
+    public synchronized Task submit(String processName, CompletableFuture<?> task) {
         getContext().getLogger().debug("Posting process with name '{}' to the process manager", processName);
         return build(processName, task);
     }
@@ -150,7 +150,13 @@ public class WorkManager implements Encapsulated, WorkListener {
     public ExecutorService singleThreadExecutor() {
         if (this.singleThreadExecutor == null) {
             getContext().getLogger().info("Initializing single thread executor");
-            this.singleThreadExecutor = Executors.newSingleThreadExecutor();
+            this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
+                        Thread thread = new Thread(r);
+                        thread.setDaemon(false);
+                        thread.setName(getContext().getName() + "_single");
+                        return thread;
+                    }
+            );
         }
         return singleThreadExecutor;
     }
@@ -177,8 +183,8 @@ public class WorkManager implements Encapsulated, WorkListener {
 
     }
 
-    public synchronized void update(String processName, Consumer<Work> consumer) {
-        Work p = root.findProcess(processName);
+    public synchronized void update(String processName, Consumer<Task> consumer) {
+        Task p = root.findProcess(processName);
         if (p != null) {
             consumer.accept(p);
         } else {

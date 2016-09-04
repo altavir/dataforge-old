@@ -17,6 +17,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -203,8 +204,23 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
                 .map(entry -> entry.getGoal()).collect(Collectors.toList()));
     }
 
-    default void onComplete(Consumer<DataNode<T>> consumer) {
+    /**
+     * Handle result when the node is evaluated. Does not trigger node evaluation. Ignores exceptional completion
+     *
+     * @param consumer
+     */
+    default void handle(Consumer<DataNode<T>> consumer) {
         nodeGoal().onComplete((res, err) -> consumer.accept(DataNode.this));
+    }
+
+    /**
+     * Same as above but with custom executor
+     *
+     * @param executor
+     * @param consumer
+     */
+    default void handle(Executor executor, Consumer<DataNode<T>> consumer) {
+        nodeGoal().onComplete(executor, (res, err) -> consumer.accept(DataNode.this));
     }
 
     @Override

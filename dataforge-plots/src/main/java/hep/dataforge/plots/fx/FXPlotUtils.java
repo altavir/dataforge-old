@@ -7,9 +7,7 @@ package hep.dataforge.plots.fx;
 
 import hep.dataforge.fx.RootApplication;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
-import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -71,26 +69,6 @@ public class FXPlotUtils {
         } catch (InterruptedException ex) {
             throw new RuntimeException("Can't get plot container", ex);
         }
-    }
-
-    /**
-     * Display a JFreeChart plot frame in a separate stage window
-     *
-     * @param title
-     * @param width
-     * @param height
-     * @return
-     */
-    public static JFreeChartFrame displayJFreeChart(String title, double width, double height, Meta meta) {
-        PlotContainer container = displayContainer(title, width, height);
-        JFreeChartFrame frame = new JFreeChartFrame(meta);
-        frame.configureValue("title", title);
-        container.setPlot(frame);
-        return frame;
-    }
-
-    public static JFreeChartFrame displayJFreeChart(String title, Meta meta) {
-        return displayJFreeChart(title, 800, 600, meta);
     }
 
     private static class PlotContainerHolder {

@@ -20,7 +20,7 @@ import hep.dataforge.meta.Meta;
 @PluginDef(name = "plots", group = "hep.dataforge", description = "Basic plottiong plugin")
 public class PlotsPlugin extends BasicPlugin implements PlotHolder {
 
-    PlotHolder plotHolderDelegate = new DefaultPlotHolder();
+    private PlotHolder plotHolderDelegate = new DefaultPlotHolder();
 
     public static PlotsPlugin buildFrom(Context context){
         if (context.provides("plots")) {
@@ -58,5 +58,6 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
     public boolean hasPlotFrame(String stage, String name) {
         return plotHolderDelegate.hasPlotFrame(stage, name);
     }
+
 
 }

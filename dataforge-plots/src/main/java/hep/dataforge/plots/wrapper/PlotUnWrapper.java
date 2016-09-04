@@ -11,9 +11,8 @@ import hep.dataforge.io.envelopes.UnWrapper;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.Plottable;
-import hep.dataforge.plots.jfreechart.JFreeChartFrame;
+
 import java.io.BufferedInputStream;
-import java.io.InputStream;
 
 /**
  *
@@ -30,7 +29,7 @@ public class PlotUnWrapper implements UnWrapper<PlotFrame> {
 
     @Override
     public PlotFrame unWrap(Envelope envelope) {
-        String plotFrameClassName = envelope.meta().getString("plotFrameClass", JFreeChartFrame.class.getName());
+        String plotFrameClassName = envelope.meta().getString("plotFrameClass", "hep.dataforge.plots.JFreeChartFrame");
         Meta plotMeta = envelope.meta().getMeta("plotMeta");
         try {
             PlotFrame frame = (PlotFrame) Class.forName(plotFrameClassName).newInstance();

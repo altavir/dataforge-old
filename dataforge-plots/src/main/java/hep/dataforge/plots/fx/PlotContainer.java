@@ -12,16 +12,8 @@ import hep.dataforge.fx.configuration.MetaEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
-import java.net.URL;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
-import java.util.function.Consumer;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -33,21 +25,16 @@ import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
-import javafx.scene.control.CheckBox;
-import javafx.scene.control.ListCell;
-import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.SplitPane;
-import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.HBox;
-import javafx.scene.layout.Pane;
-import javafx.scene.layout.Priority;
-import javafx.scene.layout.VBox;
+import javafx.scene.control.*;
+import javafx.scene.layout.*;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 import javafx.stage.WindowEvent;
 import org.slf4j.LoggerFactory;
+
+import java.net.URL;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * FXML Controller class
@@ -56,18 +43,7 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotContainer implements Initializable {
 
-    public static PlotContainer anchorTo(AnchorPane pane) {
-        PlotContainer container = new PlotContainer();
-        pane.getChildren().add(container.getRoot());
-        AnchorPane.setBottomAnchor(container.getRoot(), 0d);
-        AnchorPane.setTopAnchor(container.getRoot(), 0d);
-        AnchorPane.setLeftAnchor(container.getRoot(), 0d);
-        AnchorPane.setRightAnchor(container.getRoot(), 0d);
-        return container;
-    }
-
     private AnchorPane root;
-
     @FXML
     private AnchorPane plotPane;
     @FXML
@@ -80,13 +56,9 @@ public class PlotContainer implements Initializable {
     private Button frameOptionsButton;
     @FXML
     private SplitPane split;
-
-    private PlotFrame plot;
-
+    private FXPlotFrame plot;
     private Map<Configuration, Stage> configWindows = new HashMap<>();
-
     private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
-
     private double lastDividerPosition = -1;
 
     public PlotContainer() {
@@ -101,6 +73,16 @@ public class PlotContainer implements Initializable {
             LoggerFactory.getLogger("FX").error("Error during fxml initialization", ex);
             throw new Error(ex);
         }
+    }
+
+    public static PlotContainer anchorTo(AnchorPane pane) {
+        PlotContainer container = new PlotContainer();
+        pane.getChildren().add(container.getRoot());
+        AnchorPane.setBottomAnchor(container.getRoot(), 0d);
+        AnchorPane.setTopAnchor(container.getRoot(), 0d);
+        AnchorPane.setLeftAnchor(container.getRoot(), 0d);
+        AnchorPane.setRightAnchor(container.getRoot(), 0d);
+        return container;
     }
 
     /**
@@ -194,7 +176,7 @@ public class PlotContainer implements Initializable {
         getSideBar().getChildren().addAll(index, Arrays.asList(nodes));
     }
 
-    public PlotFrame getPlot() {
+    public FXPlotFrame getPlot() {
         return plot;
     }
 
@@ -203,7 +185,7 @@ public class PlotContainer implements Initializable {
      *
      * @param plot
      */
-    public void setPlot(PlotFrame plot) {
+    public void setPlot(FXPlotFrame plot) {
         this.plot = plot;
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);

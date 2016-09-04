@@ -29,7 +29,10 @@ class GrindShell {
     }
 
     def setContext(Context context) {
+        println("df: Using context ${context.getName()}")
         bind("context", context);
+
+        println("df: Resetting plot environment")
         PlotHelper plot = new PlotHelper(context);
         bind("plt", plot);
     }
@@ -79,5 +82,14 @@ class GrindShell {
                 ex.printStackTrace(System.out);
             }
         }
+    }
+
+    /**
+     * Start using provided closure as initializing script
+     * @param closure
+     */
+    def start(Closure closure) {
+        this.with(closure)
+        start()
     }
 }
