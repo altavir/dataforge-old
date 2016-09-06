@@ -8,6 +8,7 @@ package hep.dataforge.workspace;
 import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.NonNull;
 
 /**
  * @author Alexander Nozik
@@ -60,7 +61,7 @@ public class WorkspaceUtils {
         return model;
     }
 
-    public static TaskModel createDefaultModel(Workspace workspace, String taskName, Meta taskMeta) {
+    public static TaskModel createDefaultModel(Workspace workspace, String taskName, @NonNull Meta taskMeta) {
         TaskModel model = new TaskModel(workspace, taskName, taskMeta);
 
         Meta dependencyMeta = Meta.buildEmpty(GATHER_NODE_NAME);

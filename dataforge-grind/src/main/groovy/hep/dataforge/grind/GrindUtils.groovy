@@ -11,23 +11,22 @@ import org.codehaus.groovy.control.CompilerConfiguration
 @CompileStatic
 class GrindUtils {
 
-    public static MetaBuilder buildMeta(Closure cl) {
-        def metaSpec = new GrindMetaBuilder()
-        def metaExec = cl.rehydrate(metaSpec, this, this);
-        metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
-        return metaExec() as MetaBuilder
+    public static MetaBuilder buildMeta(@DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return buildMeta("", cl);
     }
 
-    public static MetaBuilder buildMeta(Map values, Closure cl) {
+    public static MetaBuilder buildMeta(Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         return buildMeta(cl).update(values);
     }
 
-    public static MetaBuilder buildMeta(String nodeName, Closure cl) {
+    public static MetaBuilder buildMeta(String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         def metaSpec = new GrindMetaBuilder()
-        metaSpec.invokeMethod(nodeName, cl) as MetaBuilder
+        def metaExec = cl.rehydrate(metaSpec, null, null);
+        metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
+        metaSpec.invokeMethod(nodeName, metaExec) as MetaBuilder
     }
 
-    public static MetaBuilder buildMeta(String nodeName, Map values, Closure cl) {
+    public static MetaBuilder buildMeta(String nodeName, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         return buildMeta(nodeName, cl).update(values);
     }
 

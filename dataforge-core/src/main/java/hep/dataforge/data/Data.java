@@ -16,21 +16,24 @@
 package hep.dataforge.data;
 
 import hep.dataforge.computation.Goal;
+import hep.dataforge.computation.PipeGoal;
 import hep.dataforge.computation.StaticGoal;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 /**
  * A piece of data which is basically calculated asynchronously
  *
+ * @param <T>
  * @author Alexander Nozik
  * @version $Id: $Id
- * @param <T>
  */
 public class Data<T> implements Annotated {
-    
+
     private final Goal<T> goal;
     private final Meta meta;
     private final Class<T> type;
@@ -40,6 +43,7 @@ public class Data<T> implements Annotated {
         this.meta = meta;
         this.type = type;
     }
+
     public Data(Goal<T> goal, Class<T> type) {
         this.goal = goal;
         this.meta = Meta.empty();
@@ -60,7 +64,8 @@ public class Data<T> implements Annotated {
 
     /**
      * Compute underlying goal and return sync result.
-     * @return 
+     *
+     * @return
      */
     public T get() {
         goal.run();
@@ -72,7 +77,7 @@ public class Data<T> implements Annotated {
      *
      * @return
      */
-    public CompletableFuture<T> getInFuture(){
+    public CompletableFuture<T> getInFuture() {
         return goal.result();
     }
 
@@ -92,6 +97,24 @@ public class Data<T> implements Annotated {
     @Override
     public Meta meta() {
         return meta;
+    }
+
+    /**
+     * Apply lazy transformation of the data using default executor. The meta of the result is the same as meta of input
+     *
+     * @param target
+     * @param transformation
+     * @param <R>
+     * @return
+     */
+    public <R> Data<R> transform(Class<R> target, Function<T, R> transformation) {
+        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), transformation);
+        return new Data<R>(goal, target, this.meta());
+    }
+
+    public <R> Data<R> transform(Class<R> target, Executor executor, Function<T, R> transformation) {
+        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), executor, transformation);
+        return new Data<R>(goal, target, this.meta());
     }
 
 }

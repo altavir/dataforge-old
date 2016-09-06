@@ -11,7 +11,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
 
 /**
@@ -19,13 +19,13 @@ import java.util.concurrent.ForkJoinPool;
  */
 public abstract class AbstractGoal<T> implements Goal<T> {
 
-    private final ExecutorService executor;
+    private final Executor executor;
     private final CompletableFuture<T> result;
     private final List<Runnable> onStartHooks = new ArrayList<>();
     private CompletableFuture<?> computation;
     private Thread thread;
 
-    public AbstractGoal(ExecutorService executor) {
+    public AbstractGoal(Executor executor) {
         this.executor = executor;
         result = new GoalResult();//.whenComplete((res,err)-> onCompleteHooks.forEach(hook -> hook.accept(res, err)));
     }
@@ -70,7 +70,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         }
     }
 
-    public ExecutorService getExecutor() {
+    public Executor getExecutor() {
         return executor;
     }
 

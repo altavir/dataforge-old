@@ -247,7 +247,6 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
 
         @Override
         protected TaskModel transformModel(TaskModel model) {
-            super.transformModel(model);
             modelTransformations.stream().forEach(dep -> {
                 dep.apply(model);
             });

@@ -16,6 +16,8 @@
 
 package hep.dataforge.grind.extensions
 
+import groovy.transform.CompileStatic
+import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.grind.GrindUtils
 import hep.dataforge.meta.*
 import hep.dataforge.values.MapValueProvider
@@ -24,6 +26,7 @@ import hep.dataforge.values.NamedValue
 /**
  * Created by darksnake on 20-Aug-16.
  */
+@CompileStatic
 class MetaExtension {
     static MetaBuilder plus(final Meta self, MetaBuilder other) {
         return new JoinRule().merge(self, other);
@@ -41,7 +44,7 @@ class MetaExtension {
      */
     static MetaBuilder plus(final Meta self, Map<String, Object> map) {
         MetaBuilder res = new MetaBuilder(self);
-        map.forEach { key, value ->
+        map.forEach { String key, value ->
             if (value instanceof Meta) {
                 res.putNode(key, value);
             } else {
@@ -60,7 +63,7 @@ class MetaExtension {
     }
 
     static MetaBuilder leftShift(final MetaBuilder self, Map<String, Object> map) {
-        map.forEach { key, value ->
+        map.forEach { String key, value ->
             if (value instanceof Meta) {
                 self.putNode(key, value);
             } else {
@@ -76,8 +79,18 @@ class MetaExtension {
      * @param cl
      * @return
      */
-    static MetaBuilder update(final MetaBuilder self, Closure cl) {
-        return self.update(GrindUtils.buildMeta { cl })
+    static MetaBuilder update(final MetaBuilder self, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return self.update(GrindUtils.buildMeta(cl))
+    }
+
+    /**
+     * Update existing builder using map of values and closure
+     * @param self
+     * @param cl
+     * @return
+     */
+    static MetaBuilder update(final MetaBuilder self, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return self.update(GrindUtils.buildMeta(values, cl))
     }
 
     /**
@@ -86,8 +99,28 @@ class MetaExtension {
      * @param cl
      * @return
      */
-    static MetaBuilder transform(final Meta self, Closure cl) {
-        return new MetaBuilder(self).update(GrindUtils.buildMeta { cl })
+    static MetaBuilder transform(final Meta self, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return new MetaBuilder(self).update(GrindUtils.buildMeta(self.getName(), cl))
+    }
+
+    /**
+     * Create a new builder and update it from closure and value map (existing one not changed)
+     * @param self
+     * @param cl
+     * @return
+     */
+    static MetaBuilder transform(final Meta self, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return new MetaBuilder(self).update(GrindUtils.buildMeta(self.getName(), values, cl))
+    }
+
+    /**
+     * Create a new builder and update it from map (existing one not changed)
+     * @param self
+     * @param cl
+     * @return
+     */
+    static MetaBuilder transform(final Meta self, Map values) {
+        return new MetaBuilder(self).update(values)
     }
 
     /**
@@ -111,17 +144,17 @@ class MetaExtension {
      * @param cl
      * @return
      */
-    static MetaBuilder compile(final Meta self, Map<String, Object> map, Closure cl) {
+    static MetaBuilder compile(final Meta self, Map<String, Object> map, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         Template tmp = new Template(self);
-        return tmp.compile(new MapValueProvider(map), GrindUtils.buildMeta("", cl));
+        return tmp.compile(new MapValueProvider(map), GrindUtils.buildMeta(cl));
     }
 
     static Configurable configure(final Configurable self, Closure configuration) {
-        self.configure(GrindUtils.buildMeta("config") { configuration });
+        self.configure(GrindUtils.buildMeta("config", configuration));
     }
 
     static Configurable configure(final Configurable self, Map values, Closure configuration) {
-        self.configure(GrindUtils.buildMeta("config", values) { configuration });
+        self.configure(GrindUtils.buildMeta("config", values, configuration));
     }
 
     static Configurable setAt(final Configurable self, String key, Object value) {

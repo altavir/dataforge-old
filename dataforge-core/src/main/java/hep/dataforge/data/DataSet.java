@@ -205,7 +205,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                         + "Node meta could be lost. Consider using DataTree instead.");
             }
             //PENDING rewrap data including meta?
-            node.dataStream().forEach(data -> putData(data));
+            node.dataStream().forEach(data -> putData(as + "." + data.getName(), data.anonymize()));
             return self();
         }
 

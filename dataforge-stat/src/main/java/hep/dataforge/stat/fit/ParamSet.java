@@ -95,7 +95,9 @@ public class ParamSet implements NamedValueSet, Serializable {
 
             ParamSet set = new ParamSet();
             MetaUtils.nodeStream(params).forEach(entry -> {
-                set.setPar(Param.fromMeta(entry.getValue()));
+                if (entry.getKey() != "params") {
+                    set.setPar(Param.fromMeta(entry.getValue()));
+                }
             });
 
             return set;

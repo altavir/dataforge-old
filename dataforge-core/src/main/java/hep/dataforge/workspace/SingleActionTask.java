@@ -27,19 +27,19 @@ import hep.dataforge.meta.Meta;
  */
 public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
 
-    public static <T, R> SingleActionTask<T, R> build(Action<T, R> action) {
-        return new SingleActionTask<T, R>() {
-            @Override
-            protected Action<T, R> getAction(TaskModel model) {
-                return action;
-            }
-
-            @Override
-            public String getName() {
-                return action.getName();
-            }
-        };
-    }
+//    public static <T, R> SingleActionTask<T, R> build(Action<T, R> action) {
+//        return new SingleActionTask<T, R>() {
+//            @Override
+//            protected Action<T, R> getAction(TaskModel model) {
+//                return action;
+//            }
+//
+//            @Override
+//            public String getName() {
+//                return action.getName();
+//            }
+//        };
+//    }
 
 
     protected DataNode<T> gatherNode(DataNode<?> data) {

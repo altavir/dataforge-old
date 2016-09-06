@@ -5,7 +5,7 @@
  */
 package hep.dataforge.computation;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -21,8 +21,13 @@ public class PipeGoal<S, T> extends AbstractGoal<T> {
     private final Goal<S> source;
     private final Function<S, T> transfromation;
 
-    public PipeGoal(Goal<S> source, ExecutorService executor, Function<S, T> transfromation) {
+    public PipeGoal(Goal<S> source, Executor executor, Function<S, T> transfromation) {
         super(executor);
+        this.source = source;
+        this.transfromation = transfromation;
+    }
+
+    public PipeGoal(Goal<S> source, Function<S, T> transfromation) {
         this.source = source;
         this.transfromation = transfromation;
     }

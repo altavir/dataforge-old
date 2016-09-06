@@ -146,7 +146,7 @@ class WorkspaceSpec extends Script {
      * @param closure
      * @return
      */
-    def meta(Closure closure) {
+    def loadMeta(Closure closure) {
         MetaSpec spec = new MetaSpec();
         def code = closure.rehydrate(spec, this, this);
         code.resolveStrategy = Closure.DELEGATE_FIRST;
@@ -159,11 +159,11 @@ class WorkspaceSpec extends Script {
         }
     }
 
-    def meta(String name, Closure closure) {
+    def loadMeta(String name, Closure closure) {
         this.builder.loadMeta(GrindUtils.buildMeta(name, closure));
     }
 
-    def meta(Meta meta) {
+    def loadMeta(Meta meta) {
         this.builder.loadMeta(meta);
     }
 

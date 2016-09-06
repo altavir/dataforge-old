@@ -41,6 +41,9 @@ public abstract class AbstractWorkspace implements Workspace {
 
     @Override
     public Meta getMeta(String name) {
+        if (!metas.containsKey(name)) {
+            throw new NameNotFoundException(name);
+        }
         return metas.get(name);
     }
 

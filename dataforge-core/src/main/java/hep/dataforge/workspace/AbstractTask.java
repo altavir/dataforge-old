@@ -74,9 +74,7 @@ public abstract class AbstractTask<R> implements hep.dataforge.workspace.Task {
      *
      * @param model
      */
-    protected TaskModel transformModel(TaskModel model) {
-        return model;
-    }
+    protected abstract TaskModel transformModel(TaskModel model);
 
     /**
      * Build new TaskModel and apply specific model transformation for this

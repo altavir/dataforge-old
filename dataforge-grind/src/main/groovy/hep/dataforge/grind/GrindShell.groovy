@@ -3,6 +3,7 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
+import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
@@ -43,7 +44,11 @@ class GrindShell {
 
 
     String eval(String expression) {
-        return shell.evaluate(expression);
+        Object res = shell.evaluate(expression);
+        if (res instanceof DataNode) {
+            res.computeAll();
+        }
+        return res;
     }
 
     def println(String str) {
