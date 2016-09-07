@@ -34,7 +34,7 @@ import org.slf4j.Logger;
  */
 public interface Action<T, R> extends Named, Encapsulated {
 
-    DataNode<R> run(DataNode<T> data, Meta actionMeta);
+    DataNode<R> run(DataNode<? extends T> data, Meta actionMeta);
 
    
     default Action<T,R> withLogger(Logger logger) {

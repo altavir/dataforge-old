@@ -16,6 +16,7 @@ import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.workspace.identity.Identity;
 import hep.dataforge.workspace.identity.StringIdentity;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -274,7 +275,16 @@ public class TaskModel implements Named, Annotated {
         public TaskDependency(TaskModel taskModel, String as) {
             this.taskModel = taskModel;
             if (as.isEmpty()) {
-                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> result.dataStream().forEach(data -> tree.putData(data));
+                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> {
+                    if (!result.meta().isEmpty()) {
+                        if (tree.meta().isEmpty()) {
+                            tree.setMeta(result.meta());
+                        } else {
+                            LoggerFactory.getLogger(getClass()).error("Root node meta already exists.");
+                        }
+                    }
+                    result.dataStream().forEach(data -> tree.putData(data));
+                };
             } else {
                 this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> tree.putNode(as, result);
             }

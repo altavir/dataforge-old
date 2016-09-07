@@ -417,6 +417,11 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         public Builder<T> self() {
             return this;
         }
+
+        @Override
+        public Meta meta() {
+            return this.tree.meta();
+        }
     }
 
 }

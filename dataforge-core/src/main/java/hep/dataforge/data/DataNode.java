@@ -123,11 +123,8 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         } else {
             node = getNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
         }
-        if (type.isAssignableFrom(node.type())) {
-            return (DataNode<R>) node;
-        } else {
-            throw new RuntimeException(String.format("Type check failed: expected %s but found %s", type.getName(), node.type().getName()));
-        }
+
+        return node.checked(type);
     }
 
     /**
@@ -223,12 +220,27 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         nodeGoal().onComplete(executor, (res, err) -> consumer.accept(DataNode.this));
     }
 
+    /**
+     * Return a type checked node containing this one
+     *
+     * @param checkType
+     * @param <R>
+     * @return
+     */
+    default <R> DataNode<R> checked(Class<R> checkType) {
+        if (this.type().equals(checkType)) {
+            return (DataNode<R>) this;
+        } else {
+            return new CheckedDataNode<R>(this, checkType);
+        }
+    }
+
     @Override
     default Iterator<NamedData<? extends T>> iterator() {
         return dataStream().iterator();
     }
 
-    public interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B> {
+    public interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Annotated {
 
         Class<T> type();
 

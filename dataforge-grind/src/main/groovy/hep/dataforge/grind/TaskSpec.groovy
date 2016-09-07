@@ -70,7 +70,7 @@ class TaskSpec {
 
         @Override
         DataNode run(TaskModel model) {
-            DataNode res = prototype.run(model);
+            DataNode<?> res = prototype.run(model);
             for (Pair<Action, UnaryOperator<Meta>> pair in actions) {
                 res = pair.key.run(res, pair.value.apply(model.meta()));
             }

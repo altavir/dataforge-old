@@ -42,7 +42,7 @@ import java.util.stream.Stream;
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     @Override
-    public DataNode<R> run(DataNode<T> set, Meta actionMeta) {
+    public DataNode<R> run(DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         List<DataNode<T>> groups = buildGroups(set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
@@ -56,11 +56,11 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         return new ActionResult<>(getReport(data.getName()), goal, outputMeta, getOutputType());
     }
 
-    protected List<DataNode<T>> buildGroups(DataNode<T> input, Meta actionMeta) {
+    protected List<DataNode<T>> buildGroups(DataNode<? extends T> input, Meta actionMeta) {
         if (actionMeta.hasNode("byValue")) {
             return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
         } else {
-            return Collections.singletonList(input);
+            return Collections.singletonList((DataNode<T>) input);
         }
     }
 

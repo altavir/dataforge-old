@@ -3,10 +3,13 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
+import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
+
+import java.util.function.Consumer
 
 /**
  * A REPL Groovy shell with embedded DataForge features
@@ -16,6 +19,7 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
 class GrindShell {
     private Binding binding = new Binding();
     private GroovyShell shell;
+    Set<Hook> hooks;
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -45,10 +49,25 @@ class GrindShell {
 
     String eval(String expression) {
         Object res = shell.evaluate(expression);
+        return postEval(res);
+    }
+
+    /**
+     * Post evaluate result. Compute lazy data and use smart data visualization
+     * @param res
+     * @return
+     */
+    def postEval(Object res) {
         if (res instanceof DataNode) {
-            res.computeAll();
+            res = res.computeAll();
+            res.dataStream().map { it.get() }.forEach { postEval(it) };
+            return;
+        } else if (res instanceof Data) {
+            res = res.get();
         }
-        return res;
+        hooks.each {
+            it.accept(res);
+        }
     }
 
     def println(String str) {
@@ -96,5 +115,25 @@ class GrindShell {
     def start(Closure closure) {
         this.with(closure)
         start()
+    }
+
+    /**
+     * A consumer that applies only to given type
+     * @param < T >
+     */
+    class Hook<T> {
+        private final Class<T> type;
+        private final Consumer<T> consumer;
+
+        Hook(Class<T> type, Consumer<T> consumer) {
+            this.type = type
+            this.consumer = consumer
+        }
+
+        void accept(Object t) {
+            if (type.isInstance(t)) {
+                consumer.accept(t as T);
+            }
+        }
     }
 }

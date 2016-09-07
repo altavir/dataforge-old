@@ -11,6 +11,7 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Meta;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
@@ -24,7 +25,7 @@ import java.util.stream.Stream;
 public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
-    public DataNode<R> run(DataNode<Void> data, Meta actionMeta) {
+    public DataNode<R> run(DataNode<? extends Void> data, Meta actionMeta) {
         Report log = new Report(getName(), getContext());
         Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
         //TODO add optional parallelization here
