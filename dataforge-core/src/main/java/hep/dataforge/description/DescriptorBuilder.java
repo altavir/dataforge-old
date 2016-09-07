@@ -9,6 +9,8 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
+
+import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 /**
@@ -58,6 +60,11 @@ public class DescriptorBuilder implements Annotated {
         return this;
     }
 
+    public DescriptorBuilder addNode(String node, Meta childDescriptor) {
+        builder.putNode(childDescriptor.getBuilder().rename(node).build());
+        return this;
+    }
+
     public DescriptorBuilder addNode(DescriptorBuilder childBuilder) {
         DescriptorBuilder.this.addNode(childBuilder.builder);
         return this;
@@ -66,6 +73,20 @@ public class DescriptorBuilder implements Annotated {
     public DescriptorBuilder addNode(NodeDescriptor childDescriptor) {
         DescriptorBuilder.this.addNode(childDescriptor.meta());
         return this;
+    }
+
+
+    public DescriptorBuilder addNode(String node, NodeDescriptor childDescriptor) {
+        DescriptorBuilder.this.addNode(node, childDescriptor.meta());
+        return this;
+    }
+
+    public DescriptorBuilder addNode(AnnotatedElement childType) {
+        return addNode(DescriptorUtils.buildDescriptor(childType));
+    }
+
+    public DescriptorBuilder addNode(String node, AnnotatedElement childType) {
+        return addNode(node, DescriptorUtils.buildDescriptor(childType));
     }
 
     public DescriptorBuilder addValue(String name, String type, String info) {

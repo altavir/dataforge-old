@@ -19,7 +19,7 @@ import java.util.function.Consumer
 class GrindShell {
     private Binding binding = new Binding();
     private GroovyShell shell;
-    Set<Hook> hooks;
+    Set<Hook> hooks = new HashSet<>();
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -59,8 +59,8 @@ class GrindShell {
      */
     def postEval(Object res) {
         if (res instanceof DataNode) {
-            res = res.computeAll();
-            res.dataStream().map { it.get() }.forEach { postEval(it) };
+            def node = res.computeAll();
+            node.dataStream().map { it.get() }.forEach { postEval(it) };
             return;
         } else if (res instanceof Data) {
             res = res.get();
@@ -68,6 +68,7 @@ class GrindShell {
         hooks.each {
             it.accept(res);
         }
+        return res;
     }
 
     def println(String str) {

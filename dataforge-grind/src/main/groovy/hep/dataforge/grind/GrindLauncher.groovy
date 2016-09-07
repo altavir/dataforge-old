@@ -110,10 +110,14 @@ class GrindLauncher {
      */
     def tasks() {
         Workspace ws = buildWorkspace();
-        TextDescriptorFormatter formatter = new TextDescriptorFormatter(out);
+        StringWriter writer = new StringWriter();
+
+        TextDescriptorFormatter formatter = new TextDescriptorFormatter(new PrintWriter(writer, true));
         ws.getTasks().forEach {
             formatter.showDescription(it.name, it.descriptor);
         }
+        writer.flush()
+        return writer.toString();
     }
 
 }
