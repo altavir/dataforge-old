@@ -17,14 +17,11 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.values.NamedValueSet;
-import hep.dataforge.values.ValueProvider;
-import static java.lang.Math.exp;
-import static java.lang.Math.log;
-import static java.lang.Math.pow;
-import static java.lang.Math.sqrt;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealVector;
+
+import static java.lang.Math.*;
 
 /**
  * <p>
@@ -116,7 +113,7 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
     }
 
     @Override
-    public double value(NamedValueSet pars) {
+    public double apply(NamedValueSet pars) {
         RealVector difVector = getVector(pars).subtract(values);
         return log(norm) - infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
     }

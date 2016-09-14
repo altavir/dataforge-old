@@ -15,13 +15,13 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.stat.fit.Param;
-import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.stat.fit.Param;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>MultivariateGaussianPrior class.</p>
@@ -51,7 +51,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
             double value = pars.getDouble(derivParName);
             double dif = value - mean;
 
-            return -this.value(pars) * dif / sigma / sigma;
+            return -this.apply(pars) * dif / sigma / sigma;
         } else {
             return 0;
         }
@@ -71,7 +71,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) throws NameNotFoundException {
+    public double apply(NamedValueSet pars) throws NameNotFoundException {
         double res = 1;
         for (Param par : set.getParams()) {
             

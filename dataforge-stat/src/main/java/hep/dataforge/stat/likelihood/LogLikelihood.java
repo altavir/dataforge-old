@@ -15,17 +15,16 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.stat.fit.FitSource;
-import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.parametric.AbstractParametric;
+import hep.dataforge.stat.fit.FitSource;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.FunctionUtils;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.slf4j.LoggerFactory;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 /**
  * <p>
@@ -86,7 +85,7 @@ public class LogLikelihood extends ScaleableNamedFunction {
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double apply(NamedValueSet pars) throws NamingException {
                 return expValue(pars);
             }
         };
@@ -112,7 +111,7 @@ public class LogLikelihood extends ScaleableNamedFunction {
      * {@inheritDoc}
      */
     @Override
-    public double value(NamedValueSet pars) throws NamingException {
+    public double apply(NamedValueSet pars) throws NamingException {
         return value(new ParamSet(pars));
     }
 

@@ -15,12 +15,12 @@
  */
 package hep.dataforge.stat.fit;
 
+import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
-import hep.dataforge.stat.likelihood.LogLikelihood;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 
 public class FitSource{
@@ -139,7 +139,7 @@ public class FitSource{
         }
         if (getPrior() != null) {
             //логарифм произведения равен сумме логарифмов
-            res += Math.log(getPrior().value(set));
+            res += Math.log(getPrior().apply(set));
         }
         return res;
     }
@@ -169,7 +169,7 @@ public class FitSource{
             }
         }
         if ((getPrior() != null) && (getPrior().names().contains(parName))) {
-            return res += getPrior().derivValue(parName, set) / getPrior().value(set);
+            return res += getPrior().derivValue(parName, set) / getPrior().apply(set);
         }
         return res;
     }

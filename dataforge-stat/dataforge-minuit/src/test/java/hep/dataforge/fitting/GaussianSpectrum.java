@@ -15,21 +15,16 @@
  */
 package hep.dataforge.fitting;
 
-import hep.dataforge.stat.fit.FitManager;
-import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.stat.fit.FitSource;
-import hep.dataforge.stat.fit.FitState;
-import hep.dataforge.stat.fit.Hessian;
-import static hep.dataforge.context.GlobalContext.out;
-import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.MatrixOperations;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.AbstractNamedSet;
+import hep.dataforge.stat.fit.*;
+import hep.dataforge.stat.models.XYModel;
+import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
@@ -38,6 +33,8 @@ import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import static hep.dataforge.context.GlobalContext.out;
+
 /**
  *
  * @author Darksnake
@@ -45,6 +42,13 @@ import org.apache.commons.math3.random.RandomGenerator;
 public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunction {
 
     private static final String[] list = {"w", "pos", "amp"};
+    private final RandomGenerator rnd;
+
+    public GaussianSpectrum() {
+
+        super(list);
+        rnd = new JDKRandomGenerator();
+    }
 
     public static FitState fit(Table data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
@@ -60,13 +64,6 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
         NamedMatrix hInv = new NamedMatrix(MatrixOperations.inverse(h.getMatrix()), pars.namesAsArray());
         FittingIOUtils.printNamedMatrix(out(), hInv);
-    }
-    private final RandomGenerator rnd;
-
-    public GaussianSpectrum() {
-
-        super(list);
-        rnd = new JDKRandomGenerator();
     }
 
     @Override
@@ -93,7 +90,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     }
 
     public Table sample(double pos, double w, double amp, double a, double b, int number) {
-        XYAdapter factory = new XYAdapter();
+        XYAdapter factory = XYAdapter.DEFAULT_ADAPTER;
         ListTable.Builder data = new ListTable.Builder();
         double[] v = new double[3];
         v[0] = w;

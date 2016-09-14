@@ -17,11 +17,12 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.AbstractNamedSet;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.NamedValueSet;
-import java.util.logging.Logger;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import hep.dataforge.stat.parametric.ParametricValue;
+
+import java.util.logging.Logger;
 
 /**
  *
@@ -173,7 +174,7 @@ class QOWUtils {
                         && source.getPrior().names().contains(fitPars[l])) {
                     ParametricValue prior = source.getPrior();
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
-                    double pi = prior.value(set);
+                    double pi = prior.apply(set);
                     double deriv1 = prior.derivValue(fitPars[k], set);
                     double deriv2 = prior.derivValue(fitPars[l], set);
                     //считаем априорную вероятность независимой для разных переменных
@@ -214,7 +215,7 @@ class QOWUtils {
                         && source.getPrior().names().contains(fitPars[l])) {
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                     ParametricValue prior = source.getPrior();
-                    double pi = prior.value(weight.getTheta());
+                    double pi = prior.apply(weight.getTheta());
                     double deriv1 = prior.derivValue(fitPars[k], weight.getTheta());
                     double deriv2 = prior.derivValue(fitPars[l], weight.getTheta());
                     //считаем априорную вероятность независимой для разный переменных
@@ -262,7 +263,7 @@ class QOWUtils {
             if ((source.getPrior() != null) && source.getPrior().names().contains(fitPars[k])) {
                 Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                 ParametricValue prior = source.getPrior();
-                res[k] -= prior.derivValue(fitPars[k], set) / prior.value(set);
+                res[k] -= prior.derivValue(fitPars[k], set) / prior.apply(set);
             }
         }
         return new NamedVector(fitPars, res);

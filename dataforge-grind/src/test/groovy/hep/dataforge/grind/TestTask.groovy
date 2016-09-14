@@ -7,6 +7,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.workspace.MultiStageTask
 import hep.dataforge.workspace.MultiStageTaskState
+import hep.dataforge.workspace.TaskModel
 
 /**
  * Created by darksnake on 04-Aug-16.
@@ -26,5 +27,10 @@ class TestTask extends MultiStageTask {
         MetaUtils.valueStream(config).forEach { pair -> b.putStatic("meta." + pair.getKey(), pair.getValue()) }
 
         state.finish(b.build())
+    }
+
+    @Override
+    protected TaskModel transformModel(TaskModel model) {
+        return model;
     }
 }

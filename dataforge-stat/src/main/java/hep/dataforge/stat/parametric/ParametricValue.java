@@ -15,8 +15,6 @@
  */
 package hep.dataforge.stat.parametric;
 
-import hep.dataforge.exceptions.NamingException;
-import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.values.NamedValueSet;
 
@@ -28,9 +26,9 @@ import hep.dataforge.values.NamedValueSet;
  */
 public interface ParametricValue extends NameSetContainer {
 
-    double value(NamedValueSet pars) throws NamingException;
+    double apply(NamedValueSet pars);
 
-    double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException,NamingException;
+    double derivValue(String derivParName, NamedValueSet pars);
 
     /**
      * Возвращает true только если производная явно задана. Если имени нет в списке параметров, должно возврашать false

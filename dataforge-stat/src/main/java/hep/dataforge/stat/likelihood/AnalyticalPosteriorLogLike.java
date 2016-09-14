@@ -16,19 +16,13 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
-import static java.lang.Math.log;
-import static hep.dataforge.names.NamedUtils.areEqual;
-import hep.dataforge.values.NamedValueSet;
-import static hep.dataforge.names.NamedUtils.areEqual;
-import static hep.dataforge.names.NamedUtils.areEqual;
-import static hep.dataforge.names.NamedUtils.areEqual;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
+
 import static hep.dataforge.names.NamedUtils.areEqual;
-import static hep.dataforge.names.NamedUtils.areEqual;
-import static hep.dataforge.names.NamedUtils.areEqual;
-import static hep.dataforge.names.NamedUtils.areEqual;
+import static java.lang.Math.log;
 
 /**
  * Конструирует апостериорный логарифм правдоподобия по ковариационной матрице,
@@ -77,7 +71,7 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     public double derivValue(String derivParName, NamedValueSet pars) {
         double res = this.like.derivValue(derivParName, pars);
         if (priorProb != null) {
-            res += priorProb.derivValue(derivParName, pars) / priorProb.value(pars);
+            res += priorProb.derivValue(derivParName, pars) / priorProb.apply(pars);
         }        
         return res;
     }
@@ -95,10 +89,10 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) {
-        double res = this.like.value(pars);
+    public double apply(NamedValueSet pars) {
+        double res = this.like.apply(pars);
         if (priorProb != null) {
-            res += log(priorProb.value(pars));
+            res += log(priorProb.apply(pars));
         }
         return res;
     }

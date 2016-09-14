@@ -18,8 +18,8 @@ package hep.dataforge.stat.likelihood;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>GaussianPrior class.</p>
@@ -28,9 +28,9 @@ import hep.dataforge.stat.parametric.ParametricValue;
  * @version $Id: $Id
  */
 public class GaussianPrior implements ParametricValue{
+    private final String parName;
 //    UnivariateDifferentiableFunction gaussian;
     double mean;
-    private final String parName;
     double sigma;
     private Names names;
 
@@ -54,8 +54,8 @@ public class GaussianPrior implements ParametricValue{
     public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NameNotFoundException {
         double value = pars.getDouble(parName);
         double dif = value-mean;
-        
-        return -this.value(pars)*dif/sigma/sigma;        
+
+        return -this.apply(pars) * dif / sigma / sigma;
 //        if(this.parName.equalsIgnoreCase(derivParName)){
 //            DerivativeStructure struct = new DerivativeStructure(1, 1, 1, pars.getDouble(parName));
 //            double val = gaussian.value(struct).getPartialDerivative(1);
@@ -86,7 +86,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) throws NameNotFoundException {
+    public double apply(NamedValueSet pars) throws NameNotFoundException {
 //        return this.gaussian.value(pars.getDouble(parName));
         double value = pars.getDouble(parName);
         double dif = value-mean;

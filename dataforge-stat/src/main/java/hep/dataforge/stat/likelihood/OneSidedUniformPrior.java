@@ -17,8 +17,8 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>OneSidedUniformPrior class.</p>
@@ -28,10 +28,10 @@ import hep.dataforge.stat.parametric.ParametricValue;
  */
 public class OneSidedUniformPrior implements ParametricValue {
 
-    double border;
-    boolean isLower;
     private final String parName;
     private final Names names;
+    double border;
+    boolean isLower;
 
     /**
      * <p>Constructor for OneSidedUniformPrior.</p>
@@ -98,7 +98,7 @@ public class OneSidedUniformPrior implements ParametricValue {
      * В данном случае априорная вероятность не нормирована
      */
     @Override
-    public double value(NamedValueSet pars) {
+    public double apply(NamedValueSet pars) {
         double parValue = pars.getDouble(parName);
         if (isLower) {
             if (parValue < border) {

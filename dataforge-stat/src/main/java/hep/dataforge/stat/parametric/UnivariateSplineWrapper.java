@@ -22,7 +22,7 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.OutOfRangeException;
 
 /**
- * <p>UnivariateSplineWrapper class.</p>
+ * A wrapper function for spline including valuew outside the spline region
  *
  * @author Alexander Nozik
  * @version $Id: $Id

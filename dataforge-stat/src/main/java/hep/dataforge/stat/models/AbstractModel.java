@@ -17,15 +17,14 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.parametric.AbstractParametric;
-import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.names.BaseMetaHolder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
+import hep.dataforge.stat.parametric.AbstractParametricValue;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.values.NamedValueSet;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 /**
  * Basic implementation for model
@@ -53,12 +52,12 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
         this.names = source.names();
     }
 
-    public final void setAdapter(T adapter) {
-        this.adapter = adapter;
-    }
-
     public T getAdapter() {
         return adapter;
+    }
+
+    public final void setAdapter(T adapter) {
+        this.adapter = adapter;
     }
 
     /**
@@ -87,7 +86,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double apply(NamedValueSet pars) throws NamingException {
                 return distance(point, pars);
             }
         };
@@ -114,7 +113,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double apply(NamedValueSet pars) throws NamingException {
                 return getLogProb(point, pars);
             }
         };

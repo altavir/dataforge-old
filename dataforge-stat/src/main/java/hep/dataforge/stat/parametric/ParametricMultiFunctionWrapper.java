@@ -114,9 +114,9 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
     
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) {
+    public double apply(NamedValueSet pars) {
         if (nFunc != null) {
-            return nFunc.value(pars);
+            return nFunc.apply(pars);
         } else {
             if (!pars.names().contains(names.asArray())) {
                 throw new IllegalArgumentException("Wrong parameter set.");
@@ -132,7 +132,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
             return multiFunc.value(vector);
         } else {
             NamedVector set = new NamedVector(names.asArray(), vector);
-            return nFunc.value(set);
+            return nFunc.apply(set);
         }
     }
 }

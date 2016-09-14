@@ -6,16 +6,9 @@
 package hep.dataforge.plots.viewer;
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
+import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.wrapper.PlotUnWrapper;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.ResourceBundle;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Button;
@@ -25,6 +18,15 @@ import javafx.scene.layout.AnchorPane;
 import javafx.stage.FileChooser;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.ResourceBundle;
+
 /**
  * Controller for PlotViewer
  *
@@ -32,12 +34,11 @@ import org.slf4j.LoggerFactory;
  */
 public class PlotViewerController implements Initializable {
 
+    private final Map<File, PlotContainer> plotMap = new HashMap<>();
     @FXML
     private Button loadButton;
     @FXML
     private TabPane tabs;
-
-    private final Map<File, PlotContainer> plotMap = new HashMap<>();
 
     public void loadPlot(File file) throws IOException {
         PlotContainer container;
@@ -51,7 +52,7 @@ public class PlotViewerController implements Initializable {
             tab.setOnClosed(event -> plotMap.remove(file));
             tabs.getTabs().add(tab);
         }
-        container.setPlot(new PlotUnWrapper().unWrap(new DefaultEnvelopeReader().read(new FileInputStream(file))));
+        container.setPlot((FXPlotFrame) new PlotUnWrapper().unWrap(new DefaultEnvelopeReader().read(new FileInputStream(file))));
     }
 
     /**

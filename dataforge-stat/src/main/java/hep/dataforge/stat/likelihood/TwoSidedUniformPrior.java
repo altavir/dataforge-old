@@ -17,8 +17,8 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
 
 /**
  * <p>TwoSidedUniformPrior class.</p>
@@ -28,11 +28,11 @@ import hep.dataforge.stat.parametric.ParametricValue;
  */
 public class TwoSidedUniformPrior implements ParametricValue {
 
+    private final String parName;
+    private final Names names;
     double lowerBorder;
     double norm;
-    private final String parName;
     double upperBorder;
-    private final Names names;
 
     /**
      * <p>Constructor for TwoSidedUniformPrior.</p>
@@ -101,7 +101,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
      * Нормированная априорная информация
      */
     @Override
-    public double value(NamedValueSet pars) {
+    public double apply(NamedValueSet pars) {
         double parValue = pars.getDouble(parName);
         if (parValue >= lowerBorder && parValue <= upperBorder) {
             return norm;

@@ -18,9 +18,10 @@ package hep.dataforge.stat.likelihood;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
-import static java.lang.Math.exp;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.values.NamedValueSet;
+
+import static java.lang.Math.exp;
 
 /**
  * <p>Abstract ScaleableNamedFunction class.</p>
@@ -71,7 +72,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
      * @return a double.
      */
     public double expValue(NamedValueSet point) {
-        return exp(this.value(point) + scale);
+        return exp(this.apply(point) + scale);
         
     }
 
@@ -84,10 +85,6 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
         return scale;
     }
 
-    public void reScale(NamedValueSet pars) {
-        this.scale = -this.value(pars);
-    }
-
     /**
      * Параметр scale вводится чтобы экспонентное значение не было нулем
      *
@@ -95,5 +92,9 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
      */
     public void setScale(double logShift) {
         this.scale = logShift;
+    }
+
+    public void reScale(NamedValueSet pars) {
+        this.scale = -this.apply(pars);
     }
 }

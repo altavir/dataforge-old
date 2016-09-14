@@ -50,7 +50,7 @@ public class OutputData {
             for (int j = 0; j < func.getDimension(); j++) {
                 values[j] = point.getVector().getEntry(j);
             }
-            values[values.length - 1] = func.value(point);
+            values[values.length - 1] = func.apply(point);
             DataPoint dp = new MapPoint(format, values);
             res.row(dp);
         }
