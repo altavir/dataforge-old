@@ -16,8 +16,6 @@
 package hep.dataforge.context;
 
 import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.actions.RunConfigAction;
 import hep.dataforge.computation.TaskManager;
@@ -57,10 +55,12 @@ public class GlobalContext extends Context {
     });
 
     private GlobalContext() {
-        super("df");
+        super("GLOBAL");
         Locale.setDefault(Locale.US);
+        rootLog.setLogger((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
         ActionManager actions = new ActionManager();
-        loadPlugin(actions);
+        //TODO move to plugin
+        pluginManager().loadPlugin(actions);
         actions.registerAction(TransformTableAction.class);
         actions.registerAction(ReadPointSetAction.class);
         actions.registerAction(RunConfigAction.class);
@@ -118,16 +118,17 @@ public class GlobalContext extends Context {
     @Override
     public void setIO(IOManager io) {
         super.setIO(io);
+//        LoggerFactory.getLogger(getClass()).warn("Changing io for Global. Is not recommended.");
         //redirect all logging output to new ioManager
-        Logger root = (Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME);
-
-        //redirect output to given outputstream
-        root.detachAndStopAllAppenders();
-        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setContext(root.getLoggerContext());
-        appender.setOutputStream(io.out());
-        appender.start();
-        root.addAppender(appender);
+//        Logger root = getLogger();
+//
+//        //redirect output to given outputstream
+////        root.detachAndStopAllAppenders();
+//        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+//        appender.setContext(root.getLoggerContext());
+//        appender.setOutputStream(io.out());
+//        appender.start();
+//        root.addAppender(appender);
     }
 
     @Override
@@ -147,7 +148,7 @@ public class GlobalContext extends Context {
                 System.out.println(t.toString());
             });
         }
-        return super.io();
+        return io;
     }
 
     /**

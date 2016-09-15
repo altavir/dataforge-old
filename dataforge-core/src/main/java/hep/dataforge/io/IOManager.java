@@ -16,8 +16,10 @@
 package hep.dataforge.io;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+
 import java.io.File;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -29,11 +31,11 @@ import java.io.OutputStream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface IOManager {
+public interface IOManager extends Encapsulated {
 
-    public static final String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
-    public static final String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
-    public static final String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
+    String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
+    String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
+    String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
 
     /**
      * Output stream for specific stage and specific name. All parameters could
@@ -133,6 +135,7 @@ public interface IOManager {
      *
      * @return a {@link hep.dataforge.context.Context} object.
      */
+    @Override
     Context getContext();
 
     void setContext(Context context);

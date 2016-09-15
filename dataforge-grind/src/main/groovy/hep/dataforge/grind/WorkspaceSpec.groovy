@@ -21,7 +21,7 @@ import hep.dataforge.workspace.Workspace
  * @author Alexander Nozik
  */
 @CompileStatic
-class WorkspaceSpec extends Script {
+class WorkspaceSpec {
     private final Workspace.Builder builder = BasicWorkspace.builder();
     Context parentContext = GlobalContext.instance();
 
@@ -36,8 +36,7 @@ class WorkspaceSpec extends Script {
         builder.setContext(contextSpec.build());
     }
 
-    @Override
-    Object run() {
+    Workspace.Builder build() {
         return builder;
     }
 

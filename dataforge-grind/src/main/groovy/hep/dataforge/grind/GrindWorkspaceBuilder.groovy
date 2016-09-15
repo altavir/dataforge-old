@@ -1,6 +1,8 @@
 package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
+import hep.dataforge.context.Context
+import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.DataNode
 import hep.dataforge.description.TextDescriptorFormatter
 import hep.dataforge.meta.Meta
@@ -11,35 +13,36 @@ import org.codehaus.groovy.control.CompilerConfiguration
  * Created by darksnake on 04-Aug-16.
  */
 @CompileStatic
-class GrindLauncher {
+class GrindWorkspaceBuilder {
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
-    private PrintStream out = System.out;
+    private Context context = GlobalContext.instance();
 
-    GrindLauncher from(File file) {
+    GrindWorkspaceBuilder from(File file) {
         this.source = { file.newReader() }
         return this;
     }
 
-    GrindLauncher from(Closure<? extends Reader> readerSup) {
+    GrindWorkspaceBuilder from(Closure<? extends Reader> readerSup) {
         this.source = readerSup
         return this;
     }
 
-    GrindLauncher from(String str) {
+    GrindWorkspaceBuilder from(String str) {
         this.source = { new StringReader(str) }
         return this;
     }
 
-    GrindLauncher withSpec(Class<? extends WorkspaceSpec> specClass) {
+    GrindWorkspaceBuilder withSpec(Class<? extends WorkspaceSpec> specClass) {
         this.spec = specClass
         return this;
     }
 
-//    GrindLauncher inside(Closure source) {
-//
-//    }
+    GrindWorkspaceBuilder withContext(Context context) {
+        this.context = context;
+        return this;
+    }
 
     /**
      * Create workspace builder using WorkspaceSpec
@@ -48,10 +51,14 @@ class GrindLauncher {
      */
     private Workspace.Builder getBuilder() {
         def compilerConfiguration = new CompilerConfiguration()
-        compilerConfiguration.scriptBaseClass = spec.name
+        compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
-        Script script = shell.parse(source()) as WorkspaceSpec;
-        return script.run() as Workspace.Builder;
+        DelegatingScript script = shell.parse(source()) as DelegatingScript;
+        WorkspaceSpec spec = spec.newInstance();
+        spec.parentContext = this.context;
+        script.setDelegate(spec);
+        script.run()
+        return spec.build();
     }
 
     /**

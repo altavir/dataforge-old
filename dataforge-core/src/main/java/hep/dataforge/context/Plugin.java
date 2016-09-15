@@ -65,19 +65,8 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
      * @return
      */
     @Override
-    public default String getName() {
+    default String getName() {
         return getTag().name();
-    }
-
-//    /**
-//     * Set config for this plugin and attach changes
-//     *
-//     * @param config
-//     */
-//    void configure(Meta config);
-
-    public default String name() {
-        return getTag().getFullName();
     }
 
     /**
@@ -86,7 +75,7 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
      *
      * @return
      */
-    default Plugin instance() {
+    default Plugin newInstance() {
         //FIXME a bad solution
         try {
             return getClass().getDeclaredConstructor().newInstance();
@@ -94,5 +83,4 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
             throw new RuntimeException("Failed to create instance of the plugin", ex);
         }
     }
-
 }

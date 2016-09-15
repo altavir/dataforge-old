@@ -28,7 +28,7 @@ import static hep.dataforge.workspace.WorkspaceUtils.gather;
 /**
  * Created by darksnake on 21-Aug-16.
  */
-public abstract class AbstractTask<R> implements hep.dataforge.workspace.Task {
+public abstract class AbstractTask<R> implements Task {
 
     @Override
     public DataNode<R> run(TaskModel model) {

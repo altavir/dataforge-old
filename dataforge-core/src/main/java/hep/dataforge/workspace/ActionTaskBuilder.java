@@ -30,6 +30,7 @@ import static hep.dataforge.actions.ActionUtils.*;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder> {
 
     /**

@@ -20,11 +20,12 @@ import hep.dataforge.context.GlobalContext;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
+import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.MessageFormatter;
+
 import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.MessageFormatter;
 
 /**
  * Лог организован таким образом, что он добавляет каждую строчкку в себя и по
@@ -38,12 +39,11 @@ import org.slf4j.helpers.MessageFormatter;
 public class Report implements Reportable, Named {
 
     private static int MAX_LOG_SIZE = 1000;
-
+    private final String name;
+    private final ReferenceRegistry<Consumer<ReportEntry>> listeners = new ReferenceRegistry<>();
     protected ConcurrentLinkedQueue<ReportEntry> entries = new ConcurrentLinkedQueue<>();
     private Reportable parent;
     private Logger logger;
-    private final String name;
-    private final ReferenceRegistry<Consumer<ReportEntry>> listeners = new ReferenceRegistry<>();
 
     public Report(String name, Reportable parent) {
         if (name == null || name.isEmpty()) {
@@ -51,7 +51,6 @@ public class Report implements Reportable, Named {
         }
         this.name = name;
         this.parent = parent;
-        this.logger = (Logger) LoggerFactory.getLogger(name);
     }
 
     public Report(String name) {
@@ -60,7 +59,14 @@ public class Report implements Reportable, Named {
 
     @Override
     public Logger getLogger() {
+        if (logger == null) {
+            logger = (Logger) LoggerFactory.getLogger(getName());
+        }
         return logger;
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
     }
 
     protected int getMaxLogSize() {
@@ -72,7 +78,7 @@ public class Report implements Reportable, Named {
         entries.add(entry);
         if (entries.size() >= getMaxLogSize()) {
             entries.poll();// Ограничение на размер лога
-            logger.warn("Log at maximum capacity!");
+            getLogger().warn("Log at maximum capacity!");
         }
         listeners.forEach((Consumer<ReportEntry> listener) -> {
             listener.accept(entry);
@@ -133,6 +139,6 @@ public class Report implements Reportable, Named {
     @Override
     public void reportError(String str, Object... parameters) {
         Report.this.report(new ReportEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
-        logger.error(str, parameters);
+        getLogger().error(str, parameters);
     }
 }

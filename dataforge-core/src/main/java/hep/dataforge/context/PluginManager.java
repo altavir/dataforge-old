@@ -108,7 +108,7 @@ public class PluginManager implements Encapsulated {
                 loadPlugin(tag);
             }
         }
-
+        getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
         plugin.attach(getContext());
         plugins.put(plugin.getName(), plugin);
         return plugin;

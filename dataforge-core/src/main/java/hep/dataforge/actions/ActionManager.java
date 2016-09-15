@@ -10,13 +10,10 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.*;
 
 /**
  *
@@ -25,11 +22,11 @@ import org.slf4j.LoggerFactory;
 @PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
 public class ActionManager extends BasicPlugin {
 
-    public static ActionManager buildFrom(Context context) {
-        return (ActionManager) context.pluginManager().getPlugin("actions");
-    }
-
     private final Map<String, Action> actionMap = new HashMap<>();
+
+    public static ActionManager buildFrom(Context context) {
+        return context.getPlugin(ActionManager.class);
+    }
 
     protected ActionManager getParent() {
         if (getContext() == null || getContext().getParent() == null || !getContext().getParent().provides("actions")) {

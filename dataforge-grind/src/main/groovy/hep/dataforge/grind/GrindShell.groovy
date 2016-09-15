@@ -19,6 +19,7 @@ import java.util.function.Consumer
 class GrindShell {
     private Binding binding = new Binding();
     private GroovyShell shell;
+    private Context context = GlobalContext.instance();
     Set<Hook> hooks = new HashSet<>();
 
     GrindShell() {
@@ -27,8 +28,8 @@ class GrindShell {
 
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
-        binding.setProperty("buildWorkspace", { String fileName -> new GrindLauncher().from(new File(fileName)).buildWorkspace() })
-        binding.setProperty("context", GlobalContext.instance())
+        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
+        binding.setProperty("context", context)
         binding.setProperty("plt", new PlotHelper(GlobalContext.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
     }
@@ -36,6 +37,7 @@ class GrindShell {
     def setContext(Context context) {
         println("df: Using context ${context.getName()}")
         bind("context", context);
+        this.context = context;
 
         println("df: Resetting plot environment")
         PlotHelper plot = new PlotHelper(context);
@@ -72,11 +74,12 @@ class GrindShell {
     }
 
     def println(String str) {
-        System.out.println(str)
+        context.io().out().println(str);
+        context.io().out().flush();
     }
 
     def print(String str) {
-        System.out.print(str)
+        context.io().out().print(str);
     }
 
     def start() {
@@ -92,7 +95,7 @@ class GrindShell {
 //            }
 //        }
 
-        BufferedReader reader = System.in.newReader()
+        BufferedReader reader = context.io().in().newReader()
         while (true) {
             print(">")
             String expression = reader.readLine();
@@ -101,10 +104,15 @@ class GrindShell {
             }
             try {
                 if (expression != null) {
-                    println(eval(expression));
+                    String res = eval(expression);
+                    if (res != null) {
+                        println(res);
+                    }
                 }
             } catch (Exception ex) {
-                ex.printStackTrace(System.out);
+                def err = context.io().out().newPrintWriter();
+                ex.printStackTrace(err);
+                err.flush()
             }
         }
     }

@@ -6,10 +6,12 @@ import spock.lang.Specification
 /**
  * Created by darksnake on 04-Aug-16.
  */
-class GrindLauncherTest extends Specification {
+class GrindWorkspaceBuilderTest extends Specification {
     def "Run Task"() {
         given:
-        GrindLauncher launcher = new GrindLauncher().from { this.getClass().getResource('/workspace/workspace.groovy').toURI() }
+        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().from {
+            this.getClass().getResource('/workspace/workspace.groovy').toURI()
+        }
         when:
         DataNode res = launcher.run("testTask")
         res.forEachDataWithType(Object){ key, value -> println("${key}: ${value.get()}")}
@@ -19,7 +21,9 @@ class GrindLauncherTest extends Specification {
 
     def "Run Task with meta"() {
         given:
-        GrindLauncher launcher = new GrindLauncher().from { this.getClass().getResource('/workspace/workspace.groovy').toURI() }
+        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().from {
+            this.getClass().getResource('/workspace/workspace.groovy').toURI()
+        }
         when:
         DataNode res = launcher.run("testTask{childNode(metaValue: 18); otherChildNode(val: false)}")
         res.forEachDataWithType(Object){ key, value -> println("${key}: ${value.get()}")}

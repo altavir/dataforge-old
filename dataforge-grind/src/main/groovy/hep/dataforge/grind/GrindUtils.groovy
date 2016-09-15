@@ -41,14 +41,14 @@ class GrindUtils {
     }
 
     static Workspace buildWorkspace(File file, Class spec) {
-        return new GrindLauncher().from(file).withSpec(spec).buildWorkspace();
+        return new GrindWorkspaceBuilder().from(file).withSpec(spec).buildWorkspace();
     }
 
     static Workspace buildWorkspace(File file) {
-        return new GrindLauncher().from(file).buildWorkspace();
+        return new GrindWorkspaceBuilder().from(file).buildWorkspace();
     }
 
     static Workspace buildWorkspace(String file) {
-        return new GrindLauncher().from(file).buildWorkspace();
+        return new GrindWorkspaceBuilder().from(file).buildWorkspace();
     }
 }

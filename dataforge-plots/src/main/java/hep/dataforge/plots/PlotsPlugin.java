@@ -30,16 +30,6 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
         }
     }
 
-    @Override
-    public void attach(Context context) {
-
-    }
-
-    @Override
-    public void detach() {
-
-    }
-
     public void setPlotHolderDelegate(PlotHolder holderDelegate) {
         this.plotHolderDelegate = holderDelegate;
     }

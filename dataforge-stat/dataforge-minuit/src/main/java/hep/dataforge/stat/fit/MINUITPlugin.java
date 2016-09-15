@@ -15,10 +15,8 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.stat.fit.FitEngineBuilder;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.io.reports.Report;
 import org.slf4j.LoggerFactory;
@@ -67,16 +65,15 @@ public class MINUITPlugin extends BasicPlugin {
 
     @Override
     public void attach(Context context) {
+        super.attach(context);
         FitEngineBuilder.addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
-
         clearStaticLog();
-
-        GlobalContext.instance().report("MINUIT fitter plugin started.");
     }
 
     @Override
     public void detach() {
         clearStaticLog();
+        super.detach();
     }
 
 }

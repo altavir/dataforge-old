@@ -83,10 +83,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     @Override
     protected Table execute(String name, Laminate meta, Table input) {
         //initializing plot plugin if necessary
-        if (!getContext().provides("plots")) {
-            getContext().loadPlugin(new PlotsPlugin());
-        }
-        PlotHolder holder = (PlotsPlugin) getContext().pluginManager().getPlugin("plots");
+        PlotHolder holder = getContext().getPlugin(PlotsPlugin.class);
 
         PlotFrame frame;
 

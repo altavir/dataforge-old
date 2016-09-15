@@ -48,7 +48,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Context extends AbstractProvider implements ValueProvider, Reportable, Named, AutoCloseable {
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
-    private final Report rootLog;
+    protected final Report rootLog;
     private final Context parent;
     private final String name;
     private final PluginManager pm;
@@ -148,13 +148,13 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         io.setContext(this);
 
         LoggerContext loggerContext = getLogger().getLoggerContext();
-        getLogger().detachAndStopAllAppenders();
-
         OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setName("io");
         appender.setContext(loggerContext);
         appender.setOutputStream(io.out());
         appender.start();
 
+        getLogger().detachAppender("io");
         getLogger().addAppender(appender);
 
         if (!io.out().equals(System.out)) {
@@ -211,7 +211,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      *
      * @param <T>
      * @param target a {@link java.lang.String} object.
-     * @param name a {@link hep.dataforge.names.Name} object.
+     * @param name   a {@link hep.dataforge.names.Name} object.
      * @return a boolean.
      */
     @SuppressWarnings("unchecked")
@@ -246,7 +246,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      * <p>
      * putValue.</p>
      *
-     * @param name a {@link java.lang.String} object.
+     * @param name  a {@link java.lang.String} object.
      * @param value a {@link hep.dataforge.values.Value} object.
      */
     public void putValue(String name, Value value) {
@@ -289,13 +289,13 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         }
     }
 
-    public final void loadPlugin(Plugin plugin) {
-        this.pluginManager().loadPlugin(plugin);
-    }
-
-    public final void loadPlugin(String tag) {
-        this.pluginManager().loadPlugin(tag);
-    }
+//    public final void loadPlugin(Plugin plugin) {
+//        this.pluginManager().loadPlugin(plugin);
+//    }
+//
+//    public final void loadPlugin(String tag) {
+//        this.pluginManager().loadPlugin(tag);
+//    }
 
     public Map<String, Value> getProperties() {
         return Collections.unmodifiableMap(properties);
@@ -314,4 +314,18 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         }
         GlobalContext.unregisterContext(this);
     }
+
+    public <T extends Plugin> T getPlugin(Class<T> type) {
+        try {
+            String pluginName = type.getAnnotation(PluginDef.class).name();
+            if (pluginManager().hasPlugin(pluginName)) {
+                return (T) pluginManager().getPlugin(pluginName);
+            } else {
+                return (T) pluginManager().loadPlugin(pluginName);
+            }
+        } catch (Exception ex) {
+            throw new RuntimeException("Plugin could not be loaded by type", ex);
+        }
+    }
+
 }

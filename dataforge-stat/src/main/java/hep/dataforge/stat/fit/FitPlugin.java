@@ -31,6 +31,7 @@ public class FitPlugin extends BasicPlugin {
     
     @Override
     public void attach(Context context) {
+        super.attach(context);
         if(getFitManager() == null){
             fitManager = new FitManager(context);
         } else {

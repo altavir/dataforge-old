@@ -17,7 +17,6 @@ package hep.dataforge.storage.commons;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
@@ -39,16 +38,12 @@ public class StorageManager extends BasicPlugin {
      * @return
      */
     public static StorageManager buildFrom(Context context) {
-        if (!context.provides("storage")) {
-            context.loadPlugin(new StorageManager());
-        }
-        return context.provide("storage", StorageManager.class);
+        return context.getPlugin(StorageManager.class);
     }
 
     /**
      * Return blank file storage in current working directory
      *
-     * @param context
      * @return
      */
     public Storage getDefaultStorage() {

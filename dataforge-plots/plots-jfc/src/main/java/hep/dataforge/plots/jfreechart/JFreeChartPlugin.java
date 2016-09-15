@@ -40,9 +40,9 @@ public class JFreeChartPlugin extends BasicPlugin {
 
     @Override
     public void detach() {
-        super.detach();
         if (getContext() != null) {
             getContext().provide("plots", PlotsPlugin.class).setPlotHolderDelegate(new DefaultPlotHolder());
         }
+        super.detach();
     }
 }

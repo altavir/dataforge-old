@@ -45,14 +45,12 @@ public class StorageConnection extends DeviceConnection implements Responder {
 
     @Override
     public void open(Device device) throws Exception {
-        if (!device.getContext().provides("storage")) {
-            device.getContext().loadPlugin("storage");
-        }
+        StorageManager storageManager = device.getContext().getPlugin(StorageManager.class);
         if (storage == null) {
             if (device.meta().hasNode("storage")) {
-                storage = device.getContext().provide("storage", StorageManager.class).buildStorage(device.meta().getNode("storage"));
+                storage = storageManager.buildStorage(device.meta().getNode("storage"));
             } else {
-                storage = device.getContext().provide("storage", StorageManager.class).getDefaultStorage();
+                storage = storageManager.getDefaultStorage();
             }
         }
         storage.open();
