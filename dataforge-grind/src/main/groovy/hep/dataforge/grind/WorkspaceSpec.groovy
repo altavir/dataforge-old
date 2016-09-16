@@ -145,7 +145,7 @@ class WorkspaceSpec {
      * @param closure
      * @return
      */
-    def loadMeta(Closure closure) {
+    def configuration(Closure closure) {
         MetaSpec spec = new MetaSpec();
         def code = closure.rehydrate(spec, this, this);
         code.resolveStrategy = Closure.DELEGATE_FIRST;
@@ -158,11 +158,11 @@ class WorkspaceSpec {
         }
     }
 
-    def loadMeta(String name, Closure closure) {
+    def configuration(String name, Closure closure) {
         this.builder.loadMeta(GrindUtils.buildMeta(name, closure));
     }
 
-    def loadMeta(Meta meta) {
+    def configuration(Meta meta) {
         this.builder.loadMeta(meta);
     }
 

@@ -80,10 +80,10 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
         return MetaNode.from(this);
     }
 
-    @Override
-    public MetaBuilder getBuilder() {
-        return this;
-    }
+//    @Override
+//    public MetaBuilder getBuilder() {
+//        return this;
+//    }
 
     public MetaBuilder rename(String newName) {
         super.setName(newName);

@@ -123,7 +123,9 @@ public interface Workspace extends Encapsulated, MetaProvider {
     @Override
     Meta getMeta(String name);
 
-    public interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
+    Stream<Meta> getMetas();
+
+    interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
 
         default B loadFrom(Meta meta) {
             if (meta.hasValue("context")) {

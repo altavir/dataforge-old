@@ -78,7 +78,7 @@ public class Report implements Reportable, Named {
         entries.add(entry);
         if (entries.size() >= getMaxLogSize()) {
             entries.poll();// Ограничение на размер лога
-            getLogger().warn("Log at maximum capacity!");
+//            getLogger().warn("Log at maximum capacity!");
         }
         listeners.forEach((Consumer<ReportEntry> listener) -> {
             listener.accept(entry);

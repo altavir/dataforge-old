@@ -40,6 +40,11 @@ public abstract class AbstractWorkspace implements Workspace {
     }
 
     @Override
+    public Stream<Meta> getMetas() {
+        return metas.values().stream();
+    }
+
+    @Override
     public Meta getMeta(String name) {
         if (!metas.containsKey(name)) {
             throw new NameNotFoundException(name);

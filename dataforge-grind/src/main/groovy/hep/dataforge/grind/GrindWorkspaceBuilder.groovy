@@ -115,7 +115,7 @@ class GrindWorkspaceBuilder {
     /**
      * Display a list of available tasks
      */
-    def tasks() {
+    def getTasks() {
         Workspace ws = buildWorkspace();
         StringWriter writer = new StringWriter();
 
@@ -123,6 +123,18 @@ class GrindWorkspaceBuilder {
         ws.getTasks().forEach {
             formatter.showDescription(it.name, it.descriptor);
         }
+        writer.flush()
+        return writer.toString();
+    }
+
+    def getConfigs() {
+        Workspace ws = buildWorkspace();
+        StringWriter writer = new StringWriter();
+
+        ws.getMetas().forEach {
+            writer.println(it)
+        }
+
         writer.flush()
         return writer.toString();
     }
