@@ -15,11 +15,11 @@
  */
 package hep.dataforge.storage.api;
 
+import hep.dataforge.io.envelopes.Destination;
 import hep.dataforge.io.envelopes.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Path;
-import hep.dataforge.io.envelopes.Destination;
 
 /**
  * A typed loader.
@@ -65,7 +65,7 @@ public interface Loader extends Annotated, AutoCloseable, Named, Responder, Dest
      *
      * @return
      */
-    default String getFullPath() {
+    default String getPath() {
         return getStorage().getFullPath() + Path.PATH_SEGMENT_SEPARATOR + getName();
     }
     //TODO add getRelativePath method

@@ -9,8 +9,6 @@ import hep.dataforge.context.Context;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.IOUtils;
 import hep.dataforge.io.LineIterator;
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
-import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 import hep.dataforge.storage.api.Storage;
@@ -24,48 +22,29 @@ import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.vfs2.FileObject;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Iterator;
 import java.util.function.Supplier;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
+
+import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
+import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class FilePointLoader extends AbstractPointLoader {
 
-    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (isValidFilePointLoaderEnvelope(envelope)) {
-                FilePointLoader res = new FilePointLoader(storage,
-                        FilenameUtils.getBaseName(file.getName().getBaseName()),
-                        envelope.meta(),
-                        file.getURL().toString());
-                res.setReadOnly(readOnly);
-                return res;
-            } else {
-                throw new StorageException("Is not a valid point loader file");
-            }
-        }
-    }
-
-    public static boolean isValidFilePointLoaderEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
-    }
-
     private final String uri;
     private TableFormat format;
     private PointParser parser;
-
     /**
      * An envelope used for pushing
      */
     private FileEnvelope envelope;
-
     public FilePointLoader(Storage storage, String name, Meta annotation, String uri) {
         super(storage, name, annotation);
         this.uri = uri;
@@ -74,6 +53,22 @@ public class FilePointLoader extends AbstractPointLoader {
     public FilePointLoader(Storage storage, String name, String uri) {
         super(storage, name);
         this.uri = uri;
+    }
+
+    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+            FilePointLoader res = new FilePointLoader(storage,
+                    FilenameUtils.getBaseName(file.getName().getBaseName()),
+                    envelope.meta(),
+                    file.getURL().toString());
+            res.setReadOnly(readOnly);
+            return res;
+        }
+    }
+
+    public static boolean isValidFilePointLoaderEnvelope(FileEnvelope envelope) {
+        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
+                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
     }
 
     @Override
@@ -168,7 +163,7 @@ public class FilePointLoader extends AbstractPointLoader {
         }
     }
 
-//    @Override
+    //    @Override
 //    public Table asTable() throws StorageException {
 //        return new ListTable(getFormat(), this);
 //    }
@@ -198,7 +193,7 @@ public class FilePointLoader extends AbstractPointLoader {
         return getParser().parse(line);
     }
 
-//    @Override
+    //    @Override
 //    public Index<DataPoint> buildIndex(Meta indexMeta) {
 //        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
 //    }

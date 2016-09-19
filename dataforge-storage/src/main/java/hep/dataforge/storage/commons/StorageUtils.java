@@ -20,12 +20,14 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.storage.api.Loader;
-import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import javafx.util.Pair;
+
 import java.util.List;
 import java.util.stream.Stream;
-import javafx.util.Pair;
+
+import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
 
 /**
  * A helper class to build loaders from existing storage
@@ -104,4 +106,6 @@ public class StorageUtils {
             throw new RuntimeException(ex);
         }
     }
+
+    //TODO make stream producing renamed loaders
 }
