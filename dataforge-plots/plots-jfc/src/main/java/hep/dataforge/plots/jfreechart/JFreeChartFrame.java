@@ -68,10 +68,12 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 
     private final JFreeChart chart;
     private final XYPlot plot;
+
     /**
      * Index mapping names to datasets
      */
     List<String> index = new ArrayList<>();
+
     private Mode mode = Mode.NONE;
 
     public JFreeChartFrame() {

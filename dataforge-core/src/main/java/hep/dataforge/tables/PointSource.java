@@ -5,6 +5,9 @@
  */
 package hep.dataforge.tables;
 
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 /**
  *
  * @author Alexander Nozik
@@ -12,5 +15,9 @@ package hep.dataforge.tables;
 public interface PointSource extends Iterable<DataPoint> {
 
     TableFormat getFormat();
+
+    default Stream<DataPoint> stream() {
+        return StreamSupport.stream(this.spliterator(), false);
+    }
     
 }

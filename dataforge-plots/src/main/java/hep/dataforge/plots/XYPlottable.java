@@ -58,6 +58,11 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implement
         return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
     }
 
+    public Stream<DataPoint> plotData(Value from, Value to, int maxPoints) {
+        return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to).putValue("maxPoints", maxPoints));
+    }
+
+
     protected Stream<DataPoint> filterXRange(Stream<DataPoint> data, Meta xRange) {
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);

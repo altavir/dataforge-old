@@ -17,12 +17,12 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.HashMap;
@@ -45,33 +45,24 @@ public class DynamicPlottable extends XYPlottable {
     private final String yName;
     private Instant lastUpdate;
 
+    /**
+     * Create dynamic plottable with given y value name (x name is always
+     * "timestamp")
+     *
+     * @param name
+     * @param yName
+     */
+    public DynamicPlottable(String name, String yName) {
+        super(name, new XYAdapter("timestamp", yName));
+        this.yName = yName;
+    }
+
     public static DynamicPlottable build(String name, String yName, String color, double thickness) {
         DynamicPlottable res = new DynamicPlottable(name, yName);
         res.getConfig()
                 .setValue("color", color)
                 .setValue("thickness", thickness);
         return res;
-    }
-
-//    public DynamicPlottable(String name) {
-//        super(name);
-//        MetaBuilder builder = new MetaBuilder("plottable")
-//                .setValue("adapter.x", "timestamp");
-//        setMetaBase(builder.build());
-//        this.yName = getConfig().getString("adapter.y", name);
-//    }
-
-    /**
-     * Create dynamic plottable with given y value name (x name is always
-     * "timestamp")
-     *
-     * @param name
-     * @param annotation
-     * @param yName
-     */
-    public DynamicPlottable(String name, String yName) {
-        super(name, new XYAdapter("timestamp", yName));
-        this.yName = yName;
     }
 
     /**

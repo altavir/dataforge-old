@@ -18,20 +18,19 @@ package hep.dataforge.plots;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import static hep.dataforge.io.envelopes.Wrappable.DEFAULT_WRAPPER_ENVELOPE_CODE;
-import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.utils.NonNull;
 import hep.dataforge.utils.ReferenceRegistry;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.util.stream.Collectors;
 
 /**
- *
  * @author darksnake
  */
 public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable<T> {
@@ -121,10 +120,11 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     public Envelope wrap() {
         return wrapBuilder().build();
     }
-    
+
     /**
      * Protected method to customize wrap
-     * @return 
+     *
+     * @return
      */
     protected EnvelopeBuilder wrapBuilder() {
         EnvelopeBuilder builder = new EnvelopeBuilder()
@@ -137,7 +137,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream os = new ObjectOutputStream(baos)) {
-            os.writeObject(this.data());
+            os.writeObject(this.dataStream().collect(Collectors.toList()));
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);

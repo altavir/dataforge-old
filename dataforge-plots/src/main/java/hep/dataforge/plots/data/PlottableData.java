@@ -24,6 +24,7 @@ import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -36,6 +37,17 @@ import java.util.stream.Stream;
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
+
+    //TODO replace by ObservableList and allow external modification
+    protected List<DataPoint> data = new ArrayList<>();
+
+    public PlottableData(String name) {
+        super(name);
+    }
+
+    protected PlottableData(String name, XYAdapter adapter) {
+        super(name, adapter);
+    }
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
@@ -94,17 +106,6 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    //TODO replace by ObservableList and allow external modification
-    protected List<DataPoint> data = new ArrayList<>();
-
-    public PlottableData(String name) {
-        super(name);
-    }
-
-    protected PlottableData(String name, XYAdapter adapter) {
-        super(name, adapter);
-    }
-
     public void fillData(Iterable<DataPoint> it) {
         this.data = new ArrayList<>();
         for (DataPoint dp : it) {
@@ -123,7 +124,7 @@ public class PlottableData extends XYPlottable {
     }
 
     @Override
-    public List<DataPoint> data() {
-        return this.data;
+    public DataPoint getPoint(int i) {
+        return data.get(i);
     }
 }

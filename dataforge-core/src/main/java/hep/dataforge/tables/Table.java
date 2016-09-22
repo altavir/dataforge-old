@@ -25,7 +25,6 @@ import java.util.Comparator;
 import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 import static hep.dataforge.tables.Filtering.getTagCondition;
 import static hep.dataforge.tables.Filtering.getValueCondition;
@@ -48,10 +47,6 @@ public interface Table extends PointSource, Serializable {
     int size();
 
     Table transform(UnaryOperator<Stream<DataPoint>> streamTransform);
-
-    default Stream<DataPoint> stream() {
-        return StreamSupport.stream(this.spliterator(), false);
-    }
 
     default Table sort(Comparator<DataPoint> comparator) {
         return transform(stream -> stream.sorted(comparator));

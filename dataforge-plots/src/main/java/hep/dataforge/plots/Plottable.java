@@ -16,7 +16,6 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
-import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
@@ -25,9 +24,10 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
-import java.util.List;
-import java.util.stream.Collectors;
+
 import java.util.stream.Stream;
+
+import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 
 /**
  * Единичный набор данных для отрисовки
@@ -59,13 +59,17 @@ public interface Plottable<T extends PointAdapter> extends Named, Annotated, Con
      */
     Stream<DataPoint> dataStream(Meta dataConfiguration);
 
-    default List<DataPoint> data() {
-        return data(Meta.empty());
+    /**
+     * Get the point with number i without queries. Default implementation of this method is rather slow,
+     * but static data structures could override it with random access.
+     *
+     * @param i
+     * @return
+     */
+    default DataPoint getPoint(int i) {
+        return dataStream().skip(i - 1).findFirst().get();
     }
 
-    default List<DataPoint> data(Meta dataConfiguration) {
-        return dataStream(dataConfiguration).collect(Collectors.toList());
-    }
 
     /**
      * Add plottable state listener
