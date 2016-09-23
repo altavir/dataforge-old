@@ -23,24 +23,24 @@ import java.util.Iterator;
  *
  * @author darksnake
  */
-public class DynamicPlottableSet extends PlottableSet<DynamicPlottable> {
+public class DynamicPlottableGroup extends PlottableGroup<DynamicPlottable> {
 
-    public static DynamicPlottableSet buildSet(String... names) {
-        DynamicPlottableSet set= new DynamicPlottableSet();
+    public static DynamicPlottableGroup buildSet(String... names) {
+        DynamicPlottableGroup set= new DynamicPlottableGroup();
         for(String name: names){
             set.addPlottable(new DynamicPlottable(name, name));
         }
         return set;
     }
 
-    public DynamicPlottableSet() {
+    public DynamicPlottableGroup() {
     }
 
-    public DynamicPlottableSet(DynamicPlottable... plottables) {
+    public DynamicPlottableGroup(DynamicPlottable... plottables) {
         super(plottables);
     }
 
-    public DynamicPlottableSet(Iterable<DynamicPlottable> plottables) {
+    public DynamicPlottableGroup(Iterable<DynamicPlottable> plottables) {
         super(plottables);
     }
 

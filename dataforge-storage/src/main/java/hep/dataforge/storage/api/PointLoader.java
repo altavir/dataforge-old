@@ -40,29 +40,12 @@ public interface PointLoader extends Loader, PointSource {
 
     public static final String LOADER_FORMAT_KEY = "format";
 
-//    /**
-//     * Pull the whole loader as a data set.
-//     *
-//     * @return
-//     * @throws StorageException
-//     */
-//    Table asTable() throws StorageException;
-    
     /**
      * The minimal format for points in this loader. Is null for unformatted loader
      * @return 
      */
     @Override
     TableFormat getFormat();
-
-//    /**
-//     * Build a custom index. In case it is a map index it could be stored
-//     * somewhere.
-//     *
-//     * @param indexMeta
-//     * @return
-//     */
-//    Index<DataPoint> buildIndex(Meta indexMeta);
 
     /**
      * Get index for given value name. If name is null or empty, default point
