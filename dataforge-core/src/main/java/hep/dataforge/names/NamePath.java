@@ -110,7 +110,7 @@ class NamePath implements Name {
     @Override
     public String toString() {
         Iterable<String> it = names.stream().map((NameToken token) -> token.toString())::iterator;
-        String sum = String.join(".", it);
+        String sum = String.join(NAME_TOKEN_SEPARATOR, it);
         if (nameSpace().isEmpty()) {
             return sum;
         } else {

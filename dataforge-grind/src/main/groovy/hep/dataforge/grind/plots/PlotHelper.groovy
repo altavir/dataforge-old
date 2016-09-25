@@ -19,7 +19,7 @@ package hep.dataforge.grind.plots
 import hep.dataforge.context.Context
 import hep.dataforge.plots.PlotHolder
 import hep.dataforge.plots.PlotsPlugin
-import hep.dataforge.plots.XYPlottable
+import hep.dataforge.plots.data.XYPlottable
 import hep.dataforge.plots.data.PlottableData
 import hep.dataforge.plots.data.PlottableXYFunction
 import hep.dataforge.tables.PointSource

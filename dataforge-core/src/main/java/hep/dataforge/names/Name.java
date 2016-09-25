@@ -114,7 +114,7 @@ public interface Name {
     }
 
     static String joinString(String... segments) {
-        return join(segments).toString();
+        return String.join(NAME_TOKEN_SEPARATOR, segments);
     }
 
     static Name join(Name... segments) {

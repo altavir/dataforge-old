@@ -17,7 +17,7 @@ package hep.dataforge.plots.fx;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import javafx.embed.swing.SwingFXUtils;
@@ -88,12 +88,14 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlott
             LoggerFactory.getLogger(getClass()).warn("The provided Plottable is not a subclass of XYPlottable");
         }
 
-        XYAdapter adapter = plottable.adapter();
+        XYAdapter adapter = plottable.getAdapter();
 
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();
 
-        series.getData().addAll(plottable.dataStream()
+        //TODO apply filtering here
+
+        series.getData().addAll(plottable.getData().stream()
                 .map(point -> new XYChart.Data<>(xFunc.apply(point), yFunc.apply(point)))
                 .collect(Collectors.toList()));
 

@@ -16,16 +16,16 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 
+import java.util.List;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.function.Function;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * A class for dynamic function values calculation for plot
@@ -34,25 +34,7 @@ import java.util.stream.Stream;
  */
 public class PlottableXYFunction extends XYPlottable {
 
-    private static final int DEFAULT_NODES_NUMBER = 200;
-    private final NavigableMap<Double, Double> cache = new TreeMap<>();
-    private final ObjectProperty<Function<Double, Double>> function = new SimpleObjectProperty();
-    private final DoubleProperty lo = new SimpleDoubleProperty();
-    private final DoubleProperty hi = new SimpleDoubleProperty();
-    private final IntegerProperty density = new SimpleIntegerProperty(DEFAULT_NODES_NUMBER);
-    /**
-     *
-     * @param name
-     */
-    public PlottableXYFunction(String name) {
-        super(name);
-        getConfig().setValue("showLine", true);
-        getConfig().setValue("showSymbol", false);
-        function.addListener((ObservableValue<? extends Function<Double, Double>> observable,
-                Function<Double, Double> oldValue, Function<Double, Double> newValue) -> {
-            invalidateCache();
-        });
-    }
+    private static final int DEFAULT_DENSITY = 200;
 
     public static PlottableXYFunction plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
         PlottableXYFunction p = new PlottableXYFunction(name);
@@ -61,6 +43,29 @@ public class PlottableXYFunction extends XYPlottable {
         p.setDensity(numPoints, false);
         return p;
     }
+
+    private final NavigableMap<Double, Double> cache = new TreeMap<>();
+    private final ObjectProperty<Function<Double, Double>> function = new SimpleObjectProperty();
+    private final DoubleProperty lo = new SimpleDoubleProperty();
+    private final DoubleProperty hi = new SimpleDoubleProperty();
+    /**
+     * The minimal number of points per range
+     */
+    private final IntegerProperty density = new SimpleIntegerProperty(DEFAULT_DENSITY);
+
+    /**
+     * @param name
+     */
+    public PlottableXYFunction(String name) {
+        super(name);
+        getConfig().setValue("showLine", true);
+        getConfig().setValue("showSymbol", false);
+        function.addListener((ObservableValue<? extends Function<Double, Double>> observable,
+                              Function<Double, Double> oldValue, Function<Double, Double> newValue) -> {
+            invalidateCache();
+        });
+    }
+
 
     public void setFunction(Function<Double, Double> function) {
         this.function.set(function);
@@ -80,9 +85,8 @@ public class PlottableXYFunction extends XYPlottable {
     }
 
     /**
-     *
-     * @param from lower range boundary
-     * @param to upper range boundary
+     * @param from   lower range boundary
+     * @param to     upper range boundary
      * @param notify notify listeners
      */
     public void setXRange(double from, double to, boolean notify) {
@@ -110,9 +114,8 @@ public class PlottableXYFunction extends XYPlottable {
      * Split region into uniform blocks, then check if each block contains at
      * least one cached point and calculate additional point in the center of
      * the block if it does not.
-     *
+     * <p>
      * If function is not set or desired density not positive does nothing.
-     *
      */
     protected void validateCache() {
         if (function.get() == null && density.get() > 0) {
@@ -165,18 +168,22 @@ public class PlottableXYFunction extends XYPlottable {
     }
 
     @Override
-    public Stream<DataPoint> dataStream(Meta cfg) {
+    protected List<DataPoint> getRawData(Meta query) {
         //recalculate cache with default values
-        if (cfg.hasNode("xRange")) {
-            this.lo.set(cfg.getDouble("xRange.from", lo.get()));
-            this.hi.set(cfg.getDouble("xRange.to", hi.get()));
+        if (query.hasValue("xRange.from")) {
+            this.lo.set(query.getDouble("xRange.from"));
         }
-        if (cfg.hasValue("density")) {
-            this.density.set(cfg.getInt("density"));
+        if (query.hasValue("xRange.to")) {
+            this.hi.set(query.getDouble("xRange.to"));
+        }
+        if (query.hasValue("density")) {
+            this.density.set(query.getInt("density"));
         }
         validateCache();
-        return filterDataStream(cache.entrySet().stream()
-                .map(entry -> new MapPoint(new String[]{"x", "y"}, entry.getKey(), entry.getValue())), cfg);
+        return cache.entrySet().stream()
+                .map(entry -> new MapPoint(new String[]{"x", "y"}, entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
     }
+
 
 }

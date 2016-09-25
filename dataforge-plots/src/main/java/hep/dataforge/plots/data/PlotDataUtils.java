@@ -6,22 +6,14 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.XYPlottable;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.Table;
-import hep.dataforge.tables.TableFormat;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.*;
 import hep.dataforge.values.Value;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class PlotDataUtils {
@@ -38,10 +30,10 @@ public class PlotDataUtils {
         names.add("x");
 
         for (XYPlottable pl : plottables) {
-            XYAdapter adapter = pl.adapter();
+            XYAdapter adapter = pl.getAdapter();
 
             names.add(pl.getName());
-            pl.dataStream().forEach(point -> {
+            pl.getData().stream().forEach(point -> {
                 Value x = adapter.getX(point);
                 MapPoint.Builder mdp;
                 if (points.containsKey(x)) {
@@ -59,4 +51,25 @@ public class PlotDataUtils {
         res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }
+
+    /**
+     * Build a group from single point stream but multiple y-s
+     *
+     * @param xName
+     * @param yNames
+     * @param source
+     * @return
+     */
+    public static PlottableGroup<PlottableData> buildGroup(String xName, Collection<String> yNames, Stream<DataPoint> source) {
+        List<DataPoint> points = source.collect(Collectors.toList());
+        List<PlottableData> plottables = yNames.stream().map(yName -> {
+            PlottableData pl = new PlottableData(yName);
+            pl.setAdapter(new XYAdapter(xName, yName));
+            return pl;
+        }).collect(Collectors.toList());
+        plottables.forEach(pl-> pl.setData(points));
+
+        return new PlottableGroup<>(plottables);
+    }
+
 }

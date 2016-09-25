@@ -23,24 +23,24 @@ import java.util.Iterator;
  *
  * @author darksnake
  */
-public class DynamicPlottableSet extends PlottableSet<DynamicPlottable> {
+public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
 
-    public static DynamicPlottableSet buildSet(String... names) {
-        DynamicPlottableSet set= new DynamicPlottableSet();
+    public static TimePlottableGroup buildSet(String... names) {
+        TimePlottableGroup set= new TimePlottableGroup();
         for(String name: names){
-            set.addPlottable(new DynamicPlottable(name, name));
+            set.addPlottable(new TimePlottable(name, name));
         }
         return set;
     }
 
-    public DynamicPlottableSet() {
+    public TimePlottableGroup() {
     }
 
-    public DynamicPlottableSet(DynamicPlottable... plottables) {
+    public TimePlottableGroup(TimePlottable... plottables) {
         super(plottables);
     }
 
-    public DynamicPlottableSet(Iterable<DynamicPlottable> plottables) {
+    public TimePlottableGroup(Iterable<TimePlottable> plottables) {
         super(plottables);
     }
 
@@ -76,7 +76,7 @@ public class DynamicPlottableSet extends PlottableSet<DynamicPlottable> {
     }
 
     @Override
-    public Iterator<DynamicPlottable> iterator() {
+    public Iterator<TimePlottable> iterator() {
         return this.map.values().iterator();
     }
 }

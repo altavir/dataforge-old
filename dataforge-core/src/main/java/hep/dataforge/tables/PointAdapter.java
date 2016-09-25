@@ -26,9 +26,7 @@ import java.io.Serializable;
  */
 public interface PointAdapter extends Annotated, Serializable {
     
-    public static final String WEIGHT = "@weight";    
-
-    public static final String DATA_ADAPTER_ANNOTATION_NAME = "adapter";
+    public static final String DATA_ADAPTER_KEY = "adapter";
 
     /**
      * Аннотация, описывающая данный тип адаптера

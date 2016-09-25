@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.XYPlottable;
+import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
@@ -265,7 +265,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             });
         } else {
             JFCDataWrapper wrapper = (JFCDataWrapper) plot.getDataset(index.indexOf(name));
-            wrapper.clearCache();
+            //TODO add support for ObservableLists and dynamic data sets
+            wrapper.invalidateData();
             run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
         }
     }

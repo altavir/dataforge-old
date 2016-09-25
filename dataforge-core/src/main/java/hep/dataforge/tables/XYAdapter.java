@@ -15,30 +15,42 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 
 /**
- * Интерпретатор полей DataPoint
+ * An adapter to correctly interpret DataPoint into X-Y plot or model. could have multiple Y-s
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@ValueDef(name = "x", def = "x", info = "X value name")
-@ValueDef(name = "y", def = "y", info = "Y value name")
-@ValueDef(name = "xErr", def = "xErr", info = "X error value name")
-@ValueDef(name = "yErr", def = "yErr", info = "Y error value name")
+@NodeDef(name = "x", info = "x axis mapping", target = "method::hep.dataforge.tables.AbstractPointAdapter.getAxisMeta")
+@NodeDef(name = "y", info = "y axis mapping", target = "method::hep.dataforge.tables.AbstractPointAdapter.getAxisMeta")
 public class XYAdapter extends AbstractPointAdapter {
+
+    public static final String X_AXIS = "x";
+    public static final String Y_AXIS = "y";
+
+    public static final String X_VALUE_KEY = Name.joinString(X_AXIS, VALUE_KEY);
+    public static final String X_ERROR_KEY = Name.joinString(X_AXIS, ERROR_KEY);
+    public static final String Y_VALUE_KEY = Name.joinString(Y_AXIS, VALUE_KEY);
+    public static final String Y_ERROR_KEY = Name.joinString(Y_AXIS, ERROR_KEY);
+
 
     public static final XYAdapter DEFAULT_ADAPTER = new XYAdapter();
 
-    public static final String X_NAME = "x";
-    public static final String Y_NAME = "y";
-    public static final String X_ERR_NAME = "xErr";
-    public static final String Y_ERR_NAME = "yErr";
+    public static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
+        return new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
+                .putValue(X_VALUE_KEY, xName)
+                .putValue(Y_VALUE_KEY, yName)
+                .putValue(X_ERROR_KEY, xErrName)
+                .putValue(Y_ERROR_KEY, yErrName);
+    }
 
     protected XYAdapter() {
     }
@@ -48,13 +60,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
-        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_ANNOTATION_NAME)
-                .putValue(X_NAME, xName)
-                .putValue(Y_NAME, yName)
-                .putValue(X_ERR_NAME, xErrName)
-                .putValue(Y_ERR_NAME, yErrName)
-                .build()
-        );
+        super(buildAdapterMeta(xName, xErrName, yName, yErrName));
     }
 
     public XYAdapter(String xName, String yName, String yErrName) {
@@ -65,25 +71,76 @@ public class XYAdapter extends AbstractPointAdapter {
         this(xName, null, yName, null);
     }
 
+
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapPoint(new String[]{getValueName(X_NAME), getValueName(Y_NAME), getValueName(Y_ERR_NAME)},
+        return new MapPoint(new String[]{getValueName(X_VALUE_KEY), getValueName(Y_VALUE_KEY), getValueName(Y_ERROR_KEY)},
                 x, y, yErr);
     }
 
+    private String yAxis(int index) {
+        if (getYCount() == 1) {
+            return Y_AXIS;
+        } else {
+            return Y_AXIS + "[" + index + "]";
+        }
+    }
+
+    /**
+     * The number of y axis explicitly defined. If no y axis defined returns 1.
+     *
+     * @return
+     */
+    public int getYCount() {
+        if (meta().hasNode(Y_AXIS)) {
+            return this.meta().getNodes(Y_AXIS).size();
+        } else return 1;
+    }
+
+    public String getYTitle(int i) {
+        return meta().getNodes(Y_AXIS).get(i).getString("axisTitle", getValueName(VALUE_KEY));
+    }
+
     public Value getX(DataPoint point) {
-        return getFrom(point, X_NAME);
+        return getValue(point, X_AXIS);
     }
 
     public Value getXerr(DataPoint point) {
-        return getFrom(point, X_ERR_NAME, 0d);
+        return getError(point, X_AXIS);
     }
 
+    /**
+     * Get y value for first y axis
+     *
+     * @param point
+     * @return
+     */
     public Value getY(DataPoint point) {
-        return getFrom(point, Y_NAME);
+        return getValue(point, Y_AXIS);
     }
 
-    public Value getYerr(DataPoint point) throws NameNotFoundException {
-        return getFrom(point, Y_ERR_NAME, 0d);
+    /**
+     * get y error for first y axis
+     *
+     * @param point
+     * @return
+     */
+    public Value getYerr(DataPoint point) {
+        return getError(point, Y_AXIS);
+    }
+
+    /**
+     * get y value for any y axis.
+     *
+     * @param point
+     * @param index
+     * @return
+     */
+    public Value getY(DataPoint point, int index) {
+        return getValue(point, yAxis(index));
+    }
+
+    public Value getYerr(DataPoint point, int index) {
+        return getError(point, yAxis(index));
     }
 
     /**
@@ -93,7 +150,7 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public double getYUpper(DataPoint point) {
-        return point.getDouble(getValueName("yUp"), getY(point).doubleValue() + getYerr(point).doubleValue());
+        return getUpperBound(point, Y_AXIS);
     }
 
     /**
@@ -103,7 +160,7 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public double getYLower(DataPoint point) {
-        return point.getDouble(getValueName("yLo"), getY(point).doubleValue() - getYerr(point).doubleValue());
+        return getLowerBound(point, Y_AXIS);
     }
 
     /**
@@ -113,7 +170,7 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public double getXUpper(DataPoint point) {
-        return point.getDouble(getValueName("xUp"), getX(point).doubleValue() + getXerr(point).doubleValue());
+        return getUpperBound(point, X_AXIS);
     }
 
     /**
@@ -123,48 +180,23 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public double getXLower(DataPoint point) {
-        return point.getDouble(getValueName("xLo"), getX(point).doubleValue() - getXerr(point).doubleValue());
+        return getLowerBound(point, X_AXIS);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param point
-     * @return
-     */
-    public double getWeight(DataPoint point) throws NameNotFoundException {
-        if (point.names().contains(WEIGHT)) {
-            return point.getDouble(WEIGHT);
-        } else {
-            double r = getYerr(point).doubleValue();
-            return 1 / (r * r);
-        }
+    public double getYUpper(DataPoint point, int index) {
+        return getUpperBound(point, yAxis(index));
+    }
+
+    public double getYLower(DataPoint point, int index) {
+        return getLowerBound(point, yAxis(index));
     }
 
     public boolean providesXError(DataPoint point) {
-        return point.hasValue(getValueName(X_ERR_NAME));
+        return point.hasValue(getValueName(X_ERROR_KEY));
     }
 
     public boolean providesYError(DataPoint point) {
-        return point.hasValue(getValueName(Y_ERR_NAME));
-    }
-
-    public DataPoint mapTo(DataPoint point, String xName, String yName, String xErrName, String yErrName) {
-        //TODO replace by virtual point
-        MapPoint.Builder res = new MapPoint.Builder();
-        res.putValue(xName, getX(point));
-        res.putValue(yName, getY(point));
-        if (providesXError(point)) {
-            res.putValue(xErrName, getXerr(point));
-        }
-        if (providesYError(point)) {
-            res.putValue(yErrName, getYerr(point));
-        }
-        return res.build();
-    }
-
-    public DataPoint mapToDefault(DataPoint point) {
-        return mapTo(point, X_NAME, Y_NAME, X_ERR_NAME, Y_ERR_NAME);
+        return point.hasValue(getValueName(Y_ERROR_KEY));
     }
 
     /**
@@ -173,9 +205,11 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public TableFormat getFormat() {
+        //FIXME wrong table format here
+        //TODO move to utils
         return new TableFormatBuilder()
-                .addNumber(X_NAME)
-                .addNumber(Y_NAME)
+                .addNumber(getValueName(X_VALUE_KEY))
+                .addNumber(getValueName(Y_VALUE_KEY))
                 .build();
     }
 

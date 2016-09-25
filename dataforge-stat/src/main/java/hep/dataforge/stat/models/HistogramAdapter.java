@@ -37,20 +37,13 @@ public class HistogramAdapter extends AbstractPointAdapter {
     }
     
     public HistogramAdapter(String binBeginName, String binEndName, String countName) {
-        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_ANNOTATION_NAME)
+        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
                 .putValue(BIN_BEGIN_NAME, binBeginName)
                 .putValue(BIN_END_NAME, binEndName)
                 .putValue(COUNT_NAME, countName)
                 .build());
     }
 
-    public double getWeight(DataPoint point) {
-        if (point.names().contains(WEIGHT)) {
-            return point.getDouble(WEIGHT);
-        } else {
-            return 1 / getCount(point);
-        }
-    }
 
     public double getBinBegin(DataPoint point) {
         return this.getFrom(point, BIN_BEGIN_NAME).doubleValue();

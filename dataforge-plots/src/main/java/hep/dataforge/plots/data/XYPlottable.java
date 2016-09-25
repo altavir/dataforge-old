@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,24 +13,27 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots.data;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 
+import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
 
 /**
- * Подкласс для рисования двумерных картинок
+ * Plottable with x and y axis. It is possible to have multiple y axis
  *
  * @author Alexander Nozik
  */
@@ -44,34 +47,45 @@ import static hep.dataforge.meta.Configuration.FINAL_TAG;
 @ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset",
         target = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
-public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implements Plottable<XYAdapter> {
+public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
 
     public XYPlottable(String name) {
         super(name);
     }
 
-    public XYPlottable(String name, XYAdapter adapter) {
-        super(name, adapter);
+    public List<DataPoint> getData(Value from, Value to) {
+        return getData(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
     }
 
-    public Stream<DataPoint> plotData(Value from, Value to) {
-        return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
+    public List<DataPoint> getData(Value from, Value to, int numPoints) {
+        return getData(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to).putValue("numPoints", numPoints));
     }
 
-    public Stream<DataPoint> plotData(Value from, Value to, int maxPoints) {
-        return dataStream(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to).putValue("maxPoints", maxPoints));
+    /**
+     * Apply range filters to data
+     * @param query
+     * @return
+     */
+    @Override
+    public List<DataPoint> getData(Meta query) {
+        if (query.isEmpty()) {
+            return getRawData(query);
+        } else {
+            return filterDataStream(getRawData(query).stream(), query).collect(Collectors.toList());
+        }
     }
 
+    protected abstract List<DataPoint> getRawData(Meta query);
 
     protected Stream<DataPoint> filterXRange(Stream<DataPoint> data, Meta xRange) {
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);
         if (from != Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.isBetween(adapter().getX(point), from, to));
+            return data.filter(point -> ValueUtils.isBetween(getAdapter().getX(point), from, to));
         } else if (from == Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(adapter().getX(point), to) < 0);
+            return data.filter(point -> ValueUtils.compare(getAdapter().getX(point), to) < 0);
         } else if (to == Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(adapter().getX(point), from) > 0);
+            return data.filter(point -> ValueUtils.compare(getAdapter().getX(point), from) > 0);
         } else {
             return data;
         }
@@ -90,10 +104,5 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> implement
     @Override
     protected XYAdapter buildAdapter(Meta adapterMeta) {
         return new XYAdapter(adapterMeta);
-    }
-
-    @Override
-    protected XYAdapter defaultAdapter() {
-        return XYAdapter.DEFAULT_ADAPTER;
     }
 }

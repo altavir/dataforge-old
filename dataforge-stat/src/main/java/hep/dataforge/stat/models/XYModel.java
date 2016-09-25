@@ -35,6 +35,8 @@ import static java.lang.Math.sqrt;
  */
 public class XYModel extends AbstractModel<XYAdapter> {
 
+    public static final String WEIGHT = "@weight";
+
     private final ParametricFunction source;
 
 
@@ -87,7 +89,16 @@ public class XYModel extends AbstractModel<XYAdapter> {
     /** {@inheritDoc} */
     @Override
     public double dispersion(DataPoint point, NamedValueSet pars) {
-        return 1 / adapter.getWeight(point);
+        return 1d / getWeight(point);
+    }
+
+    private double getWeight(DataPoint point){
+        if (point.names().contains(WEIGHT)) {
+            return point.getDouble(WEIGHT);
+        } else {
+            double r = adapter.getYerr(point).doubleValue();
+            return 1d / (r * r);
+        }
     }
 
     /** {@inheritDoc} */
@@ -106,11 +117,11 @@ public class XYModel extends AbstractModel<XYAdapter> {
         double base; // нормировка
         double xerr = adapter.getXerr(point).doubleValue();
         if (xerr > 0) {
-            base = log(2 * Math.PI * sqrt(disp) * xerr);
+            base = log(2d * Math.PI * sqrt(disp) * xerr);
         } else {
-            base = -log(2 * Math.PI * disp) / 2;
+            base = -log(2d * Math.PI * disp) / 2d;
         }
-        return -dist * dist / 2 / disp + base;// Внимание! Тут не хи-квадрат, а логарифм правдоподобия
+        return -dist * dist / 2d / disp + base;// Внимание! Тут не хи-квадрат, а логарифм правдоподобия
     }
 
     /** {@inheritDoc} */
@@ -151,7 +162,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      *
      * @param x a double.
-     * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param set
      * @return a double.
      */
     public double value(double x, NamedValueSet set) {
@@ -163,7 +174,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      *
      * @param parName a {@link java.lang.String} object.
      * @param x a double.
-     * @param set a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param set
      * @return a double.
      */
     public double derivValue(String parName, double x, NamedValueSet set) {

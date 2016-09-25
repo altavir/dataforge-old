@@ -3,14 +3,15 @@ package hep.dataforge.storage.servlet;
 import freemarker.template.Template;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.*;
+import org.slf4j.LoggerFactory;
+import ratpack.handling.Context;
+import ratpack.handling.Handler;
+
 import java.io.StringWriter;
 import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.LoggerFactory;
-import ratpack.handling.Context;
-import ratpack.handling.Handler;
 
 /**
  * Created by darksnake on 13-Dec-15.
@@ -124,7 +125,7 @@ public class StorageRatpackHandler implements Handler {
     }
 
     protected void renderLoader(StringBuilder b, Loader loader) {
-        String href = "/storage?path=" + loader.getFullPath();
+        String href = "/storage?path=" + loader.getPath();
         b.append(String.format("<li><a href=\"%s\">%s</a> (%s)</li>", href, loader.getName(), loader.getType()));
     }
 

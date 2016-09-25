@@ -5,35 +5,39 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+
 import java.util.HashMap;
 import java.util.Map;
 
 public abstract class AbstractPointAdapter implements PointAdapter {
 
+    public static final String VALUE_KEY = "value";
+    public static final String ERROR_KEY = "err";
+    public static final String LO_KEY = "lo";
+    public static final String UP_KEY = "up";
+
     private final Meta meta;
     private final Map<String, String> nameCache = new HashMap<>();
 
     public AbstractPointAdapter() {
-        meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
+        meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
     }
 
     public AbstractPointAdapter(Meta meta) {
         if (meta == null) {
-            this.meta = Meta.buildEmpty(DATA_ADAPTER_ANNOTATION_NAME);
+            this.meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
         } else {
             this.meta = meta;
         }
     }
 
-    /**
-     *
-     * @param map
-     */
     public AbstractPointAdapter(Map<String, String> map) {
-        MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_ANNOTATION_NAME);
+        MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
         map.entrySet().stream().forEach((entry) -> {
             mb.setValue(entry.getKey(), entry.getValue());
         });
@@ -52,6 +56,52 @@ public abstract class AbstractPointAdapter implements PointAdapter {
 
     public Value getFrom(DataPoint point, String component, Object def) {
         return point.getValue(getValueName(component), Value.of(def));
+    }
+
+    /**
+     * Get node for given axis
+     *
+     * @param axis
+     * @return
+     */
+    @ValueDef(name = "value", def = "value", required = true, info = "value key")
+    @ValueDef(name = "err", def = "err", info = "error key")
+    @ValueDef(name = "up", def = "up", info = "upper boundary key")
+    @ValueDef(name = "lo", def = "lo", info = "lower boundary key")
+    @ValueDef(name = "label", def = "label", info = "point label key")
+    @ValueDef(name = "axisTitle", info = "The title of this axis. By default axis name is used.")
+    public Meta getAxisMeta(String axis) {
+        return this.meta().getNode(axis, Meta.empty());
+    }
+
+    public Value getValue(DataPoint point, String axis) {
+        return getFrom(point, Name.joinString(axis, VALUE_KEY), Value.NULL);
+    }
+
+    public Value getError(DataPoint point, String axis) {
+        return getFrom(point, Name.joinString(axis, ERROR_KEY), 0);
+    }
+
+    /**
+     * Upper bound on given axis
+     *
+     * @param point
+     * @return
+     */
+    public double getUpperBound(DataPoint point, String axis) {
+        return point.getDouble(getValueName(Name.joinString(axis, UP_KEY)),
+                getValue(point, axis).doubleValue() + getError(point, axis).doubleValue());
+    }
+
+    /**
+     * Lower bound on given axis
+     *
+     * @param point
+     * @return
+     */
+    public double getLowerBound(DataPoint point, String axis) {
+        return point.getDouble(getValueName(Name.joinString(axis, LO_KEY)),
+                getValue(point, axis).doubleValue() - getError(point, axis).doubleValue());
     }
 
     /**

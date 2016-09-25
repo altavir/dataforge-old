@@ -18,7 +18,6 @@ package hep.dataforge.plots.data;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointSource;
@@ -27,27 +26,16 @@ import hep.dataforge.utils.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- *
  * @author Alexander Nozik
  */
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
-
-    //TODO replace by ObservableList and allow external modification
-    protected List<DataPoint> data = new ArrayList<>();
-
-    public PlottableData(String name) {
-        super(name);
-    }
-
-    protected PlottableData(String name, XYAdapter adapter) {
-        super(name, adapter);
-    }
 
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
@@ -70,7 +58,7 @@ public class PlottableData extends XYPlottable {
 
             data.add(point.build());
         }
-        plot.fillData(data);
+        plot.setData(data);
         return plot;
     }
 
@@ -80,7 +68,8 @@ public class PlottableData extends XYPlottable {
 
     public static PlottableData plot(String name, XYAdapter adapter, boolean showErrors) {
         MetaBuilder builder = new MetaBuilder("dataPlot").setValue("showErrors", showErrors);
-        PlottableData plot = new PlottableData(name, adapter);
+        PlottableData plot = new PlottableData(name);
+        plot.setAdapter(adapter);
         plot.configure(builder);
         return plot;
     }
@@ -91,7 +80,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, PointSource data) {
+    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, Iterable<DataPoint> data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         if (!meta.isEmpty()) {
@@ -100,31 +89,45 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, XYAdapter adapter, PointSource data) {
-        PlottableData plot = plot(name, adapter, true);
-        plot.fillData(data);
-        return plot;
+
+    //TODO replace by ObservableList and allow external modification
+    protected List<DataPoint> data = new ArrayList<>();
+
+    public PlottableData(String name) {
+        super(name);
     }
 
-    public void fillData(Iterable<DataPoint> it) {
-        this.data = new ArrayList<>();
+    /**
+     * Non safe method to set data to this plottable. The list must be immutable
+     *
+     * @param data
+     */
+    public void setData(@NonNull List<DataPoint> data) {
+        this.data = data;
+    }
+
+    public void fillData(Iterable<DataPoint> it, boolean append) {
+        if (this.data == null || !append) {
+            this.data = new ArrayList<>();
+        }
         for (DataPoint dp : it) {
             data.add(dp);
         }
         notifyDataChanged();
     }
 
-    protected void setData(@NonNull List<DataPoint> data) {
-        this.data = data;
+    /**
+     * Safe mtethod to add data
+     *
+     * @param it
+     */
+    public void fillData(@NonNull Iterable<DataPoint> it) {
+        fillData(it, false);
     }
 
     @Override
-    public Stream<DataPoint> dataStream(Meta dataConfiguration) {
-        return filterDataStream(data.stream(), dataConfiguration);
+    protected List<DataPoint> getRawData(Meta query) {
+        return data;
     }
 
-    @Override
-    public DataPoint getPoint(int i) {
-        return data.get(i);
-    }
 }

@@ -6,42 +6,43 @@
 
 package hep.dataforge.plots.data
 
-import java.time.Instant
-import spock.lang.Specification
 import hep.dataforge.values.Value
+import spock.lang.Specification
+
 import java.time.Duration
+import java.time.Instant
 
 /**
  *
  * @author darksnake
  */
-class DynamicPlottableTest extends Specification {
+class TimePlottableTest extends Specification {
 
-    def "test maxItems"(){
+    def "test maxItems"() {
         when:
-        DynamicPlottable pl = new DynamicPlottable("test",null);
+        TimePlottable pl = new TimePlottable("test", null);
         pl.setMaxItems(50);
         Instant time = Instant.now();
-        for(int i = 0; i<60; i++){
+        for (int i = 0; i < 60; i++) {
             time = time.plusMillis(10);
-            pl.put(time,Value.of(time.toEpochMilli()));
+            pl.put(time, Value.of(time.toEpochMilli()));
         }
         then:
         pl.size() == 50;
     }
-    
-    def "test maxAge"(){
+
+    def "test maxAge"() {
         when:
-        DynamicPlottable pl = new DynamicPlottable("test",null);
+        TimePlottable pl = new TimePlottable("test", null);
         pl.setMaxAge(Duration.ofMillis(500));
         Instant time = Instant.now();
-        for(int i = 0; i<60; i++){
+        for (int i = 0; i < 60; i++) {
             time = time.plusMillis(10);
-            pl.put(time,Value.of(time.toEpochMilli()));
+            pl.put(time, Value.of(time.toEpochMilli()));
         }
         then:
         pl.size() == 52;
-    }    
-	
+    }
+
 }
 

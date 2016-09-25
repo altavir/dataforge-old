@@ -19,6 +19,7 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.data.XYPlottable;
 
 /**
  *

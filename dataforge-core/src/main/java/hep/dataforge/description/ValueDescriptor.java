@@ -104,7 +104,7 @@ public class ValueDescriptor extends DescriptorBase implements Named {
         if (meta().hasValue("type")) {
             return meta().getValue("type").listValue()
                     .stream()
-                    .<ValueType>map((v) -> ValueType.valueOf(v.stringValue()))
+                    .map((v) -> ValueType.valueOf(v.stringValue()))
                     .collect(Collectors.toList());
         } else {
             return Collections.emptyList();
@@ -146,7 +146,7 @@ public class ValueDescriptor extends DescriptorBase implements Named {
      * @return
      */
     public Value defaultValue() {
-        return meta().getValue("default", null);
+        return meta().getValue("default", Value.NULL);
     }
 
     /**

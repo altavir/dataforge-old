@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots.data;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.io.envelopes.Envelope;
@@ -21,6 +21,8 @@ import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.plots.PlotStateListener;
+import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.utils.NonNull;
 import hep.dataforge.utils.ReferenceRegistry;
@@ -33,7 +35,7 @@ import java.util.stream.Collectors;
 /**
  * @author darksnake
  */
-public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable<T> {
+public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable {
 
     public static final String ADAPTER_KEY = "adapter";
     public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
@@ -42,10 +44,10 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
     private T adapter;
 
-    public AbstractPlottable(String name, @NonNull T adapter) {
-        this(name);
-        setAdapter(adapter);
-    }
+//    public AbstractPlottable(String name, @NonNull T adapter) {
+//        this(name);
+//        setAdapter(adapter);
+//    }
 
     public AbstractPlottable(@NonNull String name) {
         this.name = name;
@@ -67,29 +69,15 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     }
 
     @Override
-    public T adapter() {
+    public T getAdapter() {
+        //If adapter is not defined, creating new adapter.
         if (adapter == null) {
-            return defaultAdapter();
-        } else {
-            return adapter;
+            adapter = buildAdapter(meta().getNode(ADAPTER_KEY, Meta.empty()));
         }
-    }
-
-    @Override
-    public final void setAdapter(T adapter) {
-        this.adapter = adapter;
-        //Silently update meta to include adapter
-        this.getConfig().putNode(ADAPTER_KEY, adapter.meta(), false);
-    }
-
-    @Override
-    public final void setAdapter(Meta adapterMeta) {
-        setAdapter(buildAdapter(adapterMeta));
+        return adapter;
     }
 
     protected abstract T buildAdapter(Meta adapterMeta);
-
-    protected abstract T defaultAdapter();
 
     /**
      * Notify all listeners that configuration changed
@@ -99,9 +87,10 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     @Override
     protected synchronized void applyConfig(Meta config) {
         getListeners().forEach((l) -> l.notifyConfigurationChanged(getName()));
-        //If adapter is not defined, creating new adapter.
-        if (this.adapter == null && config.hasNode(ADAPTER_KEY)) {
-            setAdapter(config.getNode(ADAPTER_KEY));
+
+        //invalidate adapter
+        if (config.hasNode(ADAPTER_KEY)) {
+            adapter = null;
         }
     }
 
@@ -137,7 +126,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream os = new ObjectOutputStream(baos)) {
-            os.writeObject(this.dataStream().collect(Collectors.toList()));
+            os.writeObject(getData());
 
         } catch (IOException ex) {
             throw new RuntimeException(ex);
@@ -152,6 +141,10 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
      */
     private ReferenceRegistry<PlotStateListener> getListeners() {
         return listeners;
+    }
+
+    public void setAdapter(T adapter) {
+        this.configureNode(ADAPTER_KEY, adapter.meta());
     }
 
 }

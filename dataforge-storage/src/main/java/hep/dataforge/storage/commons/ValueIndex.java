@@ -87,7 +87,7 @@ public interface ValueIndex<T> extends Index<T> {
     }
 
     @Override
-    public default Stream<Supplier<T>> query(Meta query) throws StorageException {
+    default Stream<Supplier<T>> query(Meta query) throws StorageException {
         Value from = query.getValue("from", Value.NULL);
         Value to = query.getValue("to", Value.NULL);
         int limit = query.getInt("limit", -1);

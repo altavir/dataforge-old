@@ -32,7 +32,7 @@ public class PlottableUnWrapper implements UnWrapper<Plottable>{
             String name = envelope.meta().getString("name");
             List<DataPoint> data = (List<DataPoint>) new ObjectInputStream(envelope.getData().getStream()).readObject();
 
-            //Restor always as plottableData
+            //Restore always as plottableData
             PlottableData pl = new PlottableData(name);
             pl.configure(plottableMeta);
             pl.fillData(data);

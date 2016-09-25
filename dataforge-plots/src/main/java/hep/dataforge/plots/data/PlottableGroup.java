@@ -16,21 +16,21 @@ import java.util.Map;
  *
  * @author Alexander Nozik <altavir@gmail.com>
  */
-public class PlottableSet<T extends Plottable> implements  Iterable<T> {
+public class PlottableGroup<T extends Plottable> implements  Iterable<T> {
 
     //TODO replace by obsevable collection
     protected final Map<String, T> map = new LinkedHashMap<>();
 
-    public PlottableSet() {
+    public PlottableGroup() {
     }
 
-    public PlottableSet(T... plottables) {
+    public PlottableGroup(T... plottables) {
         for (T pl : plottables) {
             map.put(pl.getName(), pl);
         }
     }
 
-    public PlottableSet(Iterable<T> plottables) {
+    public PlottableGroup(Iterable<T> plottables) {
         for (T pl : plottables) {
             map.put(pl.getName(), pl);
         }
@@ -40,7 +40,7 @@ public class PlottableSet<T extends Plottable> implements  Iterable<T> {
         map.put(pl.getName(), pl);
     }
 
-    public void removePlottable(DynamicPlottable pl) {
+    public void removePlottable(TimePlottable pl) {
         map.remove(pl.getName());
     }
 

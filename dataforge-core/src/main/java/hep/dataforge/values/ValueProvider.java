@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.navigation.Path;
 import hep.dataforge.navigation.Provider;
 import java.util.List;
+import java.util.function.Supplier;
 
 public interface ValueProvider {
 
@@ -30,7 +31,7 @@ public interface ValueProvider {
      * @param provider
      * @return
      */
-    public static ValueProvider buildFrom(Provider provider) {
+    static ValueProvider buildFrom(Provider provider) {
         if (provider instanceof ValueProvider) {
             return (ValueProvider) provider;
         }
@@ -66,6 +67,14 @@ public interface ValueProvider {
         }
     }
 
+    default Boolean getBoolean(String name, Supplier<Boolean> def) {
+        if (this.hasValue(name)) {
+            return getValue(name).booleanValue();
+        } else {
+            return def.get();
+        }
+    }
+
     default Boolean getBoolean(String name) {
         return getValue(name).booleanValue();
     }
@@ -75,6 +84,14 @@ public interface ValueProvider {
             return getValue(name).doubleValue();
         } else {
             return def;
+        }
+    }
+
+    default Double getDouble(String name, Supplier<Double> def) {
+        if (this.hasValue(name)) {
+            return getValue(name).doubleValue();
+        } else {
+            return def.get();
         }
     }
 
@@ -90,6 +107,14 @@ public interface ValueProvider {
         }
     }
 
+    default Integer getInt(String name, Supplier<Integer> def) {
+        if (this.hasValue(name)) {
+            return getValue(name).intValue();
+        } else {
+            return def.get();
+        }
+    }
+
     default Integer getInt(String name) {
         return getValue(name).intValue();
     }
@@ -99,6 +124,14 @@ public interface ValueProvider {
             return getValue(name).stringValue();
         } else {
             return def;
+        }
+    }
+
+    default String getString(String name, Supplier<String> def) {
+        if (this.hasValue(name)) {
+            return getValue(name).stringValue();
+        } else {
+            return def.get();
         }
     }
 
@@ -114,6 +147,14 @@ public interface ValueProvider {
         }
     }
 
+    default Value getValue(String name, Supplier<Value> def) {
+        if (this.hasValue(name)) {
+            return getValue(name);
+        } else {
+            return def.get();
+        }
+    }
+
     default String[] getStringArray(String name) {
         List<Value> vals = getValue(name).listValue();
         String[] res = new String[vals.size()];
@@ -121,5 +162,13 @@ public interface ValueProvider {
             res[i] = vals.get(i).stringValue();
         }
         return res;
+    }
+
+    default  String[] getStringArray(String name, Supplier<String[]> def) {
+        if (this.hasValue(name)) {
+            return getStringArray(name);
+        } else {
+            return def.get();
+        }
     }
 }

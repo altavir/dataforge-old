@@ -17,7 +17,6 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
@@ -25,11 +24,8 @@ import hep.dataforge.values.Value;
 
 import java.time.Duration;
 import java.time.Instant;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.stream.Stream;
 
 /**
  * A plottable to display dynamic series with limited number of elements. Both
@@ -39,7 +35,7 @@ import java.util.stream.Stream;
  */
 @ValueDef(name = "maxAge", type = "NUMBER", def = "-1", info = "The maximum age of items in milliseconds. 0 means no limit")
 @ValueDef(name = "maxItems", type = "NUMBER", def = "-1", info = "The maximum number of items. 0 means no limit")
-public class DynamicPlottable extends XYPlottable {
+public class TimePlottable extends XYPlottable {
 
     private final DataMap map = new DataMap();
     private final String yName;
@@ -52,13 +48,14 @@ public class DynamicPlottable extends XYPlottable {
      * @param name
      * @param yName
      */
-    public DynamicPlottable(String name, String yName) {
-        super(name, new XYAdapter("timestamp", yName));
+    public TimePlottable(String name, String yName) {
+        super(name);
+        super.setAdapter(new XYAdapter("timestamp", yName));
         this.yName = yName;
     }
 
-    public static DynamicPlottable build(String name, String yName, String color, double thickness) {
-        DynamicPlottable res = new DynamicPlottable(name, yName);
+    public static TimePlottable build(String name, String yName, String color, double thickness) {
+        TimePlottable res = new TimePlottable(name, yName);
         res.getConfig()
                 .setValue("color", color)
                 .setValue("thickness", thickness);
@@ -107,8 +104,8 @@ public class DynamicPlottable extends XYPlottable {
     }
 
     @Override
-    public Stream<DataPoint> dataStream(Meta cfg) {
-        return filterDataStream(map.values().stream(), cfg);
+    protected List<DataPoint> getRawData(Meta query) {
+        return new ArrayList<>(map.values());
     }
 
     public String getYName() {
