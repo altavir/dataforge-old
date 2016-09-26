@@ -19,12 +19,13 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.StorageUtils;
-import hep.dataforge.storage.commons.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
-import java.util.Iterator;
 import org.slf4j.LoggerFactory;
+
+import java.util.Iterator;
 
 /**
  * The point loader that mirrors all points to the secondary storage

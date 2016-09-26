@@ -20,14 +20,11 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.NonNull;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Alexander Nozik
@@ -46,14 +43,14 @@ public class PlottableData extends XYPlottable {
 
         List<DataPoint> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            MapPoint.Builder point = new MapPoint(new String[]{"x", "y"}, x[i], y[i]).builder();
+            MapPoint.Builder point = new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x[i], y[i]).builder();
 
             if (xErrs != null) {
-                point.putValue("xErr", xErrs[i]);
+                point.putValue(XYAdapter.X_ERROR_KEY, xErrs[i]);
             }
 
             if (yErrs != null) {
-                point.putValue("yErr", yErrs[i]);
+                point.putValue(XYAdapter.Y_ERROR_KEY, yErrs[i]);
             }
 
             data.add(point.build());

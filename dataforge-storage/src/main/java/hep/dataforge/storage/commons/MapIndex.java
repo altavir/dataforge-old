@@ -6,7 +6,9 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -65,7 +67,7 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
         if (list == null) {
             return Collections.emptyList();
         }
-        return list.stream().<T>map(k -> transform(k)).collect(Collectors.toList());
+        return list.stream().map(k -> transform(k)).collect(Collectors.toList());
     }
 
     @Override

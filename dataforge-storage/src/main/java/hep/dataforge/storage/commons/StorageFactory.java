@@ -8,6 +8,8 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.StorageType;
+
 import java.util.ServiceLoader;
 
 /**

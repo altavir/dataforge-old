@@ -20,6 +20,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.data.XYPlottable;
+import hep.dataforge.tables.XYAdapter;
 
 /**
  *
@@ -44,9 +45,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis("x", getXAxisConfig());
+        updateAxis(XYAdapter.X_AXIS, getXAxisConfig());
 
-        updateAxis("y", getYAxisConfig());
+        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig());
 
         updateLegend(getLegendConfig());
 

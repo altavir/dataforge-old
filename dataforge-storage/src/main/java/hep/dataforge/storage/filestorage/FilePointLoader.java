@@ -12,10 +12,9 @@ import hep.dataforge.io.LineIterator;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.EnvelopeCodes;
-import hep.dataforge.storage.commons.ValueIndex;
-import hep.dataforge.storage.commons.ValueProviderIndex;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointParser;
@@ -34,18 +33,19 @@ import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
 import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class FilePointLoader extends AbstractPointLoader {
 
     private final String uri;
+    //FIXME move to abstract
     private TableFormat format;
     private PointParser parser;
     /**
      * An envelope used for pushing
      */
     private FileEnvelope envelope;
+
     public FilePointLoader(Storage storage, String name, Meta annotation, String uri) {
         super(storage, name, annotation);
         this.uri = uri;
@@ -190,22 +190,18 @@ public class FilePointLoader extends AbstractPointLoader {
         return getParser().parse(line);
     }
 
-    public ValueIndex<DataPoint> getMapIndex(String name) {
-        return new FilePointIndex(name, getStorage().getContext(), () -> {
-            try {
-                return getEnvelope();
-            } catch (StorageException ex) {
-                throw new RuntimeException(ex);
-            }
-        });
-    }
-
     @Override
     public ValueIndex<DataPoint> getIndex(String name) {
         if (name == null || name.isEmpty()) {
             return new DefaultIndex<>(this);
         } else {
-            return new ValueProviderIndex<>(this, name);
+            return new FilePointIndex(name, getStorage().getContext(), () -> {
+                try {
+                    return getEnvelope();
+                } catch (StorageException ex) {
+                    throw new RuntimeException(ex);
+                }
+            });
         }
     }
 

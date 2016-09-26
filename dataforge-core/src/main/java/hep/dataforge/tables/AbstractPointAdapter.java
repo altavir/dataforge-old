@@ -51,11 +51,11 @@ public abstract class AbstractPointAdapter implements PointAdapter {
 
     @Override
     public Value getFrom(DataPoint point, String component) {
-        return point.getValue(getValueName(component));
+        return point.getValue(nameFor(component));
     }
 
     public Value getFrom(DataPoint point, String component, Object def) {
-        return point.getValue(getValueName(component), Value.of(def));
+        return point.getValue(nameFor(component), Value.of(def));
     }
 
     /**
@@ -89,7 +89,7 @@ public abstract class AbstractPointAdapter implements PointAdapter {
      * @return
      */
     public double getUpperBound(DataPoint point, String axis) {
-        return point.getDouble(getValueName(Name.joinString(axis, UP_KEY)),
+        return point.getDouble(nameFor(Name.joinString(axis, UP_KEY)),
                 getValue(point, axis).doubleValue() + getError(point, axis).doubleValue());
     }
 
@@ -100,7 +100,7 @@ public abstract class AbstractPointAdapter implements PointAdapter {
      * @return
      */
     public double getLowerBound(DataPoint point, String axis) {
-        return point.getDouble(getValueName(Name.joinString(axis, LO_KEY)),
+        return point.getDouble(nameFor(Name.joinString(axis, LO_KEY)),
                 getValue(point, axis).doubleValue() - getError(point, axis).doubleValue());
     }
 
@@ -111,7 +111,7 @@ public abstract class AbstractPointAdapter implements PointAdapter {
      * @param component
      * @return
      */
-    protected String getValueName(String component) {
+    protected String nameFor(String component) {
         //caching name to avoid heavy meta request
         if (this.nameCache.containsKey(component)) {
             return nameCache.get(component);

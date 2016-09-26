@@ -17,7 +17,6 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.commons.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.tables.PointSource;

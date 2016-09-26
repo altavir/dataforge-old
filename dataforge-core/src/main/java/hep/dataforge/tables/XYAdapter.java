@@ -16,15 +16,13 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 
 /**
- * An adapter to correctly interpret DataPoint into X-Y plot or model. could have multiple Y-s
+ * An adapter to correctly interpret DataPoint into X-Y plot or model. Could have multiple Y-s
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -52,15 +50,32 @@ public class XYAdapter extends AbstractPointAdapter {
                 .putValue(Y_ERROR_KEY, yErrName);
     }
 
+    protected final String xValue;
+    protected final String[] yValues;
+    protected final String xError;
+    protected final String[] yErrors;
+
+
     protected XYAdapter() {
+        this(Meta.buildEmpty(DATA_ADAPTER_KEY));
     }
 
     public XYAdapter(Meta meta) {
         super(meta);
+        xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
+        xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
+        if (meta().hasNode(Y_AXIS)) {
+            yValues = meta().getNodes(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(i -> new String[i]);
+            yErrors = meta().getNodes(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(i -> new String[i]);
+        } else {
+            yValues = new String[]{Y_VALUE_KEY};
+            yErrors = new String[]{Y_ERROR_KEY};
+        }
+
     }
 
     public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
-        super(buildAdapterMeta(xName, xErrName, yName, yErrName));
+        this(buildAdapterMeta(xName, xErrName, yName, yErrName));
     }
 
     public XYAdapter(String xName, String yName, String yErrName) {
@@ -73,7 +88,7 @@ public class XYAdapter extends AbstractPointAdapter {
 
 
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapPoint(new String[]{getValueName(X_VALUE_KEY), getValueName(Y_VALUE_KEY), getValueName(Y_ERROR_KEY)},
+        return new MapPoint(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
                 x, y, yErr);
     }
 
@@ -91,21 +106,19 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public int getYCount() {
-        if (meta().hasNode(Y_AXIS)) {
-            return this.meta().getNodes(Y_AXIS).size();
-        } else return 1;
+        return yValues.length;
     }
 
     public String getYTitle(int i) {
-        return meta().getNodes(Y_AXIS).get(i).getString("axisTitle", getValueName(VALUE_KEY));
+        return meta().getNodes(Y_AXIS).get(i).getString("axisTitle", nameFor(VALUE_KEY));
     }
 
     public Value getX(DataPoint point) {
-        return getValue(point, X_AXIS);
+        return point.getValue(xValue);
     }
 
     public Value getXerr(DataPoint point) {
-        return getError(point, X_AXIS);
+        return point.getValue(xError, Value.NULL);
     }
 
     /**
@@ -115,7 +128,7 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public Value getY(DataPoint point) {
-        return getValue(point, Y_AXIS);
+        return getY(point, 0);
     }
 
     /**
@@ -125,7 +138,7 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public Value getYerr(DataPoint point) {
-        return getError(point, Y_AXIS);
+        return getYerr(point, 0);
     }
 
     /**
@@ -136,11 +149,11 @@ public class XYAdapter extends AbstractPointAdapter {
      * @return
      */
     public Value getY(DataPoint point, int index) {
-        return getValue(point, yAxis(index));
+        return point.getValue(yValues[index]);
     }
 
     public Value getYerr(DataPoint point, int index) {
-        return getError(point, yAxis(index));
+        return point.getValue(yErrors[index]);
     }
 
     /**
@@ -192,12 +205,14 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public boolean providesXError(DataPoint point) {
-        return point.hasValue(getValueName(X_ERROR_KEY));
+        return point.hasValue(xError);
     }
 
     public boolean providesYError(DataPoint point) {
-        return point.hasValue(getValueName(Y_ERROR_KEY));
+        return point.hasValue(yErrors[0]);
     }
+
+    //TODO override name searches for x and y axis
 
     /**
      * Return a default TableFormat corresponding to this adapter
@@ -208,8 +223,8 @@ public class XYAdapter extends AbstractPointAdapter {
         //FIXME wrong table format here
         //TODO move to utils
         return new TableFormatBuilder()
-                .addNumber(getValueName(X_VALUE_KEY))
-                .addNumber(getValueName(Y_VALUE_KEY))
+                .addNumber(xValue)
+                .addNumber(yValues[0])
                 .build();
     }
 

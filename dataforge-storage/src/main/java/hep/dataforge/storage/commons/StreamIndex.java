@@ -6,6 +6,7 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 

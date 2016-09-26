@@ -6,15 +6,16 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
+import javafx.util.Pair;
+
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
-
-import hep.dataforge.values.ValueUtils;
-import javafx.util.Pair;
 
 /**
  * The simple index, which uses item number for search
@@ -55,7 +56,7 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
     public List<T> pull(Value value) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> value.intValue() == pair.getKey())
-                .<T>map(pair -> pair.getValue())
+                .map(pair -> pair.getValue())
                 .collect(Collectors.toList());   
     }
 
@@ -63,7 +64,7 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
     public List<T> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
-                .<T>map(pair -> pair.getValue())
+                .map(pair -> pair.getValue())
                 .collect(Collectors.toList());   
     }
 
@@ -72,14 +73,14 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
                 .limit(maxItems)
-                .<T>map(pair -> pair.getValue())
+                .map(pair -> pair.getValue())
                 .collect(Collectors.toList());        
     }
 
     public List<T> pull(Predicate<Integer> predicate) {
         return StreamSupport.stream(spliterator(), true)
                 .filter(t -> predicate.test(t.getKey()))
-                .<T>map(pair -> pair.getValue())
+                .map(pair -> pair.getValue())
                 .collect(Collectors.toList());
     }
 

@@ -18,6 +18,7 @@ package hep.dataforge.plots.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.XYAdapter;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 
@@ -181,7 +182,7 @@ public class PlottableXYFunction extends XYPlottable {
         }
         validateCache();
         return cache.entrySet().stream()
-                .map(entry -> new MapPoint(new String[]{"x", "y"}, entry.getKey(), entry.getValue()))
+                .map(entry -> new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 

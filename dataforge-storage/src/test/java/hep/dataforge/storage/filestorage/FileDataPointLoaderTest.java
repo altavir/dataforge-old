@@ -17,22 +17,20 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.PointLoader;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
-import hep.dataforge.storage.commons.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.TableFormat;
+import org.junit.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.junit.After;
-import org.junit.AfterClass;
+
 import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 
 /**
  *
