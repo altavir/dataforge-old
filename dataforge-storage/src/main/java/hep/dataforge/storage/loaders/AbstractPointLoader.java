@@ -25,18 +25,17 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
-import static hep.dataforge.storage.commons.StorageMessageUtils.ACTION_KEY;
-import static hep.dataforge.storage.commons.StorageMessageUtils.PULL_OPERATION;
-import static hep.dataforge.storage.commons.StorageMessageUtils.PUSH_OPERATION;
-import static hep.dataforge.storage.commons.StorageMessageUtils.QUERY_ELEMENT;
-import static hep.dataforge.storage.commons.StorageMessageUtils.confirmationResponse;
 import hep.dataforge.tables.DataPoint;
-import static hep.dataforge.tables.DataPoint.fromMeta;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
+
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Supplier;
+
+import static hep.dataforge.storage.commons.StorageMessageUtils.*;
+import static hep.dataforge.tables.DataPoint.fromMeta;
 
 /**
  *
@@ -112,7 +111,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     } else if (messageMeta.hasValue("value")) {
                         String valueName = messageMeta.getString("valueName", "");
                         for (Value value : messageMeta.getValue("value").listValue()) {
-                            DataPoint point = this.getIndex(valueName).pullOne(value);
+                            DataPoint point = this.getIndex(valueName).pullOne(value).get();
                             dataAn.putNode(DataPoint.toMeta(point));
                         }
                     } else if (messageMeta.hasNode("range")) {
@@ -120,9 +119,9 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                         for (Meta rangeAn : messageMeta.getNodes("range")) {
                             Value from = rangeAn.getValue("from", Value.getNull());
                             Value to = rangeAn.getValue("to", Value.getNull());
-                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
-                            for (DataPoint point : this.getIndex(valueName).pull(from, to, maxItems)) {
-                                dataAn.putNode(DataPoint.toMeta(point));
+//                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
+                            for (Supplier<DataPoint> point : this.getIndex(valueName).pull(from, to)) {
+                                dataAn.putNode(DataPoint.toMeta(point.get()));
                             }
                             //PENDING add annotation from resulting DataSet?
                         }

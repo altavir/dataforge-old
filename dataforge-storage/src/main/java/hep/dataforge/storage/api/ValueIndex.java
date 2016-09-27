@@ -44,9 +44,9 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    List<T> pull(Value value) throws StorageException;
+    List<Supplier<T>> pull(Value value) throws StorageException;
 
-    default List<T> pull(Object value) throws StorageException {
+    default List<Supplier<T>> pull(Object value) throws StorageException {
         return pull(Value.of(value));
     }
 
@@ -57,8 +57,8 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws StorageException
      */
-    default T pullOne(Value value) throws StorageException {
-        List<T> res = pull(value);
+    default Supplier<T> pullOne(Value value) throws StorageException {
+        List<Supplier<T>> res = pull(value);
         if (!res.isEmpty()) {
             return res.get(0);
         } else {
@@ -76,38 +76,18 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    default List<T> pull(Value from, Value to) throws StorageException {
-        return pull(from, to, -1);
-    }
+    List<Supplier<T>> pull(Value from, Value to) throws StorageException;
 
-    default List<T> pull(Object from, Object to) throws StorageException {
+    default List<Supplier<T>> pull(Object from, Object to) throws StorageException {
         return pull(Value.of(from), Value.of(to));
-    }
-
-    /**
-     * Возвращает список точек, ключ которых лежит строго в пределах от from до
-     * to. В случае если число точек в диапазоне превышает {@code maxItems},
-     * выкидывает не все точки, а точки с некоторым шагом. Методика фильтрации
-     * специфична за загрузчика.
-     *
-     * @param from
-     * @param to
-     * @param maxItems
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    List<T> pull(Value from, Value to, int maxItems) throws StorageException;
-
-    default List<T> pull(Object from, Object to, int maxItems) throws StorageException {
-        return pull(Value.of(from), Value.of(to), maxItems);
     }
 
     @Override
     default Stream<Supplier<T>> query(Meta query) throws StorageException {
         Value from = query.getValue("from", Value.NULL);
         Value to = query.getValue("to", Value.NULL);
-        int limit = query.getInt("limit", -1);
-        return pull(from, to, limit).stream().<Supplier<T>>map((T t) -> () -> t);
+//        int limit = query.getInt("limit", -1);
+        return pull(from, to).stream();
     }
 
 }

@@ -22,9 +22,14 @@ import hep.dataforge.names.Name;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.ValueIndex;
+import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import javafx.util.Pair;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
@@ -106,6 +111,32 @@ public class StorageUtils {
             throw new RuntimeException(ex);
         }
     }
+
+    public static <T> List<Supplier<T>> pullFiltered(ValueIndex<T> index, Value from, Value to, int maxItems) throws StorageException {
+        if (isNumeric(from) && isNumeric(to)) {
+            double a = from.doubleValue();
+            double b = to.doubleValue();
+            double step = (b - a) / maxItems;
+            List<Supplier<T>> res = new ArrayList<>();
+            for (double val = a + step / 2d; val < b; val += step) {
+                res.add(index.pullOne(Value.of(val)));
+            }
+            return res;
+        } else {
+            List<Supplier<T>> res = index.pull(from, to);
+            if (res.size() <= maxItems) {
+                return res;
+            } else {
+                return res.subList(0, maxItems);
+            }
+        }
+    }
+
+
+    private static boolean isNumeric(Value val) {
+        return val.valueType() == ValueType.NUMBER || val.valueType() == ValueType.TIME;
+    }
+
 
     //TODO make stream producing renamed loaders
 }

@@ -14,6 +14,7 @@ import javafx.util.Pair;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -53,34 +54,25 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
 
 
     @Override
-    public List<T> pull(Value value) throws StorageException {
+    public List<Supplier<T>> pull(Value value) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> value.intValue() == pair.getKey())
-                .map(pair -> pair.getValue())
+                .<Supplier<T>>map(pair -> ()->pair.getValue())
                 .collect(Collectors.toList());   
     }
 
     @Override
-    public List<T> pull(Value from, Value to) throws StorageException {
+    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
-                .map(pair -> pair.getValue())
+                .<Supplier<T>>map(pair -> ()->pair.getValue())
                 .collect(Collectors.toList());   
     }
 
-    @Override
-    public List<T> pull(Value from, Value to, int maxItems) throws StorageException {
-        return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
-                .limit(maxItems)
-                .map(pair -> pair.getValue())
-                .collect(Collectors.toList());        
-    }
-
-    public List<T> pull(Predicate<Integer> predicate) {
+    public List<Supplier<T>> pull(Predicate<Integer> predicate) {
         return StreamSupport.stream(spliterator(), true)
                 .filter(t -> predicate.test(t.getKey()))
-                .map(pair -> pair.getValue())
+                .<Supplier<T>>map(pair -> ()->pair.getValue())
                 .collect(Collectors.toList());
     }
 

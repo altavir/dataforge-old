@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
@@ -20,8 +21,8 @@ import java.util.stream.Collectors;
  * and requires a lot of memory, so it should be used only in cases of repeated
  * pull requests.
  *
- * @author Alexander Nozik
  * @param K intermediate key representation for entries.
+ * @author Alexander Nozik
  */
 public abstract class MapIndex<T, K> implements ValueIndex<T> {
 
@@ -49,7 +50,7 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
     protected abstract T transform(K key);
 
     protected abstract Value getIndexedValue(T entry);
-    
+
 //    /**
 //     * Get index for specified entry
 //     *
@@ -63,37 +64,31 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
      */
     protected abstract void update() throws StorageException;
 
-    private List<T> transform(List<K> list) {
+    private List<Supplier<T>> transform(List<K> list) {
         if (list == null) {
             return Collections.emptyList();
         }
-        return list.stream().map(k -> transform(k)).collect(Collectors.toList());
+        return list.stream().<Supplier<T>>map(k -> () -> transform(k)).collect(Collectors.toList());
     }
 
     @Override
-    public List<T> pull(Value value) throws StorageException {
+    public List<Supplier<T>> pull(Value value) throws StorageException {
         update();
         return transform(map.get(value));
     }
 
     @Override
-    public List<T> pull(Value from, Value to) throws StorageException {
+    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
         update();
-        List<T> res = new ArrayList();
+        List<Supplier<T>> res = new ArrayList();
         map.subMap(from, true, to, true).forEach((Value t, List<K> u) -> {
             res.addAll(transform(u));
         });
         return res;
     }
 
-    @Override
-    public List<T> pull(Value from, Value to, int maxItems) throws StorageException {
-        return reduce(pull(from, to), maxItems);
-    }
 
-    protected List<T> reduce(List<T> list, int maxItems) {
-        return list;
-    }
+
 
     public void invalidate() throws StorageException {
         this.map.clear();

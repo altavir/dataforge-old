@@ -79,8 +79,8 @@ public class FileDataPointLoaderTest {
         }
 
         System.out.println("pull");
-        ValueIndex<DataPoint> index = ((FilePointLoader) loader).getMapIndex("key");
-        DataPoint dp = index.pull(24, 26).get(0);
+        ValueIndex<DataPoint> index = loader.getIndex("key");
+        DataPoint dp = index.pull(24, 26).get(0).get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
     }
 

@@ -5,17 +5,24 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.values.ValueProvider;
+import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
-import java.util.Iterator;
+import hep.dataforge.values.ValueProvider;
+import hep.dataforge.values.ValueUtils;
+
+import java.util.List;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * Simple StreamIndex for value providers
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
-public class ValueProviderIndex<T extends ValueProvider> extends StreamIndex<T, T> {
+public class ValueProviderIndex<T extends ValueProvider> implements ValueIndex<T> {
 
     private final String valueName;
     private final Value defaultValue;
@@ -28,11 +35,10 @@ public class ValueProviderIndex<T extends ValueProvider> extends StreamIndex<T, 
     }
 
     /**
-     *
      * @param iterable
      * @param valueName
      * @param defaultValue the default value in case some of iterated items does
-     * not provide required name
+     *                     not provide required name
      */
     public ValueProviderIndex(Iterable<T> iterable, String valueName, Value defaultValue) {
         this.iterable = iterable;
@@ -41,30 +47,21 @@ public class ValueProviderIndex<T extends ValueProvider> extends StreamIndex<T, 
     }
 
     @Override
-    public Iterator<T> iterator() {
-        return iterable.iterator();
+    public List<Supplier<T>> pull(Value value) throws StorageException {
+        return StreamSupport.stream(iterable.spliterator(), true)
+                .filter(it -> it.getValue(valueName, defaultValue).equals(value))
+                .<Supplier<T>>map(it -> () -> it)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Get named field
-     *
-     * @param item
-     * @return
-     */
     @Override
-    protected Value getIndexedValue(T item) {
-        return item.getValue(valueName, defaultValue);
+    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
+        return StreamSupport.stream(iterable.spliterator(), true)
+                .filter(it -> ValueUtils.isBetween(it.getValue(valueName, defaultValue), from, to))
+                .<Supplier<T>>map(it -> () -> it)
+                .collect(Collectors.toList());
     }
 
-    /**
-     * Identity transformation
-     *
-     * @param item
-     * @return
-     */
-    @Override
-    protected T transform(T item) {
-        return item;
-    }
+
 
 }
