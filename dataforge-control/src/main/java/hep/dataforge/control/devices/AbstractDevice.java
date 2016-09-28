@@ -27,6 +27,9 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -35,8 +38,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * <p>
@@ -50,20 +51,11 @@ import org.slf4j.LoggerFactory;
 @AnonimousNotAlowed
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
 
-    private Context context;
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
     private final Map<Connection, List<String>> connections = new HashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
+    private Context context;
     private Logger logger;
-
-    public void setContext(Context context) {
-        this.context = context;
-        setValueContext(context);
-    }
-
-    public void setName(String name) {
-        this.getConfig().setValue("name", name);
-    }
 
     /**
      * Set fallback meta default for this device
@@ -137,9 +129,18 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
     }
 
+    public void setContext(Context context) {
+        this.context = context;
+        setValueContext(context);
+    }
+
     @Override
     public String getName() {
         return meta().getString("name", "");
+    }
+
+    public void setName(String name) {
+        this.getConfig().setValue("name", name);
     }
 
     @Override
@@ -196,7 +197,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      */
     protected final void recalculateState(String stateName) {
         try {
-            updateState(stateName, calculateState(stateName));
+            updateState(stateName, computeState(stateName));
         } catch (ControlException ex) {
             notifyError("Can't calculate state " + stateName, ex);
         }
@@ -212,13 +213,13 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         throw new ControlException("Command with name " + commandName + " not defined");
     }
 
-    protected abstract Object calculateState(String stateName) throws ControlException;
+    protected abstract Object computeState(String stateName) throws ControlException;
 
     @Override
     public Value getState(String stateName) {
         return this.states.computeIfAbsent(stateName, (String t) -> {
             try {
-                Value newState = Value.of(calculateState(stateName));
+                Value newState = Value.of(computeState(stateName));
                 notifyStateChanged(stateName, newState);
                 return newState;
             } catch (ControlException ex) {

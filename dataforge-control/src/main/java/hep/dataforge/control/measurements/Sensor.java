@@ -10,6 +10,7 @@ import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.values.Value;
+
 import java.util.concurrent.Callable;
 
 /**
@@ -20,6 +21,8 @@ import java.util.concurrent.Callable;
  */
 @StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
+
+    private Measurement<T> measurement;
 
     /**
      * Create simple sensor with simple one-time measurement
@@ -41,8 +44,6 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
             }
         };
     }
-
-    private Measurement<T> measurement;
 
     /**
      * Read sensor data synchronously
@@ -113,7 +114,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
     }
 
     @Override
-    protected Object calculateState(String stateName) throws ControlException {
+    protected Object computeState(String stateName) throws ControlException {
         return Value.NULL;
     }
 
