@@ -51,7 +51,7 @@ public interface Envelope extends Annotated {
     public static final String META_TYPE_KEY = "metaType";
     public static final String META_ENCODING_KEY = "metaEncoding";
     public static final String META_LENGTH_KEY = "metaLength";
-    public static final String DATA_TYPE_KEY = "type";
+    public static final String DATA_TYPE_KEY = "dataType";
     public static final String DATA_LENGTH_KEY = "dataLength";
 
     Map<String, Value> getProperties();

@@ -16,68 +16,108 @@
 package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.PortException;
+import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Configuration;
+import hep.dataforge.meta.Meta;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArraySet;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import java.util.function.Supplier;
 
 /**
- *
  * @author Alexander Nozik
  */
-public abstract class VirtualPort extends PortHandler {
+public abstract class VirtualPort extends PortHandler implements Configurable {
 
     private final Set<TaggedFuture> futures = new CopyOnWriteArraySet<>();
+    private ScheduledExecutorService scheduler;
+    private boolean isOpen = false;
+    private Configuration configuration = new Configuration("virtualPort");
 
-    private final ScheduledExecutorService scheduler = new ScheduledThreadPoolExecutor(4);
-    
+    @Override
+    public void open() throws PortException {
+        scheduler = Executors.newScheduledThreadPool(meta().getInt("numThreads", 4));
+        isOpen = true;
+    }
+
+    @Override
+    public boolean isOpen() {
+        return isOpen;
+    }
+
+    @Override
+    public Configuration getConfig() {
+        return configuration;
+    }
+
+    @Override
+    public Configurable configure(Meta config) {
+        configuration.update(config);
+        return this;
+    }
+
+    @Override
+    public Meta meta() {
+        return configuration;
+    }
+
+    @Override
+    public String getPortId() {
+        return meta().getString("id", getClass().getSimpleName());
+    }
 
     @Override
     public void send(String message) throws PortException {
         evaluateRequest(message);
     }
-    
+
     /**
      * The device logic here
-     * @param request 
+     *
+     * @param request
      */
     protected abstract void evaluateRequest(String request);
-    
-    protected synchronized void clearCompleted(){
+
+    protected synchronized void clearCompleted() {
         futures.stream().filter((future) -> (future.future.isDone() || future.future.isCancelled())).forEach((future) -> {
             futures.remove(future);
         });
     }
-    
-    protected synchronized void cancelByTag(String tag){
-        futures.stream().filter((future)->future.hasTag(tag)).forEach((future)->future.cancel());
+
+    protected synchronized void cancelByTag(String tag) {
+        futures.stream().filter((future) -> future.hasTag(tag)).forEach((future) -> future.cancel());
     }
 
     /**
      * Plan the response with given delay
+     *
      * @param response
      * @param delay
-     * @param tags 
+     * @param tags
      */
     protected synchronized void planResponse(String response, Duration delay, String... tags) {
         clearCompleted();
-        Runnable task = ()-> recievePhrase(response);
+        Runnable task = () -> recievePhrase(response);
         ScheduledFuture future = scheduler.schedule(task, delay.toNanos(), TimeUnit.NANOSECONDS);
         this.futures.add(new TaggedFuture(future, tags));
     }
-    
+
     protected synchronized void planRegularResponse(Supplier<String> responseBuilder, Duration delay, Duration period, String... tags) {
         clearCompleted();
-        Runnable task = ()-> recievePhrase(responseBuilder.get());
+        Runnable task = () -> recievePhrase(responseBuilder.get());
         ScheduledFuture future = scheduler.scheduleAtFixedRate(task, delay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
         this.futures.add(new TaggedFuture(future, tags));
-    }    
+    }
+
+    @Override
+    public void close() throws Exception {
+        futures.clear();
+        this.scheduler.shutdown();
+        isOpen = false;
+    }
 
     private class TaggedFuture {
 

@@ -28,7 +28,7 @@ import java.util.*;
 import java.util.Map.Entry;
 
 /**
- * A plottable to display dynamic series with limited number of elements. Both
+ * A plottable to display dynamic series with limited number of elements (x axis is always considered to be time). Both
  * criteria are used to eviction of old elements
  *
  * @author Alexander Nozik
@@ -37,7 +37,10 @@ import java.util.Map.Entry;
 @ValueDef(name = "maxItems", type = "NUMBER", def = "-1", info = "The maximum number of items. 0 means no limit")
 public class TimePlottable extends XYPlottable {
 
+    public static final String DEFAULT_TIMESTAMP_KEY = "timestamp";
+
     private final DataMap map = new DataMap();
+    private final String timestamp;
     private final String yName;
     private Instant lastUpdate;
 
@@ -48,10 +51,29 @@ public class TimePlottable extends XYPlottable {
      * @param name
      * @param yName
      */
-    public TimePlottable(String name, String yName) {
+    public TimePlottable(String name, String timestamp, String yName) {
         super(name);
-        super.setAdapter(new XYAdapter("timestamp", yName));
+        super.setAdapter(new XYAdapter(timestamp, yName));
+        this.timestamp = timestamp;
         this.yName = yName;
+    }
+
+    /**
+     * Use default timestamp key for timestamp name
+     * @param name
+     * @param yName
+     */
+    public TimePlottable(String name, String yName) {
+        this(name, DEFAULT_TIMESTAMP_KEY, yName);
+    }
+
+
+    /**
+     * Use yName for plottable name
+     * @param yName
+     */
+    public TimePlottable(String yName) {
+        this(yName, DEFAULT_TIMESTAMP_KEY, yName);
     }
 
     public static TimePlottable build(String name, String yName, String color, double thickness) {
@@ -70,8 +92,8 @@ public class TimePlottable extends XYPlottable {
      */
     public void put(DataPoint point) {
         Value v = point.getValue(yName);
-        if (point.hasValue("timestamp")) {
-            put(point.getValue("timestamp").timeValue(), v);
+        if (point.hasValue(timestamp)) {
+            put(point.getValue(timestamp).timeValue(), v);
         } else {
             put(v);
         }
@@ -94,7 +116,7 @@ public class TimePlottable extends XYPlottable {
      */
     public void put(Instant time, Value value) {
         Map<String, Value> point = new HashMap<>(2);
-        point.put("timestamp", Value.of(time));
+        point.put(timestamp, Value.of(time));
         point.put(yName, value);
         this.map.put(time, new MapPoint(point));
         if (lastUpdate == null || time.isAfter(lastUpdate)) {

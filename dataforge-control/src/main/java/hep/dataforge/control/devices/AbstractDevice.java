@@ -15,6 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
+import ch.qos.logback.classic.Logger;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.control.connections.Connection;
@@ -27,7 +28,6 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
@@ -68,13 +68,17 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     protected Logger setupLogger() {
         //TODO move logger construction to context IoManager
-        return LoggerFactory.getLogger(getClass());
+        if(meta().hasValue("logger")){
+            return (Logger) LoggerFactory.getLogger(meta().getString("logger"));
+        } else {
+            return getContext().getLogger();
+        }
     }
 
     public Logger getLogger() {
         if (logger == null) {
             logger = setupLogger();
-            logger.error("Logger is not initialized. Call init() before working with device.");
+            logger.warn("Logger is not initialized. Call init() before working with device.");
         }
         return logger;
     }
@@ -136,7 +140,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public String getName() {
-        return meta().getString("name", "");
+        return meta().getString("name", getClass().getSimpleName());
     }
 
     public void setName(String name) {

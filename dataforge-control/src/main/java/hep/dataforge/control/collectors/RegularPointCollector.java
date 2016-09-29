@@ -8,15 +8,10 @@ package hep.dataforge.control.collectors;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
+
 import java.time.Duration;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -101,7 +96,7 @@ public class RegularPointCollector implements ValueCollector {
         values.get(name).add(value);
     }
 
-    public void cancel() {
+    private void cancel() {
         if (timer != null && startTime != null) {
             timer.cancel();
         }

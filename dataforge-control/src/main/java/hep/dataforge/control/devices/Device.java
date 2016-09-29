@@ -27,6 +27,7 @@ import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
+
 import java.util.List;
 
 /**
@@ -131,7 +132,7 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      * Invoke a simple command (set state) for this device
      *
      * @param commandName
-     * @param arguments
+     * @param argument
      */
     void command(String commandName, Value argument) throws ControlException;
 
@@ -139,7 +140,7 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      * A command with complex configuration
      *
      * @param commandName
-     * @param arguments
+     * @param commandConfiguration
      */
     void command(String commandName, Meta commandConfiguration) throws ControlException;
 

@@ -69,7 +69,6 @@ public interface DeviceListener {
      *
      * @param device
      * @param command
-     * @param commandMeta
      */
     default void notifyDeviceCommandAccepted(Device device, String command) {
 
@@ -78,8 +77,6 @@ public interface DeviceListener {
     /**
      * Evaluate device event
      *
-     * @param device
-     * @param status
      */
     default void evaluateDeviceEvent(Event event){
         
