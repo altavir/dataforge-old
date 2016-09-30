@@ -18,11 +18,12 @@ package hep.dataforge.control.ports;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.exceptions.PortLockException;
 import hep.dataforge.meta.Annotated;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
-import org.slf4j.LoggerFactory;
 
 /**
  * The handler
@@ -31,21 +32,29 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class PortHandler implements AutoCloseable, Annotated {
 
-    private volatile String lastResponse = null;
+    private final ReentrantLock portLock = new ReentrantLock(true);
     protected PortController controller;
 
     //PENDING add additional port listeners?
+    private volatile String lastResponse = null;
     /**
      * The default end phrase condition
      */
     private Predicate<String> phraseCondition = defaultPhraseCondition();
-
-    private final ReentrantLock portLock = new ReentrantLock(true);
 //    private final String portName;
 
 //    public PortHandler(String portName) {
 //        this.portName = portName;
 //    }
+
+    /**
+     * The definition of default phrase condition
+     *
+     * @return
+     */
+    private static Predicate<String> defaultPhraseCondition() {
+        return (String str) -> str.endsWith("\n");
+    }
 
     public void setPhraseCondition(Predicate<String> condition) {
         this.phraseCondition = condition;
@@ -69,7 +78,7 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
 
     /**
      * An unique ID for this port
-     * @return 
+     * @return
      */
     public abstract String getPortId();
 
@@ -104,15 +113,6 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
      */
     public boolean isPhrase(String str) {
         return phraseCondition.test(str);
-    }
-
-    /**
-     * The definition of default phrase condition
-     *
-     * @return
-     */
-    private static Predicate<String> defaultPhraseCondition() {
-        return (String str) -> str.endsWith("\n");
     }
 
     /**
@@ -204,13 +204,17 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
      * handler
      */
     public synchronized void unholdBy(PortController controller) throws PortLockException {
-        assert controller != null;
-        if (controller.equals(this.controller)) {
-            this.controller = null;
-            portLock.unlock();
-            LoggerFactory.getLogger(getClass()).debug("Unlocked by {}", controller);
+        if (isLocked()) {
+            assert controller != null;
+            if (controller.equals(this.controller)) {
+                this.controller = null;
+                portLock.unlock();
+                LoggerFactory.getLogger(getClass()).debug("Unlocked by {}", controller);
+            } else {
+                throw new PortLockException("Can't unlock hold with wrong holder");
+            }
         } else {
-            throw new PortLockException("Can't unlock hold with wrong holder");
+            LoggerFactory.getLogger(getClass()).warn("Attempting to unhold unlocked port");
         }
     }
 

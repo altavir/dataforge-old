@@ -15,3 +15,4 @@ include ':dataforge-control' // tools for measurement and control applications
 include ':dataforge-storage' // storage module
 include ':dataforge-storage:storage-servlet' // Storage web servlet
 include ':dataforge-storage:storage-oak'
+include ':dataforge-storage:storage-visual'//visualization tools

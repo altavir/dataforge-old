@@ -7,9 +7,10 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.ReferenceRegistry;
-import java.time.Instant;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
+
+import java.time.Instant;
 
 /**
  * A boilerplate code for measurements
@@ -18,18 +19,10 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
-    protected enum MeasurementState {
-        INIT, //Measurement not started
-        PENDING, // Measurement in process
-        OK, // Last measurement complete, the same as FINISHED for one-time measurements
-        FAILED, // Last measurement failed 
-        FINISHED, // Measurement finished or stopped
-    }
-
-    private MeasurementState state;
     protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
     protected Pair<T, Instant> lastResult;
     protected Throwable exception;
+    private MeasurementState state;
 
     protected MeasurementState getMeasurementState() {
         return state;
@@ -55,6 +48,14 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
     }
 
+    /**
+     * Reset measurement to initial state
+     */
+    protected void afterPause() {
+        setMeasurementState(MeasurementState.OK);
+        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
+    }
+
     protected synchronized void error(Throwable error) {
         LoggerFactory.getLogger(getClass()).error("Measurement failed with error", error);
         setMeasurementState(MeasurementState.FAILED);
@@ -65,7 +66,8 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     /**
      * Internal method to notify measurement complete. Uses current system time
-     * @param result 
+     *
+     * @param result
      */
     protected final void result(T result) {
         result(result, Instant.now());
@@ -73,8 +75,9 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
     /**
      * Internal method to notify measurement complete
-     * @param result 
-     */    
+     *
+     * @param result
+     */
     protected synchronized void result(T result, Instant time) {
         this.lastResult = new Pair<>(result, time);
         setMeasurementState(MeasurementState.OK);
@@ -128,9 +131,9 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
                 throw new MeasurementException(ex);
             }
         }
-        if(this.lastResult != null){
+        if (this.lastResult != null) {
             return this.lastResult;
-        } else if(state == MeasurementState.FAILED) {
+        } else if (state == MeasurementState.FAILED) {
             throw new MeasurementException(getError());
         } else {
             throw new MeasurementException("Measurement failed for unknown reason");
@@ -145,6 +148,14 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
     @Override
     public T getResult() throws MeasurementException {
         return get().getKey();
+    }
+
+    protected enum MeasurementState {
+        INIT, //Measurement not started
+        PENDING, // Measurement in process
+        OK, // Last measurement complete, next is planned
+        FAILED, // Last measurement failed
+        FINISHED, // Measurement finished or stopped
     }
 
 }

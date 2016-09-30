@@ -6,11 +6,12 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
+
 import java.time.Instant;
 
 /**
  * A general representation of ongoing or completed measurement. Could be
- * regular. 
+ * regular.
  *
  * @author Alexander Nozik
  */
@@ -29,16 +30,17 @@ public interface Measurement<T> {
      * @param force force stop if measurement in progress
      * @throws MeasurementException
      */
-    boolean stop(boolean force)throws MeasurementException;
+    boolean stop(boolean force) throws MeasurementException;
 
     /**
      * Measurement is started
-     * @return 
+     *
+     * @return
      */
     public boolean isStarted();
-    
+
     /**
-     * Measurement is complete or stopped
+     * Measurement is complete or stopped and could be recycled
      *
      * @return
      */
@@ -60,10 +62,11 @@ public interface Measurement<T> {
      * @throws MeasurementException
      */
     T getResult() throws MeasurementException;
-    
+
     /**
      * Last thrown exception. Null if no exceptions are thrown
-     * @return 
+     *
+     * @return
      */
     Throwable getError();
 

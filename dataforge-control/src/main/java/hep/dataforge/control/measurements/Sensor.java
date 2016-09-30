@@ -16,8 +16,8 @@ import java.util.concurrent.Callable;
 /**
  * A device with single one-time or periodic measurement
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 @StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
 public abstract class Sensor<T> extends AbstractMeasurementDevice {
@@ -59,10 +59,11 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
             onCreateMeasurement(measurement);
-            this.measurement.start();
-        } else {
+        } else if (measurement.isStarted()) {
             getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
         }
+
+        this.measurement.start();
         return this.measurement;
     }
 
@@ -74,12 +75,14 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
      * Stop current measurement
      *
      * @param force if true than current measurement will be interrupted even if
-     * running
+     *              running
      * @throws hep.dataforge.exceptions.MeasurementException
      */
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
+        } else {
+            getLogger().warn("No active measurement to stop. Ignoring.");
         }
     }
 
@@ -95,12 +98,13 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         }
         super.shutdown();
     }
-    
+
     /**
      * Shows if there is ongoing measurement
-     * @return 
+     *
+     * @return
      */
-    public boolean isMeasuring(){
+    public boolean isMeasuring() {
         return measurement != null && !measurement.isFinished();
     }
 
