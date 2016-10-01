@@ -15,15 +15,17 @@
  */
 package hep.dataforge.io.envelopes;
 
-import static hep.dataforge.io.envelopes.Envelope.*;
-import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
 import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+
 import java.nio.ByteBuffer;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import static hep.dataforge.io.envelopes.Envelope.*;
+import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
 
 /**
  * An Envelope critical properties that could be encoded in a short binary
@@ -33,7 +35,7 @@ import java.util.Map;
  */
 public class Tag {
 
-    public static final short CURRENT_PROTOCOL_VERSION = 0x0001;
+    public static final short CURRENT_PROTOCOL_VERSION = 0x3031;
 
     public static final short MAX_SHORT = -1;
 

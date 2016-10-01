@@ -18,6 +18,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @param <T>
  */
+@Deprecated
 public class StreamQuery<T> implements Query<T> {
 
     private final Supplier<Stream<T>> sup;

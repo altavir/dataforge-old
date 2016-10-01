@@ -14,6 +14,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public interface Query<T> {
 
     /**

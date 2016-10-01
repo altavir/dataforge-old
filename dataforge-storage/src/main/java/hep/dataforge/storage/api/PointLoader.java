@@ -59,6 +59,18 @@ public interface PointLoader extends Loader, PointSource {
     ValueIndex<DataPoint> getIndex(String name);
 
     /**
+     * get default index
+     * @return
+     */
+    default ValueIndex<DataPoint> getIndex(){
+        if(meta().hasValue("index")){
+            return getIndex(meta().getString("index"));
+        } else {
+            return getIndex(DEFAULT_INDEX_FIELD);
+        }
+    }
+
+    /**
      * Push the DataPoint to the loader.
      *
      * @param dp

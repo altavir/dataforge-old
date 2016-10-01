@@ -8,9 +8,10 @@ package hep.dataforge.storage.api;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+import java.util.stream.Collectors;
 
 /**
  * @author Alexander Nozik
@@ -24,7 +25,7 @@ public interface Index<T> {
      * @return
      * @throws StorageException
      */
-    Stream<Supplier<T>> query(Meta query) throws StorageException;
+    List<Supplier<T>> query(Meta query) throws StorageException;
 
 
     /**
@@ -37,8 +38,9 @@ public interface Index<T> {
     default <R> Index<R> transform(Function<T, R> transformation) {
         final Index<T> theIndex = this;
         return (Meta query) -> theIndex
-                .query(query)
-                .map((Supplier<T> t) -> (Supplier<R>) () -> transformation.apply(t.get()));
+                .query(query).stream()
+                .map((Supplier<T> t) -> (Supplier<R>) () -> transformation.apply(t.get()))
+                .collect(Collectors.toList());
     }
 
 }

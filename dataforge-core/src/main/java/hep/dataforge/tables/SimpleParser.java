@@ -16,6 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.values.Value;
+
 import java.util.Scanner;
 
 /**
@@ -67,8 +68,10 @@ public class SimpleParser implements PointParser {
                 values[i] = Value.of(sc.nextDouble());
             } else if (sc.hasNextInt()) {
                 values[i] = Value.of(sc.nextInt());
-            } else {
+            } else if(sc.hasNext()) {
                 values[i] = Value.of(sc.next());
+            } else {
+                values[i] = Value.NULL;
             }
         }
 

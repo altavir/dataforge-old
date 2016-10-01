@@ -5,12 +5,13 @@
  */
 package hep.dataforge.query;
 
+import javafx.util.Pair;
+
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-import javafx.util.Pair;
 
 /**
  * A specific type of query to work with key-value pairs
@@ -18,6 +19,7 @@ import javafx.util.Pair;
  * @author Alexander Nozik
  * @param <T>
  */
+@Deprecated
 public class MapStreamQuery<K, V> extends StreamQuery<Pair<K, V>> {
 
     /**

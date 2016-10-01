@@ -193,6 +193,7 @@ public class FilePointLoader extends AbstractPointLoader {
     @Override
     public ValueIndex<DataPoint> getIndex(String name) {
         if (name == null || name.isEmpty()) {
+            //use point number index
             return new DefaultIndex<>(this);
         } else {
             return new FilePointIndex(name, getStorage().getContext(), () -> {
@@ -204,6 +205,7 @@ public class FilePointLoader extends AbstractPointLoader {
             });
         }
     }
+
 
     private class FilePointIndex extends FileMapIndex<DataPoint> {
 

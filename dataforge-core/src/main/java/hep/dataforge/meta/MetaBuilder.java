@@ -164,7 +164,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
      * @param values
      * @return
      */
-    public MetaBuilder update(Map<String, Object> values) {
+    public MetaBuilder update(Map<String, ? extends Object> values) {
         values.forEach((key, value) -> setValue(key, value));
         return self();
     }

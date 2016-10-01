@@ -5,11 +5,16 @@
  */
 package hep.dataforge.storage.servlet;
 
+import com.google.visualization.datasource.base.InvalidQueryException;
+import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.PointLoader;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -19,8 +24,13 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import java.io.StringWriter;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import static hep.dataforge.storage.api.ValueIndex.LIMIT_KEY;
 
 /**
  * A handler to evaluate Google visualization library requests to point loaders
@@ -39,10 +49,11 @@ public class PointLoaderDataHandler implements Handler {
         this.loader = loader;
     }
 
-    public static JsonObjectBuilder makeTable(PointLoader loader, Meta query) {
+    public static JsonObjectBuilder makeTable(ValueIndex index, TableFormat format, Meta query) throws StorageException {
         JsonObjectBuilder res = Json.createObjectBuilder();
-        res.add("cols", makeCols(loader.getFormat()));
-        res.add("rows", makeRows(loader.getFormat(), loader));
+
+        res.add("cols", makeCols(format));
+        res.add("rows", makeRows(format, index.query(query)));
         return res;
     }
 
@@ -71,11 +82,11 @@ public class PointLoaderDataHandler implements Handler {
         return res;
     }
 
-    private static JsonArrayBuilder makeRows(TableFormat format, Iterable<DataPoint> data) {
+    private static JsonArrayBuilder makeRows(TableFormat format, Iterable<Supplier<DataPoint>> data) {
         JsonArrayBuilder rows = Json.createArrayBuilder();
-        for (DataPoint p : data) {
-            rows.add(makeRow(format, p));
-        }
+        data.forEach(it -> {
+            rows.add(makeRow(format, it.get()));
+        });
         return rows;
     }
 
@@ -98,8 +109,14 @@ public class PointLoaderDataHandler implements Handler {
                 .add("c", values);
     }
 
-    private static Meta buildQuery(String tq) {
-        return null;
+    private static Meta buildQuery(String tq, Map<String, String> params) throws InvalidQueryException {
+//        Query q = QueryBuilder.getInstance().parseQuery(tq);
+        MetaBuilder builder = new MetaBuilder("query");
+        builder.update(params);
+        if (!params.containsKey(LIMIT_KEY)) {
+            builder.setValue(LIMIT_KEY, 500);
+        }
+        return builder.build();
     }
 
     private static Map<String, String> getRequestParams(String tqx) {
@@ -130,11 +147,34 @@ public class PointLoaderDataHandler implements Handler {
 
         ctx.getResponse().contentType("text/json");
 
+        ValueIndex<DataPoint> index;
+
+        Meta query = buildQuery(tq, params);
+
+        Instant start = Instant.now();
+
+        //use custom index if needed
+        if (query.hasValue("index")) {
+            index = loader.getIndex(query.getString("index", ""));
+        } else {
+            //use loader default one otherwise
+            index = loader.getIndex();
+        }
+
+        Logger logger = LoggerFactory.getLogger("POINT_LOADER");
+        Duration indexLoadTime = Duration.between(start,Instant.now());
+        logger.info("Index file loaded in {}", indexLoadTime);
+
+
+        start = Instant.now();
         JsonObject response = Json.createObjectBuilder()
                 .add("status", "ok")
                 .add("reqId", rqid)
-                .add("table", makeTable(loader, buildQuery(tq)))
+                .add("table", makeTable(index, loader.getFormat(), buildQuery(tq, params)))
                 .build();
+
+        Duration tableBuildTime = Duration.between(start, Instant.now());
+        logger.info("Table built in {}", tableBuildTime);
 
         ctx.render(wrapResponse(response, responseHandler));
     }

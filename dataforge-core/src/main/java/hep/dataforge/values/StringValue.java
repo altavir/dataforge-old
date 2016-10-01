@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
+
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.time.Instant;
@@ -50,7 +51,7 @@ class StringValue extends AbstractValue {
             return false;
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
-            return this.stringValue() == other.stringValue();
+            return Objects.equals(this.stringValue(), other.stringValue());
         } else {
             return super.equals(obj);
         }
@@ -74,6 +75,7 @@ class StringValue extends AbstractValue {
 //    public StringValue(Boolean value) {
 //        this.value = value.toString();
 //    }
+
     /**
      * {@inheritDoc}
      */
@@ -100,7 +102,7 @@ class StringValue extends AbstractValue {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Всегда возвращаем строковое значение строки в ковычках чтобы избежать
      * проблем с пробелами
      */

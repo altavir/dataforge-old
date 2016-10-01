@@ -112,24 +112,58 @@ public class StorageUtils {
         }
     }
 
-    public static <T> List<Supplier<T>> pullFiltered(ValueIndex<T> index, Value from, Value to, int maxItems) throws StorageException {
-        if (isNumeric(from) && isNumeric(to)) {
-            double a = from.doubleValue();
-            double b = to.doubleValue();
-            double step = (b - a) / maxItems;
-            List<Supplier<T>> res = new ArrayList<>();
-            for (double val = a + step / 2d; val < b; val += step) {
-                res.add(index.pullOne(Value.of(val)));
-            }
-            return res;
-        } else {
-            List<Supplier<T>> res = index.pull(from, to);
-            if (res.size() <= maxItems) {
-                return res;
+    /**
+     * Use smartPull for numeric values and simple limit for other types. Non-positive limits treated as non-existent.
+     *
+     * @param index
+     * @param from
+     * @param to
+     * @param limit
+     * @param <T>
+     * @return
+     * @throws StorageException
+     */
+    public static <T> List<Supplier<T>> pullFiltered(ValueIndex<T> index, Value from, Value to, int limit) throws StorageException {
+        if (limit > 0) {
+            if (isNumeric(from) && isNumeric(to)) {
+                double a = from.doubleValue();
+                double b = to.doubleValue();
+                return smartPull(index, a, b, limit);
             } else {
-                return res.subList(0, maxItems);
+                List<Supplier<T>> res = index.pull(from, to);
+                if (res.size() <= limit) {
+                    return res;
+                } else {
+                    return res.subList(0, limit);
+                }
+            }
+        } else {
+            return index.pull(from, to);
+        }
+    }
+
+    /**
+     * Pull a uniformly distributed list of objects. It splits a region in uniform segments and returns any value from each segment.
+     * If segment does not contain a value, it is skipped.
+     *
+     * @param index
+     * @param from
+     * @param to
+     * @param limit
+     * @param <T>
+     * @return
+     * @throws StorageException
+     */
+    public static <T> List<Supplier<T>> smartPull(ValueIndex<T> index, double from, double to, int limit) throws StorageException {
+        List<Supplier<T>> res = new ArrayList<>();
+        for (double x = from; x < to; x += (to - from) / limit) {
+            List<Supplier<T>> segmentList = index.pull(from, to);
+            if (!segmentList.isEmpty()) {
+                //get central element
+                res.add(segmentList.get((segmentList.size() - 1) / 2));
             }
         }
+        return res;
     }
 
 

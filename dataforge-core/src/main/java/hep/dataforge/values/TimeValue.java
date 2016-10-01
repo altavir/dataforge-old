@@ -24,7 +24,7 @@ import java.util.Objects;
  *
  * @author Alexander Nozik
  */
-class TimeValue implements Value {
+class TimeValue extends AbstractValue {
 
     /**
      * {@inheritDoc}

@@ -17,6 +17,8 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
+
+import java.time.Duration;
 import java.util.Iterator;
 
 /**
@@ -65,14 +67,14 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
     /**
      * Maximum age in millis
      *
-     * @param millis
+     * @param age
      */
-    public void setMaxAge(int millis) {
-        setEachConfigValue("maxAge", Value.of(millis));
+    public void setMaxAge(Duration age) {
+        this.forEach(it-> it.setMaxAge(age));
     }
 
     public void setMaxItems(int maxItems) {
-        setEachConfigValue("maxItems", Value.of(maxItems));
+        this.forEach(it->it.setMaxItems(maxItems));
     }
 
     @Override

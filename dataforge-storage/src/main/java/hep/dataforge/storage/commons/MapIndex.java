@@ -8,6 +8,7 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,7 +27,7 @@ import java.util.stream.Collectors;
  */
 public abstract class MapIndex<T, K> implements ValueIndex<T> {
 
-    protected TreeMap<Value, List<K>> map = new TreeMap<>();
+    protected TreeMap<Value, List<K>> map = new TreeMap<>(new ValueUtils.ValueComparator());
 
     /**
      * Store index entry
@@ -80,14 +81,21 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
     @Override
     public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
         update();
+        //If null, use the whole range
+        if (from == Value.NULL) {
+            from = map.firstKey();
+        }
+
+        if (to == Value.NULL) {
+            to = map.lastKey();
+        }
+
         List<Supplier<T>> res = new ArrayList();
         map.subMap(from, true, to, true).forEach((Value t, List<K> u) -> {
             res.addAll(transform(u));
         });
         return res;
     }
-
-
 
 
     public void invalidate() throws StorageException {

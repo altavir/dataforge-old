@@ -1,5 +1,6 @@
 package hep.dataforge.values;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.Comparator;
@@ -18,6 +19,7 @@ public class ValueUtils {
             case BOOLEAN:
                 return Boolean.compare(val1.booleanValue(), val2.booleanValue());
             case STRING:
+                //use alphanumeric comparator here
                 return val1.stringValue().compareTo(val2.stringValue());
             case TIME:
                 return val1.timeValue().compareTo(val2.timeValue());
@@ -46,7 +48,14 @@ public class ValueUtils {
         return isBetween(Value.of(val), val1, val2);
     }
 
-    public static class NumberComparator implements Comparator<Number> {
+    public static class ValueComparator implements Comparator<Value>, Serializable {
+        @Override
+        public int compare(Value o1, Value o2) {
+            return ValueUtils.compare(o1, o2);
+        }
+    }
+
+    public static class NumberComparator implements Comparator<Number>, Serializable {
 
         @Override
         public int compare(final Number x, final Number y) {

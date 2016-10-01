@@ -2,7 +2,9 @@ package hep.dataforge.storage.servlet;
 
 import freemarker.template.Template;
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.*;
+import hep.dataforge.storage.commons.JSONMetaWriter;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -37,8 +39,8 @@ public class StorageRatpackHandler implements Handler {
 
     @Override
     public void handle(Context ctx) throws Exception {
-
         if (ctx.getRequest().getQuery().isEmpty()) {
+            root.refresh();
             renderStorageTree(ctx, root);
         } else {
             String path = ctx.getRequest().getQueryParams().get("path");
@@ -160,9 +162,15 @@ public class StorageRatpackHandler implements Handler {
     protected void renderObjects(Context ctx, ObjectLoader loader) {
         defaultRenderLoader(ctx, loader);
     }
-    
-    protected String pointLoaderPlotOptions(PointLoader loader){
-        return null;
+
+    protected MetaBuilder pointLoaderPlotOptions(PointLoader loader) {
+        return new MetaBuilder("options")
+                .putValue("width", "90%")
+                .putValue("height", 500)
+                .putValue("curveType", "function")
+                .putNode(new MetaBuilder("explorer")
+                        .putValues("actions", new String[]{"dragToZoom", "rightClickToReset"})
+                );
     }
 
     protected void renderPoints(Context ctx, PointLoader loader) {
@@ -186,12 +194,12 @@ public class StorageRatpackHandler implements Handler {
             String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
 
             String dataSourceStr = serverAddres + ctx.getRequest().getUri() + "&action=pull";
-            
+
             data.put("dataSource", dataSourceStr);
             data.put("loaderName", loader.getName());
             data.put("updateInterval", 30);
-            String plotParams = pointLoaderPlotOptions(loader);
-            if(plotParams!= null){
+            String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
+            if (plotParams != null) {
                 data.put("plotParams", plotParams);
             }
 //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));

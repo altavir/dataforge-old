@@ -10,20 +10,14 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.values.Value;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Supplier;
-import org.slf4j.LoggerFactory;
 
 /**
- *
  * @author Alexander Nozik
  */
 public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Serializable, Encapsulated {
@@ -111,7 +105,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
     }
 
     private File getIndexFile() throws StorageException {
-        FileEnvelope env = getEnvelope();
+//        FileEnvelope env = getEnvelope();
         return new File(getIndexFileDirectory(), indexFileName());
     }
 
@@ -123,6 +117,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 //    private void setContext(Context context) {
 //        this.context = context;
 //    }
+
     /**
      * Load index content from external file
      */
@@ -156,6 +151,9 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         try {
             LoggerFactory.getLogger(getClass()).info("Saving index to file...");
             if (!indexFile.exists()) {
+                if(!indexFile.getParentFile().exists()){
+                    indexFile.getParentFile().mkdirs();
+                }
                 indexFile.createNewFile();
             }
             try (ObjectOutputStream ous = new ObjectOutputStream(new FileOutputStream(indexFile))) {
@@ -165,7 +163,9 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             lastSavedPosition = lastIndexedPosition;
         } catch (IOException ex) {
             LoggerFactory.getLogger(getClass()).error("Failed to write index file. Removing index file.", ex);
-            indexFile.delete();
+            if (indexFile.exists()) {
+                indexFile.delete();
+            }
         }
     }
 

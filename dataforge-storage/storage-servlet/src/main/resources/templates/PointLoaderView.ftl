@@ -31,12 +31,7 @@
             table.draw(data, {showRowNumber: false, page: 'enable', width : '90%', pageSize: 50, sort : 'disable'});
             
             <#if  plotParams??>
-                var options = {
-                    width: '90%',
-                    height: 500,    
-                    curveType: 'function',
-                    ${plotParams}
-                }
+                var options = ${plotParams}
 
                 var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
                 chart.draw(data, options);

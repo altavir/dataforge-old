@@ -23,11 +23,11 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.storage.commons.StorageUtils;
 import hep.dataforge.values.Value;
 
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 /**
  * An index that uses a Value corresponding to each indexed element
@@ -35,6 +35,10 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public interface ValueIndex<T> extends Index<T> {
+
+    String FROM_KEY = "from";
+    String TO_KEY = "to";
+    String LIMIT_KEY = "limit";
 
     /**
      * Search for the index field value closest to provided one. Specific search
@@ -82,12 +86,23 @@ public interface ValueIndex<T> extends Index<T> {
         return pull(Value.of(from), Value.of(to));
     }
 
+    /**
+     * By default uses smart optimized index pull
+     * @param query
+     * @return
+     * @throws StorageException
+     */
     @Override
-    default Stream<Supplier<T>> query(Meta query) throws StorageException {
-        Value from = query.getValue("from", Value.NULL);
-        Value to = query.getValue("to", Value.NULL);
-//        int limit = query.getInt("limit", -1);
-        return pull(from, to).stream();
+    default List<Supplier<T>> query(Meta query) throws StorageException {
+        //TODO add support for query engines
+        //null values correspond to
+        Value from = query.getValue(FROM_KEY, Value.NULL);
+        Value to = query.getValue(TO_KEY, Value.NULL);
+        if (query.hasValue(LIMIT_KEY)) {
+            return StorageUtils.pullFiltered(this, from, to, query.getInt(LIMIT_KEY));
+        } else {
+            return pull(from, to);
+        }
     }
 
 }
