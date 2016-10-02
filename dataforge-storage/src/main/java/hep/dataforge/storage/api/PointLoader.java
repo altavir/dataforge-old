@@ -35,14 +35,15 @@ import java.util.Collection;
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
 public interface PointLoader extends Loader, PointSource {
 
-    public static final String POINT_LOADER_TYPE = "point";
-    public static final String DEFAULT_INDEX_FIELD = "";
+    String POINT_LOADER_TYPE = "point";
+    String DEFAULT_INDEX_FIELD = "";
 
-    public static final String LOADER_FORMAT_KEY = "format";
+    String LOADER_FORMAT_KEY = "format";
 
     /**
      * The minimal format for points in this loader. Is null for unformatted loader
-     * @return 
+     *
+     * @return
      */
     @Override
     TableFormat getFormat();
@@ -60,11 +61,14 @@ public interface PointLoader extends Loader, PointSource {
 
     /**
      * get default index
+     *
      * @return
      */
-    default ValueIndex<DataPoint> getIndex(){
-        if(meta().hasValue("index")){
+    default ValueIndex<DataPoint> getIndex() {
+        if (meta().hasValue("index")) {
             return getIndex(meta().getString("index"));
+        } else if (meta().hasValue("index.key")) {
+            return getIndex(meta().getString("index.key"));
         } else {
             return getIndex(DEFAULT_INDEX_FIELD);
         }

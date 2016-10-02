@@ -191,7 +191,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     @Override
-    public ValueIndex<DataPoint> getIndex(String name) {
+    public ValueIndex<DataPoint> buildIndex(String name) {
         if (name == null || name.isEmpty()) {
             //use point number index
             return new DefaultIndex<>(this);

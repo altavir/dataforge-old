@@ -77,7 +77,7 @@ public class ChainPointLoader extends AbstractPointLoader {
 //    }
 
     @Override
-    public ValueIndex<DataPoint> getIndex(String name) {
+    public ValueIndex<DataPoint> buildIndex(String name) {
         return primaryLoader.getIndex(name);
     }
 

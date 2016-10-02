@@ -10,9 +10,11 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Supplier;
@@ -127,7 +129,18 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             LoggerFactory.getLogger(getClass()).info("Loading index from file...");
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(indexFile))) {
                 long position = ois.readLong();
-                TreeMap<Value, List<Integer>> newMap = (TreeMap<Value, List<Integer>>) ois.readObject();
+                TreeMap<Value, List<Integer>> newMap = new TreeMap<>(new ValueUtils.ValueComparator());
+                while(ois.available()>0){
+                    Value val = ValueUtils.readValue(ois);
+                    short num = ois.readShort();
+                    List<Integer> integers = new ArrayList<>();
+                    for (int i = 0; i < num; i++) {
+                        integers.add(ois.readInt());
+                    }
+                    newMap.put(val,integers);
+                }
+
+
                 if (position > 0 && position >= this.lastIndexedPosition && newMap != null) {
                     this.map = newMap;
                     this.lastIndexedPosition = position;
@@ -151,14 +164,24 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         try {
             LoggerFactory.getLogger(getClass()).info("Saving index to file...");
             if (!indexFile.exists()) {
-                if(!indexFile.getParentFile().exists()){
+                if (!indexFile.getParentFile().exists()) {
                     indexFile.getParentFile().mkdirs();
                 }
                 indexFile.createNewFile();
             }
             try (ObjectOutputStream ous = new ObjectOutputStream(new FileOutputStream(indexFile))) {
                 ous.writeLong(lastIndexedPosition);
-                ous.writeObject(map);
+                map.forEach((value, integers) -> {
+                    try {
+                        ValueUtils.writeValue(ous, value);
+                        ous.writeShort(integers.size());
+                        for (Integer i : integers) {
+                            ous.writeInt(i);
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                });
             }
             lastSavedPosition = lastIndexedPosition;
         } catch (IOException ex) {

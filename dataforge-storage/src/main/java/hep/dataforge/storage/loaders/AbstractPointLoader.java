@@ -23,6 +23,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
 import hep.dataforge.tables.DataPoint;
@@ -30,6 +31,7 @@ import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
 
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -38,12 +40,12 @@ import static hep.dataforge.storage.commons.StorageMessageUtils.*;
 import static hep.dataforge.tables.DataPoint.fromMeta;
 
 /**
- *
  * @author Alexander Nozik
  */
 public abstract class AbstractPointLoader extends AbstractLoader implements PointLoader {
 
     protected final Set<PointListener> listeners = new HashSet<>();
+    private HashMap<String, ValueIndex<DataPoint>> indexMap = new HashMap<>();
 
     public AbstractPointLoader(Storage storage, String name, Meta annotation) {
         super(storage, name, annotation);
@@ -60,10 +62,18 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
         }
     }
 
+    @Override
+    public synchronized ValueIndex<DataPoint> getIndex(String name) {
+        return indexMap.computeIfAbsent(name, str -> buildIndex(str));
+    }
+
+    protected abstract ValueIndex<DataPoint> buildIndex(String name);
+
     /**
      * Push point and notify all listeners
+     *
      * @param dp
-     * @throws StorageException 
+     * @throws StorageException
      */
     @Override
     public void push(DataPoint dp) throws StorageException {
@@ -76,6 +86,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
 
     /**
      * push procedure implementation
+     *
      * @param dp
      * @throws StorageException
      */
@@ -84,7 +95,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
     @Override
     public Envelope respond(Envelope message) {
         try {
-            if(!acceptEnvelope(message)){
+            if (!acceptEnvelope(message)) {
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
             Meta messageMeta = message.meta();
@@ -115,7 +126,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                             dataAn.putNode(DataPoint.toMeta(point));
                         }
                     } else if (messageMeta.hasNode("range")) {
-                        String valueName = messageMeta.getString("valueName", "");                        
+                        String valueName = messageMeta.getString("valueName", "");
                         for (Meta rangeAn : messageMeta.getNodes("range")) {
                             Value from = rangeAn.getValue("from", Value.getNull());
                             Value to = rangeAn.getValue("to", Value.getNull());
