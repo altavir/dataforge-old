@@ -22,13 +22,23 @@
 
         function handleQueryResponse(response) {
             if (response.isError()) {
+                google.visualization.errors.addError.addErrorFromQueryResponse(document.getElementById('table_div'),response)
                 alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
                 return;
             }
 
             var data = response.getDataTable();
             var table = new google.visualization.Table(document.getElementById('table_div'));
-            table.draw(data, {showRowNumber: false, page: 'enable', width : '90%', pageSize: 50, sort : 'disable'});
+
+            var tableOptions = {
+                showRowNumber: false,
+                page: 'enable',
+                width : '90%',
+                pageSize: 50,
+                sort : 'disable'
+            }
+
+            table.draw(data, tableOptions);
             
             <#if  plotParams??>
                 var options = ${plotParams}
@@ -45,9 +55,13 @@
             <h1>Point loader: ${loaderName}</h1>
         </div>
         <br/>
-        <div id="plot_div"></div>
+        <div id="plot_div">
+
+        </div>
         <br/>
-        <div id="table_div"></div>
+        <div id="table_div">
+            <h2>Loading data...</h2>
+        </div>
     </div>
     
     <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

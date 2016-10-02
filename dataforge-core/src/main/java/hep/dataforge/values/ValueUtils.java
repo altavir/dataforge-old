@@ -1,14 +1,22 @@
 package hep.dataforge.values;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
+import java.nio.charset.Charset;
+import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 /**
  * Created by darksnake on 06-Aug-16.
  */
 public class ValueUtils {
+    private static final Charset utf = Charset.forName("UTF-8");
 
     public static final NumberComparator NUMBER_COMPARATOR = new NumberComparator();
 
@@ -46,6 +54,124 @@ public class ValueUtils {
 
     public static boolean isBetween(Object val, Value val1, Value val2) {
         return isBetween(Value.of(val), val1, val2);
+    }
+
+
+    /**
+     * Fast and compact serialization for values
+     *
+     * @param oos
+     * @param value
+     * @throws IOException
+     */
+    public static void writeValue(ObjectOutputStream oos, Value value) throws IOException {
+        if (value.isList()) {
+            oos.writeChar('L'); // List designation
+            oos.writeShort(value.listValue().size());
+            for (Value subValue : value.listValue()) {
+                writeValue(oos, subValue);
+            }
+        } else {
+            switch (value.valueType()) {
+                case NULL:
+                    oos.writeChar('0'); // null
+                    break;
+                case TIME:
+                    oos.writeChar('T');//Instant
+                    oos.writeLong(value.timeValue().getEpochSecond());
+                    oos.writeLong(value.timeValue().getNano());
+                    break;
+                case STRING:
+                    //TODO add encding specification
+                    oos.writeChar('S');//String
+                    byte[] bytes = value.stringValue().getBytes(utf);
+                    oos.writeInt(bytes.length);
+                    oos.write(bytes);
+                    break;
+                case NUMBER:
+                    Number num = value.numberValue();
+                    if (num instanceof Double) {
+                        oos.writeChar('D'); // double
+                        oos.writeDouble(num.doubleValue());
+                    } else if (num instanceof Integer) {
+                        oos.writeChar('I'); // integer
+                        oos.writeInt(num.intValue());
+                    } else if (num instanceof BigDecimal) {
+                        oos.writeChar('B'); // BigDecimal
+                        byte[] bigInt = ((BigDecimal) num).unscaledValue().toByteArray();
+                        int scale = ((BigDecimal) num).scale();
+                        oos.writeShort(bigInt.length);
+                        oos.write(bigInt);
+                        oos.writeInt(scale);
+                    } else {
+                        oos.writeChar('N'); //custom number
+                        oos.writeObject(num);
+                    }
+                    break;
+                case BOOLEAN:
+                    if (value.booleanValue()) {
+                        oos.writeChar('+'); //true
+                    } else {
+                        oos.writeChar('-'); // false
+                    }
+                    break;
+                default:
+                    oos.writeChar('C');//custom
+                    oos.writeObject(value);
+            }
+        }
+    }
+
+    /**
+     * Value deserialization
+     *
+     * @param ois
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static Value readValue(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+        char c = ois.readChar();
+        switch (c) {
+            case 'L':
+                short listSize = ois.readShort();
+                List<Value> valueList = new ArrayList<>();
+                for (int i = 0; i < listSize; i++) {
+                    valueList.add(readValue(ois));
+                }
+                return Value.of(valueList);
+            case '0':
+                return Value.NULL;
+            case 'T':
+                Instant time = Instant.ofEpochSecond(ois.readLong(), ois.readLong());
+                return Value.of(time);
+            case 'S':
+                int stringSize = ois.readInt();
+                byte[] bytes = new byte[stringSize];
+                ois.read(bytes);
+                return Value.of(new String(bytes, utf));
+            case 'D':
+                return Value.of(ois.readDouble());
+            case 'I':
+                return Value.of(ois.readInt());
+            case 'B':
+                short intSize = ois.readShort();
+                byte[] intBytes = new byte[intSize];
+                ois.read(intBytes);
+                int scale = ois.readInt();
+                BigDecimal bdc = new BigDecimal(new BigInteger(intBytes),scale);
+                return Value.of(bdc);
+            case 'N':
+                return Value.of(ois.readObject());
+            case '+':
+                return BooleanValue.TRUE;
+            case '-':
+                return BooleanValue.FALSE;
+            case 'C':
+                return (Value) ois.readObject();
+            default:
+                throw new RuntimeException("Wrong value serialization format. Designation " + c + " is unexpected");
+        }
     }
 
     public static class ValueComparator implements Comparator<Value>, Serializable {

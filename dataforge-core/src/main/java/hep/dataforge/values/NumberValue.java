@@ -15,10 +15,7 @@
  */
 package hep.dataforge.values;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.time.Instant;
-import java.util.Comparator;
 import java.util.Objects;
 
 /**
@@ -26,8 +23,6 @@ import java.util.Objects;
  * @author Alexander Nozik
  */
 class NumberValue extends AbstractValue {
-
-
 
     /**
      * {@inheritDoc}
@@ -48,7 +43,7 @@ class NumberValue extends AbstractValue {
             return false;
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
-            return this.numberValue() == other.numberValue();
+            return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
         } else {
             return super.equals(obj);
         }
@@ -121,5 +116,4 @@ class NumberValue extends AbstractValue {
     public String toString() {
         return stringValue();
     }
-
 }
