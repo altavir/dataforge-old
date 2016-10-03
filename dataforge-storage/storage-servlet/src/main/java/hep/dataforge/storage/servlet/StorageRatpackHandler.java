@@ -159,7 +159,7 @@ public class StorageRatpackHandler implements Handler {
         defaultRenderLoader(ctx, loader);
     }
 
-    protected void renderObjects(Context ctx, ObjectLoader loader) {
+    protected void renderObjects(Context ctx, ObjectLoader<?> loader) {
         defaultRenderLoader(ctx, loader);
     }
 

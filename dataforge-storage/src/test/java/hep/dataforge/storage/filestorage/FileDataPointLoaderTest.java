@@ -23,17 +23,21 @@ import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.values.Value;
 import org.junit.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.stream.Collectors;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 /**
- *
  * @author Darksnake
  */
 public class FileDataPointLoaderTest {
@@ -64,7 +68,7 @@ public class FileDataPointLoaderTest {
     }
 
     @Test
-    public void test() throws FileNotFoundException, StorageException {
+    public void testReadWrite() throws FileNotFoundException, StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
         FileStorage storage = FileStorage.in(dir, null);
@@ -72,14 +76,43 @@ public class FileDataPointLoaderTest {
         PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", TableFormat.forNames(names));
 
         System.out.println("push");
-        for (int i = 0; i < 100; i++) {
-
+        Instant start = Instant.now();
+        for (int i = 0; i < 1000; i++) {
             loader.push(new MapPoint(names, i, i * 2, Math.sqrt(i)));
-            System.out.printf("Point with number %d loaded%n", i);
+//            System.out.printf("Point with number %d loaded%n", i);
         }
+        System.out.printf("Push operation for 1000 element completed in %s%n", Duration.between(start, Instant.now()));
 
-        System.out.println("pull");
+
+        System.out.println("direct pull");
+
+        start = Instant.now();
         ValueIndex<DataPoint> index = loader.getIndex("key");
+
+//        IntStream.range(0, 100).mapToObj(i -> {
+//            try {
+//                return index.pull(i * 10);
+//            } catch (StorageException e) {
+//                throw new RuntimeException(e);
+//            }
+//        }).flatMap(it -> it.stream()).map(it -> it.get()).count();
+
+        for (int i = 0; i < 100; i++) {
+            index.pull(i * 10).stream().map(it -> it.get()).collect(Collectors.toList());
+        }
+        System.out.printf("Selective pull operation on 100 element completed in %s%n", Duration.between(start, Instant.now()));
+
+
+        System.out.println("smart pull");
+
+        start = Instant.now();
+        int smartPullSize = index.pull(Value.NULL, Value.NULL, 100)
+                .stream().map(it -> it.get()).collect(Collectors.toList()).size();
+        assertTrue(smartPullSize <= 100);
+
+        System.out.printf("Smart pull operation on %d element completed in %s%n", smartPullSize, Duration.between(start, Instant.now()));
+
+        System.out.println("pull consistency check");
         DataPoint dp = index.pull(24, 26).get(0).get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
     }

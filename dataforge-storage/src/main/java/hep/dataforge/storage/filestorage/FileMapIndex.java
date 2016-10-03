@@ -129,7 +129,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             LoggerFactory.getLogger(getClass()).info("Loading index from file...");
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(indexFile))) {
                 long position = ois.readLong();
-                TreeMap<Value, List<Integer>> newMap = new TreeMap<>(new ValueUtils.ValueComparator());
+                TreeMap<Value, List<Integer>> newMap = new TreeMap<>(ValueUtils.VALUE_COMPARATPR);
                 while(ois.available()>0){
                     Value val = ValueUtils.readValue(ois);
                     short num = ois.readShort();

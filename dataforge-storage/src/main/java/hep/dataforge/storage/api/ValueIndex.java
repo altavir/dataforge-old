@@ -27,6 +27,7 @@ import hep.dataforge.storage.commons.StorageUtils;
 import hep.dataforge.values.Value;
 
 import java.util.List;
+import java.util.NavigableSet;
 import java.util.function.Supplier;
 
 /**
@@ -70,6 +71,10 @@ public interface ValueIndex<T> extends Index<T> {
         }
     }
 
+    default Supplier<T> pullOne(Object value) throws StorageException {
+        return pullOne(Value.of(value));
+    }
+
     /**
      * Возвращает список точек, ключ которых лежит строго в пределах от from до
      * to. Работает только для сравнимых значений (для строк может выдавать
@@ -87,7 +92,23 @@ public interface ValueIndex<T> extends Index<T> {
     }
 
     /**
+     * A sparse pull operation with limited number of results.
+     * This method does not guarantee specific node placement but tries to place them as uniformly as possible.
+     * It is intended primarily for visualization.
+     *
+     * @param from
+     * @param to
+     * @param limit
+     * @return
+     * @throws StorageException
+     */
+    default List<Supplier<T>> pull(Value from, Value to, int limit) throws StorageException {
+        return StorageUtils.sparsePull(this, from, to, limit);
+    }
+
+    /**
      * By default uses smart optimized index pull
+     *
      * @param query
      * @return
      * @throws StorageException
@@ -99,10 +120,22 @@ public interface ValueIndex<T> extends Index<T> {
         Value from = query.getValue(FROM_KEY, Value.NULL);
         Value to = query.getValue(TO_KEY, Value.NULL);
         if (query.hasValue(LIMIT_KEY)) {
-            return StorageUtils.pullFiltered(this, from, to, query.getInt(LIMIT_KEY));
+
+            return pull(from, to, query.getInt(LIMIT_KEY));
         } else {
             return pull(from, to);
         }
     }
+
+    NavigableSet<Value> keySet() throws StorageException;
+
+    default Value getFirstKey() throws StorageException {
+        return keySet().first();
+    }
+
+    default Value getLastKey() throws StorageException {
+        return keySet().last();
+    }
+
 
 }

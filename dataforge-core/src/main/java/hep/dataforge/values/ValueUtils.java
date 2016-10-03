@@ -18,7 +18,8 @@ import java.util.List;
 public class ValueUtils {
     private static final Charset utf = Charset.forName("UTF-8");
 
-    public static final NumberComparator NUMBER_COMPARATOR = new NumberComparator();
+    public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
+    public static final Comparator<Value> VALUE_COMPARATPR = new ValueComparator();
 
     public static int compare(Value val1, Value val2) {
         switch (val1.valueType()) {
@@ -174,14 +175,14 @@ public class ValueUtils {
         }
     }
 
-    public static class ValueComparator implements Comparator<Value>, Serializable {
+    private static class ValueComparator implements Comparator<Value>, Serializable {
         @Override
         public int compare(Value o1, Value o2) {
             return ValueUtils.compare(o1, o2);
         }
     }
 
-    public static class NumberComparator implements Comparator<Number>, Serializable {
+    private static class NumberComparator implements Comparator<Number>, Serializable {
 
         @Override
         public int compare(final Number x, final Number y) {

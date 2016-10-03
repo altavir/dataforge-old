@@ -12,12 +12,14 @@ import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueUtils;
 
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
- * Simple StreamIndex for value providers
+ * Simple in memory index. Very inefficient.
  *
  * @param <T>
  * @author Alexander Nozik
@@ -62,6 +64,10 @@ public class ValueProviderIndex<T extends ValueProvider> implements ValueIndex<T
                 .collect(Collectors.toList());
     }
 
-
-
+    @Override
+    public NavigableSet<Value> keySet() {
+        TreeSet<Value> res = new TreeSet<>(ValueUtils.VALUE_COMPARATPR);
+        StreamSupport.stream(iterable.spliterator(),true).map(it-> it.getValue(valueName, defaultValue)).forEach(it-> res.add(it));
+        return res;
+    }
 }

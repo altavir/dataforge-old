@@ -113,7 +113,7 @@ public class StorageUtils {
     }
 
     /**
-     * Use smartPull for numeric values and simple limit for other types. Non-positive limits treated as non-existent.
+     * Use sparsePull for numeric values and simple limit for other types. Non-positive limits treated as non-existent.
      *
      * @param index
      * @param from
@@ -123,12 +123,12 @@ public class StorageUtils {
      * @return
      * @throws StorageException
      */
-    public static <T> List<Supplier<T>> pullFiltered(ValueIndex<T> index, Value from, Value to, int limit) throws StorageException {
+    public static <T> List<Supplier<T>> sparsePull(ValueIndex<T> index, Value from, Value to, int limit) throws StorageException {
         if (limit > 0) {
             if (isNumeric(from) && isNumeric(to)) {
                 double a = from.doubleValue();
                 double b = to.doubleValue();
-                return smartPull(index, a, b, limit);
+                return sparsePull(index, a, b, limit);
             } else {
                 List<Supplier<T>> res = index.pull(from, to);
                 if (res.size() <= limit) {
@@ -154,13 +154,20 @@ public class StorageUtils {
      * @return
      * @throws StorageException
      */
-    public static <T> List<Supplier<T>> smartPull(ValueIndex<T> index, double from, double to, int limit) throws StorageException {
+    public static <T> List<Supplier<T>> sparsePull(ValueIndex<T> index, double from, double to, int limit) throws StorageException {
+        if (!Double.isFinite(from)) {
+            from = index.getFirstKey().doubleValue();
+        }
+        if (!Double.isFinite(to)) {
+            to = index.getLastKey().doubleValue();
+        }
+
         List<Supplier<T>> res = new ArrayList<>();
-        for (double x = from; x < to; x += (to - from) / limit) {
-            List<Supplier<T>> segmentList = index.pull(from, to);
-            if (!segmentList.isEmpty()) {
-                //get central element
-                res.add(segmentList.get((segmentList.size() - 1) / 2));
+        double step = (to - from) / limit;
+        for (double x = from; x < to; x += step) {
+            Supplier<T> sup = index.pullOne(x + step / 2);
+            if(sup!= null) {
+                res.add(sup);
             }
         }
         return res;

@@ -46,7 +46,7 @@ public class SimpleParser implements PointParser {
      * @param line a {@link java.lang.String} object.
      */
     public SimpleParser(String line) {
-        this.format = line.trim().split("[^\\w']+");
+        this.format = line.trim().split("[^\\w']*");
     }
     
     public SimpleParser(TableFormat format){

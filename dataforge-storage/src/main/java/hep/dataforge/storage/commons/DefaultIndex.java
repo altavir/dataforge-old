@@ -13,6 +13,8 @@ import javafx.util.Pair;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.NavigableSet;
+import java.util.TreeSet;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -21,8 +23,8 @@ import java.util.stream.StreamSupport;
 /**
  * The simple index, which uses item number for search
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>> {
 
@@ -57,23 +59,29 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
     public List<Supplier<T>> pull(Value value) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> value.intValue() == pair.getKey())
-                .<Supplier<T>>map(pair -> ()->pair.getValue())
-                .collect(Collectors.toList());   
+                .<Supplier<T>>map(pair -> () -> pair.getValue())
+                .collect(Collectors.toList());
     }
 
     @Override
     public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> ValueUtils.isBetween(pair.getKey(),from, to))
-                .<Supplier<T>>map(pair -> ()->pair.getValue())
-                .collect(Collectors.toList());   
+                .filter(pair -> ValueUtils.isBetween(pair.getKey(), from, to))
+                .<Supplier<T>>map(pair -> () -> pair.getValue())
+                .collect(Collectors.toList());
     }
 
     public List<Supplier<T>> pull(Predicate<Integer> predicate) {
         return StreamSupport.stream(spliterator(), true)
                 .filter(t -> predicate.test(t.getKey()))
-                .<Supplier<T>>map(pair -> ()->pair.getValue())
+                .<Supplier<T>>map(pair -> () -> pair.getValue())
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public NavigableSet<Value> keySet() {
+        TreeSet<Value> res = new TreeSet<>();
+        StreamSupport.stream(spliterator(), false).forEach(it -> res.add(Value.of(it.getKey())));
+        return res;
+    }
 }
