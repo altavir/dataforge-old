@@ -14,5 +14,6 @@ public class Roles {
     public static final String DEVICE_LISTENER_ROLE = "deviceListener";
     public static final String MEASUREMENT_CONSUMER_ROLE = "measurementListener";
     public static final String STORAGE_ROLE = "storage";
+    public static final String POINT_LISTENER_ROLE = "pointListener";
     public static final String VIEW_ROLE = "view";
 }

@@ -25,7 +25,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.Table;
-import hep.dataforge.utils.CommonUtils;
+import hep.dataforge.utils.Utils;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -81,7 +81,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         PrintWriter writer = new PrintWriter(buildActionOutput(name));
 
         for (FitStage task : stages) {
-            CommonUtils.checkThread();// check if action is cacneled
+            Utils.checkThread();// check if action is cacneled
             res = fm.runTask(res, task, writer, getReport(name));
         }
         getReport(name).print(writer);

@@ -16,9 +16,8 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.io.MetaStreamWriter;
-import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
-import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.values.Value;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,6 +25,10 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
+
+import static hep.dataforge.io.envelopes.Coder.getMetaType;
+import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
+import static hep.dataforge.io.envelopes.Envelope.*;
 
 /**
  *
@@ -62,8 +65,8 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         Map<String, Value> newProperties = new HashMap<>(defaultProperties);
         newProperties.putAll(envelope.getProperties());
 
-        MetaStreamWriter writer = EnvelopeProperties.getMetaType(newProperties.get(META_TYPE_KEY)).getWriter();
-        Charset charset = EnvelopeProperties.getCharset(newProperties.get(META_ENCODING_KEY));
+        MetaStreamWriter writer = getMetaType(newProperties.get(META_TYPE_KEY)).getWriter();
+        Charset charset = Charset.forName(newProperties.get(META_ENCODING_KEY).stringValue());//Coder.getCharset(newProperties.get(META_ENCODING_KEY));
         byte[] meta;
         int metaSize;
         if (envelope.meta().isEmpty()) {

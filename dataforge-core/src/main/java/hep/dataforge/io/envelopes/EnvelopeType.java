@@ -15,15 +15,14 @@
  */
 package hep.dataforge.io.envelopes;
 
-import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
+
 import java.util.Collections;
 import java.util.Map;
 
 /**
- *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 public interface EnvelopeType<T extends Envelope> {
 
@@ -31,13 +30,9 @@ public interface EnvelopeType<T extends Envelope> {
 
     String getName();
 
-    default Value getValue() {
-        return new CompositePropertyValue(getCode(), getName());
-    }
-
     String description();
-    
-    default Map<String, Value> defaultProperties(){
+
+    default Map<String, Value> defaultProperties() {
         return Collections.emptyMap();
     }
 

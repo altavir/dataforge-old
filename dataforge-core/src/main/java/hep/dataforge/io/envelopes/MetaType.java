@@ -7,8 +7,6 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
-import hep.dataforge.values.CompositePropertyValue;
-import hep.dataforge.values.Value;
 
 /**
  *
@@ -19,10 +17,6 @@ public interface MetaType {
     short getCode();
 
     String getName();
-
-    default Value getValue() {
-        return new CompositePropertyValue(getCode(), getName());
-    }
 
     MetaStreamReader getReader();
 

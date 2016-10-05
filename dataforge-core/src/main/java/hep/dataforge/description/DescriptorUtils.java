@@ -11,7 +11,7 @@ import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.navigation.Path;
-import hep.dataforge.utils.CommonUtils;
+import hep.dataforge.utils.Utils;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
@@ -33,7 +33,7 @@ import java.util.Map;
  */
 public class DescriptorUtils {
 
-    private static final Map<AnnotatedElement, NodeDescriptor> descriptorCache = CommonUtils.getLRUCache(500);
+    private static final Map<AnnotatedElement, NodeDescriptor> descriptorCache = Utils.getLRUCache(500);
 
     /**
      * Build Meta that contains all the default nodes and values from given node

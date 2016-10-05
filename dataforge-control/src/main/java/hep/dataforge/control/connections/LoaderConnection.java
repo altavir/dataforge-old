@@ -9,14 +9,13 @@ import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.PointListener;
 import org.slf4j.LoggerFactory;
 
 /**
  *
  * @author Alexander Nozik
  */
-public class LoaderConnection implements PointListener, Connection<Device> {
+public class LoaderConnection implements PointListenerConnection {
 
     private final PointLoader loader;
 

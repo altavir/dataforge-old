@@ -17,15 +17,15 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.BufferedBinary;
-import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
+
 import java.nio.ByteBuffer;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
+
+import static hep.dataforge.io.envelopes.Envelope.*;
 
 /**
  * The convenient build for envelopes
@@ -36,6 +36,7 @@ public class EnvelopeBuilder {
 
     private Map<String, Value> properties = new HashMap<>();
     private MetaBuilder meta = new MetaBuilder("envelope");
+
     //initializing with empty buffer
     private Binary data = new BufferedBinary(new byte[0]);
 
@@ -112,13 +113,11 @@ public class EnvelopeBuilder {
     }
 
     public EnvelopeBuilder setMetaType(String metaType) {
-        Value metaTypeValue = EnvelopeProperties.getMetaType(metaType).getValue();
-        return setProperty(META_TYPE_KEY, metaTypeValue);
+        return setProperty(META_TYPE_KEY, metaType);
     }
 
     public EnvelopeBuilder setMetaEncoding(String metaEncoding) {
-        Value metaEncodingValue = EnvelopeProperties.getCharsetValue(metaEncoding);
-        return setProperty(META_ENCODING_KEY, metaEncodingValue);
+        return setProperty(META_ENCODING_KEY, metaEncoding);
     }
 
     public EnvelopeBuilder setData(Binary data) {
@@ -140,7 +139,7 @@ public class EnvelopeBuilder {
 //        return setProperty(MESSAGE_PRIORITY_KEY, priority);
 //    }
     public EnvelopeBuilder setEnvelopeType(EnvelopeType type) {
-        return this.setProperty(TYPE_KEY, type.getValue());
+        return this.setProperty(TYPE_KEY, type.getName());
     }
 
     public EnvelopeBuilder setEnvelopeType(String type) {

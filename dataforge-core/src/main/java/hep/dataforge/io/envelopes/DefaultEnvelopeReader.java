@@ -19,11 +19,9 @@ import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
-import static hep.dataforge.io.envelopes.DefaultEnvelopeType.CUSTOM_PROPERTY_HEAD;
-import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
-import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -37,6 +35,11 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static hep.dataforge.io.envelopes.Coder.getMetaType;
+import static hep.dataforge.io.envelopes.DefaultEnvelopeType.CUSTOM_PROPERTY_HEAD;
+import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
+import static hep.dataforge.io.envelopes.Envelope.*;
 
 /**
  *
@@ -124,8 +127,8 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
             properties.putAll(overrideProperties);
         }
 
-        MetaStreamReader parser = EnvelopeProperties.getMetaType(properties.get(META_TYPE_KEY)).getReader();
-        Charset charset = EnvelopeProperties.getCharset(properties.get(META_ENCODING_KEY));
+        MetaStreamReader parser = getMetaType(properties.get(META_TYPE_KEY)).getReader();
+        Charset charset = Charset.forName(properties.get(META_ENCODING_KEY).stringValue());//Coder.getCharset(newProperties.get(META_ENCODING_KEY));
         int metaLength = properties.get(META_LENGTH_KEY).intValue();
         Meta meta;
         if (metaLength == 0) {

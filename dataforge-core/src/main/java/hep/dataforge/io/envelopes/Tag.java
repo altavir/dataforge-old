@@ -15,17 +15,15 @@
  */
 package hep.dataforge.io.envelopes;
 
-import hep.dataforge.values.CompositePropertyValue;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
 import static hep.dataforge.io.envelopes.Envelope.*;
-import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
 
 /**
  * An Envelope critical properties that could be encoded in a short binary
@@ -34,6 +32,7 @@ import static hep.dataforge.io.envelopes.EnvelopeProperties.ASCII_CHARSET;
  * @author Alexander Nozik
  */
 public class Tag {
+    public static final Charset ASCII_CHARSET = Charset.forName("US-ASCII");
 
     public static final short CURRENT_PROTOCOL_VERSION = 0x3031;
 
@@ -119,56 +118,80 @@ public class Tag {
 
     /**
      * Apply all valid properties from given map. Return a copy containing all remaining properties
+     *
      * @param map
-     * @return 
+     * @return
      */
     public Map<String, Value> applyProperties(Map<String, Value> map) {
-        Map<String,Value> properties = new HashMap<>(map);
+        Map<String, Value> properties = new HashMap<>(map);
         protocolVersion = (short) (properties.containsKey(VERSION_KEY) ? properties.get(VERSION_KEY).intValue() : CURRENT_PROTOCOL_VERSION);
         properties.remove(VERSION_KEY);
-        type = getShortCompositePropertyValue(properties, TYPE_KEY);
+        type = getCodeShort(properties, TYPE_KEY);
         opt = properties.containsKey(OPT_KEY) ? properties.get(OPT_KEY).intValue() : 0;
         properties.remove(OPT_KEY);
-        metaType = getShortCompositePropertyValue(properties, META_TYPE_KEY);
-        metaEncoding = getShortCompositePropertyValue(properties, META_ENCODING_KEY);
+        metaType = getCodeShort(properties, META_TYPE_KEY);
+        metaEncoding = getCodeShort(properties, META_ENCODING_KEY);
         metaLength = (properties.containsKey(META_LENGTH_KEY) ? properties.get(META_LENGTH_KEY).intValue() : -1);
         properties.remove(META_LENGTH_KEY);
-        dataType = getCompositePropertyValue(properties, DATA_TYPE_KEY);
+        dataType = getCode(properties, DATA_TYPE_KEY);
         dataLength = (properties.containsKey(DATA_LENGTH_KEY) ? properties.get(DATA_LENGTH_KEY).numberValue().longValue() : -1);
         properties.remove(DATA_LENGTH_KEY);
         return properties;
     }
-    
 
-    private int getCompositePropertyValue(Map<String, Value> properties, String key) {
-        if (properties.containsKey(key)) {
-            Value val = properties.get(key);
-            if (val.valueType() == ValueType.NUMBER || val instanceof CompositePropertyValue) {
-                properties.remove(key);
-                return val.intValue();
-            } else {
-                // place ? int tag and use custom property instead
-                return 0x3f3f3f3f;
-            }
+
+    private int getCode(Map<String, Value> map, String key) {
+        int res;
+        if (map.containsKey(key)) {
+            res = Coder.encode(key, map.get(key));
         } else {
-            return 0;
+            res = 0;
         }
+        map.remove(key);
+        return res;
     }
 
-    private short getShortCompositePropertyValue(Map<String, Value> properties, String key) {
-        if (properties.containsKey(key)) {
-            Value val = properties.get(key);
-            if (val.valueType() == ValueType.NUMBER || val instanceof CompositePropertyValue) {
-                properties.remove(key);
-                return (short) val.intValue();
-            } else {
-                // place ? int tag and use custom property instead
-                return 0x3f3f;
-            }
+    private short getCodeShort(Map<String, Value> map, String key) {
+        short res;
+        if (map.containsKey(key)) {
+            res = Coder.encodeShort(key, map.get(key));
         } else {
-            return 0;
+            res = 0;
         }
-    }    
+        map.remove(key);
+        return res;
+    }
+
+
+//    private int getCompositePropertyValue(Map<String, Value> properties, String key) {
+//        if (properties.containsKey(key)) {
+//            Value val = properties.get(key);
+//            if (val.valueType() == ValueType.NUMBER) {
+//                properties.remove(key);
+//                return val.intValue();
+//            } else {
+//                // place ? int tag and use custom property instead
+//                return 0x3f3f3f3f;
+//            }
+//        } else {
+//            return 0;
+//        }
+//    }
+//
+//    private short getShortCompositePropertyValue(Map<String, Value> properties, String key) {
+//        if (properties.containsKey(key)) {
+//            Value val = properties.get(key);
+//            if (val.valueType() == ValueType.NUMBER) {
+//                properties.remove(key);
+//                return (short) val.intValue();
+//            } else {
+//                // place ? int tag and use custom property instead
+//                return 0x3f3f;
+//            }
+//        } else {
+//            return 0;
+//        }
+//    }
 
     /**
      * Build new serialization tag string with enclosing #! and !# but without
@@ -254,10 +277,10 @@ public class Tag {
         Map<String, Value> res = new HashMap<>();
         res.put(TYPE_KEY, Value.of(type));
         res.put(OPT_KEY, Value.of(Instant.ofEpochMilli(opt)));
-        res.put(META_ENCODING_KEY, EnvelopeProperties.getCharsetValue(metaEncoding));
-        res.put(META_TYPE_KEY, EnvelopeProperties.getMetaType(metaType).getValue());
+        res.put(META_ENCODING_KEY, Coder.decode(META_ENCODING_KEY, metaEncoding));
+        res.put(META_TYPE_KEY, Coder.decode(META_TYPE_KEY, metaType));
         res.put(META_LENGTH_KEY, Value.of(metaLength));
-        res.put(DATA_TYPE_KEY, Value.of(dataType));
+        res.put(DATA_TYPE_KEY, Coder.decode(DATA_TYPE_KEY, dataType));
         res.put(DATA_LENGTH_KEY, Value.of(dataLength));
 
         return res;

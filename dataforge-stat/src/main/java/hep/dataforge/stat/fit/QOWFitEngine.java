@@ -15,20 +15,19 @@
  */
 package hep.dataforge.stat.fit;
 
-import static hep.dataforge.stat.fit.FitStage.TASK_COVARIANCE;
-import static hep.dataforge.stat.fit.FitStage.TASK_RUN;
-import static hep.dataforge.stat.fit.FitStage.TASK_SINGLE;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.maths.MathUtils;
-import static hep.dataforge.maths.MatrixOperations.inverse;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
-import hep.dataforge.utils.CommonUtils;
+import hep.dataforge.maths.NamedVector;
+import hep.dataforge.utils.Utils;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
+
+import static hep.dataforge.maths.MatrixOperations.inverse;
+import static hep.dataforge.stat.fit.FitStage.*;
 
 /**
  * <p>
@@ -116,7 +115,7 @@ public class QOWFitEngine implements FitEngine {
     }
 
     private ParamSet newtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
-        CommonUtils.checkThread();// check if action is cacneled
+        Utils.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, par, weight));
 
@@ -125,7 +124,7 @@ public class QOWFitEngine implements FitEngine {
     }
 
     private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
-        CommonUtils.checkThread();// check if action is cacneled
+        Utils.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, weight));
 

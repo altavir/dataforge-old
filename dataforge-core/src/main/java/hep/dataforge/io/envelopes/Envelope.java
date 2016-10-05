@@ -37,22 +37,19 @@ public interface Envelope extends Annotated {
     /**
      * The type of the envelope
      */
-    public static final String TYPE_KEY = "type";
+    String TYPE_KEY = "type";
+
     /**
      * Version of envelope
      */
-    public static final String VERSION_KEY = "version";
-//    /**
-//     * The offset between tag end and meta begin. Used to define custom
-//     * properties
-//     */
-//    public static final String META_OFFSET_KEY = "metaOffset";
-    public static final String OPT_KEY = "opt";
-    public static final String META_TYPE_KEY = "metaType";
-    public static final String META_ENCODING_KEY = "metaEncoding";
-    public static final String META_LENGTH_KEY = "metaLength";
-    public static final String DATA_TYPE_KEY = "dataType";
-    public static final String DATA_LENGTH_KEY = "dataLength";
+    String VERSION_KEY = "version";
+
+    String OPT_KEY = "opt";
+    String META_TYPE_KEY = "metaType";
+    String META_ENCODING_KEY = "metaEncoding";
+    String META_LENGTH_KEY = "metaLength";
+    String DATA_TYPE_KEY = "dataType";
+    String DATA_LENGTH_KEY = "dataLength";
 
     Map<String, Value> getProperties();
 

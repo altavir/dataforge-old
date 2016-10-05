@@ -6,7 +6,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.CommonUtils;
+import hep.dataforge.utils.Utils;
 import hep.dataforge.workspace.identity.Identity;
 
 import java.io.*;
@@ -31,7 +31,7 @@ public class LocalFileDataCache extends DataCache {
 
     public LocalFileDataCache(File cacheDir) {
         this.cacheDir = cacheDir;
-        lruCache = CommonUtils.getLRUCache(200);
+        lruCache = Utils.getLRUCache(200);
         fileMap = new ConcurrentHashMap<>();
         loadCacheMap();
     }
