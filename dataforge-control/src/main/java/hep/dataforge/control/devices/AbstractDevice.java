@@ -31,7 +31,6 @@ import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -52,7 +51,7 @@ import java.util.stream.Stream;
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
 
     private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    private final Map<Connection, List<String>> connections = new HashMap<>();
+    private final Map<Connection, List<String>> connections = new ConcurrentHashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
     private Context context;
     private Logger logger;
@@ -319,7 +318,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param action
      */
     public <T> void forEachTypedConnection(String role, Class<T> type, Consumer<T> action) {
-        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
+        Stream<Map.Entry<Connection, List<String>>> stream = connections();
 
         if (role != null && !role.isEmpty()) {
             stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
@@ -327,6 +326,10 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
         stream.filter((entry) -> type.isInstance(entry.getKey())).<T>map((entry) -> (T) entry.getKey())
                 .forEach(action::accept);
+    }
+
+    public Stream<Map.Entry<Connection, List<String>>> connections() {
+        return connections.entrySet().stream();
     }
 
     @Override
