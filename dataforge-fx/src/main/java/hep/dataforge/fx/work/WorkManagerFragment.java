@@ -7,29 +7,25 @@ package hep.dataforge.fx.work;
 
 import hep.dataforge.computation.TaskManager;
 import hep.dataforge.context.Context;
-import hep.dataforge.fx.FXFragment;
-import hep.dataforge.fx.FXUtils;
+import hep.dataforge.fx.fragments.Fragment;
 import hep.dataforge.utils.NonNull;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
-import javafx.stage.Stage;
 
 /**
- *
  * @author Alexander Nozik
  */
-public class WorkManagerFragment extends FXFragment {
+public class WorkManagerFragment extends Fragment {
 
-    private final AnchorPane root = new AnchorPane();
     private TaskManager manager;
 
     public WorkManagerFragment() {
+        super("DataForge task manager", 400, 400);
     }
 
     public WorkManagerFragment(TaskManager manager) {
-        this.manager = manager;
+        this();
+        setManager(manager);
     }
 
     /**
@@ -43,36 +39,25 @@ public class WorkManagerFragment extends FXFragment {
         return new WorkManagerFragment(manager);
     }
 
-    @Override
-    protected Stage buildStage(Parent root) {
-        Stage stage = new Stage();
-        Scene scene = new Scene(root, 400, 400);
-        stage.sizeToScene();
-        stage.setTitle("DataForge task manager");
-        stage.setScene(scene);
-
-        return stage;
-    }
 
     public TaskManager getManager() {
         return manager;
     }
 
-    public void setManager(@NonNull TaskManager manager) {
+    public final void setManager(@NonNull TaskManager manager) {
         this.manager = manager;
-        FXUtils.runNow(() -> {
-            root.getChildren().clear();
-            BorderPane node = WorkManagerViewController.build(manager);
-            AnchorPane.setBottomAnchor(node, 0d);
-            AnchorPane.setTopAnchor(node, 0d);
-            AnchorPane.setLeftAnchor(node, 0d);
-            AnchorPane.setRightAnchor(node, 0d);
-            root.getChildren().add(node);
-        });
     }
 
     @Override
-    protected AnchorPane getRoot() {
+    protected AnchorPane buildRoot() {
+        AnchorPane root = new AnchorPane();
+        root.getChildren().clear();
+        BorderPane node = WorkManagerViewController.build(manager);
+        AnchorPane.setBottomAnchor(node, 0d);
+        AnchorPane.setTopAnchor(node, 0d);
+        AnchorPane.setLeftAnchor(node, 0d);
+        AnchorPane.setRightAnchor(node, 0d);
+        root.getChildren().add(node);
         return root;
     }
 

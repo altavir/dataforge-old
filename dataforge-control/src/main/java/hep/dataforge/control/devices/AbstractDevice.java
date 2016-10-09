@@ -77,14 +77,13 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     public Logger getLogger() {
         if (logger == null) {
             logger = setupLogger();
-            logger.warn("Logger is not initialized. Call init() before working with device.");
+//            logger.warn("Logger is not initialized. Call init() before working with device.");
         }
         return logger;
     }
 
     @Override
     public void init() throws ControlException {
-        logger = setupLogger();
         logger.info("Initializing device '{}'...", getName());
         listeners.forEach(it -> it.notifyDeviceInitialized(this));
     }
@@ -94,7 +93,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         getLogger().info("Shutting down device '{}'...", getName());
         listeners.forEach(it -> it.notifyDeviceShutdown(this));
         //TODO close connections and close listeners
-        logger = null;
     }
 
     @Override
@@ -334,6 +332,9 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     protected void applyConfig(Meta config) {
+        if(meta().hasValue("logger")){
+            setupLogger();
+        }
         getLogger().debug("Applying configuration change");
         listeners.forEach((DeviceListener it) -> it.notifyDeviceConfigChanged(AbstractDevice.this));
     }

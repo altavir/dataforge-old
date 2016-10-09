@@ -3,27 +3,27 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.fragments;
 
 import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
 import hep.dataforge.context.GlobalContext;
-import java.io.PrintStream;
-import java.time.Instant;
-import java.util.function.BiConsumer;
+import hep.dataforge.fx.FXDataOutputPane;
+import hep.dataforge.fx.FXUtils;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.stage.Stage;
 import org.apache.commons.io.output.TeeOutputStream;
 import org.slf4j.LoggerFactory;
 
+import java.io.PrintStream;
+import java.time.Instant;
+import java.util.function.BiConsumer;
+
 /**
- *
  * @author Alexander Nozik
  */
-public class ConsoleFragment extends FXFragment implements AutoCloseable {
+public class ConsoleFragment extends Fragment implements AutoCloseable {
 
     public final static PrintStream STD_OUT = System.out;
     public final static PrintStream STD_ERR = System.err;
@@ -59,6 +59,7 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
     private boolean stdHooked = false;
 
     public ConsoleFragment() {
+        super("DataForge console", 800, 200);
         outputPane = new FXDataOutputPane();
 
         outputPane.setMaxLines(2000);
@@ -73,16 +74,6 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
         logAppender.setName(CONSOLE_LOG_APPENDER_NAME);
         logAppender.setContext(GlobalContext.instance().getLogger().getLoggerContext());
         logAppender.start();
-    }
-
-    @Override
-    protected Stage buildStage(Parent root) {
-        Stage stage = new Stage();
-        stage.setTitle("DataForge console");
-        stage.setScene(new Scene(root, 800, 200));
-        stage.sizeToScene();
-
-        return stage;
     }
 
     /**
@@ -152,11 +143,10 @@ public class ConsoleFragment extends FXFragment implements AutoCloseable {
     public void close() {
         restoreStd();
         logAppender.stop();
-        super.close();
     }
 
     @Override
-    protected Parent getRoot() {
+    public Parent buildRoot() {
         return outputPane.getRoot();
     }
 

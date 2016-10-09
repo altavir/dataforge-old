@@ -32,9 +32,10 @@ import hep.dataforge.navigation.Path;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
-import org.slf4j.LoggerFactory;
 
 /**
  * Конфигурации загрузчиков хранятся в оперативной памяти. Те, что поставляются
@@ -59,7 +60,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     protected final Map<String, Storage> shelves = new HashMap<>();
 
-    public AbstractStorage(Storage parent, String name, Meta annotation) {
+    protected AbstractStorage(Storage parent, String name, Meta annotation) {
         this.name = name;
         this.storageConfig = annotation;
         this.parent = parent;
