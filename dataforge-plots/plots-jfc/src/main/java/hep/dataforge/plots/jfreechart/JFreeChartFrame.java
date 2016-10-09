@@ -153,8 +153,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        logAxis.setMinorTickCount(10);
         logAxis.setExpTickLabelsFlag(true);
         logAxis.setMinorTickMarksVisible(true);
-        if (meta.hasNode("range")) {
-            logAxis.setRange(getRange(meta.getNode("range")));
+        if (meta.hasMeta("range")) {
+            logAxis.setRange(getRange(meta.getMeta("range")));
         } else {
             logAxis.setAutoRange(meta.getBoolean("autoRange", true));
         }

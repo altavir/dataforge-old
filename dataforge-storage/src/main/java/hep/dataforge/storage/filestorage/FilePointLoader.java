@@ -124,8 +124,8 @@ public class FilePointLoader extends AbstractPointLoader {
     @Override
     public TableFormat getFormat() {
         if (format == null) {
-            if (meta().hasNode("format")) {
-                format = TableFormat.fromMeta(meta().getNode("format"));
+            if (meta().hasMeta("format")) {
+                format = TableFormat.fromMeta(meta().getMeta("format"));
             } else if (meta().hasValue("format")) {
                 format = TableFormat.forNames(meta().getStringArray("format"));
             } else {

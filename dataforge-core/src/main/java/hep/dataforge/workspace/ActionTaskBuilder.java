@@ -208,7 +208,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @return
      */
     public ActionTaskBuilder fromMeta(Context context, Meta actionsMeta) {
-        actionsMeta.getNodes(ACTION_NODE_KEY).stream().forEach((action) -> {
+        actionsMeta.getMetaList(ACTION_NODE_KEY).stream().forEach((action) -> {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             action(buildAction(context, actionType), action);
         });

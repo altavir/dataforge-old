@@ -107,11 +107,11 @@ public abstract class MergeRule {
 
         // Overriding nodes
         for (String nodeName : main.getNodeNames()) {
-            if (!builder.hasNode(nodeName)) {
-                builder = writeElement(builder, nodeName, main.getNodes(nodeName));
+            if (!builder.hasMeta(nodeName)) {
+                builder = writeElement(builder, nodeName, main.getMetaList(nodeName));
             } else {
-                List<? extends Meta> mainNodes = main.getNodes(nodeName);
-                List<? extends Meta> secondNodes = builder.getNodes(nodeName);
+                List<? extends Meta> mainNodes = main.getMetaList(nodeName);
+                List<? extends Meta> secondNodes = builder.getMetaList(nodeName);
                 if (mainNodes.size() == 1 && secondNodes.size() == 1) {
                     writeElement(builder, nodeName, Collections.singletonList(merge(mainNodes.get(0), secondNodes.get(0))));
                 } else {

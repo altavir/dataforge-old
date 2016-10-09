@@ -116,7 +116,7 @@ public class DescriptorUtils {
 
         for (NodeDef nodeDef : listAnnotations(element, NodeDef.class, true)) {
             //TODO replace by map to avoid multiple node parsing
-            boolean exists = res.hasNode("node") && res.getNodes("node").stream()
+            boolean exists = res.hasMeta("node") && res.getMetaList("node").stream()
                     .anyMatch(mb -> mb.getString("name").equals(nodeDef.name()));
             //avoiding dublicate nodes
             if (!exists) {
@@ -143,7 +143,7 @@ public class DescriptorUtils {
 
         //FIXME forbid non-unique values and Nodes
         for (ValueDef valueDef : listAnnotations(element, ValueDef.class, true)) {
-            boolean exists = res.hasNode("value") && res.getNodes("value").stream()
+            boolean exists = res.hasMeta("value") && res.getMetaList("value").stream()
                     .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
             if (!exists) {
                 res.putNode(ValueDescriptor.build(valueDef).meta());

@@ -95,8 +95,8 @@ public class DataFilter {
     }
 
     public DataFilter configure(Meta meta) {
-        if (meta.hasNode("include")) {
-            meta.getNodes("include").forEach(include -> {
+        if (meta.hasMeta("include")) {
+            meta.getMetaList("include").forEach(include -> {
                 String namePattern = include.getString("pattern", "*");
                 Class type = Object.class;
                 if (include.hasValue("type")) {
@@ -115,8 +115,8 @@ public class DataFilter {
             });
         }
 
-        if (meta.hasNode("exclude")) {
-            meta.getNodes("exclude").forEach(exclude -> {
+        if (meta.hasMeta("exclude")) {
+            meta.getMetaList("exclude").forEach(exclude -> {
                 String namePattern = exclude.getString("pattern", "*");
 
                 if (exclude.getBoolean("excludeData", true)) {

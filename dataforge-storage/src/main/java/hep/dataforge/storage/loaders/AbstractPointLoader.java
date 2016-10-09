@@ -30,10 +30,7 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Supplier;
 
 import static hep.dataforge.storage.commons.StorageMessageUtils.*;
@@ -102,12 +99,12 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
             String operation = messageMeta.getString(ACTION_KEY);
             switch (operation) {
                 case PUSH_OPERATION:
-                    if (!messageMeta.hasNode("data")) {
+                    if (!messageMeta.hasMeta("data")) {
                         //TODO реализовать бинарную передачу данных
                         throw new StorageException("No data in the push data command");
                     }
 
-                    Meta data = messageMeta.getNode("data");
+                    Meta data = messageMeta.getMeta("data");
                     for (DataPoint dp : fromMeta(data)) {
                         this.push(dp);
                     }
@@ -115,34 +112,35 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     return confirmationResponse(message);
 
                 case PULL_OPERATION:
-                    MetaBuilder dataAn = new MetaBuilder("data");
-                    if (messageMeta.hasNode(QUERY_ELEMENT)) {
-                        //TODO implement query building
-                        throw new UnsupportedOperationException("Not implemented");
+                    List<Supplier<DataPoint>> points = new ArrayList<>();
+                    if (messageMeta.hasMeta(QUERY_ELEMENT)) {
+                        points = getIndex().query(messageMeta.getMeta(QUERY_ELEMENT));
                     } else if (messageMeta.hasValue("value")) {
                         String valueName = messageMeta.getString("valueName", "");
                         for (Value value : messageMeta.getValue("value").listValue()) {
-                            DataPoint point = this.getIndex(valueName).pullOne(value).get();
-                            dataAn.putNode(DataPoint.toMeta(point));
+                            points.add(this.getIndex(valueName).pullOne(value));
                         }
-                    } else if (messageMeta.hasNode("range")) {
+                    } else if (messageMeta.hasMeta("range")) {
                         String valueName = messageMeta.getString("valueName", "");
-                        for (Meta rangeAn : messageMeta.getNodes("range")) {
+                        for (Meta rangeAn : messageMeta.getMetaList("range")) {
                             Value from = rangeAn.getValue("from", Value.getNull());
                             Value to = rangeAn.getValue("to", Value.getNull());
 //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
-                            for (Supplier<DataPoint> point : this.getIndex(valueName).pull(from, to)) {
-                                dataAn.putNode(DataPoint.toMeta(point.get()));
-                            }
-                            //PENDING add annotation from resulting DataSet?
+                            points.addAll(this.getIndex(valueName).pull(from, to));
                         }
+                    }
+
+                    MetaBuilder dataAn = new MetaBuilder("data");
+                    for (Supplier<DataPoint> dp : points) {
+                        dataAn.putNode(DataPoint.toMeta(dp.get()));
                     }
                     return new MessageFactory().okResponseBase(message, true, false)
                             .putMetaNode(dataAn)
+                            .putMetaValue("data.size", points.size())
                             .build();
 
                 default:
-                    throw new NotDefinedException("Unknown operation");
+                    throw new NotDefinedException(operation);
             }
 
         } catch (StorageException | UnsupportedOperationException | NotDefinedException ex) {

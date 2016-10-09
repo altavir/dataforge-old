@@ -7,13 +7,11 @@ package hep.dataforge.io;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -21,8 +19,12 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
-import org.w3c.dom.Document;
-import org.w3c.dom.Element;
+import java.io.OutputStream;
+import java.nio.charset.Charset;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 
 /**
  * A writer for XML represented Meta
@@ -98,7 +100,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
         }
 
         for (String name : an.getNodeNames()) {
-            List<? extends Meta> elementList = an.getNodes(name);
+            List<? extends Meta> elementList = an.getMetaList(name);
             if (elementList.size() == 1) {
                 Element el = getXMLElement(elementList.get(0), doc);
                 res.appendChild(el);

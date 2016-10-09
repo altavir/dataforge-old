@@ -77,9 +77,9 @@ public class Template implements Annotated, UnaryOperator<Meta> {
                 if (metaProvider != null && metaProvider.hasMeta(includePath)) {
                     MetaBuilder parent = node.getParent();
                     parent.replaceChildNode(node, metaProvider.getMeta(includePath));
-                } else if (def.hasNode(includePath)) {
+                } else if (def.hasMeta(includePath)) {
                     MetaBuilder parent = node.getParent();
-                    parent.replaceChildNode(node, def.getNode(includePath));
+                    parent.replaceChildNode(node, def.getMeta(includePath));
                 } else {
                     LoggerFactory.getLogger(MetaUtils.class)
                             .warn("Can't compile template meta node with name {} not provided", includePath);

@@ -57,7 +57,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected List<DataNode<T>> buildGroups(DataNode<? extends T> input, Meta actionMeta) {
-        if (actionMeta.hasNode("byValue")) {
+        if (actionMeta.hasMeta("byValue")) {
             return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
         } else {
             return Collections.singletonList((DataNode<T>) input);

@@ -45,7 +45,7 @@ public abstract class TemplateTask extends MultiStageTask {
     protected void transform(ProgressCallback callback, Context context, MultiStageTaskState state, Meta config) {
         DataNode res = state.getData();
         config = template.apply(config);
-        for (Meta action : config.getNodes(ACTION_NODE_KEY)) {
+        for (Meta action : config.getMetaList(ACTION_NODE_KEY)) {
             String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             res = buildAction(context, actionType).withParentProcess(callback.workName()).run(res, action);
             state.setData(actionType, res);

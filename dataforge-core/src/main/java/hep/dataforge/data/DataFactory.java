@@ -16,10 +16,11 @@
 package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
-import static hep.dataforge.data.DataFactory.*;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
+
+import static hep.dataforge.data.DataFactory.*;
 
 /**
  * A factory for data tree
@@ -73,19 +74,19 @@ public abstract class DataFactory<T> {
      */
     protected void fillData(Context context, Meta dataConfig, DataTree.Builder<T> builder) {
         // Apply node name
-        if (dataConfig.hasNode(NODE_NAME_KEY)) {
+        if (dataConfig.hasMeta(NODE_NAME_KEY)) {
             builder.setName(dataConfig.getString(NODE_NAME_KEY));
         }
 
         // Apply node meta
-        if (dataConfig.hasNode(NODE_META_KEY)) {
-            builder.setMeta(dataConfig.getNode(NODE_META_KEY));
+        if (dataConfig.hasMeta(NODE_META_KEY)) {
+            builder.setMeta(dataConfig.getMeta(NODE_META_KEY));
         }
 
         // Apply non-specific child nodes
-        if (dataConfig.hasNode(NODE_KEY)) {
+        if (dataConfig.hasMeta(NODE_KEY)) {
             //FIXME check types for child nodes
-            dataConfig.getNodes(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
+            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
         }
 
         //Configuring filter

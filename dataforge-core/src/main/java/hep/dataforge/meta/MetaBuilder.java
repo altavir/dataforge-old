@@ -55,7 +55,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
 
         Collection<String> elementNames = annotation.getNodeNames();
         elementNames.stream().forEach((elementName) -> {
-            List<MetaBuilder> item = annotation.getNodes(elementName).stream()
+            List<MetaBuilder> item = annotation.getMetaList(elementName).stream()
                     .map((an) -> new MetaBuilder(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
@@ -124,7 +124,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
      * @return
      */
     public MetaBuilder updateNode(String name, MergeRule rule, Meta... elements) {
-        if (!hasNode(name)) {
+        if (!hasMeta(name)) {
             MetaBuilder.this.setNode(name, elements);
         }
         List<MetaBuilder> list = super.getChildNodeItem(name);

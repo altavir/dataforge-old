@@ -93,8 +93,8 @@ public class FitAction extends OneToOneAction<Table, FitState> {
 
         ModelManager mm = fm.getModelManager();
 
-        if (meta.hasNode(MODEL_KEY)) {
-            model = mm.buildModel(getContext(), meta.getNode(MODEL_KEY));
+        if (meta.hasMeta(MODEL_KEY)) {
+            model = mm.buildModel(getContext(), meta.getMeta(MODEL_KEY));
         } else {
             model = mm.buildModel(getContext(), meta.getString(MODEL_KEY));
         }
@@ -113,8 +113,8 @@ public class FitAction extends OneToOneAction<Table, FitState> {
 
     private List<FitStage> buildStageList(Meta meta) {
         List<FitStage> list = new ArrayList<>();
-        if (meta.hasNode(STAGE_KEY)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
-            meta.getNodes(STAGE_KEY).stream().forEach((an) -> {
+        if (meta.hasMeta(STAGE_KEY)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
+            meta.getMetaList(STAGE_KEY).stream().forEach((an) -> {
                 list.add(new FitStage(an));
             });
         } else { // если и там нет, то считаем что имеется всего одна задача и она зашифрована в а аннотациях

@@ -56,8 +56,8 @@ public class StorageUtils {
     }
 
     public static void setupLoaders(Storage storage, Meta loaderConfig) throws StorageException {
-        if (loaderConfig.hasNode("shelf")) {
-            for (Meta an : loaderConfig.getNodes("shelf")) {
+        if (loaderConfig.hasMeta("shelf")) {
+            for (Meta an : loaderConfig.getMetaList("shelf")) {
                 String shelfName = shelfName(an);
                 Storage shelf;
 
@@ -70,8 +70,8 @@ public class StorageUtils {
             }
         }
 
-        if (loaderConfig.hasNode("loader")) {
-            List<? extends Meta> loaderAns = loaderConfig.getNodes("loader");
+        if (loaderConfig.hasMeta("loader")) {
+            List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
             for (Meta la : loaderAns) {
                 String loaderName = loaderName(la);
                 if (!storage.hasLoader(loaderName)) {

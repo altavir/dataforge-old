@@ -217,14 +217,14 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     public T setNode(String name, List<? extends Meta> elements, boolean notify) {
         if (elements != null && !elements.isEmpty()) {
             List<T> oldNodeItem;
-            if (hasNode(name)) {
-                oldNodeItem = new ArrayList<>(getNodes(name));
+            if (hasMeta(name)) {
+                oldNodeItem = new ArrayList<>(getMetaList(name));
             } else {
                 oldNodeItem = null;
             }
             setNodeItem(name, elements);
             if (notify) {
-                notifyNodeChanged(name, oldNodeItem, getNodes(name));
+                notifyNodeChanged(name, oldNodeItem, getMetaList(name));
             }
         } else {
             removeNode(name);
@@ -336,8 +336,8 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param path
      */
     public T removeNode(String path) {
-        if (hasNode(path)) {
-            List<T> oldNode = getNodes(path);
+        if (hasMeta(path)) {
+            List<T> oldNode = getMetaList(path);
 
             if (nodes.containsKey(path)) {
                 nodes.remove(path);
@@ -362,15 +362,15 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     public void replaceChildNode(T child, Meta node) {
         String nodeName = child.getName();
-        if (hasNode(nodeName)) {
-            List<T> oldNode = getNodes(nodeName);
+        if (hasMeta(nodeName)) {
+            List<T> oldNode = getMetaList(nodeName);
             int index = nodes.get(nodeName).indexOf(child);
             if (node == null) {
                 nodes.get(nodeName).remove(index);
             } else {
                 nodes.get(nodeName).set(index, transformNode(child.getName(), node));
             }
-            notifyNodeChanged(nodeName, oldNode, getNodes(nodeName));
+            notifyNodeChanged(nodeName, oldNode, getMetaList(nodeName));
         }
     }
 

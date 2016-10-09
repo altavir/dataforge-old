@@ -27,6 +27,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.workspace.identity.Identity;
 import hep.dataforge.workspace.identity.MetaIdentity;
 import hep.dataforge.workspace.identity.StringIdentity;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -50,8 +51,8 @@ public class ActionUtils {
      */
     public static DataNode runConfig(Context context, Meta config) {
         DataNode data;
-        if (config.hasNode(DATA_ELEMENT)) {
-            Meta dataElement = config.getNode(DATA_ELEMENT);
+        if (config.hasMeta(DATA_ELEMENT)) {
+            Meta dataElement = config.getMeta(DATA_ELEMENT);
             data = new FileDataFactory().build(context, dataElement);
         } else {
             data = null;
@@ -79,8 +80,8 @@ public class ActionUtils {
 
     public static void readProperties(Context context, Meta element)
             throws ContentException {
-        if (element.hasNode("property")) {
-            List<? extends Meta> propertyNodes = element.getNodes("property");
+        if (element.hasMeta("property")) {
+            List<? extends Meta> propertyNodes = element.getMetaList("property");
             propertyNodes.stream().forEach((option) -> {
                 context.putValue(option.getString("key"), option.getString("value"));
             });
@@ -114,7 +115,7 @@ public class ActionUtils {
             }
 
             Identity id = new StringIdentity(getContext().getName());
-            for (Meta actionMeta : sequenceMeta.getNodes(ACTION_NODE_KEY)) {
+            for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
                 id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
                 res = buildAction(getContext(), actionType).run(res, actionMeta);

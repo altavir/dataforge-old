@@ -29,15 +29,15 @@ import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
-import static hep.dataforge.storage.commons.StorageMessageUtils.ACTION_KEY;
-import static hep.dataforge.storage.commons.StorageMessageUtils.PULL_OPERATION;
-import static hep.dataforge.storage.commons.StorageMessageUtils.PUSH_OPERATION;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import org.slf4j.LoggerFactory;
+
+import static hep.dataforge.storage.commons.StorageMessageUtils.*;
 
 /**
  *
@@ -110,8 +110,8 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
             switch (operation) {
                 case PUSH_OPERATION:
                 case "set":
-                    if (envelopeMeta.hasNode("state")) {
-                        for (Meta state : envelopeMeta.getNodes("state")) {
+                    if (envelopeMeta.hasMeta("state")) {
+                        for (Meta state : envelopeMeta.getMetaList("state")) {
                             String stateName = state.getString("name");
                             String stateValue = state.getString("value");
                             setValue(stateName, stateValue);

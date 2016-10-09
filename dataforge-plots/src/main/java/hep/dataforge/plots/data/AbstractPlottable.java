@@ -30,7 +30,6 @@ import hep.dataforge.utils.ReferenceRegistry;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.util.stream.Collectors;
 
 /**
  * @author darksnake
@@ -72,7 +71,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     public T getAdapter() {
         //If adapter is not defined, creating new adapter.
         if (adapter == null) {
-            adapter = buildAdapter(meta().getNode(ADAPTER_KEY, Meta.empty()));
+            adapter = buildAdapter(meta().getMeta(ADAPTER_KEY, Meta.empty()));
         }
         return adapter;
     }
@@ -89,7 +88,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
         getListeners().forEach((l) -> l.notifyConfigurationChanged(getName()));
 
         //invalidate adapter
-        if (config.hasNode(ADAPTER_KEY)) {
+        if (config.hasMeta(ADAPTER_KEY)) {
             adapter = null;
         }
     }

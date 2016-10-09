@@ -26,6 +26,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
 import hep.dataforge.values.ValueType;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -50,7 +51,7 @@ public class TableFormat implements Annotated, NameSetContainer, Serializable {
     private final Map<String, ValueFormatter> formats = new HashMap<>();
 
     public static TableFormat fromMeta(Meta meta) {
-        if (meta.hasNode("column")) {
+        if (meta.hasMeta("column")) {
             return new TableFormat(meta);
         } else if (meta.hasValue("names")) {
             return TableFormat.forNames(meta.getStringArray("names"));
@@ -116,7 +117,7 @@ public class TableFormat implements Annotated, NameSetContainer, Serializable {
     @Override
     public Names names() {
         if (this.names == null) {
-            names = Names.of(meta().getNodes("column").stream().map(node -> node.getString("name", "")).collect(Collectors.toList()));
+            names = Names.of(meta().getMetaList("column").stream().map(node -> node.getString("name", "")).collect(Collectors.toList()));
         }
         return this.names;
     }
@@ -127,7 +128,7 @@ public class TableFormat implements Annotated, NameSetContainer, Serializable {
     @ValueDef(name = "title", info = "A column title. By default equals column name")
     @ValueDef(name = "role", info = "A role of this column")
     private Optional<? extends Meta> findColumnMeta(String columnName) {
-        return meta().getNodes("column").stream().filter(column -> columnName.equals(column.getString("name"))).findFirst();
+        return meta().getMetaList("column").stream().filter(column -> columnName.equals(column.getString("name"))).findFirst();
     }
 
     public Meta getColumnMeta(String columnName) {
@@ -136,8 +137,8 @@ public class TableFormat implements Annotated, NameSetContainer, Serializable {
     }
 
     protected Meta getDefaultColumnMeta() {
-        if (meta.hasNode("defaultColumn")) {
-            return meta.getNode("defaultColumn");
+        if (meta.hasMeta("defaultColumn")) {
+            return meta.getMeta("defaultColumn");
         } else {
             return new MetaBuilder("column").build();
         }

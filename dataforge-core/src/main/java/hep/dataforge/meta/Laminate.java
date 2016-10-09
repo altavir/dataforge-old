@@ -18,16 +18,11 @@ package hep.dataforge.meta;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
+
+import java.util.*;
 
 /**
  * A chain of immutable meta. The value is taken from the first meta in list
@@ -86,7 +81,7 @@ public class Laminate extends Meta {
 
     /**
      * Add node descriptor as a separate laminate layer to avoid including it in
-     * hasNode and hasValue
+     * hasMeta and hasValue
      */
     private void buildDescriptorLayer() {
 
@@ -152,11 +147,11 @@ public class Laminate extends Meta {
     }
 
     @Override
-    public Meta getNode(String path) {
+    public Meta getMeta(String path) {
         List<Meta> childLayers = new ArrayList<>();
-        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
+        layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
             //FIXME child elements are not chained!
-            childLayers.add(m.getNode(path));
+            childLayers.add(m.getMeta(path));
         });
         if (!childLayers.isEmpty()) {
             Laminate laminate = new Laminate(childLayers);
@@ -168,17 +163,17 @@ public class Laminate extends Meta {
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
          if (descriptorLayer != null) {
-                return descriptorLayer.getNode(path);
+                return descriptorLayer.getMeta(path);
             } else {
                 throw new NameNotFoundException(path);
             }
     }
 
     @Override
-    public List<? extends Meta> getNodes(String path) {
+    public List<? extends Meta> getMetaList(String path) {
         List<List<? extends Meta>> childLayers = new ArrayList<>();
-        layers.stream().filter((m) -> (m.hasNode(path))).forEach((m) -> {
-            childLayers.add(m.getNodes(path));
+        layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
+            childLayers.add(m.getMetaList(path));
         });
         if (!childLayers.isEmpty()) {
             if (childLayers.size() > 1) {
@@ -188,7 +183,7 @@ public class Laminate extends Meta {
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
          if (descriptorLayer != null) {
-                return descriptorLayer.getNodes(path);
+                return descriptorLayer.getMetaList(path);
             } else {
                 throw new NameNotFoundException(path);
             }

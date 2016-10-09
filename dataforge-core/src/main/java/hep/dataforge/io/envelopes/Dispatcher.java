@@ -7,6 +7,7 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.meta.Meta;
+
 import static hep.dataforge.io.envelopes.Destination.ENVELOPE_DESTINATION_NODE;
 
 /**
@@ -20,6 +21,6 @@ public interface Dispatcher {
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     
     default Responder getResponder(Envelope envelope){
-        return getResponder(envelope.meta().getNode(ENVELOPE_DESTINATION_NODE));
+        return getResponder(envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE));
     }
 }

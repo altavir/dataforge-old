@@ -61,8 +61,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
      */
     public Map<String, ValueDescriptor> valueDescriptors() {
         Map<String, ValueDescriptor> map = new HashMap<>();
-        if (meta().hasNode("value")) {
-            for (Meta valueNode : meta().getNodes("value")) {
+        if (meta().hasMeta("value")) {
+            for (Meta valueNode : meta().getMetaList("value")) {
                 ValueDescriptor vd = new ValueDescriptor(valueNode);
                 map.put(vd.getName(), vd);
             }
@@ -88,8 +88,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
      */
     public Map<String, NodeDescriptor> childrenDescriptors() {
         Map<String, NodeDescriptor> map = new HashMap<>();
-        if (meta().hasNode("node")) {
-            for (Meta node : meta().getNodes("node")) {
+        if (meta().hasMeta("node")) {
+            for (Meta node : meta().getMetaList("node")) {
                 NodeDescriptor nd = new NodeDescriptor(node);
                 map.put(nd.getName(), nd);
             }
@@ -103,7 +103,7 @@ public class NodeDescriptor extends DescriptorBase implements Named {
      * @return
      */
     public boolean hasDefault() {
-        return meta().hasNode("default");
+        return meta().hasMeta("default");
     }
 
     /**
@@ -125,8 +125,8 @@ public class NodeDescriptor extends DescriptorBase implements Named {
      * @return
      */
     public List<? extends Meta> defaultNode() {
-        if (meta().hasNode("default")) {
-            return meta().getNodes("default");
+        if (meta().hasMeta("default")) {
+            return meta().getMetaList("default");
         } else {
             return null;
         }

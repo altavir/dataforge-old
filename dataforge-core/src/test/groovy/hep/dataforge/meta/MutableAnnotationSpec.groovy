@@ -15,7 +15,6 @@
  */
 package hep.dataforge.meta
 
-import hep.dataforge.meta.Configuration
 import hep.dataforge.values.Value
 import spock.lang.Specification
 
@@ -52,7 +51,7 @@ class MutableAnnotationSpec extends Specification {
     def "test child Value observer"(){
         when:
         testAnnotation.addObserver(new Observer());
-        testAnnotation.getNode("child").putValue("new_child_value",89);
+        testAnnotation.getMeta("child").putValue("new_child_value",89);
         then:
         testAnnotation.hasValue("child.new_child_value")
     }

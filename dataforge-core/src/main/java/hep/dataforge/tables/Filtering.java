@@ -103,8 +103,8 @@ public class Filtering {
     @NodeDef(name = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", target = "method::hep.dataforge.tables.Filtering.buildCondition")
     public static Predicate<DataPoint> buildConditionSet(Meta an) {
         Predicate<DataPoint> res = null;
-        if (an.hasNode("is")) {
-            for (Meta condition : an.getNodes("is")) {
+        if (an.hasMeta("is")) {
+            for (Meta condition : an.getMetaList("is")) {
                 Predicate<DataPoint> predicate = buildCondition(condition);
                 if (res == null) {
                     res = predicate;
@@ -114,8 +114,8 @@ public class Filtering {
             }
         }
 
-        if (an.hasNode("not")) {
-            for (Meta condition : an.getNodes("not")) {
+        if (an.hasMeta("not")) {
+            for (Meta condition : an.getMetaList("not")) {
                 Predicate<DataPoint> predicate = buildCondition(condition).negate();
                 if (res == null) {
                     res = predicate;

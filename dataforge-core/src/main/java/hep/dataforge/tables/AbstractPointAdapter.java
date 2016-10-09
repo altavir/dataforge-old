@@ -71,7 +71,7 @@ public abstract class AbstractPointAdapter implements PointAdapter {
     @ValueDef(name = "label", def = "label", info = "point label key")
     @ValueDef(name = "axisTitle", info = "The title of this axis. By default axis name is used.")
     public Meta getAxisMeta(String axis) {
-        return this.meta().getNode(axis, Meta.empty());
+        return this.meta().getMeta(axis, Meta.empty());
     }
 
     public Value getValue(DataPoint point, String axis) {

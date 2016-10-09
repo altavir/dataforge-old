@@ -8,6 +8,7 @@ package hep.dataforge.plots.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.plots.Plottable;
+
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -86,8 +87,8 @@ public class PlottableGroup<T extends Plottable> implements  Iterable<T> {
      * @param config
      */
     public void applyConfig(Meta config) {
-        if(config.hasNode("eachPlot")){
-            applyEachConfig(config.getNode("eachPlot"));
+        if(config.hasMeta("eachPlot")){
+            applyEachConfig(config.getMeta("eachPlot"));
         }
         map.values().stream().forEach((pl) -> {
             Meta m = MetaUtils.findNodeByValue(config, "plot", "name", pl.getName());

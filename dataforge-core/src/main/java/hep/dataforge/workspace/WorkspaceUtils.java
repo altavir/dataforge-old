@@ -43,15 +43,15 @@ public class WorkspaceUtils {
     public static TaskModel applyDataModel(TaskModel model, Meta dataModel) {
         //Iterating over direct data dependancies
         //PENDING replace by DataFactory for unification?
-        if (dataModel.hasNode("data")) {
-            dataModel.getNodes("data").stream().forEach((dataElement) -> {
+        if (dataModel.hasMeta("data")) {
+            dataModel.getMetaList("data").stream().forEach((dataElement) -> {
                 String dataPath = dataElement.getString("name");
                 model.data(dataPath, dataElement.getString("as", dataPath));
             });
         }
         //Iterating over task dependancies
-        if (dataModel.hasNode("task")) {
-            dataModel.getNodes("task").stream().forEach((taskElement) -> {
+        if (dataModel.hasMeta("task")) {
+            dataModel.getMetaList("task").stream().forEach((taskElement) -> {
                 String taskName = taskElement.getString("name");
                 Task task = model.getWorkspace().getTask(taskName);
                 //Building model with default data construction
@@ -66,8 +66,8 @@ public class WorkspaceUtils {
 
         Meta dependencyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
         // Use @gather node for data construction
-        if (taskMeta.hasNode(GATHER_NODE_NAME)) {
-            dependencyMeta = taskMeta.getNode(GATHER_NODE_NAME);
+        if (taskMeta.hasMeta(GATHER_NODE_NAME)) {
+            dependencyMeta = taskMeta.getMeta(GATHER_NODE_NAME);
         }
 
         return applyDataModel(model, dependencyMeta);

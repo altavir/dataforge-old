@@ -20,6 +20,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,7 +42,7 @@ public interface DataPoint extends NamedValueSet, Serializable {
 
     public static List<DataPoint> fromMeta(Meta annotation) {
         List<DataPoint> res = new ArrayList<>();
-        for (Meta pointAn : annotation.getNodes("point")) {
+        for (Meta pointAn : annotation.getMetaList("point")) {
             Map<String, Value> map = new HashMap<>();
             for (String key : pointAn.getValueNames()) {
                 map.put(key, pointAn.getValue(key));

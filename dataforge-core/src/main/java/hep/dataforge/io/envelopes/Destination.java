@@ -38,7 +38,7 @@ public interface Destination {
      * @return
      */
     default boolean acceptEnvelope(Envelope env) {
-        return !env.meta().hasNode(ENVELOPE_DESTINATION_NODE)
-                || env.meta().getNode(ENVELOPE_DESTINATION_NODE).equals(destinationMeta());
+        return !env.meta().hasMeta(ENVELOPE_DESTINATION_NODE)
+                || env.meta().getMeta(ENVELOPE_DESTINATION_NODE).equals(destinationMeta());
     }
 }

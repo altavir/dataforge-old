@@ -7,15 +7,13 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.PathSyntaxException;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
 import javafx.util.Pair;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -40,10 +38,10 @@ public class MetaUtils {
      * @return
      */
     public static List<Meta> findNodes(Meta root, String path, Predicate<Meta> condition) {
-        if (!root.hasNode(path)) {
+        if (!root.hasMeta(path)) {
             return Collections.emptyList();
         } else {
-            return root.getNodes(path).stream()
+            return root.getMetaList(path).stream()
                     .filter(condition)
                     .collect(Collectors.<Meta>toList());
         }
@@ -154,7 +152,7 @@ public class MetaUtils {
     private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node) {
         return Stream.concat(Stream.of(new Pair<>(prefix, node)),
                 node.getNodeNames().stream().flatMap(nodeName -> {
-                    List<? extends Meta> metaList = node.getNodes(nodeName);
+                    List<? extends Meta> metaList = node.getMetaList(nodeName);
                     String nodePrefix;
                     if (prefix == null || prefix.isEmpty()) {
                         nodePrefix = nodeName;

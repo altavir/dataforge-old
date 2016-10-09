@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.DescriptorException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
@@ -170,14 +171,14 @@ public class TextDescriptorFormatter implements DescriptorFormatter {
     }
 
     protected void printNodeContent(String prefix, Meta nodeDef) throws DescriptorException {
-        if (nodeDef.hasNode("node")) {
-            for (Meta elDef : nodeDef.getNodes("node")) {
+        if (nodeDef.hasMeta("node")) {
+            for (Meta elDef : nodeDef.getMetaList("node")) {
                 printElementShort(prefix, elDef);
             }
         }
 
-        if (nodeDef.hasNode("value")) {
-            for (Meta parDef : nodeDef.getNodes("value")) {
+        if (nodeDef.hasMeta("value")) {
+            for (Meta parDef : nodeDef.getMetaList("value")) {
                 printParameterShort(prefix, parDef);
             }
         }

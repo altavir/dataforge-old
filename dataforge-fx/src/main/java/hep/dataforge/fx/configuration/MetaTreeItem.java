@@ -9,14 +9,15 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
-import java.util.List;
-import java.util.function.Function;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.Event;
 import javafx.scene.Node;
 import javafx.scene.control.TreeItem;
 import org.slf4j.LoggerFactory;
+
+import java.util.List;
+import java.util.function.Function;
 
 /**
  *
@@ -77,7 +78,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
             // recursevely adding child nodes including descriptors
             if (config != null) {
                 config.getNodeNames().stream().forEach((childNodeName) -> {
-                    List<Configuration> childConfigs = config.getNodes(childNodeName);
+                    List<Configuration> childConfigs = config.getMetaList(childNodeName);
                     for (int i = 0; i < childConfigs.size(); i++) {
                         Configuration childConfig = childConfigs.get(i);
                         //applying descriptor from parent
@@ -114,7 +115,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
             // adding the rest default value from descriptor. Ignoring the ones allready added
             if (descriptor != null) {
                 descriptor.childrenDescriptors().values().stream()
-                        .filter((nd) -> showDescribedNode(nd) && (config == null || !config.hasNode(nd.getName())))
+                        .filter((nd) -> showDescribedNode(nd) && (config == null || !config.hasMeta(nd.getName())))
                         .map((nd) -> new MetaTreeBranch(branch, null, nd))
                         .forEach((childTree) -> {
                             children.add(new MetaTreeItem(childTree));

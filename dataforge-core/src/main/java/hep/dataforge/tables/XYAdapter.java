@@ -64,9 +64,9 @@ public class XYAdapter extends AbstractPointAdapter {
         super(meta);
         xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
         xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
-        if (meta().hasNode(Y_AXIS)) {
-            yValues = meta().getNodes(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(i -> new String[i]);
-            yErrors = meta().getNodes(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(i -> new String[i]);
+        if (meta().hasMeta(Y_AXIS)) {
+            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(i -> new String[i]);
+            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(i -> new String[i]);
         } else {
             yValues = new String[]{Y_VALUE_KEY};
             yErrors = new String[]{Y_ERROR_KEY};
@@ -110,7 +110,7 @@ public class XYAdapter extends AbstractPointAdapter {
     }
 
     public String getYTitle(int i) {
-        return meta().getNodes(Y_AXIS).get(i).getString("axisTitle", nameFor(VALUE_KEY));
+        return meta().getMetaList(Y_AXIS).get(i).getString("axisTitle", nameFor(VALUE_KEY));
     }
 
     public Value getX(DataPoint point) {

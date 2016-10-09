@@ -19,17 +19,8 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.function.Function;
+import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
-
-import javafx.util.Pair;
 
 /**
  * An immutable representation of annotation node. Descendants could be mutable
@@ -61,7 +52,7 @@ public class MetaNode<T extends MetaNode> extends Meta {
 
         Collection<String> nodeNames = meta.getNodeNames();
         nodeNames.stream().forEach((elementName) -> {
-            List<MetaNode> item = meta.getNodes(elementName).stream()
+            List<MetaNode> item = meta.getMetaList(elementName).stream()
                     .<MetaNode>map((an) -> from(an))
                     .collect(Collectors.toList());
             res.nodes.put(elementName, new ArrayList<>(item));
@@ -164,7 +155,7 @@ public class MetaNode<T extends MetaNode> extends Meta {
      * @return
      */
     @Override
-    public List<T> getNodes(String name) {
+    public List<T> getMetaList(String name) {
         Name n = Name.of(name);
         List<T> item = getNodeItem(n);
         if (item == null) {
@@ -175,8 +166,8 @@ public class MetaNode<T extends MetaNode> extends Meta {
     }
 
     @Override
-    public T getNode(String name) {
-        return getNodes(name).get(0);
+    public T getMeta(String name) {
+        return getMetaList(name).get(0);
     }
 
     @Override
@@ -243,9 +234,9 @@ public class MetaNode<T extends MetaNode> extends Meta {
         return !(name.contains("[") || name.contains("]") || name.contains("$"));
     }
 
-    public T getNode(String path, T def) {
-        if (this.hasNode(path)) {
-            return this.getNode(path);
+    public T getMeta(String path, T def) {
+        if (this.hasMeta(path)) {
+            return this.getMeta(path);
         } else {
             return def;
         }
@@ -260,7 +251,7 @@ public class MetaNode<T extends MetaNode> extends Meta {
 //    private Stream<Pair<String, T>> nodeStream(String prefix) {
 //        return Stream.concat(Stream.of(new Pair<>(prefix, this)),
 //                this.getNodeNames().stream().flatMap(nodeName -> {
-//                    List<? extends T> metaList = this.getNodes(nodeName);
+//                    List<? extends T> metaList = this.getMetaList(nodeName);
 //                    String nodePrefix;
 //                    if (prefix == null || prefix.isEmpty()) {
 //                        nodePrefix = nodeName;

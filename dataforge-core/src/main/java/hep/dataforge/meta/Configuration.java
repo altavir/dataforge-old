@@ -62,7 +62,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
 
         Collection<String> elementNames = meta.getNodeNames();
         for (String elementName : elementNames) {
-            List<Configuration> item = meta.getNodes(elementName).stream()
+            List<Configuration> item = meta.getMetaList(elementName).stream()
                     .<Configuration>map((an) -> new Configuration(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
@@ -140,7 +140,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
             annotation.getNodeNames().stream().forEach((elementName) -> {
                 setNode(elementName,
                         annotation
-                        .getNodes(elementName)
+                        .getMetaList(elementName)
                         .stream()
                         .<Configuration>map((el) -> new Configuration(el))
                         .collect(Collectors.toList())
@@ -168,8 +168,8 @@ public class Configuration extends MutableMetaNode<Configuration> {
      * @return
      */
     public Configuration requestNode(String name) {
-        if (hasNode(name)) {
-            return getNode(name);
+        if (hasMeta(name)) {
+            return getMeta(name);
         } else {
             Configuration child = createChildNode(name);
             super.attachNode(child);

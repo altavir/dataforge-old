@@ -24,8 +24,9 @@ import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
-import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET_TYPE;
 import org.slf4j.LoggerFactory;
+
+import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET_TYPE;
 
 /**
  *
@@ -129,8 +130,8 @@ public abstract class AbstractLoader implements Loader {
      */
     @Override
     public boolean acceptEnvelope(Envelope envelope) {
-        if (envelope.meta().hasNode(ENVELOPE_DESTINATION_NODE)) {
-            Meta target = envelope.meta().getNode(ENVELOPE_DESTINATION_NODE);
+        if (envelope.meta().hasMeta(ENVELOPE_DESTINATION_NODE)) {
+            Meta target = envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE);
             String targetType = target.getString(TARGET_TYPE_KEY, LOADER_TARGET_TYPE);
             if (targetType.equals(LOADER_TARGET_TYPE)) {
                 String targetName = target.getString(TARGET_NAME_KEY);

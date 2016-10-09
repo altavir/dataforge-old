@@ -65,7 +65,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
 
     private Meta findFrameDescription(Meta meta, String name) {
         //TODO сделать тут возможность подстановки стилей?
-        List<? extends Meta> frameDescriptions = meta.getNodes("plotFrame");
+        List<? extends Meta> frameDescriptions = meta.getMetaList("plotFrame");
         Meta defaultDescription = new MetaBuilder("plotFrame").build();
         for (Meta an : frameDescriptions) {
             String frameName = meta.getString("frameName");
@@ -94,18 +94,18 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         } else {
             frame = holder.buildPlotFrame(frame_name, findFrameDescription(meta, frame_name));
         }
-        XYAdapter adapter = new XYAdapter(meta.getNode("adapter", Meta.buildEmpty("adapter")));
+        XYAdapter adapter = new XYAdapter(meta.getMeta("adapter", Meta.buildEmpty("adapter")));
 
         frame.add(PlottableData.plot(name, meta, adapter, input));
 
-//        if (meta.hasNode("snapshot")) {
-//            snapshot(name, frame, meta.getNode("snapshot"));
+//        if (meta.hasMeta("snapshot")) {
+//            snapshot(name, frame, meta.getMeta("snapshot"));
 //        } else if (meta.getBoolean("snapshot", false)) {
 //            snapshot(name, frame, MetaBuilder.buildEmpty("snapshot"));
 //        }
 //
-//        if (meta.hasNode("serialize")) {
-//            serialize(name, frame, meta.getNode("serialize"));
+//        if (meta.hasMeta("serialize")) {
+//            serialize(name, frame, meta.getMeta("serialize"));
 //        } else if (meta.getBoolean("serialize", false)) {
 //            serialize(name, frame, MetaBuilder.buildEmpty("serialize"));
 //        }

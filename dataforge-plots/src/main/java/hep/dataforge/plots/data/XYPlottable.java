@@ -19,7 +19,6 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
@@ -95,8 +94,8 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
         if (cfg.isEmpty()) {
             return data;
         }
-        if (cfg.hasNode("xRange")) {
-            data = filterXRange(data, cfg.getNode("xRange"));
+        if (cfg.hasMeta("xRange")) {
+            data = filterXRange(data, cfg.getMeta("xRange"));
         }
         return data;
     }

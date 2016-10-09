@@ -11,11 +11,13 @@ import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import static hep.dataforge.utils.NamingUtils.wildcardMatch;
 import hep.dataforge.values.Value;
+
 import java.io.File;
 import java.util.Arrays;
 import java.util.List;
+
+import static hep.dataforge.utils.NamingUtils.wildcardMatch;
 
 @NodeDef(name = "file", info = "File data element or list of files with the same meta defined by mask.")
 @NodeDef(name = "dir", info = "Directory data node.")
@@ -37,7 +39,7 @@ public class FileDataFactory extends DataFactory<Binary> {
     protected void buildChildren(Context context, DataTree.Builder<Binary> builder, DataFilter filter, Meta dataConfig) {
         //FIXME add filtering here
         File parentFile;
-        if (dataConfig.hasNode(DATA_DIR_KEY)) {
+        if (dataConfig.hasMeta(DATA_DIR_KEY)) {
             parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
         } else if (context.hasValue(DATA_DIR_KEY)) {
             parentFile = context.io().getFile(context.getString(DATA_DIR_KEY));
@@ -45,12 +47,12 @@ public class FileDataFactory extends DataFactory<Binary> {
             parentFile = context.io().getRootDirectory();
         }
 
-        if (dataConfig.hasNode(FILE_NODE)) {
-            dataConfig.getNodes(FILE_NODE).forEach((node) -> addFile(context, builder, parentFile, node));
+        if (dataConfig.hasMeta(FILE_NODE)) {
+            dataConfig.getMetaList(FILE_NODE).forEach((node) -> addFile(context, builder, parentFile, node));
         }
 
-        if (dataConfig.hasNode(DIRECTORY_NODE)) {
-            dataConfig.getNodes(DIRECTORY_NODE).forEach((node) -> addDir(context, builder, parentFile, node));
+        if (dataConfig.hasMeta(DIRECTORY_NODE)) {
+            dataConfig.getMetaList(DIRECTORY_NODE).forEach((node) -> addDir(context, builder, parentFile, node));
         }
 
         if (dataConfig.hasValue(FILE_NODE)) {
@@ -87,11 +89,11 @@ public class FileDataFactory extends DataFactory<Binary> {
             context.getLogger().warn("No files matching the filter: " + fileNode.toString());
         } else if (files.size() == 1) {
             File file = files.get(0);
-            Meta fileMeta = fileNode.hasNode(NODE_META_KEY) ? fileNode.getNode(NODE_META_KEY) : Meta.empty();
+            Meta fileMeta = fileNode.hasMeta(NODE_META_KEY) ? fileNode.getMeta(NODE_META_KEY) : Meta.empty();
             builder.putData(fileName(file), buildFileData(file, fileMeta));
         } else {
             files.forEach(file -> {
-                Meta fileMeta = fileNode.hasNode(NODE_META_KEY) ? fileNode.getNode(NODE_META_KEY) : Meta.empty();
+                Meta fileMeta = fileNode.hasMeta(NODE_META_KEY) ? fileNode.getMeta(NODE_META_KEY) : Meta.empty();
                 builder.putData(fileName(file), buildFileData(file, fileMeta));
             });
         }
@@ -112,8 +114,8 @@ public class FileDataFactory extends DataFactory<Binary> {
         DataTree.Builder<Binary> dirBuilder = DataTree.builder(Binary.class);
         File dir = new File(parentFile, dirNode.getString("path"));
         dirBuilder.setName(dirNode.getString(NODE_NAME_KEY, dirNode.getName()));
-        if (dirNode.hasNode(NODE_META_KEY)) {
-            dirBuilder.setMeta(dirNode.getNode(NODE_META_KEY));
+        if (dirNode.hasMeta(NODE_META_KEY)) {
+            dirBuilder.setMeta(dirNode.getMeta(NODE_META_KEY));
         }
 
         boolean recurse = dirNode.getBoolean("recursive", true);

@@ -90,8 +90,8 @@ public class ParamSet implements NamedValueSet, Serializable {
     @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
     @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
     public static ParamSet fromMeta(Meta cfg) {
-        if (cfg.hasNode("params")) {
-            Meta params = cfg.getNode("params");
+        if (cfg.hasMeta("params")) {
+            Meta params = cfg.getMeta("params");
 
             ParamSet set = new ParamSet();
             MetaUtils.nodeStream(params).forEach(entry -> {
@@ -106,9 +106,9 @@ public class ParamSet implements NamedValueSet, Serializable {
         }
 
 
-//        if (cfg.hasNode("param")) {
+//        if (cfg.hasMeta("param")) {
 //            List<? extends Meta> params;
-//            params = cfg.getNodes("param");
+//            params = cfg.getMetaList("param");
 //            ParamSet set = new ParamSet();
 //            for (Meta param : params) {
 //                set.setPar(Param.fromMeta(param));

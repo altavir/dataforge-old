@@ -11,6 +11,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.tables.DataPoint;
+
 import java.io.ObjectInputStream;
 import java.util.List;
 
@@ -28,7 +29,7 @@ public class PlottableUnWrapper implements UnWrapper<Plottable>{
     @Override
     public Plottable unWrap(Envelope envelope) {
         try {
-            Meta plottableMeta = envelope.meta().getNode("meta");
+            Meta plottableMeta = envelope.meta().getMeta("meta");
             String name = envelope.meta().getString("name");
             List<DataPoint> data = (List<DataPoint>) new ObjectInputStream(envelope.getData().getStream()).readObject();
 

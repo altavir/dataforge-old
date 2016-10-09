@@ -131,8 +131,8 @@ public interface Workspace extends Encapsulated, MetaProvider {
             if (meta.hasValue("context")) {
                 setContext(GlobalContext.getContext(meta.getString("context")));
             }
-            if (meta.hasNode("data")) {
-                meta.getNodes("data").forEach((Meta dataMeta) -> {
+            if (meta.hasMeta("data")) {
+                meta.getMetaList("data").forEach((Meta dataMeta) -> {
                     DataFactory factory;
                     if (dataMeta.hasValue("dataFactoryClass")) {
                         try {
@@ -147,9 +147,9 @@ public interface Workspace extends Encapsulated, MetaProvider {
                     loadData(as, factory.build(getContext(), dataMeta));
                 });
             }
-            if (meta.hasNode("config")) {
-                meta.getNodes("config").forEach((Meta configMeta) -> {
-                    loadMeta(configMeta.getString("name"), configMeta.getNode("meta"));
+            if (meta.hasMeta("config")) {
+                meta.getMetaList("config").forEach((Meta configMeta) -> {
+                    loadMeta(configMeta.getString("name"), configMeta.getMeta("meta"));
                 });
             }
 

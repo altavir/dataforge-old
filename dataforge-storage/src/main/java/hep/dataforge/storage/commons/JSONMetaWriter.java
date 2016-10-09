@@ -8,16 +8,13 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
+import javax.json.*;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonWriterFactory;
 
 /**
  * A converter from Meta object to JSON character stream
@@ -66,7 +63,7 @@ public class JSONMetaWriter implements MetaStreamWriter {
         }
         // рекурсивно записываем все аннотации
         for (String key : an.getNodeNames()) {
-            List<? extends Meta> item = an.getNodes(key);
+            List<? extends Meta> item = an.getMetaList(key);
             if (item.size() == 1) {
                 res.add(key, fromMeta(item.get(0)));
             } else {

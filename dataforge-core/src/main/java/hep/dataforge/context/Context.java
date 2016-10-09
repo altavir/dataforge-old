@@ -72,8 +72,8 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         this.rootLog = new Report(name, parent);
         this.name = name;
         if (config != null) {
-            if (config.hasNode("property")) {
-                config.getNodes("property").stream().forEach((propertyNode) -> {
+            if (config.hasMeta("property")) {
+                config.getMetaList("property").stream().forEach((propertyNode) -> {
                     properties.put(propertyNode.getString("key"), propertyNode.getValue("value"));
                 });
             }

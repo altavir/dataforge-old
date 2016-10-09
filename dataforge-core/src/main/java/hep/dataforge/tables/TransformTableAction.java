@@ -59,8 +59,8 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
 
     private Predicate<DataPoint> buildFilter(Meta meta) {
         Predicate<DataPoint> res = null;
-        if (meta.hasNode("filter")) {
-            for (Meta filter : meta.getNodes("filter")) {
+        if (meta.hasMeta("filter")) {
+            for (Meta filter : meta.getMetaList("filter")) {
                 Predicate<DataPoint> predicate = buildConditionSet(filter);
                 if (res == null) {
                     res = predicate;

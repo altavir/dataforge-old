@@ -11,11 +11,8 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -157,8 +154,8 @@ public class ValueDescriptor extends DescriptorBase implements Named {
      */
     public Map<Value, String> allowedValues() {
         Map<Value, String> map = new HashMap<>();
-        if (meta().hasNode("allowedValue")) {
-            for (Meta allowed : meta().getNodes("allowedValue")) {
+        if (meta().hasMeta("allowedValue")) {
+            for (Meta allowed : meta().getMetaList("allowedValue")) {
                 map.put(allowed.getValue("value"), allowed.getString("description", ""));
             }
         } else if (meta().hasValue("allowedValues")) {

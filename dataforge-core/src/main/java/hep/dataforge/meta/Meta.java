@@ -70,13 +70,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
         return new MetaBuilder(this);
     }
 
-    public abstract Meta getNode(String path);
-
-    @Override
-    public Meta getMeta(String path) {
-        return getNode(path);
-    }
-
+    public abstract Meta getMeta(String path);
     /**
      * В случае передачи {@code "$all"} или {@code null} в качестве аргумента
      * возвращает всех прямых наследников
@@ -84,7 +78,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      * @param name
      * @return
      */
-    public abstract List<? extends Meta> getNodes(String name);
+    public abstract List<? extends Meta> getMetaList(String name);
 
     /**
      * {@inheritDoc}
@@ -99,7 +93,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
         return !getNodeNames().isEmpty();
     }
 
-    public boolean hasNode(String name) {
+    public boolean hasMeta(String name) {
         Collection<String> names = getNodeNames();
         if (names.contains(name)) {
             return true;
@@ -109,7 +103,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
                 String head = path.getFirst().entry();
                 String tail = path.cutFirst().toString();
                 if (names.contains(head)) {
-                    return getNode(head).hasNode(tail);
+                    return getMeta(head).hasMeta(tail);
                 } else {
                     return false;
                 }
@@ -136,7 +130,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
                 String head = path.getFirst().entry();
                 String tail = path.cutFirst().toString();
                 if (names.contains(head)) {
-                    return getNode(head).hasValue(tail);
+                    return getMeta(head).hasValue(tail);
                 } else {
                     return false;
                 }
@@ -159,7 +153,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
             case VALUE_TARGET:
                 return getValue(name.toString());
             case META_TARGET:
-                return getNode(name.toString());
+                return getMeta(name.toString());
             default:
                 throw new TargetNotProvidedException();
         }
@@ -174,7 +168,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
             case VALUE_TARGET:
                 return hasValue(name.toString());
             case META_TARGET:
-                return hasNode(name.toString());
+                return hasMeta(name.toString());
             default:
                 return false;
         }
@@ -201,9 +195,9 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      * @param def
      * @return 
      */
-    public Meta getNode(String path, Meta def) {
-        if (this.hasNode(path)) {
-            return getNode(path);
+    public Meta getMeta(String path, Meta def) {
+        if (this.hasMeta(path)) {
+            return getMeta(path);
         } else {
             return def;
         }
@@ -215,7 +209,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      * @return 
      */
     public Meta getNodeOrEmpty(String path) {
-        return getNode(path, Meta.empty());
+        return getMeta(path, Meta.empty());
     }
 
     @Override
@@ -248,8 +242,8 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
             }
         }
         for (String elementName : getNodeNames()) {
-            List<? extends Meta> elementItem = getNodes(elementName);
-            if (!other.hasNode(elementName) || !elementItem.equals(other.getNodes(elementName))) {
+            List<? extends Meta> elementItem = getMetaList(elementName);
+            if (!other.hasMeta(elementName) || !elementItem.equals(other.getMetaList(elementName))) {
                 return false;
             }
         }
@@ -264,7 +258,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
             hash = 59 * hash + Objects.hashCode(getValue(valueName));
         }
         for (String elementName : getNodeNames()) {
-            hash = 59 * hash + Objects.hashCode(getNodes(elementName));
+            hash = 59 * hash + Objects.hashCode(getMetaList(elementName));
         }
         return hash;
     }
