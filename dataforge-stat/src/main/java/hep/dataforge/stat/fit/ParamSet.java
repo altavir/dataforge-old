@@ -87,8 +87,8 @@ public class ParamSet implements NamedValueSet, Serializable {
         }
     }
 
-    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
-    @NodeDef(name = "params", info = "Could be used as a wrapper for 'param' elements. Used solely on purpose of xml readability.")
+//    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
+    @NodeDef(name = "params", info = "Used as a wrapper for 'param' elements.")
     public static ParamSet fromMeta(Meta cfg) {
         if (cfg.hasMeta("params")) {
             Meta params = cfg.getMeta("params");

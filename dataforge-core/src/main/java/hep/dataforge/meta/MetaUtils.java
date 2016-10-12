@@ -149,32 +149,35 @@ public class MetaUtils {
      * @param prefix
      * @return
      */
-    private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node) {
-        return Stream.concat(Stream.of(new Pair<>(prefix, node)),
-                node.getNodeNames().stream().flatMap(nodeName -> {
-                    List<? extends Meta> metaList = node.getMetaList(nodeName);
-                    String nodePrefix;
-                    if (prefix == null || prefix.isEmpty()) {
-                        nodePrefix = nodeName;
-                    } else {
-                        nodePrefix = prefix + "." + nodeName;
-                    }
-                    if (metaList.size() == 1) {
-                        return nodeStream(nodePrefix, metaList.get(0));
-                    } else {
-                        return IntStream.range(0, metaList.size()).boxed()
-                                .flatMap(i -> {
-                                    String subPrefix = String.format("%s[%d]", nodePrefix, i);
-                                    Meta subNode = metaList.get(i);
-                                    return nodeStream(subPrefix, subNode);
-                                });
-                    }
-                })
-        );
+    private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node, boolean includeRoot) {
+        Stream<Pair<String, Meta>> subNodeStream = node.getNodeNames().stream().flatMap(nodeName -> {
+            List<? extends Meta> metaList = node.getMetaList(nodeName);
+            String nodePrefix;
+            if (prefix == null || prefix.isEmpty()) {
+                nodePrefix = nodeName;
+            } else {
+                nodePrefix = prefix + "." + nodeName;
+            }
+            if (metaList.size() == 1) {
+                return nodeStream(nodePrefix, metaList.get(0), true);
+            } else {
+                return IntStream.range(0, metaList.size()).boxed()
+                        .flatMap(i -> {
+                            String subPrefix = String.format("%s[%d]", nodePrefix, i);
+                            Meta subNode = metaList.get(i);
+                            return nodeStream(subPrefix, subNode, true);
+                        });
+            }
+        });
+        if (includeRoot) {
+            return Stream.concat(Stream.of(new Pair<>(prefix, node)), subNodeStream);
+        } else {
+            return subNodeStream;
+        }
     }
 
     public static Stream<Pair<String, Meta>> nodeStream(Meta node) {
-        return nodeStream("", node);
+        return nodeStream("", node, false);
     }
 
     public static Stream<Pair<String, Value>> valueStream(Meta node) {

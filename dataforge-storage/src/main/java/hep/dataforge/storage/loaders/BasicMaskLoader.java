@@ -16,6 +16,7 @@
 package hep.dataforge.storage.loaders;
 
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
@@ -72,8 +73,11 @@ public class BasicMaskLoader implements Loader {
         return loader.isOpen();
     }
 
-    
-    
+    @Override
+    public MessageValidator getValidator() {
+        return loader.getValidator();
+    }
+
     @Override
     public void open() throws Exception {
         loader.open();

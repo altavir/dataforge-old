@@ -74,6 +74,11 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      */
     protected abstract R execute(String nodeName, Map<String, T> input, Meta meta);
 
+    /**
+     * Build output meta for resulting object
+     * @param input
+     * @return
+     */
     protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder("node")
                 .putValue("name", input.getName())
