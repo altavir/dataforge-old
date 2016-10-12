@@ -3,12 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.io.envelopes;
+package hep.dataforge.io.messages;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
+import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
-
-import static hep.dataforge.io.envelopes.Destination.ENVELOPE_DESTINATION_NODE;
 
 /**
  * A dispatcher of messages that could provide appropriate responder for
@@ -17,10 +17,15 @@ import static hep.dataforge.io.envelopes.Destination.ENVELOPE_DESTINATION_NODE;
  * @author Alexander Nozik
  */
 public interface Dispatcher {
-   
+    String MESSAGE_TARGET_NODE = "@target";
+    String TARGET_TYPE_KEY = "type";
+    String TARGET_NAME_KEY = "name";
+
+    @ValueDef(name = TARGET_TYPE_KEY, info = "The type of the message target")
+    @ValueDef(name = TARGET_NAME_KEY, info = "The name of the message target")
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     
     default Responder getResponder(Envelope envelope){
-        return getResponder(envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE));
+        return getResponder(envelope.meta().getMeta(MESSAGE_TARGET_NODE));
     }
 }

@@ -23,7 +23,8 @@ import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.MessageValidator;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
@@ -397,30 +398,34 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
         }
     }
 
-    @Override
-    public boolean acceptEnvelope(Envelope envelope) {
-        if (envelope.meta().hasMeta(ENVELOPE_DESTINATION_NODE)) {
-            Meta target = envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE);
-            String targetType = target.getString(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE);
-            if (targetType.equals(STORAGE_TARGET_TYPE)) {
-                String targetName = target.getString(TARGET_NAME_KEY);
-                return targetName.endsWith(getName());
-            } else {
-                return false;
-            }
-        } else {
-            LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
-            return true;
-        }
+    public MessageValidator getValidator() {
+        return StorageUtils.defaultMessageValidator(STORAGE_TARGET_TYPE, getName());
     }
 
-    @Override
-    public Meta destinationMeta() {
-        return new MetaBuilder(ENVELOPE_DESTINATION_NODE)
-                .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
-                .putValue(TARGET_NAME_KEY, getName())
-                .build();
-    }
+//    @Override
+//    public boolean acceptEnvelope(Envelope envelope) {
+//        if (envelope.meta().hasMeta(ENVELOPE_DESTINATION_NODE)) {
+//            Meta target = envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE);
+//            String targetType = target.getString(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE);
+//            if (targetType.equals(STORAGE_TARGET_TYPE)) {
+//                String targetName = target.getString(TARGET_NAME_KEY);
+//                return targetName.endsWith(getName());
+//            } else {
+//                return false;
+//            }
+//        } else {
+//            LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
+//            return true;
+//        }
+//    }
+//
+//    @Override
+//    public Meta destinationMeta() {
+//        return new MetaBuilder(ENVELOPE_DESTINATION_NODE)
+//                .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
+//                .putValue(TARGET_NAME_KEY, getName())
+//                .build();
+//    }
 
     @Override
     @ValueDef(name = "name", info = "The name of storage or loader.")

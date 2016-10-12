@@ -101,7 +101,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
     public Envelope respond(Envelope message) {
         check();
         try {
-            if (!acceptEnvelope(message)) {
+            if (!getValidator().isValid(message)) {
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
             Meta envelopeMeta = message.meta();

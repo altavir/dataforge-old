@@ -241,7 +241,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
         //Checking if connection could serve given roles
         for (String role : roles) {
-            if (!hasRole(role)) {
+            if (!acceptsRole(role)) {
                 getLogger().warn("The device {} does not support role {}", getName(), role);
             } else {
                 RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).findAny().get();

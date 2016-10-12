@@ -3,7 +3,7 @@ package hep.dataforge.storage.servlet;
 import hep.dataforge.io.envelopes.Coder;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.commons.JSONMetaWriter;
 import ratpack.form.Form;

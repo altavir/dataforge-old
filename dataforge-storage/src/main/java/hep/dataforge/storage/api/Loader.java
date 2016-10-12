@@ -15,8 +15,8 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.io.envelopes.Destination;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.MessageValidator;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Path;
@@ -27,7 +27,7 @@ import hep.dataforge.navigation.Path;
  *
  * @author Alexander Nozik
  */
-public interface Loader extends Annotated, AutoCloseable, Named, Responder, Destination {
+public interface Loader extends Annotated, AutoCloseable, Named, Responder {
 
     public static final String LOADER_NAME_KEY = "name";
     public static final String LOADER_TYPE_KEY = "type";
@@ -59,6 +59,8 @@ public interface Loader extends Annotated, AutoCloseable, Named, Responder, Dest
     void open() throws Exception;
 
     boolean isEmpty();
+
+    MessageValidator getValidator();
 
     /**
      * Get full path to this loader relative to root storage

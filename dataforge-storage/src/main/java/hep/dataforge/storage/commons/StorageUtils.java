@@ -16,6 +16,8 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
@@ -26,12 +28,14 @@ import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import javafx.util.Pair;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static hep.dataforge.io.messages.Dispatcher.*;
 import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
 
 /**
@@ -166,7 +170,7 @@ public class StorageUtils {
         double step = (to - from) / limit;
         for (double x = from; x < to; x += step) {
             Supplier<T> sup = index.pullOne(x + step / 2);
-            if(sup!= null) {
+            if (sup != null) {
                 res.add(sup);
             }
         }
@@ -176,6 +180,38 @@ public class StorageUtils {
 
     private static boolean isNumeric(Value val) {
         return val.valueType() == ValueType.NUMBER || val.valueType() == ValueType.TIME;
+    }
+
+    /**
+     * A simple validator that checks only name and type if present
+     * @param type
+     * @param name
+     * @return
+     */
+    public static MessageValidator defaultMessageValidator(String type, String name) {
+        return new MessageValidator() {
+            @Override
+            public Meta validate(Envelope message) {
+                if (message.meta().hasMeta(MESSAGE_TARGET_NODE)) {
+                    Meta target = message.meta().getMeta(MESSAGE_TARGET_NODE);
+                    String targetName = target.getString(TARGET_NAME_KEY);
+                    if (targetName.equals(name)) {
+                        if (!target.hasValue(TARGET_TYPE_KEY) || target.getString(TARGET_TYPE_KEY).equals(type)) {
+                            return MessageValidator.valid();
+                        } else {
+                            return MessageValidator.invalid("Wrong message target type");
+
+                        }
+                    } else {
+                        return MessageValidator.invalid("Wrong message target name");
+                    }
+                } else {
+                    LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
+                    return MessageValidator.valid();
+                }
+            }
+        };
+
     }
 
 

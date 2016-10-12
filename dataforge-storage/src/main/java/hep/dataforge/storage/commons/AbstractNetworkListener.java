@@ -18,18 +18,20 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
 
 /**
  * Abstract network listener for envelopes

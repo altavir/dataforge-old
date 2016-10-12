@@ -17,19 +17,17 @@ package hep.dataforge.storage.loaders;
 
 import hep.dataforge.exceptions.PushFailedException;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
-import org.slf4j.LoggerFactory;
+import hep.dataforge.storage.commons.StorageUtils;
 
 import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET_TYPE;
 
 /**
- *
  * @author Alexander Nozik
  */
 public abstract class AbstractLoader implements Loader {
@@ -122,35 +120,8 @@ public abstract class AbstractLoader implements Loader {
         }
     }
 
-    /**
-     * Check if this loader is the target for given envelope
-     *
-     * @param envelope
-     * @return
-     */
-    @Override
-    public boolean acceptEnvelope(Envelope envelope) {
-        if (envelope.meta().hasMeta(ENVELOPE_DESTINATION_NODE)) {
-            Meta target = envelope.meta().getMeta(ENVELOPE_DESTINATION_NODE);
-            String targetType = target.getString(TARGET_TYPE_KEY, LOADER_TARGET_TYPE);
-            if (targetType.equals(LOADER_TARGET_TYPE)) {
-                String targetName = target.getString(TARGET_NAME_KEY);
-                return targetName.endsWith(getName());
-            } else {
-                return false;
-            }
-        } else {
-            LoggerFactory.getLogger(getClass()).debug("Envelope does not have target. Acepting by default.");
-            return true;
-        }
-    }
-
-    @Override
-    public Meta destinationMeta() {
-        return new MetaBuilder(ENVELOPE_DESTINATION_NODE)
-                .putValue(TARGET_TYPE_KEY, LOADER_TARGET_TYPE)
-                .putValue(TARGET_NAME_KEY, getName())
-                .build();
+    public MessageValidator getValidator() {
+        return StorageUtils.defaultMessageValidator(LOADER_TARGET_TYPE, getName());
     }
 
     protected void checkOpen() {

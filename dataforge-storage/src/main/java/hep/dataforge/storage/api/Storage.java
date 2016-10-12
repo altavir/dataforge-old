@@ -17,15 +17,16 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.io.envelopes.Dispatcher;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.Dispatcher;
+import hep.dataforge.io.messages.MessageValidator;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.Provider;
+
 import java.util.Map;
-import hep.dataforge.io.envelopes.Destination;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -38,7 +39,7 @@ import hep.dataforge.io.envelopes.Destination;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, Destination {
+public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated{
 
     /**
      * Initialize this storage.
@@ -156,6 +157,12 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      */
     EventLoader getDefaultEventLoader() throws StorageException;
+
+    /**
+     * Get validator for
+     * @return
+     */
+    MessageValidator getValidator();
 
     /**
      * Get the full path of this storage relative to root using '.' as a

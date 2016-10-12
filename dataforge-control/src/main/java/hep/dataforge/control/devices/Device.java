@@ -15,13 +15,14 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.ControlException;
-import hep.dataforge.io.envelopes.Responder;
+import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
@@ -66,6 +67,12 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      * @return
      */
     String type();
+
+    /**
+     * Set context for this device
+     * @param context
+     */
+    void setContext(Context context);
 
     /**
      * Get the device state with given name. Null if such state not found or
@@ -178,7 +185,7 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
      * @param name
      * @return
      */
-    default boolean hasRole(String name) {
+    default boolean acceptsRole(String name) {
         return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().isPresent();
     }
 

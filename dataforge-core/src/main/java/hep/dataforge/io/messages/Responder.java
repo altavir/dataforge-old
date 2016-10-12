@@ -13,7 +13,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.envelopes;
+package hep.dataforge.io.messages;
+
+import hep.dataforge.io.envelopes.Envelope;
 
 import java.util.concurrent.Future;
 import java.util.concurrent.FutureTask;

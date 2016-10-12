@@ -5,6 +5,9 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.io.messages.Dispatcher;
+import hep.dataforge.io.messages.Responder;
+
 /**
  * A Responder that does not respond itself but delegates response to
  * appropriate responder.
