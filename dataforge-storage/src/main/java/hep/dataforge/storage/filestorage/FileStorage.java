@@ -24,32 +24,25 @@ import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.Tag;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.storage.api.EventLoader;
-import hep.dataforge.storage.api.Loader;
-import hep.dataforge.storage.api.ObjectLoader;
-import hep.dataforge.storage.api.PointLoader;
-import hep.dataforge.storage.api.StateLoader;
+import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.EnvelopeCodes;
-import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
-import static hep.dataforge.storage.commons.EnvelopeCodes.EVENT_LOADER_TYPE_CODE;
-import static hep.dataforge.storage.commons.EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
-import static hep.dataforge.storage.commons.EnvelopeCodes.POINT_LOADER_TYPE_CODE;
-import static hep.dataforge.storage.commons.EnvelopeCodes.STATE_LOADER_TYPE_CODE;
 import hep.dataforge.storage.commons.StorageUtils;
-import hep.dataforge.values.Value;
+import org.apache.commons.vfs2.FileChangeEvent;
+import org.apache.commons.vfs2.FileListener;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.FileSystemException;
+import org.apache.commons.vfs2.impl.DefaultFileMonitor;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
-import org.apache.commons.vfs2.FileChangeEvent;
-import org.apache.commons.vfs2.FileListener;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
+
+import static hep.dataforge.storage.commons.EnvelopeCodes.*;
 import static org.apache.commons.vfs2.FileType.FOLDER;
-import org.apache.commons.vfs2.impl.DefaultFileMonitor;
-import org.slf4j.LoggerFactory;
 
 /**
  * Сервер данных на локальных текстовых файлах.
@@ -404,7 +397,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void fileDeleted(FileChangeEvent event) throws Exception {
-        //do nothing we suppose that file could not be deleted in the runtime
+        //do nothing, we suppose that file could not be deleted in the runtime
     }
 
     @Override

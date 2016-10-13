@@ -1,7 +1,6 @@
 package hep.dataforge.storage.servlet;
 
 import freemarker.template.Template;
-import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.JSONMetaWriter;
@@ -14,6 +13,8 @@ import java.lang.ref.SoftReference;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static hep.dataforge.storage.servlet.StorageRenderer.renderStorage;
 
 /**
  * Created by darksnake on 13-Dec-15.
@@ -40,7 +41,6 @@ public class StorageRatpackHandler implements Handler {
     @Override
     public void handle(Context ctx) throws Exception {
         if (ctx.getRequest().getQuery().isEmpty()) {
-            root.refresh();
             renderStorageTree(ctx, root);
         } else {
             String path = ctx.getRequest().getQueryParams().get("path");
@@ -77,12 +77,9 @@ public class StorageRatpackHandler implements Handler {
         }
     }
 
-    protected void defaultRenderLoader(Context ctx, Loader loader) {
-        ctx.render("Loader view for loader " + loader.getName() + " not yet implemented");
-    }
-
     protected void renderStorageTree(Context ctx, Storage storage) {
         try {
+            storage.refresh();
             ctx.getResponse().contentType("text/html");
             Template template = Utils.freemarkerConfig().getTemplate("StorageTemplate.ftl");
 
@@ -99,37 +96,16 @@ public class StorageRatpackHandler implements Handler {
             ctx.render(writer.toString());
 
         } catch (Exception ex) {
-            LoggerFactory.getLogger(getClass()).error("Error rendering storage tree");
+            LoggerFactory.getLogger(StorageRenderer.class).error("Error rendering storage tree");
             ctx.render(ex.toString());
         }
     }
 
-    protected void renderStorage(StringBuilder b, Storage storage) throws StorageException {
-        b.append("<div class=\"node\">\n");
-        if (!storage.loaders().isEmpty()) {
-            b.append("<div class=\"leaf\">\n"
-                    + "<ul>");
-            for (Loader loader : storage.loaders().values()) {
-                renderLoader(b, loader);
-            }
-            b.append("</ul>"
-                    + "</div>\n");
-        }
-        if (!storage.shelves().isEmpty()) {
-            b.append("<ul>\n");
-            for (Storage shelf : storage.shelves().values()) {
-                b.append(String.format("<li><strong>+ %s</strong></li>%n", shelf.getName()));
-                renderStorage(b, shelf);
-            }
-            b.append("</ul>");
-        }
-        b.append("</div>\n");
+    protected void defaultRenderLoader(Context ctx, Loader loader) {
+        ctx.render("Loader view for loader " + loader.getName() + " not yet implemented");
     }
 
-    protected void renderLoader(StringBuilder b, Loader loader) {
-        String href = "/storage?path=" + loader.getPath();
-        b.append(String.format("<li><a href=\"%s\">%s</a> (%s)</li>", href, loader.getName(), loader.getType()));
-    }
+
 
     protected void renderStates(Context ctx, StateLoader loader) {
         try {
@@ -179,7 +155,7 @@ public class StorageRatpackHandler implements Handler {
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
             Template template = Utils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
 
-            Map data = new HashMap(4);
+            Map<String, Object> data = new HashMap(4);
 
 //            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
 //            String from = ctx.getRequest().getQueryParams().get("from");

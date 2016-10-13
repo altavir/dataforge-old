@@ -307,7 +307,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         return self();
     }
 
-    public T putValues(String name, Object[] values) {
+    public T putValues(String name, Object... values) {
         if (values != null) {
             for (Object obj : values) {
                 putValue(name, obj);

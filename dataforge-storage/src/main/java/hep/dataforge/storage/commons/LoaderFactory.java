@@ -19,13 +19,9 @@ import hep.dataforge.exceptions.LoaderNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.storage.api.EventLoader;
-import hep.dataforge.storage.api.Loader;
-import hep.dataforge.storage.api.ObjectLoader;
-import hep.dataforge.storage.api.PointLoader;
-import hep.dataforge.storage.api.StateLoader;
-import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.*;
 import hep.dataforge.tables.TableFormat;
+
 import java.util.Arrays;
 
 /**
@@ -91,7 +87,7 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static ObjectLoader buildObjectLoder(Storage storage, String loaderName, String shelfName)
+    public static ObjectLoader<?> buildObjectLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         if (shelfName != null && !shelfName.isEmpty()) {
             if (!storage.hasShelf(shelfName)) {
@@ -105,7 +101,7 @@ public class LoaderFactory {
                 .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
                 .build();
 
-        return (ObjectLoader) storage.buildLoader(loaderAn);
+        return (ObjectLoader<?>) storage.buildLoader(loaderAn);
     }    
     
     /**

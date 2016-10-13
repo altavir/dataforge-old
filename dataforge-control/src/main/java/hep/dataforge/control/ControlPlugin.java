@@ -12,6 +12,7 @@ import hep.dataforge.utils.ReferenceRegistry;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * A plugin for creating and using different devices
@@ -32,7 +33,7 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
 
     public Device buildDevice(Meta deviceMeta) {
         MetaFactory<Device> factory = getDeviceFactory(deviceMeta);
-        if(factory!= null){
+        if (factory != null) {
             Device device = factory.build(meta());
 //            String deviceName = ControlUtils.getDeviceName(deviceMeta);
             device.setContext(getContext());
@@ -43,7 +44,7 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
         }
     }
 
-    private MetaFactory<Device> getDeviceFactory(Meta deviceMeta){
+    private MetaFactory<Device> getDeviceFactory(Meta deviceMeta) {
         String deviceType = ControlUtils.getDeviceType(deviceMeta);
         return deviceFactoryMap.get(deviceType);
     }
@@ -52,4 +53,9 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
     public Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException {
         return null;
     }
+
+    public Optional<Device> getDeviceByName(String name) {
+        return devices.findFirst(it -> getName().equals(name));
+    }
+
 }

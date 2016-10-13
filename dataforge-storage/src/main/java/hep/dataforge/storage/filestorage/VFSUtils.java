@@ -39,6 +39,10 @@ public class VFSUtils {
         return VFS.getManager().toFileObject(file);
     }
 
+    public static FileObject getLocalFile(String file) throws FileSystemException {
+        return VFS.getManager().toFileObject(new File(file));
+    }
+
     /**
      * Build remotr vfs file using sftp protocol
      *

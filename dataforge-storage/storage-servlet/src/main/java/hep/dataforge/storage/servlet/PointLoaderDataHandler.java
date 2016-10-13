@@ -26,6 +26,8 @@ import javax.json.JsonObjectBuilder;
 import java.io.StringWriter;
 import java.time.Duration;
 import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -90,15 +92,25 @@ public class PointLoaderDataHandler implements Handler {
         return rows;
     }
 
+    private static String formatTime(Instant time) {
+        OffsetDateTime off = time.atOffset(ZoneOffset.UTC);
+        return String.format("Date(%d,%d,%d,%d,%d,%d)", off.getYear(), off.getMonthValue(),
+                off.getDayOfMonth(), off.getHour(), off.getMinute(), off.getSecond());
+    }
+
     private static JsonObjectBuilder makeRow(TableFormat format, DataPoint point) {
         JsonArrayBuilder values = Json.createArrayBuilder();
         for (String valueName : format.names()) {
             Value value = point.getValue(valueName);
             switch (value.valueType()) {
                 case TIME:
-                    values.add(Json.createObjectBuilder().add("v", "Date(" + value.longValue() + ")")
+
+                    values.add(Json.createObjectBuilder().add("v", formatTime(value.timeValue()))
                             .add("f", value.stringValue()));
                     break;
+                case NUMBER:
+                    values.add(Json.createObjectBuilder().add("v", value.doubleValue())
+                            .add("f", value.stringValue()));
                 default:
                     values.add(Json.createObjectBuilder().add("v", value.stringValue())
                             .add("f", value.stringValue()));
@@ -162,7 +174,7 @@ public class PointLoaderDataHandler implements Handler {
         }
 
         Logger logger = LoggerFactory.getLogger("POINT_LOADER");
-        Duration indexLoadTime = Duration.between(start,Instant.now());
+        Duration indexLoadTime = Duration.between(start, Instant.now());
         logger.info("Index file loaded in {}", indexLoadTime);
 
 
