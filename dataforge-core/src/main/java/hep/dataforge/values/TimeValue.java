@@ -21,10 +21,29 @@ import java.time.ZoneOffset;
 import java.util.Objects;
 
 /**
- *
  * @author Alexander Nozik
  */
 class TimeValue extends AbstractValue {
+
+    private final Instant value;
+
+    /**
+     * <p>
+     * Constructor for TimeValue.</p>
+     *
+     * @param value a {@link java.lang.String} object.
+     */
+    public TimeValue(String value) {
+        this.value = LocalDateTime.parse(value).toInstant(ZoneOffset.UTC);
+    }
+
+    public TimeValue(LocalDateTime value) {
+        this.value = value.toInstant(ZoneOffset.UTC);
+    }
+
+    public TimeValue(Instant value) {
+        this.value = value;
+    }
 
     /**
      * {@inheritDoc}
@@ -51,26 +70,6 @@ class TimeValue extends AbstractValue {
         return Objects.equals(this.value, other.value);
     }
 
-    private final Instant value;
-
-    /**
-     * <p>
-     * Constructor for TimeValue.</p>
-     *
-     * @param value a {@link java.lang.String} object.
-     */
-    public TimeValue(String value) {
-        this.value = LocalDateTime.parse(value).toInstant(ZoneOffset.UTC);
-    }
-
-    public TimeValue(LocalDateTime value) {
-        this.value = value.toInstant(ZoneOffset.UTC);
-    }
-
-    public TimeValue(Instant value) {
-        this.value = value;
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -93,6 +92,7 @@ class TimeValue extends AbstractValue {
     @Override
     public String stringValue() {
         return value.toString();
+//        return LocalDateTime.ofInstant(value, ZoneId.systemDefault()).toString();
     }
 
     /**

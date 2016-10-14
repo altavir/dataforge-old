@@ -15,12 +15,15 @@
  */
 package hep.dataforge.io.reports;
 
-import static java.lang.String.format;
+import hep.dataforge.utils.DateTimeUtils;
+
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+
+import static java.lang.String.format;
 
 /**
  * <p>
@@ -51,7 +54,7 @@ public class ReportEntry {
     }
 
     public ReportEntry(String message) {
-        this.time = Instant.now();
+        this.time = DateTimeUtils.now();
         this.message = message;
     }
 

@@ -7,6 +7,8 @@ package hep.dataforge.events;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.DateTimeUtils;
+
 import java.lang.ref.WeakReference;
 import java.time.Instant;
 import java.util.HashMap;
@@ -48,7 +50,7 @@ public class BasicEvent implements Event {
         builder.setValue(EVENT_TYPE_KEY, type);
 
         if (time == null) {
-            time = Instant.now();
+            time = DateTimeUtils.now();
         }
         builder.setValue(EVENT_TIME_KEY, time);
         if (source != null && !source.isEmpty()) {

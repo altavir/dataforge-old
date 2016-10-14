@@ -15,12 +15,13 @@
  */
 package hep.dataforge.plots.fx;
 
-import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
+import hep.dataforge.utils.DateTimeUtils;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.scene.chart.Axis;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Inspired by DateAxis implementation by hansolo
@@ -32,10 +33,8 @@ import javafx.scene.chart.Axis;
 public abstract class FXObjectAxis<T> extends Axis<T> {
 
     private final ObjectProperty<Range<T>> currentRangeProperty;
-
-    private Range<T> dataRange;
-
     private final Range<T> defaultRange;
+    private Range<T> dataRange;
 
     //TODO add maxElementCount and maxAge properties
     //TODO add advanced tick label formatter
@@ -131,7 +130,7 @@ public abstract class FXObjectAxis<T> extends Axis<T> {
     protected List<T> calculateTickValues(double length, Object range) {
         Range<T> theRange = (Range<T>) range;
 
-        int numLabels = Math.max((int) (length / measureTickMarkLabelSize(Instant.now().toString(), getTickLabelRotation()).getWidth()) - 1, 1);
+        int numLabels = Math.max((int) (length / measureTickMarkLabelSize(DateTimeUtils.now().toString(), getTickLabelRotation()).getWidth()) - 1, 1);
 
         double fromNumber = toNumericValue(theRange.getLower());
         double toNumber = toNumericValue(theRange.getUpper());

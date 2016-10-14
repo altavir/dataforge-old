@@ -18,6 +18,7 @@ package hep.dataforge.control.ports;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.exceptions.PortLockException;
 import hep.dataforge.meta.Annotated;
+import hep.dataforge.utils.DateTimeUtils;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
@@ -181,11 +182,11 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
      */
     private synchronized void waitForPhrase(Predicate<String> responseCondition, Duration timeout) throws PortException {
         lastResponse = null;
-        Instant start = Instant.now();
+        Instant start = DateTimeUtils.now();
         try {
             while (lastResponse == null
                     || (responseCondition != null && !responseCondition.test(lastResponse))) {
-                if (Duration.between(start, Instant.now()).compareTo(timeout) > 0) {
+                if (Duration.between(start, DateTimeUtils.now()).compareTo(timeout) > 0) {
                     throw new PortTimeoutException(timeout);
                 }
                 wait(timeout.toMillis());

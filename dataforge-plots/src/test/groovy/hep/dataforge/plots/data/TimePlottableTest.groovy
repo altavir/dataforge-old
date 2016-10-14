@@ -6,10 +6,11 @@
 
 package hep.dataforge.plots.data
 
-import java.time.Instant
-import spock.lang.Specification
 import hep.dataforge.values.Value
+import spock.lang.Specification
+
 import java.time.Duration
+import java.time.Instant
 
 /**
  *
@@ -21,7 +22,7 @@ class TimePlottableTest extends Specification {
         when:
         TimePlottable pl = new TimePlottable("test",null);
         pl.setMaxItems(50);
-        Instant time = Instant.now();
+        Instant time = DateTimeUtils.now();
         for(int i = 0; i<60; i++){
             time = time.plusMillis(10);
             pl.put(time,Value.of(time.toEpochMilli()));
@@ -34,7 +35,7 @@ class TimePlottableTest extends Specification {
         when:
         TimePlottable pl = new TimePlottable("test",null);
         pl.setMaxAge(Duration.ofMillis(500));
-        Instant time = Instant.now();
+        Instant time = DateTimeUtils.now();
         for(int i = 0; i<60; i++){
             time = time.plusMillis(10);
             pl.put(time,Value.of(time.toEpochMilli()));

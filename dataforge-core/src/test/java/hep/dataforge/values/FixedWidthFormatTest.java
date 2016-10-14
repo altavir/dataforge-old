@@ -15,9 +15,10 @@
  */
 package hep.dataforge.values;
 
-import java.time.Instant;
-import static org.junit.Assert.assertTrue;
+import hep.dataforge.utils.DateTimeUtils;
 import org.junit.Test;
+
+import static org.junit.Assert.assertTrue;
 
 /**
  *
@@ -70,7 +71,7 @@ public class FixedWidthFormatTest {
     @Test
     public void testAllowed() {
         ValueFormatter format = new FixedWidthFormat(6);
-        assertTrue(!format.allowed(Value.of(Instant.now())));
+        assertTrue(!format.allowed(Value.of(DateTimeUtils.now())));
     }
 
 }

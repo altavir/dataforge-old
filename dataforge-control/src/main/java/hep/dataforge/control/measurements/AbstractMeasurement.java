@@ -6,6 +6,7 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.utils.ReferenceRegistry;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
@@ -70,7 +71,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      * @param result
      */
     protected final void result(T result) {
-        result(result, Instant.now());
+        result(result, DateTimeUtils.now());
     }
 
     /**

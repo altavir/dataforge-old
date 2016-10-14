@@ -13,6 +13,7 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -163,7 +164,7 @@ public class PointLoaderDataHandler implements Handler {
 
         Meta query = buildQuery(tq, params);
 
-        Instant start = Instant.now();
+        Instant start = DateTimeUtils.now();
 
         //use custom index if needed
         if (query.hasValue("index")) {
@@ -174,18 +175,18 @@ public class PointLoaderDataHandler implements Handler {
         }
 
         Logger logger = LoggerFactory.getLogger("POINT_LOADER");
-        Duration indexLoadTime = Duration.between(start, Instant.now());
+        Duration indexLoadTime = Duration.between(start, DateTimeUtils.now());
         logger.info("Index file loaded in {}", indexLoadTime);
 
 
-        start = Instant.now();
+        start = DateTimeUtils.now();
         JsonObject response = Json.createObjectBuilder()
                 .add("status", "ok")
                 .add("reqId", rqid)
                 .add("table", makeTable(index, loader.getFormat(), buildQuery(tq, params)))
                 .build();
 
-        Duration tableBuildTime = Duration.between(start, Instant.now());
+        Duration tableBuildTime = Duration.between(start, DateTimeUtils.now());
         logger.info("Table built in {}", tableBuildTime);
 
         ctx.render(wrapResponse(response, responseHandler));

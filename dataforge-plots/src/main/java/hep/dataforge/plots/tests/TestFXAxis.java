@@ -16,9 +16,7 @@
 package hep.dataforge.plots.tests;
 
 import hep.dataforge.plots.fx.FXTimeAxis;
-import java.time.Instant;
-import java.util.Timer;
-import java.util.TimerTask;
+import hep.dataforge.utils.DateTimeUtils;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.event.ActionEvent;
@@ -30,6 +28,10 @@ import javafx.scene.control.ToggleButton;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
+import java.time.Instant;
+import java.util.Timer;
+import java.util.TimerTask;
+
 /**
  *
  * @author Darksnake
@@ -37,6 +39,13 @@ import javafx.stage.Stage;
 public class TestFXAxis extends Application {
 
     Timer timer;
+
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String[] args) {
+        launch(args);
+    }
 
     @Override
     public void start(Stage primaryStage) {
@@ -75,13 +84,6 @@ public class TestFXAxis extends Application {
         }
     }
 
-    /**
-     * @param args the command line arguments
-     */
-    public static void main(String[] args) {
-        launch(args);
-    }
-
     private void togglePlot(XYChart.Series data, boolean toggle) {
         if (timer != null) {
             timer.cancel();
@@ -92,7 +94,7 @@ public class TestFXAxis extends Application {
 
                 @Override
                 public void run() {
-                    Instant time = Instant.now();
+                    Instant time = DateTimeUtils.now();
                     double x = ((double) time.toEpochMilli()) / 5000d * Math.PI;
                     Platform.runLater(() -> {
                         data.getData().

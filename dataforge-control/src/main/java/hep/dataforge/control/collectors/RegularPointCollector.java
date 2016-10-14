@@ -7,6 +7,7 @@ package hep.dataforge.control.collectors;
 
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointListener;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 
 import java.time.Duration;
@@ -23,15 +24,15 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class RegularPointCollector implements ValueCollector {
 
-    private Instant startTime;
     private final Map<String, List<Value>> values = new ConcurrentHashMap<>();
+    private final PointListener consumer;
+    private final Duration duration;
+    private Instant startTime;
     /**
      * The names that must be in the dataPoint
      */
     private List<String> names = new ArrayList<>();
     private Timer timer;
-    private final PointListener consumer;
-    private final Duration duration;
 
     public RegularPointCollector(PointListener consumer, Duration duration) {
         this.consumer = consumer;
@@ -51,7 +52,7 @@ public class RegularPointCollector implements ValueCollector {
 
     @Override
     public void collect() {
-        collect(Instant.now());
+        collect(DateTimeUtils.now());
     }
 
     public synchronized void collect(Instant time) {
@@ -80,7 +81,7 @@ public class RegularPointCollector implements ValueCollector {
     @Override
     public synchronized void put(String name, Value value) {
         if (startTime == null) {
-            startTime = Instant.now();
+            startTime = DateTimeUtils.now();
             timer = new Timer();
             timer.schedule(new TimerTask() {
                 @Override

@@ -17,13 +17,11 @@ package hep.dataforge.control.collectors;
 
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.PointListener;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -71,7 +69,7 @@ public class PointCollector implements ValueCollector {
      */
     @Override
     public void collect() {
-        collect(Instant.now());
+        collect(DateTimeUtils.now());
     }
 
     public synchronized void collect(Instant time) {

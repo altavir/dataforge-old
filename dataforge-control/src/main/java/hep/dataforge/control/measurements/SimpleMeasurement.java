@@ -6,12 +6,14 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
+import hep.dataforge.utils.DateTimeUtils;
+import javafx.util.Pair;
+import org.slf4j.LoggerFactory;
+
 import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
-import javafx.util.Pair;
-import org.slf4j.LoggerFactory;
 
 /**
  * A simple one-time measurement wrapping FutureTask. Could be restarted
@@ -125,7 +127,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                 if (res == null) {
                     return null;
                 }
-                Instant time = Instant.now();
+                Instant time = DateTimeUtils.now();
                 return new Pair<>(res, time);
             } catch (Exception ex) {
                 error(ex);

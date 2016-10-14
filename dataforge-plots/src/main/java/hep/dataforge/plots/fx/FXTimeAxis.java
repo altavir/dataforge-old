@@ -15,6 +15,8 @@
  */
 package hep.dataforge.plots.fx;
 
+import hep.dataforge.utils.DateTimeUtils;
+
 import java.time.Instant;
 
 /**
@@ -28,7 +30,7 @@ public class FXTimeAxis extends FXObjectAxis<Instant> {
     }
 
     public FXTimeAxis() {
-        super(Instant.now(), Instant.now().plusSeconds(60));
+        super(DateTimeUtils.now(), DateTimeUtils.now().plusSeconds(60));
     }
 
     @Override

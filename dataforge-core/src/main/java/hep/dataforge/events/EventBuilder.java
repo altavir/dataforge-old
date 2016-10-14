@@ -5,15 +5,16 @@
  */
 package hep.dataforge.events;
 
-import static hep.dataforge.events.Event.EVENT_PRIORITY_KEY;
-import static hep.dataforge.events.Event.EVENT_SOURCE_KEY;
-import static hep.dataforge.events.Event.EVENT_TIME_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.utils.GenericBuilder;
+
 import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
+
+import static hep.dataforge.events.Event.*;
 
 /**
  * Th builder class for events
@@ -25,12 +26,12 @@ public abstract class EventBuilder<E extends EventBuilder> implements GenericBui
     protected final MetaBuilder builder = new MetaBuilder("event");
     private final Map<String, Object> objectMap = new HashMap<>();
     
-    public static EventBuilder make(String type){
-        return new ConcreteEventBuilder(type);
-    }
-
     protected EventBuilder(String type) {
         this.builder.setValue(Event.EVENT_TYPE_KEY, type);
+    }
+
+    public static EventBuilder make(String type) {
+        return new ConcreteEventBuilder(type);
     }
 
     public EventBuilder setTime(Instant time) {
@@ -44,7 +45,7 @@ public abstract class EventBuilder<E extends EventBuilder> implements GenericBui
      * @return
      */
     public EventBuilder setTime() {
-        builder.setValue(EVENT_TIME_KEY, Instant.now());
+        builder.setValue(EVENT_TIME_KEY, DateTimeUtils.now());
         return this;
     }
 

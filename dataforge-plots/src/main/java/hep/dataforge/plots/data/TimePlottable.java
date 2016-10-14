@@ -20,6 +20,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 
 import java.time.Duration;
@@ -105,7 +106,7 @@ public class TimePlottable extends XYPlottable {
      * @param value
      */
     public void put(Value value) {
-        put(Instant.now(), value);
+        put(DateTimeUtils.now(), value);
     }
 
     /**
