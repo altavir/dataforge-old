@@ -31,4 +31,12 @@ public interface Annotated {
      * @return
      */
     Meta meta();
+
+    /**
+     * Alias for {@code meta()} to be used in groovy/Kotlin properties
+     * @return
+     */
+    default Meta getMeta(){
+        return meta();
+    }
 }

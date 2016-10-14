@@ -70,7 +70,22 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
         return new MetaBuilder(this);
     }
 
+    /**
+     * Get meta node with given name
+     * @param path
+     * @return
+     */
     public abstract Meta getMeta(String path);
+
+    /**
+     * Alias for {@code getMeta()}
+     * @param path
+     * @return
+     */
+    public final Meta getNode(String path){
+        return getMeta(path);
+    }
+
     /**
      * В случае передачи {@code "$all"} или {@code null} в качестве аргумента
      * возвращает всех прямых наследников
@@ -93,6 +108,11 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
         return !getNodeNames().isEmpty();
     }
 
+    /**
+     * Check if this meta has a node with given name
+     * @param name
+     * @return
+     */
     public boolean hasMeta(String name) {
         Collection<String> names = getNodeNames();
         if (names.contains(name)) {
@@ -111,6 +131,15 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
                 return false;
             }
         }
+    }
+
+    /**
+     * Alias for {@code hasMeta}
+     * @param name
+     * @return
+     */
+    public final boolean hasNode(String name) {
+        return hasMeta(name);
     }
 
     /**

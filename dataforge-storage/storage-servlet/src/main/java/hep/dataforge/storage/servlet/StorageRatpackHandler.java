@@ -106,7 +106,6 @@ public class StorageRatpackHandler implements Handler {
     }
 
 
-
     protected void renderStates(Context ctx, StateLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
@@ -145,7 +144,7 @@ public class StorageRatpackHandler implements Handler {
                 .putValue("height", 500)
                 .putValue("curveType", "function")
                 .putNode(new MetaBuilder("explorer")
-                        .putValues("actions", new String[]{"dragToZoom", "rightClickToReset"})
+                        .putValues("actions", "dragToZoom", "rightClickToReset")
                 );
     }
 

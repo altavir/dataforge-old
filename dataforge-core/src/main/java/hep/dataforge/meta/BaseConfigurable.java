@@ -27,8 +27,12 @@ public abstract class BaseConfigurable extends SimpleConfigurable {
     public BaseConfigurable() {
         laminate = new Laminate(getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }
-    
-    protected final void setMetaBase(Meta... metaBase) {
+
+    /**
+     * Set unconformable meta layers below configuration layer
+     * @param metaBase
+     */
+    public final void setMetaBase(Meta... metaBase) {
         this.laminate.setLayers(metaBase);
         this.laminate.addFirstLayer(getConfig());        
     }
