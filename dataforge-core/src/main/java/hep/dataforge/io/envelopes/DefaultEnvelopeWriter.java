@@ -26,9 +26,9 @@ import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.Map;
 
-import static hep.dataforge.io.envelopes.Coder.getMetaType;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import static hep.dataforge.io.envelopes.EnvelopePropertyCodes.getMetaType;
 
 /**
  *
@@ -66,7 +66,7 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
         newProperties.putAll(envelope.getProperties());
 
         MetaStreamWriter writer = getMetaType(newProperties.get(META_TYPE_KEY)).getWriter();
-        Charset charset = Charset.forName(newProperties.get(META_ENCODING_KEY).stringValue());//Coder.getCharset(newProperties.get(META_ENCODING_KEY));
+        Charset charset = Charset.forName(newProperties.get(META_ENCODING_KEY).stringValue());//EnvelopePropertyCodes.getCharset(newProperties.get(META_ENCODING_KEY));
         byte[] meta;
         int metaSize;
         if (envelope.meta().isEmpty()) {

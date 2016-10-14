@@ -201,7 +201,7 @@ public class TaskModel implements Named, Annotated {
          * @param tree
          * @param workspace
          */
-        public void apply(DataTree.Builder tree, Workspace workspace);
+        void apply(DataTree.Builder tree, Workspace workspace);
     }
 
     /**

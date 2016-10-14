@@ -37,7 +37,7 @@ public interface Measurement<T> {
      *
      * @return
      */
-    public boolean isStarted();
+    boolean isStarted();
 
     /**
      * Measurement is complete or stopped and could be recycled
@@ -70,7 +70,7 @@ public interface Measurement<T> {
      */
     Throwable getError();
 
-    public void addListener(MeasurementListener<T> listener);
+    void addListener(MeasurementListener<T> listener);
 
-    public void removeListener(MeasurementListener<T> listener);
+    void removeListener(MeasurementListener<T> listener);
 }

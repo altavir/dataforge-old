@@ -16,8 +16,9 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
+
 import java.util.Set;
 
 /**
@@ -27,7 +28,7 @@ import java.util.Set;
  */
 public interface StateLoader extends Loader, ValueProvider {
 
-    public static final String STATE_LOADER_TYPE = "state";
+    String STATE_LOADER_TYPE = "state";
 
     /**
      * Change the state and generate corresponding StateChangedEvent
@@ -43,7 +44,7 @@ public interface StateLoader extends Loader, ValueProvider {
     }
 
     @Override
-    public Value getValue(String path);
+    Value getValue(String path);
 
     /**
      * List of all available state names (including default values if they are
@@ -51,6 +52,6 @@ public interface StateLoader extends Loader, ValueProvider {
      *
      * @return
      */
-    public Set<String> getStateNames();
+    Set<String> getStateNames();
     
 }

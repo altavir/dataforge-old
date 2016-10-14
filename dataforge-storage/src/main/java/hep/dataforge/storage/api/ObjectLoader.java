@@ -16,6 +16,7 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
+
 import java.util.Collection;
 
 /**
@@ -25,8 +26,8 @@ import java.util.Collection;
  */
 public interface ObjectLoader<T> extends Loader {
 
-    public static final String OBJECT_LOADER_TYPE = "object";
-    public static final String DEFAULT_FRAGMENT_NAME = "";
+    String OBJECT_LOADER_TYPE = "object";
+    String DEFAULT_FRAGMENT_NAME = "";
     
     Collection<String> fragmentNames();
     

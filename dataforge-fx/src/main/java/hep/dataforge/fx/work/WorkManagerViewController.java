@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
  */
 public class WorkManagerViewController implements Initializable {
 
-    private final Map<Task, Parent> processNodeCache = Utils.<Task, Parent>getLRUCache(400);
+    private final Map<Task, Parent> processNodeCache = Utils.getLRUCache(400);
     @FXML
     private TreeView<Task> processTreeView;
 

@@ -18,6 +18,7 @@ package hep.dataforge.storage.api;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.StorageException;
+
 import java.util.function.Predicate;
 
 /**
@@ -29,7 +30,7 @@ import java.util.function.Predicate;
  */
 public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
 
-    public static final String EVENT_LOADER_TYPE = "event";
+    String EVENT_LOADER_TYPE = "event";
 
     /**
      * Put an event to Loader

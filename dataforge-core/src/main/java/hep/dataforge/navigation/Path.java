@@ -26,11 +26,11 @@ import hep.dataforge.names.Name;
  */
 public interface Path {
 
-    public static final String TARGET_EMPTY = "";
-    public static final String PATH_SEGMENT_SEPARATOR = "/";
-    public static final String TARGET_SEPARATOR = "::";
+    String TARGET_EMPTY = "";
+    String PATH_SEGMENT_SEPARATOR = "/";
+    String TARGET_SEPARATOR = "::";
 
-    public static Path of(String path) {
+    static Path of(String path) {
         SegmentedPath p = new SegmentedPath(path);
         if (p.hasTail()) {
             return p;
@@ -39,7 +39,7 @@ public interface Path {
         }
     }
     
-    public static Path of(String path, String target){
+    static Path of(String path, String target){
                 SegmentedPath p = new SegmentedPath(path);
         if (p.hasTail()) {
             return p;
@@ -53,7 +53,7 @@ public interface Path {
      *
      * @return a boolean.
      */
-    public boolean hasTail();
+    boolean hasTail();
 
     /**
      * The Name of first segment
@@ -71,7 +71,7 @@ public interface Path {
      *
      * @return
      */
-    public Path tail();
+    Path tail();
 
     /**
      * The target of first segment

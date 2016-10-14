@@ -29,7 +29,7 @@ public interface Named {
      * @param obj
      * @return
      */
-    public static String nameOf(Object obj) {
+    static String nameOf(Object obj) {
         if (obj instanceof Named) {
             return ((Named) obj).getName();
         } else {

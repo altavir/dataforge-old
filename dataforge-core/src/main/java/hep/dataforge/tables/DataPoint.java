@@ -32,7 +32,7 @@ import java.util.Map;
  */
 public interface DataPoint extends NamedValueSet, Serializable {
 
-    public static Meta toMeta(DataPoint point) {
+    static Meta toMeta(DataPoint point) {
         MetaBuilder builder = new MetaBuilder("point");
         for (String name : point.namesAsArray()) {
             builder.putValue(name, point.getValue(name));
@@ -40,7 +40,7 @@ public interface DataPoint extends NamedValueSet, Serializable {
         return builder.build();
     }
 
-    public static List<DataPoint> fromMeta(Meta annotation) {
+    static List<DataPoint> fromMeta(Meta annotation) {
         List<DataPoint> res = new ArrayList<>();
         for (Meta pointAn : annotation.getMetaList("point")) {
             Map<String, Value> map = new HashMap<>();

@@ -16,6 +16,7 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NamingException;
+
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.stream.Collectors;
@@ -159,10 +160,7 @@ class NamePath implements Name {
         if (!Objects.equals(this.nameSpace, other.nameSpace)) {
             return false;
         }
-        if (!Objects.equals(this.names, other.names)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.names, other.names);
     }
 
     LinkedList<NameToken> getNames() {

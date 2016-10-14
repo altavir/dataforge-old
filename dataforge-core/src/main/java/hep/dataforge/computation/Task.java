@@ -37,7 +37,7 @@ public class Task implements Named {
 
     private final ObjectProperty<CompletableFuture<?>> taskProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, Task> children = FXCollections.<String, Task>observableHashMap();
+    private final ObservableMap<String, Task> children = FXCollections.observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 

@@ -7,17 +7,18 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.ValueProviderIndex;
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Iterator;
-import java.util.function.Function;
+import hep.dataforge.values.ValueProvider;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.VFS;
 import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Iterator;
+import java.util.function.Function;
 
 /**
  * A factory for file indeces
@@ -108,7 +109,7 @@ public class FileIndexFactory implements Encapsulated {
      * @throws FileSystemException
      * @throws IOException
      */
-    private FileEnvelope getEvelope() throws FileSystemException, IOException {
+    private FileEnvelope getEvelope() throws IOException {
         if (envelope == null) {
             FileObject file = VFS.getManager().resolveFile(uri);
             if (file.exists() && file.isReadable()) {

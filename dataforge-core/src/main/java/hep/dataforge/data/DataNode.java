@@ -240,7 +240,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         return dataStream().iterator();
     }
 
-    public interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Annotated {
+    interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Annotated {
 
         Class<T> type();
 

@@ -29,17 +29,17 @@ import java.util.List;
  */
 public interface Names extends Iterable<String>, Serializable {
 
-    public static Names of(String... names) {
+    static Names of(String... names) {
         return new NameList(names);
     }
-    public static Names of(Iterable<String> names) {
+    static Names of(Iterable<String> names) {
         return new NameList(names);
     }
-    public static Names of(Names names) {
+    static Names of(Names names) {
         return new NameList(names);
     }
 
-    public static Names of(NameSetContainer set) {
+    static Names of(NameSetContainer set) {
         return new NameList(set.names());
     }
 
@@ -60,7 +60,7 @@ public interface Names extends Iterable<String>, Serializable {
         return asList().toArray(new String[getDimension()]);
     }
 
-    public String getName(int k);
+    String getName(int k);
 
     /**
      * Finds the number of the given name in list if numbering is supported

@@ -18,12 +18,13 @@ package hep.dataforge.values;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.navigation.Path;
 import hep.dataforge.navigation.Provider;
+
 import java.util.List;
 import java.util.function.Supplier;
 
 public interface ValueProvider {
 
-    public static final String VALUE_TARGET = "value";
+    String VALUE_TARGET = "value";
 
     /**
      * Build a meta provider from given general provider

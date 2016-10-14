@@ -5,14 +5,15 @@
  */
 package hep.dataforge.maths;
 
-import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.LinearInterpolator;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.interpolation.UnivariateInterpolator;
 import org.apache.commons.math3.util.Precision;
+
+import java.util.Map;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /**
  *
@@ -20,7 +21,7 @@ import org.apache.commons.math3.util.Precision;
  */
 public class Interpolation {
 
-    public static enum InterpolationType {
+    public enum InterpolationType {
         LINE,
         SPLINE
     }

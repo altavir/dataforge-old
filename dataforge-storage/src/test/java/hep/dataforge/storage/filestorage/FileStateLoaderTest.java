@@ -15,20 +15,17 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.values.Value;
+import org.junit.*;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import org.junit.After;
-import org.junit.AfterClass;
-import static org.junit.Assert.*;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -62,7 +59,7 @@ public class FileStateLoaderTest {
     }
 
     @Test
-    public void testIO() throws StorageException, Exception {
+    public void testIO() throws Exception {
         FileStorage storage = FileStorage.in(dir, null);
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
 

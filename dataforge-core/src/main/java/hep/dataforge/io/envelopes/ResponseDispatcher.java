@@ -17,7 +17,7 @@ import hep.dataforge.io.messages.Responder;
 public interface ResponseDispatcher extends Responder, Dispatcher {
 
     @Override
-    public default Envelope respond(Envelope message) {
+    default Envelope respond(Envelope message) {
         return getResponder(message).respond(message);
     }
 

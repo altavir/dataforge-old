@@ -16,10 +16,12 @@
 package hep.dataforge.events;
 
 import hep.dataforge.description.ValueDef;
-import static hep.dataforge.events.Event.*;
 import hep.dataforge.meta.Annotated;
+
 import java.time.Instant;
 import java.util.Optional;
+
+import static hep.dataforge.events.Event.*;
 
 /**
  * Генеральный класс для событий всех возможных типов
@@ -32,10 +34,10 @@ import java.util.Optional;
 @ValueDef(name = EVENT_TIME_KEY, required = true, info = "Time of the event")
 public interface Event extends Annotated {
 
-    public static final String EVENT_PRIORITY_KEY = "priority";
-    public static final String EVENT_TYPE_KEY = "type";
-    public static final String EVENT_SOURCE_KEY = "sourceTag";
-    public static final String EVENT_TIME_KEY = "time";
+    String EVENT_PRIORITY_KEY = "priority";
+    String EVENT_TYPE_KEY = "type";
+    String EVENT_SOURCE_KEY = "sourceTag";
+    String EVENT_TIME_KEY = "time";
 
     //PENDING allow weak references to objects in events?
     default int priority() {
@@ -61,7 +63,7 @@ public interface Event extends Annotated {
      * @param tag
      * @return
      */
-    public Optional getReference(String tag);
+    Optional getReference(String tag);
 
     /**
      * get event string representation (header) to write in logs

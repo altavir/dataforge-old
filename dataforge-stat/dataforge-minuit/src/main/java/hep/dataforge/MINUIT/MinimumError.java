@@ -149,14 +149,14 @@ class MinimumError {
     }
 
     static class MnHesseFailed {
-    };
+    }
 
     static class MnInvertFailed {
-    };
+    }
 
     static class MnMadePosDef {
-    };
+    }
 
     static class MnNotPosDef {
-    };
+    }
 }

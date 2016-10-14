@@ -22,7 +22,7 @@
 
         function handleQueryResponse(response) {
             if (response.isError()) {
-                google.visualization.errors.addError.addErrorFromQueryResponse(document.getElementById('table_div'),response)
+                google.visualization.errors.addError.addErrorFromQueryResponse(document.getElementById('table_div'),response);
                 alert('Error in query: ' + response.getMessage() + ' ' + response.getDetailedMessage());
                 return;
             }
@@ -36,12 +36,12 @@
                 width : '90%',
                 pageSize: 50,
                 sort : 'disable'
-            }
+            };
 
             table.draw(data, tableOptions);
             
             <#if  plotParams??>
-                var options = ${plotParams}
+                var options =; ${plotParams}
 
                 var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
                 chart.draw(data, options);

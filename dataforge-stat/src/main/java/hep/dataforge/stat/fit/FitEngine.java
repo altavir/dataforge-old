@@ -31,7 +31,7 @@ public interface FitEngine {
      * @param name
      * @return
      */
-    public static FitEngine forName(String name) {
+    static FitEngine forName(String name) {
         return FitEngineBuilder.buildEngine(name);
     }
 

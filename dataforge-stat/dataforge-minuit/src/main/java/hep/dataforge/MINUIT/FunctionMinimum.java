@@ -251,8 +251,8 @@ public class FunctionMinimum {
     }
 
     static class MnAboveMaxEdm {
-    };
+    }
 
     static class MnReachedCallLimit {
-    };
+    }
 }

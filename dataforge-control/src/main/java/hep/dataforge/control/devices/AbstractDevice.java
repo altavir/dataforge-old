@@ -322,7 +322,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
         }
 
-        stream.filter((entry) -> type.isInstance(entry.getKey())).<T>map((entry) -> (T) entry.getKey())
+        stream.filter((entry) -> type.isInstance(entry.getKey())).map((entry) -> (T) entry.getKey())
                 .forEach(action::accept);
     }
 

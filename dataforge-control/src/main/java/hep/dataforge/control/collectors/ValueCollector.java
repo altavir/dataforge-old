@@ -15,9 +15,9 @@ import hep.dataforge.values.Value;
  */
 public interface ValueCollector {
 
-    public void put(String name, Value value);
+    void put(String name, Value value);
 
-    default public void put(String name, Object value) {
+    default void put(String name, Object value) {
         put(name, Value.of(value));
     }
 
@@ -25,11 +25,11 @@ public interface ValueCollector {
      * Send current cached result to listener. Could be used to force collect
      * even if not all values are present.
      */
-    public void collect();
+    void collect();
     
     /**
      * Clear currently collected data
      */
-    public void clear();
+    void clear();
     
 }

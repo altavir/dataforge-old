@@ -16,11 +16,7 @@
 package hep.dataforge.values;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -79,7 +75,7 @@ public class ValueSet implements Value {
         } else if (values.size() == 1) {
             return values.get(0).stringValue();
         } else {
-            return values.stream().<String>map(v -> v.stringValue()).collect(Collectors.joining(", ", "[", "]"));
+            return values.stream().map(v -> v.stringValue()).collect(Collectors.joining(", ", "[", "]"));
         }
     }
 

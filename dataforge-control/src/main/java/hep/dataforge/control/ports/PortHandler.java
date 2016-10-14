@@ -228,7 +228,7 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
      * controller can simultaneously hold many handlers, but handler could be
      * held by only one controller.
      */
-    public static interface PortController {
+    public interface PortController {
 
         void accept(String message);
 

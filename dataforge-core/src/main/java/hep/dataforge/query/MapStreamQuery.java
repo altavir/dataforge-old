@@ -30,7 +30,7 @@ public class MapStreamQuery<K, V> extends StreamQuery<Pair<K, V>> {
      * @return 
      */
     public static <K, V> MapStreamQuery<K, V> forMap(Supplier<Stream<Map.Entry<K, V>>> sup) {
-        return new MapStreamQuery<>(() -> sup.get().<Pair<K, V>>map((entry -> new Pair<>(entry.getKey(), entry.getValue()))));
+        return new MapStreamQuery<>(() -> sup.get().map((entry -> new Pair<>(entry.getKey(), entry.getValue()))));
     }
 
     public MapStreamQuery(Supplier<Stream<Pair<K, V>>> sup) {
@@ -72,7 +72,7 @@ public class MapStreamQuery<K, V> extends StreamQuery<Pair<K, V>> {
     }
 
     public Stream<V> makeValues() {
-        return makeStream().<V>map(entry -> entry.getValue());
+        return makeStream().map(entry -> entry.getValue());
     }
 
 }

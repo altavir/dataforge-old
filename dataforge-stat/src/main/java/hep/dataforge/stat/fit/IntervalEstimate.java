@@ -44,7 +44,7 @@ public interface IntervalEstimate extends Serializable, NameSetContainer {
      * @param parName
      * @return
      */
-    public Pair<Value, Value> getInterval(String parName);
+    Pair<Value, Value> getInterval(String parName);
 
     default Value gerLowerBound(String parName) {
         return getInterval(parName).getKey();
@@ -59,6 +59,6 @@ public interface IntervalEstimate extends Serializable, NameSetContainer {
      *
      * @return
      */
-    public double getCL();
+    double getCL();
     
 }

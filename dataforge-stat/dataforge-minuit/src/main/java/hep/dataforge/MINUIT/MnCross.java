@@ -93,11 +93,11 @@ public class MnCross {
     }
 
     static class CrossFcnLimit {
-    };
+    }
 
     static class CrossNewMin {
-    };
+    }
 
     static class CrossParLimit {
-    };
+    }
 }

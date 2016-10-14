@@ -16,6 +16,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.values.Value;
+
 import java.util.List;
 import java.util.Objects;
 
@@ -65,10 +66,7 @@ public class DelegateConfigChangeListener implements ConfigChangeListener {
         if (!Objects.equals(this.observer, other.observer)) {
             return false;
         }
-        if (!Objects.equals(this.prefix, other.prefix)) {
-            return false;
-        }
-        return true;
+        return Objects.equals(this.prefix, other.prefix);
     }
 
 

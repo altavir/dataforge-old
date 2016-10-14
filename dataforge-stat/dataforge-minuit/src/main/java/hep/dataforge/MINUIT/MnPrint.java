@@ -15,9 +15,10 @@
  */
 package hep.dataforge.MINUIT;
 
+import org.apache.commons.math3.linear.RealVector;
+
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import org.apache.commons.math3.linear.RealVector;
 
 /**
  * Utilities for printing various minuit results.
@@ -241,8 +242,7 @@ public abstract class MnPrint {
         }
     }
 
-    ;
-   /**
+    /**
     * <p>print.</p>
     *
     * @param os a {@link java.io.PrintWriter} object.
@@ -321,8 +321,7 @@ public abstract class MnPrint {
         os.println();
     }
 
-    ;
-   /**
+    /**
     * <p>print.</p>
     *
     * @param os a {@link java.io.PrintWriter} object.

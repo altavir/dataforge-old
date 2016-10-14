@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  */
 public interface PlotHolder {
-    public static final String DEFAULT_STAGE_NAME = "";
+    String DEFAULT_STAGE_NAME = "";
     
     /**
      * Выдает рамку с обновленными парамтрами или создаент новую.

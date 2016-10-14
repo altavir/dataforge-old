@@ -160,10 +160,7 @@ public class TimePlottable extends XYPlottable {
                 return true;
             }
             int maxAge = meta().getInt("maxAge", -1);
-            if (maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(), lastUpdate).toMillis() > maxAge) {
-                return true;
-            }
-            return false;
+            return maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(), lastUpdate).toMillis() > maxAge;
         }
 
     }

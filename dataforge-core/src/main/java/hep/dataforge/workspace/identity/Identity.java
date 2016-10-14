@@ -16,6 +16,7 @@
 package hep.dataforge.workspace.identity;
 
 import hep.dataforge.meta.Meta;
+
 import java.io.Serializable;
 
 /**
@@ -53,7 +54,7 @@ public interface Identity extends Serializable, Comparable<Identity> {
     }    
 
     @Override
-    public default int compareTo(Identity o) {
+    default int compareTo(Identity o) {
         return Integer.compare(this.hashCode(), o.hashCode());
     }
     

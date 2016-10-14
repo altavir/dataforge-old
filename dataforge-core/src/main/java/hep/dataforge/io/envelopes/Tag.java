@@ -143,7 +143,7 @@ public class Tag {
     private int getCode(Map<String, Value> map, String key) {
         int res;
         if (map.containsKey(key)) {
-            res = Coder.encode(key, map.get(key));
+            res = EnvelopePropertyCodes.encode(key, map.get(key));
         } else {
             res = 0;
         }
@@ -154,7 +154,7 @@ public class Tag {
     private short getCodeShort(Map<String, Value> map, String key) {
         short res;
         if (map.containsKey(key)) {
-            res = Coder.encodeShort(key, map.get(key));
+            res = EnvelopePropertyCodes.encodeShort(key, map.get(key));
         } else {
             res = 0;
         }
@@ -277,10 +277,10 @@ public class Tag {
         Map<String, Value> res = new HashMap<>();
         res.put(TYPE_KEY, Value.of(type));
         res.put(OPT_KEY, Value.of(Instant.ofEpochMilli(opt)));
-        res.put(META_ENCODING_KEY, Coder.decode(META_ENCODING_KEY, metaEncoding));
-        res.put(META_TYPE_KEY, Coder.decode(META_TYPE_KEY, metaType));
+        res.put(META_ENCODING_KEY, EnvelopePropertyCodes.decode(META_ENCODING_KEY, metaEncoding));
+        res.put(META_TYPE_KEY, EnvelopePropertyCodes.decode(META_TYPE_KEY, metaType));
         res.put(META_LENGTH_KEY, Value.of(metaLength));
-        res.put(DATA_TYPE_KEY, Coder.decode(DATA_TYPE_KEY, dataType));
+        res.put(DATA_TYPE_KEY, EnvelopePropertyCodes.decode(DATA_TYPE_KEY, dataType));
         res.put(DATA_LENGTH_KEY, Value.of(dataLength));
 
         return res;

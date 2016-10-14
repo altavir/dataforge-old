@@ -15,7 +15,7 @@ import hep.dataforge.navigation.Provider;
  */
 public interface MetaProvider {
 
-    public static final String META_TARGET = "meta";
+    String META_TARGET = "meta";
 
     /**
      * Build a meta provider from given general provider
@@ -23,7 +23,7 @@ public interface MetaProvider {
      * @param provider
      * @return
      */
-    public static MetaProvider buildFrom(Provider provider) {
+    static MetaProvider buildFrom(Provider provider) {
         if(provider instanceof MetaProvider){
             return (MetaProvider) provider;
         }

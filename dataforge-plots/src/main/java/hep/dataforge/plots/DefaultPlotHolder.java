@@ -27,7 +27,7 @@ public class DefaultPlotHolder implements PlotHolder {
 
     protected synchronized PlotContainer showPlot(String name, FXPlotFrame frame) {
         PlotContainer container = FXPlotUtils.displayContainer(name, 800, 600);
-        container.setPlot((FXPlotFrame) frame);
+        container.setPlot(frame);
         containers.put(name, container);
         return container;
     }

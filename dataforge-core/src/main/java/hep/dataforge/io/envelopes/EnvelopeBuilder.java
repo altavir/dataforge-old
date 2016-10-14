@@ -147,7 +147,7 @@ public class EnvelopeBuilder {
     }
 
     public EnvelopeBuilder setEnvelopeType(short code) {
-        Value type = Coder.decode(TYPE_KEY, code);
+        Value type = EnvelopePropertyCodes.decode(TYPE_KEY, code);
         return this.setProperty(TYPE_KEY, type);
     }
 
@@ -156,7 +156,7 @@ public class EnvelopeBuilder {
     }
 
     public EnvelopeBuilder setDataType(int code) {
-        Value type = Coder.decode(DATA_TYPE_KEY, code);
+        Value type = EnvelopePropertyCodes.decode(DATA_TYPE_KEY, code);
         return this.setProperty(DATA_TYPE_KEY, type);
     }
 

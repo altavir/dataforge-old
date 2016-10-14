@@ -18,6 +18,7 @@ package hep.dataforge.tables;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
 import java.io.Serializable;
 
 /**
@@ -26,7 +27,7 @@ import java.io.Serializable;
  */
 public interface PointAdapter extends Annotated, Serializable {
     
-    public static final String DATA_ADAPTER_KEY = "adapter";
+    String DATA_ADAPTER_KEY = "adapter";
 
     /**
      * Аннотация, описывающая данный тип адаптера

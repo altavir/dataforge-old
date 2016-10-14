@@ -63,7 +63,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
         Collection<String> elementNames = meta.getNodeNames();
         for (String elementName : elementNames) {
             List<Configuration> item = meta.getMetaList(elementName).stream()
-                    .<Configuration>map((an) -> new Configuration(an))
+                    .map((an) -> new Configuration(an))
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
         }
@@ -142,7 +142,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
                         annotation
                         .getMetaList(elementName)
                         .stream()
-                        .<Configuration>map((el) -> new Configuration(el))
+                        .map((el) -> new Configuration(el))
                         .collect(Collectors.toList())
                 );
             });

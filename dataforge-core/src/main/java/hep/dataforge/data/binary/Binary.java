@@ -24,7 +24,7 @@ public interface Binary {
      * @param binary
      * @return 
      */
-    public static ByteBuffer readToBuffer(Binary binary) throws IOException{
+    static ByteBuffer readToBuffer(Binary binary) throws IOException{
         if(binary.size() > 0){
             ByteBuffer buffer = ByteBuffer.allocate((int) binary.size());
             binary.getChannel().read(buffer);

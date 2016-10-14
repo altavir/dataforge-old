@@ -36,10 +36,10 @@ import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static hep.dataforge.io.envelopes.Coder.getMetaType;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.CUSTOM_PROPERTY_HEAD;
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
 import static hep.dataforge.io.envelopes.Envelope.*;
+import static hep.dataforge.io.envelopes.EnvelopePropertyCodes.getMetaType;
 
 /**
  *
@@ -128,7 +128,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader<Envelope> {
         }
 
         MetaStreamReader parser = getMetaType(properties.get(META_TYPE_KEY)).getReader();
-        Charset charset = Charset.forName(properties.get(META_ENCODING_KEY).stringValue());//Coder.getCharset(newProperties.get(META_ENCODING_KEY));
+        Charset charset = Charset.forName(properties.get(META_ENCODING_KEY).stringValue());//EnvelopePropertyCodes.getCharset(newProperties.get(META_ENCODING_KEY));
         int metaLength = properties.get(META_LENGTH_KEY).intValue();
         Meta meta;
         if (metaLength == 0) {

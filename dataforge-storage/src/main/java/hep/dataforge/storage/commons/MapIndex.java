@@ -89,6 +89,9 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
     @Override
     public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
         update();
+        if(map.isEmpty()){
+            return Collections.emptyList();
+        }
         //If null, use the whole range
         if (from == Value.NULL) {
             from = map.firstKey();

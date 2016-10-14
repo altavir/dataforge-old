@@ -15,16 +15,15 @@
  */
 package hep.dataforge.stat.models;
 
-import hep.dataforge.stat.fit.Param;
-import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.names.Named;
+import hep.dataforge.stat.fit.Param;
+import hep.dataforge.stat.fit.ParamSet;
+import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.values.NamedValueSet;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 /**
  *
@@ -109,14 +108,14 @@ public interface Model extends NameSetContainer, Annotated {
      * @param point
      * @return
      */
-    public ParametricValue getDistanceFunction(DataPoint point);
+    ParametricValue getDistanceFunction(DataPoint point);
 
     /**
      *
      * @param point
      * @return
      */
-    public ParametricValue getLogProbFunction(DataPoint point);
+    ParametricValue getLogProbFunction(DataPoint point);
 
     /**
      * Пытается угадать набор параметров по набору данных. По-умолчанию этот
@@ -125,7 +124,7 @@ public interface Model extends NameSetContainer, Annotated {
      * @param data
      * @return
      */
-    default public ParamSet getParametersGuess(PointSource data) {
+    default ParamSet getParametersGuess(PointSource data) {
         throw new NotDefinedException("Initial guess not defined");
     }
 
@@ -135,7 +134,7 @@ public interface Model extends NameSetContainer, Annotated {
      * @param name
      * @return
      */
-    default public Param getDefaultParameter(String name) {
+    default Param getDefaultParameter(String name) {
         throw new NotDefinedException("Default parameter not found");
     }
 

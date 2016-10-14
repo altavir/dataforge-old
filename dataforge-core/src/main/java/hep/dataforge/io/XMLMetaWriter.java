@@ -93,7 +93,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             } else {
                 String val = valueList
                         .stream()
-                        .<String>map((v) -> v.stringValue())
+                        .map((v) -> v.stringValue())
                         .collect(Collectors.joining(", ", "[", "]"));
                 res.setAttribute(normalizeName(name), val);
             }

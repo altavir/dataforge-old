@@ -441,5 +441,5 @@ class MnAlgebraicSymMatrix {
 
 
     private class EigenvaluesException extends RuntimeException {
-    };
+    }
 }

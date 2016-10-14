@@ -15,7 +15,7 @@ import hep.dataforge.io.envelopes.Envelope;
  */
 public interface EnvelopeLoader extends Loader, Iterable<Envelope> {
 
-    public static final String ENVELOPE_LOADER_TYPE = "envelope";
+    String ENVELOPE_LOADER_TYPE = "envelope";
 
     /**
      * Push new envelope to loader

@@ -37,7 +37,7 @@ import java.util.stream.Stream;
  */
 public interface Workspace extends Encapsulated, MetaProvider {
 
-    public static final String DATA_STAGE_NAME = "@data";
+    String DATA_STAGE_NAME = "@data";
 
     /**
      * Get specific static data. Null if no data with given name is found

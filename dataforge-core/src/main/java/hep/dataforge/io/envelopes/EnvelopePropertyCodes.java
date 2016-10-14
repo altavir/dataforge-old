@@ -5,7 +5,6 @@
  */
 package hep.dataforge.io.envelopes;
 
-import hep.dataforge.exceptions.PropertyCodeException;
 import hep.dataforge.values.Value;
 
 import java.util.HashMap;
@@ -17,7 +16,7 @@ import java.util.ServiceLoader;
  *
  * @author Alexander Nozik
  */
-public class Coder {
+public class EnvelopePropertyCodes {
 
 
 //    private static final Map<Short, String> charsets = new HashMap<>();
@@ -81,8 +80,8 @@ public class Coder {
 
     static {
         invalidate();
-        map(Envelope.META_ENCODING_KEY,"UTF-8",0);
-        map(Envelope.META_ENCODING_KEY,"US-ASCII",1);
+        map(Envelope.META_ENCODING_KEY, "UTF-8", 0);
+        map(Envelope.META_ENCODING_KEY, "US-ASCII", 1);
     }
 
     /**
@@ -151,7 +150,7 @@ public class Coder {
                 return mt;
             }
         }
-        throw new PropertyCodeException(val);
+        throw new RuntimeException("Can't find meta type " + val);
     }
 
     public static MetaType getMetaType(Value name) {

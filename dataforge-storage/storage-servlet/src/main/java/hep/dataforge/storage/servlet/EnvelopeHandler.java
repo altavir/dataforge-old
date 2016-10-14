@@ -1,8 +1,8 @@
 package hep.dataforge.storage.servlet;
 
-import hep.dataforge.io.envelopes.Coder;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.io.envelopes.EnvelopePropertyCodes;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.commons.JSONMetaWriter;
@@ -32,7 +32,7 @@ public class EnvelopeHandler implements Handler, Responder {
 
             EnvelopeBuilder builder = new EnvelopeBuilder();
 
-            Meta meta = Coder.getMetaType(metaType).getReader().readString(metaString, Charset.forName(metaEncoding));
+            Meta meta = EnvelopePropertyCodes.getMetaType(metaType).getReader().readString(metaString, Charset.forName(metaEncoding));
             byte[] data = request.file("data").getBytes();
 
             builder.setMeta(meta);

@@ -5,16 +5,16 @@
  */
 package hep.dataforge.storage.servlet;
 
-import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.storage.filestorage.FileStorage;
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.InputStreamReader;
 import ratpack.handling.Chain;
 import ratpack.server.RatpackServer;
 import ratpack.server.RatpackServerSpec;
 import ratpack.server.ServerConfigBuilder;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
 
 /**
  *
@@ -26,7 +26,7 @@ public class TestStorageServlet {
      * @param args the command line arguments
      * @throws hep.dataforge.exceptions.StorageException
      */
-    public static void main(String[] args) throws StorageException, Exception {
+    public static void main(String[] args) throws Exception {
         new StorageManager().startGlobal();
         String path = "D:/temp/test";
         //String path = "/home/numass-storage";

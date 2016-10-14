@@ -29,8 +29,8 @@ import hep.dataforge.navigation.Path;
  */
 public interface Loader extends Annotated, AutoCloseable, Named, Responder {
 
-    public static final String LOADER_NAME_KEY = "name";
-    public static final String LOADER_TYPE_KEY = "type";
+    String LOADER_NAME_KEY = "name";
+    String LOADER_TYPE_KEY = "type";
 
     @Override
     void close() throws Exception;
