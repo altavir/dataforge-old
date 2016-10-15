@@ -96,7 +96,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     /**
      * Notify all listeners that data changed
      */
-    public void notifyDataChanged() {
+    public synchronized void notifyDataChanged() {
         getListeners().forEach((l) -> l.notifyDataChanged(getName()));
     }
 

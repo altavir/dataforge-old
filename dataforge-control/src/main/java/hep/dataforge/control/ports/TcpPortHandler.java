@@ -17,12 +17,13 @@ package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.meta.Meta;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -80,7 +81,7 @@ public class TcpPortHandler extends PortHandler {
     public void close() throws PortException {
         try {
             stopFlag = true;
-            listenerThread.join();
+            listenerThread.join(3000);
             listenerThread = null;
             socket.close();
         } catch (IOException | InterruptedException ex) {

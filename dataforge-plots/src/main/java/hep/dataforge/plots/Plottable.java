@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
@@ -27,9 +28,6 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
 
 import java.util.List;
-import java.util.stream.Stream;
-
-import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 
 /**
  * Единичный набор данных для отрисовки
@@ -41,7 +39,7 @@ import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @ValueDef(name = "visble", def = "true", type = "BOOLEAN", info = "The current visiblity of this plottable")
 @AnonimousNotAlowed
-public interface Plottable extends Named, Annotated, Configurable, Wrappable {
+public interface Plottable extends Named, Annotated, Configurable, Wrappable, Described {
 
     /**
      * Get immutable list of data data according to query

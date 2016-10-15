@@ -67,7 +67,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     protected Logger setupLogger() {
         //TODO move logger construction to context IoManager
-        if(meta().hasValue("logger")){
+        if (meta().hasValue("logger")) {
             return (Logger) LoggerFactory.getLogger(meta().getString("logger"));
         } else {
             return getContext().getLogger();
@@ -91,6 +91,13 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     @Override
     public void shutdown() throws ControlException {
         getLogger().info("Shutting down device '{}'...", getName());
+        connections().forEach(it -> {
+            try {
+                it.getKey().close();
+            } catch (Exception e) {
+                getLogger().error("Failed to close connection {} with roles", it.getKey(), it.getValue());
+            }
+        });
         listeners.forEach(it -> it.notifyDeviceShutdown(this));
         //TODO close connections and close listeners
     }
@@ -332,7 +339,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     protected void applyConfig(Meta config) {
-        if(meta().hasValue("logger")){
+        if (meta().hasValue("logger")) {
             setupLogger();
         }
         getLogger().debug("Applying configuration change");

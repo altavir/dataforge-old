@@ -22,11 +22,13 @@ import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
-import java.util.Map.Entry;
+
+import static hep.dataforge.plots.data.TimePlottable.*;
 
 /**
  * A plottable to display dynamic series with limited number of elements (x axis is always considered to be time). Both
@@ -34,20 +36,22 @@ import java.util.Map.Entry;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "maxAge", type = "NUMBER", def = "-1", info = "The maximum age of items in milliseconds. 0 means no limit")
-@ValueDef(name = "maxItems", type = "NUMBER", def = "-1", info = "The maximum number of items. 0 means no limit")
+@ValueDef(name = MAX_AGE_KEY, type = "NUMBER", def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
+@ValueDef(name = MAX_ITEMS_KEY, type = "NUMBER", def = "-1", info = "The maximum number of items. Negative means no limit")
+@ValueDef(name = PREF_ITEMS_KEY, type = "NUMBER", def = "400", info = "The prefered number of items to leave after cleanup.")
 public class TimePlottable extends XYPlottable {
+    public static final String MAX_AGE_KEY = "maxAge";
+    public static final String MAX_ITEMS_KEY = "maxItems";
+    public static final String PREF_ITEMS_KEY = "prefItems";
 
     public static final String DEFAULT_TIMESTAMP_KEY = "timestamp";
 
-    private final DataMap map = new DataMap();
+    private TreeMap<Instant, DataPoint> map = new TreeMap<>();
     private final String timestamp;
     private final String yName;
-    private Instant lastUpdate;
 
     /**
-     * Create dynamic plottable with given y value name (x name is always
-     * "timestamp")
+     * Create dynamic time plottable with given y value name
      *
      * @param name
      * @param yName
@@ -61,6 +65,7 @@ public class TimePlottable extends XYPlottable {
 
     /**
      * Use default timestamp key for timestamp name
+     *
      * @param name
      * @param yName
      */
@@ -71,19 +76,20 @@ public class TimePlottable extends XYPlottable {
 
     /**
      * Use yName for plottable name
+     *
      * @param yName
      */
     public TimePlottable(String yName) {
         this(yName, DEFAULT_TIMESTAMP_KEY, yName);
     }
 
-    public static TimePlottable build(String name, String yName, String color, double thickness) {
-        TimePlottable res = new TimePlottable(name, yName);
-        res.getConfig()
-                .setValue("color", color)
-                .setValue("thickness", thickness);
-        return res;
-    }
+//    public static TimePlottable build(String name, String yName, String color, double thickness) {
+//        TimePlottable res = new TimePlottable(name, yName);
+//        res.getConfig()
+//                .setValue("color", color)
+//                .setValue("thickness", thickness);
+//        return res;
+//    }
 
     /**
      * Puts value with the same name as this y name from data point. If data
@@ -115,14 +121,19 @@ public class TimePlottable extends XYPlottable {
      * @param time
      * @param value
      */
-    public void put(Instant time, Value value) {
+    public synchronized void put(Instant time, Value value) {
         Map<String, Value> point = new HashMap<>(2);
         point.put(timestamp, Value.of(time));
         point.put(yName, value);
         this.map.put(time, new MapPoint(point));
-        if (lastUpdate == null || time.isAfter(lastUpdate)) {
-            lastUpdate = time;
+
+        if (size() > 2) {
+            int maxItems = meta().getInt(MAX_ITEMS_KEY, -1);
+            int prefItems = meta().getInt(PREF_ITEMS_KEY, Math.min(400,maxItems));
+            int maxAge = meta().getInt(MAX_AGE_KEY, -1);
+            cleanup(maxAge, maxItems, prefItems);
         }
+
         notifyDataChanged();
     }
 
@@ -135,34 +146,47 @@ public class TimePlottable extends XYPlottable {
         return yName;
     }
 
-    public Instant getLastUpdateTime() {
-        return lastUpdate;
-    }
-
     public void setMaxItems(int maxItems) {
-        getConfig().setValue("maxItems", maxItems);
+        getConfig().setValue(MAX_ITEMS_KEY, maxItems);
     }
 
     public void setMaxAge(Duration age) {
-        getConfig().setValue("maxAge", age.toMillis());
+        getConfig().setValue(MAX_AGE_KEY, age.toMillis());
+    }
+
+    public void setPrefItems(int prefItems) {
+        configureValue(PREF_ITEMS_KEY, prefItems);
     }
 
     public int size() {
         return map.size();
     }
 
-    private class DataMap extends LinkedHashMap<Instant, DataPoint> {
 
-        @Override
-        protected boolean removeEldestEntry(Entry<Instant, DataPoint> eldest) {
-            int maxItems = meta().getInt("maxItems", -1);
-            if (maxItems > 0 && size() > maxItems) {
-                return true;
+    synchronized void cleanup(int maxAge, int maxItems, int prefItems) {
+        Instant first = map.firstKey();
+        Instant last = map.lastKey();
+
+        int oldsize = size();
+        if (maxItems > 0 && oldsize > maxItems) {
+            //copying retained elements into new map
+            TreeMap<Instant, DataPoint> newMap = new TreeMap<>();
+            int step = (int) (Duration.between(first, last).toMillis() / prefItems);
+            newMap.put(first, map.firstEntry().getValue());
+            newMap.put(last, map.lastEntry().getValue());
+            for (Instant x = first; x.isBefore(last); x = x.plusMillis(step)) {
+                Map.Entry<Instant, DataPoint> entry = map.ceilingEntry(x);
+                newMap.putIfAbsent(entry.getKey(), entry.getValue());
             }
-            int maxAge = meta().getInt("maxAge", -1);
-            return maxAge > 0 && lastUpdate != null && Duration.between(eldest.getKey(), lastUpdate).toMillis() > maxAge;
+            //replacing map with new one
+            this.map = newMap;
+            LoggerFactory.getLogger(getClass()).debug("Reduced size from {} to {}", oldsize, size());
         }
 
+        while (maxAge > 0 && last != null && Duration.between(map.firstKey(), last).toMillis() > maxAge) {
+            map.remove(map.firstKey());
+        }
     }
+
 
 }

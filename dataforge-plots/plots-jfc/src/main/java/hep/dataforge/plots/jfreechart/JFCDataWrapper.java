@@ -10,12 +10,9 @@ import hep.dataforge.names.Name;
 import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.values.Value;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
 
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author Alexander Nozik
@@ -38,7 +35,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         return data;
     }
 
-    private DataPoint getAt(int i) {
+    private synchronized DataPoint getAt(int i) {
         return getData().get(i);
     }
 

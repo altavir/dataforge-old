@@ -77,6 +77,10 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
         this.forEach(it->it.setMaxItems(maxItems));
     }
 
+    public void setPrefItems(int prefItems) {
+        this.forEach(it->it.setPrefItems(prefItems));
+    }
+
     @Override
     public Iterator<TimePlottable> iterator() {
         return this.map.values().iterator();
