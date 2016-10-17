@@ -34,17 +34,8 @@ import static hep.dataforge.stat.fit.FitAction.STAGE_KEY;
  */
 public class FitStage implements Annotated, Named, Serializable {
 
-    /**
-     * Constant <code>TASK_RUN="fit"</code>
-     */
     public static final String TASK_RUN = "fit";
-    /**
-     * Constant <code>TASK_SINGLE="single"</code>
-     */
     public static final String TASK_SINGLE = "single";
-    /**
-     * Constant <code>TASK_COVARIANCE="covariance"</code>
-     */
     public static final String TASK_COVARIANCE = "covariance";
 
     private static final String NAME = "type";
@@ -52,26 +43,13 @@ public class FitStage implements Annotated, Named, Serializable {
     private static final String ENGINE_NAME = "engine";
     private static final String METHOD_NAME = "method";
     private static final String DEFAULT_METHOD_NAME = "default";
-//    private static final String MODEL_ANNOTATION_NAME = "model";    
 
-//    private final String taskName;
-//    private final Annotation taskDescription;
-//    private String[] freePars;
     private final Meta taskDescription;
 
     public FitStage(Meta taskAnnotation) {
         this.taskDescription = taskAnnotation;
     }
 
-    /**
-     * <p>
-     * Constructor for FitTask.</p>
-     *
-     * @param engineName a {@link java.lang.String} object.
-     * @param taskName a {@link java.lang.String} object.
-     * @param methodName
-     * @param freePars an array of {@link java.lang.String} objects.
-     */
     public FitStage(String engineName, String taskName, String methodName, String[] freePars) {
         taskDescription = new MetaBuilder(STAGE_KEY)
                 .putValue(NAME, taskName)

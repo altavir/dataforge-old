@@ -17,7 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.fit.FitSource;
+import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.FunctionUtils;
@@ -35,9 +35,9 @@ import org.slf4j.LoggerFactory;
  */
 public class LogLikelihood extends ScaleableNamedFunction {
 
-    private final FitSource source;
+    private final FitState source;
 
-    public LogLikelihood(FitSource source) {
+    public LogLikelihood(FitState source) {
         super(source.getModel());
         this.source = source;
         if (!source.getModel().providesProb()) {

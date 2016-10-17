@@ -16,83 +16,42 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.io.FittingIOUtils;
-import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import hep.dataforge.maths.NamedMatrix;
+
 import java.io.PrintWriter;
 
+import static hep.dataforge.io.FittingIOUtils.printParamSet;
+
 /**
- * <p>
- * FitTaskResult class.</p>
- *
+ * An extension of FitState containing information about last fit stage
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public class FitTaskResult extends FitState {
     
-    public static FitStage emptyTask(String name){
-        return new FitStage(name);
-    }
-
-    /**
-     * <p>
-     * Constructor for FitTaskResult.</p>
-     *
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param allPars a {@link hep.dataforge.stat.fit.ParamSet} object.
-     * @param lastTask a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
-     */
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars) {
-        return new FitTaskResult(state.edit().setPars(allPars).build(), lastTask);
-    }
-
-    /**
-     * <p>
-     * Constructor for FitTaskResult.</p>
-     *
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param allPars a {@link hep.dataforge.stat.fit.ParamSet} object.
-     * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
-     * @param lastTask a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
-     */
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars, NamedMatrix covariance) {
-        return new FitTaskResult(state.edit().setPars(allPars).setCovariance(covariance, true).build(), lastTask);
-    }
-
-    /**
-     * <p>
-     * Constructor for FitTaskResult.</p>
-     *
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
-     * @param lastTask a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
-     */
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, NamedMatrix covariance) {
-        return new FitTaskResult(state.edit().setCovariance(covariance, true).build(), lastTask);
-    }
-    private boolean isValid = true;
     private final FitStage lastTask;
+    private boolean isValid = true;
 
-    /**
-     * <p>
-     * Constructor for FitTaskResult.</p>
-     *
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param lastTask a {@link hep.dataforge.stat.fit.FitStage} object.
-     */
     public FitTaskResult(FitState state, FitStage lastTask) {
         super(state);
         this.lastTask = lastTask;
     }
 
-    /**
-     * <p>
-     * getFreePars.</p>
-     *
-     * @return the fitPars
-     */
+    public static FitStage emptyTask(String name){
+        return new FitStage(name);
+    }
+
+    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars) {
+        return new FitTaskResult(state.edit().setPars(allPars).build(), lastTask);
+    }
+
+    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars, NamedMatrix covariance) {
+        return new FitTaskResult(state.edit().setPars(allPars).setCovariance(covariance, true).build(), lastTask);
+    }
+
+    public static FitTaskResult buildResult(FitState state, FitStage lastTask, NamedMatrix covariance) {
+        return new FitTaskResult(state.edit().setCovariance(covariance, true).build(), lastTask);
+    }
+
     public String[] getFreePars() {
         String[] res = lastTask.getFreePars();
         if (res == null || res.length == 0) {
@@ -102,32 +61,14 @@ public class FitTaskResult extends FitState {
         }
     }
 
-    /**
-     * <p>
-     * isValid.</p>
-     *
-     * @return the isValid
-     */
     public boolean isValid() {
         return isValid;
     }
 
-    /**
-     * <p>
-     * setValid.</p>
-     *
-     * @param isValid the isValid to set
-     */
     public void setValid(boolean isValid) {
         this.isValid = isValid;
     }
 
-    /**
-     * <p>
-     * ndf.</p>
-     *
-     * @return a int.
-     */
     public int ndf() {
         return this.getDataSize() - this.getFreePars().length;
     }
@@ -138,7 +79,7 @@ public class FitTaskResult extends FitState {
         out.println("***FITTING RESULT***");
         this.printAllValues(out);
         this.printFitParsValues(out);
-        if (covariance != null) {
+        if (hasCovariance()) {
             out.println();
             out.println("Corellation marix:");
             FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());

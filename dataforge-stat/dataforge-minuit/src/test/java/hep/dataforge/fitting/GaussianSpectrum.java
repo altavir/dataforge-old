@@ -22,7 +22,10 @@ import hep.dataforge.maths.MatrixOperations;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.stat.fit.*;
+import hep.dataforge.stat.fit.FitManager;
+import hep.dataforge.stat.fit.FitState;
+import hep.dataforge.stat.fit.Hessian;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.DataPoint;
@@ -60,7 +63,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     public static void printInvHessian(Table data, ParamSet pars) {
         XYModel model = new XYModel(new GaussianSpectrum());
-        FitSource fs = new FitSource(data, model);
+        FitState fs = FitState.builder().setDataSet(data).setModel(model).build();
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
         NamedMatrix hInv = new NamedMatrix(MatrixOperations.inverse(h.getMatrix()), pars.namesAsArray());
         FittingIOUtils.printNamedMatrix(out(), hInv);

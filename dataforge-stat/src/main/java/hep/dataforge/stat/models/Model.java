@@ -41,7 +41,7 @@ public interface Model extends NameSetContainer, Annotated {
     double distance(DataPoint point, NamedValueSet pars);
 
     /**
-     *
+     * The derivative of distance
      * @param parName
      * @param point
      * @param pars
@@ -51,7 +51,7 @@ public interface Model extends NameSetContainer, Annotated {
     double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
     /**
-     * get inversed weight of the point
+     * Inverted weight of the point
      *
      * @param point
      * @param pars
@@ -70,13 +70,6 @@ public interface Model extends NameSetContainer, Annotated {
     double getLogProb(DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
     /**
-     * Модель имеет собственное распределение ошибок
-     *
-     * @return
-     */
-    boolean providesProb();
-
-    /**
      *
      * @param parName
      * @param point
@@ -86,8 +79,16 @@ public interface Model extends NameSetContainer, Annotated {
      */
     double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
 
+
     /**
-     * Модель возвращает аналитическую производную распределения ошибок
+     * The model provides its own definition of point distribution
+     *
+     * @return
+     */
+    boolean providesProb();
+
+    /**
+     * Model provides point distribution derivative
      *
      * @param name
      * @return
@@ -95,9 +96,7 @@ public interface Model extends NameSetContainer, Annotated {
     boolean providesProbDeriv(String name);
 
     /**
-     * Модель возвращает аналитическую производную расстояния до точки по
-     * данному параметру
-     *
+     * Model provicer derivative of distance to data point
      * @param name
      * @return
      */
