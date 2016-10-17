@@ -16,9 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.maths.NamedVector;
-import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -30,7 +28,7 @@ import java.util.logging.Logger;
  */
 class QOWUtils {
 
-    static RealMatrix covarFExp(FitState source, ParamSet set, Weight weight) {
+    static RealMatrix covarFExp(FitState source, ParamSet set, QOWeight weight) {
         return covarFExp(source, set, weight.namesAsArray(), weight);
     }
 
@@ -44,7 +42,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static RealMatrix covarF(FitState source, Weight weight) {
+    static RealMatrix covarF(FitState source, QOWeight weight) {
 
         int fitDim = weight.names().getDimension();
         double[][] res = new double[fitDim][fitDim];
@@ -80,7 +78,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static RealMatrix covarFExp(FitState source, ParamSet set, String[] fitPars, Weight weight) {
+    static RealMatrix covarFExp(FitState source, ParamSet set, String[] fitPars, QOWeight weight) {
 
         int fitDim = fitPars.length;
         double[][] res = new double[fitDim][fitDim];
@@ -120,11 +118,11 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static RealMatrix getEqDerivValues(FitState source, ParamSet set, Weight weight) {
+    static RealMatrix getEqDerivValues(FitState source, ParamSet set, QOWeight weight) {
         return getEqDerivValues(source, set, weight.namesAsArray(), weight);
     }
 
-    static RealMatrix getEqDerivValues(FitState source, Weight weight) {
+    static RealMatrix getEqDerivValues(FitState source, QOWeight weight) {
         return getEqDerivValues(source, weight.namesAsArray(), weight);
     }
 
@@ -137,7 +135,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static RealMatrix getEqDerivValues(FitState source, ParamSet set, String[] fitPars, Weight weight) {
+    static RealMatrix getEqDerivValues(FitState source, ParamSet set, String[] fitPars, QOWeight weight) {
 
         int fitDim = fitPars.length;
         //Возвращает производную k-того Eq по l-тому параметру
@@ -194,7 +192,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static RealMatrix getEqDerivValues(FitState source, String[] fitPars, Weight weight) {
+    static RealMatrix getEqDerivValues(FitState source, String[] fitPars, QOWeight weight) {
         int fitDim = fitPars.length;
         double[][] res = new double[fitDim][fitDim];
         int i;
@@ -226,7 +224,7 @@ class QOWUtils {
         return new Array2DRowRealMatrix(res);
     }
 
-    static NamedVector getEqValues(FitState source, ParamSet set, Weight weight) {
+    static NamedVector getEqValues(FitState source, ParamSet set, QOWeight weight) {
         return getEqValues(source, set, weight.namesAsArray(), weight);
     }
 
@@ -239,7 +237,7 @@ class QOWUtils {
      * @param weight
      * @return
      */
-    static NamedVector getEqValues(FitState source, ParamSet set, String[] fitPars, Weight weight) {
+    static NamedVector getEqValues(FitState source, ParamSet set, String[] fitPars, QOWeight weight) {
 
         double[] res = new double[fitPars.length];
         int i;
@@ -270,96 +268,3 @@ class QOWUtils {
     }
 }
 
-class Weight extends AbstractNamedSet {
-
-    /**
-     * Производная спектра по параметру в тета-0 Первый индекс - номер
-     * переменной, второй - номер точки из data;
-     *
-     */
-    private double[][] derivs;
-    /**
-     * КВАДРАТ! ошибки в i-той точке Пока используем экспериментальную ошибку, а
-     * там подумаем
-     */
-    private double[] dispersion;
-    private FitState source;
-    private NamedValueSet theta; // точка, в которой веса вычислены
-
-    Weight(FitState source, String[] list) {
-        super(list);
-        this.source = source;
-    }
-
-    Weight(FitState source, String[] fitPars, ParamSet theta) {
-        this(source, fitPars);
-        this.update(theta);
-    }
-
-    /**
-     * Производные от значения спектра в точке по параметрам. Первый индекс -
-     * номер точки, второй - номер параметра.
-     *
-     * @return the derivs
-     */
-    public double[][] getDerivs() {
-        return derivs;
-    }
-
-    /**
-     * Квадрат ошибки точки.
-     *
-     * @return the dispersion
-     */
-    public double[] getDispersion() {
-        return dispersion;
-    }
-
-    /**
-     * Состояние,для которого посчитан вес.
-     *
-     * @return the source
-     */
-    public FitState getSource() {
-        return source;
-    }
-
-    /**
-     * Набор параметров, в котором посчитан вес.
-     *
-     * @return the theta
-     */
-    public NamedValueSet getTheta() {
-        if (this.theta == null) {
-            throw new IllegalStateException("Update operation for weight is required.");
-        }
-        return theta;
-    }
-
-    /**
-     * Обновление весов. На всякий случай требуем явной передачи набора
-     * параметров
-     * @param set
-     */
-    final void update(ParamSet set) {
-
-        if (getSource().getDataSize() <= 0) {
-            throw new IllegalStateException("Data is not set.");
-        }
-        theta = set.copy();
-
-        int i;
-        int k;
-        dispersion = new double[getSource().getDataSize()];
-        derivs = new double[getDimension()][getSource().getDataSize()];
-
-        for (i = 0; i < getSource().getDataSize(); i++) {
-
-            this.dispersion[i] = getSource().getDispersion(i, set);
-            for (k = 0; k < this.getDimension(); k++) {
-                derivs[k][i] = getSource().getDisDeriv(this.names().getName(k), i, set);
-            }
-        }
-
-    }
-}

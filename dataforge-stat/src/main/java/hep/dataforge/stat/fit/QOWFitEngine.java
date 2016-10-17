@@ -55,7 +55,7 @@ public class QOWFitEngine implements FitEngine {
 //    public QOWFitEngine(Reportable report) {
 //        super(report);
 //    }
-    private ParamSet newtonianRun(FitState state, FitStage task, Weight weight, Reportable log) {
+    private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, Reportable log) {
         int maxSteps = task.meta().getInt("iterations", 100);
         double tolerance = task.meta().getDouble("tolerance", 0);
 
@@ -114,7 +114,7 @@ public class QOWFitEngine implements FitEngine {
         return par;
     }
 
-    private ParamSet newtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
+    private ParamSet newtonianStep(FitState source, ParamSet par, NamedVector eqvalues, QOWeight weight) {
         Utils.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, par, weight));
@@ -123,7 +123,7 @@ public class QOWFitEngine implements FitEngine {
         return par.copy().setParValues(new NamedVector(weight.namesAsArray(), start.subtract(step)));
     }
 
-    private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedVector eqvalues, Weight weight) {
+    private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedVector eqvalues, QOWeight weight) {
         Utils.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, weight));
@@ -159,7 +159,7 @@ public class QOWFitEngine implements FitEngine {
 
         String[] fitPars = getFitPars(state, task);
 
-        Weight curWeight = new Weight(state, fitPars, state.getParameters());
+        QOWeight curWeight = new QOWeight(state, fitPars, state.getParameters());
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
         log.report("The starting weight is: \n\t{}",
@@ -190,7 +190,7 @@ public class QOWFitEngine implements FitEngine {
 
         String[] fitPars = getFitPars(state, task);
 
-        Weight curWeight = new Weight(state, fitPars, state.getParameters());
+        QOWeight curWeight = new QOWeight(state, fitPars, state.getParameters());
 
         // вычисляем вес в allPar. Потом можно будет попробовать ручное задание веса
         log.report("The starting weight is: \n\t{}",
@@ -212,7 +212,7 @@ public class QOWFitEngine implements FitEngine {
 
     }
 
-    private NamedMatrix getCovariance(FitState source, Weight weight) {
+    private NamedMatrix getCovariance(FitState source, QOWeight weight) {
 //        RealMatrix res;
         RealMatrix invH = inverse(QOWUtils.getEqDerivValues(source, weight.namesAsArray(), weight));
 //        RealMatrix transinvH = invH.transpose();
