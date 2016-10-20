@@ -17,7 +17,6 @@ package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.ValueConversionException;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -160,7 +159,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         }
         logAxis.setAllowNegativesFlag(false);
         logAxis.setAutoRangeNextLogFlag(true);
-        logAxis.setStrictValuesFlag(false); // Ommit negatives but do not throw exception
+        logAxis.setStrictValuesFlag(false); // Omit negatives but do not throw exception
         return logAxis;
     }
 
@@ -229,20 +228,20 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        });
     }
 
-    protected double convertValue(Value v) {
-        try {
-            switch (v.valueType()) {
-                case NULL:
-                    return Double.NaN;
-//                case TIME:
-//                    return v.timeValue().toEpochMilli();
-                default:
-                    return v.doubleValue();
-            }
-        } catch (ValueConversionException ex) {
-            return Double.NaN;
-        }
-    }
+//    protected double convertValue(Value v) {
+//        try {
+//            switch (v.valueType()) {
+//                case NULL:
+//                    return Double.NaN;
+////                case TIME:
+////                    return v.timeValue().toEpochMilli();
+//                default:
+//                    return v.doubleValue();
+//            }
+//        } catch (ValueConversionException ex) {
+//            return Double.NaN;
+//        }
+//    }
 
     @Override
     protected synchronized void updatePlotData(String name) {

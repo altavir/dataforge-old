@@ -82,6 +82,8 @@ public class EnvelopePropertyCodes {
         invalidate();
         map(Envelope.META_ENCODING_KEY, "UTF-8", 0);
         map(Envelope.META_ENCODING_KEY, "US-ASCII", 1);
+        //add additional maeta types for backward compatibility
+        map(Envelope.META_TYPE_KEY, "XML", 0);
     }
 
     /**

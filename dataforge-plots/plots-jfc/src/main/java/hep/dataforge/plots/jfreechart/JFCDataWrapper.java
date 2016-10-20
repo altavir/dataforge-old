@@ -10,6 +10,7 @@ import hep.dataforge.names.Name;
 import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Value;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
 
 import java.util.List;
@@ -84,15 +85,23 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     @Override
     public Number getX(int i, int i1) {
-        return adapter().getX(getAt(i1)).numberValue();
+        return transform(adapter().getX(getAt(i1)));
+    }
+
+    private Number transform(Value value) {
+        if (value.isNull()) {
+            return null;
+        } else {
+            return value.doubleValue();
+        }
     }
 
     @Override
     public Number getY(int i, int i1) {
-        return adapter().getY(getAt(i1),i).numberValue();
+        return transform(adapter().getY(getAt(i1), i));
     }
 
-    public void invalidateData(){
+    public void invalidateData() {
         this.data = null;
     }
 

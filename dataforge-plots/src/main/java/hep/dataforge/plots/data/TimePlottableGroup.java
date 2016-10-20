@@ -27,14 +27,6 @@ import java.util.Iterator;
  */
 public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
 
-    public static TimePlottableGroup buildSet(String... names) {
-        TimePlottableGroup set= new TimePlottableGroup();
-        for(String name: names){
-            set.addPlottable(new TimePlottable(name, name));
-        }
-        return set;
-    }
-
     public TimePlottableGroup() {
     }
 
@@ -46,12 +38,18 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
         super(plottables);
     }
 
-    public void put(DataPoint point) {
-        for (String name : map.keySet()) {
-            if (point.hasValue(name)) {
-                map.get(name).put(point.getValue(name));
-            }
+    public static TimePlottableGroup buildSet(String... names) {
+        TimePlottableGroup set = new TimePlottableGroup();
+        for (String name : names) {
+            set.addPlottable(new TimePlottable(name, name));
         }
+        return set;
+    }
+
+    public void put(DataPoint point) {
+        map.keySet().stream().filter(point::hasValue).forEach(name -> {
+            map.get(name).put(point.getValue(name));
+        });
     }
 
     public void put(String name, Object value) {

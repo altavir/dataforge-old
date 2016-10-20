@@ -84,7 +84,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     @Override
     public void init() throws ControlException {
-        logger.info("Initializing device '{}'...", getName());
+        getLogger().info("Initializing device '{}'...", getName());
         listeners.forEach(it -> it.notifyDeviceInitialized(this));
     }
 
