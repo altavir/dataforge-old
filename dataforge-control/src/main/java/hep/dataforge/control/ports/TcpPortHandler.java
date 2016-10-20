@@ -26,7 +26,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class TcpPortHandler extends PortHandler {
@@ -34,8 +33,6 @@ public class TcpPortHandler extends PortHandler {
     private final Socket socket;
 
     private Thread listenerThread;
-
-    private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
     private volatile boolean stopFlag = false;
 
@@ -63,14 +60,14 @@ public class TcpPortHandler extends PortHandler {
         try {
             if (listenerThread == null) {
                 stopFlag = false;
-                listenerThread = startListnerThread();
+                listenerThread = startListenerThread();
             }
         } catch (IOException ex) {
             throw new PortException(ex);
         }
     }
 
-//    @Override
+    //    @Override
 //    public void holdBy(PortController controller) throws PortException {
 //        super.holdBy(controller); //To change body of generated methods, choose Tools | Templates.
 //
@@ -81,22 +78,26 @@ public class TcpPortHandler extends PortHandler {
     public void close() throws PortException {
         try {
             stopFlag = true;
-            listenerThread.join(3000);
-            listenerThread = null;
-            socket.close();
-        } catch (IOException | InterruptedException ex) {
+            listenerThread.join(1500);
+        } catch (InterruptedException ex) {
             throw new PortException(ex);
+        } finally {
+            listenerThread = null;
+            try {
+                socket.close();
+            } catch (IOException e) {
+                throw new PortException(e);
+            }
         }
     }
 
-    private Thread startListnerThread() throws IOException {
+    private Thread startListenerThread() throws IOException {
         final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
+        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         Runnable task = () -> {
             try {
                 while (!stopFlag) {
-                    if (reader.available() > 0) {
-                        buffer.write(reader.read());
-                    }
+                    buffer.write(reader.read());
                     String str = buffer.toString();
                     if (isPhrase(str)) {
                         recievePhrase(str);
