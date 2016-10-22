@@ -1,6 +1,5 @@
 package hep.dataforge.grind
 
-import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.DataNode
@@ -12,7 +11,6 @@ import org.codehaus.groovy.control.CompilerConfiguration
 /**
  * Created by darksnake on 04-Aug-16.
  */
-@CompileStatic
 class GrindWorkspaceBuilder {
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
@@ -112,6 +110,10 @@ class GrindWorkspaceBuilder {
         return runTask(meta.getName(), meta);
     }
 
+    def methodMissing(String name, def args) {
+        return runTask(name, args[0] as String)
+    }
+
     /**
      * Display a list of available tasks
      */
@@ -127,7 +129,8 @@ class GrindWorkspaceBuilder {
         return writer.toString();
     }
 
-    def getConfigs() {
+
+    def getTargets() {
         Workspace ws = buildWorkspace();
         StringWriter writer = new StringWriter();
 
