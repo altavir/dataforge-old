@@ -18,19 +18,16 @@ package hep.dataforge.control.ports;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import jssc.SerialPort;
-import static jssc.SerialPort.BAUDRATE_9600;
-import static jssc.SerialPort.DATABITS_8;
-import static jssc.SerialPort.PARITY_NONE;
-import static jssc.SerialPort.PURGE_RXCLEAR;
-import static jssc.SerialPort.PURGE_TXCLEAR;
-import static jssc.SerialPort.STOPBITS_1;
 import jssc.SerialPortEvent;
 import jssc.SerialPortEventListener;
 import jssc.SerialPortException;
 import org.slf4j.LoggerFactory;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+
+import static jssc.SerialPort.*;
 
 /**
  *
@@ -41,23 +38,23 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
 //    private static final int CHAR_SIZE = 1;
 //    private static final int MAX_SIZE = 50;
     private SerialPort port;
-    private Meta meta;
 
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
     public ComPortHandler(Meta meta) {
-        this.meta = meta;
+        super(meta);
     }
 
     @Override
     public String getPortId() {
-        return String.format("com::%s", meta.getString("name"));
+        return String.format("com::%s", getString("name"));
     }
 
     
     
     public ComPortHandler(String portName, int baudRate, int dataBits, int stopBits, int parity) {
-        this(new MetaBuilder("port")
+        this(new MetaBuilder("handler")
+                .setValue("type","com")
                 .putValue("name", portName)
                 .putValue("baudRate", baudRate)
                 .putValue("dataBits", dataBits)
@@ -89,7 +86,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     public void open() throws PortException {
         try {
             if (port == null) {
-                port = new SerialPort(meta.getString("name"));
+                port = new SerialPort(getString("name"));
                 port.openPort();
                 Meta an = meta();
                 int baudRate = an.getInt("baudRate", BAUDRATE_9600);
@@ -160,11 +157,6 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
             }
 
         }
-    }
-
-    @Override
-    public Meta meta() {
-        return meta;
     }
 
     @Override

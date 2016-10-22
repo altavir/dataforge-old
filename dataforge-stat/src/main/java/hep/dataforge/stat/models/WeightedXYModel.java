@@ -15,11 +15,12 @@
  */
 package hep.dataforge.stat.models;
 
-import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.NamedValueSet;
+
 import java.util.function.Function;
 
 /**
@@ -60,7 +61,9 @@ public class WeightedXYModel extends XYModel {
     public double dispersion(DataPoint point, NamedValueSet pars) {
         return super.dispersion(point, pars)*weightFunction.apply(point);
     }
-    
-    
-    
+
+    @Override
+    public void setMeta(Meta meta) {
+        super.setMeta(meta);
+    }
 }

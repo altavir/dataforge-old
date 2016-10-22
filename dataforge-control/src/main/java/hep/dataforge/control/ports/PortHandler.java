@@ -18,6 +18,8 @@ package hep.dataforge.control.ports;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.exceptions.PortLockException;
 import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.BaseMetaHolder;
 import hep.dataforge.utils.DateTimeUtils;
 import org.slf4j.LoggerFactory;
 
@@ -31,7 +33,7 @@ import java.util.function.Predicate;
  *
  * @author Alexander Nozik
  */
-public abstract class PortHandler implements AutoCloseable, Annotated {
+public abstract class PortHandler extends BaseMetaHolder implements AutoCloseable, Annotated {
 
     private final ReentrantLock portLock = new ReentrantLock(true);
     protected PortController controller;
@@ -47,6 +49,14 @@ public abstract class PortHandler implements AutoCloseable, Annotated {
 //    public PortHandler(String portName) {
 //        this.portName = portName;
 //    }
+
+
+    public PortHandler(Meta meta) {
+        super(meta);
+    }
+
+    public PortHandler() {
+    }
 
     /**
      * The definition of default phrase condition

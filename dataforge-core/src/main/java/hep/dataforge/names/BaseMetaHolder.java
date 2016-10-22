@@ -10,8 +10,8 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -65,7 +65,7 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
      *
      * @param meta
      */
-    public void setMeta(Meta meta) {
+    protected void setMeta(Meta meta) {
         if(meta != null){
             LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotanted object");
         }

@@ -17,6 +17,7 @@ package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
@@ -30,7 +31,7 @@ import java.net.Socket;
  */
 public class TcpPortHandler extends PortHandler {
 
-    private final Socket socket;
+    private Socket socket;
 
     private Thread listenerThread;
 
@@ -38,21 +39,16 @@ public class TcpPortHandler extends PortHandler {
 
     //TODO сделать аннотацию и конструктор по аннотации
     public TcpPortHandler(String ip, int port) throws PortException {
-        try {
-            socket = new Socket(ip, port);
-        } catch (IOException ex) {
-            throw new PortException(ex);
-        }
-
-    }
-
-    public TcpPortHandler(Socket socket) throws IOException {
-        this.socket = socket;
+        super(new MetaBuilder("handler")
+                .setValue("type", "tcp")
+                .setValue("ip", ip)
+                .setValue("port", port)
+                .build());
     }
 
     @Override
     public String getPortId() {
-        return String.format("tcp::%s:%s", socket.getInetAddress(), socket.getPort());
+        return String.format("tcp::%s:%s", getString("ip"), getString("port"));
     }
 
     @Override
@@ -75,38 +71,54 @@ public class TcpPortHandler extends PortHandler {
 //
 //    }
     @Override
-    public void close() throws PortException {
-        try {
-            stopFlag = true;
-            listenerThread.join(1500);
-        } catch (InterruptedException ex) {
-            throw new PortException(ex);
-        } finally {
-            listenerThread = null;
+    public synchronized void close() throws PortException {
+        if (socket != null) {
             try {
-                socket.close();
-            } catch (IOException e) {
-                throw new PortException(e);
+                stopFlag = true;
+                listenerThread.join(1500);
+            } catch (InterruptedException ex) {
+                throw new PortException(ex);
+            } finally {
+                listenerThread = null;
+                try {
+                    getSocket().close();
+                    socket = null;
+                } catch (IOException e) {
+                    throw new PortException(e);
+                }
             }
         }
     }
 
     private Thread startListenerThread() throws IOException {
-        final BufferedInputStream reader = new BufferedInputStream(socket.getInputStream());
-        final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         Runnable task = () -> {
-            try {
-                while (!stopFlag) {
+            BufferedInputStream reader = null;
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            while (!stopFlag) {
+                try {
+                    if (reader == null) {
+                        reader = new BufferedInputStream(getSocket().getInputStream());
+                    }
                     buffer.write(reader.read());
                     String str = buffer.toString();
                     if (isPhrase(str)) {
                         recievePhrase(str);
                         buffer.reset();
                     }
+                } catch (IOException ex) {
+                    LoggerFactory.getLogger(getClass()).error("TCP connection broken on {}. Reconnecting.", getPortId());
+                    try {
+                        if (socket != null) {
+                            socket.close();
+                            socket = null;
+                        }
+                        reader = new BufferedInputStream(getSocket().getInputStream());
+                    }catch (Exception ex1){
+                        throw new RuntimeException("Failed to reconnect tcp port");
+                    }
                 }
-            } catch (IOException ex) {
-                throw new RuntimeException(ex);
             }
+
         };
         Thread thread = new Thread(task, "tcpPortListener");
         thread.start();
@@ -117,7 +129,7 @@ public class TcpPortHandler extends PortHandler {
     @Override
     public void send(String message) throws PortException {
         try {
-            OutputStream stream = socket.getOutputStream();
+            OutputStream stream = getSocket().getOutputStream();
             stream.write(message.getBytes());
             stream.flush();
             LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
@@ -137,4 +149,10 @@ public class TcpPortHandler extends PortHandler {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
+    public synchronized Socket getSocket() throws IOException {
+        if (socket == null) {
+            socket = new Socket(getString("ip"), getInt("port"));
+        }
+        return socket;
+    }
 }

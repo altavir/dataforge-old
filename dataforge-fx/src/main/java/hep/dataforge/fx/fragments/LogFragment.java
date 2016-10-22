@@ -23,7 +23,7 @@ import java.util.function.BiConsumer;
 /**
  * @author Alexander Nozik
  */
-public class ConsoleFragment extends Fragment implements AutoCloseable {
+public class LogFragment extends Fragment implements AutoCloseable {
 
     public final static PrintStream STD_OUT = System.out;
     public final static PrintStream STD_ERR = System.err;
@@ -58,7 +58,7 @@ public class ConsoleFragment extends Fragment implements AutoCloseable {
     private final Appender<ILoggingEvent> logAppender;
     private boolean stdHooked = false;
 
-    public ConsoleFragment() {
+    public LogFragment() {
         super("DataForge console", 800, 200);
         outputPane = new FXDataOutputPane();
 
@@ -66,7 +66,7 @@ public class ConsoleFragment extends Fragment implements AutoCloseable {
         logAppender = new AppenderBase<ILoggingEvent>() {
             @Override
             protected void append(ILoggingEvent eventObject) {
-                synchronized (ConsoleFragment.this) {
+                synchronized (LogFragment.this) {
                     loggerFormatter.accept(outputPane, eventObject);
                 }
             }
