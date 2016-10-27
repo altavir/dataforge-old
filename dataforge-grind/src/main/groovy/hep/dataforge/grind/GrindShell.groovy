@@ -6,6 +6,7 @@ import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
+import jline.console.ConsoleReader
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
@@ -21,6 +22,7 @@ class GrindShell {
     private GroovyShell shell;
     private Context context = GlobalContext.instance();
     Set<Hook> hooks = new HashSet<>();
+    ConsoleReader console;
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -28,10 +30,25 @@ class GrindShell {
 
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
-        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
+//        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
         binding.setProperty("context", context)
         binding.setProperty("plt", new PlotHelper(GlobalContext.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
+
+    }
+
+    /**
+     * Build default jline console based on operating system. Do not use for preview inside IDE
+     * @return
+     */
+    GrindShell withConsole() {
+        console = new ConsoleReader("df", System.in, System.out, null)
+        return this
+    }
+
+    GrindShell withConsole(ConsoleReader console) {
+        this.console = console
+        return this
     }
 
     def setContext(Context context) {
@@ -44,12 +61,17 @@ class GrindShell {
         bind("plt", plot);
     }
 
+    def GrindShell withContext(Context context) {
+        setContext(context)
+        return this;
+    }
+
     def bind(String key, Object value) {
         binding.setProperty(key, value)
     }
 
 
-    String eval(String expression) {
+    protected String eval(String expression) {
         Object res = shell.evaluate(expression);
         return postEval(res);
     }
@@ -59,7 +81,7 @@ class GrindShell {
      * @param res
      * @return
      */
-    def postEval(Object res) {
+    protected def postEval(Object res) {
         if (res instanceof DataNode) {
             def node = res.computeAll();
             node.dataStream().map { it.get() }.forEach { postEval(it) };
@@ -83,36 +105,39 @@ class GrindShell {
     }
 
     def start() {
-//        while(true) {
-//            String expression = console.readLine(">");
-//            if ("exit" == expression) {
-//                break;
-//            }
-//            try {
-//                console.println(eval(expression));
-//            } catch (Exception ex) {
-//                ex.printStackTrace(new PrintWriter(console.getOutput()));
-//            }
-//        }
-
-        BufferedReader reader = context.io().in().newReader()
-        while (true) {
-            print(">")
-            String expression = reader.readLine();
-            if ("exit" == expression) {
-                break;
-            }
-            try {
-                if (expression != null) {
-                    String res = eval(expression);
-                    if (res != null) {
-                        println(res);
-                    }
+        if (console != null) {
+            while (true) {
+                String expression = console.readLine(">");
+                if ("exit" == expression) {
+                    break;
                 }
-            } catch (Exception ex) {
-                def err = context.io().out().newPrintWriter();
-                ex.printStackTrace(err);
-                err.flush()
+                try {
+                    console.println(eval(expression));
+                } catch (Exception ex) {
+                    ex.printStackTrace(new PrintWriter(console.getOutput()));
+                }
+            }
+            console.shutdown()
+        } else {
+            BufferedReader reader = context.io().in().newReader()
+            while (true) {
+                print(">")
+                String expression = reader.readLine();
+                if ("exit" == expression) {
+                    break;
+                }
+                try {
+                    if (expression != null) {
+                        String res = eval(expression);
+                        if (res != null) {
+                            println(res);
+                        }
+                    }
+                } catch (Exception ex) {
+                    def err = context.io().out().newPrintWriter();
+                    ex.printStackTrace(err);
+                    err.flush()
+                }
             }
         }
     }

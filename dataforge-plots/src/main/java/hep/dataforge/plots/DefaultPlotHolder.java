@@ -6,6 +6,7 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.fx.RootApplication;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.fx.FXLineChartFrame;
 import hep.dataforge.plots.fx.FXPlotFrame;
@@ -14,15 +15,27 @@ import hep.dataforge.plots.fx.PlotContainer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author Alexander Nozik
  */
 public class DefaultPlotHolder implements PlotHolder {
     private final Map<String, PlotContainer> containers = new HashMap<>();
+    private Supplier<FXPlotFrame<?>> plotFrameFactory = () -> new FXLineChartFrame();
+
+    public DefaultPlotHolder(Supplier<FXPlotFrame<?>> plotFrameFactory) {
+        this();
+        this.plotFrameFactory = plotFrameFactory;
+    }
+
+    public DefaultPlotHolder() {
+        //call rootAplication to initialize fx framework
+        RootApplication.instance();
+    }
 
     protected FXPlotFrame<?> buildFrame() {
-        return new FXLineChartFrame();
+        return plotFrameFactory.get();
     }
 
     protected synchronized PlotContainer showPlot(String name, FXPlotFrame frame) {

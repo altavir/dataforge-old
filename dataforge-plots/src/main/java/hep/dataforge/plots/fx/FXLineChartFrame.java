@@ -108,7 +108,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlott
 
     @Override
     protected void updateLegend(Meta legendMeta) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        //throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     @Override

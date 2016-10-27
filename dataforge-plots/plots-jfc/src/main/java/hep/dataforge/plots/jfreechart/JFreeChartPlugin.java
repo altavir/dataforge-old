@@ -30,12 +30,8 @@ public class JFreeChartPlugin extends BasicPlugin {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        context.provide("plots", PlotsPlugin.class).setPlotHolderDelegate(new DefaultPlotHolder() {
-            @Override
-            protected JFreeChartFrame buildFrame() {
-                return new JFreeChartFrame();
-            }
-        });
+        context.provide("plots", PlotsPlugin.class)
+                .setPlotHolderDelegate(new DefaultPlotHolder(() -> new JFreeChartFrame()));
     }
 
     @Override
