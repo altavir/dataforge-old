@@ -309,6 +309,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     @Override
     public void close() throws Exception {
         //stopping all works in this context
+        pluginManager().close();
         if (this.taskManager != null) {
             taskManager.shutdown();
         }

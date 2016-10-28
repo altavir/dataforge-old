@@ -71,8 +71,11 @@ class GrindShell {
     }
 
 
-    protected String eval(String expression) {
+    protected synchronized String eval(String expression) {
         Object res = shell.evaluate(expression);
+        //remembering last answer
+        bind("res", res);
+        //TODO remember n last answers
         return postEval(res);
     }
 
@@ -104,24 +107,24 @@ class GrindShell {
         context.io().out().print(str);
     }
 
-    def start() {
+    def launch() {
         if (console != null) {
             while (true) {
-                String expression = console.readLine(">");
+                String expression = console.readLine("[${context.getName()}] --> ");
                 if ("exit" == expression) {
                     break;
                 }
                 try {
-                    console.println(eval(expression));
+                    console.println("\tres = ${eval(expression)}");
                 } catch (Exception ex) {
-                    ex.printStackTrace(new PrintWriter(console.getOutput()));
+                    ex.printStackTrace(console.getOutput().newPrintWriter());
                 }
             }
             console.shutdown()
         } else {
             BufferedReader reader = context.io().in().newReader()
             while (true) {
-                print(">")
+                print("[${context.getName()}] --> ")
                 String expression = reader.readLine();
                 if ("exit" == expression) {
                     break;
@@ -140,15 +143,16 @@ class GrindShell {
                 }
             }
         }
+        GlobalContext.instance().close();
     }
 
     /**
      * Start using provided closure as initializing script
      * @param closure
      */
-    def start(Closure closure) {
+    def launch(Closure closure) {
         this.with(closure)
-        start()
+        launch()
     }
 
     /**

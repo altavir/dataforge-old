@@ -94,6 +94,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public void attach(Context context) {
+        if(context.pluginManager().hasPlugin(getName())){
+            context.getLogger().warn("Overriding existing plugin");
+        }
         this.context = context;
     }
 

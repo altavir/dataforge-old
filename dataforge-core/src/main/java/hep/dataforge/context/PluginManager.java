@@ -25,7 +25,7 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class PluginManager implements Encapsulated {
+public class PluginManager implements Encapsulated, AutoCloseable {
 
     private final Map<String, Plugin> plugins = new HashMap<>();
     /**
@@ -114,4 +114,8 @@ public class PluginManager implements Encapsulated {
         return plugin;
     }
 
+    @Override
+    public void close() throws Exception {
+        this.plugins.values().forEach(Plugin::detach);
+    }
 }

@@ -209,6 +209,7 @@ public class GlobalContext extends Context {
      */
     @Override
     public void close() throws Exception {
+        getLogger().info("Shutting down global context");
         for (Context ctx : contexts) {
             ctx.close();
         }

@@ -14,15 +14,15 @@ import hep.dataforge.meta.Meta;
 /**
  * A plugin for displaying plots. It works as a PlotHolder but delegates all
  * methods to internal delegate.
- *
- s* @author Alexander Nozik
+ * <p>
+ * s* @author Alexander Nozik
  */
-@PluginDef(name = "plots", group = "hep.dataforge", description = "Basic plottiong plugin")
+@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = {"fx"}, description = "Basic plottiong plugin")
 public class PlotsPlugin extends BasicPlugin implements PlotHolder {
 
     private PlotHolder plotHolderDelegate = new DefaultPlotHolder();
 
-    public static PlotsPlugin buildFrom(Context context){
+    public static PlotsPlugin buildFrom(Context context) {
         if (context.provides("plots")) {
             return context.provide("plots", PlotsPlugin.class);
         } else {

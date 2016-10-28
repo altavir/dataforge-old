@@ -5,7 +5,8 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.fx.RootApplication;
+import hep.dataforge.context.GlobalContext;
+import hep.dataforge.fx.FXPlugin;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.plots.PlotFrame;
 import javafx.scene.Scene;
@@ -19,19 +20,18 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class FXPlotUtils {
 
     public static void addExportPlotAction(ContextMenu menu, PlotFrame frame) {
         MenuItem exportAction = new MenuItem("Export DFP");
-        exportAction.setOnAction(event->{
+        exportAction.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
             chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge plot", "*.dfp"));
             chooser.setTitle("Select file to save plot into");
             File file = chooser.showSaveDialog(menu.getOwnerWindow());
-            if(file != null){
+            if (file != null) {
                 try {
                     DefaultEnvelopeWriter.instance.write(new FileOutputStream(file), frame.wrap());
                 } catch (IOException ex) {
@@ -50,10 +50,10 @@ public class FXPlotUtils {
      * @param height
      * @return
      */
-    public static PlotContainer displayContainer(String title, double width, double height) {
+    public static PlotContainer displayContainer(FXPlugin fx, String title, double width, double height) {
         PlotContainerHolder containerHolder = new PlotContainerHolder();
 
-        RootApplication.show(() -> {
+        fx.show(() -> {
             Stage stage = new Stage();
             stage.setWidth(width);
             stage.setHeight(height);
@@ -69,6 +69,10 @@ public class FXPlotUtils {
         } catch (InterruptedException ex) {
             throw new RuntimeException("Can't get plot container", ex);
         }
+    }
+
+    public static PlotContainer displayContainer(String title, double width, double height) {
+        return displayContainer(GlobalContext.instance().getPlugin(FXPlugin.class), title, width, height);
     }
 
     private static class PlotContainerHolder {
