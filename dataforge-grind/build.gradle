@@ -8,11 +8,11 @@ mainClassName = mainClass
 
 description = 'The grind plugin for dataforge framework'
 
-dependencies{
+dependencies {
     compile 'org.codehaus.groovy:groovy:2.4.+'
     compile project(':dataforge-core')
     //compile project(':dataforge-maths')
-    compile project(':dataforge-plots')
+    compile project(':dataforge-plots:plots-jfc')
 
     // https://mvnrepository.com/artifact/jline/jline
     compile group: 'jline', name: 'jline', version: '2.14.2'

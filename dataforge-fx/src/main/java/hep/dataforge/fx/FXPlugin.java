@@ -18,7 +18,11 @@ import java.util.function.Supplier;
 @PluginDef(name = "fx", description = "JavaFX application holder")
 public class FXPlugin extends BasicPlugin {
 
+    //used to determine if application toolkit is initialized
     private static boolean toolkitInitialized = false;
+
+    //used to determine if any windows been spawn
+    private static boolean hasChildren = false;
 
     private Application app;
     private Stage stage;
@@ -38,6 +42,7 @@ public class FXPlugin extends BasicPlugin {
         if (!context.equals(GlobalContext.instance())) {
             context.getLogger().warn("Starting fx plugin not in global context");
         }
+        Platform.setImplicitExit(false);
         if (this.app == null) {
             context.getLogger().info("JavaFX application not defined. Starting default stage holder.");
             startDefaultApp();
@@ -47,13 +52,12 @@ public class FXPlugin extends BasicPlugin {
 
     @Override
     public void detach() {
-        Platform.setImplicitExit(true);
-        try {
-            app.stop();
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
         super.detach();
+        if(hasChildren) {
+            Platform.setImplicitExit(true);
+        } else {
+            Platform.exit();
+        }
     }
 
     public synchronized Application getApp() {
@@ -100,6 +104,7 @@ public class FXPlugin extends BasicPlugin {
             Stage newStage = sup.get();
             newStage.initOwner(primaStage.getOwner());
             newStage.show();
+            hasChildren = true;
         });
     }
 
@@ -108,7 +113,6 @@ public class FXPlugin extends BasicPlugin {
             DefaultRootApplication.plugin = this;
             if (!toolkitInitialized) {
                 new Thread(() -> {
-                    Platform.setImplicitExit(false);
                     Application.launch(DefaultRootApplication.class);
                     toolkitInitialized = true;
                 }).start();

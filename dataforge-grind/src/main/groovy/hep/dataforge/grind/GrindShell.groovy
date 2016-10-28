@@ -1,6 +1,5 @@
 package hep.dataforge.grind
 
-import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.Data
@@ -16,13 +15,12 @@ import java.util.function.Consumer
  * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
  */
-@CompileStatic
 class GrindShell {
     private Binding binding = new Binding();
     private GroovyShell shell;
     private Context context = GlobalContext.instance();
-    Set<Hook> hooks = new HashSet<>();
-    ConsoleReader console;
+    private Set<Hook> hooks = new HashSet<>();
+    private ConsoleReader console;
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -31,8 +29,15 @@ class GrindShell {
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
 //        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
+        binding.setProperty("man", { obj ->
+            try {
+                println(obj.help())
+            } catch (Exception ex){
+                println("No manual or help article for ${obj.class}")
+            }
+        })
         binding.setProperty("context", context)
-        binding.setProperty("plt", new PlotHelper(GlobalContext.instance()))
+        binding.setProperty("plots", new PlotHelper(GlobalContext.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
 
     }
