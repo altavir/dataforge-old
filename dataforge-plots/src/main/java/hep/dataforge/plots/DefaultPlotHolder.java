@@ -13,6 +13,9 @@ import hep.dataforge.plots.fx.FXLineChartFrame;
 import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.plots.fx.PlotContainer;
+import javafx.application.Platform;
+import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -61,13 +64,16 @@ public class DefaultPlotHolder implements PlotHolder {
     public PlotFrame getPlotFrame(String stage, String name) throws NameNotFoundException {
         if (!hasPlotFrame(stage, name)) {
             return buildPlotFrame(stage, name, Meta.empty());
-
+        } else {
+            PlotContainer container = containers.get(name);
+            Window window = container.getRoot().getScene().getWindow();
+            if (!window.isShowing()) {
+                if (window instanceof Stage) {
+                    Platform.runLater(() -> ((Stage) window).show());
+                }
+            }
+            return container.getPlot();
         }
-        PlotContainer container = containers.get(name);
-        if (!container.getRoot().getScene().getWindow().isShowing()) {
-            container = showPlot(name, container.getPlot());
-        }
-        return container.getPlot();
     }
 
     @Override

@@ -67,7 +67,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public boolean hasPlugin(VersionTag tag) {
-        return plugins.containsKey(tag.name());
+        return plugins.containsKey(tag.name()) || (getParent() != null && getParent().hasPlugin(tag));
     }
 
     public Plugin loadPlugin(String name) {
