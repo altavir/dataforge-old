@@ -1,13 +1,22 @@
 package hep.dataforge.grind
 
+import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
-import jline.console.ConsoleReader
+import hep.dataforge.io.IOUtils
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
+import org.jline.reader.LineReader
+import org.jline.reader.LineReaderBuilder
+import org.jline.terminal.Attributes
+import org.jline.terminal.Terminal
+import org.jline.terminal.TerminalBuilder
+import org.jline.utils.AttributedString
+import org.jline.utils.AttributedStringBuilder
+import org.jline.utils.AttributedStyle
 
 import java.util.function.Consumer
 
@@ -15,12 +24,17 @@ import java.util.function.Consumer
  * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
  */
+@CompileStatic
 class GrindShell {
+    private static final AttributedStyle RES = AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);
+    private static final AttributedStyle PROMPT = AttributedStyle.BOLD.foreground(AttributedStyle.CYAN);
+    private static final AttributedStyle DEFAULT = AttributedStyle.DEFAULT;
+
     private Binding binding = new Binding();
     private GroovyShell shell;
     private Context context = GlobalContext.instance();
     private Set<Hook> hooks = new HashSet<>();
-    private ConsoleReader console;
+    private Terminal terminal;
 
     GrindShell() {
         ImportCustomizer importCustomizer = new ImportCustomizer();
@@ -29,10 +43,10 @@ class GrindShell {
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
 //        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
-        binding.setProperty("man", { obj ->
+        binding.setProperty("man", { Object obj ->
             try {
-                println(obj.help())
-            } catch (Exception ex){
+                println(obj.invokeMethod("help", null))
+            } catch (Exception ex) {
                 println("No manual or help article for ${obj.class}")
             }
         })
@@ -46,13 +60,28 @@ class GrindShell {
      * Build default jline console based on operating system. Do not use for preview inside IDE
      * @return
      */
-    GrindShell withConsole() {
-        console = new ConsoleReader("df", System.in, System.out, null)
+    GrindShell withTerminal() {
+        Attributes attrs = new Attributes();
+        attrs.with {
+            setLocalFlag(Attributes.LocalFlag.ECHO, false);
+            setLocalFlag(Attributes.LocalFlag.ECHONL, false);
+            setInputFlag(Attributes.InputFlag.IGNCR, true);
+        }
+        this.terminal = TerminalBuilder.builder()
+                .name("df")
+//                .jna(true)
+                .system(true)
+                .streams(System.in, System.out)
+                .encoding("UTF-8")
+                .attributes(attrs) // does not work
+                .build()
+//        terminal = new JnaWinSysTerminal("df",true);
+//        terminal.setAttributes(attrs)
         return this
     }
 
-    GrindShell withConsole(ConsoleReader console) {
-        this.console = console
+    GrindShell withTerminal(Terminal terminal) {
+        this.terminal = terminal
         return this
     }
 
@@ -113,19 +142,37 @@ class GrindShell {
     }
 
     def launch() {
-        if (console != null) {
+        if (terminal != null) {
+//            System.setOut(console.output);
+            LineReader reader = LineReaderBuilder.builder()
+                    .terminal(terminal)
+                    .appName("DataForge Grind terminal")
+                    .build();
+            PrintWriter writer = terminal.writer();
+            def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
             while (true) {
-                String expression = console.readLine("[${context.getName()}] --> ");
+                String expression = reader.readLine(promptLine);
                 if ("exit" == expression) {
+                    terminal.close()
+//                    terminal.raise(Terminal.Signal.QUIT)
                     break;
                 }
                 try {
-                    console.println("\tres = ${eval(expression)}");
+                    def res = eval(expression);
+                    if (res != null) {
+                        def resStr = new AttributedStringBuilder()
+                                .style(RES)
+                                .append("\tres = ")
+                                .style(DEFAULT)
+                                .append(res.toString());
+                        terminal.writer().println(resStr.toAnsi(terminal))
+                    }
                 } catch (Exception ex) {
-                    ex.printStackTrace(console.getOutput().newPrintWriter());
+                    writer.print(IOUtils.ANSI_RED);
+                    ex.printStackTrace(writer);
+                    writer.print(IOUtils.ANSI_RESET);
                 }
             }
-            console.shutdown()
         } else {
             BufferedReader reader = context.io().in().newReader()
             while (true) {
@@ -148,7 +195,6 @@ class GrindShell {
                 }
             }
         }
-        GlobalContext.instance().close();
     }
 
     /**

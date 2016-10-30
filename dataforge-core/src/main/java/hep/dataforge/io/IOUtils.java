@@ -74,6 +74,11 @@ public class IOUtils {
      */
     public static final String ANSI_WHITE = "\u001B[37m";
 
+
+    public static String wrapANSI(String str, String ansiColor) {
+        return ansiColor + str + ANSI_RESET;
+    }
+
     public static String[] parse(String line) {
         Scanner scan = new Scanner(line);
         ArrayList<String> tokens = new ArrayList<>();
