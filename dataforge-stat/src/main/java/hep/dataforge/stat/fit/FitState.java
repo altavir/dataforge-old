@@ -46,7 +46,7 @@ public class FitState implements Serializable {
 
     private final Table dataSet;
 
-    private final Model model;
+    private transient final Model model;
 
     private final ParametricValue prior;
 

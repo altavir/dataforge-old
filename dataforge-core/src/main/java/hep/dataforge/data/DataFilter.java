@@ -36,9 +36,9 @@ public class DataFilter {
         }
     }
 
-    public final void includeData(String namePattern, Class type) {
-        if (namePattern == null || namePattern.isEmpty()) {
-            namePattern = "*";
+    public final void includeData(String mask, Class type) {
+        if (mask == null || mask.isEmpty()) {
+            mask = "*";
         }
         Class limitingType;
         if (type == null) {
@@ -46,7 +46,7 @@ public class DataFilter {
         } else {
             limitingType = type;
         }
-        String compiledPattern = namePattern.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
+        String compiledPattern = mask.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
         BiPredicate<String, Data> predicate = ((name, data)
                 -> name.matches(compiledPattern) && limitingType.isAssignableFrom(data.type()));
         includeData(predicate);
@@ -97,7 +97,7 @@ public class DataFilter {
     public DataFilter configure(Meta meta) {
         if (meta.hasMeta("include")) {
             meta.getMetaList("include").forEach(include -> {
-                String namePattern = include.getString("pattern", "*");
+                String namePattern = include.getString("mask", "*");
                 Class type = Object.class;
                 if (include.hasValue("type")) {
                     try {
@@ -117,7 +117,7 @@ public class DataFilter {
 
         if (meta.hasMeta("exclude")) {
             meta.getMetaList("exclude").forEach(exclude -> {
-                String namePattern = exclude.getString("pattern", "*");
+                String namePattern = exclude.getString("mask", "*");
 
                 if (exclude.getBoolean("excludeData", true)) {
                     excludeData(namePattern);
