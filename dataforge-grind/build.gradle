@@ -19,7 +19,7 @@ dependencies {
 
 task shell(dependsOn: classes, type: JavaExec) {
     main mainClass
-    jvmArgs ['-Djansi.passthrough=true']
+//    jvmArgs ['-Djansi.passthrough=true']
     standardInput = System.in
     standardOutput = System.out
     classpath = sourceSets.main.runtimeClasspath

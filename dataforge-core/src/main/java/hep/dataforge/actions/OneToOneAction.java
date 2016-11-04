@@ -37,7 +37,6 @@ import java.util.stream.Collectors;
  * @version $Id: $Id
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
-
     /**
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data
@@ -89,12 +88,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         return wrap(set.getName(), set.meta(),
-                set.dataStream().collect(Collectors.toMap(data -> data.getName(),
+                set.dataStream().collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
                         data -> runOne(data, actionMeta))));
-    }
-
-    protected String getResultName(String dataName, Meta actionMeta) {
-        return actionMeta.getString("@resultName", dataName);
     }
 
     /**

@@ -69,14 +69,12 @@ class GrindShell {
         }
         this.terminal = TerminalBuilder.builder()
                 .name("df")
-//                .jna(true)
                 .system(true)
-                .streams(System.in, System.out)
+                .jna(true)
                 .encoding("UTF-8")
-                .attributes(attrs) // does not work
+                .attributes(attrs) // does not work for system terminal
                 .build()
 //        terminal = new JnaWinSysTerminal("df",true);
-//        terminal.setAttributes(attrs)
         return this
     }
 

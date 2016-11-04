@@ -25,6 +25,7 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -37,6 +38,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
+import static hep.dataforge.actions.GenericAction.*;
+
 /**
  * A basic implementation of Action interface
  *
@@ -45,7 +48,13 @@ import java.util.concurrent.ExecutorService;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@ValueDef(name = RESULT_GROUP_KEY, def = "", info = "The name of the data group appended before the path. By default is empty.")
+@ValueDef(name = RESULT_NAME_KEY, info = "The override for resulting data name. If not presented, then input data name is used.")
+@ValueDef(name = ALLOW_PARALLEL_KEY, type = "BOOLEAN", def = "true", info = "A flag to allow or forbid parallel execution of this action")
 public abstract class GenericAction<T, R> implements Action<T, R> {
+    public static final String RESULT_GROUP_KEY = "@resultGroup";
+    public static final String RESULT_NAME_KEY = "@resultName";
+    public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
 
     private Logger logger;
     private String parentProcessName;
@@ -53,7 +62,25 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     private Map<String, Report> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
-        return meta.getBoolean("allowParallel", true);
+        return meta.getBoolean("@allowParallel", true);
+    }
+
+    /**
+     * Generate the name of the resulting data based on name of input data and action meta
+     * @param dataName
+     * @param actionMeta
+     * @return
+     */
+    protected String getResultName(String dataName, Meta actionMeta) {
+        if (actionMeta.hasValue(RESULT_NAME_KEY)) {
+            return actionMeta.getString(RESULT_NAME_KEY);
+        } else {
+            String res = dataName;
+            if (actionMeta.hasValue(RESULT_GROUP_KEY)) {
+                res = Name.joinString(actionMeta.getString(RESULT_GROUP_KEY), res);
+            }
+            return res;
+        }
     }
 
     /**

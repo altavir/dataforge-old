@@ -47,7 +47,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         List<DataNode<T>> groups = buildGroups(set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
         groups.forEach((group) -> results.put(group.getName(), runGroup(group, actionMeta)));
-        return wrap(set.getName(), set.meta(), results);
+        return wrap(getResultName(set.getName(),actionMeta), set.meta(), results);
     }
 
     public ActionResult<R> runGroup(DataNode<T> data, Meta actionMeta) {
@@ -57,6 +57,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected List<DataNode<T>> buildGroups(DataNode<? extends T> input, Meta actionMeta) {
+        //TODO expand grouping options
         if (actionMeta.hasMeta("byValue")) {
             return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
         } else {
