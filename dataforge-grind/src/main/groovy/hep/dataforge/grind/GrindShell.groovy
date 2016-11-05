@@ -14,6 +14,7 @@ import org.jline.reader.LineReaderBuilder
 import org.jline.terminal.Attributes
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
+import org.jline.terminal.impl.DumbTerminal
 import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.AttributedStyle
@@ -42,18 +43,25 @@ class GrindShell {
 
         CompilerConfiguration configuration = new CompilerConfiguration();
         configuration.addCompilationCustomizers(importCustomizer);
-//        binding.setProperty("buildWorkspace", { String fileName -> new GrindWorkspaceBuilder().from(new File(fileName)).buildWorkspace() })
-        binding.setProperty("man", { Object obj ->
-            try {
-                println(obj.invokeMethod("help", null))
-            } catch (Exception ex) {
-                println("No manual or help article for ${obj.class}")
-            }
-        })
+
+        //define help closure
+        def help = this.&help;
+        binding.setProperty("man", help);
+        binding.setProperty("help", help);
+
+        //define important properties
         binding.setProperty("context", context)
         binding.setProperty("plots", new PlotHelper(GlobalContext.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
 
+    }
+
+    def help(Object obj) {
+        try {
+            println(obj.invokeMethod("help", null))
+        } catch (Exception ex) {
+            println("No manual or help article for ${obj.class}")
+        }
     }
 
     /**
@@ -140,59 +148,39 @@ class GrindShell {
     }
 
     def launch() {
-        if (terminal != null) {
-//            System.setOut(console.output);
-            LineReader reader = LineReaderBuilder.builder()
-                    .terminal(terminal)
-                    .appName("DataForge Grind terminal")
-                    .build();
-            PrintWriter writer = terminal.writer();
-            def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
-            while (true) {
-                String expression = reader.readLine(promptLine);
-                if ("exit" == expression) {
-                    terminal.close()
-//                    terminal.raise(Terminal.Signal.QUIT)
-                    break;
-                }
-                try {
-                    def res = eval(expression);
-                    if (res != null) {
-                        def resStr = new AttributedStringBuilder()
-                                .style(RES)
-                                .append("\tres = ")
-                                .style(DEFAULT)
-                                .append(res.toString());
-                        terminal.writer().println(resStr.toAnsi(terminal))
-                    }
-                } catch (Exception ex) {
-                    writer.print(IOUtils.ANSI_RED);
-                    ex.printStackTrace(writer);
-                    writer.print(IOUtils.ANSI_RESET);
-                }
+        if (terminal == null) {
+            terminal = new DumbTerminal(System.in, System.out);
+            terminal.echo(false);
+        }
+        LineReader reader = LineReaderBuilder.builder()
+                .terminal(terminal)
+                .appName("DataForge Grind terminal")
+                .build();
+        PrintWriter writer = terminal.writer();
+        def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
+        while (true) {
+            String expression = reader.readLine(promptLine);
+            if ("exit" == expression) {
+                terminal.close()
+                break;
             }
-        } else {
-            BufferedReader reader = context.io().in().newReader()
-            while (true) {
-                print("[${context.getName()}] --> ")
-                String expression = reader.readLine();
-                if ("exit" == expression) {
-                    break;
+            try {
+                def res = eval(expression);
+                if (res != null) {
+                    def resStr = new AttributedStringBuilder()
+                            .style(RES)
+                            .append("\tres = ")
+                            .style(DEFAULT)
+                            .append(res.toString());
+                    terminal.writer().println(resStr.toAnsi(terminal))
                 }
-                try {
-                    if (expression != null) {
-                        String res = eval(expression);
-                        if (res != null) {
-                            println(res);
-                        }
-                    }
-                } catch (Exception ex) {
-                    def err = context.io().out().newPrintWriter();
-                    ex.printStackTrace(err);
-                    err.flush()
-                }
+            } catch (Exception ex) {
+                writer.print(IOUtils.ANSI_RED);
+                ex.printStackTrace(writer);
+                writer.print(IOUtils.ANSI_RESET);
             }
         }
+
     }
 
     /**
