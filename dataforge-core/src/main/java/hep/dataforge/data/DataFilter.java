@@ -20,6 +20,10 @@ public class DataFilter {
     private BiPredicate<String, DataNode> nodeCondition = TRUTH;
     private BiPredicate<String, Data> dataCondition = TRUTH;
 
+    public static String applyMask(String pattern) {
+        return pattern.replace(".", "\\.").replace("?", ".").replace("*", ".*?");
+    }
+
     public boolean acceptNode(String nodeName, DataNode node) {
         return this.nodeCondition.test(nodeName, node);
     }
@@ -36,19 +40,15 @@ public class DataFilter {
         }
     }
 
-    public final void includeData(String mask, Class type) {
-        if (mask == null || mask.isEmpty()) {
-            mask = "*";
-        }
+    public final void includeData(String namePattern, Class type) {
         Class limitingType;
         if (type == null) {
             limitingType = Object.class;
         } else {
             limitingType = type;
         }
-        String compiledPattern = mask.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
         BiPredicate<String, Data> predicate = ((name, data)
-                -> name.matches(compiledPattern) && limitingType.isAssignableFrom(data.type()));
+                -> name.matches(namePattern) && limitingType.isAssignableFrom(data.type()));
         includeData(predicate);
     }
 
@@ -57,23 +57,19 @@ public class DataFilter {
     }
 
     public final void excludeData(String namePattern) {
-        String compiledPattern = namePattern.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
-        excludeData((name, data) -> name.matches(compiledPattern));
+        excludeData((name, data) -> name.matches(namePattern));
     }
 
     public final void includeNode(String namePattern, Class type) {
-        if (namePattern == null || namePattern.isEmpty()) {
-            namePattern = "*";
-        }
+
         Class limitingType;
         if (type == null) {
             limitingType = Object.class;
         } else {
             limitingType = type;
         }
-        String compiledPattern = namePattern.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
         BiPredicate<String, DataNode> predicate = ((name, data)
-                -> name.matches(compiledPattern) && limitingType.isAssignableFrom(data.type()));
+                -> name.matches(namePattern) && limitingType.isAssignableFrom(data.type()));
         includeNode(predicate);
     }
 
@@ -90,14 +86,23 @@ public class DataFilter {
     }
 
     public final void excludeNode(String namePattern) {
-        String compiledPattern = namePattern.replace(".", "\\.").replace("?", ".?").replace("*", ".*?");
-        excludeNode((name, node) -> name.matches(compiledPattern));
+        excludeNode((name, node) -> name.matches(namePattern));
+    }
+
+    private String getPattern(Meta node) {
+        if (node.hasValue("mask")) {
+            return applyMask(node.getString("mask"));
+        } else if (node.hasValue("pattern")) {
+            return node.getString("pattern");
+        } else {
+            return ".*";
+        }
     }
 
     public DataFilter configure(Meta meta) {
         if (meta.hasMeta("include")) {
             meta.getMetaList("include").forEach(include -> {
-                String namePattern = include.getString("mask", "*");
+                String namePattern = getPattern(include);
                 Class type = Object.class;
                 if (include.hasValue("type")) {
                     try {
@@ -117,7 +122,7 @@ public class DataFilter {
 
         if (meta.hasMeta("exclude")) {
             meta.getMetaList("exclude").forEach(exclude -> {
-                String namePattern = exclude.getString("mask", "*");
+                String namePattern = getPattern(exclude);
 
                 if (exclude.getBoolean("excludeData", true)) {
                     excludeData(namePattern);
