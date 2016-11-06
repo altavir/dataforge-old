@@ -103,6 +103,11 @@ public abstract class DataCache {
     protected abstract void invalidate(Identity id);
 
     /**
+     * Invalidate all elements
+     */
+    public abstract void invalidate();
+
+    /**
      * Check if cache contains given id
      *
      * @param id

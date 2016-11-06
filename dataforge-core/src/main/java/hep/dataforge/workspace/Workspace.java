@@ -125,6 +125,11 @@ public interface Workspace extends Encapsulated, MetaProvider {
 
     Stream<Meta> getMetas();
 
+    /**
+     * Clean up workspace. Invalidate caches etc.
+     */
+    void clean();
+
     interface Builder<B extends Builder> extends GenericBuilder<Workspace, B>, Encapsulated {
 
         default B loadFrom(Meta meta) {

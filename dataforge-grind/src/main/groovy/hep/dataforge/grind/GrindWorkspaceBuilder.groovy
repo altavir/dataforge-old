@@ -142,4 +142,8 @@ class GrindWorkspaceBuilder {
         return writer.toString();
     }
 
+    def clean() {
+        buildWorkspace().clean()
+    }
+
 }

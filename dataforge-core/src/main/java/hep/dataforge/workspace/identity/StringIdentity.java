@@ -36,7 +36,9 @@ public class StringIdentity implements Identity {
         final StringIdentity other = (StringIdentity) obj;
         return Objects.equals(this.str, other.str);
     }
-    
-    
-    
+
+    @Override
+    public String toString() {
+        return "string::" + str;
+    }
 }

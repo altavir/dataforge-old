@@ -76,4 +76,16 @@ public abstract class AbstractWorkspace implements Workspace {
             return task.run(model);
         }
     }
+
+    @Override
+    public void clean() {
+        getContext().getLogger().info("Cleaning up cache...");
+        invalidateCache();
+    }
+
+    public void invalidateCache() {
+        if (cache != null) {
+            cache.invalidate();
+        }
+    }
 }

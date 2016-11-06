@@ -17,6 +17,7 @@ package hep.dataforge.context;
 
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -146,17 +147,6 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      */
     public void setIO(IOManager io) {
         io.setContext(this);
-
-        LoggerContext loggerContext = getLogger().getLoggerContext();
-        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setName("io");
-        appender.setContext(loggerContext);
-        appender.setOutputStream(io.out());
-        appender.start();
-
-        getLogger().detachAppender("io");
-        getLogger().addAppender(appender);
-
         if (!io.out().equals(System.out)) {
             getReport().addReportListener((ReportEntry t) -> {
                 try {
@@ -168,6 +158,26 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
             });
         }
         this.io = io;
+        startLogAppender();
+    }
+
+    protected void startLogAppender() {
+        stopLogAppender();
+        LoggerContext loggerContext = getLogger().getLoggerContext();
+        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setName("io");
+        appender.setContext(loggerContext);
+        appender.setOutputStream(io.out());
+        appender.start();
+        getLogger().addAppender(appender);
+    }
+
+    protected void stopLogAppender() {
+        Appender<ILoggingEvent> app = getLogger().getAppender("io");
+        if (app != null) {
+            getLogger().detachAppender(app);
+            app.stop();
+        }
     }
 
     /**

@@ -15,14 +15,12 @@
  */
 package hep.dataforge.workspace.identity;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Objects;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * An Identity object allowing to combine many identities into one
+ *
  * @author Alexander Nozik
  */
 public class CombinedIdentity implements Identity {
@@ -41,11 +39,11 @@ public class CombinedIdentity implements Identity {
         if (obj == null) {
             return false;
         }
-        
-        if(this.ids.size() == 1){
+
+        if (this.ids.size() == 1) {
             return Objects.equals(obj, ids.stream().findFirst().get());
         }
-        
+
         if (getClass() != obj.getClass()) {
             return false;
         }
@@ -59,7 +57,9 @@ public class CombinedIdentity implements Identity {
         hash = 79 * hash + Objects.hashCode(this.ids);
         return hash;
     }
-    
-    
-    
+
+    @Override
+    public String toString() {
+        return "[" + String.join(", ", ids.stream().map(Identity::toString).collect(Collectors.toList())) + "]";
+    }
 }

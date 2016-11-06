@@ -17,12 +17,8 @@ package hep.dataforge.io;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.names.Name;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.PrintStream;
+
+import java.io.*;
 
 /**
  * <p>
@@ -45,7 +41,7 @@ public class BasicIOManager implements IOManager {
         this.out = out;
     }
 
-    public BasicIOManager(PrintStream out, InputStream in) {
+    public BasicIOManager(OutputStream out, InputStream in) {
         this.out = out;
         this.in = in;
     }

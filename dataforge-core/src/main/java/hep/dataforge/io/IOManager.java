@@ -101,15 +101,16 @@ public interface IOManager extends Encapsulated {
      * @return a {@link java.io.File} object.
      */
     File getRootDirectory();
-    
+
     /**
      * The working directory for output and temporary files. Is always inside root directory
-     * @return 
+     *
+     * @return
      */
-    default File getWorkDirectory(){
+    default File getWorkDirectory() {
         String tmpDir = getContext().getString(WORK_DIRECTORY_CONTEXT_KEY, ".dataforge");
         File work = new File(getRootDirectory(), tmpDir);
-        if(!work.exists()){
+        if (!work.exists()) {
             work.mkdirs();
         }
         return work;
@@ -124,7 +125,7 @@ public interface IOManager extends Encapsulated {
     default File getTmpDirectory() {
         String tmpDir = getContext().getString(TEMP_DIRECTORY_CONTEXT_KEY, ".dataforge/.temp");
         File tmp = new File(getRootDirectory(), tmpDir);
-        if(!tmp.exists()){
+        if (!tmp.exists()) {
             tmp.mkdirs();
         }
         return tmp;
@@ -139,5 +140,4 @@ public interface IOManager extends Encapsulated {
     Context getContext();
 
     void setContext(Context context);
-
 }

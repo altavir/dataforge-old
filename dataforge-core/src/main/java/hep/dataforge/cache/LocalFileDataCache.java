@@ -120,4 +120,13 @@ public class LocalFileDataCache extends DataCache {
         }
     }
 
+    @Override
+    public void invalidate() {
+        lruCache.keySet().forEach(id -> {
+            if (fileMap.containsKey(id)) {
+                fileMap.get(id).delete();
+            }
+        });
+        lruCache.clear();
+    }
 }

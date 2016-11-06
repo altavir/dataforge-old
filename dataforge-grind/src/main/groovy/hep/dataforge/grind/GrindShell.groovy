@@ -6,6 +6,7 @@ import hep.dataforge.context.GlobalContext
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
+import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
@@ -157,6 +158,11 @@ class GrindShell {
                 .appName("DataForge Grind terminal")
                 .build();
         PrintWriter writer = terminal.writer();
+
+        context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
+        def appender = TerminalLogLayout.buildAppender(context.logger.loggerContext, terminal);
+        context.logger.addAppender(appender)
+
         def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
         while (true) {
             String expression = reader.readLine(promptLine);
