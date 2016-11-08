@@ -12,6 +12,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
+import org.jline.reader.UserInterruptException
 import org.jline.terminal.Attributes
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
@@ -164,27 +165,34 @@ class GrindShell {
         context.logger.addAppender(appender)
 
         def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
-        while (true) {
-            String expression = reader.readLine(promptLine);
-            if ("exit" == expression) {
-                terminal.close()
-                break;
-            }
-            try {
-                def res = eval(expression);
-                if (res != null) {
-                    def resStr = new AttributedStringBuilder()
-                            .style(RES)
-                            .append("\tres = ")
-                            .style(DEFAULT)
-                            .append(res.toString());
-                    terminal.writer().println(resStr.toAnsi(terminal))
+        try {
+            while (true) {
+                String expression = reader.readLine(promptLine);
+                if ("exit" == expression|| expression == null) {
+                    break;
                 }
-            } catch (Exception ex) {
-                writer.print(IOUtils.ANSI_RED);
-                ex.printStackTrace(writer);
-                writer.print(IOUtils.ANSI_RESET);
+                try {
+                    def res = eval(expression);
+                    if (res != null) {
+                        def resStr = new AttributedStringBuilder()
+                                .style(RES)
+                                .append("\tres = ")
+                                .style(DEFAULT)
+                                .append(res.toString());
+                        terminal.writer().println(resStr.toAnsi(terminal))
+                    }
+                } catch (Exception ex) {
+                    writer.print(IOUtils.ANSI_RED);
+                    ex.printStackTrace(writer);
+                    writer.print(IOUtils.ANSI_RESET);
+                }
             }
+        } catch (UserInterruptException ex) {
+            writer.println("Interrupted by user")
+        }catch (EndOfFileException){
+            writer.println("Terminated by user")
+        } finally {
+            terminal.close()
         }
 
     }
