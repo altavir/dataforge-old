@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 public abstract class AbstractWorkspace implements Workspace {
 
     protected final Map<String, Task> tasks = new HashMap<>();
-    protected final Map<String, Meta> metas = new HashMap<>();
+    protected final Map<String, Meta> targets = new HashMap<>();
     private Context context;
     private DataCache cache;
 
@@ -40,16 +40,21 @@ public abstract class AbstractWorkspace implements Workspace {
     }
 
     @Override
-    public Stream<Meta> getMetas() {
-        return metas.values().stream();
+    public Stream<Meta> getTargets() {
+        return targets.values().stream();
     }
 
     @Override
-    public Meta getMeta(String name) {
-        if (!metas.containsKey(name)) {
+    public Meta getTarget(String name) {
+        if (!targets.containsKey(name)) {
             throw new NameNotFoundException(name);
         }
-        return metas.get(name);
+        return targets.get(name);
+    }
+
+    @Override
+    public boolean hasTarget(String name) {
+        return targets.containsKey(name);
     }
 
     @Override

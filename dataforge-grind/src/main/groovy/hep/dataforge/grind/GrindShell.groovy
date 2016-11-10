@@ -58,11 +58,19 @@ class GrindShell {
 
     }
 
+    def help(){
+        println("In order to display state of object and show help type `help <object>`");
+    }
+
     def help(Object obj) {
-        try {
-            println(obj.invokeMethod("help", null))
-        } catch (Exception ex) {
-            println("No manual or help article for ${obj.class}")
+        if(obj == null){
+            help()
+        } else {
+            try {
+                println(obj.invokeMethod("help", null))
+            } catch (Exception ex) {
+                println("No manual or help article for ${obj.class}")
+            }
         }
     }
 
@@ -127,6 +135,9 @@ class GrindShell {
      * @return
      */
     protected def postEval(Object res) {
+        if(res instanceof Closure){
+            res = res.call()
+        }
         if (res instanceof DataNode) {
             def node = res.computeAll();
             node.dataStream().map { it.get() }.forEach { postEval(it) };
@@ -141,12 +152,16 @@ class GrindShell {
     }
 
     def println(String str) {
-        context.io().out().println(str);
-        context.io().out().flush();
+        terminal.writer().with {
+            println(str);
+            flush();
+        }
     }
 
     def print(String str) {
-        context.io().out().print(str);
+        terminal.writer().with {
+            print(str)
+        }
     }
 
     def launch() {
@@ -174,12 +189,16 @@ class GrindShell {
                 try {
                     def res = eval(expression);
                     if (res != null) {
-                        def resStr = new AttributedStringBuilder()
-                                .style(RES)
-                                .append("\tres = ")
-                                .style(DEFAULT)
-                                .append(res.toString());
-                        terminal.writer().println(resStr.toAnsi(terminal))
+                        if(terminal instanceof DumbTerminal){
+                            println(" = ${res.toString()}")
+                        } else {
+                            def resStr = new AttributedStringBuilder()
+                                    .style(RES)
+                                    .append("\tres = ")
+                                    .style(DEFAULT)
+                                    .append(res.toString());
+                            println(resStr.toAnsi(terminal))
+                        }
                     }
                 } catch (Exception ex) {
                     writer.print(IOUtils.ANSI_RED);

@@ -24,7 +24,6 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaProvider;
 import hep.dataforge.utils.GenericBuilder;
 
 import java.util.stream.Stream;
@@ -35,7 +34,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Workspace extends Encapsulated, MetaProvider {
+public interface Workspace extends Encapsulated {
 
     String DATA_STAGE_NAME = "@data";
 
@@ -56,6 +55,12 @@ public interface Workspace extends Encapsulated, MetaProvider {
      */
     DataNode<Object> getData();
 
+    /**
+     * Get task by name. Throw {@link hep.dataforge.exceptions.NameNotFoundException} if task with given name does not exist.
+     * @param taskName
+     * @param <T>
+     * @return
+     */
     <T> Task<T> getTask(String taskName);
 
     /**
@@ -76,8 +81,8 @@ public interface Workspace extends Encapsulated, MetaProvider {
      */
     default <T> DataNode<T> runTask(String taskName, Meta config, boolean overlay) {
         Task<T> task = getTask(taskName);
-        if (overlay && hasMeta(config.getName())) {
-            config = new Laminate(config, getMeta(config.getName()));
+        if (overlay && hasTarget(config.getName())) {
+            config = new Laminate(config, getTarget(config.getName()));
         }
         TaskModel model = task.build(this, config);
         return runTask(model);
@@ -99,7 +104,7 @@ public interface Workspace extends Encapsulated, MetaProvider {
     }
 
     /**
-     * Run task using meta previously stored in workspace
+     * Run task using meta previously stored in workspace.
      *
      * @param <T>
      * @param taskName
@@ -107,9 +112,15 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @return
      */
     default <T> DataNode<T> runTask(String taskName, String target) {
-        return runTask(taskName, getMeta(target));
+        return runTask(taskName, getTarget(target));
     }
 
+    /**
+     * Run task with given model.
+     * @param model
+     * @param <T>
+     * @return
+     */
     default <T> DataNode<T> runTask(TaskModel model) {
         return this.<T>getTask(model.getName()).run(model);
     }
@@ -120,10 +131,20 @@ public interface Workspace extends Encapsulated, MetaProvider {
      * @param name
      * @return
      */
-    @Override
-    Meta getMeta(String name);
+    Meta getTarget(String name);
 
-    Stream<Meta> getMetas();
+    /**
+     * Check if workspace contains given target
+     * @param name
+     * @return
+     */
+    boolean hasTarget(String name);
+
+    /**
+     * Get stream of meta objects stored in the Workspace. Not every target is valid for every task.
+     * @return
+     */
+    Stream<Meta> getTargets();
 
     /**
      * Clean up workspace. Invalidate caches etc.

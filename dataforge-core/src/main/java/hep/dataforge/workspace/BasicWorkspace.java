@@ -91,7 +91,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
         @Override
         public Builder loadMeta(String name, Meta meta) {
-            w.metas.put(name, meta);
+            w.targets.put(name, meta);
             return self();
         }
 

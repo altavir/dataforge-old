@@ -47,7 +47,7 @@ class GrindWorkspaceBuilder {
      * @param input
      * @return
      */
-    private Workspace.Builder getBuilder() {
+    protected Workspace.Builder getBuilder() {
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
@@ -87,13 +87,13 @@ class GrindWorkspaceBuilder {
 
     DataNode runTask(String taskName, String target) {
         Workspace ws = buildWorkspace();
-        Meta taskMeta = ws.hasMeta(target) ? ws.getMeta(target) : Meta.empty();
+        Meta taskMeta = ws.hasMeta(target) ? ws.getTarget(target) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
 
     DataNode runTask(String taskName) {
         Workspace ws = buildWorkspace();
-        Meta taskMeta = ws.hasMeta(taskName) ? ws.getMeta(taskName) : Meta.empty();
+        Meta taskMeta = ws.hasMeta(taskName) ? ws.getTarget(taskName) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
 
@@ -134,7 +134,7 @@ class GrindWorkspaceBuilder {
         Workspace ws = buildWorkspace();
         StringWriter writer = new StringWriter();
 
-        ws.getMetas().forEach {
+        ws.getTargets().forEach {
             writer.println(it)
         }
 
