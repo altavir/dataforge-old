@@ -87,13 +87,13 @@ class GrindWorkspaceBuilder {
 
     DataNode runTask(String taskName, String target) {
         Workspace ws = buildWorkspace();
-        Meta taskMeta = ws.hasMeta(target) ? ws.getTarget(target) : Meta.empty();
+        Meta taskMeta = ws.hasTarget(target) ? ws.getTarget(target) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
 
     DataNode runTask(String taskName) {
         Workspace ws = buildWorkspace();
-        Meta taskMeta = ws.hasMeta(taskName) ? ws.getTarget(taskName) : Meta.empty();
+        Meta taskMeta = ws.hasTarget(taskName) ? ws.getTarget(taskName) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
 
