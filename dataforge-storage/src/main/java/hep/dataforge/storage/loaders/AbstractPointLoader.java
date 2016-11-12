@@ -34,7 +34,7 @@ import java.util.*;
 import java.util.function.Supplier;
 
 import static hep.dataforge.storage.commons.StorageMessageUtils.*;
-import static hep.dataforge.tables.DataPoint.fromMeta;
+import static hep.dataforge.tables.DataPoint.buildFromMeta;
 
 /**
  * @author Alexander Nozik
@@ -105,7 +105,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     }
 
                     Meta data = messageMeta.getMeta("data");
-                    for (DataPoint dp : fromMeta(data)) {
+                    for (DataPoint dp : buildFromMeta(data)) {
                         this.push(dp);
                     }
 
@@ -132,7 +132,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
 
                     MetaBuilder dataAn = new MetaBuilder("data");
                     for (Supplier<DataPoint> dp : points) {
-                        dataAn.putNode(DataPoint.toMeta(dp.get()));
+                        dataAn.putNode(dp.get().toMeta());
                     }
                     return new MessageFactory().okResponseBase(message, true, false)
                             .putMetaNode(dataAn)

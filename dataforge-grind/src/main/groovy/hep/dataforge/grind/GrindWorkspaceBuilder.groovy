@@ -16,6 +16,8 @@ class GrindWorkspaceBuilder {
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
     private Context context = GlobalContext.instance();
+    private String cachedScript;
+    private Workspace.Builder cachedBuilder;
 
     GrindWorkspaceBuilder from(File file) {
         this.source = { file.newReader() }
@@ -43,7 +45,7 @@ class GrindWorkspaceBuilder {
     }
 
     /**
-     * Create workspace builder using WorkspaceSpec
+     * Create workspace builder using WorkspaceSpec. Use existing workspace if script not changed
      * @param input
      * @return
      */
@@ -51,12 +53,20 @@ class GrindWorkspaceBuilder {
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
-        DelegatingScript script = shell.parse(source()) as DelegatingScript;
-        WorkspaceSpec spec = spec.newInstance();
-        spec.parentContext = this.context;
-        script.setDelegate(spec);
-        script.run()
-        return spec.build();
+        def scriptText = source().text
+        if(scriptText == cachedScript){
+            return cachedBuilder
+        } else {
+            DelegatingScript script = shell.parse(scriptText) as DelegatingScript;
+            WorkspaceSpec spec = spec.newInstance();
+            spec.parentContext = this.context;
+            script.setDelegate(spec);
+            script.run()
+            def res = spec.build();
+            cachedScript = scriptText;
+            cachedBuilder = res;
+            return res;
+        }
     }
 
     /**

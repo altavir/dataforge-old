@@ -16,9 +16,14 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.exceptions.NonEmptyMetaMorphException;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -29,7 +34,8 @@ import java.util.Map;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MapPoint implements DataPoint {
+
+public class MapPoint implements DataPoint, MetaMorph {
 
     private Map<String, Value> valueMap;
 
@@ -134,6 +140,25 @@ public class MapPoint implements DataPoint {
         return new Builder(new LinkedHashMap<>(valueMap));
     }
 
+    @Override
+    public void fromMeta(Meta meta) {
+        if (!this.valueMap.isEmpty()) {
+            throw new NonEmptyMetaMorphException(getClass());
+        }
+        for (String valName : meta.getValueNames()) {
+            valueMap.put(valName, meta.getValue(valName));
+        }
+    }
+
+    @Override
+    public Meta toMeta() {
+        MetaBuilder builder = new MetaBuilder("point");
+        for (String name : namesAsArray()) {
+            builder.putValue(name, getValue(name));
+        }
+        return builder.build();
+    }
+
     public static class Builder implements GenericBuilder<MapPoint, Builder> {
 
         private final MapPoint p;
@@ -157,7 +182,7 @@ public class MapPoint implements DataPoint {
         /**
          * if value exists it is replaced
          *
-         * @param name a {@link java.lang.String} object.
+         * @param name  a {@link java.lang.String} object.
          * @param value a {@link hep.dataforge.values.Value} object.
          * @return a {@link hep.dataforge.tables.MapPoint} object.
          */

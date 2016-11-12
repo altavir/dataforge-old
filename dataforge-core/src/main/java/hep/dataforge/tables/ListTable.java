@@ -18,11 +18,13 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatter;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -38,7 +40,7 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable implements Table, Serializable {
+public class ListTable implements Table, MetaMorph {
 
     private final ArrayList<DataPoint> data = new ArrayList<>();
 
@@ -47,7 +49,7 @@ public class ListTable implements Table, Serializable {
      * точке из набора данных. Набор полей каждой точки может быть шире, но не
      * уже.
      */
-    private final TableFormat format;
+    private TableFormat format;
 
     private ListTable(TableFormat format) {
         this.format = format;
@@ -213,6 +215,25 @@ public class ListTable implements Table, Serializable {
      */
     public void clear() {
         this.data.clear();
+    }
+
+    @Override
+    public Meta toMeta() {
+        MetaBuilder res = new MetaBuilder("table");
+        res.putNode("format", format.toMeta());
+        MetaBuilder dataNode = new MetaBuilder("data");
+        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+        res.putNode(dataNode);
+        return res;
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        if (this.format != null || !data.isEmpty()) {
+            throw new NonEmptyMetaMorphException(getClass());
+        }
+        format = TableFormat.buildFromMeta(meta.getNode("format"));
+        data.addAll(DataPoint.buildFromMeta(meta.getNode("data")));
     }
 
     public static class Builder {

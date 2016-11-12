@@ -27,9 +27,9 @@ import hep.dataforge.values.Value;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@NodeDef(name = "x", info = "x axis mapping", target = "method::hep.dataforge.tables.AbstractPointAdapter.getAxisMeta")
-@NodeDef(name = "y", info = "y axis mapping", target = "method::hep.dataforge.tables.AbstractPointAdapter.getAxisMeta")
-public class XYAdapter extends AbstractPointAdapter {
+@NodeDef(name = "x", info = "x axis mapping", target = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
+@NodeDef(name = "y", info = "y axis mapping", target = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
+public class XYAdapter extends AxisPointAdapter {
 
     public static final String X_AXIS = "x";
     public static final String Y_AXIS = "y";
@@ -42,7 +42,7 @@ public class XYAdapter extends AbstractPointAdapter {
 
     public static final XYAdapter DEFAULT_ADAPTER = new XYAdapter();
 
-    public static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
+    private static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
         return new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
                 .putValue(X_VALUE_KEY, xName)
                 .putValue(Y_VALUE_KEY, yName)
@@ -50,10 +50,10 @@ public class XYAdapter extends AbstractPointAdapter {
                 .putValue(Y_ERROR_KEY, yErrName);
     }
 
-    protected final String xValue;
-    protected final String[] yValues;
-    protected final String xError;
-    protected final String[] yErrors;
+    private String xValue;
+    private String[] yValues;
+    private String xError;
+    private String[] yErrors;
 
 
     protected XYAdapter() {
@@ -62,6 +62,10 @@ public class XYAdapter extends AbstractPointAdapter {
 
     public XYAdapter(Meta meta) {
         super(meta);
+        updateCache();
+    }
+
+    private void updateCache(){
         xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
         xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
         if (meta().hasMeta(Y_AXIS)) {
@@ -71,7 +75,6 @@ public class XYAdapter extends AbstractPointAdapter {
             yValues = new String[]{Y_VALUE_KEY};
             yErrors = new String[]{Y_ERROR_KEY};
         }
-
     }
 
     public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
@@ -228,4 +231,10 @@ public class XYAdapter extends AbstractPointAdapter {
                 .build();
     }
 
+
+    @Override
+    public void fromMeta(Meta meta) {
+        super.fromMeta(meta);
+        updateCache();
+    }
 }

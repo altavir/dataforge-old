@@ -15,6 +15,7 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -34,7 +35,7 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
+public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements GenericBuilder<Meta, MetaBuilder> {
 
     //    private ValueProvider valueContext;
     public MetaBuilder(String name) {
@@ -60,15 +61,10 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
         });
-//        if (annotation instanceof MetaBuilder) {
-//            valueContext = ((MetaBuilder) annotation).valueContext;
-//        }
-
     }
 
-//    protected MetaBuilder(String name, MetaBuilder parent) {
-//        super(name, parent);
-//    }
+
+
 
     /**
      * return an immutable annotation base on this builder
@@ -79,11 +75,6 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> {
     public Meta build() {
         return MetaNode.from(this);
     }
-
-//    @Override
-//    public MetaBuilder getBuilder() {
-//        return this;
-//    }
 
     public MetaBuilder rename(String newName) {
         super.setName(newName);

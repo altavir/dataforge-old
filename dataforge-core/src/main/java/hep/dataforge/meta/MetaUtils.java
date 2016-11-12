@@ -10,8 +10,13 @@ import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
+import hep.dataforge.values.ValueUtils;
 import javafx.util.Pair;
 
+import java.io.IOException;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Predicate;
@@ -195,6 +200,80 @@ public class MetaUtils {
                         return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
                     });
         });
+    }
+
+    /**
+     * Write Meta node to binary output stream.
+     *
+     * @param out
+     * @param meta        node to serialize
+     * @param includeName include node name in serialization
+     * @throws IOException
+     */
+    public static void writeMeta(ObjectOutput out, Meta meta, boolean includeName) throws IOException {
+        // write name if it is required
+        if (includeName) {
+            out.writeUTF(meta.getName());
+        }
+        out.writeShort(meta.getValueNames().size());
+        //writing values in format [name length, name, value]
+        for (String valName : meta.getValueNames()) {
+            out.writeUTF(valName);
+            ValueUtils.writeValue(out, meta.getValue(valName));
+        }
+        out.writeShort(meta.getNodeNames().size());
+        for (String nodeName : meta.getNodeNames()) {
+            out.writeUTF(nodeName);
+            List<? extends Meta> metas = meta.getMetaList(nodeName);
+            out.writeShort(metas.size());
+            for (Meta m : metas) {
+                //ignoring names for children
+                writeMeta(out, m, false);
+            }
+        }
+        out.flush();
+    }
+
+    public static void writeMeta(ObjectOutput out, Meta meta) throws IOException {
+        writeMeta(out, meta, true);
+    }
+
+    /**
+     * Read Meta node from serial stream as MetaBuilder
+     *
+     * @param in
+     * @param name the name of the node. If null, then the name is being read from stream
+     * @return
+     * @throws IOException
+     * @throws ClassNotFoundException
+     */
+    public static MetaBuilder readMeta(ObjectInput in, String name) throws IOException, ClassNotFoundException {
+        MetaBuilder res = new MetaBuilder(name);
+        if (name == null) {
+            res.setName(in.readUTF());
+        }
+        short valSize = in.readShort();
+        for (int i = 0; i < valSize; i++) {
+            String valName = in.readUTF();
+            Value val = ValueUtils.readValue(in);
+            res.setValue(valName, val);
+        }
+        short nodeSize = in.readShort();
+        for (int i = 0; i < nodeSize; i++) {
+            String nodeName = in.readUTF();
+            short listSize = in.readShort();
+            List<MetaBuilder> nodeList = new ArrayList<>();
+            for (int j = 0; j < listSize; j++) {
+                nodeList.add(readMeta(in, nodeName));
+            }
+            res.setNodeItem(nodeName, nodeList);
+        }
+
+        return res;
+    }
+
+    public static MetaBuilder readMeta(ObjectInput in) throws IOException, ClassNotFoundException {
+        return readMeta(in,null);
     }
 
 }

@@ -1,22 +1,21 @@
 package hep.dataforge.values;
 
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
+import java.io.ObjectInput;
+import java.io.ObjectOutput;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+
 /**
  * Created by darksnake on 06-Aug-16.
  */
 public class ValueUtils {
-    private static final Charset utf = Charset.forName("UTF-8");
 
     public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
     public static final Comparator<Value> VALUE_COMPARATPR = new ValueComparator();
@@ -65,7 +64,7 @@ public class ValueUtils {
      * @param value
      * @throws IOException
      */
-    public static void writeValue(ObjectOutputStream oos, Value value) throws IOException {
+    public static void writeValue(ObjectOutput oos, Value value) throws IOException {
         if (value.isList()) {
             oos.writeChar('L'); // List designation
             oos.writeShort(value.listValue().size());
@@ -85,9 +84,7 @@ public class ValueUtils {
                 case STRING:
                     //TODO add encding specification
                     oos.writeChar('S');//String
-                    byte[] bytes = value.stringValue().getBytes(utf);
-                    oos.writeInt(bytes.length);
-                    oos.write(bytes);
+                    oos.writeUTF(value.stringValue());
                     break;
                 case NUMBER:
                     Number num = value.numberValue();
@@ -131,7 +128,7 @@ public class ValueUtils {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public static Value readValue(ObjectInputStream ois) throws IOException, ClassNotFoundException {
+    public static Value readValue(ObjectInput ois) throws IOException, ClassNotFoundException {
         char c = ois.readChar();
         switch (c) {
             case 'L':
@@ -147,10 +144,7 @@ public class ValueUtils {
                 Instant time = Instant.ofEpochSecond(ois.readLong(), ois.readLong());
                 return Value.of(time);
             case 'S':
-                int stringSize = ois.readInt();
-                byte[] bytes = new byte[stringSize];
-                ois.read(bytes);
-                return Value.of(new String(bytes, utf));
+                return Value.of(ois.readUTF());
             case 'D':
                 return Value.of(ois.readDouble());
             case 'I':

@@ -16,8 +16,8 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.utils.MetaMorph;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +27,7 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Names extends Iterable<String>, Serializable {
+public interface Names extends Iterable<String>, MetaMorph {
 
     static Names of(String... names) {
         return new NameList(names);

@@ -16,7 +16,7 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.tables.AbstractPointAdapter;
+import hep.dataforge.tables.AxisPointAdapter;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
 
@@ -26,7 +26,7 @@ import hep.dataforge.tables.PointAdapter;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistogramAdapter extends AbstractPointAdapter {
+public class HistogramAdapter extends AxisPointAdapter {
 
     public static final String BIN_BEGIN_NAME = "binBegin";
     public static final String BIN_END_NAME = "binEnd";

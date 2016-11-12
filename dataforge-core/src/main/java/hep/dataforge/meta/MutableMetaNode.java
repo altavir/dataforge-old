@@ -18,7 +18,6 @@ package hep.dataforge.meta;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
-import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 
 import java.io.Serializable;
@@ -33,7 +32,7 @@ import java.util.List;
  */
 @SuppressWarnings("unchecked")
 public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNode<T>
-        implements Serializable, GenericBuilder<Meta, T> {
+        implements Serializable {
 
     protected T parent;
 
@@ -81,8 +80,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      *
      * @return
      */
-    @Override
-    public abstract T self();
+    protected abstract T self();
 
     protected T getParent() {
         return parent;
@@ -540,8 +538,12 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     @Override
-    public Meta build() {
-        return this;
+    public void fromMeta(Meta meta) {
+        if (!isEmpty()) {
+            throw new IllegalStateException("Trying to reconstruct non-empty MetaMorph from Meta");
+        }
+        this.name = meta.getName();
+        meta.getValueNames().forEach(valName -> setValue(valName, meta.getValue(valName), false));
+        meta.getNodeNames().forEach(nodeName -> setNode(nodeName, meta.getMetaList(nodeName), false));
     }
-
 }

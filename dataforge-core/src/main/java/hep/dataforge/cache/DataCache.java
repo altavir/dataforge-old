@@ -5,6 +5,7 @@
  */
 package hep.dataforge.cache;
 
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
@@ -22,7 +23,7 @@ import java.util.function.Function;
  *
  * @author Alexander Nozik
  */
-public abstract class DataCache {
+public abstract class DataCache implements Encapsulated {
 
     /**
      * Wrap data in cacher, which stores it on first call and restores on

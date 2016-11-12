@@ -16,9 +16,12 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.exceptions.NonEmptyMetaMorphException;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -27,7 +30,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public class NameList implements Names, Serializable {
+public class NameList implements Names {
 
     protected ArrayList<String> nameList = new ArrayList<>();
 
@@ -169,4 +172,19 @@ public class NameList implements Names, Serializable {
     public List<String> asList() {
         return (List<String>) nameList.clone();
     }
+
+    @Override
+    public Meta toMeta() {
+        return new MetaBuilder("names").putValue("names", this.asList());
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        if (!this.nameList.isEmpty()) {
+            throw new NonEmptyMetaMorphException(getClass());
+        } else {
+            this.nameList.addAll(Arrays.asList(meta.getStringArray("names")));
+        }
+    }
+
 }

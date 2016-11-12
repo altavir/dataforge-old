@@ -16,7 +16,9 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.names.Name;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
 import java.util.*;
@@ -30,7 +32,8 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-public class MetaNode<T extends MetaNode> extends Meta {
+public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
+    private static final long serialVersionUID = 1L;
 
     protected final Map<String, List<T>> nodes;
     protected String name;
@@ -240,6 +243,25 @@ public class MetaNode<T extends MetaNode> extends Meta {
         } else {
             return def;
         }
+    }
+
+    @Override
+    public Meta toMeta() {
+        return this;
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        if (!isEmpty()) {
+            throw new NonEmptyMetaMorphException(getClass());
+        }
+        this.name = meta.getName();
+
+        if (!(meta instanceof MetaNode)) {
+            meta = from(meta);
+        }
+        this.values.putAll(((MetaNode) meta).values);
+        this.nodes.putAll(((MetaNode) meta).nodes);
     }
 
 //    /**

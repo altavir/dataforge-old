@@ -32,15 +32,7 @@ import java.util.Map;
  */
 public interface DataPoint extends NamedValueSet, Serializable {
 
-    static Meta toMeta(DataPoint point) {
-        MetaBuilder builder = new MetaBuilder("point");
-        for (String name : point.namesAsArray()) {
-            builder.putValue(name, point.getValue(name));
-        }
-        return builder.build();
-    }
-
-    static List<DataPoint> fromMeta(Meta annotation) {
+    static List<DataPoint> buildFromMeta(Meta annotation) {
         List<DataPoint> res = new ArrayList<>();
         for (Meta pointAn : annotation.getMetaList("point")) {
             Map<String, Value> map = new HashMap<>();
@@ -54,14 +46,6 @@ public interface DataPoint extends NamedValueSet, Serializable {
 
     /**
      * {@inheritDoc}
-     *
-     * Значение числового поля, может быть целым или числом с плавающей точкой.
-     * При операциях с объектами типа Number наблюдается потеря
-     * производительности, поэтому все вычисления желательно проводить в
-     * примитивах.
-     *
-     * Имя в принципе может быть составным. Эту возможность можно использовать
-     * для построения деревьев a la root
      */
     @Override
     Value getValue(String name) throws NameNotFoundException;
@@ -83,6 +67,14 @@ public interface DataPoint extends NamedValueSet, Serializable {
         } else {
             return getValue(name).booleanValue();
         }
+    }
+
+    default Meta toMeta() {
+        MetaBuilder builder = new MetaBuilder("point");
+        for (String name : namesAsArray()) {
+            builder.putValue(name, getValue(name));
+        }
+        return builder.build();
     }
 
 }

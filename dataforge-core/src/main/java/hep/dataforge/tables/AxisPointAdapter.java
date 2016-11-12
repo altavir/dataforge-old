@@ -6,6 +6,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
@@ -14,21 +15,21 @@ import hep.dataforge.values.Value;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class AbstractPointAdapter implements PointAdapter {
+public class AxisPointAdapter implements PointAdapter {
 
     public static final String VALUE_KEY = "value";
     public static final String ERROR_KEY = "err";
     public static final String LO_KEY = "lo";
     public static final String UP_KEY = "up";
 
-    private final Meta meta;
+    private Meta meta;
     private final Map<String, String> nameCache = new HashMap<>();
 
-    public AbstractPointAdapter() {
+    public AxisPointAdapter() {
         meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
     }
 
-    public AbstractPointAdapter(Meta meta) {
+    public AxisPointAdapter(Meta meta) {
         if (meta == null) {
             this.meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
         } else {
@@ -36,7 +37,7 @@ public abstract class AbstractPointAdapter implements PointAdapter {
         }
     }
 
-    public AbstractPointAdapter(Map<String, String> map) {
+    public AxisPointAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
         map.entrySet().stream().forEach((entry) -> {
             mb.setValue(entry.getKey(), entry.getValue());
@@ -122,4 +123,18 @@ public abstract class AbstractPointAdapter implements PointAdapter {
         }
     }
 
+    @Override
+    public Meta toMeta() {
+        return this.meta();
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        if(this.meta != null && !this.meta.isEmpty()){
+            throw new NonEmptyMetaMorphException(getClass());
+        } else {
+            nameCache.clear();
+            this.meta = meta;
+        }
+    }
 }

@@ -30,6 +30,7 @@ public class LocalFileDataCache extends DataCache {
     private final Map<Identity, Object> lruCache;
     private final Map<Identity, File> fileMap;
     private final File cacheDir;
+    private Context context;
 
     public LocalFileDataCache(File cacheDir, int cacheSize) {
         this.cacheDir = cacheDir;
@@ -39,6 +40,7 @@ public class LocalFileDataCache extends DataCache {
     }
 
     public LocalFileDataCache(Context context, Meta meta) {
+        this.context = context;
         if (meta.hasValue("directory")) {
             cacheDir = new File(meta.getString("directory"));
         } else {
@@ -47,6 +49,11 @@ public class LocalFileDataCache extends DataCache {
         lruCache = Utils.getLRUCache(meta.getInt("items", 300));
         fileMap = new ConcurrentHashMap<>();
         loadCacheMap();
+    }
+
+    @Override
+    public Context getContext() {
+        return context != null ? context : super.getContext();
     }
 
     private void loadCacheMap() {
