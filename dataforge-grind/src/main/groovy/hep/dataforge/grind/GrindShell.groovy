@@ -176,8 +176,8 @@ class GrindShell {
         PrintWriter writer = terminal.writer();
 
         context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
-        def appender = TerminalLogLayout.buildAppender(context.logger.loggerContext, terminal);
-        context.logger.addAppender(appender)
+//        def appender = TerminalLogLayout.buildAppender(context.logger.loggerContext, terminal);
+//        context.logger.addAppender(appender)
 
         def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
         try {

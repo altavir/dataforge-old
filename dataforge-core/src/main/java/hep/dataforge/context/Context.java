@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.LoggerContext;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
@@ -158,24 +159,26 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
             });
         }
         this.io = io;
-        startLogAppender();
+        if(getLogger() instanceof Logger) {
+            startLogAppender((Logger) getLogger());
+        }
     }
 
-    protected void startLogAppender() {
-        stopLogAppender();
-        LoggerContext loggerContext = getLogger().getLoggerContext();
+    protected void startLogAppender(Logger logger) {
+        stopLogAppender(logger);
+        LoggerContext loggerContext = logger.getLoggerContext();
         OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
         appender.setName("io");
         appender.setContext(loggerContext);
         appender.setOutputStream(io.out());
         appender.start();
-        getLogger().addAppender(appender);
+        logger.addAppender(appender);
     }
 
-    protected void stopLogAppender() {
-        Appender<ILoggingEvent> app = getLogger().getAppender("io");
+    protected void stopLogAppender(Logger logger) {
+        Appender<ILoggingEvent> app = logger.getAppender("io");
         if (app != null) {
-            getLogger().detachAppender(app);
+            logger.detachAppender(app);
             app.stop();
         }
     }

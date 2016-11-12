@@ -15,7 +15,8 @@
  */
 package hep.dataforge.io.reports;
 
-import ch.qos.logback.classic.Logger;
+
+import org.slf4j.Logger;
 
 /**
  * An object that could handle and store its own report. A purpose of DataForge report

@@ -57,7 +57,7 @@ public class GlobalContext extends Context {
     private GlobalContext() {
         super("GLOBAL");
         Locale.setDefault(Locale.US);
-        rootLog.setLogger((Logger) LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
+        rootLog.setLogger(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
         ActionManager actions = new ActionManager();
         //TODO move to plugin
         pluginManager().loadPlugin(actions);

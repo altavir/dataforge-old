@@ -9,7 +9,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
-import hep.dataforge.context.GlobalContext;
 import hep.dataforge.fx.FXDataOutputPane;
 import hep.dataforge.fx.FXUtils;
 import javafx.scene.Parent;
@@ -72,7 +71,7 @@ public class LogFragment extends Fragment implements AutoCloseable {
             }
         };
         logAppender.setName(CONSOLE_LOG_APPENDER_NAME);
-        logAppender.setContext(GlobalContext.instance().getLogger().getLoggerContext());
+//        logAppender.setContext(GlobalContext.instance().getLogger().getLoggerContext());
         logAppender.start();
     }
 

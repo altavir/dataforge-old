@@ -15,11 +15,11 @@
  */
 package hep.dataforge.io.reports;
 
-import ch.qos.logback.classic.Logger;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
