@@ -15,20 +15,19 @@
  */
 package hep.dataforge.stat.models;
 
-import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
-import static java.lang.Double.isNaN;
-import static java.lang.Math.sqrt;
-import java.util.Iterator;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
+
+import java.util.Iterator;
+
 import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
-import static java.lang.Double.isNaN;
+import static java.lang.Math.sqrt;
 
 /**
  * Генератор наборов данных для спектров. На входе требуется набор данных,
@@ -38,7 +37,10 @@ import static java.lang.Double.isNaN;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@Deprecated
 public class HistogramGenerator implements Generator {
+
+    public static String[] names = {"binBegin", "binEnd", "count"};
 
     static final double POISSON_BOUNDARY = 100;
     private GeneratorType genType = GeneratorType.POISSONIAN;
@@ -68,7 +70,7 @@ public class HistogramGenerator implements Generator {
     /** {@inheritDoc} */
     @Override
     public Table generateData(Iterable<DataPoint> config) {
-        ListTable.Builder res = new ListTable.Builder(Histogram.names);
+        ListTable.Builder res = new ListTable.Builder(names);
         for (Iterator<DataPoint> it = config.iterator(); it.hasNext();) {
             res.row(this.generateDataPoint(it.next()));
 
@@ -128,11 +130,11 @@ public class HistogramGenerator implements Generator {
      * @param begin a double.
      * @param end a double.
      * @param binNumber a int.
-     * @return a {@link hep.dataforge.stat.models.Histogram} object.
+     * @return
      */
     public Table generateUniformHistogram(double begin, double end, int binNumber) {
         assert end > begin;
-        ListTable.Builder res = new ListTable.Builder(Histogram.names);
+        ListTable.Builder res = new ListTable.Builder(names);
         DataPoint bin;
         double step = (end - begin) / (binNumber);
         double a = begin;
@@ -160,7 +162,7 @@ public class HistogramGenerator implements Generator {
     /**
      * <p>setGeneratorType.</p>
      *
-     * @param type a {@link hep.dataforge.fitting.models.HistogramGenerator.GeneratorType} object.
+     * @param type
      */
     public void setGeneratorType(GeneratorType type) {
         this.genType = type;

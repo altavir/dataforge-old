@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
+
 import static java.lang.Math.sqrt;
 
 /**
@@ -28,6 +29,7 @@ import static java.lang.Math.sqrt;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@Deprecated
 public class HistogramBin implements DataPoint {
 
     private static final String[] names = {"binBegin", "binEnd", "count", "binCenter", "binSize"};

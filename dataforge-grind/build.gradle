@@ -1,5 +1,13 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.+'
+    }
+}
+
 apply plugin: "groovy"
 apply plugin: "application"
+apply plugin: 'com.github.johnrengelman.shadow'
 
 if (!hasProperty('mainClass')) {
     ext.mainClass = 'hep.dataforge.grind.RunGrindShell'
@@ -12,6 +20,7 @@ dependencies {
     compile 'org.codehaus.groovy:groovy:2.4.+'
     compile project(':dataforge-core')
     compile project(':dataforge-plots:plots-jfc')
+    compile project(':dataforge-maths:groovymath')
     compile group: 'org.jline', name: 'jline', version: '3.0.+'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
     compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.14'

@@ -16,9 +16,11 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NamingException;
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import hep.dataforge.tables.SimplePointSource;
+
 import java.util.Arrays;
+
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 
 /**
  * <p>
@@ -27,6 +29,7 @@ import java.util.Arrays;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@Deprecated
 public class Histogram extends SimplePointSource {
 
     public static String[] names = {"binBegin", "binEnd", "count"};
@@ -35,7 +38,6 @@ public class Histogram extends SimplePointSource {
     /**
      * Create an empty histogram with uniformly distributed bin borders
      *
-     * @param name
      * @param begin a double.
      * @param end a double.
      * @param binSize a double.
@@ -59,7 +61,6 @@ public class Histogram extends SimplePointSource {
     /**
      * Create an empty histogram with uniformly distributed bin borders
      *
-     * @param name
      * @param begin a double.
      * @param binSize a double.
      * @param binNum a int.
@@ -74,7 +75,7 @@ public class Histogram extends SimplePointSource {
 
         int counter = 0;
         for (Number n : data) {
-            if ((n.doubleValue() >= a) && (n.doubleValue() <= b)) {
+            if ((n.doubleValue() >= a) && (n.doubleValue() < b)) {
                 counter++;
             }
         }
@@ -114,5 +115,4 @@ public class Histogram extends SimplePointSource {
             }
         }
     }
-
 }
