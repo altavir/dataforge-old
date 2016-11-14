@@ -1,4 +1,9 @@
 
+
+configurations {
+    all*.exclude group: 'commons-logging'
+}
+
 dependencies {
     compile project(':dataforge-core')
     compile 'org.controlsfx:controlsfx:8.40.12'

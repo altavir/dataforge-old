@@ -14,7 +14,7 @@ class MapRow implements GRow {
         this.map.putAll(map);
     }
 
-    MapRow(String[] keys, Object[] values) {
+    MapRow(List keys, List values) {
         if (keys.size() != values.size()) {
             throw new DimensionMismatchException(values.size(), keys.size());
         }

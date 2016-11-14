@@ -167,9 +167,13 @@ public class ListTable implements Table, MetaMorph {
                 return StreamSupport.stream(this.spliterator(), false).collect(Collectors.toList());
             }
 
-            @Override
             public Stream<Value> stream() {
                 return ListTable.this.stream().map(point -> point.getValue(columnName));
+            }
+
+            @Override
+            public Iterator<Value> iterator() {
+                return stream().iterator();
             }
 
             @Override

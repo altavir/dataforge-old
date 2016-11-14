@@ -20,9 +20,9 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * колонка однородных значений
@@ -42,10 +42,7 @@ public interface Column extends Iterable<Value>, Annotated {
 
     int size();
 
-    @Override
-    default Iterator<Value> iterator() {
-        return stream().iterator();
+    default Stream<Value> stream() {
+        return StreamSupport.stream(spliterator(), false);
     }
-
-    Stream<Value> stream();
 }

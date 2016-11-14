@@ -21,6 +21,7 @@ import hep.dataforge.values.ValueFormatFactory;
 import hep.dataforge.values.ValueFormatter;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -72,9 +73,13 @@ public class ListColumn implements Column {
         return values.get(n);
     }
 
-    @Override
     public Stream<Value> stream() {
         return values.stream();
+    }
+
+    @Override
+    public Iterator<Value> iterator() {
+        return values.iterator();
     }
 
     @Override

@@ -105,15 +105,16 @@ public class LogFragment extends Fragment implements AutoCloseable {
     }
 
     public void addLogHandler(String loggerName) {
-        try {
-            addLogHandler((Logger) LoggerFactory.getLogger(loggerName));
-        } catch (ClassCastException ex) {
-            LoggerFactory.getLogger(getClass()).error("Failed to add log handler. Only Logback loggers are supported.");
-        }
+        addLogHandler(LoggerFactory.getLogger(loggerName));
     }
 
-    public void addLogHandler(Logger logger) {
-        logger.addAppender(logAppender);
+    public void addLogHandler(org.slf4j.Logger logger) {
+        if (logger instanceof Logger) {
+            ((Logger) logger).addAppender(logAppender);
+        } else {
+            LoggerFactory.getLogger(getClass()).error("Failed to add log handler. Only Logback loggers are supported.");
+        }
+
     }
 
     /**

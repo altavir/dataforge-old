@@ -15,7 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import ch.qos.logback.classic.Logger;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.GlobalContext;
 import hep.dataforge.control.connections.Connection;
@@ -28,6 +27,7 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;

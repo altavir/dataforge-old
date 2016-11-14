@@ -4,7 +4,7 @@ package hep.dataforge.maths.groovy.tables
  * A dynamic Groovy table
  * Created by darksnake on 26-Oct-15.
  */
-class GTable{
+class GTable implements Iterable<GColumn> {
     List<GColumn> columns = new ArrayList<>();
 
     /**
@@ -71,11 +71,11 @@ class GTable{
         addColumn(name, column)
     }
 
-    def synchronized addRow(MapRow row) {
+    def synchronized addRow(GRow row) {
         //filling blank spaces
         fillNulls();
 
-        for(e in row.asMap()){
+        for (e in row.asMap()) {
             getAt(e.key).add(e.value);
         }
     }
@@ -101,15 +101,15 @@ class GTable{
         addRow(row)
     }
 
-    MapRow row(int index) {
-        return new MapRow(getColumnNames(), columns.collect { it[index] })
+    GRow row(int index) {
+        return new TableRow(this, index);
     }
 
     /**
      * List of all rows. Missing values are automatically replaced by apropriate nulls
      * @return
      */
-    List<MapRow> getRows() {
+    List<GRow> getRows() {
         return [0..maxColumnLength()].collect { row(it) };
     }
 
@@ -117,7 +117,7 @@ class GTable{
      * Iterator for better performance and less memory impact work with rows (does not store all rows in separate structure simultaneously)
      * @return
      */
-    Iterator<MapRow> getRowIterator() {
+    Iterator<GRow> getRowIterator() {
         return new Iterator<MapRow>() {
             int index = 0;
 
@@ -166,5 +166,10 @@ class GTable{
 
     List<String> getTypes() {
         columns.collect { it.type }
+    }
+
+    @Override
+    Iterator<GColumn> iterator() {
+        return columns.iterator();
     }
 }

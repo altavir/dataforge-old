@@ -1,5 +1,5 @@
 
 description = 'dataforge-core'
 dependencies {
-    compile 'ch.qos.logback:logback-classic:1.1.3'
+    compile 'ch.qos.logback:logback-classic:1.1.+'
 }

@@ -17,7 +17,6 @@ mainClassName = mainClass
 description = 'The grind plugin for dataforge framework'
 
 dependencies {
-    compile 'org.codehaus.groovy:groovy:2.4.+'
     compile project(':dataforge-core')
     compile project(':dataforge-plots:plots-jfc')
     compile project(':dataforge-maths:groovymath')

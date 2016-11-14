@@ -3,7 +3,7 @@ package hep.dataforge.maths.groovy.tables
 import java.time.Instant
 
 /**
- * GColumn for dynamic groovy table
+ * GColumn for dynamic groovy table. Column can grow, but cannot be diminished.
  *
  * Created by darksnake on 26-Oct-15.
  */
