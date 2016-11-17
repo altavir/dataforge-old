@@ -2,7 +2,7 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
-import hep.dataforge.context.GlobalContext
+import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.grind.plots.PlotHelper
@@ -35,7 +35,7 @@ class GrindShell {
 
     private Binding binding = new Binding();
     private GroovyShell shell;
-    private Context context = GlobalContext.instance();
+    private Context context = Global.instance();
     private Set<Hook> hooks = new HashSet<>();
     private Terminal terminal;
 
@@ -53,7 +53,7 @@ class GrindShell {
 
         //define important properties
         binding.setProperty("context", context)
-        binding.setProperty("plots", new PlotHelper(GlobalContext.instance()))
+        binding.setProperty("plots", new PlotHelper(Global.instance()))
         shell = new GroovyShell(getClass().classLoader, binding, configuration);
 
     }

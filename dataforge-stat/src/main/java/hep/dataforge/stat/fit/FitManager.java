@@ -17,14 +17,15 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.context.GlobalContext;
-import hep.dataforge.stat.models.Model;
-import hep.dataforge.stat.models.ModelManager;
-import hep.dataforge.stat.models.XYModel;
+import hep.dataforge.context.Global;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.stat.models.Model;
+import hep.dataforge.stat.models.ModelManager;
+import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.tables.Table;
+
 import java.io.PrintWriter;
 
 /**
@@ -42,7 +43,7 @@ public class FitManager implements Encapsulated {
     protected final ModelManager modelManager;
 
     public FitManager() {
-        this.context = GlobalContext.instance();
+        this.context = Global.instance();
         modelManager = new ModelManager();
     }
 
@@ -122,7 +123,7 @@ public class FitManager implements Encapsulated {
     }
 
     public FitTaskResult runTask(FitState state, FitStage task, Reportable log) {
-        return runTask(state, task, GlobalContext.out(), log);
+        return runTask(state, task, Global.out(), log);
     }
 
     public FitTaskResult runTask(FitState state, FitStage task, PrintWriter writer, Reportable log) {

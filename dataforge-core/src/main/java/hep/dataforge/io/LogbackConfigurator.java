@@ -19,7 +19,7 @@ public class LogbackConfigurator extends BasicConfigurator {
         ConsoleAppender<ILoggingEvent> ca = new ConsoleAppender<>();
 //        OutputStreamAppender<ILoggingEvent> ca = new OutputStreamAppender<>();
 //        ca.setOutputStream(System.out);
-//        ca.setOutputStream(GlobalContext.instance().io().out());
+//        ca.setOutputStream(Global.instance().io().out());
         ca.setContext(lc);
         ca.setName("console");
         LayoutWrappingEncoder<ILoggingEvent> encoder = new LayoutWrappingEncoder<>();

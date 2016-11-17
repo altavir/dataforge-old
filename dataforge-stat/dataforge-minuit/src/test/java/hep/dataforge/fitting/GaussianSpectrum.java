@@ -36,7 +36,7 @@ import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
-import static hep.dataforge.context.GlobalContext.out;
+import static hep.dataforge.context.Global.out;
 
 /**
  *

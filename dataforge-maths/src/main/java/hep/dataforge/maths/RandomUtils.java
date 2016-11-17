@@ -15,7 +15,7 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.values.Value;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -35,7 +35,7 @@ public class RandomUtils {
      * @return a {@link org.apache.commons.math3.random.RandomGenerator} object.
      */
     public static RandomGenerator getDefaultRandomGenerator() {
-        defaultGenerator.setSeed(GlobalContext.instance().getInt("random.seed",-1));
+        defaultGenerator.setSeed(Global.instance().getInt("random.seed",-1));
         return defaultGenerator;
     }
 
@@ -45,7 +45,7 @@ public class RandomUtils {
      * @param seed a int.
      */
     public static void setSeed(int seed) {
-        GlobalContext.instance().putValue("random.seed", Value.of(seed));
+        Global.instance().putValue("random.seed", Value.of(seed));
         defaultGenerator.setSeed(seed);
     }    
 }

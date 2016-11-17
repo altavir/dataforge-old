@@ -15,7 +15,7 @@
  */
 package hep.dataforge.io.reports;
 
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
@@ -54,7 +54,7 @@ public class Report implements Reportable, Named {
     }
 
     public Report(String name) {
-        this(name, GlobalContext.instance());
+        this(name, Global.instance());
     }
 
     @Override

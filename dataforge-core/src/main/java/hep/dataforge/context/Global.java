@@ -25,14 +25,13 @@ import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.ReportEntry;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
+import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintWriter;
-import java.util.HashSet;
 import java.util.Locale;
-import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -43,10 +42,10 @@ import java.util.concurrent.Executors;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class GlobalContext extends Context {
+public class Global extends Context {
 
-    private static final GlobalContext instance = new GlobalContext();
-    private static final Set<Context> contexts = new HashSet<>();
+    private static Global instance = new Global();
+    private static final ReferenceRegistry<Context> contextRegistry = new ReferenceRegistry();
     private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread res = new Thread(r, "DF_DISPATCH");
 //        res.setDaemon(false);
@@ -54,17 +53,6 @@ public class GlobalContext extends Context {
         return res;
     });
 
-    private GlobalContext() {
-        super("GLOBAL");
-        Locale.setDefault(Locale.US);
-        rootLog.setLogger(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
-        ActionManager actions = new ActionManager();
-        //TODO move to plugin
-        pluginManager().loadPlugin(actions);
-        actions.registerAction(TransformTableAction.class);
-        actions.registerAction(ReadPointSetAction.class);
-        actions.registerAction(RunConfigAction.class);
-    }
 
     /**
      * A single thread executor for DataForge messages dispatch. No heavy calculations should be done on this thread
@@ -75,36 +63,21 @@ public class GlobalContext extends Context {
         return dispatchThreadExecutor;
     }
 
-    public static GlobalContext instance() {
+    public synchronized static Global instance() {
         return instance;
     }
 
     /**
-     * Get previously registered context
-     *
-     * @param contextName
+     * Get previously build context o build a new one
+     * @param name
      * @return
      */
-    public static Context getContext(String contextName) {
-        return contexts.stream().filter(ctx -> ctx.getName().equals(contextName)).findFirst().orElse(null);
-    }
-
-    /**
-     * Register a context to be retrieved later
-     *
-     * @param context
-     */
-    public static void registerContext(Context context) {
-        contexts.add(context);
-    }
-
-    /**
-     * Remove context from registry
-     *
-     * @param context
-     */
-    public static void unregisterContext(Context context) {
-        contexts.remove(context);
+    public static synchronized Context getContext(String name) {
+        return contextRegistry.findFirst(ctx -> ctx.getName().equals(name)).orElseGet(()-> {
+            Context ctx = new Context(name);
+            contextRegistry.add(ctx);
+            return ctx;
+        });
     }
 
     public static File getFile(String path) {
@@ -113,6 +86,18 @@ public class GlobalContext extends Context {
 
     public static PrintWriter out() {
         return new PrintWriter(instance.io().out());
+    }
+
+    private Global() {
+        super("GLOBAL");
+        Locale.setDefault(Locale.US);
+        rootLog.setLogger(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
+        ActionManager actions = new ActionManager();
+        //TODO move to plugin
+        pluginManager().loadPlugin(actions);
+        actions.registerAction(TransformTableAction.class);
+        actions.registerAction(ReadPointSetAction.class);
+        actions.registerAction(RunConfigAction.class);
     }
 
     @Override
@@ -210,7 +195,7 @@ public class GlobalContext extends Context {
     @Override
     public void close() throws Exception {
         getLogger().info("Shutting down global context");
-        for (Context ctx : contexts) {
+        for (Context ctx : contextRegistry) {
             ctx.close();
         }
         dispatchThreadExecutor.shutdown();

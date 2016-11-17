@@ -20,7 +20,7 @@ import hep.dataforge.stat.fit.MINUITPlugin;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.tables.Table;
 
-import static hep.dataforge.context.GlobalContext.out;
+import static hep.dataforge.context.Global.out;
 
 /**
  *

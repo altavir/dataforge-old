@@ -16,7 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.MINUIT.*;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.io.reports.Report;
 import hep.dataforge.io.reports.Reportable;
 import hep.dataforge.maths.NamedMatrix;
@@ -95,7 +95,7 @@ public class MINUITFitEngine implements FitEngine {
      */
     public FitTaskResult runHesse(FitState state, FitStage task, Reportable log) {
         int strategy;
-        strategy = GlobalContext.instance().getInt("MINUIT_STRATEGY", 2);
+        strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
 
         log.report("Generating errors using MnHesse 2-nd order gradient calculator.");
 
@@ -150,9 +150,9 @@ public class MINUITFitEngine implements FitEngine {
         log.report("Starting fit using Minuit.");
 
         int strategy;
-        strategy = GlobalContext.instance().getInt("MINUIT_STRATEGY", 2);
+        strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
         boolean force;
-        force = GlobalContext.instance().getBoolean("FORCE_DERIVS", false);
+        force = Global.instance().getBoolean("FORCE_DERIVS", false);
 
         String[] fitPars = getFitPars(state, task);
 

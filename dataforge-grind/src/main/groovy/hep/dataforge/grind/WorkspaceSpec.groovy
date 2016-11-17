@@ -8,7 +8,8 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
-import hep.dataforge.context.GlobalContext
+import hep.dataforge.context.Global
+import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -23,7 +24,7 @@ import hep.dataforge.workspace.Workspace
 @CompileStatic
 class WorkspaceSpec {
     private final Workspace.Builder builder = BasicWorkspace.builder();
-    Context parentContext = GlobalContext.instance();
+    Context parentContext = Global.instance();
 
     /**
      * build context for the workspace using
@@ -46,9 +47,17 @@ class WorkspaceSpec {
         Map<String, Meta> pluginMap = new HashMap<>();
 
         Context build() {
-            Context res = new Context(WorkspaceSpec.this.parentContext, name)
+            Context res = Global.getContext(name);
             properties.each { key, value -> res.putValue(key.toString(), value) }
-            pluginMap.forEach { String key, Meta meta -> res.pluginManager().loadPlugin(key.toString()).configure(meta) }
+            pluginMap.forEach { String key, Meta meta ->
+                Plugin plugin;
+                if (res.pluginManager().hasPlugin(key)) {
+                    plugin = res.pluginManager().getPlugin(key);
+                } else {
+                    plugin = res.pluginManager().loadPlugin(key.toString())
+                }
+                plugin.configure(meta)
+            }
             return res;
         }
 

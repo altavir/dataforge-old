@@ -18,7 +18,7 @@ package hep.dataforge.actions;
 import hep.dataforge.computation.TaskListener;
 import hep.dataforge.computation.TaskListenerDelegate;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
@@ -58,7 +58,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     private Logger logger;
     private String parentProcessName;
-    private Context context = GlobalContext.instance();
+    private Context context = Global.instance();
     private Map<String, Report> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {

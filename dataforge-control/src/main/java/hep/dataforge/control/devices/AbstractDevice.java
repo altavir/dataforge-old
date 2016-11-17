@@ -16,7 +16,7 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.exceptions.ControlException;
@@ -131,7 +131,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     @Override
     public Context getContext() {
         if (context == null) {
-            return GlobalContext.instance();
+            return Global.instance();
         } else {
             return this.context;
         }

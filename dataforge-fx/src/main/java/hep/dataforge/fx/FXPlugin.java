@@ -2,7 +2,7 @@ package hep.dataforge.fx;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.utils.NonNull;
 import javafx.application.Application;
@@ -39,7 +39,7 @@ public class FXPlugin extends BasicPlugin {
 
     @Override
     public void attach(Context context) {
-        if (!context.equals(GlobalContext.instance())) {
+        if (!context.equals(Global.instance())) {
             context.getLogger().warn("Starting fx plugin not in global context");
         }
         Platform.setImplicitExit(false);

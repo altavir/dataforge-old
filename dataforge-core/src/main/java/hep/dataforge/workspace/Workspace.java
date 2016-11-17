@@ -17,7 +17,7 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
@@ -155,7 +155,7 @@ public interface Workspace extends Encapsulated {
 
         default B loadFrom(Meta meta) {
             if (meta.hasValue("context")) {
-                setContext(GlobalContext.getContext(meta.getString("context")));
+                setContext(Global.getContext(meta.getString("context")));
             }
             if (meta.hasMeta("data")) {
                 meta.getMetaList("data").forEach((Meta dataMeta) -> {

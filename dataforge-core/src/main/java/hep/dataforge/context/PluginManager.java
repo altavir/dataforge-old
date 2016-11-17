@@ -101,16 +101,20 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public <T extends Plugin> T loadPlugin(T plugin) {
-        for (VersionTag tag : plugin.dependsOn()) {
-            //If dependency not loaded
-            if (!hasPlugin(tag)) {
-                //Load dependency
-                loadPlugin(tag);
+        if (!this.plugins.containsKey(plugin.getName())) {
+            for (VersionTag tag : plugin.dependsOn()) {
+                //If dependency not loaded
+                if (!hasPlugin(tag)) {
+                    //Load dependency
+                    loadPlugin(tag);
+                }
             }
+            getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
+            plugin.attach(getContext());
+            plugins.put(plugin.getName(), plugin);
+        } else {
+            getContext().getLogger().debug("Plugin with name {} already exists in [}", plugin.getName(), getContext().getName());
         }
-        getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
-        plugin.attach(getContext());
-        plugins.put(plugin.getName(), plugin);
         return plugin;
     }
 

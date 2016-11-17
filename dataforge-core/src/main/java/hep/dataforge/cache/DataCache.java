@@ -6,7 +6,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
@@ -56,7 +56,7 @@ public abstract class DataCache implements Encapsulated {
      * @return
      */
     protected Executor executor() {
-        return GlobalContext.dispatchThreadExecutor();
+        return Global.dispatchThreadExecutor();
     }
 
     /**

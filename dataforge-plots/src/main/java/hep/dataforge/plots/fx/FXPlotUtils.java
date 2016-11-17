@@ -5,7 +5,7 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.fx.FXPlugin;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.plots.PlotFrame;
@@ -72,7 +72,7 @@ public class FXPlotUtils {
     }
 
     public static PlotContainer displayContainer(String title, double width, double height) {
-        return displayContainer(GlobalContext.instance().getPlugin(FXPlugin.class), title, width, height);
+        return displayContainer(Global.instance().getPlugin(FXPlugin.class), title, width, height);
     }
 
     private static class PlotContainerHolder {

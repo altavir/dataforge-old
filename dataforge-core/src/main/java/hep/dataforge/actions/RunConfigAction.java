@@ -16,12 +16,14 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
+
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
@@ -44,7 +46,7 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(input.meta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = new Context(getContext(), contextName);
+        Context ac = Global.getContext(contextName).withParent(getContext());
         if (meta.hasValue("configFile")) {
             File cfgFile = getContext().io().getFile(meta.getString("configFile"));
             try {

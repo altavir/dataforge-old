@@ -51,7 +51,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     protected final Report rootLog;
-    private final Context parent;
+    private Context parent = null;
     private final String name;
     private final PluginManager pm;
     protected TaskManager taskManager = null;
@@ -60,19 +60,20 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     /**
      * Build context from metadata
      *
-     * @param parent
      * @param name
-     * @param config
      */
-    public Context(Context parent, String name, Meta config) {
+    protected Context(String name) {
         this.pm = new PluginManager(this);
-        if (parent == null) {
-            this.parent = GlobalContext.instance();
-        } else {
-            this.parent = parent;
-        }
         this.rootLog = new Report(name, parent);
         this.name = name;
+    }
+
+    public Context withParent(Context parent) {
+        this.parent = parent;
+        return this;
+    }
+
+    public Context withProperties(Meta config){
         if (config != null) {
             if (config.hasMeta("property")) {
                 config.getMetaList("property").stream().forEach((propertyNode) -> {
@@ -80,14 +81,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
                 });
             }
         }
-    }
-
-    public Context(Context parent, String name) {
-        this(parent, name, null);
-    }
-
-    public Context(String name) {
-        this(GlobalContext.instance(), name);
+        return this;
     }
 
     /**
@@ -123,7 +117,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         if (this.parent != null) {
             return parent;
         } else {
-            return GlobalContext.instance();
+            return Global.instance();
         }
     }
 
@@ -197,7 +191,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
             if (getParent() != null) {
                 return getParent().taskManager();
             } else {
-                return GlobalContext.instance().taskManager();
+                return Global.instance().taskManager();
             }
         } else {
             return taskManager;
@@ -326,7 +320,6 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         if (this.taskManager != null) {
             taskManager.shutdown();
         }
-        GlobalContext.unregisterContext(this);
     }
 
     public <T extends Plugin> T getPlugin(Class<T> type) {

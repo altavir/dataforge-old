@@ -6,7 +6,7 @@
 package hep.dataforge.control.virtual;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Measurement;
@@ -15,6 +15,7 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ public class VirtualSensorFactory<T> {
     private Function<Sensor<T>, T> valueFactory = (Sensor<T> sensor) -> null;
     private Function<Sensor<T>, Duration> delayFactory = (sensor) -> Duration.ZERO;
     private String name = "device";
-    private Context context = GlobalContext.instance();
+    private Context context = Global.instance();
     private Meta meta = Meta.buildEmpty("device");
     private List<StateDef> states = new ArrayList<>();
     private List<RoleDef> roles = new ArrayList<>();

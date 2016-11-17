@@ -15,37 +15,13 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.context.GlobalContext;
-import static java.lang.Math.abs;
-import java.util.Arrays;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import org.apache.commons.math3.linear.DecompositionSolver;
-import org.apache.commons.math3.linear.DiagonalMatrix;
-import org.apache.commons.math3.linear.EigenDecomposition;
-import org.apache.commons.math3.linear.LUDecomposition;
-import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.SingularMatrixException;
+import hep.dataforge.context.Global;
+import org.apache.commons.math3.linear.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
-import static java.lang.Math.abs;
-import static java.util.Arrays.fill;
-import static java.util.Arrays.sort;
+
+import java.util.Arrays;
+
 import static java.lang.Math.abs;
 import static java.util.Arrays.fill;
 import static java.util.Arrays.sort;
@@ -73,7 +49,7 @@ public class MatrixOperations {
             return false;
         }
         double det1 = determinant(inverse(matrix));
-        return abs(det * det1 - 1) < GlobalContext.instance().getDouble("CONDITIONALITY", 1e-4);
+        return abs(det * det1 - 1) < Global.instance().getDouble("CONDITIONALITY", 1e-4);
     }
 
     /**
@@ -100,7 +76,7 @@ public class MatrixOperations {
         assert matrix.getColumnDimension() == matrix.getRowDimension();
         RealMatrix res;
         try {
-            double singularityThreshold = GlobalContext.instance().getDouble(MATRIX_SINGULARITY_THRESHOLD, 1e-11);
+            double singularityThreshold = Global.instance().getDouble(MATRIX_SINGULARITY_THRESHOLD, 1e-11);
             DecompositionSolver solver = new LUDecomposition(matrix, singularityThreshold).getSolver();
             res = solver.getInverse();
         } catch (SingularMatrixException ex) {

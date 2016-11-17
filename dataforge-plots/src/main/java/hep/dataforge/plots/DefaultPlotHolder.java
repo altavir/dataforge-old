@@ -5,7 +5,7 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.fx.FXPlugin;
 import hep.dataforge.meta.Meta;
@@ -35,7 +35,7 @@ public class DefaultPlotHolder implements PlotHolder {
     }
 
     public DefaultPlotHolder() {
-        this.fx = GlobalContext.instance().getPlugin(FXPlugin.class);
+        this.fx = Global.instance().getPlugin(FXPlugin.class);
     }
 
     protected FXPlotFrame<?> buildFrame() {

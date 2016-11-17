@@ -6,8 +6,9 @@
 package hep.dataforge.io;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.meta.MetaBuilder;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -45,11 +46,11 @@ public class MetaFileReader {
     }
 
     public static MetaBuilder read(String name, File file) throws IOException, ParseException {
-        return instance().read(GlobalContext.instance(), file, null).rename(name);
+        return instance().read(Global.instance(), file, null).rename(name);
     }
 
     public static MetaBuilder read(File file) throws IOException, ParseException {
-        return instance().read(GlobalContext.instance(), file, null);
+        return instance().read(Global.instance(), file, null);
     }
 
     public MetaBuilder read(Context context, String path, Charset encoding) throws IOException, ParseException {

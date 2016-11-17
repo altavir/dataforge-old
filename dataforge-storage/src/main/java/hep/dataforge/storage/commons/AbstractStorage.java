@@ -16,7 +16,7 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
@@ -374,7 +374,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
 
     @Override
     public Context getContext() {
-        return GlobalContext.instance();
+        return Global.instance();
     }
 
     @Override

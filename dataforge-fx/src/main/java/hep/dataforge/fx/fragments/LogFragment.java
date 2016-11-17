@@ -71,7 +71,7 @@ public class LogFragment extends Fragment implements AutoCloseable {
             }
         };
         logAppender.setName(CONSOLE_LOG_APPENDER_NAME);
-//        logAppender.setContext(GlobalContext.instance().getLogger().getLoggerContext());
+//        logAppender.setContext(Global.instance().getLogger().getLoggerContext());
         logAppender.start();
     }
 

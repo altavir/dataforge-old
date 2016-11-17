@@ -16,7 +16,7 @@
 package hep.dataforge.utils;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.GlobalContext;
+import hep.dataforge.context.Global;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 
@@ -31,6 +31,6 @@ public interface ContextMetaFactory<T> {
     T build(Context context, Meta annotation);
 
     default T build(){
-        return build(GlobalContext.instance(), MetaBuilder.buildEmpty(null));
+        return build(Global.instance(), MetaBuilder.buildEmpty(null));
     }
 }

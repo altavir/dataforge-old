@@ -1,6 +1,6 @@
 package hep.dataforge.grind
 
-import hep.dataforge.context.GlobalContext
+import hep.dataforge.context.Global
 
 /**
  * Created by darksnake on 27-Oct-16.
@@ -12,6 +12,6 @@ try {
 } catch (Exception ex) {
     ex.printStackTrace();
 } finally {
-    GlobalContext.instance().close();
+    Global.instance().close();
 }
 println "grind shell closed"

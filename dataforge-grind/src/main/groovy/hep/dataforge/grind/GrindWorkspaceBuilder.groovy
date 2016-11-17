@@ -1,7 +1,7 @@
 package hep.dataforge.grind
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.GlobalContext
+import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
 import hep.dataforge.description.TextDescriptorFormatter
 import hep.dataforge.meta.Meta
@@ -15,7 +15,7 @@ class GrindWorkspaceBuilder {
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
     private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
-    private Context context = GlobalContext.instance();
+    private Context context = Global.instance();
     private String cachedScript;
     private Workspace.Builder cachedBuilder;
 
