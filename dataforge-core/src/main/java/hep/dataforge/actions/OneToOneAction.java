@@ -19,8 +19,8 @@ import hep.dataforge.computation.PipeGoal;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -67,16 +67,16 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected void buildReport(String name, Data<? extends T> data) {
-        Reportable parent;
+        Logable parent;
         if (data != null && data instanceof ActionResult) {
-            Report actionLog = ((ActionResult) data).log();
+            Log actionLog = ((ActionResult) data).log();
             if (actionLog.getParent() != null) {
                 //Getting parent from previous report
                 parent = actionLog.getParent();
             } else {
-                parent = new Report(name, getContext());
+                parent = new Log(name, getContext());
             }
-            setReport(name, new Report(getName(), parent));
+            setReport(name, new Log(getName(), parent));
         }
     }
 

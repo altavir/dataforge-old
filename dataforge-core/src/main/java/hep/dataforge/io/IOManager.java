@@ -15,14 +15,21 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.OutputStreamAppender;
+import hep.dataforge.context.Plugin;
+import hep.dataforge.io.reports.LogEntry;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -31,7 +38,8 @@ import java.io.OutputStream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface IOManager extends Encapsulated {
+public interface IOManager extends Plugin {
+    String LOGGER_APPENDER_NAME = "df.io";
 
     String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
     String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
@@ -131,13 +139,32 @@ public interface IOManager extends Encapsulated {
         return tmp;
     }
 
-    /**
-     * Context for this IOManager
-     *
-     * @return a {@link hep.dataforge.context.Context} object.
-     */
-    @Override
-    Context getContext();
+    default Consumer<LogEntry> getLogEntryHandler() {
+        return (LogEntry t) -> {
+            try {
+                out().write((t.toString() + "\n").getBytes());
+                out().flush();
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        };
+    }
 
-    void setContext(Context context);
+    default void addLoggerAppender(Logger logger){
+        LoggerContext loggerContext = logger.getLoggerContext();
+        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setName(LOGGER_APPENDER_NAME);
+        appender.setContext(loggerContext);
+        appender.setOutputStream(out());
+        appender.start();
+        logger.addAppender(appender);
+    }
+
+    default void removeLoggerAppender(Logger logger){
+        Appender<ILoggingEvent> app = logger.getAppender(LOGGER_APPENDER_NAME);
+        if (app != null) {
+            logger.detachAppender(app);
+            app.stop();
+        }
+    }
 }

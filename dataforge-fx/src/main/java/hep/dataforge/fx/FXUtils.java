@@ -5,7 +5,6 @@
  */
 package hep.dataforge.fx;
 
-import hep.dataforge.io.reports.ReportEntry;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.layout.Region;

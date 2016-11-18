@@ -26,7 +26,7 @@ import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -59,7 +59,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
     private Logger logger;
     private String parentProcessName;
     private Context context = Global.instance();
-    private Map<String, Report> reportCache = new ConcurrentHashMap<>();
+    private Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("@allowParallel", true);
@@ -279,15 +279,15 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return context.io().out(getName(), name);
     }
 
-    protected Report getReport(String reportName) {
+    protected Log getReport(String reportName) {
         return this.reportCache.computeIfAbsent(reportName, (n) -> {
-            Report parent = new Report(n, getContext());
-            return new Report(getName(), parent);
+            Log parent = new Log(n, getContext());
+            return new Log(getName(), parent);
         });
     }
 
-    protected void setReport(String name, Report report) {
-        this.reportCache.put(name, report);
+    protected void setReport(String name, Log log) {
+        this.reportCache.put(name, log);
     }
 
     protected void report(String reportName, String entry, Object... params) {

@@ -15,19 +15,14 @@
  */
 package hep.dataforge.context;
 
-import ch.qos.logback.classic.Logger;
 import hep.dataforge.actions.ActionManager;
-import hep.dataforge.actions.RunConfigAction;
 import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.reports.ReportEntry;
-import hep.dataforge.tables.ReadPointSetAction;
-import hep.dataforge.tables.TransformTableAction;
+import hep.dataforge.io.reports.LogEntry;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
-import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -88,16 +83,23 @@ public class Global extends Context {
         return new PrintWriter(instance.io().out());
     }
 
+    /**
+     * Close all contexts and terminate framework
+     */
+    public static void terminate(){
+        org.slf4j.Logger logger = instance().getLogger();
+        try {
+            instance().close();
+        } catch (Exception e) {
+            logger.error("Exception while terminating DataForge framework");
+        }
+    }
+
     private Global() {
         super("GLOBAL");
         Locale.setDefault(Locale.US);
-        rootLog.setLogger(LoggerFactory.getLogger(Logger.ROOT_LOGGER_NAME));
         ActionManager actions = new ActionManager();
-        //TODO move to plugin
         pluginManager().loadPlugin(actions);
-        actions.registerAction(TransformTableAction.class);
-        actions.registerAction(ReadPointSetAction.class);
-        actions.registerAction(RunConfigAction.class);
     }
 
     @Override
@@ -129,7 +131,7 @@ public class Global extends Context {
     public IOManager io() {
         if (this.io == null) {
             setIO(new BasicIOManager());
-            getReport().addReportListener((ReportEntry t) -> {
+            getLog().addListener((LogEntry t) -> {
                 System.out.println(t.toString());
             });
         }
@@ -194,7 +196,7 @@ public class Global extends Context {
      */
     @Override
     public void close() throws Exception {
-        getLogger().info("Shutting down global context");
+        getLogger().info("Shutting down GLOBAL");
         for (Context ctx : contextRegistry) {
             ctx.close();
         }

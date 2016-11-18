@@ -18,7 +18,7 @@ package hep.dataforge.workspace;
 import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -37,8 +37,8 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
     @Override
     protected DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data) {
         Context context = model.getWorkspace().getContext();
-        Report report = new Report(getName(), context.getReport());
-        MultiStageTaskState state = new MultiStageTaskState(data, report);
+        Log log = new Log(getName(), context.getLog());
+        MultiStageTaskState state = new MultiStageTaskState(data, log);
 
         getLogger().debug("Starting transformation phase");
         callback.updateMessage("Data transformation...");

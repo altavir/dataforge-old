@@ -19,8 +19,6 @@ import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.io.PrintWriter;
@@ -28,24 +26,21 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
 
 /**
- * Лог организован таким образом, что он добавляет каждую строчкку в себя и по
- * цепочке во все родительские. Когда надо напечатать что-то можно просто
- * выбрать уровень лога.
- *
+ * A in-memory log that can store a finite number of entries. The difference between logger events and log is that log
+ * is usually part the part of the analysis result an should be preserved.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Report implements Reportable, Named {
+public class Log implements Logable, Named {
 
     private static int MAX_LOG_SIZE = 1000;
     private final String name;
-    private final ReferenceRegistry<Consumer<ReportEntry>> listeners = new ReferenceRegistry<>();
-    protected ConcurrentLinkedQueue<ReportEntry> entries = new ConcurrentLinkedQueue<>();
-    private Reportable parent;
-    private Logger logger;
+    private final ReferenceRegistry<Consumer<LogEntry>> listeners = new ReferenceRegistry<>();
+    protected ConcurrentLinkedQueue<LogEntry> entries = new ConcurrentLinkedQueue<>();
+    private Logable parent;
 
-    public Report(String name, Reportable parent) {
+    public Log(String name, Logable parent) {
         if (name == null || name.isEmpty()) {
             throw new AnonymousNotAlowedException();
         }
@@ -53,20 +48,12 @@ public class Report implements Reportable, Named {
         this.parent = parent;
     }
 
-    public Report(String name) {
+    public Log(String name) {
         this(name, Global.instance());
     }
 
-    @Override
-    public Logger getLogger() {
-        if (logger == null) {
-            logger = (Logger) LoggerFactory.getLogger(getName());
-        }
-        return logger;
-    }
-
-    public void setLogger(Logger logger) {
-        this.logger = logger;
+    public void setParent(Logable parent) {
+        this.parent = parent;
     }
 
     protected int getMaxLogSize() {
@@ -74,18 +61,18 @@ public class Report implements Reportable, Named {
     }
 
     @Override
-    public void report(ReportEntry entry) {
+    public void report(LogEntry entry) {
         entries.add(entry);
         if (entries.size() >= getMaxLogSize()) {
             entries.poll();// Ограничение на размер лога
 //            getLogger().warn("Log at maximum capacity!");
         }
-        listeners.forEach((Consumer<ReportEntry> listener) -> {
+        listeners.forEach((Consumer<LogEntry> listener) -> {
             listener.accept(entry);
         });
 
         if (getParent() != null) {
-            ReportEntry newEntry = pushTrace(entry, getName());
+            LogEntry newEntry = pushTrace(entry, getName());
             getParent().report(newEntry);
         }
     }
@@ -95,19 +82,19 @@ public class Report implements Reportable, Named {
      *
      * @param logListener
      */
-    public void addReportListener(Consumer<ReportEntry> logListener) {
+    public void addListener(Consumer<LogEntry> logListener) {
         this.listeners.add(logListener, true);
     }
 
-    private ReportEntry pushTrace(ReportEntry entry, String toTrace) {
-        return new ReportEntry(entry, toTrace);
+    private LogEntry pushTrace(LogEntry entry, String toTrace) {
+        return new LogEntry(entry, toTrace);
     }
 
     public void clear() {
         entries.clear();
     }
 
-    public Reportable getParent() {
+    public Logable getParent() {
         return parent;
     }
 
@@ -120,8 +107,7 @@ public class Report implements Reportable, Named {
         out.flush();
     }
 
-    @Override
-    public Report getReport() {
+    public Log getLog() {
         return this;
     }
 
@@ -132,13 +118,12 @@ public class Report implements Reportable, Named {
 
     @Override
     public void report(String str, Object... parameters) {
-        ReportEntry entry = new ReportEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
-        Report.this.report(entry);
+        LogEntry entry = new LogEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
+        Log.this.report(entry);
     }
 
     @Override
     public void reportError(String str, Object... parameters) {
-        Report.this.report(new ReportEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
-        getLogger().error(str, parameters);
+        Log.this.report(new LogEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
     }
 }

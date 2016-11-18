@@ -17,7 +17,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.computation.Goal;
 import hep.dataforge.data.Data;
-import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -28,14 +28,14 @@ import hep.dataforge.meta.Meta;
  */
 public class ActionResult<R> extends Data<R> {
 
-    private final Report log;
+    private final Log log;
 
-    public ActionResult(Report log, Goal<R> goal, Meta meta, Class<R> type) {
+    public ActionResult(Log log, Goal<R> goal, Meta meta, Class<R> type) {
         super(goal, type, meta);
         this.log = log;
     }
 
-    public Report log() {
+    public Log log() {
         return log;
     }
 }

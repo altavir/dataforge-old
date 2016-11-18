@@ -15,47 +15,52 @@
  */
 package hep.dataforge.context;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.ReportEntry;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.navigation.AbstractProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Окружение для выполнения действий (и не только). Имеет собственный лог и
- * набор свойств. Если при создании указывается предок контекста, то, что не
- * найденно в данном контексте рекурсивно ищется в предках. Является основой для
- * менеджеров.
+ * <p>
+ * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with {@link Global} at the top.
+ * </p>
+ * <p>
+ * Each context has a set of named {@link Value} properties which are taken from parent context in case they are not found in local context. Context implements {@link ValueProvider} interface and therefore could be uses as a value source for substitutions etc.
+ * </p>
+ * <p>
+ * Context contains {@link PluginManager} which could be used any number of configurable named plugins.
+ * </p>
+ * <p>
+ * Also Context has its own logger and {@link IOManager} to govern all the input and output being made inside the context.
+ * </p>
  *
  * @author Alexander Nozik
  */
-public class Context extends AbstractProvider implements ValueProvider, Reportable, Named, AutoCloseable {
+public class Context extends AbstractProvider implements ValueProvider, Logable, Named, AutoCloseable {
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
-    protected final Report rootLog;
+    protected org.slf4j.Logger logger;
+    protected Log rootLog;
     private Context parent = null;
     private final String name;
     private final PluginManager pm;
     protected TaskManager taskManager = null;
     protected IOManager io = null;
+
 
     /**
      * Build context from metadata
@@ -64,16 +69,17 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      */
     protected Context(String name) {
         this.pm = new PluginManager(this);
-        this.rootLog = new Report(name, parent);
+        this.rootLog = new Log(name);
         this.name = name;
     }
 
     public Context withParent(Context parent) {
         this.parent = parent;
+        rootLog.setParent(parent);
         return this;
     }
 
-    public Context withProperties(Meta config){
+    public Context withProperties(Meta config) {
         if (config != null) {
             if (config.hasMeta("property")) {
                 config.getMetaList("property").stream().forEach((propertyNode) -> {
@@ -82,6 +88,19 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
             }
         }
         return this;
+    }
+
+    public Logger getLogger() {
+        if (logger == null) {
+            return LoggerFactory.getLogger(getName());
+        } else {
+            return logger;
+        }
+    }
+
+    public void setLogger(Logger logger) {
+        this.logger = logger;
+        startLoggerAppender();
     }
 
     /**
@@ -108,8 +127,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
     }
 
     /**
-     * Возвращает родительский контекст, если такового нет, то возвращает
-     * глобальный контекст
+     * Return parent context or global context if parent is not defined
      *
      * @return a {@link hep.dataforge.context.Context} object.
      */
@@ -140,40 +158,28 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      *
      * @param io
      */
-    public void setIO(IOManager io) {
-        io.setContext(this);
-        if (!io.out().equals(System.out)) {
-            getReport().addReportListener((ReportEntry t) -> {
-                try {
-                    io.out().write((t.toString() + "\n").getBytes());
-                    io.out().flush();
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+    public synchronized void setIO(IOManager io) {
+        //detaching old io manager
+        if(this.io!= null){
+            stopLoggerAppender();
+            this.io.detach();
         }
+
+        io.attach(this);
         this.io = io;
-        if(getLogger() instanceof Logger) {
-            startLogAppender((Logger) getLogger());
+        getLog().addListener(io().getLogEntryHandler());
+        startLoggerAppender();
+    }
+
+    private void startLoggerAppender() {
+        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
+            io().addLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
         }
     }
 
-    protected void startLogAppender(Logger logger) {
-        stopLogAppender(logger);
-        LoggerContext loggerContext = logger.getLoggerContext();
-        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setName("io");
-        appender.setContext(loggerContext);
-        appender.setOutputStream(io.out());
-        appender.start();
-        logger.addAppender(appender);
-    }
-
-    protected void stopLogAppender(Logger logger) {
-        Appender<ILoggingEvent> app = logger.getAppender("io");
-        if (app != null) {
-            logger.detachAppender(app);
-            app.stop();
+    private void stopLoggerAppender() {
+        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
+            io().removeLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
         }
     }
 
@@ -197,11 +203,6 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
             return taskManager;
         }
     }
-
-//    public void setProcessManager(TaskManager manager) {
-//        manager.setContext(this);
-//        this.taskManager = manager;
-//    }
 
     /**
      * {@inheritDoc}
@@ -270,7 +271,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
      * @return
      */
     @Override
-    public Report getReport() {
+    public Log getLog() {
         return this.rootLog;
     }
 
@@ -322,6 +323,7 @@ public class Context extends AbstractProvider implements ValueProvider, Reportab
         }
     }
 
+    //TODO move to utils
     public <T extends Plugin> T getPlugin(Class<T> type) {
         try {
             String pluginName = type.getAnnotation(PluginDef.class).name();

@@ -15,7 +15,9 @@
  */
 package hep.dataforge.io;
 
+import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.PluginDef;
 import hep.dataforge.names.Name;
 
 import java.io.*;
@@ -27,7 +29,8 @@ import java.io.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class BasicIOManager implements IOManager {
+@PluginDef(name = "io", group = "hep.dataforge", description = "Basic input and output plugin")
+public class BasicIOManager extends BasicPlugin implements IOManager {
 
     private Context context;
 
@@ -45,6 +48,8 @@ public class BasicIOManager implements IOManager {
         this.out = out;
         this.in = in;
     }
+
+
 
     @Override
     public InputStream in() {
@@ -101,21 +106,7 @@ public class BasicIOManager implements IOManager {
         return root;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Context getContext() {
-        if (context == null) {
-            throw new RuntimeException("IOManager not attached to a context.");
-        }
-        return context;
-    }
 
-    @Override
-    public void setContext(Context context) {
-        this.context = context;
-    }
 
     @Override
     public InputStream in(String path) {

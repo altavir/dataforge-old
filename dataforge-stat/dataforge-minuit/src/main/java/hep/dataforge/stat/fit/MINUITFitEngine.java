@@ -17,8 +17,8 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.MINUIT.*;
 import hep.dataforge.context.Global;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.MultiFunction;
 
@@ -69,8 +69,8 @@ public class MINUITFitEngine implements FitEngine {
      * @param parentLog
      */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Reportable parentLog) {
-        Report log = new Report("MINUIT", parentLog);
+    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
+        Log log = new Log("MINUIT", parentLog);
 
         log.report("MINUIT fit engine started task '{}'", task.getName());
         switch (task.getName()) {
@@ -93,7 +93,7 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
      */
-    public FitTaskResult runHesse(FitState state, FitStage task, Reportable log) {
+    public FitTaskResult runHesse(FitState state, FitStage task, Logable log) {
         int strategy;
         strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
 
@@ -144,7 +144,7 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
      */
-    public FitTaskResult runFit(FitState state, FitStage task, Reportable log) {
+    public FitTaskResult runFit(FitState state, FitStage task, Logable log) {
 
         MnApplication minuit;
         log.report("Starting fit using Minuit.");
@@ -159,7 +159,7 @@ public class MINUITFitEngine implements FitEngine {
         for (String fitPar : fitPars) {
             if (!state.modelProvidesDerivs(fitPar)) {
                 force = true;
-                log.getLogger().debug("Model does not provide derivatives for parameter '{}'", fitPar);
+                log.reportError("Model does not provide derivatives for parameter '{}'", fitPar);
             }
         }
         if(force){

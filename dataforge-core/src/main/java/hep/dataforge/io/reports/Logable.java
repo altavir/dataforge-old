@@ -16,8 +16,6 @@
 package hep.dataforge.io.reports;
 
 
-import org.slf4j.Logger;
-
 /**
  * An object that could handle and store its own report. A purpose of DataForge report
  is different from standard logging because analysis report is part of the
@@ -26,24 +24,20 @@ import org.slf4j.Logger;
  *
  * @author Alexander Nozik
  */
-public interface Reportable{
+public interface Logable {
 
-    default Logger getLogger(){
-        return getReport().getLogger();
-    }
-
-    Report getReport();
+    Log getLog();
 
     default void report(String str, Object... parameters){
-        getReport().report(str, parameters);
+        getLog().report(str, parameters);
     }
 
-    default void report(ReportEntry entry){
-        getReport().report(entry);
+    default void report(LogEntry entry){
+        getLog().report(entry);
     }
     
     default void reportError(String str, Object... parameters){
-        getReport().reportError(str, parameters);
+        getLog().reportError(str, parameters);
     }
     
 }

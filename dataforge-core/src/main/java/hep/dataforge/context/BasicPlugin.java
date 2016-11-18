@@ -35,7 +35,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     private Meta getDefinition() {
         MetaBuilder builder = new MetaBuilder("plugin");
         if (getClass().isAnnotationPresent(PluginDef.class)) {
-            PluginDef def = getClass().getDeclaredAnnotation(PluginDef.class);
+            PluginDef def = getClass().getAnnotation(PluginDef.class);
             builder.putValue("group", def.group());
             builder.putValue("name", def.name());
             builder.putValue("description", def.description());

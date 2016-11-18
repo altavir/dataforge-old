@@ -15,21 +15,14 @@
  */
 package hep.dataforge.stat.fit;
 
-import static hep.dataforge.stat.fit.FitStage.TASK_RUN;
-import static hep.dataforge.stat.fit.FitStage.TASK_SINGLE;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.MultiFunction;
 import hep.dataforge.stat.parametric.ParametricMultiFunctionWrapper;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
-import hep.dataforge.maths.NamedVector;
-import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
-import static java.lang.Math.log;
-import org.apache.commons.math3.optim.InitialGuess;
-import org.apache.commons.math3.optim.MaxEval;
-import org.apache.commons.math3.optim.PointValuePair;
-import org.apache.commons.math3.optim.SimpleBounds;
-import org.apache.commons.math3.optim.SimpleValueChecker;
+import hep.dataforge.stat.parametric.ParametricValue;
+import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateFunctionMappingAdapter;
 import org.apache.commons.math3.optim.nonlinear.scalar.MultivariateOptimizer;
@@ -38,7 +31,11 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.AbstractSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
-import hep.dataforge.stat.parametric.ParametricValue;
+
+import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
+import static hep.dataforge.stat.fit.FitStage.TASK_RUN;
+import static hep.dataforge.stat.fit.FitStage.TASK_SINGLE;
+import static java.lang.Math.log;
 
 /**
  * <p>
@@ -67,8 +64,8 @@ public class CMFitEngine implements FitEngine {
 
     /** {@inheritDoc} */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Reportable parentLog) {
-        Report log = new Report("CM", parentLog);
+    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
+        Log log = new Log("CM", parentLog);
         switch (task.getName()) {
             case TASK_SINGLE:
             case TASK_RUN:
@@ -84,10 +81,10 @@ public class CMFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link hep.dataforge.io.reports.Reportable} object.
+     * @param log a {@link Logable} object.
      * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
      */
-    public FitTaskResult makeRun(FitState state, FitStage task, Reportable log) {
+    public FitTaskResult makeRun(FitState state, FitStage task, Logable log) {
 
         log.report("Starting fit using provided Commons Math algorithms.");
         int maxSteps = task.meta().getInt("iterations", DEFAULT_MAXITER);

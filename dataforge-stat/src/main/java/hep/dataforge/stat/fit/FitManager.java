@@ -19,7 +19,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.Global;
 import hep.dataforge.io.FittingIOUtils;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
@@ -99,12 +99,12 @@ public class FitManager implements Encapsulated {
         return modelManager;
     }
 
-    public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Reportable log, String... freePars) {
+    public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Logable log, String... freePars) {
         FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, taskName, freePars);
         return runTask(state, task, log);
     }
 
-    public FitTaskResult runDefaultTask(FitState state, Reportable log, String... freePars) {
+    public FitTaskResult runDefaultTask(FitState state, Logable log, String... freePars) {
         FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN, freePars);
         return runTask(state, task, log);
     }
@@ -113,7 +113,7 @@ public class FitManager implements Encapsulated {
         return runDefaultTask(state, getContext(), freePars);
     }
 
-    public FitTaskResult runTask(FitState state, String engineName, String taskName, Reportable log, String... freePars) {
+    public FitTaskResult runTask(FitState state, String engineName, String taskName, Logable log, String... freePars) {
         FitStage task = new FitStage(engineName, taskName, freePars);
         return runTask(state, task, log);
     }
@@ -122,11 +122,11 @@ public class FitManager implements Encapsulated {
         return runTask(state, engineName, taskName, getContext(), freePars);
     }
 
-    public FitTaskResult runTask(FitState state, FitStage task, Reportable log) {
+    public FitTaskResult runTask(FitState state, FitStage task, Logable log) {
         return runTask(state, task, Global.out(), log);
     }
 
-    public FitTaskResult runTask(FitState state, FitStage task, PrintWriter writer, Reportable log) {
+    public FitTaskResult runTask(FitState state, FitStage task, PrintWriter writer, Logable log) {
         if(log == null){
             log = getContext();
         }

@@ -10,6 +10,8 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.tables.ReadPointSetAction;
+import hep.dataforge.tables.TransformTableAction;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.InvocationTargetException;
@@ -28,6 +30,12 @@ public class ActionManager extends BasicPlugin {
         return context.getPlugin(ActionManager.class);
     }
 
+    public ActionManager() {
+        registerAction(TransformTableAction.class);
+        registerAction(ReadPointSetAction.class);
+        registerAction(RunConfigAction.class);
+    }
+
     protected ActionManager getParent() {
         if (getContext() == null || getContext().getParent() == null || !getContext().getParent().provides("actions")) {
             return null;
@@ -39,6 +47,7 @@ public class ActionManager extends BasicPlugin {
     public boolean hasAction(String name) {
         return actionMap.containsKey(name) || (getParent() != null && getParent().hasAction(name));
     }
+
 
     public Action getAction(String name) {
         if (actionMap.containsKey(name)) {
@@ -68,7 +77,7 @@ public class ActionManager extends BasicPlugin {
      *
      * @param actionClass a {@link java.lang.Class} object.
      */
-    public void registerAction(Class<? extends Action> actionClass) {
+    public final void registerAction(Class<? extends Action> actionClass) {
         try {
             putAction(actionClass.getDeclaredConstructor().newInstance());
         } catch (NoSuchMethodException ex) {

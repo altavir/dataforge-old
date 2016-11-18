@@ -15,8 +15,8 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
@@ -50,12 +50,12 @@ public class QOWFitEngine implements FitEngine {
 //    /**
 //     * <p>Constructor for QOWFitEngine.</p>
 //     *
-//     * @param report a {@link hep.dataforge.io.Reportable} object.
+//     * @param report a {@link hep.dataforge.io.Logable} object.
 //     */
-//    public QOWFitEngine(Reportable report) {
+//    public QOWFitEngine(Logable report) {
 //        super(report);
 //    }
-    private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, Reportable log) {
+    private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, Logable log) {
         int maxSteps = task.meta().getInt("iterations", 100);
         double tolerance = task.meta().getDouble("tolerance", 0);
 
@@ -136,8 +136,8 @@ public class QOWFitEngine implements FitEngine {
      * {@inheritDoc}
      */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Reportable parentLog) {
-        Report log = new Report("QOW", parentLog);
+    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
+        Log log = new Log("QOW", parentLog);
         log.report("QOW fit engine started task '{}'", task.getName());
         switch (task.getName()) {
             case TASK_SINGLE:
@@ -153,7 +153,7 @@ public class QOWFitEngine implements FitEngine {
         }
     }
 
-    private FitTaskResult makeRun(FitState state, FitStage task, Reportable log) {
+    private FitTaskResult makeRun(FitState state, FitStage task, Logable log) {
         /*Инициализация объектов, задание исходных значений*/
         log.report("Starting fit using quasioptimal weights method.");
 
@@ -181,10 +181,10 @@ public class QOWFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link hep.dataforge.io.reports.Reportable} object.
+     * @param log a {@link Logable} object.
      * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
      */
-    public FitTaskResult generateErrors(FitState state, FitStage task, Reportable log) {
+    public FitTaskResult generateErrors(FitState state, FitStage task, Logable log) {
 
         log.report("Starting errors estimation using quasioptimal weights method.");
 

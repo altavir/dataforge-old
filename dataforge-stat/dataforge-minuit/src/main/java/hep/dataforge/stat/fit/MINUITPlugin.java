@@ -18,7 +18,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.io.reports.Report;
+import hep.dataforge.io.reports.Log;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -36,7 +36,7 @@ public class MINUITPlugin extends BasicPlugin {
     /**
      * Constant <code>staticLog</code>
      */
-    private static final Report staticLog = new Report("MINUIT-STATIC");
+    private static final Log staticLog = new Log("MINUIT-STATIC");
 
     /**
      * <p>

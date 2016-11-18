@@ -27,19 +27,19 @@ import static java.lang.String.format;
 
 /**
  * <p>
- ReportEntry class.</p>
+ LogEntry class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ReportEntry {
+public class LogEntry {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final List<String> sourceTrace = new ArrayList<>();
     private final String message;
     private final Instant time;
 
-    public ReportEntry(ReportEntry entry, String traceAdd) {
+    public LogEntry(LogEntry entry, String traceAdd) {
         this.sourceTrace.addAll(entry.sourceTrace);
         if (traceAdd != null && !traceAdd.isEmpty()) {
             this.sourceTrace.add(0, traceAdd);
@@ -48,12 +48,12 @@ public class ReportEntry {
         this.time = entry.time;
     }
 
-    public ReportEntry(Instant time, String message) {
+    public LogEntry(Instant time, String message) {
         this.time = time;
         this.message = message;
     }
 
-    public ReportEntry(String message) {
+    public LogEntry(String message) {
         this.time = DateTimeUtils.now();
         this.message = message;
     }

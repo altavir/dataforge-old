@@ -16,8 +16,8 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
-import hep.dataforge.io.reports.Report;
-import hep.dataforge.io.reports.Reportable;
+import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.reports.Logable;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -27,7 +27,7 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class MultiStageTaskState implements Reportable {
+public class MultiStageTaskState implements Logable {
 
     private static final String INITAIL_DATA_STAGE = "@data";
 
@@ -40,14 +40,14 @@ public class MultiStageTaskState implements Reportable {
      * final finish of task
      */
     private DataNode result;
-    private Report report;
+    private Log log;
 
     private MultiStageTaskState() {
     }
 
-    public MultiStageTaskState(DataNode data, Report report) {
+    public MultiStageTaskState(DataNode data, Log log) {
         this.stages.put(INITAIL_DATA_STAGE, data);
-        this.report = report;
+        this.log = log;
     }
 
     public DataNode<?> getData(String stage) {
@@ -92,16 +92,15 @@ public class MultiStageTaskState implements Reportable {
         return this;
     }
 //
-//    public void setReport(Report report) {
-//        this.report = report;
+//    public void setReport(Log log) {
+//        this.log = log;
 //    }
 
-    @Override
-    public Report getReport() {
-        if (report == null) {
-            report = new Report("taskState");
+    public Log getLog() {
+        if (log == null) {
+            log = new Log("taskState");
         }
-        return report;
+        return log;
     }
 
 }

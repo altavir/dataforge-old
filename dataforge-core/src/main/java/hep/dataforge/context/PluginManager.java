@@ -113,7 +113,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
             plugin.attach(getContext());
             plugins.put(plugin.getName(), plugin);
         } else {
-            getContext().getLogger().debug("Plugin with name {} already exists in [}", plugin.getName(), getContext().getName());
+            getContext().getLogger().debug("Plugin with name {} already exists in {}", plugin.getName(), getContext().getName());
         }
         return plugin;
     }
