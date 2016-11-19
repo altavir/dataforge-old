@@ -8,22 +8,12 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.StringReader;
+
+import javax.json.*;
+import java.io.*;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonNumber;
-import javax.json.JsonObject;
-import javax.json.JsonString;
-import javax.json.JsonValue;
 
 /**
  * Reader for JSON meta
@@ -41,11 +31,6 @@ public class JSONMetaReader implements MetaStreamReader {
             stream.read(buffer);
             return fromString(new String(buffer, encoding));
         } else {
-//            if(!stream.markSupported()){
-//                LoggerFactory.getLogger(getClass())
-//                        .warn("Trying to infere annotation on not buffered stream. Following data could be corrupted.");
-//            }
-//            stream.mark(2048);
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             int braceCounter = 0;
 
@@ -82,9 +67,9 @@ public class JSONMetaReader implements MetaStreamReader {
 
     public MetaBuilder toMeta(String name, JsonObject source) throws ParseException {
         MetaBuilder builder = new MetaBuilder(name);
-        for (Map.Entry<String, JsonValue> entrySet : source.entrySet()) {
-            String key = entrySet.getKey();
-            JsonValue value = entrySet.getValue();
+        for (Map.Entry<String, JsonValue> entry : source.entrySet()) {
+            String key = entry.getKey();
+            JsonValue value = entry.getValue();
             putJsonValue(builder, key, value);
         }
         return builder;
@@ -108,7 +93,7 @@ public class JSONMetaReader implements MetaStreamReader {
                 builder.putValue(key, Value.of(true));
                 break;
             case STRING:
-                builder.putValue(key, ((JsonString) value).getString());
+                builder.putValue(key, normalizeString((JsonString) value));
                 break;
             case NUMBER:
                 builder.putValue(key, ((JsonNumber) value).bigDecimalValue());
@@ -117,6 +102,10 @@ public class JSONMetaReader implements MetaStreamReader {
                 builder.putValue(key, Value.getNull());
                 break;
         }
+    }
+
+    private String normalizeString(JsonString value) {
+        return value.getString();
     }
 
     @Override

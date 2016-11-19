@@ -10,27 +10,22 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.NamedValue;
 import hep.dataforge.values.Value;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.nio.charset.Charset;
-import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.List;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
-import javax.xml.parsers.ParserConfigurationException;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
+
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.List;
+
 import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 
 /**
@@ -65,10 +60,6 @@ public class XMLMetaReader implements MetaStreamReader {
         } catch (SAXException | ParserConfigurationException ex) {
             throw new RuntimeException(ex);
         }
-    }
-
-    private String normalizeName(String str) {
-        return str.replace("_at_", "@");
     }
 
     private MetaBuilder buildNode(Element element) throws ContentException {
@@ -121,7 +112,7 @@ public class XMLMetaReader implements MetaStreamReader {
         for (int i = 0; i < attributes.getLength(); i++) {
             Node node = attributes.item(i);
             String name = node.getNodeName();
-            String str = node.getNodeValue();
+            String str = normalizeValue(node.getNodeValue());
 
             if (str.contains("[")) {
                 for (String s : NamingUtils.parseArray(str)) {
@@ -153,6 +144,14 @@ public class XMLMetaReader implements MetaStreamReader {
         }
         return res;
 
+    }
+
+    private String normalizeValue(String value){
+        return value.replace("\\n","\n");
+    }
+
+    private String normalizeName(String str) {
+        return str.replace("_at_", "@");
     }
 
     @Override

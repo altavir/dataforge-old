@@ -18,17 +18,13 @@ package hep.dataforge.io;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.TableFormat;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
+import hep.dataforge.utils.Utils;
+import org.slf4j.LoggerFactory;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.util.Collection;
 import java.util.Scanner;
-import org.slf4j.LoggerFactory;
 
 /**
  * Вывод форматированного набора данных в файл или любой другой поток вывода
@@ -46,7 +42,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * Constructor for ColumnedDataWriter.</p>
      *
      * @param stream a {@link java.io.OutputStream} object.
-     * @param names a {@link java.lang.String} object.
+     * @param names  a {@link java.lang.String} object.
      */
     public ColumnedDataWriter(OutputStream stream, String... names) {
         this(stream, TableFormat.fixedWidth(8, names));
@@ -60,8 +56,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param format a {@link hep.dataforge.tables.TableFormat} object.
      */
     public ColumnedDataWriter(OutputStream stream, TableFormat format) {
-        this.writer = new PrintWriter(stream);
-        this.format = format;
+        this(stream, Utils.UTF, format);
     }
 
     public ColumnedDataWriter(OutputStream stream, Charset encoding, TableFormat format) {
@@ -73,9 +68,9 @@ public class ColumnedDataWriter implements AutoCloseable {
      * <p>
      * Constructor for ColumnedDataWriter.</p>
      *
-     * @param file a {@link java.io.File} object.
+     * @param file   a {@link java.io.File} object.
      * @param append a boolean.
-     * @param names a {@link java.lang.String} object.
+     * @param names  a {@link java.lang.String} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
@@ -86,9 +81,9 @@ public class ColumnedDataWriter implements AutoCloseable {
      * <p>
      * Constructor for ColumnedDataWriter.</p>
      *
-     * @param file a {@link java.io.File} object.
-     * @param append a boolean.
-     * @param format a {@link hep.dataforge.tables.TableFormat} object.
+     * @param file     a {@link java.io.File} object.
+     * @param append   a boolean.
+     * @param format   a {@link hep.dataforge.tables.TableFormat} object.
      * @param encoding
      * @throws java.io.FileNotFoundException if any.
      */
@@ -165,11 +160,11 @@ public class ColumnedDataWriter implements AutoCloseable {
      * <p>
      * writeDataSet.</p>
      *
-     * @param file a {@link java.io.File} object.
-     * @param data a {@link hep.dataforge.tables.Table} object.
-     * @param head a {@link java.lang.String} object.
+     * @param file   a {@link java.io.File} object.
+     * @param data   a {@link hep.dataforge.tables.Table} object.
+     * @param head   a {@link java.lang.String} object.
      * @param append a boolean.
-     * @param names a {@link java.lang.String} object.
+     * @param names  a {@link java.lang.String} object.
      * @throws java.io.FileNotFoundException if any.
      */
     public static void writeDataSet(File file, PointSource data, String head, boolean append, String... names) throws IOException {
