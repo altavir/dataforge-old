@@ -28,10 +28,6 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
 
-    public BasicPlugin() {
-        super.configure(getDefinition());
-    }
-
     private Meta getDefinition() {
         MetaBuilder builder = new MetaBuilder("plugin");
         if (getClass().isAnnotationPresent(PluginDef.class)) {
@@ -53,16 +49,16 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     }
 
     @Override
-    public VersionTag[] dependsOn() {
+    public PluginTag[] dependsOn() {
         if (meta().hasValue("dependsOn")) {
             String[] strDeps = meta().getStringArray("dependsOn");
-            VersionTag[] deps = new VersionTag[strDeps.length];
+            PluginTag[] deps = new PluginTag[strDeps.length];
             for (int i = 0; i < strDeps.length; i++) {
-                deps[i] = VersionTag.fromString(strDeps[i]);
+                deps[i] = PluginTag.fromString(strDeps[i]);
             }
             return deps;
         } else {
-            return new VersionTag[]{};
+            return new PluginTag[]{};
         }
     }
 
@@ -72,10 +68,8 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
      * @return
      */
     @Override
-    public VersionTag getTag() {
-        return new VersionTag(meta().getString("group", VersionTag.DEFAULT_GROUP),
-                meta().getString("name", getClass().getSimpleName()),
-                meta().getString("version", VersionTag.UNVERSIONED));
+    public PluginTag getTag() {
+        return new PluginTag(getDefinition());
     }
 
     public String getDescription() {
@@ -94,7 +88,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public void attach(Context context) {
-        if(context.pluginManager().hasPlugin(getName())){
+        if (context.pluginManager().hasPlugin(getName())) {
             context.getLogger().warn("Overriding existing plugin");
         }
         this.context = context;

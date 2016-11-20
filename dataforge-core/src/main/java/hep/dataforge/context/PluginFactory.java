@@ -20,7 +20,7 @@ package hep.dataforge.context;
  * Created by darksnake on 08-Sep-16.
  */
 public interface PluginFactory {
-    VersionTag tag();
+    PluginTag tag();
 
     Plugin build();
 }

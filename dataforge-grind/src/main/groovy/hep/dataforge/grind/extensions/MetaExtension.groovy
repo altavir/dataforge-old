@@ -22,6 +22,7 @@ import hep.dataforge.grind.GrindUtils
 import hep.dataforge.meta.*
 import hep.dataforge.values.MapValueProvider
 import hep.dataforge.values.NamedValue
+import hep.dataforge.values.Value
 
 /**
  * Created by darksnake on 20-Aug-16.
@@ -123,6 +124,23 @@ class MetaExtension {
         return new MetaBuilder(self).update(values)
     }
 
+    //TODO add tests
+    static void setProperty(final MetaBuilder self, String name, Object value) {
+        self.setValue(name, value)
+    }
+
+    static Value getProperty(final Meta self, String name) {
+        return self.getValue(name)
+    }
+
+    static Value getAt(final Meta self, String name){
+        return self.getValue(name);
+    }
+
+    static void setAt(final MetaBuilder self, String name, Object value){
+        self.setValue(name, value)
+    }
+
     /**
      * Compile new builder using self as a template
      * @param self
@@ -160,4 +178,5 @@ class MetaExtension {
     static Configurable setAt(final Configurable self, String key, Object value) {
         self.configureValue(key, value);
     }
+
 }

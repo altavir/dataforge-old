@@ -15,12 +15,7 @@
  */
 package hep.dataforge.context;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  *
@@ -31,9 +26,9 @@ import java.lang.annotation.Target;
 @Documented
 @Inherited
 public @interface PluginDef {
-    String group() default VersionTag.DEFAULT_GROUP;
+    String group() default PluginTag.DEFAULT_GROUP;
     String name();
-    String version() default VersionTag.UNVERSIONED;
+    String version() default PluginTag.UNVERSIONED;
     String description();
     String[] dependsOn() default {};
 }

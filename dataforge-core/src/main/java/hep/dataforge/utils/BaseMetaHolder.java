@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.names;
+package hep.dataforge.utils;
 
 import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
@@ -25,7 +25,7 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
     public static final Meta DEFAULT_EMPTY_META = Meta.empty();
 
     private Meta meta;
-    private NodeDescriptor descriptor;
+    private transient NodeDescriptor descriptor;
 
     public BaseMetaHolder(Meta meta) {
         this.meta = meta;

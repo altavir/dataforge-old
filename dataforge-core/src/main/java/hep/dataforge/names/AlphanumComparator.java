@@ -40,6 +40,8 @@ import java.util.Comparator;
  * Collections.sort(your list, new AlphanumComparator());
  */
 public class AlphanumComparator implements Comparator<String> {
+    public static final AlphanumComparator INSTANCE = new AlphanumComparator();
+
     private Comparator<String> comparator = new NaturalComparator();
 
     public AlphanumComparator(Comparator<String> comparator) {

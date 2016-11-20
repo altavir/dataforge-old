@@ -17,13 +17,13 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.names.BaseMetaHolder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.values.NamedValueSet;
 
 /**

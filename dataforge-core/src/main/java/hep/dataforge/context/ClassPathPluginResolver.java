@@ -6,6 +6,7 @@
 package hep.dataforge.context;
 
 import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
 
 /**
  * The plugin resolver that searches classpath for Plugin services and loads the
@@ -18,13 +19,12 @@ public class ClassPathPluginResolver implements PluginResolver {
     private static final ServiceLoader<Plugin> loader = ServiceLoader.load(Plugin.class);
 
     @Override
-    public Plugin getPlugin(VersionTag tag) {
-        for(Plugin plugin: loader){
-            if(tag.matches(plugin.getTag())){
-                return plugin.newInstance();
-            }
-        }
-        return null;
+    public Plugin getPlugin(PluginTag tag) {
+       return StreamSupport.stream(loader.spliterator(),false)
+               .filter(plugin -> tag.matches(plugin.getTag()))
+               .sorted((o1, o2) -> o1.getTag().compareTo(o2.getTag()))
+               .findFirst()
+               .orElseThrow(()-> new RuntimeException("No plugin matching criterion: " + tag.toString()));
     }
 
 }

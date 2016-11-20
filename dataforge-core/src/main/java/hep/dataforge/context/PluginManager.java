@@ -66,16 +66,16 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         return plugins.containsKey(name) || (getParent() != null && getParent().hasPlugin(name));
     }
 
-    public boolean hasPlugin(VersionTag tag) {
-        return plugins.containsKey(tag.name()) || (getParent() != null && getParent().hasPlugin(tag));
+    public boolean hasPlugin(PluginTag tag) {
+        return plugins.containsKey(tag.getName()) || (getParent() != null && getParent().hasPlugin(tag));
     }
 
     public Plugin loadPlugin(String name) {
-        return loadPlugin(VersionTag.fromString(name));
+        return loadPlugin(PluginTag.fromString(name));
     }
 
     /**
-     * Search for loaded plugin and
+     * Search for loaded plugin and return it if found. Throw {@link NameNotFoundException} if it is not found
      *
      * @param name
      * @return
@@ -92,7 +92,12 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         }
     }
 
-    public Plugin loadPlugin(VersionTag name) {
+    /**
+     * Get plugin instance via plugin reolver and load it.
+     * @param name
+     * @return
+     */
+    public Plugin loadPlugin(PluginTag name) {
         Plugin plugin = pluginResolver.getPlugin(name);
         if (plugin == null) {
             throw new NameNotFoundException(name.getFullName(), "Plugin not found");
@@ -100,9 +105,15 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         return loadPlugin(plugin);
     }
 
+    /**
+     * Load given plugin into this manager and return loaded instance
+     * @param plugin
+     * @param <T>
+     * @return
+     */
     public <T extends Plugin> T loadPlugin(T plugin) {
         if (!this.plugins.containsKey(plugin.getName())) {
-            for (VersionTag tag : plugin.dependsOn()) {
+            for (PluginTag tag : plugin.dependsOn()) {
                 //If dependency not loaded
                 if (!hasPlugin(tag)) {
                     //Load dependency

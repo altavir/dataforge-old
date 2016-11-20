@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.names.Named;
@@ -25,6 +26,7 @@ import hep.dataforge.names.Named;
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
 
     /**
@@ -34,7 +36,7 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
      *
      * @return
      */
-    VersionTag[] dependsOn();
+    PluginTag[] dependsOn();
 
     /**
      * Start this plugin and attach registration info to the context. This method
@@ -57,7 +59,7 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
      *
      * @return
      */
-    VersionTag getTag();
+    PluginTag getTag();
 
     /**
      * The name of this plugin ignoring version and group
@@ -66,7 +68,7 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
      */
     @Override
     default String getName() {
-        return getTag().name();
+        return getTag().getName();
     }
 
     /**
@@ -83,4 +85,5 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
             throw new RuntimeException("Failed to create instance of the plugin", ex);
         }
     }
+
 }
