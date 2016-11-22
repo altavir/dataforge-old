@@ -32,7 +32,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
 
     String DATA_TARGET = "data";
     String NODE_TARGET = "node";
-    String DEFAULT_DATA_FRAGMENT_NAME = "";
+    String DEFAULT_DATA_FRAGMENT_NAME = "@default";
 
     static <T> DataNode<T> empty(String name, Class<T> type) {
         return new EmptyDataNode<>(name, type);

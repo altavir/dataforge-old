@@ -28,7 +28,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
 
-    private Meta getDefinition() {
+    protected MetaBuilder getDefinition() {
         MetaBuilder builder = new MetaBuilder("plugin");
         if (getClass().isAnnotationPresent(PluginDef.class)) {
             PluginDef def = getClass().getAnnotation(PluginDef.class);
@@ -40,7 +40,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
                 builder.putValue("dependsOn", dep);
             }
         }
-        return builder.build();
+        return builder;
     }
 
     @Override
@@ -50,8 +50,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public PluginTag[] dependsOn() {
-        if (meta().hasValue("dependsOn")) {
-            String[] strDeps = meta().getStringArray("dependsOn");
+        PluginTag tag = getTag();
+        if (tag.hasValue("dependsOn")) {
+            String[] strDeps = tag.getStringArray("dependsOn");
             PluginTag[] deps = new PluginTag[strDeps.length];
             for (int i = 0; i < strDeps.length; i++) {
                 deps[i] = PluginTag.fromString(strDeps[i]);

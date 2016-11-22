@@ -94,13 +94,13 @@ public class PluginManager implements Encapsulated, AutoCloseable {
 
     /**
      * Get plugin instance via plugin reolver and load it.
-     * @param name
+     * @param tag
      * @return
      */
-    public Plugin loadPlugin(PluginTag name) {
-        Plugin plugin = pluginResolver.getPlugin(name);
+    public Plugin loadPlugin(PluginTag tag) {
+        Plugin plugin = pluginResolver.getPlugin(tag);
         if (plugin == null) {
-            throw new NameNotFoundException(name.getFullName(), "Plugin not found");
+            throw new NameNotFoundException(tag.toString(), "Plugin not found");
         }
         return loadPlugin(plugin);
     }

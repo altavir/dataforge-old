@@ -26,9 +26,10 @@ import java.lang.annotation.*;
 @Documented
 @Inherited
 public @interface PluginDef {
-    String group() default PluginTag.DEFAULT_GROUP;
+    String group() default "";
     String name();
-    String version() default PluginTag.UNVERSIONED;
+
+    String version() default "";
     String description();
     String[] dependsOn() default {};
 }
