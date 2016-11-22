@@ -33,7 +33,7 @@ import java.util.regex.Pattern;
 @ValueDef(name = "name")
 @ValueDef(name = "group")
 @ValueDef(name = "version")
-@ValueDef(name = "role")
+//@ValueDef(name = "role")
 @ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> {
 
@@ -71,9 +71,9 @@ public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> 
         );
     }
 
-    public String getRole() {
-        return getString("role", "");
-    }
+//    public String getRole() {
+//        return getString("role", "");
+//    }
 
 
     public String getName() {

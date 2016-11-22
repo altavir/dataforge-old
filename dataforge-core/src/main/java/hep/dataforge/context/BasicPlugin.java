@@ -70,7 +70,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
      */
     @Override
     public PluginTag getTag() {
-        return new PluginTag(getDefinition());
+        return new PluginTag(getDefinition().build());
     }
 
     public String getDescription() {

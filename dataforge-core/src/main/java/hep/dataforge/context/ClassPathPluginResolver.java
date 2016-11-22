@@ -5,7 +5,10 @@
  */
 package hep.dataforge.context;
 
+import java.util.List;
 import java.util.ServiceLoader;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
 /**
@@ -27,4 +30,10 @@ public class ClassPathPluginResolver implements PluginResolver {
                .orElseThrow(()-> new RuntimeException("No plugin matching criterion: " + tag.toString()));
     }
 
+    @Override
+    public List<Plugin> listPlugins(Predicate<Plugin> predicate) {
+        return StreamSupport.stream(loader.spliterator(),false)
+                .filter(predicate::test)
+                .collect(Collectors.toList());
+    }
 }
