@@ -27,7 +27,7 @@ public class PlotDataUtils {
 
         Map<Value, MapPoint.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
-        names.add(XYAdapter.X_VALUE_KEY);
+        names.add("x");
 
         for (XYPlottable pl : plottables) {
             XYAdapter adapter = pl.getAdapter();
