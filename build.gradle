@@ -1,11 +1,6 @@
 
 allprojects{
-    ext{
-        ignore = false
-    }
     apply plugin: 'base'
-    apply plugin: 'jacoco'
-    
     tasks.withType(Javadoc){
         options {
             failOnError = false
@@ -24,41 +19,41 @@ subprojects {
 }
 
 
-def toDeploy = [
-        ":dataforge-core",
-        ":dataforge-maths",
-        ":dataforge-stat",
-        ":dataforge-stat:dataforge-minuit",
-        ":dataforge-plots",
-        ":dataforge-storage",
-        ":dataforge-control"
-]
-
-def toDocument = [
-        ":dataforge-core",
-        ":dataforge-maths",
-        ":dataforge-stat",
-        ":dataforge-plots",
-        ":dataforge-storage",
-]
-
-
-task dfBuild(type: JavaCompile){
-    description = 'Build and install all main DataForge components'
-    toDeploy.collect{project(it)}.each{
-        dependsOn it.install
-    }
-}
-
-task dfDoc(type: Javadoc){
-    description = 'Build javadoc for all main DataForge components'
-    
-    def documentedProjects = toDocument.collect{project(it)}
-    source documentedProjects.collect { it.sourceSets.main.allJava }
-    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
-    destinationDir = file("${buildDir}/docs/javadoc")
-}
+//def toDeploy = [
+//        ":dataforge-core",
+//        ":dataforge-maths",
+//        ":dataforge-stat",
+//        ":dataforge-stat:dataforge-minuit",
+//        ":dataforge-plots",
+//        ":dataforge-storage",
+//        ":dataforge-control"
+//]
+//
+//def toDocument = [
+//        ":dataforge-core",
+//        ":dataforge-maths",
+//        ":dataforge-stat",
+//        ":dataforge-plots",
+//        ":dataforge-storage",
+//]
+//
+//
+//task dfBuild(type: JavaCompile){
+//    description = 'Build and install all main DataForge components'
+//    toDeploy.collect{project(it)}.each{
+//        dependsOn it.install
+//    }
+//}
+//
+//task dfDoc(type: Javadoc){
+//    description = 'Build javadoc for all main DataForge components'
+//
+//    def documentedProjects = toDocument.collect{project(it)}
+//    source documentedProjects.collect { it.sourceSets.main.allJava }
+//    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+//    destinationDir = file("${buildDir}/docs/javadoc")
+//}
 
 task setWrapper(type: Wrapper) {
-    gradleVersion = '2.13'
+    gradleVersion = '3.2'
 }

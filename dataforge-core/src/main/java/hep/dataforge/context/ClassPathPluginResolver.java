@@ -5,6 +5,7 @@
  */
 package hep.dataforge.context;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
@@ -25,7 +26,7 @@ public class ClassPathPluginResolver implements PluginResolver {
     public Plugin getPlugin(PluginTag tag) {
        return StreamSupport.stream(loader.spliterator(),false)
                .filter(plugin -> tag.matches(plugin.getTag()))
-               .sorted((o1, o2) -> o1.getTag().compareTo(o2.getTag()))
+               .sorted(Comparator.comparing(Plugin::getTag))
                .findFirst()
                .orElseThrow(()-> new RuntimeException("No plugin matching criterion: " + tag.toString()));
     }
@@ -34,6 +35,11 @@ public class ClassPathPluginResolver implements PluginResolver {
     public List<Plugin> listPlugins(Predicate<Plugin> predicate) {
         return StreamSupport.stream(loader.spliterator(),false)
                 .filter(predicate::test)
+                .collect(Collectors.toList());
+    }
+
+    public List<Plugin> listPlugins(){
+        return StreamSupport.stream(loader.spliterator(),false)
                 .collect(Collectors.toList());
     }
 }

@@ -15,7 +15,7 @@ import java.util.function.Supplier;
  * Plugin holding JavaFX application instance and its root stage
  * Created by darksnake on 28-Oct-16.
  */
-@PluginDef(name = "fx", description = "JavaFX application holder")
+@PluginDef(name = "fx", group = "hep.dataforge", description = "JavaFX application holder")
 public class FXPlugin extends BasicPlugin {
 
     //used to determine if application toolkit is initialized
@@ -53,7 +53,7 @@ public class FXPlugin extends BasicPlugin {
     @Override
     public void detach() {
         super.detach();
-        if(hasChildren) {
+        if (hasChildren) {
             Platform.setImplicitExit(true);
         } else {
             Platform.exit();

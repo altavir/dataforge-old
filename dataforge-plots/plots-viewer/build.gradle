@@ -16,5 +16,5 @@ if (!hasProperty('mainClass')) {
 mainClassName = mainClass
 
 dependencies {
-    compile project(':dataforge-plots')
+    compile project(':dataforge-plots:plots-jfc')
 }
