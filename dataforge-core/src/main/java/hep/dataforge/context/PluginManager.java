@@ -17,6 +17,7 @@ package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -94,6 +95,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
 
     /**
      * Get plugin instance via plugin reolver and load it.
+     *
      * @param tag
      * @return
      */
@@ -107,6 +109,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
 
     /**
      * Load given plugin into this manager and return loaded instance
+     *
      * @param plugin
      * @param <T>
      * @return
@@ -132,5 +135,14 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     @Override
     public void close() throws Exception {
         this.plugins.values().forEach(Plugin::detach);
+    }
+
+    /**
+     * List loaded plugins
+     *
+     * @return
+     */
+    public Collection<Plugin> list() {
+        return this.plugins.values();
     }
 }

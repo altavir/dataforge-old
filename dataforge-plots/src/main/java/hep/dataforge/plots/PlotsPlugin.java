@@ -30,7 +30,7 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
         }
     }
 
-    public void setPlotHolderDelegate(PlotHolder holderDelegate) {
+    public void setPlotHolder(PlotHolder holderDelegate) {
         this.plotHolderDelegate = holderDelegate;
     }
 

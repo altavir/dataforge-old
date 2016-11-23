@@ -5,7 +5,6 @@
  */
 package hep.dataforge.context;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
@@ -19,27 +18,25 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  */
 public class ClassPathPluginResolver implements PluginResolver {
-    
+
     private static final ServiceLoader<Plugin> loader = ServiceLoader.load(Plugin.class);
 
     @Override
     public Plugin getPlugin(PluginTag tag) {
-       return StreamSupport.stream(loader.spliterator(),false)
-               .filter(plugin -> tag.matches(plugin.getTag()))
-               .sorted(Comparator.comparing(Plugin::getTag))
-               .findFirst()
-               .orElseThrow(()-> new RuntimeException("No plugin matching criterion: " + tag.toString()));
+        return StreamSupport.stream(loader.spliterator(), false)
+                .filter(plugin -> tag.matches(plugin.getTag()))
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("No plugin matching criterion: " + tag.toString()));
     }
 
     @Override
     public List<Plugin> listPlugins(Predicate<Plugin> predicate) {
-        return StreamSupport.stream(loader.spliterator(),false)
+        return StreamSupport.stream(loader.spliterator(), false)
                 .filter(predicate::test)
                 .collect(Collectors.toList());
     }
 
-    public List<Plugin> listPlugins(){
-        return StreamSupport.stream(loader.spliterator(),false)
-                .collect(Collectors.toList());
+    public List<Plugin> listPlugins() {
+        return listPlugins((tag) -> true);
     }
 }

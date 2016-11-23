@@ -16,6 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+
 import java.util.HashMap;
 import java.util.Set;
 
@@ -23,7 +24,7 @@ import java.util.Set;
  *
  * @author Alexander Nozik
  */
-class FitEngineBuilder {
+class FitEngineFactory {
 
     private final static HashMap<String, FitEngine> engineList = new HashMap<>();
 

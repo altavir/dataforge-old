@@ -32,7 +32,7 @@ public interface FitEngine {
      * @return
      */
     static FitEngine forName(String name) {
-        return FitEngineBuilder.buildEngine(name);
+        return FitEngineFactory.buildEngine(name);
     }
 
     /**

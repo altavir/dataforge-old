@@ -68,7 +68,7 @@ public class FitManager implements Encapsulated {
         } else if (name.equalsIgnoreCase(CMFitEngine.CM_ENGINE_NAME)) {
             return new CMFitEngine();
         } else {
-            return FitEngineBuilder.buildEngine(name);
+            return FitEngineFactory.buildEngine(name);
         }
     }
 

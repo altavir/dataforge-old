@@ -18,7 +18,6 @@ package hep.dataforge.context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.AlphanumComparator;
 import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.regex.Matcher;
@@ -33,9 +32,7 @@ import java.util.regex.Pattern;
 @ValueDef(name = "name")
 @ValueDef(name = "group")
 @ValueDef(name = "version")
-//@ValueDef(name = "role")
-@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
-public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> {
+public class PluginTag extends SimpleMetaMorph{
 
     /**
      * Build new PluginTag from standard string representation
@@ -71,11 +68,6 @@ public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> 
         );
     }
 
-//    public String getRole() {
-//        return getString("role", "");
-//    }
-
-
     public String getName() {
         return getString("name", "");
     }
@@ -87,13 +79,6 @@ public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> 
 
     public String getVersion() {
         return getString("version", "");
-    }
-
-    /**
-     * @return the pluginVersion
-     */
-    public double getPriority() {
-        return getDouble("priority", 0);
     }
 
 
@@ -139,11 +124,5 @@ public class PluginTag extends SimpleMetaMorph implements Comparable<PluginTag> 
         }
 
         return theGroup + getName() + theVersion;
-    }
-
-
-    @Override
-    public int compareTo(PluginTag o) {
-        return Double.compare(this.getPriority(), o.getPriority()) * 10 + AlphanumComparator.INSTANCE.compare(this.getVersion(), o.getVersion());
     }
 }

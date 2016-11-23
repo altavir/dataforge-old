@@ -38,8 +38,8 @@ public class FitPlugin extends BasicPlugin {
             throw new RuntimeException("This FitPlugin is alredy atached");
         }
         
-        FitEngineBuilder.addEngine("QOW", new QOWFitEngine());
-        FitEngineBuilder.addEngine("CM", new CMFitEngine());
+        FitEngineFactory.addEngine("QOW", new QOWFitEngine());
+        FitEngineFactory.addEngine("CM", new CMFitEngine());
 
         ActionManager.buildFrom(context).registerAction(FitAction.class);
     }
