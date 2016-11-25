@@ -21,7 +21,6 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueFormatter;
 
@@ -40,7 +39,7 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable implements Table, MetaMorph {
+public class ListTable implements Table {
 
     private final ArrayList<DataPoint> data = new ArrayList<>();
 

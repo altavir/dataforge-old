@@ -36,7 +36,7 @@ public class JavaGrindLauncher {
 
     public static MetaBuilder buildMeta(String input) {
         try {
-            Class utils = loader.loadClass("hep.dataforge.grind.GrindUtils");
+            Class utils = loader.loadClass("hep.dataforge.grind.Grind");
             return (MetaBuilder) utils.getMethod("buildMeta", String.class).invoke(null, input);
         } catch (Exception e) {
             throw new RuntimeException(e);

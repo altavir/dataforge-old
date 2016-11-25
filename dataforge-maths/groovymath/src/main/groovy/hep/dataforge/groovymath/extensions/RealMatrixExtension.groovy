@@ -1,6 +1,6 @@
-package hep.dataforge.maths.groovy.extensions
+package hep.dataforge.groovymath.extensions
 
-import hep.dataforge.maths.groovy.linear.LinearUtils
+import hep.dataforge.groovymath.GM
 import org.apache.commons.math3.linear.DefaultRealMatrixChangingVisitor
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.RealVector
@@ -40,11 +40,11 @@ class RealMatrixExtension {
      * @return
      */
     static RealMatrix plus(final RealMatrix self, Number num) {
-        return self.add(LinearUtils.identity(self.rowDimension, num))
+        return self.add(GM.identityMatrix(self.rowDimension, num))
     }
 
     static RealMatrix minus(final RealMatrix self, Number num) {
-        return self.subtract(LinearUtils.identity(self.rowDimension, num))
+        return self.subtract(GM.identityMatrix(self.rowDimension, num))
     }
 
     static RealMatrix minus(final RealMatrix self, RealMatrix other) {

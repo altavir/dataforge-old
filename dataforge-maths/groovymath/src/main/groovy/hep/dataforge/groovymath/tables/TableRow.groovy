@@ -1,4 +1,4 @@
-package hep.dataforge.maths.groovy.tables
+package hep.dataforge.groovymath.tables
 
 /**
  * The row representing fixed number row in the table. This row is changed whenever underlying table is changed.

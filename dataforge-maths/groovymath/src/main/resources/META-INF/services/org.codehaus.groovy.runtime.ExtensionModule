@@ -1,8 +1,8 @@
 moduleName = groovymaths
 moduleVersion = 1.0
 extensionClasses = \
-  hep.dataforge.maths.groovy.extensions.UnivariateFunctionExtension,\
-  hep.dataforge.maths.groovy.extensions.UnivariateDifferentiableFunctionExtension,\
-  hep.dataforge.maths.groovy.extensions.RealVectorExtension,\
-  hep.dataforge.maths.groovy.extensions.RealMatrixExtension,\
-  hep.dataforge.maths.groovy.extensions.NumberExtension
+  hep.dataforge.groovymath.extensions.UnivariateFunctionExtension,\
+  hep.dataforge.groovymath.extensions.UnivariateDifferentiableFunctionExtension,\
+  hep.dataforge.groovymath.extensions.RealVectorExtension,\
+  hep.dataforge.groovymath.extensions.RealMatrixExtension,\
+  hep.dataforge.groovymath.extensions.NumberExtension

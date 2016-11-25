@@ -16,9 +16,9 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
-import java.io.Serializable;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface Table extends PointSource, Serializable {
+public interface Table extends PointSource, MetaMorph {
 
     DataPoint getRow(int i);
 
@@ -37,6 +37,10 @@ public interface Table extends PointSource, Serializable {
         return getRow(index).getValue(name);
     }
 
+    /**
+     * Number of rows in the table
+     * @return
+     */
     int size();
 
 

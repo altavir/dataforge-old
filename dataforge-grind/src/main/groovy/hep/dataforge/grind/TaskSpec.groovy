@@ -30,7 +30,7 @@ class TaskSpec {
 
     def prototype(Task proto, Closure template) {
         this.prototype = proto;
-        trans = new Template(GrindUtils.buildMeta { template });
+        trans = new Template(Grind.buildMeta { template });
     }
 
     def prototype(Task proto) {

@@ -1,6 +1,6 @@
-package hep.dataforge.maths.groovy.extensions
+package hep.dataforge.groovymath.extensions
 
-import hep.dataforge.maths.groovy.linear.LinearUtils
+import hep.dataforge.groovymath.GM
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.RealVector
 
@@ -73,7 +73,7 @@ class RealVectorExtension {
     }
 
     static RealVector transform(final RealVector self, Closure<Double> transformation) {
-        return LinearUtils.vector(self.toArray().collect(transformation))
+        return GM.vector(self.toArray().collect(transformation))
     }
 
     static Object asType(final RealVector self, Class type) {
@@ -83,7 +83,7 @@ class RealVectorExtension {
     }
 
     static Object asVector(final List<Double> self) {
-        return LinearUtils.vector(self)
+        return GM.vector(self)
     }
 
 }

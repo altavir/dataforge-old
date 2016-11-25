@@ -38,7 +38,7 @@ class WorkspaceSpecTest extends Specification {
                 }
         """
         when:
-            Meta meta = GrindUtils.buildMeta(metaStr);
+            Meta meta = Grind.buildMeta(metaStr);
         then:
             meta.getName() == "myMeta"
             meta.getDouble("otherChildNode.grandChildNode.grandChildValue") == 88.6

@@ -9,11 +9,15 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- *
+ * A finite or infinite source of DataPoints
  * @author Alexander Nozik
  */
 public interface PointSource extends Iterable<DataPoint> {
 
+    /**
+     * A minimal
+     * @return
+     */
     TableFormat getFormat();
 
     default Stream<DataPoint> stream() {

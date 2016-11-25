@@ -74,7 +74,7 @@ class WorkspaceSpec {
         }
 
         def plugin(String key, Closure cl) {
-            pluginMap.put(key, GrindUtils.buildMeta(cl))
+            pluginMap.put(key, Grind.buildMeta(cl))
         }
 
         def rootDir(String path) {
@@ -96,7 +96,7 @@ class WorkspaceSpec {
 
     private class DataSpec {
         def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            WorkspaceSpec.this.builder.loadFile(name, path, GrindUtils.buildMeta(fileMeta));
+            WorkspaceSpec.this.builder.loadFile(name, path, Grind.buildMeta(fileMeta));
         }
 
         def file(String name, String path) {
@@ -163,12 +163,12 @@ class WorkspaceSpec {
 
     private class MetaSpec {
         def methodMissing(String methodName, Closure par) {
-            WorkspaceSpec.this.builder.loadMeta(GrindUtils.buildMeta(methodName, par));
+            WorkspaceSpec.this.builder.loadMeta(Grind.buildMeta(methodName, par));
         }
     }
 
     def configuration(String name, Closure closure) {
-        this.builder.loadMeta(GrindUtils.buildMeta(name, closure));
+        this.builder.loadMeta(Grind.buildMeta(name, closure));
     }
 
     def configuration(Meta meta) {
@@ -186,11 +186,11 @@ class WorkspaceSpec {
      * @return
      */
     MetaBuilder buildMeta(String name, Closure closure) {
-        return GrindUtils.buildMeta(name, closure);
+        return Grind.buildMeta(name, closure);
     }
 
     MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
-        MetaBuilder res = GrindUtils.buildMeta(name, closure);
+        MetaBuilder res = Grind.buildMeta(name, closure);
         values.forEach { key, value -> res.setValue(key.toString(), value) }
         return res;
     }

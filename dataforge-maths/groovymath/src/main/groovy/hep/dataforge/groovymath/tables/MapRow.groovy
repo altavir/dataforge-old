@@ -1,4 +1,4 @@
-package hep.dataforge.maths.groovy.tables
+package hep.dataforge.groovymath.tables
 
 import org.apache.commons.math3.exception.DimensionMismatchException
 

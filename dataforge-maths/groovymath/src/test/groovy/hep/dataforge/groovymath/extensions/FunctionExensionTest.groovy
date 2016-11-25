@@ -1,4 +1,4 @@
-package hep.dataforge.maths.groovy.extensions
+package hep.dataforge.groovymath.extensions
 
 import org.apache.commons.math3.analysis.UnivariateFunction
 import spock.lang.Specification

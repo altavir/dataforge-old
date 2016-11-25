@@ -1,4 +1,4 @@
-package hep.dataforge.maths.groovy.tables
+package hep.dataforge.groovymath.tables
 
 /**
  * Created by darksnake on 26-Oct-15.

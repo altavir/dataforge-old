@@ -92,7 +92,7 @@ class GrindWorkspaceBuilder {
      * @return
      */
     DataNode runTask(String taskName, @DelegatesTo(GrindMetaBuilder) Closure metaClosure) {
-        return buildWorkspace().runTask(taskName, GrindUtils.buildMeta(metaClosure));
+        return buildWorkspace().runTask(taskName, Grind.buildMeta(metaClosure));
     }
 
     DataNode runTask(String taskName, String target) {
@@ -116,7 +116,7 @@ class GrindWorkspaceBuilder {
         if (!input.contains("(") && !input.contains("{")) {
             return runTask(input)
         }
-        Meta meta = GrindUtils.buildMeta(input);
+        Meta meta = Grind.buildMeta(input);
         return runTask(meta.getName(), meta);
     }
 

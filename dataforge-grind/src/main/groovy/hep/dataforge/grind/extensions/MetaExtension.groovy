@@ -17,8 +17,8 @@
 package hep.dataforge.grind.extensions
 
 import groovy.transform.CompileStatic
+import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
-import hep.dataforge.grind.GrindUtils
 import hep.dataforge.meta.*
 import hep.dataforge.values.MapValueProvider
 import hep.dataforge.values.NamedValue
@@ -81,7 +81,7 @@ class MetaExtension {
      * @return
      */
     static MetaBuilder update(final MetaBuilder self, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return self.update(GrindUtils.buildMeta(cl))
+        return self.update(Grind.buildMeta(cl))
     }
 
     /**
@@ -91,7 +91,7 @@ class MetaExtension {
      * @return
      */
     static MetaBuilder update(final MetaBuilder self, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return self.update(GrindUtils.buildMeta(values, cl))
+        return self.update(Grind.buildMeta(values, cl))
     }
 
     /**
@@ -101,7 +101,7 @@ class MetaExtension {
      * @return
      */
     static MetaBuilder transform(final Meta self, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return new MetaBuilder(self).update(GrindUtils.buildMeta(self.getName(), cl))
+        return new MetaBuilder(self).update(Grind.buildMeta(self.getName(), cl))
     }
 
     /**
@@ -111,7 +111,7 @@ class MetaExtension {
      * @return
      */
     static MetaBuilder transform(final Meta self, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return new MetaBuilder(self).update(GrindUtils.buildMeta(self.getName(), values, cl))
+        return new MetaBuilder(self).update(Grind.buildMeta(self.getName(), values, cl))
     }
 
     /**
@@ -164,15 +164,15 @@ class MetaExtension {
      */
     static MetaBuilder compile(final Meta self, Map<String, Object> map, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         Template tmp = new Template(self);
-        return tmp.compile(new MapValueProvider(map), GrindUtils.buildMeta(cl));
+        return tmp.compile(new MapValueProvider(map), Grind.buildMeta(cl));
     }
 
     static Configurable configure(final Configurable self, Closure configuration) {
-        self.configure(GrindUtils.buildMeta("config", configuration));
+        self.configure(Grind.buildMeta("config", configuration));
     }
 
     static Configurable configure(final Configurable self, Map values, Closure configuration) {
-        self.configure(GrindUtils.buildMeta("config", values, configuration));
+        self.configure(Grind.buildMeta("config", values, configuration));
     }
 
     static Configurable setAt(final Configurable self, String key, Object value) {

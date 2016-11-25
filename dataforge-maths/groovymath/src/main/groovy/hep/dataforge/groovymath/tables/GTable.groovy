@@ -1,4 +1,4 @@
-package hep.dataforge.maths.groovy.tables
+package hep.dataforge.groovymath.tables
 
 /**
  * A dynamic Groovy table

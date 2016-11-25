@@ -1,6 +1,6 @@
-package hep.dataforge.maths.groovy.extensions
+package hep.dataforge.groovymath.extensions
 
-import hep.dataforge.maths.groovy.linear.LinearUtils
+
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.RealVector
 import spock.lang.Specification
