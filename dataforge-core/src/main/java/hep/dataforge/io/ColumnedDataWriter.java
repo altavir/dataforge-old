@@ -154,6 +154,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      */
     public void ln() {
         writer.println();
+        writer.flush();
     }
 
     /**
