@@ -43,8 +43,8 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream() {
-        return node.nodeStream();
+    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        return node.nodeStream(recursive);
     }
 
     @Override

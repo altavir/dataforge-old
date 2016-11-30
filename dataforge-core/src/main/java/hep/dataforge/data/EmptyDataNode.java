@@ -33,7 +33,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream() {
+    public Stream<DataNode<? extends T>> nodeStream(boolean recusive) {
         return Stream.empty();
     }
 

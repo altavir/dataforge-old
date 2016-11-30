@@ -156,11 +156,21 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
     }
 
     /**
-     * Named recursive node stream. Each node has composite name and Laminate meta including all higher nodes information
+     * A stream of subnodes. Each node has composite name and Laminate meta including all higher nodes information
+     *
+     * @param recursive if true then recursive node stream is returned, otherwise only upper level children are used
+     * @return
+     */
+    Stream<DataNode<? extends T>> nodeStream(boolean recursive);
+
+    /**
+     * A recursive node stream
      *
      * @return
      */
-    Stream<DataNode<? extends T>> nodeStream();
+    default Stream<DataNode<? extends T>> nodeStream() {
+        return nodeStream(true);
+    }
 
     /**
      * Get border type for this DataNode

@@ -155,7 +155,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         } else {
             String head = name.getFirst().toString();
             if (this.nodes.containsKey(head)) {
-                this.nodes.get(head).checkedPutData(name.cutFirst().toString(), data, replace);
+                getNode(name.getFirst()).putData(name.cutFirst(), data, replace);
             } else {
                 DataTree<T> newNode = new DataTree<>(type);
                 newNode.name = head;
@@ -216,8 +216,12 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream() {
-        return nodeStream(Name.EMPTY, new Laminate(meta()));
+    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        if (recursive) {
+            return nodeStream(Name.EMPTY, new Laminate(meta()));
+        } else {
+            return nodes.values().stream().map(it -> it);
+        }
     }
 
     private Stream<DataNode<? extends T>> nodeStream(Name parentName, Laminate parentMeta) {
@@ -278,12 +282,12 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 
-    protected DataTree<? extends T> getNode(Name nodeName) {
+    protected DataTree<T> getNode(Name nodeName) {
         String child = nodeName.getFirst().toString();
         if (nodeName.length() == 1) {
-            return nodes.get(nodeName.toString());
+            return (DataTree<T>) nodes.get(nodeName.toString());
         } else if (this.nodes.containsKey(child)) {
-            return this.nodes.get(child).getNode(nodeName.cutFirst());
+            return (DataTree<T>) this.nodes.get(child).getNode(nodeName.cutFirst());
         } else {
             return null;
         }

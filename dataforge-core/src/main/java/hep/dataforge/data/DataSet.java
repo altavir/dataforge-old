@@ -71,21 +71,26 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
      * @return
      */
     @Override
-    public Stream<DataNode<? extends T>> nodeStream() {
-        return dataStream().map(data -> {
-            Name dataName = Name.of(data.getName());
-            if (dataName.length() > 1) {
-                return dataName.cutLast().toString();
-            } else {
-                return "";
-            }
-        }).distinct().map((String str) -> {
-            if (str.isEmpty()) {
-                return DataSet.this;
-            } else {
-                return new NodeWrapper<>(getNode(str).get(), str, meta());
-            }
-        });
+    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        return dataStream()
+                .map(data -> {
+                    Name dataName = Name.of(data.getName());
+                    if (dataName.length() > 1) {
+                        return dataName.cutLast();
+                    } else {
+                        return Name.EMPTY;
+                    }
+                })
+                .filter(it -> recursive || it.length() == 1)
+                .map(it -> it.toString())
+                .distinct()
+                .map((String str) -> {
+                    if (str.isEmpty()) {
+                        return DataSet.this;
+                    } else {
+                        return new NodeWrapper<>(getNode(str).get(), str, meta());
+                    }
+                });
     }
 
     @Override

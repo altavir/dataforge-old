@@ -57,8 +57,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream() {
-        return node.nodeStream().filter(n -> type.isAssignableFrom(n.type())).map(n -> (DataNode<? extends T>) n);
+    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> (DataNode<? extends T>) n);
     }
 
     @Override
