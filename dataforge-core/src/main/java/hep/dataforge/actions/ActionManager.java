@@ -14,6 +14,7 @@ import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import org.slf4j.LoggerFactory;
 
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
@@ -31,9 +32,9 @@ public class ActionManager extends BasicPlugin {
     }
 
     public ActionManager() {
-        registerAction(TransformTableAction.class);
-        registerAction(ReadPointSetAction.class);
-        registerAction(RunConfigAction.class);
+        register(TransformTableAction.class);
+        register(ReadPointSetAction.class);
+        register(RunConfigAction.class);
     }
 
     protected ActionManager getParent() {
@@ -44,12 +45,45 @@ public class ActionManager extends BasicPlugin {
         }
     }
 
-    public boolean hasAction(String name) {
-        return actionMap.containsKey(name) || (getParent() != null && getParent().hasAction(name));
+
+    /**
+     * Build action using its type and default empty constructor
+     * @param type
+     * @return
+     */
+    public Action build(Class<Action> type){
+        try {
+            Constructor<Action> constructor = type.getConstructor();
+            Action res = constructor.newInstance();
+            if(res instanceof GenericAction){
+                return ((GenericAction)res).withContext(getContext());
+            } else {
+                return res;
+            }
+            //TODO add logger factory and parent process
+        } catch (NoSuchMethodException e) {
+            throw new IllegalArgumentException("This action type does not have parameterless constructor");
+        } catch (Exception e) {
+            throw new RuntimeException("Error while creating an instance of action");
+        }
     }
 
+    /**
+     * Build action using class name
+     * @param type
+     * @return
+     * @throws ClassNotFoundException
+     */
+    public Action buildByType(String type) throws ClassNotFoundException {
+        return build((Class<Action>) Class.forName(type));
+    }
 
-    public Action getAction(String name) {
+    /**
+     *
+     * @param name
+     * @return
+     */
+    public Action build(String name) {
         if (actionMap.containsKey(name)) {
             return actionMap.get(name);
         } else {
@@ -58,12 +92,12 @@ public class ActionManager extends BasicPlugin {
                 //TODO сделать ActionNotFoundException
                 throw new NameNotFoundException(name);
             } else {
-                return parent.getAction(name);
+                return parent.build(name);
             }
         }
     }
 
-    private void putAction(Action action) {
+    private void put(Action action) {
         if (actionMap.containsKey(action.getName())) {
             LoggerFactory.getLogger(getClass()).warn("Duplicate action names in ActionManager.");
         } else {
@@ -77,9 +111,9 @@ public class ActionManager extends BasicPlugin {
      *
      * @param actionClass a {@link java.lang.Class} object.
      */
-    public final void registerAction(Class<? extends Action> actionClass) {
+    public final void register(Class<? extends Action> actionClass) {
         try {
-            putAction(actionClass.getDeclaredConstructor().newInstance());
+            put(actionClass.getDeclaredConstructor().newInstance());
         } catch (NoSuchMethodException ex) {
             throw new RuntimeException("Action must have default empty constructor to be registered.");
         } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
@@ -89,11 +123,11 @@ public class ActionManager extends BasicPlugin {
 
     /**
      * <p>
-     * unRegisterAction.</p>
+     * unRegister.</p>
      *
      * @param actionType a {@link java.lang.String} object.
      */
-    public void unRegisterAction(String actionType) {
+    public void unRegister(String actionType) {
         actionMap.remove(actionType);
     }
 
@@ -102,10 +136,10 @@ public class ActionManager extends BasicPlugin {
      *
      * @return
      */
-    public List<ActionDescriptor> listActions() {
+    public List<ActionDescriptor> list() {
         List<ActionDescriptor> list;
         if (getParent() != null) {
-            list = getParent().listActions();
+            list = getParent().list();
         } else {
             list = new ArrayList<>();
         }

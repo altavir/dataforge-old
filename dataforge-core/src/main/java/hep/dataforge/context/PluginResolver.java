@@ -15,28 +15,6 @@ import java.util.function.Predicate;
  */
 public interface PluginResolver {
 
-//    /**
-//     * Get a list of all available plugins that match given tag
-//     *
-//     * @param tag
-//     * @return
-//     */
-//    List<Plugin> listPlugins(PluginTag tag);
-//
-//    /**
-//     * Load plugin by its tag
-//     *
-//     * @param tag
-//     * @return
-//     */
-//    default Plugin getPlugin(PluginTag tag) {
-//        List<Plugin> plugins = listPlugins(tag);
-//        if (plugins.isEmpty()) {
-//            throw new IllegalStateException("Plugin with tag " + tag + "not found");
-//        }
-//        return listPlugins(tag).get(0);
-//    }
-
     /**
      * Load the most suitable plugin of all provided by its tag
      *
@@ -51,6 +29,10 @@ public interface PluginResolver {
      * @return
      */
     List<Plugin> listPlugins(Predicate<Plugin> predicate);
+
+    default List<Plugin> listPlugins() {
+        return listPlugins((tag) -> true);
+    }
 
     default Plugin getPlugin(String name) {
         return getPlugin(PluginTag.fromString(name));

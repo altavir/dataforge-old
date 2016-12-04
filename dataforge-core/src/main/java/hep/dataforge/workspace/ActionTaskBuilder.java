@@ -56,7 +56,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
      * @return
      */
     public ActionTaskBuilder action(String actionName, ContextMetaFactory<Meta> metaBuilder) {
-        actions.add(new Pair<>(ctx -> ActionManager.buildFrom(ctx).getAction(actionName), metaBuilder));
+        actions.add(new Pair<>(ctx -> ActionManager.buildFrom(ctx).build(actionName), metaBuilder));
         return self();
     }
 
@@ -238,7 +238,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
             for (Pair<Function<Context, Action>, ContextMetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
                 Meta actionMeta = pair.getValue().build(context, config);
-                res = action.withParentProcess(callback.workName()).run(res, actionMeta);
+                res = action.run(res, actionMeta);
                 if (actionMeta.hasValue("stageName")) {
                     state.setData(actionMeta.getString("stageName"), res);
                 }

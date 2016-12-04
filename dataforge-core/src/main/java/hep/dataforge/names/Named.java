@@ -21,6 +21,7 @@ package hep.dataforge.names;
  * @author Alexander Nozik
  */
 public interface Named {
+    String ANONYMOUS = "";
 
     /**
      * Get the name of given object. If object is Named its name is used,
@@ -53,6 +54,6 @@ public interface Named {
      * @return
      */
     default boolean isAnonimous() {
-        return (this.getName() == null || this.getName().equals(""));
+        return (this.getName() == null || this.getName().equals(ANONYMOUS));
     }
 }

@@ -56,12 +56,12 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         Laminate meta = inputMeta(data.meta(), actionMeta);
         PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(meta),
                 input -> {
-                    Thread.currentThread().setName(Name.joinString(getWorkName(), resultName));
+                    Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), resultName));
                     return transform(resultName, meta, input);
                 }
         );
-        //PENDING a bit ugly solution
-        goal.onStart(() -> workListener().submit(resultName, goal.result()));
+//        //PENDING a bit ugly solution
+//        goal.onStart(() -> workListener(actionMeta).submit(resultName, goal.result()));
 
         return new ActionResult<>(getReport(resultName), goal, outputMeta(data, meta), getOutputType());
     }
@@ -133,14 +133,14 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected void afterAction(String name, R res, Laminate meta) {
-        logger().info("Action '{}[{}]' is finished", getName(), name);
+        getLogger(meta).info("Action '{}[{}]' is finished", getName(), name);
     }
 
     protected void beforeAction(String name, T datum, Laminate meta) {
         if (getContext().getBoolean("actions.reportStart", true)) {
             report(name, "Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
         }
-        logger().info("Starting action '{}[{}]'", getName(), name);
+        getLogger(meta).info("Starting action '{}[{}]'", getName(), name);
     }
 
 }

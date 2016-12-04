@@ -36,10 +36,11 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     /**
      * A class path resolver
      */
-    private PluginResolver pluginResolver = new ClassPathPluginResolver();
+    private PluginResolver pluginResolver;
 
     public PluginManager(Context context) {
         this.context = context;
+        pluginResolver = new ClassPathPluginResolver(context);
     }
 
     @Override

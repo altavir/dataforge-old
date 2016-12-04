@@ -123,9 +123,9 @@ public interface Device extends Configurable, Annotated, Encapsulated, Named, Re
     /**
      * remove a listener
      *
-     * @param listenrer
+     * @param listener
      */
-    void removeDeviceListener(DeviceListener listenrer);
+    void removeDeviceListener(DeviceListener listener);
 
     /**
      * Register connection for this device

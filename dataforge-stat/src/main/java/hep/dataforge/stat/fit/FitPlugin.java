@@ -41,13 +41,13 @@ public class FitPlugin extends BasicPlugin {
         FitEngineFactory.addEngine("QOW", new QOWFitEngine());
         FitEngineFactory.addEngine("CM", new CMFitEngine());
 
-        ActionManager.buildFrom(context).registerAction(FitAction.class);
+        ActionManager.buildFrom(context).register(FitAction.class);
     }
 
     @Override
     public void detach() {
         fitManager = null;
-        ActionManager.buildFrom(getContext()).unRegisterAction(FitAction.FIT_ACTION_NAME);
+        ActionManager.buildFrom(getContext()).unRegister(FitAction.FIT_ACTION_NAME);
         super.detach();
     }
 

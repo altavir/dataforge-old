@@ -5,6 +5,7 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.actions.Action;
 import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
@@ -45,9 +46,10 @@ public abstract class TemplateTask extends MultiStageTask {
     protected void transform(ProgressCallback callback, Context context, MultiStageTaskState state, Meta config) {
         DataNode res = state.getData();
         config = template.apply(config);
-        for (Meta action : config.getMetaList(ACTION_NODE_KEY)) {
-            String actionType = action.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            res = buildAction(context, actionType).withParentProcess(callback.workName()).run(res, action);
+        for (Meta actionMeta : config.getMetaList(ACTION_NODE_KEY)) {
+            String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
+            Action action = buildAction(context, actionType);
+            res = action.run(res, actionMeta);
             state.setData(actionType, res);
         }
         state.finish(res);

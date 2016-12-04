@@ -31,6 +31,7 @@ import hep.dataforge.workspace.identity.StringIdentity;
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 public class ActionUtils {
 
@@ -93,14 +94,14 @@ public class ActionUtils {
         return buildAction(context, actionType).run(data, actionMeta);
     }
 
-    public static Action buildAction(Context context, String actionType) {
+    public static Action buildAction(Context context, String actionName) {
         Action res;
-        if (SEQUENCE_ACTION_TYPE.equals(actionType)) {
+        if (SEQUENCE_ACTION_TYPE.equals(actionName)) {
             res = new SequenceAction();
         } else {
-            res = ActionManager.buildFrom(context).getAction(actionType);
+            res = ActionManager.buildFrom(context).build(actionName);
         }
-        return res.withContext(context);
+        return res;
     }
 
     public static class SequenceAction extends GenericAction {
@@ -132,5 +133,56 @@ public class ActionUtils {
             return SEQUENCE_ACTION_TYPE;
         }
 
+    }
+
+    /**
+     * Compose two actions with complementary types into one.
+     *
+     * @param first
+     * @param second
+     * @param <T> initial type
+     * @param <I> intermidiate type
+     * @param <R> result type
+     * @return
+     */
+    public static <T, I, R> Action<T, R> compose(Action<T, I> first, Action<I, R> second) {
+        return new Action<T, R>() {
+            @Override
+            public DataNode<R> run(DataNode<? extends T> data, Meta actionMeta) {
+                return second
+                        .run(first.run(data, actionMeta), actionMeta);
+            }
+
+            @Override
+            public String getName() {
+                return first.getName() + " -> " + second.getName();
+            }
+        };
+    }
+
+    /**
+     * Compose any number of actions.
+     * @param actions
+     * @return
+     */
+    public static Action<?,?> compose(List<Action<?,?>> actions) {
+        if(actions.isEmpty()){
+            throw new IllegalArgumentException("Action list should not be empty");
+        }
+        return new Action() {
+            @Override
+            public DataNode run(DataNode data, Meta actionMeta) {
+                DataNode result = data;
+                for(Action<?,?> action : actions){
+                    result = action.run(result, actionMeta);
+                }
+                return result;
+            }
+
+            @Override
+            public String getName() {
+                return actions.stream().map(it->it.getName()).collect(Collectors.joining(" -> "));
+            }
+        };
     }
 }

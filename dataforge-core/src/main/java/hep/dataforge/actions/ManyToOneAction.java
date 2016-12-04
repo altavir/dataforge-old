@@ -137,8 +137,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         @Override
         protected R compute() throws Exception {
             Laminate meta = inputMeta(data.meta(), actionMeta);
-            Thread.currentThread().setName(Name.joinString(getWorkName(), data.getName()));
-            workListener().submit(data.getName(), this.result());
+            Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), data.getName()));
+//            workListener(actionMeta).submit(data.getName(), this.result());
             beforeGroup(data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()

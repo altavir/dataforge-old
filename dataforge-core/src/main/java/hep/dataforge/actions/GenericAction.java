@@ -15,8 +15,6 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.computation.TaskListener;
-import hep.dataforge.computation.TaskListenerDelegate;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
@@ -51,15 +49,20 @@ import static hep.dataforge.actions.GenericAction.*;
 @ValueDef(name = RESULT_GROUP_KEY, def = "", info = "The name of the data group appended before the path. By default is empty.")
 @ValueDef(name = RESULT_NAME_KEY, info = "The override for resulting data name. If not presented, then input data name is used.")
 @ValueDef(name = ALLOW_PARALLEL_KEY, type = "BOOLEAN", def = "true", info = "A flag to allow or forbid parallel execution of this action")
-public abstract class GenericAction<T, R> implements Action<T, R> {
+public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@resultGroup";
     public static final String RESULT_NAME_KEY = "@resultName";
     public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
 
-    private Logger logger;
-    private String parentProcessName;
-    private Context context = Global.instance();
-    private Map<String, Log> reportCache = new ConcurrentHashMap<>();
+    private transient Context context = Global.instance();
+    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
+
+    public GenericAction() {
+    }
+
+    public GenericAction(Context context) {
+        this.context = context;
+    }
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("@allowParallel", true);
@@ -67,6 +70,7 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
 
     /**
      * Generate the name of the resulting data based on name of input data and action meta
+     *
      * @param dataName
      * @param actionMeta
      * @return
@@ -121,36 +125,15 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
      *
      * @return
      */
-    protected String getWorkName() {
-        if (parentProcessName != null) {
-            return Name.joinString(parentProcessName, getName());
-        } else {
-            return getName();
-        }
+    protected String getTaskName(Meta actionMeta) {
+        return actionMeta.getString("@action.taskName", "action::" + getName());
     }
 
-    public Logger logger() {
-        if (logger == null) {
-            return LoggerFactory.getLogger("action::" + getName());
-        } else {
-            return logger;
-        }
+    protected Logger getLogger(Meta actionMeta) {
+        return LoggerFactory.getLogger(actionMeta.getString("@action.logger", getTaskName(actionMeta)));
     }
 
-    @Override
-    public Action<T, R> withLogger(Logger logger) {
-        this.logger = logger;
-        return this;
-    }
-
-    @Override
-    public Action<T, R> withParentProcess(String parentProcessName) {
-        this.parentProcessName = parentProcessName;
-        return this;
-    }
-
-    @Override
-    public Action<T, R> withContext(Context context) {
+    public GenericAction<T, R> withContext(Context context) {
         this.context = context;
         return this;
     }
@@ -160,10 +143,10 @@ public abstract class GenericAction<T, R> implements Action<T, R> {
         return context;
     }
 
-    protected TaskListener workListener() {
-        //PENDING make it variable to avoid multiple initialization
-        return new TaskListenerDelegate(getContext().taskManager(), getWorkName());
-    }
+//    protected TaskListener workListener(Meta actionMeta) {
+//        //PENDING make it variable to avoid multiple initialization
+//        return new TaskListenerDelegate(getContext().taskManager(), getTaskName(actionMeta));
+//    }
 
     protected boolean isEmptyInputAllowed() {
         return false;

@@ -66,18 +66,15 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     protected Logger setupLogger() {
+        String loggerName = meta().getString("logger", () -> "device::" + getName());
+
         //TODO move logger construction to context IoManager
-        if (meta().hasValue("logger")) {
-            return (Logger) LoggerFactory.getLogger(meta().getString("logger"));
-        } else {
-            return getContext().getLogger();
-        }
+        return LoggerFactory.getLogger(loggerName);
     }
 
     public Logger getLogger() {
         if (logger == null) {
             logger = setupLogger();
-//            logger.warn("Logger is not initialized. Call init() before working with device.");
         }
         return logger;
     }
@@ -99,7 +96,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             }
         });
         listeners.forEach(it -> it.notifyDeviceShutdown(this));
-        //TODO close connections and close listeners
     }
 
     @Override
@@ -113,8 +109,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     }
 
     @Override
-    public void removeDeviceListener(DeviceListener listenrer) {
-        listeners.remove(listenrer);
+    public void removeDeviceListener(DeviceListener listener) {
+        listeners.remove(listener);
     }
 
     /**

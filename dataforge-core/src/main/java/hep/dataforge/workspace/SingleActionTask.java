@@ -27,21 +27,6 @@ import hep.dataforge.meta.Meta;
  */
 public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
 
-//    public static <T, R> SingleActionTask<T, R> build(Action<T, R> action) {
-//        return new SingleActionTask<T, R>() {
-//            @Override
-//            protected Action<T, R> getAction(TaskModel model) {
-//                return action;
-//            }
-//
-//            @Override
-//            public String getName() {
-//                return action.getName();
-//            }
-//        };
-//    }
-
-
     protected DataNode<T> gatherNode(DataNode<?> data) {
         return (DataNode<T>) data;
     }
@@ -56,8 +41,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
     protected DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data) {
         Meta actionMeta = transformMeta(model);
         DataNode<T> checkedData = gatherNode(data);
-        return getAction(model)
-                .withParentProcess(callback.workName()).withContext(model.getWorkspace().getContext()).run(checkedData, actionMeta);
+        return getAction(model).run(checkedData, actionMeta);
     }
 
 }
