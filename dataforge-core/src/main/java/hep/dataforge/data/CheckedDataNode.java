@@ -52,8 +52,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream() {
-        return node.dataStream().filter(d -> type.isAssignableFrom(d.type())).map(d -> (NamedData<? extends T>) d);
+    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+        return node.dataStream(recursive).filter(d -> type.isAssignableFrom(d.type())).map(d -> (NamedData<? extends T>) d);
     }
 
     @Override
@@ -69,11 +69,6 @@ public class CheckedDataNode<T> implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return false;
-    }
-
-    @Override
-    public int size() {
-        return 0;
     }
 
     @Override

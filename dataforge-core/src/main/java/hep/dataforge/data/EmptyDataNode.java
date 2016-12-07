@@ -28,7 +28,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream() {
+    public Stream<NamedData<? extends T>> dataStream(boolean recusive) {
         return Stream.empty();
     }
 
@@ -46,11 +46,6 @@ public class EmptyDataNode<T> implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return true;
-    }
-
-    @Override
-    public int size() {
-        return 0;
     }
 
     @Override

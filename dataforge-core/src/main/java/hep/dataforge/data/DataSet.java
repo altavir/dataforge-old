@@ -56,8 +56,9 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream() {
+    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
         return dataMap.entrySet().stream()
+                .filter(it -> recursive || !it.getKey().contains("."))
                 .map((Map.Entry<String, Data<? extends T>> entry)
                         -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
     }
@@ -120,11 +121,6 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return dataMap.isEmpty();
-    }
-
-    @Override
-    public int size() {
-        return dataMap.size();
     }
 
     @Override

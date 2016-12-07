@@ -238,11 +238,11 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
 
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream() {
-        return dataStream(null, new Laminate(meta()));
+    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+        return dataStream(null, new Laminate(meta()), recursive);
     }
 
-    private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta) {
+    private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta, boolean recursive) {
         Stream<NamedData<? extends T>> dataStream = data.entrySet()
                 .stream()
                 .map((Map.Entry<String, Data<T>> entry) -> {
@@ -251,15 +251,20 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
                         }
                 );
 
-        // iterating over nodes including node name into dataStream
-        Stream<NamedData<? extends T>> subStream = nodes.entrySet()
-                .stream()
-                .flatMap(nodeEntry -> {
-                    Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());
-                    return nodeEntry.getValue()
-                            .dataStream(subNodeName, nodeMeta.addFirstLayer(nodeEntry.getValue().meta()));
-                });
-        return Stream.concat(dataStream, subStream);
+        if (recursive) {
+            return dataStream;
+        } else {
+
+            // iterating over nodes including node name into dataStream
+            Stream<NamedData<? extends T>> subStream = nodes.entrySet()
+                    .stream()
+                    .flatMap(nodeEntry -> {
+                        Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());
+                        return nodeEntry.getValue()
+                                .dataStream(subNodeName, nodeMeta.addFirstLayer(nodeEntry.getValue().meta()), true);
+                    });
+            return Stream.concat(dataStream, subStream);
+        }
     }
 
     @Override
@@ -270,11 +275,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return data.isEmpty() && nodes.isEmpty();
-    }
-
-    @Override
-    public int size() {
-        return data.size() + nodes.values().stream().mapToInt(DataNode::size).sum();
     }
 
     @Override

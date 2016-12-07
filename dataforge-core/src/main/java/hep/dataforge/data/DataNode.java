@@ -133,7 +133,11 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      *
      * @return
      */
-    Stream<NamedData<? extends T>> dataStream();
+    Stream<NamedData<? extends T>> dataStream(boolean recusive);
+
+    default Stream<NamedData<? extends T>> dataStream() {
+        return dataStream(true);
+    }
 
     /**
      * Iterate other all data pieces using given predicate
@@ -187,11 +191,25 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
     boolean isEmpty();
 
     /**
-     * The current number of data pieces in this node
+     * The current number of data pieces in this node including subnodes
      *
      * @return
      */
-    int size();
+    default long dataSize(boolean recursive) {
+        return dataStream().count();
+    }
+
+    default long dataSize() {
+        return dataSize(false);
+    }
+
+    default long nodesSize(boolean recursive) {
+        return nodeStream(recursive).count();
+    }
+
+    default long nodesSize() {
+        return nodesSize(false);
+    }
 
     /**
      * Force start data computation for all data and wait for completion

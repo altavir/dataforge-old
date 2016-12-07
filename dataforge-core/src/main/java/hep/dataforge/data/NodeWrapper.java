@@ -38,8 +38,8 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream() {
-        return node.dataStream();
+    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+        return node.dataStream(recursive);
     }
 
     @Override
@@ -56,12 +56,6 @@ public class NodeWrapper<T> implements DataNode<T> {
     public boolean isEmpty() {
         return node.isEmpty();
     }
-
-    @Override
-    public int size() {
-        return node.size();
-    }
-
 
     @Override
     public Laminate meta() {
