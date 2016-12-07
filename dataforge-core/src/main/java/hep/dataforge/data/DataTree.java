@@ -251,7 +251,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
                         }
                 );
 
-        if (recursive) {
+        if (!recursive) {
             return dataStream;
         } else {
 

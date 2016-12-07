@@ -94,7 +94,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      */
     default Data<? extends T> getData() {
         return getData(DEFAULT_DATA_FRAGMENT_NAME)
-                .orElse(dataStream().findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
+                .orElse(dataStream(true).findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
     }
 
     /**
@@ -196,7 +196,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default long dataSize(boolean recursive) {
-        return dataStream().count();
+        return dataStream(recursive).count();
     }
 
     default long dataSize() {

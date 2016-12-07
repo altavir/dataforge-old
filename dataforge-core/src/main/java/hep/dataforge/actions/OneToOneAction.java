@@ -88,7 +88,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         return wrap(set.getName(), set.meta(),
-                set.dataStream().collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
+                set.dataStream(true).collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
                         data -> runOne(data, actionMeta))));
     }
 
