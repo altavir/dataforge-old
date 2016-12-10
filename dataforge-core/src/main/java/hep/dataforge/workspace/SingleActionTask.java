@@ -41,7 +41,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
     protected DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data) {
         Meta actionMeta = transformMeta(model);
         DataNode<T> checkedData = gatherNode(data);
-        return getAction(model).run(checkedData, actionMeta);
+        return getAction(model).run(model.getContext(), checkedData, actionMeta);
     }
 
 }

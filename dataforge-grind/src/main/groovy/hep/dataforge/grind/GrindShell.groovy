@@ -13,7 +13,6 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
-import org.jline.terminal.Attributes
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.terminal.impl.DumbTerminal
@@ -78,27 +77,27 @@ class GrindShell {
      * Build default jline console based on operating system. Do not use for preview inside IDE
      * @return
      */
-    GrindShell withTerminal() {
-        Attributes attrs = new Attributes();
-        attrs.with {
-            setLocalFlag(Attributes.LocalFlag.ECHO, false);
-            setLocalFlag(Attributes.LocalFlag.ECHONL, false);
-            setInputFlag(Attributes.InputFlag.IGNCR, true);
-        }
+    GrindShell withSystemTerminal() {
         this.terminal = TerminalBuilder.builder()
                 .name("df")
                 .system(true)
                 .jna(true)
                 .encoding("UTF-8")
-                .attributes(attrs) // does not work for system terminal
                 .build()
-//        terminal = new JnaWinSysTerminal("df",true);
         return this
     }
 
     GrindShell withTerminal(Terminal terminal) {
         this.terminal = terminal
         return this
+    }
+
+    private Terminal getTerminal(){
+        if (terminal == null) {
+            terminal = new DumbTerminal(System.in, System.out);
+            terminal.echo(false);
+        }
+        return terminal;
     }
 
     def setContext(Context context) {
@@ -152,34 +151,30 @@ class GrindShell {
     }
 
     def println(String str) {
-        terminal.writer().with {
+        getTerminal().writer().with {
             println(str);
             flush();
         }
     }
 
     def print(String str) {
-        terminal.writer().with {
+        getTerminal().writer().with {
             print(str)
         }
     }
 
     def launch() {
-        if (terminal == null) {
-            terminal = new DumbTerminal(System.in, System.out);
-            terminal.echo(false);
-        }
         LineReader reader = LineReaderBuilder.builder()
-                .terminal(terminal)
+                .terminal(getTerminal())
                 .appName("DataForge Grind terminal")
                 .build();
-        PrintWriter writer = terminal.writer();
+        PrintWriter writer = getTerminal().writer();
 
-        context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
+        context.setIO(new BasicIOManager(getTerminal().output(), getTerminal().input()));
 //        def appender = TerminalLogLayout.buildAppender(context.logger.loggerContext, terminal);
 //        context.logger.addAppender(appender)
 
-        def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(terminal);
+        def promptLine = new AttributedString("[${context.getName()}] --> ", PROMPT).toAnsi(getTerminal());
         try {
             while (true) {
                 String expression = reader.readLine(promptLine);
@@ -189,7 +184,7 @@ class GrindShell {
                 try {
                     def res = eval(expression);
                     if (res != null) {
-                        if(terminal instanceof DumbTerminal){
+                        if(getTerminal() instanceof DumbTerminal){
                             println(" = ${res.toString()}")
                         } else {
                             def resStr = new AttributedStringBuilder()
@@ -197,7 +192,7 @@ class GrindShell {
                                     .append("\tres = ")
                                     .style(DEFAULT)
                                     .append(res.toString());
-                            println(resStr.toAnsi(terminal))
+                            println(resStr.toAnsi(getTerminal()))
                         }
                     }
                 } catch (Exception ex) {
@@ -211,7 +206,7 @@ class GrindShell {
         }catch (EndOfFileException){
             writer.println("Terminated by user")
         } finally {
-            terminal.close()
+            getTerminal().close()
         }
 
     }

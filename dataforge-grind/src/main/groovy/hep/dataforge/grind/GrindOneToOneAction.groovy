@@ -29,11 +29,6 @@ class GrindOneToOneAction extends OneToOneAction {
     }
 
     @Override
-    Context getContext() {
-        params.getOrDefault("context", super.getContext())
-    }
-
-    @Override
     String getName() {
         params.get("name")
     }
@@ -49,9 +44,9 @@ class GrindOneToOneAction extends OneToOneAction {
     }
 
     @Override
-    protected Object execute(String name, Laminate meta, Object input) {
+    protected Object execute(Context context, String name, Object input, Laminate meta) {
         if (action != null) {
-            return new OneToOneCallable(getReport(name), name, meta, input).execute(action);
+            return new OneToOneCallable(getReport(context, name), name, meta, input).execute(action);
         } else {
             return input;
         }

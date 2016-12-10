@@ -72,7 +72,7 @@ class TaskSpec {
         DataNode run(TaskModel model) {
             DataNode<?> res = prototype.run(model);
             for (Pair<Action, UnaryOperator<Meta>> pair in actions) {
-                res = pair.key.run(res, pair.value.apply(model.meta()));
+                res = pair.key.run(model.context, res, pair.value.apply(model.meta()));
             }
             return res;
         }

@@ -16,6 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
+import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
@@ -42,7 +43,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
      * @return
      */
     @Override
-    protected Table execute(String name, Laminate meta, Table input) {
+    protected Table execute(Context context, String name, Table input, Laminate meta) {
         Predicate<DataPoint> filterSet = buildFilter(meta);
 
         Table res;

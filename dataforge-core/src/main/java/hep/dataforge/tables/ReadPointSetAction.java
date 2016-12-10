@@ -16,6 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.actions.OneToOneAction;
+import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
@@ -42,7 +43,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
      * @return
      */
     @Override
-    protected Table execute(String name, Laminate meta, InputStream source) {
+    protected Table execute(Context context, String name, InputStream source, Laminate meta) {
         ListTable.Builder fileData;
 
         String encoding = meta.getString("encoding", "UTF-8");

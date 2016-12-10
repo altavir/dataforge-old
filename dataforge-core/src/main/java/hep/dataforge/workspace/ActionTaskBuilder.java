@@ -238,7 +238,7 @@ public class ActionTaskBuilder implements GenericBuilder<Task, ActionTaskBuilder
             for (Pair<Function<Context, Action>, ContextMetaFactory<Meta>> pair : actions) {
                 Action action = pair.getKey().apply(context);
                 Meta actionMeta = pair.getValue().build(context, config);
-                res = action.run(res, actionMeta);
+                res = action.run(context, res, actionMeta);
                 if (actionMeta.hasValue("stageName")) {
                     state.setData(actionMeta.getString("stageName"), res);
                 }

@@ -49,7 +49,7 @@ public abstract class TemplateTask extends MultiStageTask {
         for (Meta actionMeta : config.getMetaList(ACTION_NODE_KEY)) {
             String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
             Action action = buildAction(context, actionType);
-            res = action.run(res, actionMeta);
+            res = action.run(context, res, actionMeta);
             state.setData(actionType, res);
         }
         state.finish(res);

@@ -91,7 +91,7 @@ public class ActionUtils {
 
     public static DataNode runAction(Context context, DataNode data, Meta actionMeta) {
         String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-        return buildAction(context, actionType).run(data, actionMeta);
+        return buildAction(context, actionType).run(context, data, actionMeta);
     }
 
     public static Action buildAction(Context context, String actionName) {
@@ -107,19 +107,19 @@ public class ActionUtils {
     public static class SequenceAction extends GenericAction {
 
         @Override
-        public DataNode run(DataNode data, Meta sequenceMeta) {
+        public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
             DataNode res = data;
             DataCache cache = null;
             //Set data cache if it is defined in context
-            if (getContext().getBoolean("enableCache", false)) {
-                cache = CachePlugin.buildFrom(getContext()).getCache();
+            if (context.getBoolean("enableCache", false)) {
+                cache = CachePlugin.buildFrom(context).getCache();
             }
 
-            Identity id = new StringIdentity(getContext().getName());
+            Identity id = new StringIdentity(context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
                 id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-                res = buildAction(getContext(), actionType).run(res, actionMeta);
+                res = buildAction(context, actionType).run(context, res, actionMeta);
                 if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
                     //FIXME add context identity here
                     res = cache.cacheNode(res, new MetaIdentity(actionMeta));
@@ -140,17 +140,17 @@ public class ActionUtils {
      *
      * @param first
      * @param second
-     * @param <T> initial type
-     * @param <I> intermidiate type
-     * @param <R> result type
+     * @param <T>    initial type
+     * @param <I>    intermidiate type
+     * @param <R>    result type
      * @return
      */
     public static <T, I, R> Action<T, R> compose(Action<T, I> first, Action<I, R> second) {
         return new Action<T, R>() {
             @Override
-            public DataNode<R> run(DataNode<? extends T> data, Meta actionMeta) {
+            public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
                 return second
-                        .run(first.run(data, actionMeta), actionMeta);
+                        .run(context, first.run(context, data, actionMeta), actionMeta);
             }
 
             @Override
@@ -162,26 +162,27 @@ public class ActionUtils {
 
     /**
      * Compose any number of actions.
+     *
      * @param actions
      * @return
      */
-    public static Action<?,?> compose(List<Action<?,?>> actions) {
-        if(actions.isEmpty()){
+    public static Action<?, ?> compose(List<Action<?, ?>> actions) {
+        if (actions.isEmpty()) {
             throw new IllegalArgumentException("Action list should not be empty");
         }
         return new Action() {
             @Override
-            public DataNode run(DataNode data, Meta actionMeta) {
+            public DataNode run(Context context, DataNode data, Meta actionMeta) {
                 DataNode result = data;
-                for(Action<?,?> action : actions){
-                    result = action.run(result, actionMeta);
+                for (Action<?, ?> action : actions) {
+                    result = action.run(context, result, actionMeta);
                 }
                 return result;
             }
 
             @Override
             public String getName() {
-                return actions.stream().map(it->it.getName()).collect(Collectors.joining(" -> "));
+                return actions.stream().map(it -> it.getName()).collect(Collectors.joining(" -> "));
             }
         };
     }

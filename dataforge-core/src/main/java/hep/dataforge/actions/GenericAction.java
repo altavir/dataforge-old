@@ -16,7 +16,6 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
@@ -33,7 +32,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import static hep.dataforge.actions.GenericAction.*;
@@ -44,7 +42,6 @@ import static hep.dataforge.actions.GenericAction.*;
  * @param <T>
  * @param <R>
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 @ValueDef(name = RESULT_GROUP_KEY, def = "", info = "The name of the data group appended before the path. By default is empty.")
 @ValueDef(name = RESULT_NAME_KEY, info = "The override for resulting data name. If not presented, then input data name is used.")
@@ -53,16 +50,6 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@resultGroup";
     public static final String RESULT_NAME_KEY = "@resultName";
     public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
-
-    private transient Context context = Global.instance();
-    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
-
-    public GenericAction() {
-    }
-
-    public GenericAction(Context context) {
-        this.context = context;
-    }
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("@allowParallel", true);
@@ -111,11 +98,11 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      *
      * @return
      */
-    protected ExecutorService executor(Meta meta) {
+    protected ExecutorService executor(Context context, Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return getContext().taskManager().parallelExecutor();
+            return context.taskManager().parallelExecutor();
         } else {
-            return getContext().taskManager().singleThreadExecutor();
+            return context.taskManager().singleThreadExecutor();
         }
 
     }
@@ -131,16 +118,6 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
 
     protected Logger getLogger(Meta actionMeta) {
         return LoggerFactory.getLogger(actionMeta.getString("@action.logger", getTaskName(actionMeta)));
-    }
-
-    public GenericAction<T, R> withContext(Context context) {
-        this.context = context;
-        return this;
-    }
-
-    @Override
-    public Context getContext() {
-        return context;
     }
 
 //    protected TaskListener workListener(Meta actionMeta) {
@@ -228,25 +205,25 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @param actionMeta
      * @return
      */
-    protected Laminate inputMeta(Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
+    protected Laminate inputMeta(Context context, Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
         return new Laminate(input.meta(), nodeMeta, actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Meta... meta) {
+    protected Laminate inputMeta(Context context, Meta... meta) {
         return new Laminate(meta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Meta nodeMeta, Meta actionMeta) {
+    protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
         return new Laminate(nodeMeta, actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }
 
-    protected Laminate inputMeta(Meta actionMeta) {
+    protected Laminate inputMeta(Context context, Meta actionMeta) {
         return new Laminate(actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
@@ -258,22 +235,15 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(String name) {
+    public OutputStream buildActionOutput(Context context, String name) {
         return context.io().out(getName(), name);
     }
 
-    protected Log getReport(String reportName) {
-        return this.reportCache.computeIfAbsent(reportName, (n) -> {
-            Log parent = new Log(n, getContext());
-            return new Log(getName(), parent);
-        });
+    protected Log getReport(Context context, String reportName) {
+        return ActionManager.buildFrom(context).getLog(reportName);
     }
 
-    protected void setReport(String name, Log log) {
-        this.reportCache.put(name, log);
-    }
-
-    protected void report(String reportName, String entry, Object... params) {
-        getReport(reportName).report(entry, params);
+    protected final void report(Context context, String reportName, String entry, Object... params) {
+        getReport(context, reportName).report(entry, params);
     }
 }

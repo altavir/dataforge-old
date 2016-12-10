@@ -16,6 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.actions.OneToOneAction;
+import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
@@ -62,12 +63,12 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(String name, Laminate meta, Table input) {
+    protected FitState execute(Context context, String name, Table input, Laminate meta) {
         FitManager fm;
-        if (getContext().provides("fitting")) {
-            fm = getContext().provide("fitting", FitPlugin.class).getFitManager();
+        if (context.provides("fitting")) {
+            fm = context.provide("fitting", FitPlugin.class).getFitManager();
         } else {
-            fm = new FitManager(getContext());
+            fm = new FitManager(context);
         }
 
         List<FitStage> stages = buildStageList(meta);
@@ -77,26 +78,26 @@ public class FitAction extends OneToOneAction<Table, FitState> {
             throw new ContentException("No fit tasks defined");
         }
 
-        FitState res = buildInitialState(meta, input, fm);
-        PrintWriter writer = new PrintWriter(buildActionOutput(name));
+        FitState res = buildInitialState(context, meta, input, fm);
+        PrintWriter writer = new PrintWriter(buildActionOutput(context, name));
 
         for (FitStage task : stages) {
             Utils.checkThread();// check if action is cacneled
-            res = fm.runTask(res, task, writer, getReport(name));
+            res = fm.runTask(res, task, writer, getReport(context, name));
         }
-        getReport(name).print(writer);
+        getReport(context, name).print(writer);
         return res;
     }
 
-    private FitState buildInitialState(Laminate meta, Table input, FitManager fm) {
+    private FitState buildInitialState(Context context, Laminate meta, Table input, FitManager fm) {
         Model model;
 
         ModelManager mm = fm.getModelManager();
 
         if (meta.hasMeta(MODEL_KEY)) {
-            model = mm.buildModel(getContext(), meta.getMeta(MODEL_KEY));
+            model = mm.buildModel(context, meta.getMeta(MODEL_KEY));
         } else {
-            model = mm.buildModel(getContext(), meta.getString(MODEL_KEY));
+            model = mm.buildModel(context, meta.getString(MODEL_KEY));
         }
 
         ParamSet params;

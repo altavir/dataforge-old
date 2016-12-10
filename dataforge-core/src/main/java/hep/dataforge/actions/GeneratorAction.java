@@ -7,6 +7,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.computation.GeneratorGoal;
 import hep.dataforge.computation.Goal;
+import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.io.reports.Log;
@@ -25,12 +26,12 @@ import java.util.stream.Stream;
 public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
-    public DataNode<R> run(DataNode<? extends Void> data, Meta actionMeta) {
-        Log log = new Log(getName(), getContext());
+    public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
+        Log log = new Log(getName(), context);
         Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
         //TODO add optional parallelization here
         nameStream().forEach(name -> {
-            Goal<R> goal = new GeneratorGoal<>(() -> generateData(name), executor(actionMeta));
+            Goal<R> goal = new GeneratorGoal<>(() -> generateData(name), executor(context, actionMeta));
             resultMap.put(name, new ActionResult<>(log, goal, generateMeta(name), getOutputType()));
         });
         return wrap(resultNodeName(), actionMeta, resultMap);

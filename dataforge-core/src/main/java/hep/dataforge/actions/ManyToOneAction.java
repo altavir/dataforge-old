@@ -17,6 +17,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.computation.AbstractGoal;
 import hep.dataforge.computation.Goal;
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
@@ -42,24 +43,24 @@ import java.util.stream.Stream;
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     @Override
-    public DataNode<R> run(DataNode<? extends T> set, Meta actionMeta) {
+    public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
-        List<DataNode<T>> groups = buildGroups(set, actionMeta);
+        List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
-        groups.forEach((group) -> results.put(group.getName(), runGroup(group, actionMeta)));
-        return wrap(getResultName(set.getName(),actionMeta), set.meta(), results);
+        groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));
+        return wrap(getResultName(set.getName(), actionMeta), set.meta(), results);
     }
 
-    public ActionResult<R> runGroup(DataNode<T> data, Meta actionMeta) {
+    public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
         Meta outputMeta = outputMeta(data).build();
-        Goal<R> goal = new ManyToOneGoal(data, actionMeta, outputMeta);
-        return new ActionResult<>(getReport(data.getName()), goal, outputMeta, getOutputType());
+        Goal<R> goal = new ManyToOneGoal(context, data, actionMeta, outputMeta);
+        return new ActionResult<>(getReport(context, data.getName()), goal, outputMeta, getOutputType());
     }
 
-    protected List<DataNode<T>> buildGroups(DataNode<? extends T> input, Meta actionMeta) {
+    protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {
         //TODO expand grouping options
         if (actionMeta.hasMeta("byValue")) {
-            return GroupBuilder.byMeta(inputMeta(input.meta(), actionMeta)).group(input);
+            return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group(input);
         } else {
             return Collections.singletonList((DataNode<T>) input);
         }
@@ -73,10 +74,11 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param meta
      * @return
      */
-    protected abstract R execute(String nodeName, Map<String, T> input, Meta meta);
+    protected abstract R execute(Context context, String nodeName, Map<String, T> input, Meta meta);
 
     /**
      * Build output meta for resulting object
+     *
      * @param input
      * @return
      */
@@ -103,7 +105,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      *
      * @param input
      */
-    protected void beforeGroup(DataNode<? extends T> input) {
+    protected void beforeGroup(Context context, DataNode<? extends T> input) {
 
     }
 
@@ -112,18 +114,20 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      *
      * @param output
      */
-    protected void afterGroup(String groupName, Meta outputMeta, R output) {
+    protected void afterGroup(Context context, String groupName, Meta outputMeta, R output) {
 
     }
 
     private class ManyToOneGoal extends AbstractGoal<R> {
 
+        private final Context context;
         private final DataNode<T> data;
         private final Meta actionMeta;
         private final Meta outputMeta;
 
-        public ManyToOneGoal(DataNode<T> data, Meta actionMeta, Meta outputMeta) {
-            super(executor(actionMeta));
+        public ManyToOneGoal(Context context, DataNode<T> data, Meta actionMeta, Meta outputMeta) {
+            super(executor(context, actionMeta));
+            this.context = context;
             this.data = data;
             this.actionMeta = actionMeta;
             this.outputMeta = outputMeta;
@@ -136,15 +140,15 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
         @Override
         protected R compute() throws Exception {
-            Laminate meta = inputMeta(data.meta(), actionMeta);
+            Laminate meta = inputMeta(context, data.meta(), actionMeta);
             Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), data.getName()));
 //            workListener(actionMeta).submit(data.getName(), this.result());
-            beforeGroup(data);
+            beforeGroup(context, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()
                     .collect(Collectors.toMap(data -> data.getName(), data -> data.get()));
-            R res = execute(data.getName(), collection, meta);
-            afterGroup(data.getName(), outputMeta, res);
+            R res = execute(context, data.getName(), collection, meta);
+            afterGroup(context, data.getName(), outputMeta, res);
             return res;
         }
 
