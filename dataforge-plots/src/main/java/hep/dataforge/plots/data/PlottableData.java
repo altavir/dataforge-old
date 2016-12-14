@@ -34,6 +34,13 @@ import java.util.List;
 @ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 
+    //TODO replace by ObservableList and allow external modification
+    protected List<DataPoint> data = new ArrayList<>();
+
+    public PlottableData(String name) {
+        super(name);
+    }
+
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
 
@@ -86,14 +93,6 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-
-    //TODO replace by ObservableList and allow external modification
-    protected List<DataPoint> data = new ArrayList<>();
-
-    public PlottableData(String name) {
-        super(name);
-    }
-
     /**
      * Non safe method to set data to this plottable. The list must be immutable
      *
@@ -113,6 +112,7 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
+
     /**
      * Safe mtethod to add data
      *
@@ -122,9 +122,23 @@ public class PlottableData extends XYPlottable {
         fillData(it, false);
     }
 
+    public void append(DataPoint dp) {
+        data.add(dp);
+        notifyDataChanged();
+    }
+
+    public void append(double x, double y) {
+        append(new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
+    }
+
     @Override
     protected List<DataPoint> getRawData(Meta query) {
         return data;
+    }
+
+    public void clear() {
+        data.clear();
+        notifyDataChanged();
     }
 
 }

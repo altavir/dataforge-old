@@ -16,6 +16,7 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
@@ -32,9 +33,8 @@ import java.util.Set;
  * </p>
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
-public class ModelManager {
+public class ModelManager implements Encapsulated {
 
     /**
      * Constant <code>MODEL_NAME="name"</code>
@@ -42,13 +42,22 @@ public class ModelManager {
     public static String MODEL_NAME = "modelName";
     private final HashMap<String, ContextMetaFactory<Model>> modelList = new HashMap<>();
     private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
+    //TODO remove this
     private ModelManager defaultManager;
+    private Context context;
 
-    public ModelManager(ModelManager defaultManager) {
+    public ModelManager(Context context, ModelManager defaultManager) {
+        this(context);
         this.defaultManager = defaultManager;
     }
 
-    public ModelManager() {
+    public ModelManager(Context context) {
+        this.context = context;
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
     }
 
     public void addModel(String name, ContextMetaFactory<Model> mf) {
@@ -71,26 +80,26 @@ public class ModelManager {
     }
 
     @ValueDef(name = "modelName", info = "The name of the pre-loaded model to use.")
-    public Model buildModel(Context context, Meta a) {
+    public Model buildModel(Meta a) {
         String modelName = a.getString(MODEL_NAME);
         ContextMetaFactory<Model> factory = modelList.get(modelName.toLowerCase());
         if (factory == null) {
             if (defaultManager == null) {
                 throw new NameNotFoundException(modelName);
             } else {
-                return defaultManager.buildModel(context, a);
+                return defaultManager.buildModel(a);
             }
         }
         return factory.build(context, a);
     }
 
-    public Model buildModel(Context context, String name) throws NameNotFoundException {
+    public Model buildModel(String name) throws NameNotFoundException {
         ContextMetaFactory<Model> factory = modelList.get(name.toLowerCase());
         if (factory == null) {
             if (defaultManager == null) {
                 throw new NameNotFoundException(name);
             } else {
-                return defaultManager.buildModel(context, name);
+                return defaultManager.buildModel(name);
             }
         }
         return factory.build(context, Meta.buildEmpty("model"));

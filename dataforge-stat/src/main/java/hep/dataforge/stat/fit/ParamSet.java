@@ -87,37 +87,28 @@ public class ParamSet implements NamedValueSet, Serializable {
         }
     }
 
-//    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
+    //    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
     @NodeDef(name = "params", info = "Used as a wrapper for 'param' elements.")
     public static ParamSet fromMeta(Meta cfg) {
+
+        Meta params;
         if (cfg.hasMeta("params")) {
-            Meta params = cfg.getMeta("params");
-
-            ParamSet set = new ParamSet();
-            MetaUtils.nodeStream(params).forEach(entry -> {
-                if (entry.getKey() != "params") {
-                    set.setPar(Param.fromMeta(entry.getValue()));
-                }
-            });
-
-            return set;
+            params = cfg.getMeta("params");
+        } else if ("params".equals(cfg.getName())) {
+            params = cfg;
         } else {
             return new ParamSet();
         }
 
 
-//        if (cfg.hasMeta("param")) {
-//            List<? extends Meta> params;
-//            params = cfg.getMetaList("param");
-//            ParamSet set = new ParamSet();
-//            for (Meta param : params) {
-//                set.setPar(Param.fromMeta(param));
-//            }
-//            return set;
-//        } else {
-//            //Возрвщвем пустой лист. Нужно для совместимости со значениями параметров по-умолчанию
-//            return new ParamSet();
-//        }
+        ParamSet set = new ParamSet();
+        MetaUtils.nodeStream(params).forEach(entry -> {
+            if (entry.getKey() != "params") {
+                set.setPar(Param.fromMeta(entry.getValue()));
+            }
+        });
+
+        return set;
     }
 
     /**

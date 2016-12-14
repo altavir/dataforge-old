@@ -95,9 +95,9 @@ public class FitAction extends OneToOneAction<Table, FitState> {
         ModelManager mm = fm.getModelManager();
 
         if (meta.hasMeta(MODEL_KEY)) {
-            model = mm.buildModel(context, meta.getMeta(MODEL_KEY));
+            model = mm.buildModel(meta.getMeta(MODEL_KEY));
         } else {
-            model = mm.buildModel(context, meta.getString(MODEL_KEY));
+            model = mm.buildModel(meta.getString(MODEL_KEY));
         }
 
         ParamSet params;

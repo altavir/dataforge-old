@@ -87,7 +87,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
             return plugins.get(name);
         } else if (getParent() != null) {
             getContext().getLogger()
-                    .debug("The plugin with name `{}` not found in current context, searching parent context.", name);
+                    .trace("The plugin with name `{}` not found in current context, searching parent context.", name);
             return getParent().getPlugin(name);
         } else {
             throw new NameNotFoundException(name, "Plugin not found");

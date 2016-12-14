@@ -38,18 +38,17 @@ import java.io.PrintWriter;
 public class FitManager implements Encapsulated {
 
 
-    private final Context context;
-
     protected final ModelManager modelManager;
+    private final Context context;
 
     public FitManager() {
         this.context = Global.instance();
-        modelManager = new ModelManager();
+        modelManager = new ModelManager(context);
     }
 
     public FitManager(Context context) {
         this.context = context;
-        modelManager = new ModelManager();
+        modelManager = new ModelManager(context);
     }
 
     public FitManager(Context context, ModelManager modelManager) {
@@ -73,20 +72,20 @@ public class FitManager implements Encapsulated {
     }
 
     public Model buildModel(String name) {
-        return getModelManager().buildModel(getContext(), name);
+        return getModelManager().buildModel(name);
     }
 
     public Model buildModel(Meta modelAnnotation) {
-        return getModelManager().buildModel(getContext(), modelAnnotation);
+        return getModelManager().buildModel(modelAnnotation);
     }
 
     public FitState buildState(Table data, String modelName, ParamSet pars) {
-        Model model = getModelManager().buildModel(getContext(), modelName);
+        Model model = getModelManager().buildModel(modelName);
         return new FitState(data, model, pars);
     }
 
     public FitState buildState(Table data, Meta modelAnnotation, ParamSet pars) {
-        Model model = getModelManager().buildModel(getContext(), modelAnnotation);
+        Model model = getModelManager().buildModel(modelAnnotation);
         return new FitState(data, model, pars);
     }
 
