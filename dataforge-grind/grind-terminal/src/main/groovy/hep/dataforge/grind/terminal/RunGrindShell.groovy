@@ -1,13 +1,14 @@
-package hep.dataforge.grind
+package hep.dataforge.grind.terminal
 
 import hep.dataforge.context.Global
 
 /**
- * Created by darksnake on 05-Nov-16.
+ * Created by darksnake on 27-Oct-16.
  */
+
 println "DataForge grind shell"
 try {
-    new GrindShell().launch()
+    new GrindTerminal().withSystemTerminal().launch()
 } catch (Exception ex) {
     ex.printStackTrace();
 } finally {

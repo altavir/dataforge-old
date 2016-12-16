@@ -112,7 +112,7 @@ public abstract class AbstractLoader implements Loader {
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    protected EventLoader getEventLoader() throws StorageException {
+    protected EventLoader<?> getEventLoader() throws StorageException {
         if (getStorage() != null) {
             return getStorage().getDefaultEventLoader();
         } else {

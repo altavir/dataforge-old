@@ -41,6 +41,7 @@ public class Global extends Context {
 
     private static Global instance = new Global();
     private static final ReferenceRegistry<Context> contextRegistry = new ReferenceRegistry();
+
     private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread res = new Thread(r, "DF_DISPATCH");
 //        res.setDaemon(false);
@@ -102,21 +103,21 @@ public class Global extends Context {
         pluginManager().loadPlugin(actions);
     }
 
-    @Override
-    public void setIO(IOManager io) {
-        super.setIO(io);
-//        LoggerFactory.getLogger(getClass()).warn("Changing io for Global. Is not recommended.");
-        //redirect all logging output to new ioManager
-//        Logger root = getLogger();
-//
-//        //redirect output to given outputstream
-////        root.detachAndStopAllAppenders();
-//        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-//        appender.setContext(root.getLoggerContext());
-//        appender.setOutputStream(io.out());
-//        appender.start();
-//        root.addAppender(appender);
-    }
+//    @Override
+//    public void setIO(IOManager io) {
+//        super.setIO(io);
+////        LoggerFactory.getLogger(getClass()).warn("Changing io for Global. Is not recommended.");
+//        //redirect all logging output to new ioManager
+////        Logger root = getLogger();
+////
+////        //redirect output to given outputstream
+//////        root.detachAndStopAllAppenders();
+////        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+////        appender.setContext(root.getLoggerContext());
+////        appender.setOutputStream(io.out());
+////        appender.start();
+////        root.addAppender(appender);
+//    }
 
     @Override
     public TaskManager taskManager() {

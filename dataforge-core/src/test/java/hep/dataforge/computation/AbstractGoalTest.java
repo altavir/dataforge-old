@@ -5,14 +5,16 @@
  */
 package hep.dataforge.computation;
 
+import org.junit.Test;
+
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.FutureTask;
-import org.junit.Test;
 
 /**
  *
  * @author Alexander Nozik
  */
+@SuppressWarnings("unchecked")
 public class AbstractGoalTest {
 
     @Test

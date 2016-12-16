@@ -29,6 +29,7 @@ import java.util.function.Predicate;
  * @param <T>
  */
 public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
+    //TODO remove generics
 
     String EVENT_LOADER_TYPE = "event";
 

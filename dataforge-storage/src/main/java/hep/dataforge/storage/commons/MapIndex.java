@@ -50,14 +50,6 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
 
     protected abstract Value getIndexedValue(T entry);
 
-//    /**
-//     * Get index for specified entry
-//     *
-//     * @param key
-//     * @return
-//     */
-//    protected abstract Value getIndex(K key);
-
     /**
      * Update index to match source
      */
@@ -101,10 +93,8 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
             to = map.lastKey();
         }
 
-        List<Supplier<T>> res = new ArrayList();
-        map.subMap(from, true, to, true).forEach((Value t, List<K> u) -> {
-            res.addAll(transform(u));
-        });
+        List<Supplier<T>> res = new ArrayList<>();
+        map.subMap(from, true, to, true).forEach((Value t, List<K> u) -> res.addAll(transform(u)));
         return res;
     }
 
@@ -118,76 +108,4 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
         update();
         return this.map.navigableKeySet();
     }
-
-//    @Override
-//    @SuppressWarnings("unchecked")
-//    public List<Supplier<T>> pull(Value from, Value to, int limit) throws StorageException {
-//        TreeMap<Value, List<K>> subMap;
-//        if (from == Value.NULL && to == Value.NULL) {
-//            subMap = map;
-//        } else if (from == Value.NULL) {
-//            subMap = (TreeMap<Value, List<K>>) map.tailMap(to);
-//        } else if (to == Value.NULL) {
-//            subMap = (TreeMap<Value, List<K>>) map.headMap(from);
-//        } else {
-//            subMap = (TreeMap<Value, List<K>>) map.subMap(from, to);
-//        }
-//
-//
-//        try {
-//            return transform(top(subMap, limit));
-//        } catch (Exception e) {
-//            throw new StorageException(e);
-//        }
-//    }
-//
-//    /**
-//     * get the top elements of the balanced tree map using reflections
-//     *
-//     * @param theMap
-//     * @param limit
-//     * @return
-//     */
-//    private List<K> top(TreeMap<Value, List<K>> theMap, int limit) throws NoSuchFieldException, IllegalAccessException {
-//        Field field = theMap.getClass().getDeclaredField("root");
-//        field.setAccessible(true);
-//        Map.Entry<Value, List<K>> root = (Map.Entry<Value, List<K>>) field.get(theMap);
-//        return top(root, limit);
-//    }
-//
-//    private List<K> top(Map.Entry<Value, List<K>> theRoot, int limit) throws NoSuchFieldException, IllegalAccessException {
-//
-//        List<K> res = new ArrayList<K>();
-//        //adding values from current node
-//        for (K k : theRoot.getValue()) {
-//            res.add(k);
-//            // escape if reached limit
-//            if (res.size() == limit) {
-//                return res;
-//            }
-//        }
-//
-//        Field rightF = theRoot.getClass().getDeclaredField("right");
-//        rightF.setAccessible(true);
-//        Map.Entry<Value, List<K>> right = (Map.Entry<Value, List<K>>) rightF.get(theRoot);
-//        Field leftF = theRoot.getClass().getDeclaredField("left");
-//        leftF.setAccessible(true);
-//        Map.Entry<Value, List<K>> left = (Map.Entry<Value, List<K>>) leftF.get(theRoot);
-//
-//        int rest = limit - res.size();
-//
-//        if (right == null && left == null) {
-//            return res;
-//        } else if (right == null) {
-//            res.addAll(top(left, rest));
-//        } else if (left == null) {
-//            res.addAll(top(right, rest));
-//        } else {
-//            //adding values from right node
-//            res.addAll(top(right, (rest - 1) / 2));
-//            //adding values from left node
-//            res.addAll(top(left, (rest - 1) / 2));
-//        }
-//        return res;
-//    }
 }

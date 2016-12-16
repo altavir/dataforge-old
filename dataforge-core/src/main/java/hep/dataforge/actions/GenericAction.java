@@ -120,11 +120,6 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         return LoggerFactory.getLogger(actionMeta.getString("@action.logger", getTaskName(actionMeta)));
     }
 
-//    protected TaskListener workListener(Meta actionMeta) {
-//        //PENDING make it variable to avoid multiple initialization
-//        return new TaskListenerDelegate(getContext().taskManager(), getTaskName(actionMeta));
-//    }
-
     protected boolean isEmptyInputAllowed() {
         return false;
     }
@@ -197,34 +192,8 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         }
     }
 
-    /**
-     * Generate input meta for given data input, group meta and action meta
-     *
-     * @param input
-     * @param nodeMeta
-     * @param actionMeta
-     * @return
-     */
-    protected Laminate inputMeta(Context context, Data<? extends T> input, Meta nodeMeta, Meta actionMeta) {
-        return new Laminate(input.meta(), nodeMeta, actionMeta)
-                .setValueContext(context)
-                .setDescriptor(getDescriptor());
-    }
-
     protected Laminate inputMeta(Context context, Meta... meta) {
         return new Laminate(meta)
-                .setValueContext(context)
-                .setDescriptor(getDescriptor());
-    }
-
-    protected Laminate inputMeta(Context context, Meta nodeMeta, Meta actionMeta) {
-        return new Laminate(nodeMeta, actionMeta)
-                .setValueContext(context)
-                .setDescriptor(getDescriptor());
-    }
-
-    protected Laminate inputMeta(Context context, Meta actionMeta) {
-        return new Laminate(actionMeta)
                 .setValueContext(context)
                 .setDescriptor(getDescriptor());
     }

@@ -1,36 +1,8 @@
-buildscript {
-    repositories { jcenter() }
-    dependencies {
-        classpath 'com.github.jengelman.gradle.plugins:shadow:1.2.+'
-    }
-}
-
 apply plugin: 'groovy'
-apply plugin: "application"
-apply plugin: 'com.github.johnrengelman.shadow'
-
-if (!hasProperty('mainClass')) {
-    ext.mainClass = 'hep.dataforge.grind.RunGrindShell'
-}
-mainClassName = mainClass
 
 description = 'The grind plugin for dataforge framework'
 
 dependencies {
-    compile project(':dataforge-core')
-    compile project(':dataforge-plots:plots-jfc')
+    compile project(':dataforge-plots')
     compile project(':dataforge-maths:groovymath')
-    compile group: 'org.jline', name: 'jline', version: '3.0.+'
-    compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
-    compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.14'
-}
-
-task shell(dependsOn: classes, type: JavaExec) {
-    main mainClass
-//    jvmArgs ['-Djansi.passthrough=true']
-    standardInput = System.in
-    standardOutput = System.out
-    classpath = sourceSets.main.runtimeClasspath
-    description "Start a Grind shell with default context in terminal"
-    group "dataforge"
 }

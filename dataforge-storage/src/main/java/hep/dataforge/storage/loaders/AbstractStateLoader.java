@@ -81,7 +81,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
         }
     }
 
-    protected boolean isUpToDate() {
+    protected final boolean isUpToDate() {
         return upToDate;
     }
 

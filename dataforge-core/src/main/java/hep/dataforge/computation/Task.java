@@ -149,26 +149,26 @@ public class Task implements Named {
         isDone.invalidate();
     }
 
-    public Task findProcess(String processName) {
-        return findProcess(Name.of(processName));
+    public Task find(String subTaskName) {
+        return find(Name.of(subTaskName));
     }
 
     /**
      * Find the child process with the given name. Empty name returns this
      * process
      *
-     * @param processName
+     * @param subTaskName
      * @return null if process not found
      */
-    public Task findProcess(Name processName) {
-        if (processName.entry().isEmpty()) {
+    public Task find(Name subTaskName) {
+        if (subTaskName.entry().isEmpty()) {
             return this;
         }
-        if (this.children.containsKey(processName.entry())) {
-            if (processName.length() == 1) {
-                return this.children.get(processName.entry());
+        if (this.children.containsKey(subTaskName.entry())) {
+            if (subTaskName.length() == 1) {
+                return this.children.get(subTaskName.entry());
             } else {
-                return this.children.get(processName.entry()).findProcess(processName.cutFirst());
+                return this.children.get(subTaskName.entry()).find(subTaskName.cutFirst());
             }
         } else {
             return null;

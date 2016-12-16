@@ -50,7 +50,7 @@ public class TaskManager implements Encapsulated, TaskListener {
     }
 
     public Task find(String processName) {
-        return root.findProcess(processName);
+        return root.find(processName);
     }
 
     public Task getRoot() {
@@ -184,7 +184,7 @@ public class TaskManager implements Encapsulated, TaskListener {
     }
 
     public synchronized void update(String processName, Consumer<Task> consumer) {
-        Task p = root.findProcess(processName);
+        Task p = root.find(processName);
         if (p != null) {
             consumer.accept(p);
         } else {
