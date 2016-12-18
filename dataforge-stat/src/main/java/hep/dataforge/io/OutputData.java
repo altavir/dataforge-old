@@ -45,9 +45,9 @@ public class OutputData {
     public static Table getNamedFunctionData(ParametricValue func, List<NamedVector> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
         ListTable.Builder res = new ListTable.Builder(format);
-        Double[] values = new Double[func.getDimension() + 1];
+        Double[] values = new Double[func.size() + 1];
         for (NamedVector point : points) {
-            for (int j = 0; j < func.getDimension(); j++) {
+            for (int j = 0; j < func.size(); j++) {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.apply(point);

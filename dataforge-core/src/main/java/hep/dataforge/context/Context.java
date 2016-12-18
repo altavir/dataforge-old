@@ -53,7 +53,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Context extends AbstractProvider implements ValueProvider, Logable, Named, AutoCloseable {
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
-    protected org.slf4j.Logger logger;
+    protected Logger logger;
     protected Log rootLog;
     private Context parent = null;
     private final String name;

@@ -352,7 +352,7 @@ public class FitState implements Serializable {
     }
 
     public int getModelDim() {
-        return model.getDimension();
+        return model.size();
     }
 
     public Table getDataSet() {

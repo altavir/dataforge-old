@@ -40,15 +40,15 @@ class Grind {
         return script.run() as MetaBuilder
     }
 
-    static Workspace buildWorkspace(File file, Class spec) {
-        return new GrindWorkspaceBuilder().from(file).withSpec(spec).buildWorkspace();
-    }
+//    static Workspace buildWorkspace(File file, Class spec) {
+//        return new GrindWorkspaceBuilder().read(file).withSpec(spec).build();
+//    }
 
     static Workspace buildWorkspace(File file) {
-        return new GrindWorkspaceBuilder().from(file).buildWorkspace();
+        return new GrindWorkspaceBuilder().read(file).build();
     }
 
     static Workspace buildWorkspace(String file) {
-        return new GrindWorkspaceBuilder().from(file).buildWorkspace();
+        return new GrindWorkspaceBuilder().read(file).build();
     }
 }

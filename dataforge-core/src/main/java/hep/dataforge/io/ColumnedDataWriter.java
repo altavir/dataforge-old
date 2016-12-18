@@ -18,7 +18,7 @@ package hep.dataforge.io;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.TableFormat;
-import hep.dataforge.utils.Utils;
+import hep.dataforge.utils.Misc;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
@@ -56,7 +56,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param format a {@link hep.dataforge.tables.TableFormat} object.
      */
     public ColumnedDataWriter(OutputStream stream, TableFormat format) {
-        this(stream, Utils.UTF, format);
+        this(stream, Misc.UTF, format);
     }
 
     public ColumnedDataWriter(OutputStream stream, Charset encoding, TableFormat format) {

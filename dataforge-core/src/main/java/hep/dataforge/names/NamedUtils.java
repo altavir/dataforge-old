@@ -15,12 +15,14 @@
  */
 package hep.dataforge.names;
 
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.exceptions.NameNotFoundException;
-import static java.lang.System.arraycopy;
+import hep.dataforge.values.NamedValueSet;
+
 import java.util.ArrayList;
-import static java.util.Arrays.asList;
 import java.util.List;
+
+import static java.lang.System.arraycopy;
+import static java.util.Arrays.asList;
 
 /**
  * <p>
@@ -162,9 +164,9 @@ public class NamedUtils {
      * @return an array of {@link java.lang.Number} objects.
      */
     public static Number[] getAllNamedSetValues(NamedValueSet set) throws NameNotFoundException {
-        Number[] res = new Number[set.getDimension()];
+        Number[] res = new Number[set.size()];
         List<String> names = set.names().asList();
-        for (int i = 0; i < set.getDimension(); i++) {
+        for (int i = 0; i < set.size(); i++) {
             res[i] = set.getValue(names.get(i)).doubleValue();
         }
         return res;

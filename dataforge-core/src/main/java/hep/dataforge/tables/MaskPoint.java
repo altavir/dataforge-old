@@ -18,6 +18,7 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+
 import java.util.Map;
 
 /**
@@ -45,7 +46,7 @@ public class MaskPoint implements DataPoint {
      * @return
      */
     @Override
-    public int getDimension() {
+    public int size() {
         return nameMap.size();
     }
 

@@ -49,7 +49,7 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = new NamedMatrix(decomposition.getSolver().getInverse(), values.namesAsArray());
-        norm = 1 / sqrt(det) / pow(2 * Math.PI, this.getDimension() / 2d);
+        norm = 1 / sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
     }
 
     /**
@@ -60,11 +60,11 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
      */
     public NamedGaussianPDFLog(NamedMatrix infoMatrix) {
         super(infoMatrix);
-        this.values = new ArrayRealVector(infoMatrix.getDimension());
+        this.values = new ArrayRealVector(infoMatrix.size());
         LUDecomposition decomposition = new LUDecomposition(infoMatrix.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = infoMatrix;
-        norm = sqrt(det) / pow(2 * Math.PI, this.getDimension() / 2d);
+        norm = sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
     }
 
     /**
@@ -96,9 +96,9 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
      * @return
      */
     private RealVector getVector(NamedValueSet set) {
-        ArrayRealVector vector = new ArrayRealVector(this.getDimension());
+        ArrayRealVector vector = new ArrayRealVector(this.size());
         String[] namesArray = namesAsArray();
-        for (int i = 0; i < this.getDimension(); i++) {
+        for (int i = 0; i < this.size(); i++) {
             vector.setEntry(i, set.getDouble(namesArray[i]));
         }
         return vector;

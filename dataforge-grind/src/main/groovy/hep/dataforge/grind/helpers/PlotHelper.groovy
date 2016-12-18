@@ -17,7 +17,6 @@
 package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.Global
 import hep.dataforge.plots.PlotHolder
 import hep.dataforge.plots.PlotsPlugin
 import hep.dataforge.plots.data.PlottableData
@@ -36,7 +35,7 @@ class PlotHelper {
     PlotHolder holder;
 
     PlotHelper(Context context) {
-        Global.instance().pluginManager().loadPlugin("plots-jfc");
+//        Global.instance().pluginManager().loadPlugin("plots-jfc");
         this.holder = PlotsPlugin.buildFrom(context);
     }
 

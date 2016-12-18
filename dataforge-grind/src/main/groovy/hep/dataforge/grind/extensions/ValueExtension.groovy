@@ -6,8 +6,11 @@
 
 package hep.dataforge.grind.extensions
 
+import hep.dataforge.exceptions.ValueConversionException
+import hep.dataforge.tables.DataPoint
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+
 import java.time.Instant
 
 /**
@@ -118,6 +121,72 @@ class ValueExtension {
             case ValueType.NULL:
                 return negate(other);
         }
+    }
+
+    static Object asType(final Value self, Class type) {
+        switch (type) {
+            case double:
+                return self.doubleValue();
+            case int:
+                return self.intValue();
+            case short:
+                return self.numberValue().shortValue();
+            case long:
+                return self.numberValue().longValue();
+            case Number:
+                return self.numberValue();
+            case String:
+                return self.stringValue();
+            case boolean:
+                return self.booleanValue();
+            case Instant:
+                return self.timeValue();
+            case Date:
+                return Date.from(self.timeValue());
+            default:
+                throw new ValueConversionException("Unknown value cast type: ${type}");
+        }
+    }
+
+    /**
+     * Unwrap value and return its content in its native form. Possible loss of precision for numbers
+     * @param self
+     * @return
+     */
+    static Object unwrap(final Value self) {
+        switch (self.valueType()) {
+            case ValueType.NUMBER:
+                return self.doubleValue();
+            case ValueType.STRING:
+                return self.stringValue();
+            case ValueType.TIME:
+                return self.timeValue();
+            case ValueType.BOOLEAN:
+                return self.booleanValue();
+            case ValueType.NULL:
+                return null;
+        }
+    }
+
+    /**
+     * Represent DataPoint as a map of typed objects according to value type
+     * @param self
+     * @return
+     */
+    static Map<String, Object> unwrap(final DataPoint self) {
+        self.names().collectEntries {
+            [it: self.getValue(it).unwrap()]
+        }
+    }
+
+    /**
+     * Groovy extension to access DataPoint fields
+     * @param self
+     * @param field
+     * @return
+     */
+    static Value getAt(final DataPoint self, String field) {
+        return self.getValue(field);
     }
 }
 

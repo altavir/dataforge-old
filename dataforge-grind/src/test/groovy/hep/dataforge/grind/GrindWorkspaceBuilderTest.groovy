@@ -9,7 +9,7 @@ import spock.lang.Specification
 class GrindWorkspaceBuilderTest extends Specification {
     def "Run Task"() {
         given:
-        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().from {
+        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().read {
             this.getClass().getResource('/workspace/workspace.groovy').toURI()
         }
         when:
@@ -21,7 +21,7 @@ class GrindWorkspaceBuilderTest extends Specification {
 
     def "Run Task with meta"() {
         given:
-        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().from {
+        GrindWorkspaceBuilder launcher = new GrindWorkspaceBuilder().read {
             this.getClass().getResource('/workspace/workspace.groovy').toURI()
         }
         when:

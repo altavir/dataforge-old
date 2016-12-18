@@ -10,7 +10,6 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.io.reports.Log;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import org.slf4j.LoggerFactory;
@@ -18,7 +17,6 @@ import org.slf4j.LoggerFactory;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  *
@@ -32,9 +30,6 @@ public class ActionManager extends BasicPlugin {
     public static ActionManager buildFrom(Context context) {
         return context.getPlugin(ActionManager.class);
     }
-
-    //TODO move to separate manager
-    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
     public ActionManager() {
         register(TransformTableAction.class);
@@ -151,12 +146,4 @@ public class ActionManager extends BasicPlugin {
         return list;
     }
 
-
-    public Log getLog(String name){
-        return reportCache.computeIfAbsent(name, (n) -> {
-            Log parent = new Log(n, getContext());
-            return new Log(getName(), parent);
-        });
-    }
- 
 }

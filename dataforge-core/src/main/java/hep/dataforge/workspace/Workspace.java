@@ -208,6 +208,9 @@ public interface Workspace extends Encapsulated {
 
         B loadTask(Task task);
 
+        default B loadTask(Class<Task> type) throws IllegalAccessException, InstantiationException {
+            return loadTask(type.newInstance());
+        }
     }
 
 }

@@ -56,8 +56,9 @@ class GrindTerminal {
         this.terminal = terminal
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
+            context.pluginManager().loadPlugin("hep.dataforge:plots-jfc")
+            context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
-        context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         shell = new GrindShell(context)
 
         //define help closure

@@ -5,43 +5,94 @@ import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
 import hep.dataforge.description.TextDescriptorFormatter
 import hep.dataforge.meta.Meta
+import hep.dataforge.utils.ContextMetaFactory
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
 
+import java.util.function.Consumer
+
 /**
+ * A wrapper class to dynamically load and update workspaces from configuration
  * Created by darksnake on 04-Aug-16.
  */
 class GrindWorkspaceBuilder {
 
     private Closure<? extends Reader> source = { new File("workspace.groovy").newReader() }
-    private Class<? extends WorkspaceSpec> spec = WorkspaceSpec.class
-    private Context context = Global.instance();
+    /**
+     * Specification builder. Used for custom DSL extensions
+     */
+    private ContextMetaFactory<? extends WorkspaceSpec> specification = { context, meta -> new WorkspaceSpec(context) };
+
+    /**
+     * A script to startup workspace builder
+     */
+    private Consumer<Workspace.Builder> startup = { b -> }
+
     private String cachedScript;
     private Workspace.Builder cachedBuilder;
 
-    GrindWorkspaceBuilder from(File file) {
+    Context parentContext;
+
+    GrindWorkspaceBuilder(Context parentContext = Global.instance()) {
+        this.parentContext = parentContext
+    }
+
+    /**
+     * Read configuration from file
+     * @param file
+     * @return
+     */
+    GrindWorkspaceBuilder read(File file) {
         this.source = { file.newReader() }
         return this;
     }
 
-    GrindWorkspaceBuilder from(Closure<? extends Reader> readerSup) {
+    /**
+     * Read from file using parent context file locator
+     * @param fileName
+     * @return
+     */
+    GrindWorkspaceBuilder readFile(String fileName) {
+        return read(parentContext.io().getFile(fileName));
+    }
+
+    /**
+     * Read workspace configuration form Reader providing closure
+     * @param readerSup
+     * @return
+     */
+    GrindWorkspaceBuilder read(Closure<? extends Reader> readerSup) {
         this.source = readerSup
         return this;
     }
 
-    GrindWorkspaceBuilder from(String str) {
+    /**
+     * Read configuration form String
+     * @param str
+     * @return
+     */
+    GrindWorkspaceBuilder read(String str) {
         this.source = { new StringReader(str) }
         return this;
     }
 
-    GrindWorkspaceBuilder withSpec(Class<? extends WorkspaceSpec> specClass) {
-        this.spec = specClass
+
+    GrindWorkspaceBuilder startup(Consumer<Workspace.Builder> consumer){
+        this.startup = consumer;
         return this;
     }
 
-    GrindWorkspaceBuilder withContext(Context context) {
-        this.context = context;
-        return this;
+//    GrindWorkspaceBuilder startup(Closure cl) {
+//        this.startup = { builder ->
+//            def script = cl.rehydrate(builder,null,null);
+//            script.setResolveStrategy(Closure.DELEGATE_ONLY);
+//            script.run();
+//        }
+//        return this;
+//    }
+
+    void setSpecification(ContextMetaFactory<? extends WorkspaceSpec> specification) {
+        this.specification = specification
     }
 
     /**
@@ -50,19 +101,19 @@ class GrindWorkspaceBuilder {
      * @return
      */
     protected Workspace.Builder getBuilder() {
-        def compilerConfiguration = new CompilerConfiguration()
-        compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
-        def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
         def scriptText = source().text
-        if(scriptText == cachedScript){
+        if (scriptText == cachedScript) {
             return cachedBuilder
         } else {
+            def compilerConfiguration = new CompilerConfiguration()
+            compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
+            def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
             DelegatingScript script = shell.parse(scriptText) as DelegatingScript;
-            WorkspaceSpec spec = spec.newInstance();
-            spec.parentContext = this.context;
+            WorkspaceSpec spec = specification.build(parentContext, Meta.empty());
             script.setDelegate(spec);
             script.run()
             def res = spec.build();
+            startup.accept(res);
             cachedScript = scriptText;
             cachedBuilder = res;
             return res;
@@ -73,7 +124,7 @@ class GrindWorkspaceBuilder {
      * Build workspace using default file location
      * @return
      */
-    Workspace buildWorkspace() {
+    Workspace build() {
         return getBuilder().build();
     }
 
@@ -82,7 +133,7 @@ class GrindWorkspaceBuilder {
     }
 
     DataNode runTask(String taskName, Meta meta) {
-        return runInWorkspace(buildWorkspace(), taskName, meta);
+        return runInWorkspace(build(), taskName, meta);
     }
 
     /**
@@ -92,17 +143,17 @@ class GrindWorkspaceBuilder {
      * @return
      */
     DataNode runTask(String taskName, @DelegatesTo(GrindMetaBuilder) Closure metaClosure) {
-        return buildWorkspace().runTask(taskName, Grind.buildMeta(metaClosure));
+        return build().runTask(taskName, Grind.buildMeta(metaClosure));
     }
 
     DataNode runTask(String taskName, String target) {
-        Workspace ws = buildWorkspace();
+        Workspace ws = build();
         Meta taskMeta = ws.hasTarget(target) ? ws.getTarget(target) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
 
     DataNode runTask(String taskName) {
-        Workspace ws = buildWorkspace();
+        Workspace ws = build();
         Meta taskMeta = ws.hasTarget(taskName) ? ws.getTarget(taskName) : Meta.empty();
         return runInWorkspace(ws, taskName, taskMeta);
     }
@@ -128,7 +179,7 @@ class GrindWorkspaceBuilder {
      * Display a list of available tasks
      */
     def getTasks() {
-        Workspace ws = buildWorkspace();
+        Workspace ws = build();
         StringWriter writer = new StringWriter();
 
         TextDescriptorFormatter formatter = new TextDescriptorFormatter(new PrintWriter(writer, true));
@@ -141,7 +192,7 @@ class GrindWorkspaceBuilder {
 
 
     def getTargets() {
-        Workspace ws = buildWorkspace();
+        Workspace ws = build();
         StringWriter writer = new StringWriter();
 
         ws.getTargets().forEach {
@@ -153,7 +204,7 @@ class GrindWorkspaceBuilder {
     }
 
     def clean() {
-        buildWorkspace().clean()
+        build().clean()
     }
 
 }

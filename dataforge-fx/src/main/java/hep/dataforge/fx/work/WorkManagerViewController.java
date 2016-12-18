@@ -7,7 +7,7 @@ package hep.dataforge.fx.work;
 
 import hep.dataforge.computation.Task;
 import hep.dataforge.computation.TaskManager;
-import hep.dataforge.utils.Utils;
+import hep.dataforge.utils.Misc;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
 import javafx.fxml.FXML;
@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
  */
 public class WorkManagerViewController implements Initializable {
 
-    private final Map<Task, Parent> processNodeCache = Utils.getLRUCache(400);
+    private final Map<Task, Parent> processNodeCache = Misc.getLRUCache(400);
     @FXML
     private TreeView<Task> processTreeView;
 

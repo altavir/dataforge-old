@@ -80,7 +80,7 @@ public class NamedVector implements NamedValueSet {
      * @return
      */
     @Override
-    public int getDimension() {
+    public int size() {
         return this.nameList.getDimension();
     }
 

@@ -8,7 +8,7 @@ package hep.dataforge.cache;
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.Utils;
+import hep.dataforge.utils.Misc;
 import hep.dataforge.workspace.identity.Identity;
 
 import java.io.*;
@@ -34,7 +34,7 @@ public class LocalFileDataCache extends DataCache {
 
     public LocalFileDataCache(File cacheDir, int cacheSize) {
         this.cacheDir = cacheDir;
-        lruCache = Utils.getLRUCache(cacheSize);
+        lruCache = Misc.getLRUCache(cacheSize);
         fileMap = new ConcurrentHashMap<>();
         loadCacheMap();
     }
@@ -46,7 +46,7 @@ public class LocalFileDataCache extends DataCache {
         } else {
             cacheDir = new File(context.io().getTmpDirectory(), ".cache");
         }
-        lruCache = Utils.getLRUCache(meta.getInt("items", 300));
+        lruCache = Misc.getLRUCache(meta.getInt("items", 300));
         fileMap = new ConcurrentHashMap<>();
         loadCacheMap();
     }

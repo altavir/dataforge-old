@@ -20,7 +20,7 @@ import hep.dataforge.io.reports.Logable;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
-import hep.dataforge.utils.Utils;
+import hep.dataforge.utils.Misc;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.EigenDecomposition;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -115,7 +115,7 @@ public class QOWFitEngine implements FitEngine {
     }
 
     private ParamSet newtonianStep(FitState source, ParamSet par, NamedVector eqvalues, QOWeight weight) {
-        Utils.checkThread();// check if action is cacneled
+        Misc.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, par, weight));
 
@@ -124,7 +124,7 @@ public class QOWFitEngine implements FitEngine {
     }
 
     private ParamSet fastNewtonianStep(FitState source, ParamSet par, NamedVector eqvalues, QOWeight weight) {
-        Utils.checkThread();// check if action is cacneled
+        Misc.checkThread();// check if action is cacneled
         RealVector start = par.getParValues(weight.namesAsArray()).getVector();
         RealMatrix invJacob = inverse(QOWUtils.getEqDerivValues(source, weight));
 

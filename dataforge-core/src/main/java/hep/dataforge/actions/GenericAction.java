@@ -32,6 +32,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import static hep.dataforge.actions.GenericAction.*;
@@ -208,8 +209,14 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         return context.io().out(getName(), name);
     }
 
+    //TODO move to separate manager
+    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
+
     protected Log getReport(Context context, String reportName) {
-        return ActionManager.buildFrom(context).getLog(reportName);
+        return reportCache.computeIfAbsent(reportName, (n) -> {
+            Log parent = new Log(n, context);
+            return new Log(getName(), parent);
+        });
     }
 
     protected final void report(Context context, String reportName, String entry, Object... params) {

@@ -64,7 +64,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
      * {@inheritDoc}
      */
     @Override
-    public int getDimension() {
+    public int size() {
         return names.getDimension();
     }
 

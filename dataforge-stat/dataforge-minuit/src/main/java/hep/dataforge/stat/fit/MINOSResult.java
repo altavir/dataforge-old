@@ -69,7 +69,7 @@ public class MINOSResult implements IntervalEstimate {
             out.println("Assymetrical errors:");
             out.println();
             out.println("Name\tLower\tUpper");
-            for (int i = 0; i < this.getDimension(); i++) {
+            for (int i = 0; i < this.size(); i++) {
                 out.print(this.names().getName(i));
                 out.print("\t");
                 if (this.errl != null) {

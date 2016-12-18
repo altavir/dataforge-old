@@ -22,7 +22,7 @@ package hep.dataforge.names;
 public interface NameSetContainer {
     Names names();
     
-    default int getDimension(){
+    default int size(){
         return names().getDimension();
     }
     

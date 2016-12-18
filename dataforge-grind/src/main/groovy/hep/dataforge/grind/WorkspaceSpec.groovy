@@ -23,50 +23,57 @@ import hep.dataforge.workspace.Workspace
  */
 @CompileStatic
 class WorkspaceSpec {
-    private final Workspace.Builder builder = BasicWorkspace.builder();
-    Context parentContext = Global.instance();
+    private Workspace.Builder builder;
+    private final Context context;
+
+    WorkspaceSpec(Context context) {
+        this.builder = BasicWorkspace.builder();
+        this.builder.setContext(context);
+        this.context = context
+    }
 
     /**
-     * build context for the workspace using
+     * build context for the workspace using closure
      */
     def context(Closure cl) {
-        def contextSpec = new ContextSpec();
-        def code = cl.rehydrate(contextSpec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_ONLY;
-        code();
-        builder.setContext(contextSpec.build());
+        def contextSpec = new ContextSpec()
+        def code = cl.rehydrate(contextSpec, this, this)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code()
+        builder.setContext(contextSpec.build().withParent(context))
     }
 
     Workspace.Builder build() {
-        return builder;
+        return builder
     }
 
     private class ContextSpec {
-        String name = "workspace";
-        Map properties = new HashMap();
-        Map<String, Meta> pluginMap = new HashMap<>();
+        String name = "workspace"
+        Map properties = new HashMap()
+        Map<String, Meta> pluginMap = new HashMap<>()
 
         Context build() {
-            Context res = Global.getContext(name);
+            //using current context as a parent for workspace context
+            Context res = Global.getContext(name).withParent(context)
             properties.each { key, value -> res.putValue(key.toString(), value) }
             pluginMap.forEach { String key, Meta meta ->
-                Plugin plugin;
+                Plugin plugin
                 if (res.pluginManager().hasPlugin(key)) {
-                    plugin = res.pluginManager().getPlugin(key);
+                    plugin = res.pluginManager().getPlugin(key)
                 } else {
                     plugin = res.pluginManager().loadPlugin(key.toString())
                 }
                 plugin.configure(meta)
             }
-            return res;
+            return res
         }
 
         def properties(Closure cl) {
             def spec = [:]//new PropertySetSpec();
-            def code = cl.rehydrate(spec, this, this);
-            code.resolveStrategy = Closure.DELEGATE_ONLY;
-            code();
-            properties.putAll(spec);
+            def code = cl.rehydrate(spec, this, this)
+            code.resolveStrategy = Closure.DELEGATE_ONLY
+            code()
+            properties.putAll(spec)
         }
 
         def plugin(String key) {
@@ -78,7 +85,7 @@ class WorkspaceSpec {
         }
 
         def rootDir(String path) {
-            properties.put("rootDir", path);
+            properties.put("rootDir", path)
         }
     }
 
@@ -88,19 +95,19 @@ class WorkspaceSpec {
      * @return
      */
     def data(Closure cl) {
-        def spec = new DataSpec();
-        def code = cl.rehydrate(spec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_FIRST;
-        code();
+        def spec = new DataSpec()
+        def code = cl.rehydrate(spec, this, this)
+        code.resolveStrategy = Closure.DELEGATE_FIRST
+        code()
     }
 
     private class DataSpec {
         def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            WorkspaceSpec.this.builder.loadFile(name, path, Grind.buildMeta(fileMeta));
+            WorkspaceSpec.this.builder.loadFile(name, path, Grind.buildMeta(fileMeta))
         }
 
         def file(String name, String path) {
-            WorkspaceSpec.this.builder.loadFile(name, path);
+            WorkspaceSpec.this.builder.loadFile(name, path)
         }
 
         /**
@@ -111,7 +118,7 @@ class WorkspaceSpec {
          */
         def resource(String name, String path) {
             URI uri = URI.create(path)
-            WorkspaceSpec.this.builder.loadData(name, Data.buildStatic(uri));
+            WorkspaceSpec.this.builder.loadData(name, Data.buildStatic(uri))
         }
 
         //TODO extend data specification
@@ -124,11 +131,11 @@ class WorkspaceSpec {
      * @return
      */
     def task(String taskName, @DelegatesTo(TaskSpec) Closure cl) {
-        def taskSpec = new TaskSpec(taskName);
-        def code = cl.rehydrate(taskSpec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_FIRST;
-        code();
-        builder.loadTask(taskSpec.build());
+        def taskSpec = new TaskSpec(taskName)
+        def code = cl.rehydrate(taskSpec, this, this)
+        code.resolveStrategy = Closure.DELEGATE_FIRST
+        code()
+        builder.loadTask(taskSpec.build())
     }
 
     /**
@@ -137,7 +144,7 @@ class WorkspaceSpec {
      * @return
      */
     def task(Task task) {
-        builder.loadTask(task);
+        builder.loadTask(task)
     }
 
     /**
@@ -146,7 +153,7 @@ class WorkspaceSpec {
      * @return
      */
     def task(Class<? extends Task> taskClass) {
-        builder.loadTask(taskClass.newInstance());
+        builder.loadTask(taskClass.newInstance())
     }
 
     /**
@@ -155,24 +162,24 @@ class WorkspaceSpec {
      * @return
      */
     def configuration(Closure closure) {
-        MetaSpec spec = new MetaSpec();
-        def code = closure.rehydrate(spec, this, this);
-        code.resolveStrategy = Closure.DELEGATE_FIRST;
-        code();
+        MetaSpec spec = new MetaSpec()
+        def code = closure.rehydrate(spec, this, this)
+        code.resolveStrategy = Closure.DELEGATE_FIRST
+        code()
     }
 
     private class MetaSpec {
         def methodMissing(String methodName, Closure par) {
-            WorkspaceSpec.this.builder.loadMeta(Grind.buildMeta(methodName, par));
+            WorkspaceSpec.this.builder.loadMeta(Grind.buildMeta(methodName, par))
         }
     }
 
     def configuration(String name, Closure closure) {
-        this.builder.loadMeta(Grind.buildMeta(name, closure));
+        this.builder.loadMeta(Grind.buildMeta(name, closure))
     }
 
     def configuration(Meta meta) {
-        this.builder.loadMeta(meta);
+        this.builder.loadMeta(meta)
     }
 
 //    def meta(String name, Meta template, Map map) {
@@ -186,13 +193,13 @@ class WorkspaceSpec {
      * @return
      */
     MetaBuilder buildMeta(String name, Closure closure) {
-        return Grind.buildMeta(name, closure);
+        return Grind.buildMeta(name, closure)
     }
 
     MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
-        MetaBuilder res = Grind.buildMeta(name, closure);
+        MetaBuilder res = Grind.buildMeta(name, closure)
         values.forEach { key, value -> res.setValue(key.toString(), value) }
-        return res;
+        return res
     }
 
 }

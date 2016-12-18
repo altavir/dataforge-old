@@ -172,8 +172,8 @@ public class NamedMatrix implements NameSetContainer, Serializable {
      * @param matrix a {@link hep.dataforge.maths.NamedMatrix} object.
      */
     public void setValuesFrom(NamedMatrix matrix) {
-        for (int i = 0; i < matrix.getDimension(); i++) {
-            for (int j = 0; j < matrix.getDimension(); j++) {
+        for (int i = 0; i < matrix.size(); i++) {
+            for (int j = 0; j < matrix.size(); j++) {
                 String name1 = matrix.names.getName(i);
                 String name2 = matrix.names.getName(j);
                 if (names.contains(name1) && names.contains(name2)) {

@@ -158,7 +158,7 @@ public class ParamSet implements NamedValueSet, Serializable {
      * {@inheritDoc}
      */
     @Override
-    public int getDimension() {
+    public int size() {
         assert params != null;
         return params.size();
     }

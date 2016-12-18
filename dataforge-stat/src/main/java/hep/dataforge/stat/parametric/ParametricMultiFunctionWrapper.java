@@ -45,7 +45,9 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         this.multiFunc = null;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double derivValue(String parName, NamedValueSet pars) {
         if (nFunc != null) {
@@ -61,7 +63,9 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double derivValue(int n, double[] vector) throws NotDefinedException {
         if (multiFunc != null) {
@@ -72,13 +76,22 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public int getDimension() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    public int size() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    /** {@inheritDoc} */
+    @Override
+    public int getDimension() {
+        return size();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public Names names() {
         return names;
@@ -90,7 +103,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Подразумевается, что аналитически заданы все(!) производные
      */
     @Override
@@ -101,7 +114,9 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         return multiFunc != null && multiFunc.providesDeriv(n);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesDeriv(String name) {
         if (nFunc != null) {
@@ -111,8 +126,10 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         }
     }
 
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double apply(NamedValueSet pars) {
         if (nFunc != null) {
@@ -124,10 +141,12 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
             return this.value(MathUtils.getDoubleArray(pars, this.names().asArray()));
         }
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double value(double[] vector){
+    public double value(double[] vector) {
         if (multiFunc != null) {
             return multiFunc.value(vector);
         } else {

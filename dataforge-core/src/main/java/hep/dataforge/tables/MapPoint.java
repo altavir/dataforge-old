@@ -24,6 +24,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -84,7 +85,7 @@ public class MapPoint implements DataPoint, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public int getDimension() {
+    public int size() {
         return valueMap.size();
     }
 
@@ -157,6 +158,11 @@ public class MapPoint implements DataPoint, MetaMorph {
             builder.putValue(name, getValue(name));
         }
         return builder.build();
+    }
+
+    @Override
+    public Map<String, Value> asMap() {
+        return Collections.unmodifiableMap(this.valueMap);
     }
 
     public static class Builder implements GenericBuilder<MapPoint, Builder> {

@@ -62,8 +62,8 @@ public class LogLikelihood extends ScaleableNamedFunction {
      * {@inheritDoc}
      */
     @Override
-    public int getDimension() {
-        return source.getModel().getDimension();
+    public int size() {
+        return source.getModel().size();
     }
 
     /**

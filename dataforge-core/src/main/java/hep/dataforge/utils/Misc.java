@@ -15,7 +15,7 @@ import java.util.concurrent.CancellationException;
  *
  * @author Alexander Nozik
  */
-public class Utils {
+public class Misc {
     public static final Charset UTF = Charset.forName("UTF-8");
     /**
      * A synchronized lru cache

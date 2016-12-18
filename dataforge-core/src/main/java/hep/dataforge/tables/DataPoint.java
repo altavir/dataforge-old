@@ -77,4 +77,16 @@ public interface DataPoint extends NamedValueSet, Serializable {
         return builder.build();
     }
 
+    /**
+     * Convert a DataPoint to a Map. Order is not guaranteed
+     * @return
+     */
+    default Map<String,Value> asMap(){
+        Map<String,Value> res = new HashMap<>();
+        for(String field: this.names()){
+            res.put(field, getValue(field));
+        }
+        return res;
+    }
+
 }

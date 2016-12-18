@@ -15,53 +15,17 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.stat.likelihood.Marginalizer;
-import hep.dataforge.stat.likelihood.ScaleableNamedFunction;
-import hep.dataforge.stat.likelihood.NamedGaussianPDFLog;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
-import static java.lang.Math.abs;
-import static java.lang.Math.sqrt;
+import hep.dataforge.maths.NamedVector;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.junit.After;
-import org.junit.AfterClass;
-import static org.junit.Assert.assertEquals;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.*;
+
 import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
-import static org.junit.Assert.assertEquals;
-import static java.lang.Math.abs;
+import static java.lang.Math.sqrt;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -104,7 +68,7 @@ public class MarginalizerTest {
 
         NamedMatrix cov = new NamedMatrix(mat, nameList);
         testFunc = new NamedGaussianPDFLog(cov);
-        ArrayRealVector vector = new ArrayRealVector(cov.getDimension());
+        ArrayRealVector vector = new ArrayRealVector(cov.size());
         NamedVector zero = new NamedVector(nameList, vector);
         RandomGenerator generator = new JDKRandomGenerator();
         generator.setSeed(54321);

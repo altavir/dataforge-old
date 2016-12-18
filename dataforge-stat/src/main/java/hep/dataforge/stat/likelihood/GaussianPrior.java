@@ -68,7 +68,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public int getDimension() {
+    public int size() {
         return 1;
     }
 
