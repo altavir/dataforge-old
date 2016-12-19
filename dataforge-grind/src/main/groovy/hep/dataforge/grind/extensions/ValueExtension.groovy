@@ -153,7 +153,7 @@ class ValueExtension {
      * @param self
      * @return
      */
-    static Object unwrap(final Value self) {
+    static Object unbox(final Value self) {
         switch (self.valueType()) {
             case ValueType.NUMBER:
                 return self.doubleValue();
@@ -173,9 +173,9 @@ class ValueExtension {
      * @param self
      * @return
      */
-    static Map<String, Object> unwrap(final DataPoint self) {
+    static Map<String, Object> unbox(final DataPoint self) {
         self.names().collectEntries {
-            [it: self.getValue(it).unwrap()]
+            [it: self.getValue(it).unbox()]
         }
     }
 
