@@ -31,13 +31,13 @@ public class JFreeChartPlugin extends BasicPlugin {
     public void attach(Context context) {
         super.attach(context);
         context.provide("plots", PlotsPlugin.class)
-                .setPlotHolder(new DefaultPlotHolder(() -> new JFreeChartFrame()));
+                .setPlotHolder(new DefaultPlotHolder(context, () -> new JFreeChartFrame()));
     }
 
     @Override
     public void detach() {
         if (getContext() != null) {
-            getContext().provide("plots", PlotsPlugin.class).setPlotHolder(new DefaultPlotHolder());
+            getContext().provide("plots", PlotsPlugin.class).setPlotHolder(new DefaultPlotHolder(getContext()));
         }
         super.detach();
     }

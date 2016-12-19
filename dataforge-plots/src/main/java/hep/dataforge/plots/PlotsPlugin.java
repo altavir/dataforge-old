@@ -17,10 +17,10 @@ import hep.dataforge.meta.Meta;
  * <p>
  * s* @author Alexander Nozik
  */
-@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = {"fx"}, description = "Basic plottiong plugin")
+@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"}, description = "Basic plottiong plugin")
 public class PlotsPlugin extends BasicPlugin implements PlotHolder {
 
-    private PlotHolder plotHolderDelegate = new DefaultPlotHolder();
+    private PlotHolder plotHolderDelegate;
 
     public static PlotsPlugin buildFrom(Context context) {
         if (context.provides("plots")) {
@@ -28,6 +28,19 @@ public class PlotsPlugin extends BasicPlugin implements PlotHolder {
         } else {
             return context.pluginManager().loadPlugin(new PlotsPlugin());
         }
+    }
+
+    @Override
+    public void attach(Context context) {
+        super.attach(context);
+        if (plotHolderDelegate == null) {
+            plotHolderDelegate = new DefaultPlotHolder(context);
+        }
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
     }
 
     public void setPlotHolder(PlotHolder holderDelegate) {

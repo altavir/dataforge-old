@@ -3,6 +3,7 @@ package hep.dataforge.grind.terminal
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.fx.FXPlugin
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
@@ -49,6 +50,10 @@ class GrindTerminal {
     }
 
     GrindTerminal(Context context, Terminal terminal) {
+
+        //start fx plugin in global
+        Global.instance().getPlugin(FXPlugin);
+
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);

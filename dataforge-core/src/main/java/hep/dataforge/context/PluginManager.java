@@ -115,7 +115,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @param <T>
      * @return
      */
-    public <T extends Plugin> T loadPlugin(T plugin) {
+    public synchronized <T extends Plugin> T loadPlugin(T plugin) {
         if (!this.plugins.containsKey(plugin.getName())) {
             for (PluginTag tag : plugin.dependsOn()) {
                 //If dependency not loaded
