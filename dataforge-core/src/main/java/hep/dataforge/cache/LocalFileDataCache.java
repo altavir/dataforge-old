@@ -6,6 +6,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Global;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Misc;
@@ -53,7 +54,7 @@ public class LocalFileDataCache extends DataCache {
 
     @Override
     public Context getContext() {
-        return context != null ? context : super.getContext();
+        return context != null ? context : Global.instance();
     }
 
     private void loadCacheMap() {

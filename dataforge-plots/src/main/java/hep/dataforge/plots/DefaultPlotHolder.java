@@ -82,4 +82,9 @@ public class DefaultPlotHolder implements PlotHolder, Encapsulated {
     public boolean hasPlotFrame(String stage, String name) {
         return containers.containsKey(name);
     }
+
+    @Override
+    public Context getContext() {
+        return context;
+    }
 }
