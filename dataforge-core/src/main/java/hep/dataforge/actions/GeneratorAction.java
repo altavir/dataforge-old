@@ -5,11 +5,11 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.computation.GeneratorGoal;
-import hep.dataforge.computation.Goal;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.goals.GeneratorGoal;
+import hep.dataforge.goals.Goal;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Meta;
 

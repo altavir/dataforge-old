@@ -28,8 +28,8 @@ import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
-import hep.dataforge.navigation.AbstractProvider;
-import hep.dataforge.navigation.Path;
+import hep.dataforge.providers.AbstractProvider;
+import hep.dataforge.providers.Path;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
@@ -52,14 +52,11 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     public static final String STORAGE_TARGET_TYPE = "storage";
 
     public static final String DEFAULT_EVENT_LOADER_NAME = "@log";
-
-    protected Storage parent;
-    private final String name;
-    protected Meta storageConfig;
-
     protected final Map<String, Loader> loaders = new HashMap<>();
-
     protected final Map<String, Storage> shelves = new HashMap<>();
+    private final String name;
+    protected Storage parent;
+    protected Meta storageConfig;
 
     protected AbstractStorage(Storage parent, String name, Meta annotation) {
         this.name = name;

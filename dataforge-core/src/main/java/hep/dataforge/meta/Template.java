@@ -5,7 +5,7 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.navigation.Provider;
+import hep.dataforge.providers.Provider;
 import hep.dataforge.values.MapValueProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;

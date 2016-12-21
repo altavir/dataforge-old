@@ -16,9 +16,9 @@
 
 package hep.dataforge.workspace;
 
-import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.goals.ProgressCallback;
 import hep.dataforge.meta.Meta;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,7 +36,7 @@ public abstract class AbstractTask<R> implements Task {
         validate(model);
         Context context = model.getWorkspace().getContext();
 
-        hep.dataforge.computation.Task taskProcess = context.taskManager().submit(getName() + "_" + model.hashCode());
+        hep.dataforge.goals.Task taskProcess = context.taskManager().submit(getName() + "_" + model.hashCode());
         ProgressCallback callback = taskProcess.callback();
 
         callback.updateTitle(getName());

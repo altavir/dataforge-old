@@ -15,12 +15,12 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.computation.PipeGoal;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
+import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Laminate;

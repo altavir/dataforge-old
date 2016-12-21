@@ -5,12 +5,12 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.computation.GoalGroup;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.goals.GoalGroup;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
-import hep.dataforge.navigation.Provider;
+import hep.dataforge.providers.Provider;
 import hep.dataforge.utils.GenericBuilder;
 
 import java.util.Collection;
@@ -212,7 +212,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
     }
 
     /**
-     * Force start data computation for all data and wait for completion
+     * Force start data goals for all data and wait for completion
      */
     default DataNode<T> computeAll() throws Exception {
         nodeGoal().get();

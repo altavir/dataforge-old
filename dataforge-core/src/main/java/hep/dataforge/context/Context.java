@@ -15,16 +15,16 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
+import hep.dataforge.goals.TaskManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import hep.dataforge.navigation.AbstractProvider;
+import hep.dataforge.providers.AbstractProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import org.slf4j.Logger;
@@ -53,13 +53,13 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Context extends AbstractProvider implements ValueProvider, Logable, Named, AutoCloseable {
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
-    protected Logger logger;
-    protected Log rootLog;
-    private Context parent = null;
     private final String name;
     private final PluginManager pm;
+    protected Logger logger;
+    protected Log rootLog;
     protected TaskManager taskManager = null;
     protected IOManager io = null;
+    private Context parent = null;
 
 
     /**

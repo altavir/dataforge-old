@@ -5,8 +5,8 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.computation.Task;
 import hep.dataforge.fx.FXUtils;
+import hep.dataforge.goals.Task;
 import hep.dataforge.utils.NonNull;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;

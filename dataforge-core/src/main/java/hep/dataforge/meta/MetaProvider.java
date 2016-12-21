@@ -6,8 +6,8 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.navigation.Path;
-import hep.dataforge.navigation.Provider;
+import hep.dataforge.providers.Path;
+import hep.dataforge.providers.Provider;
 
 /**
  *

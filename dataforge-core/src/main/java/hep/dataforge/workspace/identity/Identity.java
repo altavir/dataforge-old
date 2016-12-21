@@ -38,7 +38,7 @@ public interface Identity extends Serializable, Comparable<Identity> {
     
     /**
      * Return a joined identity.
-     * @param ids
+     * @param id
      * @return 
      */
     default Identity and(Identity id){

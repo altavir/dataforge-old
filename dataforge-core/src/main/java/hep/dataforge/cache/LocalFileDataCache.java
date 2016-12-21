@@ -15,8 +15,6 @@ import hep.dataforge.workspace.identity.Identity;
 import java.io.*;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The data cache using local files
@@ -71,7 +69,7 @@ public class LocalFileDataCache extends DataCache {
         try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(cacheMapFile))) {
             oos.writeObject(fileMap);
         } catch (IOException ex) {
-            Logger.getLogger(LocalFileDataCache.class.getName()).log(Level.SEVERE, null, ex);
+            getLogger().error("Failed to save cache map to file", ex);
         }
     }
 

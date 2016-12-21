@@ -15,9 +15,9 @@
  */
 package hep.dataforge.data;
 
-import hep.dataforge.computation.Goal;
-import hep.dataforge.computation.PipeGoal;
-import hep.dataforge.computation.StaticGoal;
+import hep.dataforge.goals.Goal;
+import hep.dataforge.goals.PipeGoal;
+import hep.dataforge.goals.StaticGoal;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 

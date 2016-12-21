@@ -6,7 +6,7 @@
 package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.navigation.Path;
+import hep.dataforge.providers.Path;
 
 import java.util.Optional;
 import java.util.stream.Stream;

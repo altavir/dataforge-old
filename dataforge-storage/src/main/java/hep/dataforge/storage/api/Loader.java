@@ -19,7 +19,7 @@ import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.names.Named;
-import hep.dataforge.navigation.Path;
+import hep.dataforge.providers.Path;
 
 /**
  * A typed loader.

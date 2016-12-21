@@ -5,8 +5,8 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.data.DataTree;
+import hep.dataforge.goals.ProgressCallback;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.NonNull;
 

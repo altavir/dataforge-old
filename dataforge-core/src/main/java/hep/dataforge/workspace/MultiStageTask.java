@@ -15,9 +15,9 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.computation.ProgressCallback;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.goals.ProgressCallback;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Meta;
 

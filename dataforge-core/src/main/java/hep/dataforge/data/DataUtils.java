@@ -16,8 +16,8 @@
 
 package hep.dataforge.data;
 
-import hep.dataforge.computation.AbstractGoal;
-import hep.dataforge.computation.Goal;
+import hep.dataforge.goals.AbstractGoal;
+import hep.dataforge.goals.Goal;
 import hep.dataforge.meta.Meta;
 
 import java.util.function.BiFunction;

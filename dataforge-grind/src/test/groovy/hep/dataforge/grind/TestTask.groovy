@@ -1,8 +1,8 @@
 package hep.dataforge.grind
 
-import hep.dataforge.computation.ProgressCallback
 import hep.dataforge.context.Context
 import hep.dataforge.data.DataSet
+import hep.dataforge.goals.ProgressCallback
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.workspace.MultiStageTask

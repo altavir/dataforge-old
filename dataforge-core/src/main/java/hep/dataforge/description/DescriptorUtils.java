@@ -10,7 +10,7 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.navigation.Path;
+import hep.dataforge.providers.Path;
 import hep.dataforge.utils.Misc;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;

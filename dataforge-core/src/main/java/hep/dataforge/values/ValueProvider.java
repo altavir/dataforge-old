@@ -16,8 +16,8 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.navigation.Path;
-import hep.dataforge.navigation.Provider;
+import hep.dataforge.providers.Path;
+import hep.dataforge.providers.Provider;
 
 import java.util.List;
 import java.util.function.Supplier;

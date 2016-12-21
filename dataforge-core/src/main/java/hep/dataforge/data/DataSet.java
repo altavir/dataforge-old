@@ -7,7 +7,7 @@ package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.navigation.AbstractProvider;
+import hep.dataforge.providers.AbstractProvider;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;

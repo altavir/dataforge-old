@@ -13,12 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.navigation;
+package hep.dataforge.providers;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
-import static hep.dataforge.navigation.Path.TARGET_EMPTY;
-import static hep.dataforge.navigation.Path.TARGET_SEPARATOR;
 
 /**
  * Сегмент пути. Представляет собой пару цель::имя. Если цель не указана или

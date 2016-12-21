@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import hep.dataforge.navigation.AbstractProvider;
+import hep.dataforge.providers.AbstractProvider;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 

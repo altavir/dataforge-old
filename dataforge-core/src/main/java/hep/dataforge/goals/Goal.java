@@ -3,14 +3,14 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.computation;
+package hep.dataforge.goals;
 
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
- * A simple link in a computation chain
+ * A simple link in a goals chain
  *
  * @author Alexander Nozik
  */
@@ -24,12 +24,12 @@ public interface Goal<T> extends RunnableFuture<T> {
     Stream<Goal> dependencies();
 
     /**
-     * Start this goal computation. Triggers start of dependent goals
+     * Start this goal goals. Triggers start of dependent goals
      */
     void run();
 
     /**
-     * Get goal result for given slot. Does not trigger goal computation.
+     * Get goal result for given slot. Does not trigger goal goals.
      * Canceling this future aborts all subsequent goals
      *
      * @return

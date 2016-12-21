@@ -12,7 +12,6 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.workspace.identity.Identity;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.concurrent.Executor;
 import java.util.function.Function;
@@ -122,6 +121,6 @@ public abstract class DataCache implements Encapsulated {
      * @return
      */
     protected Logger getLogger() {
-        return LoggerFactory.getLogger(getClass());
+        return getContext().getLogger();
     }
 }

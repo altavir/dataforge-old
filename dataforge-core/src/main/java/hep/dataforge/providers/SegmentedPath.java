@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.navigation;
+package hep.dataforge.providers;
 
 import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.names.Name;
+
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
@@ -32,13 +33,7 @@ import java.util.List;
 class SegmentedPath implements Path {
 
 
-    /** {@inheritDoc} */
-    public static SegmentedPath of(String pathStr) {
-        return new SegmentedPath(pathStr);
-    }
-
     private final LinkedList<PathSegment> segments;
-
     /**
      * Для наследования цели
      */
@@ -76,6 +71,32 @@ class SegmentedPath implements Path {
         target = segments.get(0).target();
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    public static SegmentedPath of(String pathStr) {
+        return new SegmentedPath(pathStr);
+    }
+
+    /**
+     * Устраняет ведущиие и конечные "/"
+     *
+     * @param path
+     * @return
+     */
+    private static String normalize(String path) {
+        String res = path.trim();
+        // убираем ведущие сепараторы
+        while (res.startsWith(PATH_SEGMENT_SEPARATOR)) {
+            res = res.substring(1);
+        }
+        while (res.endsWith(PATH_SEGMENT_SEPARATOR)) {
+            res = res.substring(0, res.length() - 1);
+        }
+        return res;
+
+    }
+
     /** {@inheritDoc} */
     @Override
     public String target() {
@@ -94,7 +115,7 @@ class SegmentedPath implements Path {
     /**
      * <p>head.</p>
      *
-     * @return a {@link hep.dataforge.navigation.PathSegment} object.
+     * @return a {@link hep.dataforge.providers.PathSegment} object.
      */
     public PathSegment head() {
         return this.segments.peekFirst();
@@ -131,25 +152,6 @@ class SegmentedPath implements Path {
     @Override
     public boolean hasTail() {
         return size() > 1;
-    }
-
-    /**
-     * Устраняет ведущиие и конечные "/"
-     *
-     * @param path
-     * @return
-     */
-    private static String normalize(String path) {
-        String res = path.trim();
-        // убираем ведущие сепараторы
-        while (res.startsWith(PATH_SEGMENT_SEPARATOR)) {
-            res = res.substring(1);
-        }
-        while (res.endsWith(PATH_SEGMENT_SEPARATOR)) {
-            res = res.substring(0, res.length() - 1);
-        }
-        return res;
-
     }
 
     /**

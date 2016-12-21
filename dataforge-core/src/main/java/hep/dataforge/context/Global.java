@@ -16,8 +16,8 @@
 package hep.dataforge.context;
 
 import hep.dataforge.actions.ActionManager;
-import hep.dataforge.computation.TaskManager;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.goals.TaskManager;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.LogEntry;
@@ -39,16 +39,22 @@ import java.util.concurrent.Executors;
  */
 public class Global extends Context {
 
-    private static Global instance = new Global();
     private static final ReferenceRegistry<Context> contextRegistry = new ReferenceRegistry();
-
     private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread res = new Thread(r, "DF_DISPATCH");
 //        res.setDaemon(false);
         res.setPriority(Thread.MAX_PRIORITY);
         return res;
     });
+    private static Global instance = new Global();
 
+
+    private Global() {
+        super("GLOBAL");
+        Locale.setDefault(Locale.US);
+        ActionManager actions = new ActionManager();
+        pluginManager().loadPlugin(actions);
+    }
 
     /**
      * A single thread executor for DataForge messages dispatch. No heavy calculations should be done on this thread
@@ -94,13 +100,6 @@ public class Global extends Context {
         } catch (Exception e) {
             logger.error("Exception while terminating DataForge framework");
         }
-    }
-
-    private Global() {
-        super("GLOBAL");
-        Locale.setDefault(Locale.US);
-        ActionManager actions = new ActionManager();
-        pluginManager().loadPlugin(actions);
     }
 
 //    @Override

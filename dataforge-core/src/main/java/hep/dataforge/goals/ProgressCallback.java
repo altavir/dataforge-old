@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hep.dataforge.computation;
+package hep.dataforge.goals;
 
 import java.util.function.Consumer;
 

@@ -15,12 +15,12 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.computation.AbstractGoal;
-import hep.dataforge.computation.Goal;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
+import hep.dataforge.goals.AbstractGoal;
+import hep.dataforge.goals.Goal;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;

@@ -21,6 +21,12 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.Tag;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import org.apache.commons.vfs2.FileObject;
+import org.apache.commons.vfs2.RandomAccessContent;
+import org.apache.commons.vfs2.VFS;
+import org.apache.commons.vfs2.util.RandomAccessMode;
+import org.slf4j.LoggerFactory;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,11 +35,6 @@ import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.Map;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.RandomAccessContent;
-import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.util.RandomAccessMode;
-import org.slf4j.LoggerFactory;
 
 /**
  * A specific envelope to handle file storage format.
@@ -66,12 +67,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         dataSize = -1;
         properties = null;
         if (randomAccess != null) {
-            LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope content " + uri);
+            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope content " + uri);
             randomAccess.close();
             randomAccess = null;
         }
         if (file != null) {
-            LoggerFactory.getLogger(getClass()).debug("Closing FileEnvelope FileObject " + uri);
+            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope FileObject " + uri);
             file.close();
             file = null;
         }

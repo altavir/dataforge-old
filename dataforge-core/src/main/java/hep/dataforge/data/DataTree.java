@@ -8,7 +8,7 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.navigation.AbstractProvider;
+import hep.dataforge.providers.AbstractProvider;
 
 import java.util.Collection;
 import java.util.HashMap;

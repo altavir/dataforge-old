@@ -13,10 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.navigation;
+package hep.dataforge.providers;
 
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.names.Name;
+
 import java.util.function.Function;
 
 /**

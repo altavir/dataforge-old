@@ -5,9 +5,9 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.computation.TaskManager;
 import hep.dataforge.context.Context;
 import hep.dataforge.fx.fragments.Fragment;
+import hep.dataforge.goals.TaskManager;
 import hep.dataforge.utils.NonNull;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;

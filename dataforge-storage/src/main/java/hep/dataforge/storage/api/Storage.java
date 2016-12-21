@@ -24,7 +24,7 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
-import hep.dataforge.navigation.Provider;
+import hep.dataforge.providers.Provider;
 
 import java.util.Map;
 

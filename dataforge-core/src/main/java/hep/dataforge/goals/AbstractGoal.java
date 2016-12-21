@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.computation;
+package hep.dataforge.goals;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -82,7 +82,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     protected abstract T compute() throws Exception;
 
     /**
-     * Abort internal computation process without canceling result. Use with
+     * Abort internal goals process without canceling result. Use with
      * care
      */
     protected void abort() {
@@ -101,7 +101,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     }
 
     /**
-     * Abort current computation if it is in progress and set result. Useful for
+     * Abort current goals if it is in progress and set result. Useful for
      * caching purposes.
      *
      * @param result
