@@ -37,13 +37,11 @@ public class Data<T> implements Annotated {
     private final Goal<T> goal;
     private final Meta meta;
     private final Class<T> type;
-
     public Data(Goal<T> goal, Class<T> type, Meta meta) {
         this.goal = goal;
         this.meta = meta;
         this.type = type;
     }
-
     public Data(Goal<T> goal, Class<T> type) {
         this.goal = goal;
         this.meta = Meta.empty();
