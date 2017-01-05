@@ -22,8 +22,6 @@ import org.slf4j.LoggerFactory;
  */
 public class BaseMetaHolder implements Annotated, ValueProvider, Described {
 
-    public static final Meta DEFAULT_EMPTY_META = Meta.empty();
-
     private Meta meta;
     private transient NodeDescriptor descriptor;
 
@@ -51,12 +49,12 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
     }
 
     /**
-     * The meta that should be used if defined meta is null
+     * The meta that should be used if defined meta is not present
      *
      * @return
      */
     protected Meta getDefaultMeta() {
-        return DEFAULT_EMPTY_META;
+        return Meta.empty();
     }
 
     /**

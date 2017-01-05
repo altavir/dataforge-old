@@ -102,13 +102,13 @@ public class OutputData {
         out.println();
         
         String[] names = format.asArray();
-        for (int i = 0; i < format.getDimension(); i++) {
+        for (int i = 0; i < format.size(); i++) {
             out.printf("%-8s\t",names[i]);
         }
         out.println();
         out.println();
         for (DataPoint dataPoint : data) {
-            for (int i = 0; i < format.getDimension(); i++) {
+            for (int i = 0; i < format.size(); i++) {
                 out.printf("%8.8g\t", dataPoint.getValue(names[i]));
             }
 //            if(printTags){

@@ -145,7 +145,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
         return new CustomMergeRule(valueMerger, elementMerger).mergeInPlace(annotation, this);
     }
 
-    public MetaBuilder update(MetaBuilder annotation) {
+    public MetaBuilder update(Meta annotation) {
         return new DefaultMergeRule().mergeInPlace(annotation, this);
     }
 

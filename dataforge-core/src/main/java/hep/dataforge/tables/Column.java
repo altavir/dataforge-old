@@ -17,23 +17,22 @@ package hep.dataforge.tables;
 
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueFormatFactory;
-import hep.dataforge.values.ValueFormatter;
 
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * колонка однородных значений
+ * Column of values with format meta
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+
 public interface Column extends Iterable<Value>, Annotated {
 
-    default ValueFormatter formatter() {
-        return ValueFormatFactory.build(meta());
+    default ColumnFormat getFormat() {
+        return new ColumnFormat(meta());
     }
 
     Value get(int n);

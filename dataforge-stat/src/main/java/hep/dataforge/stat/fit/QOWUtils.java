@@ -44,7 +44,7 @@ class QOWUtils {
      */
     static RealMatrix covarF(FitState source, QOWeight weight) {
 
-        int fitDim = weight.names().getDimension();
+        int fitDim = weight.names().size();
         double[][] res = new double[fitDim][fitDim];
 
         int i;

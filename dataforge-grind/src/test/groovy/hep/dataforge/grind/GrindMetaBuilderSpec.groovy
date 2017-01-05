@@ -15,9 +15,9 @@
  */
 package hep.dataforge.grind
 
-import spock.lang.Specification
-import hep.dataforge.meta.Meta
 import hep.dataforge.io.XMLMetaWriter
+import hep.dataforge.meta.Meta
+import spock.lang.Specification
 
 /**
  *
@@ -41,6 +41,13 @@ class GrindMetaBuilderSpec extends Specification {
         then:
         println new XMLMetaWriter().writeString(root,null)
         root.getInt("otherChildNode.grandChildNode.a") == 22
+    }
+
+    def "Check simple meta"(){
+        when:
+        Meta m = Grind.buildMeta("myMeta");
+        then:
+        m.name == "myMeta"
     }
 	
 }

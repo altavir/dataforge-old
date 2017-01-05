@@ -22,7 +22,6 @@ import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -94,7 +93,7 @@ public class ListTable implements Table {
      * @throws hep.dataforge.exceptions.NamingException if any.
      */
     private void addRow(DataPoint e) throws NamingException {
-        if (format.names().getDimension() == 0 || e.names().contains(format.names())) {
+        if (format.names().size() == 0 || e.names().contains(format.names())) {
             this.data.add(e);
         } else {
             throw new DataFormatException("The input data point doesn't contain all required fields.");
@@ -152,8 +151,8 @@ public class ListTable implements Table {
         }
         return new Column() {
             @Override
-            public ValueFormatter formatter() {
-                return getFormat().getValueFormat(columnName);
+            public ColumnFormat getFormat() {
+                return ListTable.this.getFormat().getColumnFormat(columnName);
             }
 
             @Override
@@ -177,7 +176,7 @@ public class ListTable implements Table {
 
             @Override
             public Meta meta() {
-                return getFormat().getColumnMeta(columnName);
+                return ListTable.this.getFormat().getColumnMeta(columnName);
             }
 
             @Override
@@ -235,7 +234,7 @@ public class ListTable implements Table {
         if (this.format != null || !data.isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
-        format = TableFormat.buildFromMeta(meta.getNode("format"));
+        format = new TableFormat(meta.getNode("format"));
         data.addAll(DataPoint.buildFromMeta(meta.getNode("data")));
     }
 
@@ -256,7 +255,7 @@ public class ListTable implements Table {
         }
 
         public Builder() {
-            table = new ListTable(TableFormat.empty());
+            table = new ListTable(new TableFormat(Meta.empty()));
         }
 
         /**

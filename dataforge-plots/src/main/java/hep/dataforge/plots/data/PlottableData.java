@@ -21,7 +21,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.utils.NonNull;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -98,7 +98,7 @@ public class PlottableData extends XYPlottable {
      *
      * @param data
      */
-    public void setData(@NonNull List<DataPoint> data) {
+    public void setData(@NotNull List<DataPoint> data) {
         this.data = data;
     }
 
@@ -118,7 +118,7 @@ public class PlottableData extends XYPlottable {
      *
      * @param it
      */
-    public void fillData(@NonNull Iterable<DataPoint> it) {
+    public void fillData(@NotNull Iterable<DataPoint> it) {
         fillData(it, false);
     }
 

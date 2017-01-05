@@ -29,6 +29,19 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
 
     private Configuration configuration = null;
 
+
+    /**
+     * Create a pre-configured instance
+     * @param configuration
+     */
+    public SimpleConfigurable(Configuration configuration) {
+        this.configuration = configuration;
+    }
+
+
+    public SimpleConfigurable() {
+    }
+
     /**
      * {@inheritDoc }
      *

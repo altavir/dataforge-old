@@ -46,7 +46,7 @@ public class LoaderFactory {
         builder.putValue(Loader.LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
 
         if (format != null) {
-            builder.putNode(TableFormat.toMeta(format));
+            builder.putNode(format.toMeta());
             if (Arrays.binarySearch(format.namesAsArray(), "timestamp") > 0) {
                 builder.putValue("dynamic", true);
             }

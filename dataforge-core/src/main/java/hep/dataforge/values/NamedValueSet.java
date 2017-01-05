@@ -37,6 +37,4 @@ public interface NamedValueSet extends NameSetContainer, ValueProvider {
     default Value getValue(int num) {
         return getValue(this.names().getName(num));
     }
-    
-    //TODO add helpers to get specific converted values as well as arrays 
 }

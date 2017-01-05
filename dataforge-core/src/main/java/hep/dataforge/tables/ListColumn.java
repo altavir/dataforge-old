@@ -17,8 +17,6 @@ package hep.dataforge.tables;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueFormatFactory;
-import hep.dataforge.values.ValueFormatter;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -35,7 +33,6 @@ public class ListColumn implements Column {
     
     private final Meta columnMeta;
     private final List<Value> values;
-    private ValueFormatter format;
 
     public ListColumn(Meta meta, List<Value> values) {
         this.columnMeta = meta;
@@ -57,16 +54,6 @@ public class ListColumn implements Column {
         return new ArrayList<>(values);
     }
     
-    /** {@inheritDoc} */
-    @Override
-    public ValueFormatter formatter() {
-        if(format == null){
-            format = ValueFormatFactory.build(columnMeta);
-        }
-            
-        return format;
-    }
-
     /** {@inheritDoc} */
     @Override
     public Value get(int n) {

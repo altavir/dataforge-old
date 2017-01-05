@@ -4,10 +4,10 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.utils.NonNull;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.Supplier;
 
@@ -27,7 +27,7 @@ public class FXPlugin extends BasicPlugin {
     private Application app;
     private Stage stage;
 
-    public FXPlugin(@NonNull Application app, @NonNull Stage stage) {
+    public FXPlugin(@NotNull Application app, @NotNull Stage stage) {
         toolkitInitialized = true;
         this.app = app;
         this.stage = stage;

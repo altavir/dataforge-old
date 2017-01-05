@@ -19,8 +19,12 @@ import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 
 import java.io.*;
+import java.math.BigDecimal;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
 import java.util.regex.Pattern;
@@ -124,10 +128,14 @@ public class IOUtils {
     }
 
     public static String formatCaption(TableFormat format) {
-        return "#f" + format.names()
-                .asList()
-                .stream()
-                .map((name) -> format.getValueFormat(name).formatString(format.getTitle(name)))
+        return "#f " + format.getColumns()
+                .map(columnFormat -> formatWidth(columnFormat.getName(), getDefaultTextWidth(columnFormat.getPrimaryType())))
+                .collect(Collectors.joining("\t"));
+    }
+
+    public static String formatDataPoint(TableFormat format, DataPoint dp) {
+        return format.getColumns()
+                .map(columnFormat -> format(dp.getValue(columnFormat.getName()), getDefaultTextWidth(columnFormat.getPrimaryType())))
                 .collect(Collectors.joining("\t"));
     }
 
@@ -153,9 +161,7 @@ public class IOUtils {
 
         if (f.isAbsolute()) {
             return f;
-        }
-
-        if (file.isDirectory()) {
+        } else if (file.isDirectory()) {
             return new File(file, path);
         } else {
             return new File(file.getParentFile(), path);
@@ -176,4 +182,94 @@ public class IOUtils {
         }
 
     }
+
+    /**
+     * Get pre-defined default width for given value type
+     *
+     * @param type
+     * @return
+     */
+    public static int getDefaultTextWidth(ValueType type) {
+        switch (type) {
+            case NUMBER:
+                return 8;
+            case BOOLEAN:
+                return 6;
+            case STRING:
+                return 15;
+            case TIME:
+                return 20;
+            case NULL:
+                return 6;
+            default:
+                throw new AssertionError(type.name());
+        }
+    }
+
+    public static String formatWidth(String val, int width) {
+        return String.format("%" + width + "s", val);
+    }
+
+    private static DecimalFormat getExpFormat(int width) {
+        return new DecimalFormat(String.format("0.%sE0#;(-0.%sE0#)", grids(width - 6), grids(width - 7)));
+    }
+
+    private static String grids(int num) {
+        if (num <= 0) {
+            return "";
+        }
+        StringBuilder b = new StringBuilder();
+        for (int i = 0; i < num; i++) {
+            b.append("#");
+        }
+        return b.toString();
+    }
+
+    private static String formatNumber(Number number, int width) {
+        BigDecimal bd;
+        if (number instanceof BigDecimal) {
+            bd = (BigDecimal) number;
+        } else if (number instanceof Integer) {
+            bd = BigDecimal.valueOf(number.intValue());
+        } else {
+            bd = BigDecimal.valueOf(number.doubleValue());
+        }
+        int maxWidth = width;
+
+        if (bd.precision() - bd.scale() > 2 - width) {
+            if (number instanceof Integer) {
+                return String.format("%d", number);
+            } else {
+                return String.format("%." + (maxWidth - 1) + "g", bd.stripTrailingZeros());
+            }
+            //return getFlatFormat().format(bd);
+        } else {
+            return getExpFormat(width).format(bd);
+        }
+    }
+
+    public static String format(Value val, int width) {
+        switch (val.valueType()) {
+            case BOOLEAN:
+                if (width >= 5) {
+                    return Boolean.toString(val.booleanValue());
+                } else if (val.booleanValue()) {
+                    return formatWidth("+", width);
+                } else {
+                    return formatWidth("-", width);
+                }
+            case NULL:
+                return formatWidth("@null", width);
+            case NUMBER:
+                return formatWidth(formatNumber(val.numberValue(), width), width);
+            case STRING:
+                return formatWidth(val.stringValue(), width);
+            case TIME:
+                //TODO add time shortening
+                return formatWidth(val.stringValue(), width);
+            default:
+                throw new IllegalArgumentException("Unsupported input value type");
+        }
+    }
+
 }

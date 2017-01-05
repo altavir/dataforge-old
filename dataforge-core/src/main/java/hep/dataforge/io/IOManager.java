@@ -22,6 +22,8 @@ import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.context.Plugin;
 import hep.dataforge.io.reports.LogEntry;
+import hep.dataforge.io.text.MarkupRenderer;
+import hep.dataforge.io.text.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 
@@ -69,6 +71,10 @@ public interface IOManager extends Plugin {
 
     default OutputStream out(String stage, String name) {
         return out(Name.of(stage), Name.of(name));
+    }
+
+    default MarkupRenderer getTextRenderer() {
+        return new SimpleMarkupRenderer(out());
     }
 
     /**
@@ -150,7 +156,7 @@ public interface IOManager extends Plugin {
         };
     }
 
-    default void addLoggerAppender(Logger logger){
+    default void addLoggerAppender(Logger logger) {
         LoggerContext loggerContext = logger.getLoggerContext();
         OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
         appender.setName(LOGGER_APPENDER_NAME);
@@ -160,7 +166,7 @@ public interface IOManager extends Plugin {
         logger.addAppender(appender);
     }
 
-    default void removeLoggerAppender(Logger logger){
+    default void removeLoggerAppender(Logger logger) {
         Appender<ILoggingEvent> app = logger.getAppender(LOGGER_APPENDER_NAME);
         if (app != null) {
             logger.detachAppender(app);

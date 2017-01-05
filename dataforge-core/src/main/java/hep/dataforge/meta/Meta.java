@@ -96,14 +96,14 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      */
     public abstract List<? extends Meta> getMetaList(String name);
 
-    /**
-     * Alias for {@code getMetaList}
-     * @param name
-     * @return
-     */
-    public final List<? extends Meta> getNodes(String name){
-        return getMetaList(name);
-    }
+//    /**
+//     * Alias for {@code getMetaList}
+//     * @param name
+//     * @return
+//     */
+//    public final List<? extends Meta> getNodes(String name){
+//        return getMetaList(name);
+//    }
 
     /**
      * {@inheritDoc}

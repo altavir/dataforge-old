@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -82,6 +83,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     protected abstract T self();
 
+    @Nullable
     protected T getParent() {
         return parent;
     }

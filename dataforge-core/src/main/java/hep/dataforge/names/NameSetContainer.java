@@ -23,7 +23,7 @@ public interface NameSetContainer {
     Names names();
     
     default int size(){
-        return names().getDimension();
+        return names().size();
     }
     
     default String[] namesAsArray(){

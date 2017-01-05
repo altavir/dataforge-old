@@ -7,7 +7,6 @@ package hep.dataforge.fx.work;
 
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.goals.Task;
-import hep.dataforge.utils.NonNull;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -20,6 +19,7 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.paint.Color;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.net.URL;
@@ -70,7 +70,7 @@ public class WorkViewController implements Initializable {
         return process;
     }
 
-    public void setProcess(@NonNull Task process) {
+    public void setProcess(@NotNull Task process) {
         this.process = process;
         Platform.runLater(() -> {
             processTitle.setText(process.getTitle());

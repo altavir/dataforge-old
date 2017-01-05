@@ -81,7 +81,7 @@ public class StorageRatpackHandler implements Handler {
         try {
             storage.refresh();
             ctx.getResponse().contentType("text/html");
-            Template template = Utils.freemarkerConfig().getTemplate("StorageTemplate.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("StorageTemplate.ftl");
 
             StringBuilder b = new StringBuilder();
             renderStorage(b, storage);
@@ -109,7 +109,7 @@ public class StorageRatpackHandler implements Handler {
     protected void renderStates(Context ctx, StateLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
-            Template template = Utils.freemarkerConfig().getTemplate("StateLoaderTemplate.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("StateLoaderTemplate.ftl");
 
             Map<String, String> stateMap = new HashMap<>();
             for (String stateName : loader.getStateNames()) {
@@ -152,7 +152,7 @@ public class StorageRatpackHandler implements Handler {
         try {
             ctx.getResponse().contentType("text/html");
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
-            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
 
             Map<String, Object> data = new HashMap(4);
 

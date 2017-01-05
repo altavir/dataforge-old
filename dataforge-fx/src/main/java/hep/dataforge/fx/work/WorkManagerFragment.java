@@ -8,9 +8,9 @@ package hep.dataforge.fx.work;
 import hep.dataforge.context.Context;
 import hep.dataforge.fx.fragments.Fragment;
 import hep.dataforge.goals.TaskManager;
-import hep.dataforge.utils.NonNull;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * @author Alexander Nozik
@@ -44,7 +44,7 @@ public class WorkManagerFragment extends Fragment {
         return manager;
     }
 
-    public final void setManager(@NonNull TaskManager manager) {
+    public final void setManager(@NotNull TaskManager manager) {
         this.manager = manager;
     }
 

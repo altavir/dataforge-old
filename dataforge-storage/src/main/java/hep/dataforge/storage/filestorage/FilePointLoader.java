@@ -125,7 +125,7 @@ public class FilePointLoader extends AbstractPointLoader {
     public TableFormat getFormat() {
         if (format == null) {
             if (meta().hasMeta("format")) {
-                format = TableFormat.buildFromMeta(meta().getMeta("format"));
+                format = new TableFormat(meta().getMeta("format"));
             } else if (meta().hasValue("format")) {
                 format = TableFormat.forNames(meta().getStringArray("format"));
             } else {
@@ -148,7 +148,7 @@ public class FilePointLoader extends AbstractPointLoader {
             if (!getEnvelope().hasData()) {
                 getEnvelope().appendLine(IOUtils.formatCaption(getFormat()));
             }
-            String str = getFormat().format(dp);
+            String str = IOUtils.formatDataPoint(getFormat(), dp);
             getEnvelope().appendLine(str);
         } catch (IOException ex) {
             throw new StorageException("Error while openning an envelope", ex);

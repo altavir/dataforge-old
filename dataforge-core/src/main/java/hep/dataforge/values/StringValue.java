@@ -66,9 +66,9 @@ class StringValue extends AbstractValue {
      */
     public StringValue(String value) {
         if (value.startsWith("\"") && value.endsWith("\"")) {
-            this.value = value.substring(1, value.length() - 1).trim();
+            this.value = value.substring(1, value.length() - 1);
         } else {
-            this.value = value.trim();
+            this.value = value;
         }
     }
 

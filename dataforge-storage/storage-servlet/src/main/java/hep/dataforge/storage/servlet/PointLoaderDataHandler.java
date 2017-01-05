@@ -11,6 +11,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.ValueIndex;
+import hep.dataforge.tables.ColumnFormat;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.DateTimeUtils;
@@ -63,8 +64,9 @@ public class PointLoaderDataHandler implements Handler {
     private static JsonArrayBuilder makeCols(TableFormat format) {
         JsonArrayBuilder res = Json.createArrayBuilder();
         for (String valueName : format.names()) {
+            ColumnFormat cf = format.getColumnFormat(valueName);
             String type;
-            switch (format.getType(valueName)) {
+            switch (cf.getPrimaryType()) {
                 case NUMBER:
                     type = "number";
                     break;
@@ -79,7 +81,7 @@ public class PointLoaderDataHandler implements Handler {
             }
             res.add(Json.createObjectBuilder()
                     .add("id", valueName)
-                    .add("label", format.getTitle(valueName))
+                    .add("label", cf.getTitle())
                     .add("type", type));
         }
         return res;

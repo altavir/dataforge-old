@@ -81,7 +81,7 @@ public class ParamSet implements NamedValueSet, Serializable {
     }
 
     public ParamSet(NamedValueSet values) {
-        this.params = new LinkedHashMap<>(values.names().getDimension());
+        this.params = new LinkedHashMap<>(values.names().size());
         for (String name : values.names()) {
             this.params.put(name, new Param(name, values.getDouble(name)));
         }

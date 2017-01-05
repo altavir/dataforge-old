@@ -4,6 +4,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
 import hep.dataforge.description.TextDescriptorFormatter
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.utils.ContextMetaFactory
 import hep.dataforge.workspace.Workspace
@@ -77,7 +78,7 @@ class GrindWorkspaceBuilder {
     }
 
 
-    GrindWorkspaceBuilder startup(Consumer<Workspace.Builder> consumer){
+    GrindWorkspaceBuilder startup(Consumer<Workspace.Builder> consumer) {
         this.startup = consumer;
         return this;
     }
@@ -142,20 +143,30 @@ class GrindWorkspaceBuilder {
      * @param metaClosure
      * @return
      */
-    DataNode runTask(String taskName, @DelegatesTo(GrindMetaBuilder) Closure metaClosure) {
-        return build().runTask(taskName, Grind.buildMeta(metaClosure));
+    DataNode runTask(String taskName, Map values, @DelegatesTo(GrindMetaBuilder) Closure metaClosure) {
+        return build().runTask(taskName, Grind.buildMeta(values, metaClosure));
+    }
+
+    private Meta transformTarget(String target) {
+        Workspace ws = build();
+        Meta targetMeta = Grind.buildMeta(target);
+
+        if (ws.hasTarget(targetMeta.name)) {
+            return new Laminate(ws.getTarget(targetMeta.name), targetMeta);
+        } else {
+            ws.context.logger.warn("Target with name {} not found in the workspace. Using default target.", targetMeta.name);
+            return targetMeta;
+        }
     }
 
     DataNode runTask(String taskName, String target) {
         Workspace ws = build();
-        Meta taskMeta = ws.hasTarget(target) ? ws.getTarget(target) : Meta.empty();
-        return runInWorkspace(ws, taskName, taskMeta);
+        return runInWorkspace(ws, taskName, transformTarget(target));
     }
 
     DataNode runTask(String taskName) {
         Workspace ws = build();
-        Meta taskMeta = ws.hasTarget(taskName) ? ws.getTarget(taskName) : Meta.empty();
-        return runInWorkspace(ws, taskName, taskMeta);
+        return runInWorkspace(ws, taskName, transformTarget(taskName));
     }
 
     /**
@@ -171,8 +182,8 @@ class GrindWorkspaceBuilder {
         return runTask(meta.getName(), meta);
     }
 
-    def methodMissing(String name, def args) {
-        return runTask(name, args[0] as String)
+    def methodMissing(String name, Object[] args) {
+        return runTask(name, args.join(" "))
     }
 
     /**

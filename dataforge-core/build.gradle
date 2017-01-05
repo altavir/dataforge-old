@@ -2,4 +2,5 @@
 description = 'dataforge-core'
 dependencies {
     compile 'ch.qos.logback:logback-classic:1.1.+'
+    compile 'org.jetbrains:annotations:15.0'
 }

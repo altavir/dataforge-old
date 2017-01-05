@@ -17,6 +17,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -187,4 +188,9 @@ public class Configuration extends MutableMetaNode<Configuration> {
         return new Configuration(node);
     }
 
+    @Override
+    @Nullable
+    public Configuration getParent() {
+        return super.getParent();
+    }
 }

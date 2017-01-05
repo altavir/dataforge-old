@@ -129,7 +129,7 @@ public class NameList implements Names {
      * {@inheritDoc}
      */
     @Override
-    public int getDimension() {
+    public int size() {
         return nameList.size();
     }
 
@@ -162,7 +162,7 @@ public class NameList implements Names {
      */
     @Override
     public String[] asArray() {
-        return nameList.toArray(new String[getDimension()]);
+        return nameList.toArray(new String[size()]);
     }
 
     /**

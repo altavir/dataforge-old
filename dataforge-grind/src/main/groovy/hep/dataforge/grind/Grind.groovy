@@ -31,13 +31,17 @@ class Grind {
     }
 
     static MetaBuilder buildMeta(String input) {
-        def compilerConfiguration = new CompilerConfiguration()
-        compilerConfiguration.scriptBaseClass = DelegatingScript.class.name
-        def shell = new GroovyShell(Grind.class.classLoader, compilerConfiguration)
-        DelegatingScript script = shell.parse(input) as DelegatingScript;
-        GrindMetaBuilder builder = new GrindMetaBuilder();
-        script.setDelegate(builder)
-        return script.run() as MetaBuilder
+        if (input.contains("(") || input.contains("{")) {
+            def compilerConfiguration = new CompilerConfiguration()
+            compilerConfiguration.scriptBaseClass = DelegatingScript.class.name
+            def shell = new GroovyShell(Grind.class.classLoader, compilerConfiguration)
+            DelegatingScript script = shell.parse(input) as DelegatingScript;
+            GrindMetaBuilder builder = new GrindMetaBuilder();
+            script.setDelegate(builder)
+            return script.run() as MetaBuilder
+        } else {
+            return new MetaBuilder(input);
+        }
     }
 
 //    static Workspace buildWorkspace(File file, Class spec) {

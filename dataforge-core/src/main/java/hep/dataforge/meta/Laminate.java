@@ -15,6 +15,7 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -23,6 +24,7 @@ import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.stream.Collector;
 
 /**
  * A chain of immutable meta. The value is taken from the first meta in list
@@ -33,7 +35,7 @@ import java.util.*;
  *
  * @author darksnake
  */
-public class Laminate extends Meta {
+public class Laminate extends Meta implements Described {
 
     private String name;
     private List<Meta> layers;
@@ -56,6 +58,11 @@ public class Laminate extends Meta {
         this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(), layers);
     }
 
+    /**
+     * Create laminate from layers. Deepest first.
+     *
+     * @param layers
+     */
     public Laminate(Meta... layers) {
         this(Arrays.asList(layers));
     }
@@ -84,7 +91,6 @@ public class Laminate extends Meta {
      * hasMeta and hasValue
      */
     private void buildDescriptorLayer() {
-
         if (this.descriptor != null) {
             descriptorLayer = DescriptorUtils.buildDefaultNode(descriptor);
         }
@@ -162,7 +168,7 @@ public class Laminate extends Meta {
             laminate.setValueContext(valueContext());
             return laminate;
         } else //if node not found, using descriptor layer if it is defined
-         if (descriptorLayer != null) {
+            if (descriptorLayer != null) {
                 return descriptorLayer.getMeta(path);
             } else {
                 throw new NameNotFoundException(path);
@@ -182,7 +188,7 @@ public class Laminate extends Meta {
             }
             return childLayers.get(0);
         } else //if node not found, using descriptor layer if it is defined
-         if (descriptorLayer != null) {
+            if (descriptorLayer != null) {
                 return descriptorLayer.getMetaList(path);
             } else {
                 throw new NameNotFoundException(path);
@@ -203,8 +209,8 @@ public class Laminate extends Meta {
     public Collection<String> getNodeNames() {
         return getNodeNames(true);
     }
-    
-    
+
+
     public Collection<String> getNodeNames(boolean includeDefaults) {
         Set<String> names = new HashSet<>();
         if (layers != null) {
@@ -260,4 +266,32 @@ public class Laminate extends Meta {
         throw new NameNotFoundException(path);
     }
 
+    @Override
+    public NodeDescriptor getDescriptor() {
+        if (descriptor != null) {
+            return descriptor;
+        } else {
+            return new NodeDescriptor(Meta.empty());
+        }
+    }
+
+    /**
+     * Combine values in layers using provided collector. Default values from provider and description are ignored
+     * @param valueName
+     * @param collector
+     * @param <A>
+     * @return
+     */
+    public <A> Value collectValue(String valueName, Collector<Value, A, Value> collector) {
+        return layers.stream().map(layer -> layer.hasValue(valueName) ? layer.getValue(valueName) : null).filter(it -> it != null).collect(collector);
+    }
+
+    /**
+     * Calculate sum of numeric values with given name. Values in all layers must be numeric.
+     * @param valueName
+     * @return
+     */
+    public double sumValue(String valueName) {
+        return layers.stream().mapToDouble(layer -> layer.getDouble(valueName,0)).sum();
+    }
 }

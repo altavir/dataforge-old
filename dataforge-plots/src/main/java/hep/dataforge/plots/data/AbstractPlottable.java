@@ -24,8 +24,8 @@ import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.plots.PlotStateListener;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.PointAdapter;
-import hep.dataforge.utils.NonNull;
 import hep.dataforge.utils.ReferenceRegistry;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,17 +43,17 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
     private T adapter;
 
-//    public AbstractPlottable(String name, @NonNull T adapter) {
+//    public AbstractPlottable(String name, @NotNull T adapter) {
 //        this(name);
 //        setAdapter(adapter);
 //    }
 
-    public AbstractPlottable(@NonNull String name) {
+    public AbstractPlottable(@NotNull String name) {
         this.name = name;
     }
 
     @Override
-    public void addListener(@NonNull PlotStateListener listener) {
+    public void addListener(@NotNull PlotStateListener listener) {
         getListeners().add(listener);
     }
 
@@ -63,7 +63,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     }
 
     @Override
-    public void removeListener(@NonNull PlotStateListener listener) {
+    public void removeListener(@NotNull PlotStateListener listener) {
         this.getListeners().remove(listener);
     }
 

@@ -170,7 +170,7 @@ public class MapPoint implements DataPoint, MetaMorph {
         private final MapPoint p;
 
         public Builder(DataPoint dp) {
-            p = new MapPoint(new LinkedHashMap<>(dp.names().getDimension()));
+            p = new MapPoint(new LinkedHashMap<>(dp.names().size()));
             for (String name : dp.names()) {
                 p.valueMap.put(name, dp.getValue(name));
             }

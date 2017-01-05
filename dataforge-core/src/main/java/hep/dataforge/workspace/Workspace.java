@@ -89,7 +89,7 @@ public interface Workspace extends Encapsulated {
     }
 
     default <T> DataNode<T> runTask(String taskName, Meta config) {
-        return this.runTask(taskName, config, false);
+        return this.runTask(taskName, config, true);
     }
 
     /**

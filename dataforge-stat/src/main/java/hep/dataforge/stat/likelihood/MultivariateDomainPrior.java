@@ -55,8 +55,8 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
      */
     public MultivariateDomainPrior(Domain dom, Names named) {
         super(named);
-        if(dom.getDimension()!=named.getDimension()) {
-            throw new DimensionMismatchException(dom.getDimension(), named.getDimension());
+        if(dom.getDimension()!=named.size()) {
+            throw new DimensionMismatchException(dom.getDimension(), named.size());
         }        
         this.dom = dom;
     }

@@ -15,7 +15,7 @@ import java.util.stream.StreamSupport;
 public interface PointSource extends Iterable<DataPoint> {
 
     /**
-     * A minimal
+     * A minimal set of fields to be displayed in this table. Could return empty format if source is unformatted
      * @return
      */
     TableFormat getFormat();

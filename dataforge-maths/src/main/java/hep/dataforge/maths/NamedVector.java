@@ -53,8 +53,8 @@ public class NamedVector implements NamedValueSet {
     }
 
     public NamedVector(Names names, double[] d) {
-        if (names.getDimension() != d.length) {
-            throw new DimensionMismatchException(d.length, names.getDimension());
+        if (names.size() != d.length) {
+            throw new DimensionMismatchException(d.length, names.size());
         }
         vector = new ArrayRealVector(d);
         this.nameList = Names.of(names);
@@ -81,7 +81,7 @@ public class NamedVector implements NamedValueSet {
      */
     @Override
     public int size() {
-        return this.nameList.getDimension();
+        return this.nameList.size();
     }
 
     /**

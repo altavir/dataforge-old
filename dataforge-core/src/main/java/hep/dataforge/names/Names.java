@@ -20,6 +20,8 @@ import hep.dataforge.utils.MetaMorph;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A set of names
@@ -32,11 +34,17 @@ public interface Names extends Iterable<String>, MetaMorph {
     static Names of(String... names) {
         return new NameList(names);
     }
+
     static Names of(Iterable<String> names) {
         return new NameList(names);
     }
+
     static Names of(Names names) {
         return new NameList(names);
+    }
+
+    static Names of(Stream<String> names) {
+        return new NameList(names.collect(Collectors.toList()));
     }
 
     static Names of(NameSetContainer set) {
@@ -49,7 +57,7 @@ public interface Names extends Iterable<String>, MetaMorph {
      * @return
      */
     default List<String> asList() {
-        List<String> res = new ArrayList<>(getDimension());
+        List<String> res = new ArrayList<>(size());
         for (String name : this) {
             res.add(name);
         }
@@ -57,7 +65,7 @@ public interface Names extends Iterable<String>, MetaMorph {
     }
 
     default String[] asArray() {
-        return asList().toArray(new String[getDimension()]);
+        return asList().toArray(new String[size()]);
     }
 
     String getName(int k);
@@ -76,7 +84,6 @@ public interface Names extends Iterable<String>, MetaMorph {
      *
      * @param names
      * @return true only if all names a presented in this Names.
-     *
      */
     default boolean contains(String... names) {
         List<String> list = asList();
@@ -97,8 +104,7 @@ public interface Names extends Iterable<String>, MetaMorph {
     }
 
     /**
-     *
      * @return
      */
-    int getDimension();
+    int size();
 }

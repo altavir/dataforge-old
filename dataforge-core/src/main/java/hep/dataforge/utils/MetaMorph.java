@@ -30,6 +30,7 @@ public interface MetaMorph extends Externalizable {
 
     @Override
     default void writeExternal(ObjectOutput out) throws IOException {
+        //TODO add type tag to avoid reconstructing metamorph from meta saved form another type
         MetaUtils.writeMeta(out, toMeta());
     }
 

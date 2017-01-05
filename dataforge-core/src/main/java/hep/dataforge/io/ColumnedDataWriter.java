@@ -45,7 +45,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param names  a {@link java.lang.String} object.
      */
     public ColumnedDataWriter(OutputStream stream, String... names) {
-        this(stream, TableFormat.fixedWidth(8, names));
+        this(stream, TableFormat.forNames(names));
     }
 
     /**
@@ -74,7 +74,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @throws java.io.FileNotFoundException if any.
      */
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
-        this(file, append, Charset.defaultCharset(), TableFormat.fixedWidth(8, names));
+        this(file, append, Charset.defaultCharset(), TableFormat.forNames(names));
     }
 
     /**
@@ -123,7 +123,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param point a {@link hep.dataforge.tables.DataPoint} object.
      */
     public void writePoint(DataPoint point) {
-        writer.println(format.format(point));
+        writer.println(IOUtils.formatDataPoint(format, point));
         writer.flush();
     }
 
@@ -177,7 +177,7 @@ public class ColumnedDataWriter implements AutoCloseable {
     public static void writeDataSet(OutputStream stream, PointSource data, String head, String... names) {
         ColumnedDataWriter writer;
         TableFormat format;
-        if (data.getFormat().names().getDimension() == 0) {
+        if (data.getFormat().isEmpty()) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
             format = TableFormat.forPoint(data.iterator().next());
             LoggerFactory.getLogger(ColumnedDataWriter.class)
@@ -186,16 +186,14 @@ public class ColumnedDataWriter implements AutoCloseable {
             format = data.getFormat();
         }
 
-        if (names.length == 0) {
-            writer = new ColumnedDataWriter(stream, format);
-        } else {
-            writer = new ColumnedDataWriter(stream, format.subSet(names));
+        if (names.length != 0) {
+            format = format.filter(names);
         }
+
+        writer = new ColumnedDataWriter(stream, format);
         writer.comment(head);
         writer.ln();
-//        if (!data.meta().isEmpty()) {
-//            writer.comment(new XMLMetaWriter().writeString(data.meta(), null));
-//        }
+
         writer.writeFormatHeader();
         for (DataPoint dp : data) {
             writer.writePoint(dp);
