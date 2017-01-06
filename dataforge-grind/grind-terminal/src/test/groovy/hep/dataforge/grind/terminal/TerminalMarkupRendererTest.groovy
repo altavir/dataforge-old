@@ -1,5 +1,6 @@
 package hep.dataforge.grind.terminal
 
+import hep.dataforge.grind.GrindMarkupBuilder
 import hep.dataforge.io.text.Markup
 import hep.dataforge.io.text.MarkupBuilder
 import hep.dataforge.io.text.MarkupUtils
@@ -65,5 +66,44 @@ class TerminalMarkupRendererTest extends Specification {
         println(markup.meta.toString())
         r.render(markup)
         println()
+    }
+
+
+    def "Test markup builder"() {
+        when:
+        Markup markup = new GrindMarkupBuilder().markup {
+            meta(someKey: "someValue")
+            text color: "red", "this is my red text "
+            text color: "blue", "and blue text"
+            list(bullet: "\$ ") {
+                text "first line"
+                text "second line"
+                group {
+                    style(bold: true, italic: true)
+                    text "sub list:"
+                    list(bullet: "* ") {
+                        text "sub list line"
+                        text "another one"
+                    }
+                }
+                group("style.color": "red") {
+                    text "composite "
+                    text color: "blue", "text"
+                }
+            }
+            text bold: true, "\n***table test***\n"
+            table {
+                style (textWidth: 10)
+                row {
+                    text "a"
+                    text color: "cyan", "b"
+                    text "c"
+                }
+                row(["d", "e", "f"])
+            }
+        }
+        then:
+        println markup.meta
+        r.render(markup)
     }
 }

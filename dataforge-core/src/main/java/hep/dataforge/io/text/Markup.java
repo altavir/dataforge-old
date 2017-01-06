@@ -31,7 +31,7 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
     public static final String MARKUP_GROUP_TYPE = "group";
     public static final String MARKUP_META_NODE = "meta";
     public static final String MARKUP_STYLE_NODE = "style";
-    public static final String MARKUP_CONTENT_NODE = "content";
+    public static final String MARKUP_CONTENT_NODE = "c";
     public static final String MARKUP_TYPE_KEY = "type";
 
     public Markup(Configuration c) {

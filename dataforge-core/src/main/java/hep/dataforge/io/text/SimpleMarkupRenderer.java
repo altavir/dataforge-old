@@ -10,6 +10,10 @@ import java.io.PrintStream;
 public class SimpleMarkupRenderer extends StreamMarkupRenderer {
     private final PrintStream stream;
 
+    public SimpleMarkupRenderer() {
+        this.stream = System.out;
+    }
+
     public SimpleMarkupRenderer(PrintStream stream) {
         this.stream = stream;
     }

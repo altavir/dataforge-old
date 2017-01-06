@@ -6,11 +6,11 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.GenericBuilder;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static hep.dataforge.io.text.GenericMarkupRenderer.LIST_TYPE;
-import static hep.dataforge.io.text.GenericMarkupRenderer.TEXT_TYPE;
 
 /**
  * Created by darksnake on 03-Jan-17.
@@ -18,7 +18,7 @@ import static hep.dataforge.io.text.GenericMarkupRenderer.TEXT_TYPE;
 public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Annotated {
 
     public static MarkupBuilder text(String text) {
-        return new MarkupBuilder().setType(TEXT_TYPE).setValue("text", text);
+        return new MarkupBuilder().setValue("text", text);
     }
 
     public static MarkupBuilder text(String text, String color) {
@@ -27,7 +27,8 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Create list markup with given level and bullet
-     * @param level ignored if not positive
+     *
+     * @param level  ignored if not positive
      * @param bullet ignored if null
      * @return
      */
@@ -65,6 +66,11 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         return self();
     }
 
+    public MarkupBuilder update(Map<String, ? extends Object> map) {
+        builder.update(map);
+        return self();
+    }
+
     public MarkupBuilder setValue(String key, Object value) {
         builder.setValue(key, value);
         return self();
@@ -92,9 +98,13 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         return self();
     }
 
-    public MarkupBuilder setContent(MarkupBuilder... content) {
-        builder.setNode(Markup.MARKUP_CONTENT_NODE, Stream.of(content).map(it -> it.meta()).collect(Collectors.toList()));
+    public MarkupBuilder setContent(Stream<MarkupBuilder> content) {
+        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map(it -> it.meta()).collect(Collectors.toList()));
         return self();
+    }
+
+    public MarkupBuilder setContent(MarkupBuilder... content) {
+        return setContent(Stream.of(content));
     }
 
     public MarkupBuilder addContent(Meta content) {

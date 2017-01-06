@@ -193,4 +193,8 @@ public class Configuration extends MutableMetaNode<Configuration> {
     public Configuration getParent() {
         return super.getParent();
     }
+
+    public Configuration rename(String newName) {
+        return super.setName(newName);
+    }
 }

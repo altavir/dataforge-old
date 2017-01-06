@@ -77,8 +77,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     }
 
     public MetaBuilder rename(String newName) {
-        super.setName(newName);
-        return self();
+        return super.setName(newName);
     }
 
     @Override
