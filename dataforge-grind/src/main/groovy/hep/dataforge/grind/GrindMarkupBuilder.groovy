@@ -4,6 +4,7 @@ import hep.dataforge.io.text.Markup
 import hep.dataforge.io.text.MarkupBuilder
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
+import org.codehaus.groovy.runtime.InvokerHelper
 
 /**
  * Builder for DataForge text markup
@@ -14,22 +15,32 @@ class GrindMarkupBuilder extends BuilderSupport {
     @Override
     protected void setParent(Object parent, Object child) {
         Configuration parentConfig = ((Markup) parent).getConfig();
-        if (child instanceof Markup) {
-            Configuration childConfig = ((Markup) child).getConfig().rename(Markup.MARKUP_CONTENT_NODE);
-            parentConfig.attachNode(childConfig)
-        } else if (child instanceof Meta) {
-            parentConfig.setNode((Meta) child);
-        } else {
-            throw new RuntimeException("unknown child type")
-        }
+        Configuration childConfig = ((Markup) child).getConfig().rename(Markup.MARKUP_CONTENT_NODE);
+        parentConfig.attachNode(childConfig)
     }
 
     @Override
-    protected Object createNode(Object name, Map attributes, Object value) {
+    Object invokeMethod(String methodName, Object args) {
+        if (methodName == "style" || methodName == "meta") {
+            def mb = new GrindMetaBuilder();
+            List list = InvokerHelper.asList(args);
+            //Change environment of passed closure
+            if (list.last() instanceof Closure) {
+                Closure closure = list.last()
+                closure.setDelegate(mb);
+                //closure still can look up global builder scope, but uses delegate first
+                closure.setResolveStrategy(Closure.DELEGATE_FIRST);
+            }
+            Meta meta = new GrindMetaBuilder().invokeMethod(methodName, args);
+            ((Markup) getCurrent()).getConfig().setNode(meta)
+            return current
+        }
+        return super.invokeMethod(methodName, args)
+    }
+
+    @Override
+    protected Markup createNode(Object name, Map attributes, Object value) {
         switch (name) {
-            case "style":
-            case "meta":
-                return new GrindMetaBuilder().createNode(name, attributes, value);
             case "text":
                 return MarkupBuilder.text(value).update(attributes).build()
             default:
@@ -37,8 +48,8 @@ class GrindMarkupBuilder extends BuilderSupport {
                         .setType(name)
                         .update(attributes);
                 if (value != null) {
-                    if("row" == name){
-                        value.each {mb.addText(it)}
+                    if ("row" == name) {
+                        value.each { mb.addText(it) }
                     }
 
                     if (value instanceof Markup) {
@@ -50,7 +61,7 @@ class GrindMarkupBuilder extends BuilderSupport {
     }
 
     @Override
-    protected Object postNodeCompletion(Object parent, Object node) {
+    protected Markup postNodeCompletion(Object parent, Object node) {
         //remove type for root element
         if (parent == null) {
             ((Markup) node).getConfig().removeValue("type");
@@ -59,17 +70,17 @@ class GrindMarkupBuilder extends BuilderSupport {
     }
 
     @Override
-    protected Object createNode(Object name, Object value) {
+    protected Markup createNode(Object name, Object value) {
         return createNode(name, [:], value);
     }
 
     @Override
-    protected Object createNode(Object name) {
+    protected Markup createNode(Object name) {
         return createNode(name, [:]);
     }
 
     @Override
-    protected Object createNode(Object name, Map attributes) {
+    protected Markup createNode(Object name, Map attributes) {
         return createNode(name, attributes, null);
     }
 }

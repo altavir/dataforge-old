@@ -93,7 +93,9 @@ class TerminalMarkupRendererTest extends Specification {
             }
             text bold: true, "\n***table test***\n"
             table {
-                style (textWidth: 10)
+                style (textWidth: 10){
+                    styleChild(val:true)
+                }
                 row {
                     text "a"
                     text color: "cyan", "b"
