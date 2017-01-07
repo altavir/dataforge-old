@@ -21,13 +21,13 @@ class TerminalMarkupRenderer extends StreamMarkupRenderer {
     @Override
     protected synchronized void renderText(String text, String color, Markup element) {
         AttributedStyle style;
-        if (element.getStyle().getBoolean("bold", false)) {
+        if (element.getBoolean("bold", false)) {
             style = AttributedStyle.BOLD;
         } else {
             style = AttributedStyle.DEFAULT;
         }
 
-        if (element.getStyle().getBoolean("italic", false)) {
+        if (element.getBoolean("italic", false)) {
             style = style.italic();
         }
 

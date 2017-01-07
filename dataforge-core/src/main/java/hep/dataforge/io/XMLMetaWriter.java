@@ -24,8 +24,6 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
-
 /**
  * A writer for XML represented Meta
  *
@@ -59,7 +57,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
 
     private Document getXMLDocument(Meta meta) {
         try {
-            DocumentBuilderFactory factory = newInstance();
+            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
             Document doc = builder.newDocument();
             Element element = getXMLElement(meta, doc);

@@ -74,13 +74,13 @@ public abstract class StreamMarkupRenderer extends GenericMarkupRenderer {
             print("\t");
         }
         print(bullet);
-        render(element);
+        doRender(element);
     }
 
     @Override
     protected void tableRow(Markup element) {
         element.getContent().forEach(cell -> {
-            render(cell);
+            doRender(cell);
             print("\t");
         });
         ln(true);

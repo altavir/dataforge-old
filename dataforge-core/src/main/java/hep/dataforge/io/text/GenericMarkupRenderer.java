@@ -1,5 +1,7 @@
 package hep.dataforge.io.text;
 
+import hep.dataforge.description.ValueDef;
+
 import static hep.dataforge.io.text.Markup.MARKUP_GROUP_TYPE;
 
 /**
@@ -11,11 +13,23 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
     public static final String LIST_TYPE = "list";
     public static final String TABLE_TYPE = "table";
 
+    /**
+     * Called once per render
+     * @param mark
+     */
     @Override
-    public void render(Markup element) {
+    public void render(Markup mark) {
+        doRender(mark);
+    }
+
+    /**
+     * Override this method to change internal rendering mechanism. This method is recursively called inside rendering procedure
+     * @param element
+     */
+    protected void doRender(Markup element) {
         switch (element.getType(this::inferType)) {
             case MARKUP_GROUP_TYPE: //render container
-                element.getContent().forEach(it -> render(it));
+                element.getContent().forEach(it -> doRender(it));
                 break;
             case TEXT_TYPE:
                 text(element);
@@ -40,7 +54,6 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
     }
 
     /**
-     *
      * @param element
      */
     protected void text(Markup element) {
@@ -116,12 +129,6 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
      *
      * @param element
      */
+    @ValueDef(name = "header", type = "BOOLEAN", info = "If true the row is considered to be a header")
     protected abstract void tableRow(Markup element);
-
-//    /**
-//     * A single table cell
-//     *
-//     * @param element
-//     */
-//    protected abstract void tableCell(Markup element);
 }

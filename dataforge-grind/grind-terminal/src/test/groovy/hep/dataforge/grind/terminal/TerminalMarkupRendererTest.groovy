@@ -61,7 +61,7 @@ class TerminalMarkupRendererTest extends Specification {
                 .row(4.5, 5.678, -2)
                 .row(0, 0, 0)
                 .build()
-        Markup markup = MarkupUtils.markupTable(table);
+        Markup markup = MarkupUtils.markupTable(table).build();
         then:
         println(markup.meta.toString())
         r.render(markup)

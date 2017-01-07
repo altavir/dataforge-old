@@ -116,23 +116,23 @@ public class MarkupUtils {
      * @param table
      * @return
      */
-    public static Markup markupTable(Table table) {
+    public static MarkupBuilder markupTable(Table table) {
         MarkupBuilder builder = new MarkupBuilder().setType(GenericMarkupRenderer.TABLE_TYPE);
 
-        MarkupBuilder header = new MarkupBuilder().setValue("style.color", "red");
+        MarkupBuilder header = new MarkupBuilder().setValue("header", true);
         table.getFormat().getColumns().forEach(c -> {
             header.addColumn(c.getTitle(), getDefaultTextWidth(c.getPrimaryType()));
         });
         builder.addContent(header);
 
-        for(DataPoint dp:table){
+        for (DataPoint dp : table) {
             MarkupBuilder row = new MarkupBuilder();
             table.getFormat().getColumns().forEach(c -> {
                 int width = getDefaultTextWidth(c.getPrimaryType());
-                row.addColumn(format(dp.getValue(c.getName()),width), width);
+                row.addColumn(format(dp.getValue(c.getName()), width), width);
             });
             builder.addContent(row);
         }
-        return builder.build();
+        return builder;
     }
 }

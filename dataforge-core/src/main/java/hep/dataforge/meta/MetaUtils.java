@@ -186,7 +186,7 @@ public class MetaUtils {
     }
 
     public static Stream<Pair<String, Value>> valueStream(Meta node) {
-        return nodeStream(node).flatMap((Pair<String, Meta> entry) -> {
+        return nodeStream("", node, true).flatMap((Pair<String, Meta> entry) -> {
             String key = entry.getKey();
             Meta childMeta = entry.getValue();
             return childMeta.getValueNames().stream()
@@ -273,7 +273,7 @@ public class MetaUtils {
     }
 
     public static MetaBuilder readMeta(ObjectInput in) throws IOException, ClassNotFoundException {
-        return readMeta(in,null);
+        return readMeta(in, null);
     }
 
 }

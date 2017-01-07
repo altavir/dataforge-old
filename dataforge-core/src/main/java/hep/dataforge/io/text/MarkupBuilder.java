@@ -81,11 +81,6 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         return self();
     }
 
-    public MarkupBuilder setMeta(Meta meta) {
-        builder.setNode(Markup.MARKUP_META_NODE, meta);
-        return self();
-    }
-
     public MarkupBuilder setStyle(Meta style) {
         builder.setNode(Markup.MARKUP_STYLE_NODE, style);
         return self();
@@ -113,6 +108,11 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
     }
 
     public MarkupBuilder addContent(MarkupBuilder content) {
+        builder.putNode(Markup.MARKUP_CONTENT_NODE, content.getMeta());
+        return self();
+    }
+
+    public MarkupBuilder addContent(Markup content) {
         builder.putNode(Markup.MARKUP_CONTENT_NODE, content.getMeta());
         return self();
     }
