@@ -1,4 +1,4 @@
-package hep.dataforge.io.text;
+package hep.dataforge.io.markup;
 
 import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDef;
@@ -16,9 +16,8 @@ import java.util.stream.Stream;
 
 /**
  * Basic markup element wrapper. A markup element must have a type designation, fields specific for this markup element (like 'text' for text markup).
- * The structure of intrinsic meta could be as complex as needed as long as its upper layer nodes do not have name conflict with standard markup nodes like 'meta' and 'style'
+ * The structure of intrinsic meta could be as complex as needed as long as its upper layer nodes do not have name conflict with standard markup nodes like 'style'
  * 'style' element contains optional style information.
- * 'meta' element contains fixed style information that could not be overridden by style
  * Created by darksnake on 30-Dec-16.
  */
 @ValueDef(name = "type", def = "text", info = "The type of this block")

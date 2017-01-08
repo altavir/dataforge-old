@@ -1,4 +1,4 @@
-package hep.dataforge.io.text;
+package hep.dataforge.io.markup;
 
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static hep.dataforge.io.text.GenericMarkupRenderer.LIST_TYPE;
+import static hep.dataforge.io.markup.GenericMarkupRenderer.LIST_TYPE;
 
 /**
  * Created by darksnake on 03-Jan-17.

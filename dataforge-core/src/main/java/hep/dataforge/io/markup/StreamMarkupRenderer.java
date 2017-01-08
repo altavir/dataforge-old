@@ -1,4 +1,4 @@
-package hep.dataforge.io.text;
+package hep.dataforge.io.markup;
 
 import hep.dataforge.io.IOUtils;
 import org.jetbrains.annotations.NotNull;

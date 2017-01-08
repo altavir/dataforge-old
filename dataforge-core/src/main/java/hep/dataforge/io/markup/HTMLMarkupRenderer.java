@@ -1,4 +1,4 @@
-package hep.dataforge.io.text;
+package hep.dataforge.io.markup;
 
 import hep.dataforge.meta.MetaUtils;
 import org.slf4j.LoggerFactory;
@@ -20,6 +20,7 @@ import java.util.ArrayDeque;
 import java.util.Deque;
 
 /**
+ * The html renderer for markup
  * Created by darksnake on 07-Jan-17.
  */
 public class HTMLMarkupRenderer extends GenericMarkupRenderer {
@@ -48,19 +49,30 @@ public class HTMLMarkupRenderer extends GenericMarkupRenderer {
         stream.flush();
     }
 
+    /**
+     * Build DOM without attaching it to document
+     * @param document
+     * @param markup
+     * @return
+     */
+    public Element buildDOM(Document document, Markup markup){
+        this.document = document;
+        stack.clear();
+        Element root = document.createElement("body");
+        stack.add(root);
+        doRender(markup);
+        stack.removeLast();
+        if (stack.size() != 0) {
+            LoggerFactory.getLogger(getClass()).warn("Node stack not empty after rendering");
+        }
+        return root;
+    }
+
     @Override
     public void render(Markup element) {
         try {
-            document = buildDocument();
-            stack.clear();
-            Element root = document.createElement("body");
-            document.appendChild(root);
-            stack.add(root);
-            doRender(element);
-            stack.removeLast();
-            if (stack.size() != 0) {
-                LoggerFactory.getLogger(getClass()).warn("Node stack not empty after rendering");
-            }
+            Document document = buildDocument();
+            document.appendChild(buildDOM(document,element));
             printDocument();
         } catch (Exception ex) {
             throw new RuntimeException(ex);

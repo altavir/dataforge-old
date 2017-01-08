@@ -1,9 +1,9 @@
 package hep.dataforge.grind.terminal
 
 import hep.dataforge.grind.GrindMarkupBuilder
-import hep.dataforge.io.text.Markup
-import hep.dataforge.io.text.MarkupBuilder
-import hep.dataforge.io.text.MarkupUtils
+import hep.dataforge.io.markup.Markup
+import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.plots.PlotDataAction
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table

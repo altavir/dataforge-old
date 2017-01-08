@@ -1,8 +1,9 @@
-package hep.dataforge.io.text;
+package hep.dataforge.io.markup;
 
 import hep.dataforge.description.ValueDef;
+import org.slf4j.LoggerFactory;
 
-import static hep.dataforge.io.text.Markup.MARKUP_GROUP_TYPE;
+import static hep.dataforge.io.markup.Markup.MARKUP_GROUP_TYPE;
 
 /**
  * A basic renderer framework allowing to render basic markup elements: text, list and table
@@ -41,8 +42,16 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
                 table(element);
                 break;
             default:
-                throw new RuntimeException("Unknown markup type: " + element.getType());
+                doRenderOther(element);
         }
+    }
+
+    /**
+     * Render element of unknown type. By default logs an error and ignores node
+     * @param markup
+     */
+    protected void doRenderOther(Markup markup){
+        LoggerFactory.getLogger(getClass()).error("Unknown markup type: " + markup.getType());
     }
 
     protected String inferType(Markup element) {

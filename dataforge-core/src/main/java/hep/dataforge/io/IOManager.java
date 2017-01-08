@@ -21,11 +21,12 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.context.Plugin;
+import hep.dataforge.io.markup.MarkupRenderer;
+import hep.dataforge.io.markup.SimpleMarkupRenderer;
 import hep.dataforge.io.reports.LogEntry;
-import hep.dataforge.io.text.MarkupRenderer;
-import hep.dataforge.io.text.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,8 +74,19 @@ public interface IOManager extends Plugin {
         return out(Name.of(stage), Name.of(name));
     }
 
-    default MarkupRenderer getTextRenderer() {
+    default MarkupRenderer getMarkupRenderer() {
         return new SimpleMarkupRenderer(out());
+    }
+
+    /**
+     * Open a markup renderer for this IOManager
+     *
+     * @param stage
+     * @param name
+     * @return
+     */
+    default MarkupRenderer getMarkupRenderer(@Nullable String stage, @Nullable String name) {
+        return new SimpleMarkupRenderer(out(stage, name));
     }
 
     /**

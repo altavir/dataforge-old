@@ -1,7 +1,7 @@
 package hep.dataforge.grind
 
-import hep.dataforge.io.text.Markup
-import hep.dataforge.io.text.MarkupBuilder
+import hep.dataforge.io.markup.Markup
+import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import org.codehaus.groovy.runtime.InvokerHelper

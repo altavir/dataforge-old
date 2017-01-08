@@ -1,4 +1,4 @@
-package hep.dataforge.io.text
+package hep.dataforge.io.markup
 
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
