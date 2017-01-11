@@ -182,8 +182,9 @@ class GrindWorkspaceBuilder {
         return runTask(meta.getName(), meta);
     }
 
-    def methodMissing(String name, Object[] args) {
-        return runTask(name, args.join(" "))
+    def methodMissing(String name, Object args) {
+        String str = args.getClass().isArray() ? ((Object[]) args).join(" ") : args.toString()
+        return runTask(name, str)
     }
 
     /**
