@@ -7,7 +7,7 @@ package hep.dataforge.exceptions;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class WrongTargetException extends StorageException {
     

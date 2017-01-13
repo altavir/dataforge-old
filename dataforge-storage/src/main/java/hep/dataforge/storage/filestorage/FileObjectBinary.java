@@ -6,15 +6,16 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.Binary;
+import org.apache.commons.vfs2.FileObject;
+
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class FileObjectBinary implements Binary {
 

@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
  * forces collection when timer expires. If there are few Values with same time
  * during this period, they are averaged.
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class RegularPointCollector implements ValueCollector {
 

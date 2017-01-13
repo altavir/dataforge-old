@@ -6,12 +6,13 @@
 package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.ControlException;
+
 import java.util.HashMap;
 import java.util.Map;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class PortFactory {
     //PENDING convert to singleton?

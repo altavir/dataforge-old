@@ -10,7 +10,7 @@ import hep.dataforge.control.measurements.Measurement;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public interface MeasurementConsumer {
     void accept(Device device, String measurementName, Measurement measurement);

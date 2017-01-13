@@ -11,7 +11,7 @@ import hep.dataforge.values.Value;
  * A collector of values which listens to some input values until condition
  * satisfied then pushes the result to external listener.
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public interface ValueCollector {
 

@@ -1,0 +1,128 @@
+plugins {
+    id 'java'
+    id 'groovy'
+    id 'idea'
+    id 'org.hidetake.ssh' version '2.7.0'
+}
+
+group = 'hep.dataforge.site'
+version = '0.2'
+
+
+ext {
+    mainClassName = "com.sysgears.grain.Main"
+    grainVersion = '0.7.0'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+configurations.all {
+    exclude group: 'commons-logging'
+    exclude group: 'rhino'
+    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile "com.sysgears.grain:grain:$project.grainVersion"
+    compile 'org.codehaus.groovy:groovy:2.4.7'
+}
+
+sourceSets {
+    main {
+        groovy {
+            srcDirs = ['src']
+        }
+    }
+}
+
+task gendeps {
+    doLast {
+        def classpath = project.classpath.files
+        def depFile = new File(".site-${project.grainVersion}.dep")
+        depFile.withWriter { writer ->
+            classpath.findAll { it.name.endsWith('.jar') }.sort {
+                !it.name.endsWith("grain-${project.grainVersion}.jar")
+            }.each {
+                writer.append(it.toString()).append('\n')
+            }
+        }
+    }
+}
+
+//main grain tasks
+task generate(type: JavaExec) {
+    group 'grain'
+    logging.captureStandardOutput LogLevel.INFO
+    classpath sourceSets.main.runtimeClasspath
+    main = mainClassName
+    args name
+    doFirst {
+        println "Starting generate"
+    }
+    finalizedBy(":site:buildDocs")
+}
+
+task preview(type: JavaExec) {
+    group 'grain'
+    classpath sourceSets.main.runtimeClasspath
+    main = mainClassName
+    args name
+}
+
+//deploy configuration
+remotes {
+    mipt {
+        knownHosts = allowAnyHosts
+        role 'webServers'
+        host = 'npm.mipt.ru'
+        user = 'darksnake'
+//        authentications = ['keyboard-interactive']
+        password = file("pass.txt").text
+    }
+}
+
+task deploy {
+    group 'grain'
+    dependsOn ":site:generate"
+    doLast {
+        println "Starting deploy"
+        ssh.run {
+            session(remotes.mipt) {
+                for (f in file('target').listFiles()) {
+                    put from: f, into: '/var/www/dataforge', fileTransfer: 'scp'
+                }
+            }
+        }
+    }
+}
+
+//misc
+tasks.withType(JavaExec) {
+    jvmArgs "-Dfile.encoding=UTF-8"
+    allJvmArgs << '-Dfile.encoding=UTF-8'
+}
+
+clean.doLast { ant.delete(dir: '.cache'); ant.delete(dir: 'target') }
+
+task buildDocs(type: Javadoc) {
+    def documentedProjects = rootProject.subprojects.findAll {it.group.startsWith("hep.dataforge")}
+    def version = rootProject.version == 'unspecified'? project(':dataforge').version : rootProject.version
+
+    title "DataForge framework ${version}"
+    source documentedProjects.collect { it.sourceSets.main.allJava }
+    classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
+    destinationDir = file("target/docs/${version}/javadoc")
+
+    options {
+        failOnError = false
+        encoding "UTF-8"
+        docEncoding "UTF-8"
+        charSet "UTF-8"
+        linkSource true
+        links("http://docs.oracle.com/javase/8/docs/api/");
+        header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>";
+    }
+}

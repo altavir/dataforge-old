@@ -21,17 +21,17 @@ import java.util.ServiceLoader;
  * A reader for meta file in any supported format. Additional file formats could
  * be statically registered by plug-ins.
  *
- * <p>
  * Basically reader performs two types of "on read" transformations:
  * <ul>
- * <li>Includes: include a meta from given file instead of given node</li>
- * <li>Substitutions: replaces all occurrences of {@code ${<key>}} in child meta
- * nodes by given value. Substitutions are made as strings.</li>
+ * <li>
+ *     Includes: include a meta from given file instead of given node
+ * </li>
+ * <li>
+ *     Substitutions: replaces all occurrences of {@code ${<key>}} in child meta nodes by given value. Substitutions are made as strings.
+ * </li>
  * </ul>
  *
- * </p>
- *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class MetaFileReader {
 

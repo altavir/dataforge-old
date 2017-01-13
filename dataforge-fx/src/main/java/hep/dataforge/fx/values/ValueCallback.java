@@ -9,7 +9,7 @@ import hep.dataforge.values.Value;
 
 /**
  * A callback for some visual object trying to change some value
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public interface ValueCallback {
     ValueCallbackResponse update(Value value);

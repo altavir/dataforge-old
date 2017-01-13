@@ -31,7 +31,7 @@ import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
 /**
  * A default reader for XML represented Meta
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class XMLMetaReader implements MetaStreamReader {
 

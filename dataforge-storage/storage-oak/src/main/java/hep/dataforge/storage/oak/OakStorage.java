@@ -13,7 +13,7 @@ import hep.dataforge.storage.commons.AbstractStorage;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class OakStorage extends AbstractStorage {
 

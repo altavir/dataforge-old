@@ -9,7 +9,7 @@ import hep.dataforge.values.Value;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class ValueCallbackResponse {
     /**

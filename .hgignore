@@ -12,3 +12,8 @@ target/*
 .nb-gradle*
 .idea/
 *.iml
+
+## Grain:
+/site/target/
+/site/.cache/
+/site/pass.txt

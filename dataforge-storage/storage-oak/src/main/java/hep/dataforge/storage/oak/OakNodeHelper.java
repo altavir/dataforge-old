@@ -9,7 +9,7 @@ import org.apache.jackrabbit.oak.api.Tree;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class OakNodeHelper {
     private Tree node;

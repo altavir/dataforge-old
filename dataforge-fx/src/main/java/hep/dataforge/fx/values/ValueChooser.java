@@ -15,7 +15,7 @@ import javafx.scene.Node;
  * A value chooser object. Must have an empty constructor to be invoked by
  * reflections.
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public interface ValueChooser {
 

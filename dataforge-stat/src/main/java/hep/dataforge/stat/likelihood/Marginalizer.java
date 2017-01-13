@@ -16,9 +16,8 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
-import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.integration.DistributionSampler;
 import hep.dataforge.maths.integration.Integrand;
 import hep.dataforge.maths.integration.MonteCarloIntegrator;
@@ -31,6 +30,8 @@ import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.slf4j.LoggerFactory;
+
+import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 
 /**
  * TODO передедать конструкторы
@@ -52,16 +53,16 @@ public class Marginalizer implements NameSetContainer {
      * <p>
      * Constructor for Marginalizer.</p>
      *
-     * @param cov a {@link hep.dataforge.maths.NamedMatrix} object.
-     * @param like a {@link hep.dataforge.stat.likelihood.ScaleableNamedFunction}
-     * object.
-     * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param cov       a {@link hep.dataforge.maths.NamedMatrix} object.
+     * @param like      a {@link hep.dataforge.stat.likelihood.ScaleableNamedFunction}
+     *                  object.
+     * @param point
      * @param generator a
-     * {@link org.apache.commons.math3.random.RandomGenerator} object.
+     *                  {@link org.apache.commons.math3.random.RandomGenerator} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
     public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedValueSet point,
-            RandomGenerator generator) throws NameNotFoundException {
+                        RandomGenerator generator) throws NameNotFoundException {
         this.names = like.names();
         //считаем, что набор параметров определяется функцией
         this.cov = cov;
@@ -79,10 +80,10 @@ public class Marginalizer implements NameSetContainer {
      * <p>
      * Constructor for Marginalizer.</p>
      *
-     * @param cov a {@link hep.dataforge.maths.NamedMatrix} object.
-     * @param like a {@link hep.dataforge.stat.likelihood.ScaleableNamedFunction}
-     * object.
-     * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param cov   a {@link hep.dataforge.maths.NamedMatrix} object.
+     * @param like  a {@link hep.dataforge.stat.likelihood.ScaleableNamedFunction}
+     *              object.
+     * @param point
      */
     public Marginalizer(NamedMatrix cov, ScaleableNamedFunction like, NamedValueSet point) {
         this(cov, like, point, getDefaultRandomGenerator());
@@ -133,7 +134,7 @@ public class Marginalizer implements NameSetContainer {
      * getUnivariateMarginalFunction.</p>
      *
      * @param maxCalls a int.
-     * @param parName a {@link java.lang.String} object.
+     * @param parName  a {@link java.lang.String} object.
      * @param freePars a {@link java.lang.String} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction}
      * object.
@@ -166,7 +167,7 @@ public class Marginalizer implements NameSetContainer {
      * <p>
      * getUnivariateMarginalFunction.</p>
      *
-     * @param parName a {@link java.lang.String} object.
+     * @param parName  a {@link java.lang.String} object.
      * @param freePars a {@link java.lang.String} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction}
      * object.

@@ -38,8 +38,8 @@ import static hep.dataforge.storage.api.ValueIndex.LIMIT_KEY;
 
 /**
  * A handler to evaluate Google visualization library requests to point loaders
- * <p https://developers.google.com/chart/interactive/docs/dev/implementing_data_source />
- * <p https://developers.google.com/chart/interactive/docs/reference />
+ * <p> https://developers.google.com/chart/interactive/docs/dev/implementing_data_source <p/>
+ * <p> https://developers.google.com/chart/interactive/docs/reference </p>
  *
  * @author Alexander Nozik
  */

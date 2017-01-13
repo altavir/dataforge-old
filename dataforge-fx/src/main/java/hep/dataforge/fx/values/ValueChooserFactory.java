@@ -9,11 +9,12 @@ import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+
 import java.util.List;
 
 /**
  *
- * @author Alexander Nozik <altavir@gmail.com>
+ * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class ValueChooserFactory {
 
