@@ -2,10 +2,11 @@
 layout: default
 ---
 <div class="row">
+    <h2>Table of contents</h2>
     <ul class="list-group">
     <% page.shards.each { item ->    %>
-        <li class="list-group-item">
-            <a href="${page.url + '#'+item.label}">${item.section} ${item.title}</a>
+        <li class="list-group-item" style="text-indent: ${item.level*20}px;">
+            <a href="${link '/docs.html'}#${item.label}">${item.section} ${item.title}</a>
         </li>
     <% } %>
     </ul>
@@ -22,8 +23,8 @@ layout: default
     %>
     <tr>
         <div class="col-lg-12">
-            <h2 id="${item.label}">
-                ${item.section} ${item.title}
+            <h2 id="${item.label}" style="text-indent: ${(item.level-1)*40}px;">
+                <a href="${link '/docs.html'}#${item.label}"> <span style="color: grey;">${item.section}</span> ${item.title}</a>
             </h2>
         </div>
 

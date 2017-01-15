@@ -20,8 +20,8 @@ import java.util.List;
 /**
  * <p>ContoursError class.</p>
  *
- * @version $Id$
  * @author Darksnake
+ * @version $Id$
  */
 public class ContoursError {
     private int theNFcn;
@@ -58,80 +58,82 @@ public class ContoursError {
         return thePoints;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String toString() {
         return MnPrint.toString(this);
     }
 
-        /**
-         * <p>xMinosError.</p>
-         *
-         * @return a {@link hep.dataforge.MINUIT.MinosError} object.
-         */
+    /**
+     * <p>xMinosError.</p>
+     *
+     * @return a {@link hep.dataforge.MINUIT.MinosError} object.
+     */
     public MinosError xMinosError() {
         return theXMinos;
     }
 
-        /**
-         * <p>xRange.</p>
-         *
-         * @return a {@link hep.dataforge.maths.Range} object.
-         */
+    /**
+     * <p>xRange.</p>
+     *
+     * @return
+     */
     public Range xRange() {
         return theXMinos.range();
     }
 
-        /**
-         * <p>xmin.</p>
-         *
-         * @return a double.
-         */
+    /**
+     * <p>xmin.</p>
+     *
+     * @return a double.
+     */
     public double xmin() {
         return theXMinos.min();
     }
 
-        /**
-         * <p>xpar.</p>
-         *
-         * @return a int.
-         */
+    /**
+     * <p>xpar.</p>
+     *
+     * @return a int.
+     */
     public int xpar() {
         return theParX;
     }
 
-        /**
-         * <p>yMinosError.</p>
-         *
-         * @return a {@link hep.dataforge.MINUIT.MinosError} object.
-         */
+    /**
+     * <p>yMinosError.</p>
+     *
+     * @return a {@link hep.dataforge.MINUIT.MinosError} object.
+     */
     public MinosError yMinosError() {
         return theYMinos;
     }
 
-        /**
-         * <p>yRange.</p>
-         *
-         * @return a {@link hep.dataforge.maths.Range} object.
-         */
+    /**
+     * <p>yRange.</p>
+     *
+     * @return
+     */
     public Range yRange() {
         return theYMinos.range();
     }
 
-        /**
-         * <p>ymin.</p>
-         *
-         * @return a double.
-         */
+    /**
+     * <p>ymin.</p>
+     *
+     * @return a double.
+     */
     public double ymin() {
         return theYMinos.min();
     }
 
-        /**
-         * <p>ypar.</p>
-         *
-         * @return a int.
-         */
+    /**
+     * <p>ypar.</p>
+     *
+     * @return a int.
+     */
     public int ypar() {
         return theParY;
     }

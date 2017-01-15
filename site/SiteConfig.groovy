@@ -29,8 +29,10 @@ environments {
     }
     prod {
         log.info 'Production environment is used'
+        generate_absolute_links = true
         url = 'http://npm.mipt.ru/dataforge' // site URL, for example http://www.example.com
         show_unpublished = false
+        generate_absolute_links = true
         features {
             minify_xml = false
             minify_html = false

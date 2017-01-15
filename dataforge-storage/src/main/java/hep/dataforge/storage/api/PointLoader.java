@@ -78,6 +78,7 @@ public interface PointLoader extends Loader, PointSource {
      * Push the DataPoint to the loader.
      *
      * @param dp
+     * @throws StorageException in case push failed
      */
     void push(DataPoint dp) throws StorageException;
 

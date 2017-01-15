@@ -39,7 +39,7 @@ import java.util.Map;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated{
+public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
 
     /**
      * Initialize this storage.
@@ -47,7 +47,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @throws hep.dataforge.exceptions.StorageException
      */
     void open() throws StorageException;
-    
+
     boolean isOpen();
 
     /**
@@ -66,7 +66,6 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
     void close() throws Exception;
 
     /**
-     *
      * If the loader with given annotation is registered, than it is returned.
      * If not, it is registered and then returned. If given annotation is
      * different from the one that is stored for loader with its name than
@@ -120,7 +119,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * path not allowed.
      *
      * @param name name of the loader or data set. In general is the name of
-     * hierarchical root element for all data points
+     *             hierarchical root element for all data points
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
@@ -155,11 +154,13 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * Get the default event loader for this storage
      *
      * @return
+     * @throws StorageException
      */
     EventLoader getDefaultEventLoader() throws StorageException;
 
     /**
      * Get validator for
+     *
      * @return
      */
     MessageValidator getValidator();

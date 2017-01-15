@@ -68,7 +68,7 @@ public class FunctionUtils {
      * @param nFunc a {@link hep.dataforge.stat.parametric.ParametricValue} object.
      * @param parName a {@link java.lang.String} object.
      * @param derivativeName a {@link java.lang.String} object.
-     * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param pars
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
     public static UnivariateFunction getNamedProjectionDerivative(final ParametricValue nFunc, 
@@ -89,7 +89,7 @@ public class FunctionUtils {
      *
      * @param nFunc a {@link hep.dataforge.stat.parametric.ParametricValue} object.
      * @param parName a {@link java.lang.String} object.
-     * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param pars
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
     public static UnivariateFunction getNamedProjectionFunction(final ParametricValue nFunc, final String parName, final NamedValueSet pars) {
@@ -109,7 +109,7 @@ public class FunctionUtils {
      * берет значения оттуда.
      *
      * @param func a {@link hep.dataforge.stat.parametric.ParametricValue} object.
-     * @param initPars a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param initPars
      * @param freePars - Описывает, каким параметрам можно будет изменяться.
      * Если null, то разрешено изменение всех параметров.
      * @return a {@link hep.dataforge.stat.parametric.ParametricValue} object.
@@ -162,7 +162,7 @@ public class FunctionUtils {
      *
      * @param name a {@link java.lang.String} object.
      * @param s a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param pars
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
     public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final NamedValueSet pars) {
@@ -173,7 +173,7 @@ public class FunctionUtils {
      * <p>getSpectrumFunction.</p>
      *
      * @param s a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param pars a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param pars
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
     public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final NamedValueSet pars) {

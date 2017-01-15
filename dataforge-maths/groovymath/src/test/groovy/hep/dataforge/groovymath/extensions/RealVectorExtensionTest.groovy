@@ -1,6 +1,6 @@
 package hep.dataforge.groovymath.extensions
 
-
+import hep.dataforge.groovymath.GM
 import org.apache.commons.math3.linear.RealVector
 import spock.lang.Specification
 
@@ -10,8 +10,8 @@ import spock.lang.Specification
 class RealVectorExtensionTest extends Specification {
     def "Map"() {
         given:
-        RealVector vec1 = LinearUtils.vector([1, 2]);
-        RealVector vec2 = LinearUtils.vector([1.5, 1]);
+        RealVector vec1 = GM.vector([1, 2]);
+        RealVector vec2 = GM.vector([1.5, 1]);
 
         when:
         def res = (vec1 + vec2*2).transform{

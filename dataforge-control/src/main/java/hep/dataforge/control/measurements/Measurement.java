@@ -19,8 +19,6 @@ public interface Measurement<T> {
 
     /**
      * Begin the measurement
-     *
-     * @throws MeasurementException
      */
     void start();
 

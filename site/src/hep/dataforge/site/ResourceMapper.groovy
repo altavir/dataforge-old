@@ -40,7 +40,7 @@ class ResourceMapper {
     /**
      * Inject releases
      */
-    private def injectReleases(List resources) {
+    private injectReleases(List resources) {
         //Adding news shards
         Map newsPage = resources.find { it.url == '/releases.html' };
         def releases = resources.findAll { it.content_type == 'release' }
@@ -58,7 +58,7 @@ class ResourceMapper {
     /**
      * Inject news shards
      */
-    private def injectNews(List resources) {
+    private injectNews(List resources) {
         //Adding news shards
         Map newsPage = resources.find { it.url == '/news.html' };
         def news = resources.findAll { it.url =~ /news\/.*/ && it.content_type == 'news_shard' }
@@ -69,7 +69,7 @@ class ResourceMapper {
     }
 
 
-    private def loadSections(List resources){
+    private loadSections(List resources){
         def header = readConfig('/config/header.yml', resources)
         //println "\n Header configuration: ${header} \n"
         resources.findAll{it.layout}.each{
@@ -81,7 +81,7 @@ class ResourceMapper {
     /**
      * Inject doc shards in resource map
      */
-    private def injectShards(List resources) {
+    private injectShards(List resources) {
         Map docsPage = resources.find { it.url == '/docs.html' };
         def shards = resources.findAll { (it.url =~ /shards\/.*/ && it.content_type == 'doc_shard') }
         shards.sort { shard1, shard2 ->
@@ -113,7 +113,8 @@ class ResourceMapper {
             }
 
             lastOrdering = it.ordering;
-            it << ["section": curIndexes.findAll { it }.join(".")]
+            it << [section: curIndexes.findAll { it }.join(".")]
+            it << [level: it.ordering.size]
         }
 
 
@@ -124,11 +125,11 @@ class ResourceMapper {
     }
 
 
-    private def findResource(String name, List resources){
+    private findResource(String name, List resources){
         resources.find{it.url == name}
     }
 
-    private def readConfig(String name, List resources){
+    private readConfig(String name, List resources){
         File configFile = new File(site.content_dir as String,name)
         Yaml yaml = new Yaml();
         yaml.load(configFile.text) as Map ?: [:]
@@ -138,14 +139,14 @@ class ResourceMapper {
      * Excludes resources with published property set to false,
      * unless it is allowed to show unpublished resources in SiteConfig.
      */
-    private def filterPublished = { Map it ->
+    private filterPublished = { Map it ->
         (it.published != false || site.show_unpublished) ? it : null
     }
 
     /**
      * Fills in page `date` and `updated` fields
      */
-    private def fillDates = { Map it ->
+    private fillDates = { Map it ->
         def update = [date   : it.date ? Date.parse(dateFormat, it.date) : new Date(it.dateCreated as Long),
                       updated: it.updated ? Date.parse(dateFormat, it.updated) : new Date(it.lastUpdated as Long)]
 

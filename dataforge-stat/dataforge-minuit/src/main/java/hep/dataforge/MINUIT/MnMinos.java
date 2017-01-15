@@ -248,7 +248,7 @@ public class MnMinos {
      * <p>range.</p>
      *
      * @param par a int.
-     * @return a {@link hep.dataforge.maths.Range} object.
+     * @return
      */
     public Range range(int par) {
         return range(par, 1);
@@ -259,7 +259,7 @@ public class MnMinos {
      *
      * @param par a int.
      * @param errDef a double.
-     * @return a {@link hep.dataforge.maths.Range} object.
+     * @return
      */
     public Range range(int par, double errDef) {
         return range(par, errDef, MnApplication.DEFAULT_MAXFCN);

@@ -159,7 +159,7 @@ public class NamedUtils {
     /**
      * TODO replace by List
      *
-     * @param set a {@link hep.dataforge.names.NamedValueSet} object.
+     * @param set
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      * @return an array of {@link java.lang.Number} objects.
      */
@@ -176,7 +176,7 @@ public class NamedUtils {
      * <p>
      * getNamedSubSetValues.</p>
      *
-     * @param set a {@link hep.dataforge.names.NamedValueSet} object.
+     * @param set
      * @param names a {@link java.lang.String} object.
      * @return an array of double.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.

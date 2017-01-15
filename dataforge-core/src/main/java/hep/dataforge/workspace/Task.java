@@ -42,7 +42,6 @@ public interface Task<R> extends Named, Described {
      * Check if the model is valid and is acceptable by the task. Throw exception if not.
      *
      * @param model
-     * @return
      */
     void validate(TaskModel model);
 

@@ -174,7 +174,7 @@ public class TaskModel implements Named, Annotated {
     }
 
     /**
-     * data(mask, str -> as);
+     * data(mask, {@code str -> as});
      *
      * @param mask
      * @param as

@@ -40,7 +40,7 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
      * <p>
      * Constructor for NamedGaussianPDFLog.</p>
      *
-     * @param values a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param values
      * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
      */
     public NamedGaussianPDFLog(NamedValueSet values, NamedMatrix covariance) {

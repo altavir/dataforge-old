@@ -58,7 +58,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
      * <p>expDeriv.</p>
      *
      * @param derivName a {@link java.lang.String} object.
-     * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param point
      * @return a double.
      */
     public double expDeriv(String derivName, NamedValueSet point) {
@@ -68,7 +68,7 @@ public abstract class ScaleableNamedFunction extends AbstractNamedSet implements
     /**
      * <p>expValue.</p>
      *
-     * @param point a {@link hep.dataforge.maths.NamedDoubleSet} object.
+     * @param point
      * @return a double.
      */
     public double expValue(NamedValueSet point) {

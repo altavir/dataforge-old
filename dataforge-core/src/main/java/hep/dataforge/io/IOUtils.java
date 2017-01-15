@@ -226,25 +226,31 @@ public class IOUtils {
     }
 
     private static String formatNumber(Number number, int width) {
-        BigDecimal bd;
-        if (number instanceof BigDecimal) {
-            bd = (BigDecimal) number;
-        } else if (number instanceof Integer) {
-            bd = BigDecimal.valueOf(number.intValue());
-        } else {
-            bd = BigDecimal.valueOf(number.doubleValue());
-        }
-        int maxWidth = width;
+        try {
+            BigDecimal bd = new BigDecimal(number.toString());
+//        if (number instanceof BigDecimal) {
+//            bd = (BigDecimal) number;
+//        } else if (number instanceof Integer) {
+//            bd = BigDecimal.valueOf(number.intValue());
+//        } else {
+//
+//            bd = BigDecimal.valueOf(number.doubleValue());
+//        }
 
-        if (bd.precision() - bd.scale() > 2 - width) {
-            if (number instanceof Integer) {
-                return String.format("%d", number);
+            int maxWidth = width;
+
+            if (bd.precision() - bd.scale() > 2 - width) {
+                if (number instanceof Integer) {
+                    return String.format("%d", number);
+                } else {
+                    return String.format("%." + (maxWidth - 1) + "g", bd.stripTrailingZeros());
+                }
+                //return getFlatFormat().format(bd);
             } else {
-                return String.format("%." + (maxWidth - 1) + "g", bd.stripTrailingZeros());
+                return getExpFormat(width).format(bd);
             }
-            //return getFlatFormat().format(bd);
-        } else {
-            return getExpFormat(width).format(bd);
+        } catch (Exception ex){
+            return number.toString();
         }
     }
 

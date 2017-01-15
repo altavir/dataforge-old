@@ -5,18 +5,17 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.HashMap;
+import org.apache.commons.math3.analysis.UnivariateFunction;
+
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
  * Integrator that breaks an interval into subintervals and integrates each
  * interval with its own integrator;
  *
  * @author Alexander Nozik
- * @param <T>
  */
 public class SplitUnivariateIntegrator extends UnivariateIntegrator<UnivariateIntegrand> {
     

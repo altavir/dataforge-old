@@ -1,6 +1,6 @@
 package hep.dataforge.groovymath.extensions
 
-
+import hep.dataforge.groovymath.GM
 import org.apache.commons.math3.linear.RealMatrix
 import org.apache.commons.math3.linear.RealVector
 import spock.lang.Specification
@@ -11,8 +11,8 @@ import spock.lang.Specification
 class RealMatrixExtensionTest extends Specification {
     def "matrix extension"(){
         given:
-            RealMatrix mat = LinearUtils.matrix([[0, -0.5], [-0.5, 0]]);
-            RealVector vec = LinearUtils.vector([1,1]);
+            RealMatrix mat = GM.matrix([[0, -0.5], [-0.5, 0]]);
+            RealVector vec = GM.vector([1,1]);
         when:
             def res = vec*(mat + 1)*vec;
         then:

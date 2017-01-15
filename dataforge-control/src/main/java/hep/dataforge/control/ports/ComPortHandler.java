@@ -30,12 +30,11 @@ import java.io.IOException;
 import static jssc.SerialPort.*;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class ComPortHandler extends PortHandler implements SerialPortEventListener {
 
-//    private static final int CHAR_SIZE = 1;
+    //    private static final int CHAR_SIZE = 1;
 //    private static final int MAX_SIZE = 50;
     private SerialPort port;
 
@@ -50,11 +49,10 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
         return String.format("com::%s", getString("name"));
     }
 
-    
-    
+
     public ComPortHandler(String portName, int baudRate, int dataBits, int stopBits, int parity) {
         this(new MetaBuilder("handler")
-                .setValue("type","com")
+                .setValue("type", "com")
                 .putValue("name", portName)
                 .putValue("baudRate", baudRate)
                 .putValue("dataBits", dataBits)
@@ -76,9 +74,8 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
      * Parity: non</p>
      *
      * @param portName
-     * @throws SerialPortException
      */
-    public ComPortHandler(String portName){
+    public ComPortHandler(String portName) {
         this(portName, BAUDRATE_9600, DATABITS_8, STOPBITS_1, PARITY_NONE);
     }
 
