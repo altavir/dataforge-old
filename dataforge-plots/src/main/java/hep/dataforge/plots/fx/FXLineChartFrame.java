@@ -62,7 +62,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlott
     }
 
     @Override
-    protected void updateAxis(String axisName, Meta annotation) {
+    protected void updateAxis(String axisName, Meta axisMeta, Meta plotMeta) {
 
     }
 

@@ -19,17 +19,15 @@ import java.util.function.Supplier;
 public class FXPlugin extends BasicPlugin {
 
     //used to determine if application toolkit is initialized
-    private static boolean toolkitInitialized = false;
+    private boolean toolkitInitialized = false;
 
     //used to determine if any windows been spawn
-    private static boolean hasChildren = false;
+    private boolean hasChildren = false;
 
-    private Application app;
     private Stage stage;
 
-    public FXPlugin(@NotNull Application app, @NotNull Stage stage) {
+    public FXPlugin(@NotNull Stage stage) {
         toolkitInitialized = true;
-        this.app = app;
         this.stage = stage;
     }
 
@@ -43,10 +41,6 @@ public class FXPlugin extends BasicPlugin {
             context.getLogger().warn("Starting fx plugin not in global context");
         }
         Platform.setImplicitExit(false);
-        if (this.app == null) {
-            context.getLogger().info("JavaFX application not defined. Starting default stage holder.");
-            startDefaultApp();
-        }
         super.attach(context);
     }
 
@@ -60,22 +54,13 @@ public class FXPlugin extends BasicPlugin {
         }
     }
 
-    public synchronized Application getApp() {
-        waitForApp();
-        return app;
-    }
-
-    protected synchronized void setApplication(Application instance) {
-        this.app = instance;
-        notify();
-    }
-
     private synchronized void waitForApp() {
-        if (app == null) {
+        if (!toolkitInitialized) {
+            getContext().getLogger().info("JavaFX application not started. Starting default stage holder.");
             startDefaultApp();
         }
         try {
-            while (stage == null || app == null) {
+            while (stage == null || !toolkitInitialized) {
                 wait(2000);
             }
         } catch (InterruptedException ex) {
@@ -116,14 +101,6 @@ public class FXPlugin extends BasicPlugin {
                     Application.launch(DefaultRootApplication.class);
                     toolkitInitialized = true;
                 }).start();
-            } else {
-                Platform.runLater(() -> {
-                    try {
-                        new DefaultRootApplication().start(new Stage());
-                    } catch (Exception e) {
-                        throw new RuntimeException(e);
-                    }
-                });
             }
         } else {
             getContext().getLogger().error("Trying to setup default fx stage holder over existing one");
@@ -131,6 +108,9 @@ public class FXPlugin extends BasicPlugin {
     }
 
 
+    /**
+     * An application (Singleton) used when no apparent java fx application being started
+     */
     public static class DefaultRootApplication extends Application {
 
         private static FXPlugin plugin;
@@ -138,13 +118,7 @@ public class FXPlugin extends BasicPlugin {
         @Override
         public void start(Stage primaryStage) throws Exception {
             plugin.setStage(primaryStage);
-            plugin.setApplication(this);
-        }
-
-        @Override
-        public void stop() throws Exception {
-            plugin.setStage(null);
-            plugin.setApplication(null);
+            plugin.toolkitInitialized = true;
         }
     }
 }

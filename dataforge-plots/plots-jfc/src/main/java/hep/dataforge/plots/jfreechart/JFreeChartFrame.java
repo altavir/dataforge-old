@@ -179,16 +179,39 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     }
 
     @Override
-    protected synchronized void updateAxis(String axisName, Meta axisMeta) {
+    protected synchronized void updateAxis(String axisName, Meta axisMeta, Meta plotMeta) {
         run(() -> {
             ValueAxis axis = getAxis(axisMeta);
+
+            String crosshair = axisMeta.getString("crosshair",
+                    plotMeta.getString("crosshair", "none"));
 
             switch (axisName) {
                 case "x":
                     plot.setDomainAxis(axis);
+                    switch (crosshair) {
+                        case "free":
+                            plot.setDomainCrosshairVisible(true);
+                            plot.setDomainCrosshairLockedOnData(false);
+                        case "data":
+                            plot.setDomainCrosshairVisible(true);
+                            plot.setDomainCrosshairLockedOnData(true);
+                        case "none":
+                            plot.setDomainCrosshairVisible(false);
+                    }
                     break;
                 case "y":
                     plot.setRangeAxis(axis);
+                    switch (crosshair) {
+                        case "free":
+                            plot.setRangeCrosshairVisible(true);
+                            plot.setRangeCrosshairLockedOnData(false);
+                        case "data":
+                            plot.setRangeCrosshairVisible(true);
+                            plot.setRangeCrosshairLockedOnData(true);
+                        case "none":
+                            plot.setRangeCrosshairVisible(false);
+                    }
                     break;
                 default:
                     throw new NameNotFoundException(axisName, "No such axis in this plot");
@@ -201,6 +224,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                 }
                 axis.setLabel(label);
             }
+
         });
     }
 

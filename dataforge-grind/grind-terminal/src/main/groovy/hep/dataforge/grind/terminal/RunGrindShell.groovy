@@ -8,7 +8,7 @@ import hep.dataforge.context.Global
 
 println "DataForge grind shell"
 try {
-    new GrindTerminal().withSystemTerminal().launch()
+    GrindTerminal.system().launch()
 } catch (Exception ex) {
     ex.printStackTrace();
 } finally {

@@ -23,13 +23,13 @@ import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.XYAdapter;
 
 /**
- *
  * @author Alexander Nozik
  */
 @NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
 @NodeDef(name = "yAxis", info = "The description of Y axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
 @NodeDef(name = "legend", info = "The configuration for plot legend", target = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
+
 
     @Override
     protected abstract void updatePlotData(String name);
@@ -45,9 +45,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(XYAdapter.X_AXIS, getXAxisConfig());
+        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), getConfig());
 
-        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig());
+        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), getConfig());
 
         updateLegend(getLegendConfig());
 
@@ -71,13 +71,16 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
      * перерисовка осей
      *
      * @param axisName
-     * @param annotation
+     * @param axisMeta
      */
     @ValueDef(name = "type", allowed = "[number, log, time]", def = "number",
             info = "The type of axis. By default number axis is used")
     @ValueDef(name = "axisTitle", info = "The title of the axis.")
     @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
-    protected abstract void updateAxis(String axisName, Meta annotation);
+    @ValueDef(name = "crosshair", def = "none",
+            allowed = "[none, free, data]",
+            info = "Appearance and type of crosshair")
+    protected abstract void updateAxis(String axisName, Meta axisMeta, Meta plotMeta);
 
     @ValueDef(name = "show", type = "BOOLEAN", def = "true", info = "Display or hide the legend")
     protected abstract void updateLegend(Meta legendMeta);
