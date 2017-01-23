@@ -23,6 +23,7 @@ import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.LogEntry;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.PrintWriter;
@@ -65,8 +66,12 @@ public class Global extends Context {
         return dispatchThreadExecutor;
     }
 
-    public synchronized static Global instance() {
+    public static Global instance() {
         return instance;
+    }
+
+    public static Logger logger(){
+        return instance.logger;
     }
 
     /**
@@ -101,22 +106,6 @@ public class Global extends Context {
             logger.error("Exception while terminating DataForge framework");
         }
     }
-
-//    @Override
-//    public void setIO(IOManager io) {
-//        super.setIO(io);
-////        LoggerFactory.getLogger(getClass()).warn("Changing io for Global. Is not recommended.");
-//        //redirect all logging output to new ioManager
-////        Logger root = getLogger();
-////
-////        //redirect output to given outputstream
-//////        root.detachAndStopAllAppenders();
-////        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-////        appender.setContext(root.getLoggerContext());
-////        appender.setOutputStream(io.out());
-////        appender.start();
-////        root.addAppender(appender);
-//    }
 
     @Override
     public TaskManager taskManager() {

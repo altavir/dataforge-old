@@ -33,3 +33,13 @@ task shell(dependsOn: classes, type: JavaExec) {
     description "Start a Grind shell with default context in terminal"
     group "dataforge"
 }
+
+task dumbShell(dependsOn: classes, type: JavaExec) {
+    main 'hep.dataforge.grind.terminal.RunDumbGrindShell'
+//    jvmArgs ['-Djansi.passthrough=true']
+    standardInput = System.in
+    standardOutput = System.out
+    classpath = sourceSets.main.runtimeClasspath
+    description "Start a Grind shell with default context in dumb terminal"
+    group "dataforge"
+}

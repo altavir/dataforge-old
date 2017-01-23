@@ -273,7 +273,7 @@ public class PlotContainer implements Initializable {
         private Configuration config;
 
         @Override
-        protected void updateItem(Plottable item, boolean empty) {
+        protected synchronized void updateItem(Plottable item, boolean empty) {
             super.updateItem(item, empty);
             if (empty) {
                 if (config != null) {
@@ -294,36 +294,34 @@ public class PlotContainer implements Initializable {
         }
 
         private void setContent(Plottable item) {
-            FXUtils.runNow(() -> {
-                setText(null);
+            setText(null);
 
-                title = new CheckBox();
-                title.setSelected(true);
-                configButton = new Button("...");
-                configButton.setMinWidth(0);
-                Pane space = new Pane();
-                HBox.setHgrow(space, Priority.ALWAYS);
-                content = new HBox(title, space, configButton);
-                HBox.setHgrow(content, Priority.ALWAYS);
-                content.setMaxWidth(Double.MAX_VALUE);
+            title = new CheckBox();
+            title.setSelected(true);
+            configButton = new Button("...");
+            configButton.setMinWidth(0);
+            Pane space = new Pane();
+            HBox.setHgrow(space, Priority.ALWAYS);
+            content = new HBox(title, space, configButton);
+            HBox.setHgrow(content, Priority.ALWAYS);
+            content.setMaxWidth(Double.MAX_VALUE);
 
 //                title.textProperty().bindBidirectional(new ConfigStringValueProperty(config, "title"));
-                title.setText(config.getString("title", item.getName()));
-                title.setSelected(config.getBoolean("visible", true));
+            title.setText(config.getString("title", item.getName()));
+            title.setSelected(config.getBoolean("visible", true));
 //                title.selectedProperty().bindBidirectional(new ConfigBooleanValueProperty(config, "visible"));
-                title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-                    config.setValue("visible", newValue);
-                });
-
-                if (config.hasValue("color")) {
-                    title.setTextFill(Color.valueOf(config.getString("color")));
-                }
-
-                configButton.setOnAction((ActionEvent event) -> {
-                    displayConfigurator(item.getName() + " configuration", config, DescriptorUtils.buildDescriptor(item));
-                });
-                setGraphic(content);
+            title.selectedProperty().addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
+                config.setValue("visible", newValue);
             });
+
+            if (config.hasValue("color")) {
+                title.setTextFill(Color.valueOf(config.getString("color")));
+            }
+
+            configButton.setOnAction((ActionEvent event) -> {
+                displayConfigurator(item.getName() + " configuration", config, DescriptorUtils.buildDescriptor(item));
+            });
+            setGraphic(content);
         }
 
         @Override
