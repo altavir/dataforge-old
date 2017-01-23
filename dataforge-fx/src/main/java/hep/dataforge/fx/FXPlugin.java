@@ -36,7 +36,11 @@ public class FXPlugin extends BasicPlugin {
     @Override
     public void detach() {
         if (getContext() == Global.instance()) {
-            Platform.setImplicitExit(true);
+            if (windows.isEmpty()) {
+                Platform.exit();
+            } else {
+                Platform.setImplicitExit(true);
+            }
         }
 
         //close all windows

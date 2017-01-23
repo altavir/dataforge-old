@@ -32,4 +32,5 @@ public @interface PluginDef {
     String version() default "";
     String description();
     String[] dependsOn() default {};
+
 }
