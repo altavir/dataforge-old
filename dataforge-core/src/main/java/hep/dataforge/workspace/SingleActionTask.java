@@ -18,7 +18,6 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.actions.Action;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.goals.ProgressCallback;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -38,7 +37,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
     }
 
     @Override
-    protected DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data) {
+    protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         Meta actionMeta = transformMeta(model);
         DataNode<T> checkedData = gatherNode(data);
         return getAction(model).run(model.getContext(), checkedData, actionMeta);

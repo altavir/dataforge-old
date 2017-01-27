@@ -6,9 +6,10 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataTree;
-import hep.dataforge.goals.ProgressCallback;
+import hep.dataforge.goals.Work;
 import hep.dataforge.meta.Meta;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * @author Alexander Nozik
@@ -21,7 +22,7 @@ public class WorkspaceUtils {
      */
     public static final String GATHER_NODE_NAME = "@gather";
 
-//    public static DataTree.Builder gather(TaskManager.Callback callback, Workspace workspace, TaskModel model) {
+//    public static DataTree.Builder gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
 //        DataTree.Builder builder = DataTree.builder();
 //        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
 //        model.taskDeps().forEachData(dep -> {
@@ -73,12 +74,13 @@ public class WorkspaceUtils {
         return applyDataModel(model, dependencyMeta);
     }
 
-    public static DataTree.Builder gather(ProgressCallback callback, TaskModel model) {
+    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
+        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");
         DataTree.Builder builder = DataTree.builder();
-        callback.setMaxProgress(model.dependencies().size());
+        gatherWork.setMaxProgress(model.dependencies().size());
         model.dependencies().forEach(dep -> {
             dep.apply(builder, model.getWorkspace());
-            callback.increaseProgress(1.0);
+            gatherWork.increaseProgress(1.0);
         });
         return builder;
     }

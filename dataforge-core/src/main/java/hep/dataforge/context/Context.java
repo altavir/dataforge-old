@@ -17,7 +17,7 @@ package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
-import hep.dataforge.goals.TaskManager;
+import hep.dataforge.goals.WorkManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Logable;
@@ -57,7 +57,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     private final PluginManager pm;
     protected Logger logger;
     protected Log rootLog;
-    protected TaskManager taskManager = null;
+    protected WorkManager workManager = null;
     protected IOManager io = null;
     private Context parent = null;
 
@@ -160,7 +160,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
      */
     public synchronized void setIO(IOManager io) {
         //detaching old io manager
-        if(this.io!= null){
+        if (this.io != null) {
             stopLoggerAppender();
             this.io.detach();
         }
@@ -192,15 +192,15 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         return this.pm;
     }
 
-    public TaskManager taskManager() {
-        if (this.taskManager == null) {
+    public WorkManager getWorkManager() {
+        if (this.workManager == null) {
             if (getParent() != null) {
-                return getParent().taskManager();
+                return getParent().getWorkManager();
             } else {
-                return Global.instance().taskManager();
+                return Global.instance().getWorkManager();
             }
         } else {
-            return taskManager;
+            return workManager;
         }
     }
 
@@ -297,14 +297,6 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         }
     }
 
-//    public final void loadPlugin(Plugin plugin) {
-//        this.pluginManager().loadPlugin(plugin);
-//    }
-//
-//    public final void loadPlugin(String tag) {
-//        this.pluginManager().loadPlugin(tag);
-//    }
-
     public Map<String, Value> getProperties() {
         return Collections.unmodifiableMap(properties);
     }
@@ -316,13 +308,21 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
      */
     @Override
     public void close() throws Exception {
-        //stopping all works in this context
+        //detach all plugins
         pluginManager().close();
-        if (this.taskManager != null) {
-            taskManager.shutdown();
+
+        //stopping all works in this context
+        if (this.workManager != null) {
+            workManager.shutdown();
         }
     }
 
+    /**
+     * Get typed plugin by its class
+     * @param type
+     * @param <T>
+     * @return
+     */
     //TODO move to utils
     public <T extends Plugin> T getPlugin(Class<T> type) {
         try {

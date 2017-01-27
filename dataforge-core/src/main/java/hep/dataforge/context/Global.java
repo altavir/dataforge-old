@@ -17,7 +17,7 @@ package hep.dataforge.context;
 
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.goals.TaskManager;
+import hep.dataforge.goals.WorkManager;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.LogEntry;
@@ -108,12 +108,12 @@ public class Global extends Context {
     }
 
     @Override
-    public TaskManager taskManager() {
-        if (taskManager == null) {
-            this.taskManager = new TaskManager();
-            this.taskManager.setContext(this);
+    public WorkManager getWorkManager() {
+        if (workManager == null) {
+            this.workManager = new WorkManager();
+            this.workManager.attach(this);
         }
-        return super.taskManager();
+        return super.getWorkManager();
     }
 
     @Override

@@ -21,10 +21,10 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Collector;
+import java.util.stream.Stream;
 
 /**
  * A chain of immutable meta. The value is taken from the first meta in list
@@ -175,24 +175,18 @@ public class Laminate extends Meta implements Described {
             }
     }
 
+    /**
+     * Get the first occurrence of meta node with the given name without merging. If not found, uses description.
+     *
+     * @param path
+     * @return
+     */
     @Override
     public List<? extends Meta> getMetaList(String path) {
-        List<List<? extends Meta>> childLayers = new ArrayList<>();
-        layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
-            childLayers.add(m.getMetaList(path));
-        });
-        if (!childLayers.isEmpty()) {
-            if (childLayers.size() > 1) {
-                LoggerFactory.getLogger(getClass())
-                        .warn("Using laminate to merge lists of nodes. Node list merging is not currently supported");
-            }
-            return childLayers.get(0);
-        } else //if node not found, using descriptor layer if it is defined
-            if (descriptorLayer != null) {
-                return descriptorLayer.getMetaList(path);
-            } else {
-                throw new NameNotFoundException(path);
-            }
+        return Stream.concat(layers.stream(), Stream.of(descriptorLayer))
+                .filter((m) -> (m.hasMeta(path)))
+                .map(m -> m.getMetaList(path)).findFirst()
+                .orElseThrow(() -> new NameNotFoundException(path));
     }
 
     @Override
@@ -277,6 +271,7 @@ public class Laminate extends Meta implements Described {
 
     /**
      * Combine values in layers using provided collector. Default values from provider and description are ignored
+     *
      * @param valueName
      * @param collector
      * @param <A>
@@ -288,10 +283,11 @@ public class Laminate extends Meta implements Described {
 
     /**
      * Calculate sum of numeric values with given name. Values in all layers must be numeric.
+     *
      * @param valueName
      * @return
      */
     public double sumValue(String valueName) {
-        return layers.stream().mapToDouble(layer -> layer.getDouble(valueName,0)).sum();
+        return layers.stream().mapToDouble(layer -> layer.getDouble(valueName, 0)).sum();
     }
 }
