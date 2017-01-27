@@ -16,14 +16,16 @@ import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 /**
- *
+ * An visualisation for task tree. This class used only for visualisation and user interrupts.
  * <p>
- * WARNING! While Work uses JavaFX beans API, it is not run on JavaFX UI thread.
+ * WARNING! While {@code Task} uses JavaFX beans API, it is not run on JavaFX UI thread.
  * In order to bind variables to UI components, one needs to wrap all UI calls
  * into Platform.runLater.
  * </p>
@@ -31,27 +33,27 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class Task implements Named {
+public class Work implements Named {
 
     private final String name;
 
-    private final ObjectProperty<CompletableFuture<?>> taskProperty = new SimpleObjectProperty<>();
+    private final ObjectProperty<CompletableFuture<?>> futureProperty = new SimpleObjectProperty<>();
 
-    private final ObservableMap<String, Task> children = FXCollections.observableHashMap();
+    private final ObservableMap<String, Work> children = FXCollections.observableHashMap();
 
     private final DoubleProperty curMaxProgress;
 
     private final DoubleProperty curProgress;
 
     /**
-     * Titile for current task (by default equals name)
+     * Title for current task (by default equals name)
      */
     private final StringProperty title;
 
     /**
      * Message for current task
      */
-    private final StringProperty message;
+    private final StringProperty status;
 
     /**
      * Total process progress including children
@@ -65,9 +67,9 @@ public class Task implements Named {
     /**
      * The manager to which this process is attached
      */
-    private final TaskManager manager;
+    private final WorkManager manager;
 
-    public Task(TaskManager manager, String name) {
+    public Work(WorkManager manager, String name) {
         this.name = name;
         this.manager = manager;
         this.curProgress = new SimpleDoubleProperty(0);
@@ -86,26 +88,22 @@ public class Task implements Named {
             }
         };
 
-        curProgress.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            totalProgress.invalidate();
-        });
+        curProgress.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> totalProgress.invalidate());
 
         this.curMaxProgress = new SimpleDoubleProperty(0);
 
-        curMaxProgress.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> {
-            totalMaxProgress.invalidate();
-        });
+        curMaxProgress.addListener((ObservableValue<? extends Number> observable, Number oldValue, Number newValue) -> totalMaxProgress.invalidate());
 
         isDone = new BooleanBinding() {
             @Override
             protected boolean computeValue() {
-                return (taskProperty.get() == null || taskProperty.get().isDone())
-                        && children.values().stream().allMatch((Task p) -> p.isDone());
+                return (futureProperty.get() == null || futureProperty.get().isDone())
+                        && children.values().stream().allMatch(Work::isDone);
             }
         };
 
         this.title = new SimpleStringProperty(name);
-        this.message = new SimpleStringProperty("");
+        this.status = new SimpleStringProperty("");
     }
 
     /**
@@ -113,7 +111,7 @@ public class Task implements Named {
      *
      * @return
      */
-    public ObservableMap<String, Task> getChildren() {
+    public ObservableMap<String, Work> getChildren() {
         return children;
     }
 
@@ -123,21 +121,18 @@ public class Task implements Named {
     }
 
     public ObjectProperty<CompletableFuture<?>> taskProperty() {
-        return taskProperty;
+        return futureProperty;
     }
 
-    public CompletableFuture<?> getTask() {
-        return taskProperty.get();
+    public CompletableFuture<?> getFuture() {
+        return futureProperty.get();
     }
 
-    protected void setTask(CompletableFuture<?> task) {
-        if (this.taskProperty.get() != null) {
+    protected void setFuture(CompletableFuture<?> task) {
+        if (this.futureProperty.get() != null) {
             throw new RuntimeException("The task for this process already set");
         }
         getManager().onStarted(getName());
-//        if (task.isDone()) {
-//            curProgress.set(curMaxProgress.get());
-//        }
 
         task.whenCompleteAsync((res, ex) -> {
             curProgress.set(curMaxProgress.get());
@@ -145,11 +140,11 @@ public class Task implements Named {
             getManager().onFinished(getName());
         });
 
-        taskProperty.set(task);
+        futureProperty.set(task);
         isDone.invalidate();
     }
 
-    public Task find(String subTaskName) {
+    public Work find(String subTaskName) {
         return find(Name.of(subTaskName));
     }
 
@@ -160,7 +155,7 @@ public class Task implements Named {
      * @param subTaskName
      * @return null if process not found
      */
-    public Task find(Name subTaskName) {
+    public Work find(Name subTaskName) {
         if (subTaskName.entry().isEmpty()) {
             return this;
         }
@@ -175,15 +170,19 @@ public class Task implements Named {
         }
     }
 
-    Task addChild(String childName, CompletableFuture<?> future) {
+    public Work addChild(String childName) {
+        return addChild(childName, null);
+    }
+
+    public Work addChild(String childName, CompletableFuture<?> future) {
         return addChild(Name.of(childName), future);
     }
 
-    Task addChild(Name childName, CompletableFuture<?> future) {
+    public Work addChild(Name childName, CompletableFuture<?> future) {
         if (childName.length() == 1) {
             return addDirectChild(childName.toString(), future);
         } else {
-            Task childProcess;
+            Work childProcess;
             if (children.containsKey(childName.getFirst().toString())) {
                 childProcess = children.get(childName.getFirst().toString());
             } else {
@@ -198,16 +197,16 @@ public class Task implements Named {
      * Add a child with the simple name (no path)
      *
      * @param childName a name of child process without path notation
-     * @param future could be null
+     * @param future    could be null
      */
-    protected Task addDirectChild(String childName, CompletableFuture<?> future) {
+    private Work addDirectChild(String childName, @Nullable CompletableFuture<?> future) {
         if (this.children.containsKey(childName) && !this.children.get(childName).isDone()) {
-            throw new RuntimeException("Triyng to replace existing running process with the same name.");
+            throw new RuntimeException("Trying to replace existing running process with the same name.");
         }
 
-        Task childProcess = new Task(getManager(), Name.join(getName(), childName).toString());
+        Work childProcess = new Work(getManager(), Name.join(getName(), childName).toString());
         if (future != null) {
-            childProcess.setTask(future);
+            childProcess.setFuture(future);
         }
         this.children.put(childName, childProcess);
         //Add listeners for progress
@@ -243,16 +242,16 @@ public class Task implements Named {
         this.titleProperty().set(title);
     }
 
-    public StringProperty messageProperty() {
-        return message;
+    public StringProperty statusProperty() {
+        return status;
     }
 
-    public String getMessage() {
-        return messageProperty().get();
+    public String getStatus() {
+        return statusProperty().get();
     }
 
-    public void setMessage(String message) {
-        this.messageProperty().set(message);
+    public void setStatus(String status) {
+        this.statusProperty().set(status);
     }
 
     public ObservableDoubleValue progressProperty() {
@@ -322,10 +321,10 @@ public class Task implements Named {
      * @param interrupt
      */
     public void cancel(boolean interrupt) {
-        if (this.taskProperty.get() != null) {
-            this.taskProperty.get().cancel(interrupt);
+        if (this.futureProperty.get() != null) {
+            this.futureProperty.get().cancel(interrupt);
         }
-        this.children.values().forEach((Task p) -> p.cancel(interrupt));
+        this.children.values().forEach((Work p) -> p.cancel(interrupt));
     }
 
     /**
@@ -335,19 +334,15 @@ public class Task implements Named {
         children.entrySet()
                 .stream()
                 .filter(entry -> entry.getValue().isDone())
-                .map(entry -> entry.getKey())
-                .collect(Collectors.toList()).stream().forEach((childName) -> this.children.remove(childName));
-        this.children.forEach((String procName, Task proc) -> proc.cleanup());
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList()).forEach(this.children::remove);
+        this.children.forEach((String procName, Work work) -> work.cleanup());
     }
 
     /**
      * @return the manager
      */
-    public TaskManager getManager() {
+    public WorkManager getManager() {
         return manager;
-    }
-
-    public ProgressCallback callback() {
-        return getManager().callback(this.getName());
     }
 }

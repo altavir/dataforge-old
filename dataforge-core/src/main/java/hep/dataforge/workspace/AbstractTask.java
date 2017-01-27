@@ -16,14 +16,13 @@
 
 package hep.dataforge.workspace;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.goals.ProgressCallback;
+import hep.dataforge.goals.Work;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static hep.dataforge.workspace.WorkspaceUtils.gather;
 
 /**
  * Created by darksnake on 21-Aug-16.
@@ -34,29 +33,31 @@ public abstract class AbstractTask<R> implements Task {
     public DataNode<R> run(TaskModel model) {
         //validate model
         validate(model);
-        Context context = model.getWorkspace().getContext();
 
-        hep.dataforge.goals.Task taskProcess = context.taskManager().submit(getName() + "_" + model.hashCode());
-        ProgressCallback callback = taskProcess.callback();
+        Work work = getWork(model, "");
 
-        callback.updateTitle(getName());
-        callback.updateMessage("Gathering...");
+        work.setTitle(getName());
+        work.setStatus("Gathering...");
 
-        DataNode input = gather(callback, model).build();
-        callback.updateMessage("Evaluating...");
+        DataNode input = WorkspaceUtils.gather(model, work).build();
+        work.setStatus("Evaluating...");
 
-        DataNode<R> output = run(model, callback, input);
+        DataNode<R> output = run(model, input);
 
         model.outs().forEach(reporter -> {
             output.handle(reporter.getExecutor(), reporter);
         });
 
-        callback.updateMessage("Complete");
+        work.setStatus("Complete");
 
         return output;
     }
 
-    protected abstract DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data);
+    protected abstract DataNode<R> run(TaskModel model, DataNode<?> data);
+
+    protected Work getWork(TaskModel model, String name) {
+        return model.getContext().getWorkManager().getWork(Name.joinString(getName(), Integer.toUnsignedString(model.hashCode()), name));
+    }
 
 
     @Override
@@ -64,9 +65,6 @@ public abstract class AbstractTask<R> implements Task {
         //TODO add validation here
     }
 
-//    protected Meta getTaskMeta(Context context, TaskModel model) {
-//        return model.meta();
-//    }
 
     /**
      * Apply model transformation to include custom dependencies or change
@@ -89,8 +87,16 @@ public abstract class AbstractTask<R> implements Task {
         return transformModel(WorkspaceUtils.createDefaultModel(workspace, getName(), taskConfig));
     }
 
-    public Logger getLogger() {
+    public Logger getLogger(TaskModel model) {
         //TODO replace by context logger
+        return model.getContext().getLogger();
+    }
+
+    /**
+     * Get default logger for this task
+     * @return
+     */
+    public Logger getLogger(){
         return LoggerFactory.getLogger(getName());
     }
 }

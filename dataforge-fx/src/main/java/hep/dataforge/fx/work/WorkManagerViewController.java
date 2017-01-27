@@ -5,8 +5,8 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.goals.Task;
-import hep.dataforge.goals.TaskManager;
+import hep.dataforge.goals.Work;
+import hep.dataforge.goals.WorkManager;
 import hep.dataforge.utils.Misc;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;
@@ -31,11 +31,11 @@ import java.util.ResourceBundle;
  */
 public class WorkManagerViewController implements Initializable {
 
-    private final Map<Task, Parent> processNodeCache = Misc.getLRUCache(400);
+    private final Map<Work, Parent> processNodeCache = Misc.getLRUCache(400);
     @FXML
-    private TreeView<Task> processTreeView;
+    private TreeView<Work> processTreeView;
 
-    public static BorderPane build(TaskManager manager) {
+    public static BorderPane build(WorkManager manager) {
         try {
             FXMLLoader loader = new FXMLLoader(manager.getClass().getResource("/fxml/ProcessManagerView.fxml"));
             BorderPane p = loader.load();
@@ -52,9 +52,9 @@ public class WorkManagerViewController implements Initializable {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        processTreeView.setCellFactory((TreeView<Task> param) -> new TreeCell<Task>() {
+        processTreeView.setCellFactory((TreeView<Work> param) -> new TreeCell<Work>() {
             @Override
-            public void updateItem(Task item, boolean empty) {
+            public void updateItem(Work item, boolean empty) {
                 super.updateItem(item, empty);
                 if (empty || item == null) {
                     setText(null);
@@ -68,20 +68,20 @@ public class WorkManagerViewController implements Initializable {
         });
     }
 
-    public void setRoot(Task rootTask) {
-        TreeItem<Task> root = buildTree(rootTask);
+    public void setRoot(Work rootWork) {
+        TreeItem<Work> root = buildTree(rootWork);
         Platform.runLater(() -> processTreeView.setRoot(root));
     }
 
     //FXME concurrent modification
-    private TreeItem<Task> buildTree(Task proc) {
-        TreeItem<Task> res = new TreeItem<>(proc);
+    private TreeItem<Work> buildTree(Work proc) {
+        TreeItem<Work> res = new TreeItem<>(proc);
         res.setExpanded(true);
-        proc.getChildren().values().stream().forEach((Task child) -> {
+        proc.getChildren().values().stream().forEach((Work child) -> {
             res.getChildren().add(buildTree(child));
         });
 
-        proc.getChildren().addListener((MapChangeListener.Change<? extends String, ? extends Task> change) -> {
+        proc.getChildren().addListener((MapChangeListener.Change<? extends String, ? extends Work> change) -> {
             if (change.wasAdded()) {
                 res.getChildren().add(buildTree(change.getValueAdded()));
             }

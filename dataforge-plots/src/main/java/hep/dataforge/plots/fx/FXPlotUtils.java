@@ -5,10 +5,11 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.context.Global;
+import hep.dataforge.fx.ApplicationSurrogate;
 import hep.dataforge.fx.FXPlugin;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.plots.PlotFrame;
+import javafx.application.Platform;
 import javafx.scene.Scene;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -18,6 +19,7 @@ import javafx.stage.Stage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.function.Consumer;
 
 /**
  * @author Alexander Nozik
@@ -51,45 +53,39 @@ public class FXPlotUtils {
      * @return
      */
     public static PlotContainer displayContainer(FXPlugin fx, String title, double width, double height) {
-        PlotContainerHolder containerHolder = new PlotContainerHolder();
+        PlotContainer container = new PlotContainer();
+        fx.show(buildPlotStage(container, title, width, height));
+        return container;
+    }
 
-        fx.show(() -> {
-            Stage stage = new Stage();
+    /**
+     * Display a single plot container without initiation framework and terminating it after window is closed
+     *
+     * @param title
+     * @param width
+     * @param height
+     * @return
+     */
+    public static PlotContainer displayContainer(String title, double width, double height) {
+        Platform.setImplicitExit(false);
+        ApplicationSurrogate.start();
+        PlotContainer container = new PlotContainer();
+        Platform.runLater(() -> {
+            buildPlotStage(container, title, width, height).accept(ApplicationSurrogate.getStage());
+            ApplicationSurrogate.getStage().show();
+        });
+
+        Platform.setImplicitExit(true);
+        return container;
+    }
+
+    private static Consumer<Stage> buildPlotStage(PlotContainer container, String title, double width, double height) {
+        return stage -> {
             stage.setWidth(width);
             stage.setHeight(height);
-            PlotContainer container = new PlotContainer();
-            containerHolder.setContainer(container);
             Scene scene = new Scene(container.getRoot(), width, height);
             stage.setTitle(title);
             stage.setScene(scene);
-            return stage;
-        });
-        try {
-            return containerHolder.getContainer();
-        } catch (InterruptedException ex) {
-            throw new RuntimeException("Can't get plot container", ex);
-        }
+        };
     }
-
-    public static PlotContainer displayContainer(String title, double width, double height) {
-        return displayContainer(Global.instance().getPlugin(FXPlugin.class), title, width, height);
-    }
-
-    private static class PlotContainerHolder {
-
-        private PlotContainer container;
-
-        public synchronized PlotContainer getContainer() throws InterruptedException {
-            while (container == null) {
-                wait();
-            }
-            return container;
-        }
-
-        public synchronized void setContainer(PlotContainer container) {
-            this.container = container;
-            notify();
-        }
-    }
-
 }

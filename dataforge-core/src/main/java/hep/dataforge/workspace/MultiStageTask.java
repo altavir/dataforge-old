@@ -17,9 +17,9 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.goals.ProgressCallback;
-import hep.dataforge.io.reports.Log;
+import hep.dataforge.goals.Work;
 import hep.dataforge.meta.Meta;
+import org.slf4j.Logger;
 
 /**
  * A generic implementation of task with 4 phases:
@@ -35,21 +35,23 @@ import hep.dataforge.meta.Meta;
 public abstract class MultiStageTask<R> extends AbstractTask<R> {
 
     @Override
-    protected DataNode<R> run(TaskModel model, ProgressCallback callback, DataNode<?> data) {
+    protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         Context context = model.getWorkspace().getContext();
-        Log log = new Log(getName(), context.getLog());
-        MultiStageTaskState state = new MultiStageTaskState(data, log);
+        MultiStageTaskState state = new MultiStageTaskState(data);
+        Logger logger = getLogger(model);
+        Work work = getWork(model,data.getName());
 
-        getLogger().debug("Starting transformation phase");
-        callback.updateMessage("Data transformation...");
-        transform(callback, context, state, model.meta());
+
+        logger.debug("Starting transformation phase");
+        work.setStatus("Data transformation...");
+        transform(context, state, model.meta());
         if (!state.isFinished) {
-            getLogger().warn("Task state is not finalized. Using last applied state as a result");
+            logger.warn("Task state is not finalized. Using last applied state as a result");
             state.finish();
         }
-        getLogger().debug("Starting result phase");
+        logger.debug("Starting result phase");
 
-        callback.updateMessage("Task result generation...");
+        work.setStatus("Task result generation...");
         DataNode<R> res = result(model, state);
 
         return res;
@@ -61,7 +63,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      * @param state
      * @param config
      */
-    protected abstract void transform(ProgressCallback callback, Context context, MultiStageTaskState state, Meta config);
+    protected abstract void transform(Context context, MultiStageTaskState state, Meta config);
 
     /**
      * Generating finish and storing it in workspace.

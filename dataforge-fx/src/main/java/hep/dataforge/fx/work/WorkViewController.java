@@ -6,7 +6,7 @@
 package hep.dataforge.fx.work;
 
 import hep.dataforge.fx.FXUtils;
-import hep.dataforge.goals.Task;
+import hep.dataforge.goals.Work;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
@@ -32,7 +32,7 @@ import java.util.ResourceBundle;
  */
 public class WorkViewController implements Initializable {
 
-    private Task process;
+    private Work process;
     @FXML
     private HBox processBox;
     @FXML
@@ -46,7 +46,7 @@ public class WorkViewController implements Initializable {
     @FXML
     private Label progressLabel;
 
-    public static Parent build(Task proc) {
+    public static Parent build(Work proc) {
         try {
             FXMLLoader loader = new FXMLLoader(proc.getClass().getResource("/fxml/ProcessView.fxml"));
             Parent p = loader.load();
@@ -66,11 +66,11 @@ public class WorkViewController implements Initializable {
         // TODO
     }
 
-    public Task getProcess() {
+    public Work getProcess() {
         return process;
     }
 
-    public void setProcess(@NotNull Task process) {
+    public void setProcess(@NotNull Work process) {
         this.process = process;
         Platform.runLater(() -> {
             processTitle.setText(process.getTitle());
@@ -103,7 +103,7 @@ public class WorkViewController implements Initializable {
 
     }
 
-    private void updateProgress(Task process) {
+    private void updateProgress(Work process) {
         Platform.runLater(() -> {
             double progress = process.getProgress();
             double maxProgress = process.getMaxProgress();

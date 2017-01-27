@@ -7,7 +7,7 @@ package hep.dataforge.fx.work;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.fx.fragments.Fragment;
-import hep.dataforge.goals.TaskManager;
+import hep.dataforge.goals.WorkManager;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import org.jetbrains.annotations.NotNull;
@@ -17,13 +17,13 @@ import org.jetbrains.annotations.NotNull;
  */
 public class WorkManagerFragment extends Fragment {
 
-    private TaskManager manager;
+    private WorkManager manager;
 
     public WorkManagerFragment() {
         super("DataForge task manager", 400, 400);
     }
 
-    public WorkManagerFragment(TaskManager manager) {
+    public WorkManagerFragment(WorkManager manager) {
         this();
         setManager(manager);
     }
@@ -35,16 +35,16 @@ public class WorkManagerFragment extends Fragment {
      * @return
      */
     public static WorkManagerFragment attachToContext(Context context) {
-        TaskManager manager = context.taskManager();
+        WorkManager manager = context.getWorkManager();
         return new WorkManagerFragment(manager);
     }
 
 
-    public TaskManager getManager() {
+    public WorkManager getManager() {
         return manager;
     }
 
-    public final void setManager(@NotNull TaskManager manager) {
+    public final void setManager(@NotNull WorkManager manager) {
         this.manager = manager;
     }
 

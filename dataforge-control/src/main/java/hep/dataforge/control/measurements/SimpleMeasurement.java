@@ -25,7 +25,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
     private FutureTask<Pair<T, Instant>> task;
 
     /**
-     * invalidate current task. New task will be created on next getTask call.
+     * invalidate current task. New task will be created on next getFuture call.
      * This method does not guarantee that task is finished when it is cleared
      */
     private void clearTask() {

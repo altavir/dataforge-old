@@ -39,7 +39,7 @@ class GrindTerminal {
                 TerminalBuilder.builder()
                         .name("df")
                         .system(true)
-//                        .jna(true)
+                        .jna(true)
                         .encoding("UTF-8")
                         .build()
         )

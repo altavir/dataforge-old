@@ -71,19 +71,19 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
         return getTag().getName();
     }
 
-    /**
-     * Return new blank instance of this plugin. This method is used only to
-     * avoid separate factory class;
-     *
-     * @return
-     */
-    default Plugin newInstance() {
-        //FIXME a bad solution
-        try {
-            return getClass().getDeclaredConstructor().newInstance();
-        } catch (Exception ex) {
-            throw new RuntimeException("Failed to create instance of the plugin", ex);
-        }
-    }
+//    /**
+//     * Return new blank instance of this plugin. This method is used only to
+//     * avoid separate factory class;
+//     *
+//     * @return
+//     */
+//    default Plugin newInstance() {
+//        //FIXME a bad solution
+//        try {
+//            return getClass().getDeclaredConstructor().newInstance();
+//        } catch (Exception ex) {
+//            throw new RuntimeException("Failed to create instance of the plugin", ex);
+//        }
+//    }
 
 }
