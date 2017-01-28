@@ -39,14 +39,12 @@ public abstract class AbstractTask<R> implements Task {
         work.setTitle(getName());
         work.setStatus("Gathering...");
 
-        DataNode input = WorkspaceUtils.gather(model, work).build();
+        DataNode input = TaskUtils.gather(model, work).build();
         work.setStatus("Evaluating...");
 
         DataNode<R> output = run(model, input);
 
-        model.outs().forEach(reporter -> {
-            output.handle(reporter.getExecutor(), reporter);
-        });
+        model.outs().forEach(reporter -> output.handle(reporter.getExecutor(), reporter));
 
         work.setStatus("Complete");
 
@@ -84,7 +82,7 @@ public abstract class AbstractTask<R> implements Task {
      */
     @Override
     public TaskModel build(Workspace workspace, Meta taskConfig) {
-        return transformModel(WorkspaceUtils.createDefaultModel(workspace, getName(), taskConfig));
+        return transformModel(TaskUtils.createDefaultModel(workspace, getName(), taskConfig));
     }
 
     public Logger getLogger(TaskModel model) {

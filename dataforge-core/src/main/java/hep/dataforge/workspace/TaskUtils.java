@@ -12,29 +12,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
+ * Some utility methods to work with tasks
  * @author Alexander Nozik
  */
-public class WorkspaceUtils {
+public class TaskUtils {
 
     /**
      * A meta node that is used to add additional dependencies to the task
      * manually
      */
     public static final String GATHER_NODE_NAME = "@gather";
-
-//    public static DataTree.Builder gather(WorkManager.Callback callback, Workspace workspace, TaskModel model) {
-//        DataTree.Builder builder = DataTree.builder();
-//        callback.setMaxProgress(model.taskDeps().size() + model.dataDeps().size());
-//        model.taskDeps().forEachData(dep -> {
-//            builder.putNode(dep.placementRule(), workspace.runTask(dep.model()));
-//            callback.increaseProgress(1);
-//        });
-//        model.dataDeps().forEachData(dep -> {
-//            builder.putData(dep.as(), workspace.getData(dep.path()));
-//            callback.increaseProgress(1);
-//        });
-//        return builder;
-//    }
 
     /**
      * Construct task dependencies using given dependency model.

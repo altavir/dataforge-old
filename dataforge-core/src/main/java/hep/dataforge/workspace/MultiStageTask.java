@@ -15,11 +15,12 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.goals.Work;
-import hep.dataforge.meta.Meta;
 import org.slf4j.Logger;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * A generic implementation of task with 4 phases:
@@ -36,15 +37,13 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
 
     @Override
     protected DataNode<R> run(TaskModel model, DataNode<?> data) {
-        Context context = model.getWorkspace().getContext();
         MultiStageTaskState state = new MultiStageTaskState(data);
         Logger logger = getLogger(model);
-        Work work = getWork(model,data.getName());
-
+        Work work = getWork(model, data.getName());
 
         logger.debug("Starting transformation phase");
         work.setStatus("Data transformation...");
-        transform(context, state, model.meta());
+        transform(model, state);
         if (!state.isFinished) {
             logger.warn("Task state is not finalized. Using last applied state as a result");
             state.finish();
@@ -60,10 +59,10 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
     /**
      * The main task body
      *
+     * @param model
      * @param state
-     * @param config
      */
-    protected abstract void transform(Context context, MultiStageTaskState state, Meta config);
+    protected abstract void transform(TaskModel model, MultiStageTaskState state);
 
     /**
      * Generating finish and storing it in workspace.
@@ -74,5 +73,75 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
     protected DataNode<R> result(TaskModel model, MultiStageTaskState state) {
         //FIXME check for type cast
         return (DataNode<R>) state.getResult();
+    }
+
+    /**
+     * The mutable data content of a task.
+     *
+     * @author Alexander Nozik
+     */
+    protected static class MultiStageTaskState {
+
+        private static final String INITAIL_DATA_STAGE = "@data";
+
+        /**
+         * list of stages results
+         */
+        private final Map<String, DataNode> stages = new LinkedHashMap<>();
+        boolean isFinished = false;
+        /**
+         * final finish of task
+         */
+        private DataNode result;
+
+        private MultiStageTaskState() {
+        }
+
+        public MultiStageTaskState(DataNode data) {
+            this.stages.put(INITAIL_DATA_STAGE, data);
+        }
+
+        public DataNode<?> getData(String stage) {
+            return stages.get(stage);
+        }
+
+        /**
+         * Return initial data
+         *
+         * @return
+         */
+        public DataNode<?> getData() {
+            return getData(INITAIL_DATA_STAGE);
+        }
+
+        public DataNode<?> getResult() {
+            return result;
+        }
+
+        public MultiStageTaskState setData(String stage, DataNode data) {
+            if (isFinished) {
+                throw new IllegalStateException("Can't edit task state after result is finalized");
+            } else {
+                this.stages.put(stage, data);
+                result = data;
+                return this;
+            }
+        }
+
+        public synchronized MultiStageTaskState finish(DataNode result) {
+            if (isFinished) {
+                throw new IllegalStateException("Can't edit task state after result is finalized");
+            } else {
+                this.result = result;
+                isFinished = true;
+                return this;
+            }
+        }
+
+        public MultiStageTaskState finish() {
+            this.isFinished = true;
+            return this;
+        }
+
     }
 }

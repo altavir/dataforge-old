@@ -6,7 +6,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.actions.Action;
-import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Template;
@@ -42,13 +41,13 @@ public abstract class TemplateTask extends MultiStageTask {
     }
 
     @Override
-    protected void transform(Context context, MultiStageTaskState state, Meta config) {
+    protected void transform(TaskModel model, MultiStageTaskState state) {
         DataNode res = state.getData();
-        config = template.apply(config);
+        Meta config = template.apply(model.meta());
         for (Meta actionMeta : config.getMetaList(ACTION_NODE_KEY)) {
             String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-            Action action = buildAction(context, actionType);
-            res = action.run(context, res, actionMeta);
+            Action action = buildAction(model.getContext(), actionType);
+            res = action.run(model.getContext(), res, actionMeta);
             state.setData(actionType, res);
         }
         state.finish(res);

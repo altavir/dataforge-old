@@ -80,7 +80,8 @@ public class WorkManager extends BasicPlugin {
 
     public Work startWork(String processName, Consumer<Work> con) {
         Work work = getWork(processName);
-        return this.startWork(processName, () -> con.accept(work));
+        work.setFuture(CompletableFuture.runAsync(() -> con.accept(work), (Runnable command) -> execute(processName, command)));
+        return work;
     }
 
     /**

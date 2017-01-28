@@ -1,11 +1,8 @@
 package hep.dataforge.grind
 
-import hep.dataforge.context.Context
 import hep.dataforge.data.DataSet
-import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.workspace.MultiStageTask
-import hep.dataforge.workspace.MultiStageTaskState
 import hep.dataforge.workspace.TaskModel
 
 /**
@@ -18,7 +15,7 @@ class TestTask extends MultiStageTask {
     }
 
     @Override
-    protected void transform(Context context, MultiStageTaskState state, Meta config) {
+    protected void transform(TaskModel model, MultiStageTaskState state) {
         DataSet.Builder b = DataSet.builder()
         context.getProperties().forEach { key, value ->
             b.putStatic(key, value);
