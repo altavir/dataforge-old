@@ -26,7 +26,10 @@ import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import hep.dataforge.utils.ContextMetaFactory;
+import hep.dataforge.utils.MetaFactory;
 
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -39,6 +42,49 @@ import java.util.stream.Collectors;
  * @version $Id: $Id
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
+
+    /**
+     * Build simple pipe unconfigurable action using provided transformation.
+     * @param transformation
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> OneToOneAction<T, R> transform(Function<T, R> transformation) {
+        return new OneToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return transformation.apply(input);
+            }
+        };
+    }
+
+    /**
+     * Use provided transformation factory with action input as a parameter and then apply transformation to the data.
+     * Context and data name are ignored. For anything more complex one needs to subclass {@link OneToOneAction}
+     * @param factory
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> OneToOneAction<T, R> transform(MetaFactory<Function<T, R>> factory) {
+        return new OneToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return factory.build(inputMeta).apply(input);
+            }
+        };
+    }
+
+    public static <T, R> OneToOneAction<T, R> transform(ContextMetaFactory<Function<T, R>> factory) {
+        return new OneToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return factory.build(context,inputMeta).apply(input);
+            }
+        };
+    }
+
     /**
      * Build asynchronous result for single data. Data types separated from
      * action generics to be able to operate maps instead of raw data

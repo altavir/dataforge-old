@@ -25,11 +25,14 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
+import hep.dataforge.utils.ContextMetaFactory;
+import hep.dataforge.utils.MetaFactory;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -41,6 +44,34 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
+
+    public static <T, R> ManyToOneAction<T, R> transform(Function<Map<String, T>, R> transformation) {
+        return new ManyToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return transformation.apply(input);
+            }
+        };
+    }
+
+    public static <T, R> ManyToOneAction<T, R> transform(MetaFactory<Function<Map<String, T>, R>> factory) {
+        return new ManyToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return factory.build(meta).apply(input);
+            }
+        };
+    }
+
+    public static <T, R> ManyToOneAction<T, R> transform(ContextMetaFactory<Function<Map<String, T>, R>> factory) {
+        return new ManyToOneAction<T, R>() {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return factory.build(context, meta).apply(input);
+            }
+        };
+    }
+
 
     @Override
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
@@ -74,7 +105,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
      * @param meta
      * @return
      */
-    protected abstract R execute(Context context, String nodeName, Map<String, T> input, Meta meta);
+    protected abstract R execute(Context context, String nodeName, Map<String, T> input, Laminate meta);
 
     /**
      * Build output meta for resulting object

@@ -149,8 +149,7 @@ public class ActionUtils {
         return new Action<T, R>() {
             @Override
             public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
-                return second
-                        .run(context, first.run(context, data, actionMeta), actionMeta);
+                return second.run(context, first.run(context, data, actionMeta), actionMeta);
             }
 
             @Override

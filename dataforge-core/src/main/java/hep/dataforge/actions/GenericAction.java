@@ -83,6 +83,8 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>> result) {
         DataSet.Builder<R> builder = DataSet.builder(getOutputType());
         result.forEach(builder::putData);
+        builder.setName(name);
+        builder.setMeta(meta);
         return builder.build();
     }
 

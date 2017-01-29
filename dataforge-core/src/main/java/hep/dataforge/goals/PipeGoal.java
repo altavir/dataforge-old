@@ -21,15 +21,15 @@ public class PipeGoal<S, T> extends AbstractGoal<T> {
     private final Goal<S> source;
     private final Function<S, T> transfromation;
 
-    public PipeGoal(Goal<S> source, Executor executor, Function<S, T> transfromation) {
+    public PipeGoal(Goal<S> source, Executor executor, Function<S, T> transformation) {
         super(executor);
         this.source = source;
-        this.transfromation = transfromation;
+        this.transfromation = transformation;
     }
 
-    public PipeGoal(Goal<S> source, Function<S, T> transfromation) {
+    public PipeGoal(Goal<S> source, Function<S, T> transformation) {
         this.source = source;
-        this.transfromation = transfromation;
+        this.transfromation = transformation;
     }
 
     @Override
