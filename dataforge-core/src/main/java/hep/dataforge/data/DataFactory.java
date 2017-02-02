@@ -31,7 +31,7 @@ import static hep.dataforge.data.DataFactory.*;
 @NodeDef(name = NODE_KEY)
 @ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
-public abstract class DataFactory<T> {
+public abstract class DataFactory<T> implements DataLoader<T> {
 
     public static final String NODE_META_KEY = "meta";
     public static final String NODE_TYPE_KEY = "type";
@@ -44,21 +44,12 @@ public abstract class DataFactory<T> {
         this.baseType = baseType;
     }
 
-    public DataNode<T> build(Context context, Meta dataConfig) {
+    @Override
+    public DataNode<T> load(Context context, Meta dataConfig) {
         return builder(context, dataConfig).build();
     }
 
     protected DataTree.Builder<T> builder(Context context, Meta dataConfig) {
-//        Class type;
-//        if (dataConfig.hasValue(NODE_TYPE_KEY)) {
-//            try {
-//                type = Class.forName(dataConfig.getString(NODE_TYPE_KEY));
-//            } catch (ClassNotFoundException ex) {
-//                throw new RuntimeException("Can't initialize data node", ex);
-//            }
-//        } else {
-//            type = Object.class;
-//        }
         DataTree.Builder<T> builder = DataTree.builder(baseType);
         fillData(context, dataConfig, builder);
         return builder;
@@ -85,7 +76,7 @@ public abstract class DataFactory<T> {
         // Apply non-specific child nodes
         if (dataConfig.hasMeta(NODE_KEY)) {
             //FIXME check types for child nodes
-            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
+            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(load(context, nodeMeta)));
         }
 
         //Configuring filter

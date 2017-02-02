@@ -54,7 +54,7 @@ public class ActionUtils {
         DataNode data;
         if (config.hasMeta(DATA_ELEMENT)) {
             Meta dataElement = config.getMeta(DATA_ELEMENT);
-            data = new FileDataFactory().build(context, dataElement);
+            data = new FileDataFactory().load(context, dataElement);
         } else {
             data = null;
         }
@@ -102,37 +102,6 @@ public class ActionUtils {
             res = ActionManager.buildFrom(context).build(actionName);
         }
         return res;
-    }
-
-    public static class SequenceAction extends GenericAction {
-
-        @Override
-        public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
-            DataNode res = data;
-            DataCache cache = null;
-            //Set data cache if it is defined in context
-            if (context.getBoolean("enableCache", false)) {
-                cache = CachePlugin.buildFrom(context).getCache();
-            }
-
-            Identity id = new StringIdentity(context.getName());
-            for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
-                id = id.and(actionMeta);
-                String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-                res = buildAction(context, actionType).run(context, res, actionMeta);
-                if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
-                    //FIXME add context identity here
-                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
-                }
-            }
-            return res;
-        }
-
-        @Override
-        public String getName() {
-            return SEQUENCE_ACTION_TYPE;
-        }
-
     }
 
     /**
@@ -184,5 +153,36 @@ public class ActionUtils {
                 return actions.stream().map(it -> it.getName()).collect(Collectors.joining(" -> "));
             }
         };
+    }
+
+    public static class SequenceAction extends GenericAction {
+
+        @Override
+        public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
+            DataNode res = data;
+            DataCache cache = null;
+            //Set data cache if it is defined in context
+            if (context.getBoolean("enableCache", false)) {
+                cache = CachePlugin.buildFrom(context).getCache();
+            }
+
+            Identity id = new StringIdentity(context.getName());
+            for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
+                id = id.and(actionMeta);
+                String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
+                res = buildAction(context, actionType).run(context, res, actionMeta);
+                if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
+                    //FIXME add context identity here
+                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
+                }
+            }
+            return res;
+        }
+
+        @Override
+        public String getName() {
+            return SEQUENCE_ACTION_TYPE;
+        }
+
     }
 }

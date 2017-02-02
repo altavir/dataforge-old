@@ -170,7 +170,7 @@ public interface Workspace extends Encapsulated {
                         factory = new FileDataFactory();
                     }
                     String as = dataMeta.getString("as", "");
-                    loadData(as, factory.build(getContext(), dataMeta));
+                    loadData(as, factory.load(getContext(), dataMeta));
                 });
             }
             if (meta.hasMeta("config")) {
@@ -189,7 +189,7 @@ public interface Workspace extends Encapsulated {
         B loadData(String name, DataNode datanode);
 
         default B loadData(String name, DataFactory factory, Meta dataConfig) {
-            return loadData(name, factory.build(getContext(), dataConfig));
+            return loadData(name, factory.load(getContext(), dataConfig));
         }
 
         default B loadFile(String dataName, String filePath, Meta meta) {
