@@ -41,7 +41,7 @@ class AnalyticalGradientCalculator implements GradientCalculator {
     /** {@inheritDoc} */
     @Override
     public FunctionGradient gradient(MinimumParameters par) {
-//      double[] grad = theGradCalc.gradientValue(theTransformation.transform(par.vec()).data());
+//      double[] grad = theGradCalc.gradientValue(theTransformation.andThen(par.vec()).data());
         double[] point = theTransformation.transform(par.vec()).toArray();
         if (function.getDimension() != theTransformation.parameters().size()) {
             throw new IllegalArgumentException("Invalid parameter size");

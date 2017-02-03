@@ -54,7 +54,7 @@ public class ActionUtils {
         DataNode data;
         if (config.hasMeta(DATA_ELEMENT)) {
             Meta dataElement = config.getMeta(DATA_ELEMENT);
-            data = new FileDataFactory().load(context, dataElement);
+            data = new FileDataFactory().build(context, dataElement);
         } else {
             data = null;
         }

@@ -36,6 +36,11 @@ public class FileDataFactory extends DataFactory<Binary> {
     }
 
     @Override
+    public String getName() {
+        return "file";
+    }
+
+    @Override
     protected void buildChildren(Context context, DataTree.Builder<Binary> builder, DataFilter filter, Meta dataConfig) {
         //FIXME add filtering here
         File parentFile;

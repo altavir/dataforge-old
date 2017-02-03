@@ -45,7 +45,7 @@ public abstract class DataFactory<T> implements DataLoader<T> {
     }
 
     @Override
-    public DataNode<T> load(Context context, Meta dataConfig) {
+    public DataNode<T> build(Context context, Meta dataConfig) {
         return builder(context, dataConfig).build();
     }
 
@@ -76,7 +76,7 @@ public abstract class DataFactory<T> implements DataLoader<T> {
         // Apply non-specific child nodes
         if (dataConfig.hasMeta(NODE_KEY)) {
             //FIXME check types for child nodes
-            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(load(context, nodeMeta)));
+            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
         }
 
         //Configuring filter

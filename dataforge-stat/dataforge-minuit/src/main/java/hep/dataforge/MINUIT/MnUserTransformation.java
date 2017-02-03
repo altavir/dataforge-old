@@ -15,16 +15,13 @@
  */
 package hep.dataforge.MINUIT;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
+import java.util.*;
+
 /**
- * knows how to transform between user specified parameters (external) and
+ * knows how to andThen between user specified parameters (external) and
  * internal parameters used for minimization
  *
  * Жуткий октопус, который занимается преобразованием внешних параметров во внутренние

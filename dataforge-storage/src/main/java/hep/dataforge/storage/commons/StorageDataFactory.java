@@ -13,8 +13,9 @@ import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
-import java.util.stream.Stream;
 import javafx.util.Pair;
+
+import java.util.stream.Stream;
 
 /**
  *
@@ -24,6 +25,11 @@ public class StorageDataFactory extends DataFactory<Loader> {
 
     public StorageDataFactory() {
         super(Loader.class);
+    }
+
+    @Override
+    public String getName() {
+        return "storage";
     }
 
     @Override

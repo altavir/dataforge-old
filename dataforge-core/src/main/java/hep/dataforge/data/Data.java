@@ -37,11 +37,13 @@ public class Data<T> implements Annotated {
     private final Goal<T> goal;
     private final Meta meta;
     private final Class<T> type;
+
     public Data(Goal<T> goal, Class<T> type, Meta meta) {
         this.goal = goal;
         this.meta = meta;
         this.type = type;
     }
+
     public Data(Goal<T> goal, Class<T> type) {
         this.goal = goal;
         this.meta = Meta.empty();
@@ -88,6 +90,10 @@ public class Data<T> implements Annotated {
         return type;
     }
 
+    /**
+     *
+     * @return false if goal is canceled or completed exceptionally
+     */
     public boolean isValid() {
         return !getInFuture().isCancelled() && !getInFuture().isCompletedExceptionally();
     }
@@ -105,12 +111,12 @@ public class Data<T> implements Annotated {
      * @param <R>
      * @return
      */
-    public <R> Data<R> transform(Class<R> target, Function<T, R> transformation) {
+    public <R> Data<R> andThen(Class<R> target, Function<T, R> transformation) {
         Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), transformation);
         return new Data<R>(goal, target, this.meta());
     }
 
-    public <R> Data<R> transform(Class<R> target, Executor executor, Function<T, R> transformation) {
+    public <R> Data<R> andThen(Class<R> target, Executor executor, Function<T, R> transformation) {
         Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), executor, transformation);
         return new Data<R>(goal, target, this.meta());
     }

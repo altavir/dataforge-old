@@ -11,7 +11,7 @@ import hep.dataforge.meta.Template;
 
 
 /**
- * A task that wraps other task, but uses a template to transform meta
+ * A task that wraps other task, but uses a template to andThen meta
  * @param <R>
  */
 public class TaskWrapper<R> implements Task<R> {

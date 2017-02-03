@@ -64,21 +64,23 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadData(String name, Data data) {
-            if (w.getData().provides(name)) {
+        public Builder loadData(String as, Data data) {
+            if (w.getData().provides(as)) {
                 getContext().getLogger().warn("Overriding non-empty data during workspace data fill");
             }
-            getData().putData(name, data);
+            getData().putData(as, data);
             return self();
         }
 
         @Override
-        public Builder loadData(String name, DataNode datanode) {
-            if (name == null || name.isEmpty()) {
-                //FIXME add warning?
+        public Builder loadData(String as, DataNode datanode) {
+            if (as == null || as.isEmpty()) {
+                if (!w.data.isEmpty()) {
+                    getContext().getLogger().warn("Overriding non-empty root data node during workspace construction");
+                }
                 w.data = new DataTree.Builder<>(datanode);
             } else {
-                getData().putNode(name, datanode);
+                getData().putNode(as, datanode);
             }
             return self();
         }

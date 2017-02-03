@@ -224,7 +224,7 @@ public class TaskModel implements Named, Annotated {
         private final Function<Workspace, Stream<NamedData<?>>> gatherer;
 
         /**
-         * The rule to transform from workspace data name to DataTree path
+         * The rule to andThen from workspace data name to DataTree path
          */
         private final UnaryOperator<String> pathTransformationRule;
 

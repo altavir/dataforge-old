@@ -426,6 +426,10 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         public Meta meta() {
             return this.tree.meta();
         }
+
+        public boolean isEmpty(){
+            return this.tree.isEmpty();
+        }
     }
 
 }

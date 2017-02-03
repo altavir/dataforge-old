@@ -10,7 +10,6 @@ import hep.dataforge.meta.Meta;
 import java.util.function.BiPredicate;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class DataFilter {
@@ -30,6 +29,16 @@ public class DataFilter {
 
     public boolean acceptData(String dataName, Data data) {
         return this.dataCondition.test(dataName, data);
+    }
+
+    public <T> DataNode<T> filter(DataNode<T> node) {
+        DataTree.Builder<T> builder = DataTree.builder(node.type());
+        node.dataStream(true).forEach(d -> {
+            if (acceptData(d.getName(), d)) {
+                builder.putData(d);
+            }
+        });
+        return builder.build();
     }
 
     public final void includeData(BiPredicate<String, Data> dataCondition) {

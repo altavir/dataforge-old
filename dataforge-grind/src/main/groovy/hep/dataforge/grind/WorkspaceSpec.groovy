@@ -102,23 +102,33 @@ class WorkspaceSpec {
     }
 
     private class DataSpec {
-        def file(String name, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            WorkspaceSpec.this.builder.loadFile(name, path, Grind.buildMeta(fileMeta))
+        def files(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
+            WorkspaceSpec.this.builder.loadFiles(place, path, Grind.buildMeta(fileMeta))
         }
 
-        def file(String name, String path) {
-            WorkspaceSpec.this.builder.loadFile(name, path)
+        def files(String place, String path) {
+            WorkspaceSpec.this.builder.loadFiles(place, path)
         }
 
         /**
          * Put a static resource as data
-         * @param name
+         * @param place
          * @param path
          * @return
          */
-        def resource(String name, String path) {
+        def resource(String place, String path) {
             URI uri = URI.create(path)
-            WorkspaceSpec.this.builder.loadData(name, Data.buildStatic(uri))
+            WorkspaceSpec.this.builder.loadData(place, Data.buildStatic(uri))
+        }
+
+        def load(Map values, @DelegatesTo(GrindMetaBuilder) Closure closure) {
+            MetaBuilder meta = Grind.buildMeta(values, closure);
+            //TODO remove control values from meta
+            WorkspaceSpec.this.builder.loadData(
+                    meta.getString("as", null),
+                    meta.getString("loader"),
+                    meta
+            )
         }
 
         //TODO extend data specification

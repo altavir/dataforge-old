@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * The library of available models
  * <p>
- * TODO transform ModelManager into Library
+ * TODO andThen ModelManager into Library
  * </p>
  *
  * @author Alexander Nozik
