@@ -45,7 +45,7 @@ class GrindMetaBuilderSpec extends Specification {
 
     def "Check simple meta"(){
         when:
-        Meta m = Grind.buildMeta("myMeta");
+        Meta m = Grind.parseMeta("myMeta");
         then:
         m.name == "myMeta"
     }

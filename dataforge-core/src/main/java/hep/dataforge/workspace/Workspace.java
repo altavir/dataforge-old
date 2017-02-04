@@ -220,12 +220,12 @@ public interface Workspace extends Encapsulated {
             return loadData(place, DataLoader.getFactory(factoryType), dataConfig);
         }
 
-        default B loadFiles(String place, String filePath, Meta meta) {
+        default B loadFileData(String place, String filePath, Meta meta) {
             return loadData(place, FileDataFactory.buildFileData(getContext(), filePath, meta));
         }
 
-        default B loadFiles(String dataName, String filePath) {
-            return loadFiles(dataName, filePath, Meta.empty());
+        default B loadFileData(String dataName, String filePath) {
+            return loadFileData(dataName, filePath, Meta.empty());
         }
 
         B loadMeta(String name, Meta meta);

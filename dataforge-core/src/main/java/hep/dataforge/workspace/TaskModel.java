@@ -14,6 +14,8 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
+import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.workspace.identity.Identity;
 import hep.dataforge.workspace.identity.StringIdentity;
 import org.slf4j.LoggerFactory;
@@ -33,7 +35,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Annotated {
+public class TaskModel implements Named, Annotated, ValueProvider {
 
     //TODO implement builder chain
     private final Workspace workspace;
@@ -187,6 +189,26 @@ public class TaskModel implements Named, Annotated {
     public Identity getIdentity() {
         //FIXME make more complex identity
         return new StringIdentity(getName()).and(meta());
+    }
+
+    /**
+     * Convenience method. Equals {@code meta().getValue(path)}
+     * @param path
+     * @return
+     */
+    @Override
+    public Value getValue(String path) {
+        return meta().getValue(path);
+    }
+
+    /**
+     * Convenience method. Equals {@code meta().hasValue(path)}
+     * @param path
+     * @return
+     */
+    @Override
+    public boolean hasValue(String path) {
+        return meta().hasValue(path);
     }
 
     /**

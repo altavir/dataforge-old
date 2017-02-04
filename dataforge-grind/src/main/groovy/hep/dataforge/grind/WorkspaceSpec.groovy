@@ -103,11 +103,11 @@ class WorkspaceSpec {
 
     private class DataSpec {
         def files(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
-            WorkspaceSpec.this.builder.loadFiles(place, path, Grind.buildMeta(fileMeta))
+            WorkspaceSpec.this.builder.loadFileData(place, path, Grind.buildMeta(fileMeta))
         }
 
         def files(String place, String path) {
-            WorkspaceSpec.this.builder.loadFiles(place, path)
+            WorkspaceSpec.this.builder.loadFileData(place, path)
         }
 
         /**
@@ -121,11 +121,14 @@ class WorkspaceSpec {
             WorkspaceSpec.this.builder.loadData(place, Data.buildStatic(uri))
         }
 
-        def load(Map values, @DelegatesTo(GrindMetaBuilder) Closure closure) {
-            MetaBuilder meta = Grind.buildMeta(values, closure);
+        def load(Object... args) {
+            loadFromMeta(Grind.buildMeta(args))
+        }
+
+        def loadFromMeta(Meta meta) {
             //TODO remove control values from meta
             WorkspaceSpec.this.builder.loadData(
-                    meta.getString("as", null),
+                    meta.getString("as", ""),
                     meta.getString("loader"),
                     meta
             )

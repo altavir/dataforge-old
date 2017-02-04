@@ -149,7 +149,7 @@ class GrindWorkspaceBuilder {
 
     private Meta transformTarget(String target) {
         Workspace ws = build();
-        Meta targetMeta = Grind.buildMeta(target);
+        Meta targetMeta = Grind.parseMeta(target);
 
         if (ws.hasTarget(targetMeta.name)) {
             return new Laminate(ws.getTarget(targetMeta.name), targetMeta);
@@ -178,7 +178,7 @@ class GrindWorkspaceBuilder {
         if (!input.contains("(") && !input.contains("{")) {
             return runTask(input)
         }
-        Meta meta = Grind.buildMeta(input);
+        Meta meta = Grind.parseMeta(input);
         return runTask(meta.getName(), meta);
     }
 

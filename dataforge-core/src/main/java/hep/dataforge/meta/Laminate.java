@@ -51,7 +51,7 @@ public class Laminate extends Meta implements Described {
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
         this.layers = new ArrayList(layers);
-        this.layers.removeIf((meta) -> meta == null);
+        this.layers.removeIf((meta) -> meta == null||meta.isEmpty());
     }
 
     public Laminate(List<Meta> layers) {
@@ -108,7 +108,9 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate addFirstLayer(Meta layer) {
-        this.layers.add(0, layer);
+        if(!layer.isEmpty()) {
+            this.layers.add(0, layer);
+        }
         return this;
     }
 
@@ -119,21 +121,23 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate addLayer(Meta layer) {
-        this.layers.add(layer);
+        if(!layer.isEmpty()) {
+            this.layers.add(layer);
+        }
         return this;
     }
 
     public Laminate setLayers(Meta... layers) {
         this.layers.clear();
         this.layers.addAll(Arrays.asList(layers));
-        this.layers.removeIf((meta) -> meta == null);
+        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
         return this;
     }
 
     public Laminate setLayers(Collection<Meta> layers) {
         this.layers.clear();
         this.layers.addAll(layers);
-        this.layers.removeIf((meta) -> meta == null);
+        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
         return this;
     }
 
@@ -267,6 +271,11 @@ public class Laminate extends Meta implements Described {
         } else {
             return new NodeDescriptor(Meta.empty());
         }
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return this.layers.isEmpty() && (this.descriptorLayer == null || this.descriptorLayer.isEmpty());
     }
 
     /**
