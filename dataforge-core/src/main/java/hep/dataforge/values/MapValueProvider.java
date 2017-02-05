@@ -26,7 +26,7 @@ import java.util.Map;
 public class MapValueProvider implements ValueProvider {
     private final Map<String, Value> map;
 
-    public MapValueProvider(Map<String, Object> map) {
+    public MapValueProvider(Map<String, ?> map) {
         this.map = new HashMap<>();
         map.forEach((key, value) -> this.map.put(key, Value.of(value)));
     }

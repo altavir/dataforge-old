@@ -16,18 +16,24 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.io.markup.Markedup;
+import hep.dataforge.io.markup.Markup;
+import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
+
 /**
  * An immutable table of values
  *
  * @author Alexander Nozik
  */
-public interface Table extends PointSource, MetaMorph {
+public interface Table extends PointSource, MetaMorph, Markedup {
 
     DataPoint getRow(int i);
 
@@ -39,16 +45,37 @@ public interface Table extends PointSource, MetaMorph {
 
     /**
      * Number of rows in the table
+     *
      * @return
      */
     int size();
 
 
     //PENDING replace by stream provider + default table factory?
+
     /**
      * Apply row-based transformation
+     *
      * @param streamTransform
      * @return
      */
     Table transform(UnaryOperator<Stream<DataPoint>> streamTransform);
+
+    @Override
+    default Markup markup(Meta configuration) {
+        MarkupBuilder builder = new MarkupBuilder().setType(TABLE_TYPE);
+        //render header
+        builder.addContent(new MarkupBuilder()
+                .setValue("header", true)
+                .setType("tr") //optional
+                .setContent(getFormat().getColumns().map(col -> MarkupBuilder.text(col.getTitle())))
+        );
+        //render table itself
+        forEach(dp -> {
+            builder.addContent(new MarkupBuilder()
+                    .setType("td") // optional
+                    .setContent(getFormat().getColumns().map(col -> MarkupBuilder.text(dp.getString(col.getName())))));
+        });
+        return builder.build();
+    }
 }

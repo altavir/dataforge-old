@@ -162,7 +162,7 @@ class MetaExtension {
      * @param cl
      * @return
      */
-    static MetaBuilder compile(final Meta self, Map<String, Object> map, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+    static MetaBuilder compile(final Meta self, Map<String, ?> map, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         Template tmp = new Template(self);
         return tmp.compile(new MapValueProvider(map), Grind.buildMeta(cl));
     }
@@ -171,8 +171,12 @@ class MetaExtension {
         self.configure(Grind.buildMeta("config", configuration));
     }
 
-    static Configurable configure(final Configurable self, Map values, Closure configuration) {
+    static Configurable configure(final Configurable self, Map<String, ?> values, Closure configuration) {
         self.configure(Grind.buildMeta("config", values, configuration));
+    }
+
+    static Configurable configure(final Configurable self, Map<String, ?> values) {
+        self.configure(Grind.buildMeta("config", values));
     }
 
     static Configurable setAt(final Configurable self, String key, Object value) {

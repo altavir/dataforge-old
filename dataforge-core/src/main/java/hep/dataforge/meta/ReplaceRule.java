@@ -21,12 +21,11 @@ import hep.dataforge.values.Value;
 import java.util.List;
 
 /**
- * Правило, по которому всегда происходит использование элемента главной
- * аннотации без слияния
+ * Always use the element from main meta
  *
  * @author Alexander Nozik
  */
-class DefaultMergeRule extends MergeRule {
+class ReplaceRule extends MergeRule {
 
 
     /**

@@ -4,9 +4,14 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.fx.FXPlugin
+import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
+import hep.dataforge.io.markup.Markedup
+import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.meta.Meta
+import hep.dataforge.names.Named
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
@@ -65,6 +70,21 @@ class GrindTerminal {
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
         shell = new GrindShell(context)
+        shell.getConfig().setValue("evalData",true) // force to eval data
+        //.configure(evalData: true) - does not work
+
+
+        //add terminal hook for marked up objects
+        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
+        Meta markupConfig = Grind.buildMeta(target: "terminal")
+        shell.hook(Markedup) {
+            renderer.ln()
+            if(it instanceof Named){
+                renderer.render(MarkupBuilder.text(it.name,"red").build())
+                renderer.ln()
+            }
+            renderer.render(it.markup(markupConfig))
+        }
 
         //define help closure
         def help = this.&help;
@@ -72,12 +92,12 @@ class GrindTerminal {
         shell.bind("help", help);
     }
 
-    def help(){
+    def help() {
         println("In order to display state of object and show help type `help <object>`");
     }
 
     def help(Object obj) {
-        if(obj == null){
+        if (obj == null) {
             help()
         } else {
             try {

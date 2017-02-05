@@ -25,6 +25,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.utils.MetaMorph;
 
+import java.util.Iterator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -36,7 +37,7 @@ import java.util.stream.StreamSupport;
  */
 @NodeDef(name = "column", multiple = true, required = true, info = "A column format", target = "class::hep.dataforge.tables.ColumnFormat")
 @NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given")
-public class TableFormat extends BaseMetaHolder implements NameSetContainer, MetaMorph {
+public class TableFormat extends BaseMetaHolder implements NameSetContainer, MetaMorph, Iterable<ColumnFormat> {
 
     /**
      * An empty format holding information only about the names of columns
@@ -120,6 +121,11 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
         MetaBuilder newFormat = new MetaBuilder(meta());
         newFormat.setNode("column", Stream.of(names).map(n -> getColumnMeta(n)).collect(Collectors.toList()));
         return new TableFormat(newFormat);
+    }
+
+    @Override
+    public Iterator<ColumnFormat> iterator() {
+        return getColumns().iterator();
     }
 
     //

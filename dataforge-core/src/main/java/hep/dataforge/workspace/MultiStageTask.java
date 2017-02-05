@@ -80,7 +80,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      *
      * @author Alexander Nozik
      */
-    protected static class MultiStageTaskState {
+    public static class MultiStageTaskState {
 
         private static final String INITAIL_DATA_STAGE = "@data";
 

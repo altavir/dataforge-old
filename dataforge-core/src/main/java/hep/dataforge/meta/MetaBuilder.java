@@ -102,7 +102,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     }
 
     public MetaBuilder updateNode(String name, Meta element) {
-        return updateNode(name, MergeRule.getDefault(), element);
+        return updateNode(name, MergeRule.replace(), element);
     }
 
     /**
@@ -145,7 +145,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     }
 
     public MetaBuilder update(Meta annotation) {
-        return new DefaultMergeRule().mergeInPlace(annotation, this);
+        return new ReplaceRule().mergeInPlace(annotation, this);
     }
 
     /**

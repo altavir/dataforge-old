@@ -66,21 +66,44 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         return self();
     }
 
+    /**
+     * Directly update markup fields
+     *
+     * @param map
+     * @return
+     */
     public MarkupBuilder update(Map<String, ? extends Object> map) {
         builder.update(map);
         return self();
     }
 
+    /**
+     * Directly update markup fields
+     *
+     * @param key
+     * @param value
+     * @return
+     */
     public MarkupBuilder setValue(String key, Object value) {
         builder.setValue(key, value);
         return self();
     }
 
+    /**
+     * Set the type of the element
+     * @param type
+     * @return
+     */
     public MarkupBuilder setType(String type) {
         builder.setValue(Markup.MARKUP_TYPE_KEY, type);
         return self();
     }
 
+    /**
+     * Set the style of element
+     * @param style
+     * @return
+     */
     public MarkupBuilder setStyle(Meta style) {
         builder.setNode(Markup.MARKUP_STYLE_NODE, style);
         return self();
@@ -88,6 +111,11 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     //TODO apply style
 
+    /**
+     * Add content nodes to this markup
+     * @param content
+     * @return
+     */
     public MarkupBuilder setContent(Meta... content) {
         builder.setNode(Markup.MARKUP_CONTENT_NODE, content);
         return self();
@@ -117,12 +145,23 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         return self();
     }
 
+    /**
+     * Add text content
+     * @param text
+     * @return
+     */
     public MarkupBuilder addText(String text) {
         return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
         );
     }
 
+    /**
+     * Add clored text content
+     * @param text
+     * @param color
+     * @return
+     */
     public MarkupBuilder addText(String text, String color) {
         return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
@@ -130,6 +169,20 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         );
     }
 
+    /**
+     * Add a new line or a paragraph break
+     * @return
+     */
+    public MarkupBuilder ln() {
+        return addText("\n");
+    }
+
+    /**
+     * Add a fixed width text
+     * @param text
+     * @param width
+     * @return
+     */
     public MarkupBuilder addColumn(String text, int width) {
         return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
@@ -137,6 +190,11 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
         );
     }
 
+    /**
+     * Add a list
+     * @param items
+     * @return
+     */
     public MarkupBuilder addList(MarkupBuilder... items) {
         return addContent(new MarkupBuilder()
                 .setType(GenericMarkupRenderer.LIST_TYPE)
@@ -145,6 +203,11 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
     }
 
 
-// TODO add tables
+    public MarkupBuilder addTable(MarkupBuilder... rows){
+        return addContent(new MarkupBuilder()
+                .setType(GenericMarkupRenderer.TABLE_TYPE)
+                .setContent(rows)
+        );
+    }
 
 }

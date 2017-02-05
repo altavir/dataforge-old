@@ -112,4 +112,5 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
     public Stream<Markup> getContent() {
         return getConfig().getMetaList(MARKUP_CONTENT_NODE).stream().map(it -> new Markup(it));
     }
+
 }

@@ -5,7 +5,11 @@ import hep.dataforge.context.Encapsulated
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValuesDefs
 import hep.dataforge.grind.helpers.PlotHelper
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.SimpleConfigurable
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
@@ -14,7 +18,11 @@ import java.util.function.Consumer
 /**
  * Created by darksnake on 15-Dec-16.
  */
-class GrindShell implements Encapsulated {
+@ValuesDefs([
+    @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
+    @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value")
+])
+class GrindShell extends SimpleConfigurable implements Encapsulated {
 
     private Context context;
     private Binding binding = new Binding();
@@ -39,6 +47,14 @@ class GrindShell implements Encapsulated {
         binding.setProperty(key, value)
     }
 
+    def <T> void hook(Class<T> type, Consumer<T> con) {
+        hooks.add(new Hook(type, con));
+    }
+
+    def hook(Consumer<?> con) {
+        hooks.add(new Hook(java.lang.Object, con));
+    }
+
     @Override
     Context getContext() {
         return context;
@@ -58,20 +74,28 @@ class GrindShell implements Encapsulated {
      * @return
      */
     protected Object postEval(Object res) {
-        if (res instanceof Closure) {
+        if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
             res = res.call()
         }
-        if (res instanceof DataNode) {
-            def node = res.computeAll();
-            node.dataStream().map { it.get() }.forEach { postEval(it) };
-            return;
-        } else if (res instanceof Data) {
+
+        if (getConfig().getBoolean("evalData", false) && res instanceof Data) {
             res = res.get();
         }
+
+        if (res instanceof DataNode) {
+            res.dataStream().forEach { postEval(it) };
+        }
+
         hooks.each {
             it.accept(res);
         }
+
         return res;
+    }
+
+    @Override
+    protected void applyConfig(Meta config) {
+
     }
 
     /**

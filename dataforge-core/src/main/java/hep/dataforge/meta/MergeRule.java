@@ -20,6 +20,12 @@ import hep.dataforge.values.Value;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 
 /**
  * Правило объединения двух аннотаций
@@ -27,7 +33,7 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public abstract class MergeRule {
+public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
 
     /**
      * Правило объединения по-умолчанию. Подразумевается простая замена всех
@@ -35,8 +41,12 @@ public abstract class MergeRule {
      *
      * @return
      */
-    public static MergeRule getDefault() {
-        return new DefaultMergeRule();
+    public static MergeRule replace() {
+        return new ReplaceRule();
+    }
+
+    public static MergeRule join(){
+        return new JoinRule();
     }
 
     /**
@@ -46,7 +56,7 @@ public abstract class MergeRule {
      * @param toJoin
      * @return
      */
-    public static MergeRule getConfigured(String... toJoin) {
+    public static MergeRule custom(String... toJoin) {
         return new ConfigurableMergeRule(toJoin);
     }
 
@@ -58,7 +68,7 @@ public abstract class MergeRule {
      * @return
      */
     public static MetaBuilder replace(Meta main, Meta second) {
-        return getDefault().merge(main, second);
+        return replace().merge(main, second);
     }
 
     /**
@@ -150,5 +160,31 @@ public abstract class MergeRule {
 
     protected MetaBuilder writeElement(MetaBuilder builder, String name, List<? extends Meta> item) {
         return builder.setNode(name, item);
+    }
+
+    @Override
+    public Supplier<MetaBuilder> supplier() {
+        return () -> new MetaBuilder("");
+    }
+
+    //TODO test it via Laminate collector
+    @Override
+    public BiConsumer<MetaBuilder, Meta> accumulator() {
+        return ((builder, meta) -> mergeInPlace(meta, builder));
+    }
+
+    @Override
+    public BinaryOperator<MetaBuilder> combiner() {
+        return (builder1, builder2) -> merge(builder1, builder2);
+    }
+
+    @Override
+    public Function<MetaBuilder, Meta> finisher() {
+        return (builder) -> builder.build();
+    }
+
+    @Override
+    public Set<Characteristics> characteristics() {
+        return Collections.emptySet();
     }
 }

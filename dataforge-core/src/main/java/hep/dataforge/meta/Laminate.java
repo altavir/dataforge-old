@@ -23,15 +23,14 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
  * A chain of immutable meta. The value is taken from the first meta in list
  * that contains it.
- * <p>
- * TODO make customizable merging procedures
- * </p>
  *
  * @author darksnake
  */
@@ -51,7 +50,7 @@ public class Laminate extends Meta implements Described {
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
         this.layers = new ArrayList(layers);
-        this.layers.removeIf((meta) -> meta == null||meta.isEmpty());
+        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
     }
 
     public Laminate(List<Meta> layers) {
@@ -108,7 +107,7 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate addFirstLayer(Meta layer) {
-        if(!layer.isEmpty()) {
+        if (!layer.isEmpty()) {
             this.layers.add(0, layer);
         }
         return this;
@@ -121,7 +120,7 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate addLayer(Meta layer) {
-        if(!layer.isEmpty()) {
+        if (!layer.isEmpty()) {
             this.layers.add(layer);
         }
         return this;
@@ -256,7 +255,7 @@ public class Laminate extends Meta implements Described {
             }
         }
 
-        // if descriptor layer is definded, serching it for value
+        // if descriptor layer is definded, searching it for value
         if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
             return MetaUtils.transformValue(descriptorLayer.getValue(path), valueContext());
         }
@@ -287,7 +286,65 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     public <A> Value collectValue(String valueName, Collector<Value, A, Value> collector) {
-        return layers.stream().map(layer -> layer.hasValue(valueName) ? layer.getValue(valueName) : null).filter(it -> it != null).collect(collector);
+        return layers.stream()
+                .filter(layer -> layer.hasValue(valueName))
+                .map(layer -> layer.getValue(valueName))
+                .collect(collector);
+    }
+
+    /**
+     * Merge nodes using provided collector (good idea to use {@link MergeRule}).
+     *
+     * @param nodeName
+     * @param collector
+     * @param <A>
+     * @return
+     */
+    public <A> Meta collectNode(String nodeName, Collector<Meta, A, Meta> collector) {
+        return layers.stream()
+                .filter(layer -> layer.hasMeta(nodeName))
+                .map(layer -> layer.getNode(nodeName))
+                .collect(collector);
+    }
+
+    /**
+     * Merge node lists grouping nodes by provided classifier and then merging each group independently
+     *
+     * @param nodeName   the name of node
+     * @param classifier grouping function
+     * @param collector  used to each group
+     * @param <A>        intermediate collector accumulator type
+     * @param <K>        classifier key type
+     * @return
+     */
+    public <A, K> Collection<Meta> collectNodes(String nodeName, Function<? super Meta, ? extends K> classifier, Collector<Meta, A, Meta> collector) {
+        return layers().stream()
+                .filter(layer -> layer.hasMeta(nodeName))
+                .flatMap(layer -> layer.getMetaList(nodeName).stream())
+                .collect(Collectors.groupingBy(classifier, () -> new LinkedHashMap<>(), collector)).values();
+        //linkedhashmap ensures ordering
+    }
+
+    /**
+     * Same as above, but uses fixed replace rule to merge meta
+     *
+     * @param nodeName
+     * @param classifier
+     * @param <K>
+     * @return
+     */
+    public <K> Collection<Meta> collectNodes(String nodeName, Function<? super Meta, ? extends K> classifier) {
+        return collectNodes(nodeName, classifier, MergeRule.replace());
+    }
+
+    /**
+     * Same as above but uses fixed meta value with given key as identity
+     * @param nodeName
+     * @param key
+     * @return
+     */
+    public Collection<Meta> collectNodes(String nodeName, String key) {
+        return collectNodes(nodeName, meta -> getValue(key, Value.NULL));
     }
 
     /**

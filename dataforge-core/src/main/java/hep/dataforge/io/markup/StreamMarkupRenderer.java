@@ -83,6 +83,11 @@ public abstract class StreamMarkupRenderer extends GenericMarkupRenderer {
             doRender(cell);
             print("\t");
         });
+
+        if (element.getBoolean("header", false)) {
+            ln(false);
+        }
+
         ln(true);
     }
 }
