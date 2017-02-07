@@ -129,7 +129,7 @@ public class Work implements Named {
     }
 
     protected void setFuture(CompletableFuture<?> task) {
-        if (this.futureProperty.get() != null) {
+        if (this.futureProperty.get() != null && !getFuture().isDone()) {
             throw new RuntimeException("The task for this process already set");
         }
         getManager().onStarted(getName());
