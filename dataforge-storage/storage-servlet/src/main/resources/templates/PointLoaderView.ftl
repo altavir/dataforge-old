@@ -41,7 +41,7 @@
             table.draw(data, tableOptions);
             
             <#if  plotParams??>
-                var options =; ${plotParams}
+                var options = ${plotParams};
 
                 var chart = new google.visualization.LineChart(document.getElementById('plot_div'));
                 chart.draw(data, options);
