@@ -25,7 +25,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public abstract class SimpleConfigurable implements Configurable, Annotated {
+public class SimpleConfigurable implements Configurable, Annotated {
 
     private Configuration configuration = null;
 
@@ -71,7 +71,9 @@ public abstract class SimpleConfigurable implements Configurable, Annotated {
      *
      * @param config
      */
-    protected abstract void applyConfig(Meta config);
+    protected void applyConfig(Meta config){
+        //does nothing by default
+    }
 
     /**
      * Apply specific value change. By default applies the whole configuration.

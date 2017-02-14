@@ -282,7 +282,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     /**
      * @return the file
      */
-    private synchronized FileObject getFile() throws IOException {
+    public synchronized FileObject getFile() throws IOException {
         if (this.file == null) {
             this.file = VFS.getManager().resolveFile(uri);
             if (!file.exists()) {
