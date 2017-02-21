@@ -17,8 +17,7 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.Described;
-import hep.dataforge.description.DescriptorUtils;
-import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
@@ -65,8 +64,13 @@ public interface Task<R> extends Named, Described {
         return run(build(workspace, taskConfig));
     }
 
+//    @Override
+//    default NodeDescriptor getDescriptor() {
+//        return DescriptorUtils.buildDescriptor(getName(), getClass());
+//    }
+
     @Override
-    default NodeDescriptor getDescriptor() {
-        return DescriptorUtils.buildDescriptor(getName(), getClass());
+    default MarkupBuilder getHeader() {
+        return MarkupBuilder.text(getName(), "blue");
     }
 }

@@ -30,6 +30,14 @@ import hep.dataforge.meta.MetaBuilder;
  */
 public class ActionDescriptor extends NodeDescriptor {
 
+    public ActionDescriptor(String name) {
+        super(name);
+    }
+
+    public ActionDescriptor(Meta meta) {
+        super(meta);
+    }
+
     public static ActionDescriptor build(Action action) {
         MetaBuilder builder = DescriptorUtils.buildDescriptorMeta(action.getClass());
 
@@ -74,14 +82,6 @@ public class ActionDescriptor extends NodeDescriptor {
         return new ActionDescriptor(builder);
     }
 
-    public ActionDescriptor(String name) {
-        super(name);
-    }
-
-    public ActionDescriptor(Meta meta) {
-        super(meta);
-    }
-
     @Override
     public String info() {
         return meta().getString("actionDef.description", "");
@@ -99,5 +99,6 @@ public class ActionDescriptor extends NodeDescriptor {
     public String getName() {
         return meta().getString("actionDef.name", super.getName());
     }
+
 
 }

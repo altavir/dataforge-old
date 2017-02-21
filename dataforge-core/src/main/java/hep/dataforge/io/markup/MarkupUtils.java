@@ -1,7 +1,6 @@
 package hep.dataforge.io.markup;
 
-import hep.dataforge.description.ActionDescriptor;
-import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.description.Described;
 import hep.dataforge.exceptions.DescriptorException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
@@ -17,24 +16,29 @@ import static hep.dataforge.io.IOUtils.getDefaultTextWidth;
  */
 public class MarkupUtils {
 
-    public static Markup markupDescriptor(NodeDescriptor descriptor) {
-        return applyDescriptorNode(descriptorHead(descriptor), descriptor.meta()).build();
+    public static Markup markupDescriptor(Described obj) {
+        MarkupBuilder builder = new MarkupBuilder();
+        applyDescriptorHead(builder, obj);
+        applyDescriptorNode(builder, obj.getDescriptor().getMeta());
+        return builder.build();
     }
 
-    private static MarkupBuilder descriptorHead(NodeDescriptor descriptor) {
-        MarkupBuilder builder = new MarkupBuilder();
-        if (descriptor instanceof ActionDescriptor) {
-            ActionDescriptor ad = (ActionDescriptor) descriptor;
-            builder.addText(ad.getName(), "green")
-                    .addText(" {input : ")
-                    .addText(ad.inputType(), "cyan")
-                    .addText(", output : ")
-                    .addText(ad.outputType(), "cyan")
-                    .addText(String.format("}: %s", ad.info()));
-        } else if (descriptor.getName() != null && !descriptor.getName().isEmpty()) {
-            builder.addText(descriptor.getName(), "blue");
-        }
-        return builder;
+    private static MarkupBuilder applyDescriptorHead(MarkupBuilder builder, Described obj) {
+        return builder.addContent(obj.getHeader());
+//        NodeDescriptor descriptor = obj.getDescriptor();
+//        MarkupBuilder builder = new MarkupBuilder();
+//        if (descriptor instanceof ActionDescriptor) {
+//            ActionDescriptor ad = (ActionDescriptor) descriptor;
+//            builder.addText(ad.getName(), "green")
+//                    .addText(" {input : ")
+//                    .addText(ad.inputType(), "cyan")
+//                    .addText(", output : ")
+//                    .addText(ad.outputType(), "cyan")
+//                    .addText(String.format("}: %s", ad.info()));
+//        } else if (descriptor.getName() != null && !descriptor.getName().isEmpty()) {
+//            builder.addText(descriptor.getName(), "blue");
+//        }
+//        return builder;
     }
 
     private static MarkupBuilder descriptorValue(Meta valueDef) throws DescriptorException {
@@ -72,6 +76,9 @@ public class MarkupUtils {
     }
 
     private static MarkupBuilder applyDescriptorNode(MarkupBuilder builder, Meta nodeDef) throws DescriptorException {
+        if (builder == null) {
+            builder = new MarkupBuilder();
+        }
         if (nodeDef.hasMeta("node")) {
             MarkupBuilder elementList = MarkupBuilder.list(-1, "+ ");
             for (Meta elDef : nodeDef.getMetaList("node")) {

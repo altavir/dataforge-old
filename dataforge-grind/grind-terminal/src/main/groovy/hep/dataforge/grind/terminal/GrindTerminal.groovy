@@ -3,6 +3,7 @@ package hep.dataforge.grind.terminal
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.description.Described
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
@@ -10,6 +11,7 @@ import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Named
 import org.jline.reader.LineReader
@@ -70,20 +72,28 @@ class GrindTerminal {
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
         shell = new GrindShell(context)
-        shell.getConfig().setValue("evalData",true) // force to eval data
+        shell.getConfig().setValue("evalData", true) // force to eval data
         //.configure(evalData: true) - does not work
-
 
         //add terminal hook for marked up objects
         TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
         Meta markupConfig = Grind.buildMeta(target: "terminal")
         shell.hook(Markedup) {
             renderer.ln()
-            if(it instanceof Named){
-                renderer.render(MarkupBuilder.text(it.name,"red").build())
+            if (it instanceof Named) {
+                renderer.render(MarkupBuilder.text(it.name, "red").build())
                 renderer.ln()
             }
             renderer.render(it.markup(markupConfig))
+        }
+        //add terminal hook for described elements
+        shell.hook(Described) {
+//            if (it instanceof Named) {
+//                renderer.render(MarkupBuilder.text(it.name, "red").build())
+//                renderer.ln()
+//            }
+            renderer.render(MarkupUtils.markupDescriptor(it))
+            renderer.ln()
         }
 
         //define help closure
@@ -150,11 +160,19 @@ class GrindTerminal {
                 try {
                     def res = shell.eval(expression);
                     if (res != null) {
+                        String str = res.toString();
+
+                        //abbreviating the result
+                        //TODO improve string abbreviation
+                        if (str.size() > 50) {
+                            str = str[0..50] + "..."
+                        }
+
                         def resStr = new AttributedStringBuilder()
                                 .style(RES)
                                 .append("\tres = ")
                                 .style(DEFAULT)
-                                .append(res.toString());
+                                .append(str);
                         println(resStr.toAnsi(getTerminal()))
                     }
                 } catch (Exception ex) {
