@@ -17,7 +17,7 @@ import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.workspace.identity.Identity;
-import hep.dataforge.workspace.identity.StringIdentity;
+import hep.dataforge.workspace.identity.ValueIdentity;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
@@ -188,7 +188,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
 
     public Identity getIdentity() {
         //FIXME make more complex identity
-        return new StringIdentity(getName()).and(meta());
+        return new ValueIdentity(getName()).and(meta());
     }
 
     /**

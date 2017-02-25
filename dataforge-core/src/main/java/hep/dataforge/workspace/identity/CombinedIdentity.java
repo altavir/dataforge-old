@@ -15,6 +15,9 @@
  */
 package hep.dataforge.workspace.identity;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -61,5 +64,18 @@ public class CombinedIdentity implements Identity {
     @Override
     public String toString() {
         return "[" + String.join(", ", ids.stream().map(Identity::toString).collect(Collectors.toList())) + "]";
+    }
+
+    @Override
+    public Meta toMeta() {
+        MetaBuilder res =  new MetaBuilder("id")
+                .setValue("type","composite");
+        this.ids.forEach(id-> res.putNode(id.toMeta()));
+        return res;
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        meta.getMetaList("id").forEach(node->ids.add(Identity.from(node)));
     }
 }

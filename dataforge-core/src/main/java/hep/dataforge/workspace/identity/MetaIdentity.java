@@ -16,12 +16,14 @@
 package hep.dataforge.workspace.identity;
 
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaNode;
+
 import java.util.Objects;
 
 public class MetaIdentity implements Identity {
 
-    private final Meta meta;
+    private Meta meta;
 
     /**
      * Constructor snapshots the meta state when it is created, if meta is
@@ -53,9 +55,22 @@ public class MetaIdentity implements Identity {
 
     @Override
     public String toString() {
-        return "meta::"+hashCode();
+        return "meta::" + hashCode();
     }
-    
-    
 
+
+    @Override
+    public Meta toMeta() {
+        return new MetaBuilder("id")
+                .setValue("type", "meta")
+                .setNode("meta", meta);
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        if(!meta.getString("type").equals("meta")){
+            throw new RuntimeException("Wrong Identity type");
+        }
+        this.meta = meta.getMeta("meta");
+    }
 }

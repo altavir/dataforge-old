@@ -16,8 +16,7 @@
 package hep.dataforge.workspace.identity;
 
 import hep.dataforge.meta.Meta;
-
-import java.io.Serializable;
+import hep.dataforge.utils.MetaMorph;
 
 /**
  * A marker interface that designates some object with could call {@code equals}
@@ -26,7 +25,7 @@ import java.io.Serializable;
  *
  * @author Alexander Nozik
  */
-public interface Identity extends Serializable, Comparable<Identity> {
+public interface Identity extends MetaMorph, Comparable<Identity> {
 
     /**
      * The string representation of this identity. Usually a hash code
@@ -46,7 +45,7 @@ public interface Identity extends Serializable, Comparable<Identity> {
     }
     
     default Identity and(String str){
-        return and(new StringIdentity(str));
+        return and(new ValueIdentity(str));
     }
     
     default Identity and(Meta meta){
@@ -56,6 +55,30 @@ public interface Identity extends Serializable, Comparable<Identity> {
     @Override
     default int compareTo(Identity o) {
         return Integer.compare(this.hashCode(), o.hashCode());
+    }
+
+    public static Identity from(Meta meta){
+        try {
+            Class<? extends Identity> type;
+            switch (meta.getString("type", "value")) {
+                case "value":
+                    type = ValueIdentity.class;
+                    break;
+                case "composite":
+                    type = CombinedIdentity.class;
+                    break;
+                case "meta":
+                    type = MetaIdentity.class;
+                    break;
+                default:
+                    type = (Class<? extends Identity>) Class.forName(meta.getString("type"));
+            }
+            Identity res = type.newInstance();
+            res.fromMeta(meta);
+            return res;
+        }catch (Exception ex){
+            throw new RuntimeException(ex);
+        }
     }
     
     

@@ -15,6 +15,10 @@
  */
 package hep.dataforge.workspace.identity;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import org.slf4j.LoggerFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -30,12 +34,14 @@ import java.util.Objects;
  */
 public class ClassIdentity implements Identity {
 
-    String id;
+    private Class cl;
+    private String md5;
 
     public ClassIdentity(Class cl) {
+        this.cl = cl;
         File classFile = new File(cl.getResource(cl.getCanonicalName()).getFile());
         try {
-            this.id = new String(MessageDigest.getInstance("MD5").digest(Files.readAllBytes(classFile.toPath())));
+            this.md5 = new String(MessageDigest.getInstance("MD5").digest(Files.readAllBytes(classFile.toPath())));
         } catch (NoSuchAlgorithmException ex) {
             throw new Error();
         } catch (IOException ex) {
@@ -45,7 +51,7 @@ public class ClassIdentity implements Identity {
 
     @Override
     public int hashCode() {
-        int hash = 3 + id.hashCode();
+        int hash = 3 + md5.hashCode();
         return hash;
     }
 
@@ -58,12 +64,29 @@ public class ClassIdentity implements Identity {
             return false;
         }
         final ClassIdentity other = (ClassIdentity) obj;
-        return Objects.equals(this.id, other.id);
+        return Objects.equals(this.md5, other.md5);
     }
 
     @Override
     public String toString() {
-        return "class::" + id;
+        return "class::" + md5;
     }
 
+    @Override
+    public Meta toMeta() {
+        return new MetaBuilder("id")
+                .setValue("type","class")
+                .setValue("class", cl.getName())
+                .setValue("md5", md5);
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        try {
+            this.cl = Class.forName(meta.getString("class"));
+        } catch (ClassNotFoundException e) {
+            LoggerFactory.getLogger(getClass()).warn("Can't find class described in class identity");
+        }
+        this.md5 = meta.getString("md5");
+    }
 }

@@ -26,7 +26,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.workspace.identity.Identity;
 import hep.dataforge.workspace.identity.MetaIdentity;
-import hep.dataforge.workspace.identity.StringIdentity;
+import hep.dataforge.workspace.identity.ValueIdentity;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -166,7 +166,7 @@ public class ActionUtils {
                 cache = CachePlugin.buildFrom(context).getCache();
             }
 
-            Identity id = new StringIdentity(context.getName());
+            Identity id = new ValueIdentity(context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
                 id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);

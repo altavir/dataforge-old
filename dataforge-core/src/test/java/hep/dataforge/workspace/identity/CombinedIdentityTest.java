@@ -8,7 +8,8 @@ package hep.dataforge.workspace.identity;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import org.junit.Test;
-import static org.junit.Assert.*;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -22,7 +23,7 @@ public class CombinedIdentityTest {
     @Test
     public void testStrings() {
         System.out.println("test string identity");
-        assertEquals(new StringIdentity("myString"), new StringIdentity("myString"));
+        assertEquals(new ValueIdentity("myString"), new ValueIdentity("myString"));
     }
 
     /**
@@ -34,7 +35,7 @@ public class CombinedIdentityTest {
         Meta myMeta = new MetaBuilder("meta").putNode(new MetaBuilder("child").putValue("childValue", 18)).putValue("value", true);
 
         Identity one = new MetaIdentity(myMeta).and("myString");
-        Identity two = new StringIdentity("myString").and(new MetaIdentity(new MetaBuilder(myMeta)));
+        Identity two = new ValueIdentity("myString").and(new MetaIdentity(new MetaBuilder(myMeta)));
 
         assertEquals(one, two);
     }

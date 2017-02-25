@@ -67,7 +67,7 @@ public interface Goal<T> extends RunnableFuture<T> {
     }
 
     /**
-     * Complete this goal externally with given result. May or may not cancel
+     * Complete this goal externally with given result. Try to cancel
      * current execution
      *
      * @param result
