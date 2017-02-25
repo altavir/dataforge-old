@@ -14,13 +14,15 @@ import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 import java.util.function.Consumer
+import java.util.stream.Stream
 
 /**
  * Created by darksnake on 15-Dec-16.
  */
 @ValuesDefs([
-    @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
-    @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value")
+        @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
+        @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value"),
+        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "true", info = "Apply result hooks for each element of collection or stream")
 ])
 class GrindShell extends SimpleConfigurable implements Encapsulated {
 
@@ -84,6 +86,14 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
 
         if (res instanceof DataNode) {
             res.dataStream().forEach { postEval(it) };
+        }
+
+        if (getConfig().getBoolean("unwrap", true)) {
+            if (res instanceof Iterable) {
+                res.forEach { postEval(it) }
+            } else if (res instanceof Stream) {
+                res.forEach { postEval(it) }
+            }
         }
 
         hooks.each {

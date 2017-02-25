@@ -3,7 +3,6 @@ package hep.dataforge.grind
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
-import hep.dataforge.description.TextDescriptorFormatter
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.utils.ContextMetaFactory
@@ -11,6 +10,7 @@ import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
 
 import java.util.function.Consumer
+import java.util.stream.Collectors
 
 /**
  * A wrapper class to dynamically load and update workspaces from configuration
@@ -191,28 +191,30 @@ class GrindWorkspaceBuilder {
      * Display a list of available tasks
      */
     def getTasks() {
-        Workspace ws = build();
-        StringWriter writer = new StringWriter();
-
-        TextDescriptorFormatter formatter = new TextDescriptorFormatter(new PrintWriter(writer, true));
-        ws.getTasks().forEach {
-            formatter.showDescription(it.name, it.descriptor);
-        }
-        writer.flush()
-        return writer.toString();
+        return build().tasks.collect(Collectors.toList())
+//        Workspace ws = build();
+//        StringWriter writer = new StringWriter();
+//
+//        TextDescriptorFormatter formatter = new TextDescriptorFormatter(new PrintWriter(writer, true));
+//        ws.getTasks().forEach {
+//            formatter.showDescription(it.name, it.descriptor);
+//        }
+//        writer.flush()
+//        return writer.toString();
     }
 
 
     def getTargets() {
-        Workspace ws = build();
-        StringWriter writer = new StringWriter();
-
-        ws.getTargets().forEach {
-            writer.println(it)
-        }
-
-        writer.flush()
-        return writer.toString();
+        return build().targets.collect(Collectors.toList())
+//        Workspace ws = build();
+//        StringWriter writer = new StringWriter();
+//
+//        ws.getTargets().forEach {
+//            writer.println(it)
+//        }
+//
+//        writer.flush()
+//        return writer.toString();
     }
 
     def clean() {

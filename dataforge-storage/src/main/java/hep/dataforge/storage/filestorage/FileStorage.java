@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import ch.qos.logback.classic.Level;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
@@ -33,6 +34,7 @@ import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.DefaultFileMonitor;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -56,6 +58,53 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     public static final String LOADER_PATH_KEY = "path";
     public static final String STORAGE_CONFIGURATION_FILE = "storage.xml";
+
+    static {
+        //set up slf4j bridge and logging level
+        Logger logger = LoggerFactory.getLogger("org.apache.commons.vfs2");
+        if (logger instanceof ch.qos.logback.classic.Logger) {
+            ((ch.qos.logback.classic.Logger) logger).setLevel(Level.WARN);
+        }
+    }
+
+    private final FileObject dataDir;
+    private DefaultFileMonitor monitor;
+
+    /**
+     * Create a root storage in directory
+     *
+     * @param dir
+     * @param config
+     * @throws StorageException
+     */
+    protected FileStorage(FileObject dir, Meta config) throws StorageException {
+        super("root", config);
+        this.dataDir = dir;
+        try {
+            startup();
+        } catch (FileSystemException ex) {
+            throw new StorageException(ex);
+        }
+    }
+
+    /**
+     * Create a child storage
+     *
+     * @param parent
+     * @param dirName
+     * @param config
+     * @throws StorageException
+     */
+    protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
+        super(parent, dirName, config);
+        try {
+            //replacing points with path separators we build directory structure
+            dataDir = parent.dataDir.resolveFile(dirName.replace(".", File.separator));
+            startup();
+        } catch (FileSystemException ex) {
+            throw new StorageException(ex);
+        }
+    }
 
     /**
      * Create root File storage from annotation
@@ -136,47 +185,20 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    private final FileObject dataDir;
-    private DefaultFileMonitor monitor;
-
-    /**
-     * Create a root storage in directory
-     *
-     * @param dir
-     * @param config
-     * @throws StorageException
-     */
-    protected FileStorage(FileObject dir, Meta config) throws StorageException {
-        super("root", config);
-        this.dataDir = dir;
-        try {
-            startup();
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
-        }
-    }
-
-    /**
-     * Create a child storage
-     *
-     * @param parent
-     * @param dirName
-     * @param config
-     * @throws StorageException
-     */
-    protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
-        super(parent, dirName, config);
-        try {
-            //replacing points with path separators we build directory structure
-            dataDir = parent.dataDir.resolveFile(dirName.replace(".", File.separator));
-            startup();
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
+    public static Tag readFileTag(FileObject file) throws IOException {
+        InputStream stream = file.getContent().getInputStream();
+        byte[] bytes = new byte[Tag.TAG_LENGTH];
+        stream.read(bytes);
+        if (Tag.isValidTag(bytes)) {
+            Tag tag = new Tag();
+            tag.read(bytes);
+            return tag;
+        } else {
+            return null;
         }
     }
 
     private void startup() throws FileSystemException, StorageException {
-
         if (!isReadOnly()) {
             if (!dataDir.exists()) {
                 dataDir.createFolder();
@@ -229,12 +251,12 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    protected Meta buildDirectoryMeta(FileObject directory) throws FileSystemException{
+    protected Meta buildDirectoryMeta(FileObject directory) throws FileSystemException {
         return new MetaBuilder("storage")
                 .putValue("file.timeModified", Instant.ofEpochMilli(directory.getContent().getLastModifiedTime()))
                 .build();
     }
-    
+
     /**
      * The method should be overridden in descendants to add new loader types
      *
@@ -268,19 +290,6 @@ public class FileStorage extends AbstractStorage implements FileListener {
             } finally {
                 file.close();
             }
-        }
-    }
-
-    public static Tag readFileTag(FileObject file) throws IOException {
-        InputStream stream = file.getContent().getInputStream();
-        byte[] bytes = new byte[Tag.TAG_LENGTH];
-        stream.read(bytes);
-        if (Tag.isValidTag(bytes)) {
-            Tag tag = new Tag();
-            tag.read(bytes);
-            return tag;
-        } else {
-            return null;
         }
     }
 

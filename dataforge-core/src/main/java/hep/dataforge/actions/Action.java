@@ -17,6 +17,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.description.Described;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 
@@ -30,7 +31,7 @@ import hep.dataforge.names.Named;
  * @param <T> - the main type of input data
  * @param <R> - the main type of resulting object
  */
-public interface Action<T, R> extends Named {
+public interface Action<T, R> extends Named, Described {
 
 //    default DataNode<R> run(DataNode<? extends T> data, Meta actionMeta){
 //        return run(Global.instance(),data,actionMeta);

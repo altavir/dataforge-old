@@ -20,9 +20,9 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.description.ActionDescriptor;
-import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -51,6 +51,8 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@resultGroup";
     public static final String RESULT_NAME_KEY = "@resultName";
     public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
+    //TODO move to separate manager
+    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("@allowParallel", true);
@@ -145,8 +147,20 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      *
      * @return
      */
-    public NodeDescriptor getDescriptor() {
+    @Override
+    public ActionDescriptor getDescriptor() {
         return ActionDescriptor.build(this);
+    }
+
+    @Override
+    public MarkupBuilder getHeader() {
+        ActionDescriptor ad = getDescriptor();
+        return MarkupBuilder.text(ad.getName(), "green")
+                .addText(" {input : ")
+                .addText(ad.inputType(), "cyan")
+                .addText(", output : ")
+                .addText(ad.outputType(), "cyan")
+                .addText(String.format("}: %s", ad.info()));
     }
 
     /**
@@ -210,9 +224,6 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public OutputStream buildActionOutput(Context context, String name) {
         return context.io().out(getName(), name);
     }
-
-    //TODO move to separate manager
-    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
     protected Log getReport(Context context, String reportName) {
         return reportCache.computeIfAbsent(reportName, (n) -> {

@@ -32,6 +32,7 @@ import static hep.dataforge.io.IOUtils.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@Deprecated
 public class TextDescriptorFormatter implements DescriptorFormatter {
 
 
