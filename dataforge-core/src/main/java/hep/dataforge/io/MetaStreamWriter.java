@@ -6,11 +6,8 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.Meta;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+
+import java.io.*;
 import java.nio.charset.Charset;
 
 /**
@@ -21,27 +18,30 @@ import java.nio.charset.Charset;
 public interface MetaStreamWriter {
 
     /**
+     * Set charset for this writer
+     * @param charset
+     * @return
+     */
+    MetaStreamWriter withCharset(Charset charset);
+
+    /**
      * write Meta object to the giver OuputStream using given charset (if it is
      * possible)
      *
      * @param stream
      * @param meta
-     * @param charset a charset for this write operation if null, than default
      * charset is used
      */
-    void write(OutputStream stream, Meta meta, Charset charset);
+    void write(OutputStream stream, Meta meta);
+
 
     default String writeString(Meta meta) {
-        return writeString(meta, null);
-    }
-
-    default String writeString(Meta meta, Charset charset) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        write(baos, meta, charset);
+        write(baos, meta);
         return new String(baos.toByteArray(), Charset.forName("UTF-8"));
     }
 
-    default void writeToFile(File file, Meta meta, Charset charset) throws FileNotFoundException {
-        write(new FileOutputStream(file), meta, charset);
+    default void writeToFile(File file, Meta meta) throws FileNotFoundException {
+        write(new FileOutputStream(file), meta);
     }
 }

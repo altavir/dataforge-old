@@ -6,11 +6,8 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.MetaBuilder;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
+
+import java.io.*;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 
@@ -33,57 +30,51 @@ public interface MetaStreamReader {
      *
      * @param stream a stream that should be read.
      * @param length a number of bytes from stream that should be read. Any
-     * negative value .
-     * @param charset an override charset for this read operation. Null value is
-     * ignored
-     * @throws java.io.IOException if any.
-     * @throws java.text.ParseException if any.
+     *               negative value .
      * @return a {@link hep.dataforge.meta.Meta} object.
+     * @throws java.io.IOException      if any.
+     * @throws java.text.ParseException if any.
      */
-    MetaBuilder read(InputStream stream, long length, Charset charset) throws IOException, ParseException;
-    
-    default MetaBuilder read(InputStream stream) throws IOException, ParseException{
-        return read(stream, -1, null);
+    MetaBuilder read(InputStream stream, long length) throws IOException, ParseException;
+
+    default MetaBuilder read(InputStream stream) throws IOException, ParseException {
+        return read(stream, -1);
     }
-    
+
     /**
-     * Decide if this reader accepts given file
-     * 
-     * @return 
+     * Set charset for current reader instance
+     *
+     * @param charset
+     * @return
      */
-    boolean acceptsFile(File file);
-    //TODO replace by nio or vfs
+    MetaStreamReader withCharset(Charset charset);
+
+    Charset getCharset();
 
     /**
      * Read the Meta from file. The whole file is considered to be Meta file.
      *
      * @param file
-     * @param charset
      * @return
      * @throws IOException
      * @throws ParseException
      */
-    default MetaBuilder readFile(File file, Charset charset) throws IOException, ParseException {
-        return read(new FileInputStream(file), file.length(), charset);
+    default MetaBuilder readFile(File file) throws IOException, ParseException {
+        return read(new FileInputStream(file), file.length());
     }
 
     /**
      * Read Meta from string
      *
      * @param string
-     * @param charset overrides string encoding if present
      * @return
      * @throws IOException
      * @throws ParseException
      */
-    default MetaBuilder readString(String string, Charset charset) throws IOException, ParseException {
+    default MetaBuilder readString(String string) throws IOException, ParseException {
         byte[] bytes;
-        if (charset != null) {
-            bytes = string.getBytes(charset);
-        } else {
-            bytes = string.getBytes();
-        }
+        bytes = string.getBytes(getCharset());
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
-        return read(bais, bytes.length, charset);
+        return read(bais, bytes.length);
     }
 }

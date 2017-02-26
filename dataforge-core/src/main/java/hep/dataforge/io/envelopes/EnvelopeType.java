@@ -19,14 +19,28 @@ import hep.dataforge.values.Value;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Objects;
+import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
 
 /**
- * @param <T>
  * @author Alexander Nozik
  */
-public interface EnvelopeType<T extends Envelope> {
+public interface EnvelopeType {
 
-    short getCode();
+    ServiceLoader<EnvelopeType> loader = ServiceLoader.load(EnvelopeType.class);
+
+    static EnvelopeType resolve(int code) {
+        return StreamSupport.stream(loader.spliterator(), false)
+                .filter(it -> it.getCode() == code).findFirst().orElse(null);
+    }
+
+    static EnvelopeType resolve(String name) {
+        return StreamSupport.stream(loader.spliterator(), false)
+                .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+    }
+
+    int getCode();
 
     String getName();
 
@@ -36,19 +50,19 @@ public interface EnvelopeType<T extends Envelope> {
         return Collections.emptyMap();
     }
 
-    EnvelopeReader<T> getReader();
+    EnvelopeReader getReader();
 
-    EnvelopeWriter<T> getWriter();
+    EnvelopeWriter getWriter();
 
     /**
-     * True if metadata lenth autodetection is allowed
+     * True if metadata length auto detection is allowed
      *
      * @return
      */
     boolean infiniteMetaAllowed();
 
     /**
-     * True if data lenth autodetection is allowed
+     * True if data length auto detection is allowed
      *
      * @return
      */

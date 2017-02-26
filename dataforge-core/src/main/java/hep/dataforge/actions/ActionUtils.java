@@ -16,7 +16,6 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.cache.CachePlugin;
-import hep.dataforge.cache.DataCache;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
@@ -160,20 +159,21 @@ public class ActionUtils {
         @Override
         public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
             DataNode res = data;
-            DataCache cache = null;
+            CachePlugin cache = null;
             //Set data cache if it is defined in context
             if (context.getBoolean("enableCache", false)) {
-                cache = CachePlugin.buildFrom(context).getCache();
+                cache = context.getPlugin(CachePlugin.class);
             }
 
             Identity id = new ValueIdentity(context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
                 id = id.and(actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
-                res = buildAction(context, actionType).run(context, res, actionMeta);
+                Action action = buildAction(context, actionType);
+                res = action.run(context, res, actionMeta);
                 if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
                     //FIXME add context identity here
-                    res = cache.cacheNode(res, new MetaIdentity(actionMeta));
+                    res = cache.cacheNode(action.getName(), new MetaIdentity(actionMeta), res);
                 }
             }
             return res;

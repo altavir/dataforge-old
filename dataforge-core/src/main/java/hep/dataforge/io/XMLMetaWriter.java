@@ -24,6 +24,8 @@ import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.io.IOUtils.UTF8_CHARSET;
+
 /**
  * A writer for XML represented Meta
  *
@@ -31,12 +33,17 @@ import java.util.stream.Collectors;
  */
 public class XMLMetaWriter implements MetaStreamWriter {
 
+    Charset charset = UTF8_CHARSET;
+
     @Override
-    public void write(OutputStream stream, Meta meta, Charset charset) {
+    public XMLMetaWriter withCharset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    @Override
+    public void write(OutputStream stream, Meta meta) {
         try {
-            if (charset == null) {
-                charset = Charset.forName("UTF-8");
-            }
 
             Document doc = getXMLDocument(meta);
             TransformerFactory tf = TransformerFactory.newInstance();

@@ -16,6 +16,7 @@ import java.util.ServiceLoader;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public class EnvelopePropertyCodes {
 
 

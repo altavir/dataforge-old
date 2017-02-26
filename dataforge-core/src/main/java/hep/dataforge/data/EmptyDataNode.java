@@ -72,5 +72,4 @@ public class EmptyDataNode<T> implements DataNode<T> {
     public boolean provides(Path path) {
         return false;
     }
-
 }

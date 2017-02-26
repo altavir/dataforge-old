@@ -19,22 +19,25 @@ package hep.dataforge.io.envelopes;
  *
  * @author darksnake
  */
-public class DefaultEnvelopeType implements EnvelopeType<Envelope> {
+public class DefaultEnvelopeType implements EnvelopeType {
+
+    public static DefaultEnvelopeType instance = new DefaultEnvelopeType();
+
+    public static int DEFAULT_ENVELOPE_TYPE = 0x44463032;
 
     /**
      * The set of symbols that separates tag from metadata and data
      */
     public static final byte[] SEPARATOR = {'\r', '\n'};
-    public static final byte[] CUSTOM_PROPERTY_HEAD = {'#', '?'};
 
     @Override
     public String description() {
-        return "Standard envelope type. Meta and data autodetectio are not supported. Tag is mandatory.";
+        return "Standard envelope type. Meta and data end auto detection are not supported. Tag is mandatory.";
     }
 
     @Override
-    public short getCode() {
-        return 0x0000;
+    public int getCode() {
+        return DEFAULT_ENVELOPE_TYPE;
     }
 
     @Override
@@ -43,12 +46,12 @@ public class DefaultEnvelopeType implements EnvelopeType<Envelope> {
     }
 
     @Override
-    public EnvelopeReader<Envelope> getReader() {
+    public EnvelopeReader getReader() {
         return DefaultEnvelopeReader.instance;
     }
 
     @Override
-    public EnvelopeWriter<Envelope> getWriter() {
+    public EnvelopeWriter getWriter() {
         return DefaultEnvelopeWriter.instance;
     }
 

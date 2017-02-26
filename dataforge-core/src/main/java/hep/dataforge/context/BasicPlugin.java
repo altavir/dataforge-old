@@ -15,7 +15,6 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
 
@@ -41,11 +40,6 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
             }
         }
         return builder;
-    }
-
-    @Override
-    protected void applyConfig(Meta config) {
-
     }
 
     @Override
@@ -104,6 +98,4 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     public final Context getContext() {
         return context;
     }
-
-
 }

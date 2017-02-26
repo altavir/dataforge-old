@@ -31,6 +31,7 @@ import static hep.dataforge.io.envelopes.Envelope.*;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public class Tag {
     public static final Charset ASCII_CHARSET = Charset.forName("US-ASCII");
 

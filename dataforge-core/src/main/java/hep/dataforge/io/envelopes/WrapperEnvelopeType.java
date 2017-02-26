@@ -18,8 +18,8 @@ public class WrapperEnvelopeType extends DefaultEnvelopeType {
     }
 
     @Override
-    public short getCode() {
-        return Wrappable.DEFAULT_WRAPPER_ENVELOPE_CODE;
+    public int getCode() {
+        return Wrappable.WRAPPER_ENVELOPE_CODE;
     }
 
     @Override

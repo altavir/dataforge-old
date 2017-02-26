@@ -35,8 +35,8 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
     }
 
     @Override
-    public short getCode() {
-        return EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
+    public int getCode() {
+        return EnvelopeCodes.DATAFORGE_ENVELOPE | EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
     }
 
     @Override

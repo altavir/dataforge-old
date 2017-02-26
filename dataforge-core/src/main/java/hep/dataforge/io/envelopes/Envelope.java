@@ -35,21 +35,20 @@ public interface Envelope extends Annotated {
 
     //Constants
     /**
-     * The type of the envelope
+     * Primary tag keys
      */
     String TYPE_KEY = "type";
+    String META_TYPE_KEY = "metaType";
+    String META_LENGTH_KEY = "metaLength";
+    String DATA_LENGTH_KEY = "dataLength";
 
     /**
-     * Version of envelope
+     * Obsolete keys
      */
     String VERSION_KEY = "version";
-
     String OPT_KEY = "opt";
-    String META_TYPE_KEY = "metaType";
     String META_ENCODING_KEY = "metaEncoding";
-    String META_LENGTH_KEY = "metaLength";
     String DATA_TYPE_KEY = "dataType";
-    String DATA_LENGTH_KEY = "dataLength";
 
     Map<String, Value> getProperties();
 

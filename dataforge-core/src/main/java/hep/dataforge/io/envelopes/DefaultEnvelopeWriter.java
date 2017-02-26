@@ -22,29 +22,24 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
-import java.util.HashMap;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
-import static hep.dataforge.io.envelopes.Envelope.*;
-import static hep.dataforge.io.envelopes.EnvelopePropertyCodes.getMetaType;
+import static hep.dataforge.io.envelopes.Envelope.DATA_LENGTH_KEY;
+import static hep.dataforge.io.envelopes.Envelope.META_LENGTH_KEY;
 
 /**
- *
  * @author darksnake
  */
-public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
+public class DefaultEnvelopeWriter implements EnvelopeWriter {
+    private static final Set<String> TAG_PROPERTIES = new HashSet<>(
+            Arrays.asList(new String[]{Envelope.TYPE_KEY, Envelope.META_TYPE_KEY, Envelope.META_LENGTH_KEY, Envelope.DATA_LENGTH_KEY})
+    );
 
     public static final DefaultEnvelopeWriter instance = new DefaultEnvelopeWriter();
-
-    private static final Map<String, Value> defaultProperties;
-
-    static {
-        defaultProperties = new HashMap<>();
-        defaultProperties.put(META_TYPE_KEY, Value.of(0));
-        defaultProperties.put(META_ENCODING_KEY, Value.of(0));
-    }
 
     @Override
     public void write(OutputStream stream, Envelope envelope) throws IOException {
@@ -57,16 +52,15 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
      *
      * @param stream
      * @param envelope
-     * @param useStamp
+     * @param useTag
      * @throws IOException
      */
-    public void write(OutputStream stream, Envelope envelope, boolean useStamp) throws IOException {
+    public void write(OutputStream stream, Envelope envelope, boolean useTag) throws IOException {
 
-        Map<String, Value> newProperties = new HashMap<>(defaultProperties);
-        newProperties.putAll(envelope.getProperties());
+        EnvelopeTag tag = new EnvelopeTag();
+        tag.setValues(envelope.getProperties());
 
-        MetaStreamWriter writer = getMetaType(newProperties.get(META_TYPE_KEY)).getWriter();
-        Charset charset = Charset.forName(newProperties.get(META_ENCODING_KEY).stringValue());//EnvelopePropertyCodes.getCharset(newProperties.get(META_ENCODING_KEY));
+        MetaStreamWriter writer = tag.getMetaType().getWriter();
         byte[] meta;
         int metaSize;
         if (envelope.meta().isEmpty()) {
@@ -74,25 +68,26 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter<Envelope> {
             metaSize = 0;
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            writer.write(baos, envelope.meta(), charset);
+            writer.write(baos, envelope.meta());
             meta = baos.toByteArray();
             metaSize = meta.length + 2;
         }
-        newProperties.putIfAbsent(META_LENGTH_KEY, Value.of(metaSize));
+        tag.setValue(META_LENGTH_KEY, metaSize);
 
 //        byte[] dataBytes = envelope.getData().array();
         long dataSize = envelope.getData().size();
-        newProperties.putIfAbsent(DATA_LENGTH_KEY, Value.of(dataSize));
+        tag.setValue(DATA_LENGTH_KEY, dataSize);
 
-        if (useStamp) {
-            Tag stamp = new Tag();
-            newProperties = stamp.applyProperties(newProperties);
-            stream.write(stamp.asByteArray());
+        if (useTag) {
+            stream.write(tag.byteHeader());
         }
 
-        for (Map.Entry<String, Value> entry : newProperties.entrySet()) {
-            stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
-            stream.write(SEPARATOR);
+        for (Map.Entry<String, Value> entry : tag.getValues().entrySet()) {
+            if (useTag && TAG_PROPERTIES.contains(entry.getKey())) {
+            } else {
+                stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
+                stream.write(SEPARATOR);
+            }
         }
 
         stream.write(meta);

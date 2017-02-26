@@ -9,6 +9,7 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
+import java.io.File;
 import java.net.URI;
 import java.util.Map;
 import java.util.Properties;
@@ -19,8 +20,20 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class DefaultCacheManager implements CacheManager, Encapsulated {
 
-    private Context context = Global.instance();
+    private final Context context;
     private Map<String, DefaultCache> map = new ConcurrentHashMap<>();
+
+    public DefaultCacheManager(Context context) {
+        this.context = context;
+    }
+
+    public DefaultCacheManager() {
+        this.context = Global.instance();
+    }
+
+    public File getRootCacheDir() {
+        return new File(context.io().getTmpDirectory(), ".cache");
+    }
 
     @Override
     public CachingProvider getCachingProvider() {
@@ -29,7 +42,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public URI getURI() {
-        return URI.create("default");
+        return getRootCacheDir().toURI();
     }
 
     @Override
@@ -44,6 +57,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) throws IllegalArgumentException {
+        //TODO add configuration for cache
         return getCache(cacheName);
     }
 
@@ -66,6 +80,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
     public void destroyCache(String cacheName) {
         Cache cache = map.get(cacheName);
         if (cache != null) {
+            cache.clear();
             cache.close();
             map.remove(cacheName);
         }
@@ -97,12 +112,8 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
         if (clazz == DefaultCacheManager.class) {
             return (T) new DefaultCacheManager();
         } else {
-            throw new RuntimeException("Wrong wrapped class");
+            throw new IllegalArgumentException("Wrong wrapped class");
         }
-    }
-
-    public void setContext(Context context) {
-        this.context = context;
     }
 
     @Override

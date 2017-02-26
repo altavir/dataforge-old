@@ -24,6 +24,7 @@ import hep.dataforge.values.ValueType;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -40,6 +41,9 @@ import static java.util.regex.Pattern.compile;
  * @version $Id: $Id
  */
 public class IOUtils {
+    public static final Charset ASCII_CHARSET = Charset.forName("US-ASCII");
+    public static final Charset UTF8_CHARSET = Charset.forName("UTF-8");
+
 
     /**
      * Constant <code>ANSI_RESET="\u001B[0m"</code>

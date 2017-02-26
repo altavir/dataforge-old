@@ -21,8 +21,8 @@ import java.io.OutputStream;
 /**
  *
  * @author Alexander Nozik
- * @param <T>
+
  */
-public interface EnvelopeWriter<T extends Envelope> {
-    void write(OutputStream stream, T envelope) throws IOException;
+public interface EnvelopeWriter {
+    void write(OutputStream stream, Envelope envelope) throws IOException;
 }

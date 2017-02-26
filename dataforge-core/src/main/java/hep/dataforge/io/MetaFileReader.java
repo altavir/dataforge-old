@@ -7,6 +7,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
+import hep.dataforge.io.envelopes.MetaType;
 import hep.dataforge.meta.MetaBuilder;
 
 import java.io.File;
@@ -39,7 +40,7 @@ public class MetaFileReader {
     public static String INCLUDE_ELEMENT = "df:include";
 
     private static final MetaFileReader instance = new MetaFileReader();
-    private static final ServiceLoader<MetaStreamReader> loader = ServiceLoader.load(MetaStreamReader.class);
+    private static final ServiceLoader<MetaType> loader = ServiceLoader.load(MetaType.class);
 
     public static MetaFileReader instance() {
         return instance;
@@ -62,9 +63,9 @@ public class MetaFileReader {
     }
 
     public MetaBuilder read(Context context, File file, Charset encoding) throws IOException, ParseException {
-        for (MetaStreamReader reader : loader) {
-            if (reader.acceptsFile(file)) {
-                return transform(context, reader.read(new FileInputStream(file), file.length(), encoding));
+        for (MetaType type : loader) {
+            if (type.fileNameFilter().test(file.getName())) {
+                return transform(context, type.getReader().withCharset(encoding).read(new FileInputStream(file), file.length()));
             }
         }
 

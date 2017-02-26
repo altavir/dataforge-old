@@ -20,7 +20,10 @@ import org.xml.sax.SAXException;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -34,16 +37,24 @@ import static javax.xml.parsers.DocumentBuilderFactory.newInstance;
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class XMLMetaReader implements MetaStreamReader {
+    Charset charset = IOUtils.UTF8_CHARSET;
 
     @Override
-    public MetaBuilder read(InputStream stream, long length, Charset charset) throws IOException, ParseException {
+    public MetaStreamReader withCharset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    @Override
+    public Charset getCharset() {
+        return charset;
+    }
+
+    @Override
+    public MetaBuilder read(InputStream stream, long length) throws IOException, ParseException {
         try {
             DocumentBuilderFactory factory = newInstance();
             DocumentBuilder builder = factory.newDocumentBuilder();
-
-            if (charset == null) {
-                charset = Charset.forName("UTF-8");
-            }
 
             InputSource source;
             if (length < 0) {
@@ -153,10 +164,4 @@ public class XMLMetaReader implements MetaStreamReader {
     private String normalizeName(String str) {
         return str.replace("_at_", "@");
     }
-
-    @Override
-    public boolean acceptsFile(File file) {
-        return file.toString().toLowerCase().endsWith(".xml");
-    }
-
 }

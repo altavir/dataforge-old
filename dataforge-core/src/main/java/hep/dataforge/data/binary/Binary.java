@@ -18,6 +18,7 @@ import java.nio.channels.ReadableByteChannel;
  * @author Alexander Nozik
  */
 public interface Binary {
+    //TODO add randomAcessBinary
     
     /**
      * Read binary content to single ByteBuffer

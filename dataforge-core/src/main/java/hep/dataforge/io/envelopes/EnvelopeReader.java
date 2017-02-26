@@ -22,10 +22,29 @@ import java.io.InputStream;
  * interface for reading envelopes
  *
  * @author Alexander Nozik
- * @param <T>
- */
-public interface EnvelopeReader<T extends Envelope> {
+  */
+public interface EnvelopeReader {
 
-    T read(InputStream stream) throws IOException;
+    /**
+     * Read properties of the envelope
+     * @param stream
+     * @return
+     * @throws IOException
+     */
+    default EnvelopeTag readProperties(InputStream stream) throws IOException {
+        return new EnvelopeTag().read(stream);
+    }
+
+    /**
+     * Read the whole envelope using internal properties reader.
+     * @param stream
+     * @return
+     * @throws IOException
+     */
+    default Envelope read(InputStream stream) throws IOException {
+        return read(readProperties(stream),stream);
+    }
+
+    Envelope read(EnvelopeTag properties, InputStream stream) throws IOException;
 
 }

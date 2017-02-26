@@ -10,7 +10,12 @@ import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.io.XMLMetaReader;
 import hep.dataforge.io.XMLMetaWriter;
 
+import java.util.function.Predicate;
+
 public class XMLMetaType implements MetaType {
+    public static XMLMetaType instance = new XMLMetaType();
+
+    public static final String XML_META_TYPE = "XML";
 
     @Override
     public short getCode() {
@@ -19,7 +24,7 @@ public class XMLMetaType implements MetaType {
 
     @Override
     public String getName() {
-        return "XML";
+        return XML_META_TYPE;
     }
 
     @Override
@@ -30,6 +35,11 @@ public class XMLMetaType implements MetaType {
     @Override
     public MetaStreamWriter getWriter() {
         return new XMLMetaWriter();
+    }
+
+    @Override
+    public Predicate<String> fileNameFilter() {
+        return str-> str.toLowerCase().endsWith(".xml");
     }
 
 }

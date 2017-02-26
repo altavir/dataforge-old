@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.names.Named;
+
 import java.time.Instant;
 
 /**
@@ -25,6 +26,10 @@ import java.time.Instant;
  * @version $Id: $Id
  */
 public class NamedValue implements Named, Value {
+
+    public static NamedValue of(String name, Object value){
+        return new NamedValue(name,Value.of(value));
+    }
 
     private final Value value;
     private final String name;

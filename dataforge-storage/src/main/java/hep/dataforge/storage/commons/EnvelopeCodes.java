@@ -22,6 +22,12 @@ package hep.dataforge.storage.commons;
 public class EnvelopeCodes {
 
     //Enevelope codes
+
+    /**
+     * Leadingsymbols
+     */
+    public static final int DATAFORGE_ENVELOPE = 0x44460000;//DFxx
+
     /**
      * A DataForge system message type
      */

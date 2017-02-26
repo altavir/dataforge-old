@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public class LocalFileDataCache extends DataCache {
 
     private static final String CACHE_MAP_FILE = "cache.map";

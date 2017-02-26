@@ -300,7 +300,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private void open() {
         try (InputStream stream = getFile().getContent().getInputStream()) {
 //            LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
-            Envelope header = DefaultEnvelopeReader.instance.customRead(stream, null);
+            Envelope header = DefaultEnvelopeReader.instance.read(null, stream);
             this.properties = header.getProperties();
             meta = header.meta();
             dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();

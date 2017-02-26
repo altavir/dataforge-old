@@ -47,7 +47,7 @@ public class EnvelopeBuilder {
     }
 
     public EnvelopeBuilder() {
-        this.properties.put(VERSION_KEY, Value.of(Tag.CURRENT_PROTOCOL_VERSION));
+
     }
 
     public EnvelopeBuilder setProperty(String name, Value value) {
@@ -112,8 +112,8 @@ public class EnvelopeBuilder {
         return this;
     }
 
-    public EnvelopeBuilder setMetaType(String metaType) {
-        return setProperty(META_TYPE_KEY, metaType);
+    public EnvelopeBuilder setMetaType(MetaType metaType) {
+        return setProperty(META_TYPE_KEY, metaType.getName());
     }
 
     public EnvelopeBuilder setMetaEncoding(String metaEncoding) {
@@ -135,29 +135,8 @@ public class EnvelopeBuilder {
         return this;
     }
 
-    //    public EnvelopeBuilder setPriority(int priority) {
-//        return setProperty(MESSAGE_PRIORITY_KEY, priority);
-//    }
     public EnvelopeBuilder setEnvelopeType(EnvelopeType type) {
         return this.setProperty(TYPE_KEY, type.getName());
-    }
-
-    public EnvelopeBuilder setEnvelopeType(String type) {
-        return this.setProperty(TYPE_KEY, type);
-    }
-
-    public EnvelopeBuilder setEnvelopeType(short code) {
-        Value type = EnvelopePropertyCodes.decode(TYPE_KEY, code);
-        return this.setProperty(TYPE_KEY, type);
-    }
-
-    public EnvelopeBuilder setDataType(String type) {
-        return this.setProperty(DATA_TYPE_KEY, type);
-    }
-
-    public EnvelopeBuilder setDataType(int code) {
-        Value type = EnvelopePropertyCodes.decode(DATA_TYPE_KEY, code);
-        return this.setProperty(DATA_TYPE_KEY, type);
     }
 
     //    public EnvelopeBuilder setTime(LocalDateTime time){

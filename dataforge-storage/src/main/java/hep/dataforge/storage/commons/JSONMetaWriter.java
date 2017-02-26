@@ -5,6 +5,7 @@
  */
 package hep.dataforge.storage.commons;
 
+import hep.dataforge.io.IOUtils;
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
@@ -23,7 +24,8 @@ import java.util.Map;
  */
 public class JSONMetaWriter implements MetaStreamWriter {
 
-    boolean prettify = true;
+    private boolean prettify = true;
+    private Charset charset = IOUtils.UTF8_CHARSET;
 
     public JSONMetaWriter() {
     }
@@ -33,10 +35,13 @@ public class JSONMetaWriter implements MetaStreamWriter {
     }
 
     @Override
-    public void write(OutputStream stream, Meta meta, Charset charset) {
-        if (charset == null) {
-            charset = Charset.forName("UTF-8");
-        }
+    public MetaStreamWriter withCharset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    @Override
+    public void write(OutputStream stream, Meta meta) {
         Map<String, Object> properties = new HashMap<>();
         if (prettify) {
             properties.put("javax.json.stream.JsonGenerator.prettyPrinting", true);

@@ -5,11 +5,12 @@
  */
 package hep.dataforge.io.envelopes;
 
-import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+
+import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
 
 /**
  * Utilities to do simple wrap or unwrap operations
@@ -25,7 +26,6 @@ public class WrapperUtils {
 
         EnvelopeBuilder builder = new EnvelopeBuilder();
         builder.setEnvelopeType(new WrapperEnvelopeType());
-        builder.setDataType("df.Object");
         builder.putMetaValue(WRAPPED_TYPE_KEY, JAVA_OBJECT_TYPE);
         builder.putMetaValue(JAVA_CLASS_KEY, obj.getClass().getName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

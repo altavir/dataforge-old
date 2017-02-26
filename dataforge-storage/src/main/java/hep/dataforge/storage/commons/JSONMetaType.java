@@ -9,6 +9,8 @@ import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.io.envelopes.MetaType;
 
+import java.util.function.Predicate;
+
 public class JSONMetaType implements MetaType {
 
     @Override
@@ -29,6 +31,11 @@ public class JSONMetaType implements MetaType {
     @Override
     public MetaStreamWriter getWriter() {
         return new JSONMetaWriter();
+    }
+
+    @Override
+    public Predicate<String> fileNameFilter() {
+        return str-> str.toLowerCase().endsWith(".json");
     }
 
 }

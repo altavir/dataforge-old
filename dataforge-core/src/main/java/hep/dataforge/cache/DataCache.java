@@ -22,6 +22,7 @@ import java.util.function.Function;
  *
  * @author Alexander Nozik
  */
+@Deprecated
 public abstract class DataCache implements Encapsulated {
 
     /**

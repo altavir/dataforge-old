@@ -2,9 +2,16 @@ package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
+import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.names.Named;
+import hep.dataforge.utils.Misc;
+import hep.dataforge.values.Value;
 import hep.dataforge.workspace.identity.Identity;
+import org.slf4j.Logger;
 
 import javax.cache.Cache;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
@@ -13,57 +20,85 @@ import javax.cache.integration.CompletionListener;
 import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
-import java.io.File;
-import java.io.ObjectInputStream;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.io.*;
+import java.util.*;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
+ * Default implementation for
  * Created by darksnake on 10-Feb-17.
  */
 public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identity, V>, Encapsulated {
+
+    private static DefaultEnvelopeReader reader = new DefaultEnvelopeReader();
+    private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter();
 
     private final String name;
     private DefaultCacheManager manager;
     private final Class<V> valueType;
 
-    private Map<Identity, V> lruCache;
-    private Map<Identity, Envelope> envelopes;
+    private Map<Identity, V> softCache;
+    private Map<Identity, File> hardCache = new HashMap<>();
     private File cacheDir;
 
     public DefaultCache(String name, DefaultCacheManager manager, Class<V> valueType) {
         this.name = name;
         this.manager = manager;
         this.valueType = valueType;
+        cacheDir = new File(manager.getRootCacheDir(), name);
+        scanDirectory();
+    }
+
+    private Logger getLogger() {
+        return getContext().getLogger();
+    }
+
+    private Envelope read(File file) {
+        try (FileInputStream fis = new FileInputStream(file)) {
+            return reader.readWithData(fis);
+        } catch (Exception e) {
+            throw new RuntimeException("File read error", e);
+        }
+    }
+
+    private synchronized void scanDirectory() {
+        if (cacheDir.exists()) {
+            hardCache.clear();
+            Stream.of(cacheDir.listFiles((dir, name) -> name.endsWith(".dfcache"))).forEach(file -> {
+                try {
+                    Envelope envelope = read(file);
+                    hardCache.put(Identity.from(envelope.meta()), file);
+                } catch (Exception ex) {
+                    getLogger().error("Failed to read cache file {}", file.getName());
+                    file.delete();
+                }
+            });
+        }
     }
 
     @Override
     public V get(Identity id) {
-        if (lruCache.containsKey(id)) {
-            return (V) lruCache.get(id);
-        } else if (envelopes.containsKey(id)) {
-            Envelope envelpe = envelopes.get(id);
-            try (ObjectInputStream ois = new ObjectInputStream(envelpe.getData().getStream())) {
+        if (getSoftCache().containsKey(id)) {
+            return (V) getSoftCache().get(id);
+        } else if (hardCache.containsKey(id)) {
+            File cacheFile = hardCache.get(id);
+            Envelope envelope = read(cacheFile);
+            try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
                 V res = (V) ois.readObject();
-                lruCache.put(id, res);
+                getSoftCache().put(id, res);
                 return res;
             } catch (Exception ex) {
-//                getLogger().error("Failed to read cached object with id '{}' from file with message: {}", id.toString(), ex.getMessage());
-//                if (envelpe instanceof FileEnvelope) {
-//                    file.deleteOnExit();
-//                }
-                envelopes.remove(id);
-                throw new RuntimeException("File read error", ex);
+                getLogger().error("Failed to read cached object with id '{}' from file with message: {}", id.toString(), ex.getMessage());
+                cacheFile.delete();
+                hardCache.remove(id);
+                return null;
             }
         } else {
-            throw new RuntimeException("Object not cached");
+            return null;
         }
     }
 
-//    private Map<Identity, File> scan(){
-//
-//    }
 
     @Override
     public Map<Identity, V> getAll(Set<? extends Identity> keys) {
@@ -72,7 +107,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
     @Override
     public boolean containsKey(Identity key) {
-        return false;
+        return getSoftCache().containsKey(key) || hardCache.containsKey(key);
     }
 
     @Override
@@ -82,27 +117,37 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
     @Override
     public synchronized void put(Identity id, V data) {
-//        lruCache.put(id, data);
-//        if (data instanceof Serializable) {
-//            String fileName = data.getClass().getSimpleName();
-//            if (data instanceof Named) {
-//                fileName += "[" + ((Named) data).getName() + "]";
-//            }
-//            fileName += id.hashCode() + ".dfcache";
-//
-//            File file = new File(cacheDir(), fileName);
-//            try (ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream(file))) {
-//                oos.writeObject(data);
-//                envelopes.put(id, file);
-//            } catch (IOException ex) {
-//                getLogger().error("Failed to write data with id '{}' to file with message: {}", id.toString(), ex.getMessage());
-//            }
-//        }
+        getSoftCache().put(id, data);
+        if (data instanceof Serializable) {
+            String fileName = data.getClass().getSimpleName();
+            if (data instanceof Named) {
+                fileName += "[" + ((Named) data).getName() + "]";
+            }
+            fileName += Integer.toUnsignedLong(id.hashCode()) + ".dfcache";
+
+            if (!cacheDir.exists()) {
+                cacheDir.mkdirs();
+            }
+
+            File file = new File(cacheDir, fileName);
+
+            try (FileOutputStream fos = new FileOutputStream(file)) {
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                ObjectOutputStream oos = new ObjectOutputStream(baos);
+                oos.writeObject(data);
+                EnvelopeBuilder builder = new EnvelopeBuilder().setMeta(id.toMeta()).setData(baos.toByteArray());
+                baos.close();
+                writer.write(fos, builder.build());
+                hardCache.put(id, file);
+            } catch (IOException ex) {
+                getLogger().error("Failed to write data with id '{}' to file with message: {}", id.toString(), ex.getMessage());
+            }
+        }
     }
 
     @Override
     public V getAndPut(Identity key, V value) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -112,42 +157,42 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
     @Override
     public boolean putIfAbsent(Identity key, V value) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean remove(Identity key) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean remove(Identity key, V oldValue) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public V getAndRemove(Identity key) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean replace(Identity key, V oldValue, V newValue) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public boolean replace(Identity key, V value) {
-        return false;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public V getAndReplace(Identity key, V value) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void removeAll(Set<? extends Identity> keys) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -157,17 +202,20 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
     @Override
     public void clear() {
-
+        if (softCache != null) {
+            softCache.clear();
+        }
+        hardCache.values().forEach(file -> file.delete());
     }
 
     @Override
     public <T> T invoke(Identity key, EntryProcessor<Identity, V, T> entryProcessor, Object... arguments) throws EntryProcessorException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public <T> Map<Identity, EntryProcessorResult<T>> invokeAll(Set<? extends Identity> keys, EntryProcessor<Identity, V, T> entryProcessor, Object... arguments) {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override
@@ -197,18 +245,21 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
     @Override
     public void registerCacheEntryListener(CacheEntryListenerConfiguration<Identity, V> cacheEntryListenerConfiguration) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<Identity, V> cacheEntryListenerConfiguration) {
-
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public Iterator<Entry<Identity, V>> iterator() {
-        return null;
+        return softCache.entrySet().stream()
+                .<Entry<Identity, V>>map(entry -> new DefaultEntry(entry.getKey(), () -> entry.getValue()))
+                .iterator();
     }
+
 
     @Override
     public <C extends Configuration<Identity, V>> C getConfiguration(Class<C> clazz) {
@@ -218,5 +269,49 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     @Override
     public Context getContext() {
         return getCacheManager().getContext();
+    }
+
+    @Override
+    protected void applyValueChange(String name, Value oldItem, Value newItem) {
+        super.applyValueChange(name, oldItem, newItem);
+        //update cache size preserving all of the elements
+        if (Objects.equals(name, "softCache.size") && softCache != null) {
+            Map<Identity, V> lru = Misc.getLRUCache(newItem.intValue());
+            lru.putAll(softCache);
+            softCache = lru;
+        }
+    }
+
+    private synchronized Map<Identity, V> getSoftCache() {
+        if (softCache == null) {
+            softCache = Misc.getLRUCache(getConfig().getInt("softCache.size", 500));
+        }
+        return softCache;
+    }
+
+    private class DefaultEntry implements Entry<Identity, V> {
+
+        private Identity key;
+        private Supplier<V> supplier;
+
+        public DefaultEntry(Identity key, Supplier<V> supplier) {
+            this.key = key;
+            this.supplier = supplier;
+        }
+
+        @Override
+        public Identity getKey() {
+            return key;
+        }
+
+        @Override
+        public V getValue() {
+            return supplier.get();
+        }
+
+        @Override
+        public <T> T unwrap(Class<T> clazz) {
+            return clazz.cast(this);
+        }
     }
 }

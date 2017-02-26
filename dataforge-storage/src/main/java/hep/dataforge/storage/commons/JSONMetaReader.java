@@ -5,6 +5,7 @@
  */
 package hep.dataforge.storage.commons;
 
+import hep.dataforge.io.IOUtils;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
@@ -21,15 +22,27 @@ import java.util.Map;
  * @author Alexander Nozik
  */
 public class JSONMetaReader implements MetaStreamReader {
+    Charset charset = IOUtils.UTF8_CHARSET;
 
     @Override
-    public MetaBuilder read(InputStream stream, long length, Charset encoding) throws IOException, ParseException {
+    public MetaStreamReader withCharset(Charset charset) {
+        this.charset = charset;
+        return this;
+    }
+
+    @Override
+    public Charset getCharset() {
+        return charset;
+    }
+
+    @Override
+    public MetaBuilder read(InputStream stream, long length) throws IOException, ParseException {
         if (length == 0) {
             return new MetaBuilder("");
         } else if (length > 0) {
             byte[] buffer = new byte[(int) length];
             stream.read(buffer);
-            return fromString(new String(buffer, encoding));
+            return fromString(new String(buffer, getCharset()));
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             int braceCounter = 0;
@@ -53,7 +66,7 @@ public class JSONMetaReader implements MetaStreamReader {
 
             ByteArrayInputStream ins = new ByteArrayInputStream(baos.toByteArray());
 
-            return toMeta(Json.createReader(new InputStreamReader(ins, encoding)).readObject());
+            return toMeta(Json.createReader(new InputStreamReader(ins, getCharset())).readObject());
         }
     }
 
