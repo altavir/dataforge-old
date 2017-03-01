@@ -16,19 +16,18 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.exceptions.StorageException;
-import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.loaders.AbstractStateLoader;
 import hep.dataforge.values.Value;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.vfs2.FileObject;
+
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * A file implementation of state loader
@@ -39,21 +38,20 @@ public class FileStateLoader extends AbstractStateLoader {
 
     public static FileStateLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
         try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (isValidFileStateLoaderEnvelope(envelope)) {
-                FileStateLoader res = new FileStateLoader(file.getURL().toString(),
-                        storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
-                        envelope.meta());
-                res.setReadOnly(readOnly);
-                return res;
-            } else {
-                throw new StorageException("Is not a valid point loader file");
-            }
+            return fromEnvelope(storage, envelope);
         }
     }
 
-    public static boolean isValidFileStateLoaderEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.STATE_LOADER_TYPE_CODE;
+    public static FileStateLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
+        if (FileStorageEnvelopeType.validate(envelope, STATE_LOADER_TYPE)) {
+            FileStateLoader res = new FileStateLoader(envelope.getFile().getURL().toString(),
+                    storage, FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    envelope.meta());
+            res.setReadOnly(envelope.isReadOnly());
+            return res;
+        } else {
+            throw new StorageException("Is not a valid state loader file");
+        }
     }
 
     private final String filePath;
@@ -124,7 +122,7 @@ public class FileStateLoader extends AbstractStateLoader {
      * @return the file
      */
     private FileEnvelope getFile() throws Exception {
-        if(file == null){
+        if (file == null) {
             open();
         }
         return file;

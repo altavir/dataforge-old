@@ -5,6 +5,7 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.context.Global;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
 
@@ -27,8 +28,11 @@ public interface MetaType {
      * @return
      */
     static MetaType resolve(short code){
-        return StreamSupport.stream(loader.spliterator(),false)
-                .filter(it-> it.getCode() == code).findFirst().orElse(null);
+        //TODO add caching here?
+        synchronized (Global.instance()) {
+            return StreamSupport.stream(loader.spliterator(), false)
+                    .filter(it -> it.getCode() == code).findFirst().orElse(null);
+        }
     }
 
     /**
@@ -37,8 +41,10 @@ public interface MetaType {
      * @return
      */
     static MetaType resolve(String name){
-        return StreamSupport.stream(loader.spliterator(),false)
-                .filter(it-> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+        synchronized (Global.instance()) {
+            return StreamSupport.stream(loader.spliterator(), false)
+                    .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+        }
     }
 
     short getCode();

@@ -11,6 +11,7 @@ import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -26,11 +27,50 @@ public class EnvelopeTag {
     public static final byte[] END_SEQUENCE = {'~', '#', '\r', '\n'};
     public static final String CUSTOM_PROPERTY_HEAD = "#?";
 
+    public static byte[] LEGACY_START_SEQUENCE = {'#', '!'};
+
     private static final int DEFAULT_BUFFER_SIZE = 1024;
 
     private Map<String, Value> values = new HashMap<>();
     private MetaType metaType = XMLMetaType.instance;
     private EnvelopeType envelopeType = DefaultEnvelopeType.instance;
+    private int length = -1;
+
+    /**
+     * Get the length of tag in bytes. -1 means undefined size in case tag was modified
+     *
+     * @return
+     */
+    public int getLength() {
+        return length;
+    }
+
+    private Map<String, Value> readLegacyHeader(InputStream stream) throws IOException {
+        length += 28;
+        byte[] bytes = new byte[28];
+        stream.read(bytes);
+        ByteBuffer buffer = ByteBuffer.wrap(bytes);
+
+        Map<String, Value> res = new HashMap<>();
+
+        int type = buffer.getInt();
+        res.put(Envelope.TYPE_KEY, Value.of(type));
+
+        short metaTypeCode = buffer.getShort(8);
+        MetaType metaType = MetaType.resolve(metaTypeCode);
+
+        if (metaType != null) {
+            res.put(Envelope.META_TYPE_KEY, Value.of(metaType.getName()));
+        } else {
+            LoggerFactory.getLogger(EnvelopeTag.class).warn("Could not resolve meta type. Using default");
+        }
+
+        long metaLength = Integer.toUnsignedLong(buffer.getInt(12));
+        res.put(Envelope.META_LENGTH_KEY, Value.of(metaLength));
+        long dataLength = Integer.toUnsignedLong(buffer.getInt(20));
+        res.put(Envelope.DATA_LENGTH_KEY, Value.of(dataLength));
+        return res;
+    }
 
     /**
      * Read header line only
@@ -38,16 +78,11 @@ public class EnvelopeTag {
      * @param stream
      * @throws IOException
      */
-    public static Map<String, Value> readHeader(InputStream stream) throws IOException {
-        //TODO add support for legacy envelopes
+    private Map<String, Value> readHeader(InputStream stream) throws IOException {
+        length += 18;
+
         Map<String, Value> res = new HashMap<>();
 
-        //reading start sequence
-        byte[] startSequence = new byte[2];
-        stream.read(startSequence);
-        if (!Arrays.equals(startSequence, START_SEQUENCE)) {
-            throw new IOException("Wrong start sequence for envelope tag");
-        }
         byte[] body = new byte[14];
         stream.read(body);
 
@@ -55,15 +90,24 @@ public class EnvelopeTag {
 
         //reading type
         int type = buffer.getInt();
-        res.put(Envelope.TYPE_KEY, Value.of(type));
+        EnvelopeType envelopeType = EnvelopeType.resolve(type);
+
+        if (envelopeType != null) {
+            res.put(Envelope.TYPE_KEY, Value.of(envelopeType.getName()));
+        } else {
+            LoggerFactory.getLogger(EnvelopeTag.class).warn("Could not resolve envelope type code. Using default");
+        }
+
         //reading meta type
         short metaTypeCode = buffer.getShort(4);
         MetaType metaType = MetaType.resolve(metaTypeCode);
+
         if (metaType != null) {
             res.put(Envelope.META_TYPE_KEY, Value.of(metaType.getName()));
         } else {
-            LoggerFactory.getLogger(EnvelopeTag.class).warn("Could not resolve meta type code. Using default");
+            LoggerFactory.getLogger(EnvelopeTag.class).warn("Could not resolve meta type. Using default");
         }
+
         //reading meta length
         long metaLength = Integer.toUnsignedLong(buffer.getInt(6));
         res.put(Envelope.META_LENGTH_KEY, Value.of(metaLength));
@@ -86,12 +130,13 @@ public class EnvelopeTag {
      * @return true if line is s
      */
     @Nullable
-    private static NamedValue readCustomProperty(InputStream stream) throws IOException {
+    private NamedValue readCustomProperty(InputStream stream) throws IOException {
         stream.mark(DEFAULT_BUFFER_SIZE);
         byte[] smallBuffer = new byte[2];
         stream.read(smallBuffer);
 
         if (Arrays.equals(smallBuffer, CUSTOM_PROPERTY_HEAD.getBytes())) {
+            length += 2;
             //reading line
             ByteBuffer customPropertyBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE - 2);
             byte b;
@@ -102,6 +147,7 @@ public class EnvelopeTag {
                     throw new RuntimeException("Custom properties with length more than " + customPropertyBuffer.limit() + " are not supported");
                 }
             } while ('\n' != b);
+            length += customPropertyBuffer.position();
             String line = new String(customPropertyBuffer.array()).trim();
 
             Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*)");
@@ -118,6 +164,26 @@ public class EnvelopeTag {
             return null;
         }
     }
+
+    public static EnvelopeTag from(InputStream stream) {
+        try {
+            return new EnvelopeTag().read(stream);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read envelope tag", e);
+        }
+    }
+
+//    public static EnvelopeTag fromLegacy(InputStream stream) throws IOException {
+//        EnvelopeTag tag =  new EnvelopeTag();
+//        tag.setValues(readLegacyHeader(stream));
+//        //custom properties
+//        NamedValue value;
+//        do {
+//            value = readCustomProperty(stream);
+//            tag.setValue(value.getName(), value);
+//        } while (value != null);
+//        return tag;
+//    }
 
     /**
      * Convert tag to properties
@@ -148,7 +214,7 @@ public class EnvelopeTag {
             if (type != null) {
                 envelopeType = type;
             } else {
-                LoggerFactory.getLogger(getClass()).error("Can't resolve envelope type");
+                LoggerFactory.getLogger(getClass()).debug("Can't resolve envelope type");
             }
         } else if (Envelope.META_TYPE_KEY.equals(name)) {
             MetaType type = value.valueType() == ValueType.NUMBER ? MetaType.resolve((short) value.intValue()) : MetaType.resolve(value.stringValue());
@@ -179,11 +245,37 @@ public class EnvelopeTag {
     }
 
     public EnvelopeTag read(InputStream stream) throws IOException {
-        setValues(readHeader(stream));
+
+        length = 2;
+
+        Map<String, Value> header;
+        stream.mark(30);
+
+        //reading start sequence
+        byte[] startSequence = new byte[2];
+        stream.read(startSequence);
+
+        if (Arrays.equals(startSequence, LEGACY_START_SEQUENCE)) {
+            header = readLegacyHeader(stream);
+        } else if (Arrays.equals(startSequence, START_SEQUENCE)) {
+            header = readHeader(stream);
+        } else if (Arrays.equals(startSequence, CUSTOM_PROPERTY_HEAD.getBytes())) {
+            //No tag
+            header = Collections.emptyMap();
+            stream.reset();
+            length = 0;
+        } else {
+            throw new IOException("Wrong start sequence for envelope tag");
+        }
+
+        setValues(header);
         //custom properties
         NamedValue value;
         do {
             value = readCustomProperty(stream);
+            if (value != null) {
+                setValue(value.getName(), value);
+            }
         } while (value != null);
         return this;
     }

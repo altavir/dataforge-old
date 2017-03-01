@@ -66,7 +66,6 @@ public class XMLMetaReader implements MetaStreamReader {
             }
 
             Element element = builder.parse(source).getDocumentElement();
-
             return buildNode(element);
         } catch (SAXException | ParserConfigurationException ex) {
             throw new RuntimeException(ex);

@@ -39,7 +39,7 @@ public class PlotUnWrapper implements UnWrapper<PlotFrame> {
             PlottableUnWrapper unwrapper = new PlottableUnWrapper();
             
             while (dataStream.available() > 0) {
-                Plottable pl = unwrapper.unWrap(DefaultEnvelopeReader.instance.readWithData(dataStream));
+                Plottable pl = unwrapper.unWrap(DefaultEnvelopeReader.INSTANCE.readWithData(dataStream));
                 frame.add(pl);
             }
 

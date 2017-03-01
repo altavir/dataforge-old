@@ -26,6 +26,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.ParseException;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
@@ -35,7 +36,7 @@ import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
  */
 public class DefaultEnvelopeReader implements EnvelopeReader {
 
-    public static final DefaultEnvelopeReader instance = new DefaultEnvelopeReader();
+    public static final DefaultEnvelopeReader INSTANCE = new DefaultEnvelopeReader();
 
     /**
      * Read an envelope and override properties.
@@ -45,13 +46,14 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
      * to avoid this problem, it is wise to call {@code getData} after read.
      * </p>
      *
-     * @param tag
      * @param stream
+     * @param tagReader
      * @return
      * @throws IOException
      */
     @Override
-    public Envelope read(@NotNull EnvelopeTag tag, @NotNull InputStream stream) throws IOException {
+    public Envelope read(@NotNull InputStream stream, @NotNull Function<InputStream,EnvelopeTag> tagReader) throws IOException {
+        EnvelopeTag tag = tagReader.apply(stream);
         MetaStreamReader parser = tag.getMetaType().getReader();
         int metaLength = (int) tag.getMetaSize();
         Meta meta;
@@ -68,7 +70,8 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         Supplier<Binary> supplier = () -> {
             int dataLength = (int) tag.getDataSize();
             try {
-                if (metaLength == Tag.INFINITE_SIZE) {
+                //skipping separator for automatic meta reading
+                if (metaLength == -1) {
                     stream.skip(separator().length);
                 }
                 return readData(stream, dataLength);
@@ -106,7 +109,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
      * @throws IOException
      */
     public Envelope readWithData(InputStream stream) throws IOException {
-        Envelope res = read(null, stream);
+        Envelope res = read(stream);
         res.getData();
         return res;
     }

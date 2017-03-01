@@ -16,9 +16,10 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.Binary;
-import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
+import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.Tag;
+import hep.dataforge.io.envelopes.EnvelopeTag;
+import hep.dataforge.io.envelopes.EnvelopeType;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import org.apache.commons.vfs2.FileObject;
@@ -44,7 +45,6 @@ import java.util.Map;
 public class FileEnvelope implements Envelope, AutoCloseable {
 
     public static final long INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1);
-    private static final long DATA_SIZE_PROPERTY_OFFSET = 22;
     private static final String NEWLINE = "\r\n";
 
     private final boolean readOnly;
@@ -52,9 +52,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private FileObject file;
     private Meta meta;
     private RandomAccessContent randomAccess;
-    private Map<String, Value> properties;
-    private long dataOffset = -1;
-    private long dataSize = -1;
+    private EnvelopeTag tag;
+    private EnvelopeType type = DefaultEnvelopeType.instance;
 
     public FileEnvelope(String uri, boolean readOnly) throws IOException, ParseException {
         this.uri = uri;
@@ -63,9 +62,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public synchronized void close() throws Exception {
-        dataOffset = -1;
-        dataSize = -1;
-        properties = null;
+        tag = null;
+
         if (randomAccess != null) {
             LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope content " + uri);
             randomAccess.close();
@@ -80,7 +78,9 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public Binary getData() {
+        ensureOpen();
         try {
+            long dataSize = tag.getDataSize();
             if (dataSize == INFINITE_DATA_SIZE) {
                 dataSize = getRandomAccess().length() - getDataOffset();
             }
@@ -92,20 +92,22 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     @Override
-    public Meta meta() {
+    public synchronized Meta meta() {
         if(meta == null){
-            open();
+            ensureOpen();
+            try (InputStream stream =  getFile().getContent().getInputStream()){
+                meta = type.getReader().read(stream).meta();
+            } catch (IOException e) {
+                throw new RuntimeException("Can't read meta from file Envelope");
+            }
         }
         return meta;
     }
 
     @Override
     public Map<String, Value> getProperties() {
-        if (properties == null) {
-            open();
-        }
-        return properties;
-
+        ensureOpen();
+        return tag.getValues();
     }
 
     public String readLine(int offset) throws IOException {
@@ -185,12 +187,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         getRandomAccess().seek(getDataOffset());
     }
 
-    synchronized protected void setDataSize(int size) throws IOException {
+    private synchronized void setDataSize(int size) throws IOException {
         long offset = getRandomAccess().getFilePointer();
-        getRandomAccess().seek(DATA_SIZE_PROPERTY_OFFSET);//seeking binary 
-        getRandomAccess().writeInt(size); // write 4 bytes
+        getRandomAccess().seek(0);//seeking begin
+        getRandomAccess().write(tag.byteHeader());
         getRandomAccess().seek(offset);//return to the initial position
-        properties.put(DATA_LENGTH_KEY, Value.of(size));//update property
+        tag.setValue(DATA_LENGTH_KEY, size);//update property
     }
 
     /**
@@ -201,15 +203,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     synchronized public void append(byte[] bytes) throws IOException {
-        if (dataSize < 0) {
-            open();
-        }
+        ensureOpen();
         if (isReadOnly()) {
             throw new IOException("Trying to write to readonly file " + uri);
         } else {
             getRandomAccess().seek(eofPos());
             getRandomAccess().write(bytes);
-            dataSize += bytes.length;
             setDataSize((int) (eofPos() - getRandomAccess().getFilePointer()));
         }
     }
@@ -299,12 +298,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      */
     private void open() {
         try (InputStream stream = getFile().getContent().getInputStream()) {
-//            LoggerFactory.getLogger(getClass()).debug("Reading header of FileEnvelope " + uri);
-            Envelope header = DefaultEnvelopeReader.instance.read(null, stream);
-            this.properties = header.getProperties();
-            meta = header.meta();
-            dataOffset = Tag.TAG_LENGTH + header.getProperties().get(META_LENGTH_KEY).intValue();
-            dataSize = Integer.toUnsignedLong(header.getProperties().get(DATA_LENGTH_KEY).intValue());
+            tag = EnvelopeTag.from(stream);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -314,9 +308,20 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @return the dataOffset
      */
     private long getDataOffset() {
-        if (dataOffset <= 0) {
+        ensureOpen();
+        return tag.getLength() + tag.getMetaSize();
+    }
+
+    /**
+     * ensure envelope is initialized
+     */
+    private synchronized void ensureOpen(){
+        if(!isOpen()){
             open();
         }
-        return dataOffset;
+    }
+
+    public boolean isOpen(){
+        return tag!=null;
     }
 }

@@ -118,11 +118,10 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
         }
 
         EnvelopeBuilder builder = new EnvelopeBuilder()
-                .setDataType("df.plots.PlotFrame")
                 .putMetaValue(WRAPPED_TYPE_KEY, PLOT_WRAPPER_TYPE)
                 .putMetaValue("plotFrameClass", getClass().getName())
                 .putMetaNode("plotMeta", meta())
-                .setEnvelopeType(WRAPPER_ENVELOPE_CODE)
+                .setEnvelopeType(new WrapperEnvelopeType())
                 .setData(baos.toByteArray());
         return builder.build();
     }

@@ -43,10 +43,8 @@ public interface Envelope extends Annotated {
     String DATA_LENGTH_KEY = "dataLength";
 
     /**
-     * Obsolete keys
+     * Auxiliary keys
      */
-    String VERSION_KEY = "version";
-    String OPT_KEY = "opt";
     String META_ENCODING_KEY = "metaEncoding";
     String DATA_TYPE_KEY = "dataType";
 

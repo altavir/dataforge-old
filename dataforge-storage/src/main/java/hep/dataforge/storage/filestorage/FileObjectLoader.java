@@ -6,24 +6,18 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.exceptions.StorageException;
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
-import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.loaders.AbstractBinaryLoader;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.vfs2.FileObject;
+
+import java.io.*;
 import java.text.ParseException;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  * A file loader to store Serializable java objects
@@ -33,24 +27,23 @@ import org.apache.commons.vfs2.FileObject;
 public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoader<T> {
 
     //FIXME concurrent access currently not available
-    public static FileObjectLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+    public static <T extends Serializable> FileObjectLoader<T> fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
         try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (isValidFileObjectLoaderEnvelope(envelope)) {
-                FileObjectLoader res = new FileObjectLoader(storage,
-                        FilenameUtils.getBaseName(file.getName().getBaseName()),
-                        envelope.meta(),
-                        file.getURL().toString());
-                res.setReadOnly(readOnly);
-                return res;
-            } else {
-                throw new StorageException("Is not a valid point loader file");
-            }
+            return fromEnvelope(storage, envelope);
         }
     }
 
-    public static boolean isValidFileObjectLoaderEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
+    public static <T extends Serializable> FileObjectLoader<T> fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
+        if (FileStorageEnvelopeType.validate(envelope, OBJECT_LOADER_TYPE)) {
+            FileObjectLoader res = new FileObjectLoader(storage,
+                    FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    envelope.meta(),
+                    envelope.getFile().getURL().toString());
+            res.setReadOnly(envelope.isReadOnly());
+            return res;
+        } else {
+            throw new StorageException("Is not a valid object loader file");
+        }
     }
 
     private final String filePath;

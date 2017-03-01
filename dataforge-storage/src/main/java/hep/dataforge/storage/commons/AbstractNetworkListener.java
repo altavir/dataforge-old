@@ -18,7 +18,6 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
@@ -31,7 +30,8 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
+import static hep.dataforge.storage.commons.MessageFactory.isTerminator;
+import static hep.dataforge.storage.commons.MessageFactory.terminator;
 
 /**
  * Abstract network listener for envelopes
@@ -109,13 +109,6 @@ public abstract class AbstractNetworkListener implements Annotated, AutoCloseabl
         return true;
     }
 
-    protected Envelope terminator() {
-        return new EnvelopeBuilder()
-                .setEnvelopeType(EnvelopeCodes.DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setDataType(EnvelopeCodes.MESSAGE_TERMINATOR_CODE)
-                .build();
-    }
-
     protected MessageFactory getResponseFactory() {
         return new MessageFactory();
     }
@@ -170,9 +163,9 @@ public abstract class AbstractNetworkListener implements Annotated, AutoCloseabl
             logger.info("Client processing finished for {}", socket.getRemoteSocketAddress().toString());
             if (!socket.isClosed()) {
                 try {
-                    write(terminator());//Sending additiona terminator to notify client that server is closing connection
+                    write(terminator());//Sending additional terminator to notify client that server is closing connection
                 } catch (IOException ex) {
-                    logger.error("Terminator send failed",ex);
+                    logger.error("Terminator send failed", ex);
                 }
                 try {
                     socket.close();
@@ -191,9 +184,7 @@ public abstract class AbstractNetworkListener implements Annotated, AutoCloseabl
             os.flush();
         }
 
-        private boolean isTerminator(Envelope envelope) {
-            return envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.MESSAGE_TERMINATOR_CODE;
-        }
+
 
     }
 }

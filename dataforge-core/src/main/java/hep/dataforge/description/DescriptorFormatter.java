@@ -23,6 +23,7 @@ import hep.dataforge.exceptions.DescriptorException;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
+@Deprecated
 public interface DescriptorFormatter {
 
 

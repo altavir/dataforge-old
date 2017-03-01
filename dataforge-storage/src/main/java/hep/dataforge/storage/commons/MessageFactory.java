@@ -16,9 +16,8 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.io.envelopes.Envelope;
-import static hep.dataforge.io.envelopes.Envelope.*;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_MESSAGE_ENVELOPE_CODE;
+import hep.dataforge.io.envelopes.MetaType;
 
 /**
  * A factory for messages with fixed format
@@ -27,6 +26,11 @@ import static hep.dataforge.storage.commons.EnvelopeCodes.DATAFORGE_MESSAGE_ENVE
  * @author Alexander Nozik
  */
 public class MessageFactory {
+
+    public static final String MESSAGE_META_KEY = "message";
+    public static final String MESSAGE_TERMINATOR = "@terminate";
+    public static final String MESSAGE_OK = "@ok";
+    public static final String MESSAGE_FAIL = "@error";
 
     public static final String MESSAGE_TYPE_KEY = "type";
     public static final String RESPONSE_SUCCESS_KEY = "success";
@@ -41,10 +45,7 @@ public class MessageFactory {
      * @return
      */
     public EnvelopeBuilder responseBase(Envelope request) {
-        EnvelopeBuilder res = new EnvelopeBuilder()
-                .setEnvelopeType(DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setMetaEncoding(request.getProperties().get(META_ENCODING_KEY).stringValue())
-                .setMetaType(request.getProperties().get(META_TYPE_KEY).stringValue());
+        EnvelopeBuilder res = new EnvelopeBuilder().setProperties(request.getProperties());
         String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
         if (!type.isEmpty()) {
             res.putMetaValue(MESSAGE_TYPE_KEY, type + RESPONSE_TYPE_SUFFIX);
@@ -60,8 +61,6 @@ public class MessageFactory {
      */
     public EnvelopeBuilder responseBase(String type) {
         EnvelopeBuilder res = new EnvelopeBuilder()
-                .setEnvelopeType(DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setMetaEncoding(metaEncoding())
                 .setMetaType(metaType());
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
@@ -80,11 +79,8 @@ public class MessageFactory {
      */
     public EnvelopeBuilder requestBase(String type) {
         EnvelopeBuilder res = new EnvelopeBuilder()
-                .setEnvelopeType(DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setMetaEncoding(metaEncoding())
                 .setMetaType(metaType());
         if (type != null && !type.isEmpty()) {
-
             res.putMetaValue(MESSAGE_TYPE_KEY, type);
         }
         return res;
@@ -95,11 +91,12 @@ public class MessageFactory {
      *
      * @return
      */
-    public Envelope terminator() {
-        return new EnvelopeBuilder()
-                .setEnvelopeType(EnvelopeCodes.DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setDataType(EnvelopeCodes.MESSAGE_TERMINATOR_CODE)
-                .build();
+    public static Envelope terminator() {
+        return new EnvelopeBuilder().putMetaValue(MESSAGE_META_KEY, MESSAGE_TERMINATOR).build();
+    }
+
+    public static boolean isTerminator(Envelope envelope) {
+        return envelope.meta().getString(MESSAGE_META_KEY, "").equals(MESSAGE_TERMINATOR);
     }
 
     /**
@@ -113,11 +110,8 @@ public class MessageFactory {
     }
 
     public EnvelopeBuilder okResponseBase(Envelope request, boolean hasMeta, boolean hasData) {
-        EnvelopeBuilder res = new EnvelopeBuilder()
-                .setEnvelopeType(DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setMetaEncoding(request.getProperties().get(META_ENCODING_KEY).stringValue())
-                .setMetaType(request.getProperties().get(META_TYPE_KEY).stringValue())
-                .setDataType(okResponseCode(hasMeta, hasData));
+        EnvelopeBuilder res = new EnvelopeBuilder().setProperties(request.getProperties())
+                .putMetaValue(MESSAGE_META_KEY, MESSAGE_OK);
         String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
@@ -142,10 +136,8 @@ public class MessageFactory {
      */
     public EnvelopeBuilder okResponseBase(String type, boolean hasMeta, boolean hasData) {
         EnvelopeBuilder res = new EnvelopeBuilder()
-                .setEnvelopeType(DATAFORGE_MESSAGE_ENVELOPE_CODE)
-                .setMetaEncoding(metaEncoding())
                 .setMetaType(metaType())
-                .setDataType(okResponseCode(hasMeta, hasData));
+                .putMetaValue(MESSAGE_META_KEY, MESSAGE_OK);
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
                 type += RESPONSE_TYPE_SUFFIX;
@@ -159,27 +151,8 @@ public class MessageFactory {
         return res;
     }
 
-    protected int okResponseCode(boolean hasMeta, boolean hasData) {
-        int res = EnvelopeCodes.MESSAGE_CONFIRM_CODE;
-        if (hasMeta) {
-            res = res | EnvelopeCodes.MESSAGE_HAS_META_FLAG;
-        }
-        if (hasMeta) {
-            res = res | EnvelopeCodes.MESSAGE_HAS_DATA_FLAG;
-        }
-        return res;
-    }
-
-    protected int failResponseCode() {
-        return EnvelopeCodes.MESSAGE_FAIL_CODE;
-    }
-
-    protected String metaEncoding() {
-        return "UTF-8";
-    }
-
-    protected String metaType() {
-        return "JSON";
+    protected MetaType metaType() {
+        return JSONMetaType.instance;
     }
 
     /**
@@ -197,7 +170,7 @@ public class MessageFactory {
             type += RESPONSE_TYPE_SUFFIX;
         }
         EnvelopeBuilder builder = responseBase(type)
-                .setDataType(failResponseCode());
+                .putMetaValue(MESSAGE_META_KEY, MESSAGE_FAIL);
         for (Throwable err : errors) {
             builder.putMetaNode(StorageUtils.getErrorMeta(err));
         }

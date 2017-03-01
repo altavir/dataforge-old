@@ -12,6 +12,7 @@ import hep.dataforge.io.envelopes.MetaType;
 import java.util.function.Predicate;
 
 public class JSONMetaType implements MetaType {
+    public static final JSONMetaType instance = new JSONMetaType();
 
     @Override
     public short getCode() {

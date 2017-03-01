@@ -47,7 +47,7 @@ public class DefaultEnvelopeType implements EnvelopeType {
 
     @Override
     public EnvelopeReader getReader() {
-        return DefaultEnvelopeReader.instance;
+        return DefaultEnvelopeReader.INSTANCE;
     }
 
     @Override

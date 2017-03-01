@@ -121,8 +121,4 @@ public class JSONMetaReader implements MetaStreamReader {
         return value.getString();
     }
 
-    @Override
-    public boolean acceptsFile(File file) {
-        return file.toString().toLowerCase().endsWith(".json");
-    }
 }

@@ -17,44 +17,40 @@ package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.events.Event;
 import hep.dataforge.exceptions.StorageException;
-import static hep.dataforge.io.envelopes.Envelope.*;
+import hep.dataforge.io.IOUtils;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.commons.JSONMetaWriter;
 import hep.dataforge.storage.loaders.AbstractEventLoader;
-import java.nio.charset.Charset;
-import java.util.Iterator;
-import java.util.function.Predicate;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
+import java.util.Iterator;
+import java.util.function.Predicate;
+
 /**
- *
  * @author darksnake
  */
 public class FileEventLoader extends AbstractEventLoader {
 
-    private static final Charset CHARSET = Charset.forName("UTF-8");
     private static final byte[] NEWLINE = {'\r', '\n'};
 
     public static FileEventLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
         try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (isValidFileEventLoaderEnvelope(envelope)) {
-                FileEventLoader res = new FileEventLoader(file.getURL().toString(),
-                        storage, FilenameUtils.getBaseName(file.getName().getBaseName()),
-                        envelope.meta());
-                res.setReadOnly(readOnly);
-                return res;
-            } else {
-                throw new StorageException("Is not a valid point loader file");
-            }
+            return fromEnvelope(storage, envelope);
         }
     }
 
-    public static boolean isValidFileEventLoaderEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.EVENT_LOADER_TYPE_CODE;
+    public static FileEventLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
+        if (FileStorageEnvelopeType.validate(envelope, EVENT_LOADER_TYPE)) {
+            FileEventLoader res = new FileEventLoader(envelope.getFile().getURL().toString(),
+                    storage, FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    envelope.meta());
+            res.setReadOnly(envelope.isReadOnly());
+            return res;
+        } else {
+            throw new StorageException("Is not a valid point loader file");
+        }
     }
 
     private final String filePath;
@@ -65,11 +61,11 @@ public class FileEventLoader extends AbstractEventLoader {
         super(storage, name, annotation);
         this.filePath = filePath;
     }
-    
+
 
     @Override
     public void open() throws Exception {
-        if(this.meta == null){
+        if (this.meta == null) {
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
@@ -108,8 +104,8 @@ public class FileEventLoader extends AbstractEventLoader {
     protected void pushDirect(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
-                String eventString = new JSONMetaWriter(false).writeString(event.meta(),CHARSET);
-                getFile().append(eventString.getBytes(CHARSET));
+                String eventString = new JSONMetaWriter(false).writeString(event.meta());
+                getFile().append(eventString.getBytes(IOUtils.UTF8_CHARSET));
                 getFile().append(NEWLINE);
             } catch (Exception ex) {
                 throw new StorageException(ex);
@@ -135,7 +131,7 @@ public class FileEventLoader extends AbstractEventLoader {
      * @return the file
      */
     private FileEnvelope getFile() throws Exception {
-        if(file == null){
+        if (file == null) {
             open();
         }
         return file;

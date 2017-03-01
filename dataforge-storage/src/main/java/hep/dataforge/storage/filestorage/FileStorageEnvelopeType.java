@@ -16,13 +16,24 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
-import hep.dataforge.storage.commons.EnvelopeCodes;
+import hep.dataforge.io.envelopes.Envelope;
+
+import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 
 /**
  *
  * @author darksnake
  */
 public class FileStorageEnvelopeType extends DefaultEnvelopeType {
+    public static final String FILE_STORAGE_ENVELOPE_TYPE = "storage";
+
+    public static boolean validate(Envelope envelope){
+        return FILE_STORAGE_ENVELOPE_TYPE.equals(envelope.getProperties().get(TYPE_KEY));
+    }
+
+    public static boolean validate(Envelope envelope, String loaderType){
+        return validate(envelope)&& envelope.meta().getString("type","").equals(loaderType);
+    }
 
     @Override
     public String description() {
@@ -31,12 +42,12 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
 
     @Override
     public String getName() {
-        return "hep.dataforge.storage";
+        return FILE_STORAGE_ENVELOPE_TYPE;
     }
 
     @Override
     public int getCode() {
-        return EnvelopeCodes.DATAFORGE_ENVELOPE | EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE;
+        return 0x44465354;//DFST
     }
 
     @Override

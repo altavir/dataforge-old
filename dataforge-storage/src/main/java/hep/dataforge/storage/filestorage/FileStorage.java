@@ -22,12 +22,11 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.Tag;
+import hep.dataforge.io.envelopes.XMLMetaType;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
-import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.commons.StorageUtils;
 import org.apache.commons.vfs2.FileChangeEvent;
 import org.apache.commons.vfs2.FileListener;
@@ -39,11 +38,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.time.Instant;
 
-import static hep.dataforge.storage.commons.EnvelopeCodes.*;
 import static org.apache.commons.vfs2.FileType.FOLDER;
 
 /**
@@ -185,17 +182,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    public static Tag readFileTag(FileObject file) throws IOException {
-        InputStream stream = file.getContent().getInputStream();
-        byte[] bytes = new byte[Tag.TAG_LENGTH];
-        stream.read(bytes);
-        if (Tag.isValidTag(bytes)) {
-            Tag tag = new Tag();
-            tag.read(bytes);
-            return tag;
-        } else {
-            return null;
-        }
+    private static boolean checkIfEnvelope(FileObject file) {
+        return true;
+        //TODO implement check
     }
 
     private void startup() throws FileSystemException, StorageException {
@@ -278,35 +267,36 @@ public class FileStorage extends AbstractStorage implements FileListener {
             }
         } else {
             try {
-                Tag stamp = readFileTag(file);
-                if (stamp != null && stamp.type == DATAFORGE_STORAGE_ENVELOPE_CODE) {
-                    Loader loader = buildLoader(file, stamp);
+                if (checkIfEnvelope(file)) {
+                    Loader loader = buildLoader(file);
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
             } catch (Exception ex) {
                 LoggerFactory.getLogger(getClass())
-                        .error("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
-                throw new RuntimeException(ex);
+                        .warn("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
             } finally {
                 file.close();
             }
         }
     }
 
-    protected Loader buildLoader(FileObject file, Tag stamp) throws Exception {
-        switch (stamp.dataType) {
-            case POINT_LOADER_TYPE_CODE:
-                return FilePointLoader.fromFile(this, file, isReadOnly());
-            case STATE_LOADER_TYPE_CODE:
-                return FileStateLoader.fromFile(this, file, isReadOnly());
-            case EVENT_LOADER_TYPE_CODE:
-                return FileEventLoader.fromFile(this, file, isReadOnly());
-            case OBJECT_LOADER_TYPE_CODE:
-                return FileObjectLoader.fromFile(this, file, isReadOnly());
-            default:
-                throw new StorageException("The loader type with code " + Integer.toHexString(stamp.dataType) + " is not supported");
+    protected Loader buildLoader(FileObject file) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), isReadOnly())) {
+            switch (envelope.meta().getString("type", "")) {
+                case PointLoader.POINT_LOADER_TYPE:
+                    return FilePointLoader.fromEnvelope(this, envelope);
+                case EventLoader.EVENT_LOADER_TYPE:
+                    return FileEventLoader.fromEnvelope(this, envelope);
+                case StateLoader.STATE_LOADER_TYPE:
+                    return FileStateLoader.fromEnvelope(this, envelope);
+                case ObjectLoader.OBJECT_LOADER_TYPE:
+                    return FileObjectLoader.fromEnvelope(this, envelope);
+                default:
+                    throw new StorageException(
+                            "The loader type with type " + envelope.meta().getString("type", "") + " is not supported"
+                    );
+            }
         }
-
     }
 
     @Override
@@ -329,19 +319,19 @@ public class FileStorage extends AbstractStorage implements FileListener {
     protected Loader buildLoaderByType(Meta loaderConfiguration, String type) throws StorageException {
         switch (type) {
             case PointLoader.POINT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".points", EnvelopeCodes.POINT_LOADER_TYPE_CODE);
+                return createNewFileLoader(loaderConfiguration, ".points");
             case StateLoader.STATE_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".state", EnvelopeCodes.STATE_LOADER_TYPE_CODE);
+                return createNewFileLoader(loaderConfiguration, ".state");
             case ObjectLoader.OBJECT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".binary", EnvelopeCodes.OBJECT_LOADER_TYPE_CODE);
+                return createNewFileLoader(loaderConfiguration, ".binary");
             case EventLoader.EVENT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".event", EnvelopeCodes.EVENT_LOADER_TYPE_CODE);
+                return createNewFileLoader(loaderConfiguration, ".event");
             default:
                 throw new StorageException("Loader type not supported");
         }
     }
 
-    protected Loader createNewFileLoader(Meta an, String extension, int dataType) throws StorageException {
+    protected Loader createNewFileLoader(Meta an, String extension) throws StorageException {
         try {
             String name = StorageUtils.loaderName(an);
             FileObject dir = getDataDir();
@@ -355,12 +345,11 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 dataFile.createFile();
                 try (OutputStream stream = dataFile.getContent().getOutputStream()) {
                     Envelope emptyEnvelope = new EnvelopeBuilder()
-                            .setEnvelopeType(DATAFORGE_STORAGE_ENVELOPE_CODE)
+                            .setEnvelopeType(new FileStorageEnvelopeType())
                             .setMeta(an)
-                            .setMetaType("XML")
+                            .setMetaType(XMLMetaType.instance)
                             .setMetaEncoding("UTF-8")
                             .setInfiniteDataSize()
-                            .setDataType(dataType)
                             .build();
                     DefaultEnvelopeWriter.instance.write(stream, emptyEnvelope, true);
 

@@ -17,34 +17,26 @@ package hep.dataforge.io.envelopes;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.function.Function;
 
 /**
  * interface for reading envelopes
  *
  * @author Alexander Nozik
-  */
+ */
 public interface EnvelopeReader {
 
     /**
-     * Read properties of the envelope
-     * @param stream
-     * @return
-     * @throws IOException
-     */
-    default EnvelopeTag readProperties(InputStream stream) throws IOException {
-        return new EnvelopeTag().read(stream);
-    }
-
-    /**
      * Read the whole envelope using internal properties reader.
+     *
      * @param stream
      * @return
      * @throws IOException
      */
     default Envelope read(InputStream stream) throws IOException {
-        return read(readProperties(stream),stream);
+        return read(stream, is -> EnvelopeTag.from(is));
     }
 
-    Envelope read(EnvelopeTag properties, InputStream stream) throws IOException;
+    Envelope read(InputStream stream, Function<InputStream, EnvelopeTag> tagReader) throws IOException;
 
 }

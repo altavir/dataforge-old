@@ -9,18 +9,16 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
-import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.AbstractEnvelopeLoader;
-import hep.dataforge.storage.commons.EnvelopeCodes;
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.vfs2.FileObject;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Iterator;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 /**
  *
@@ -30,7 +28,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
 
     public static FileEnvelopeLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
         try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (isValidFileEnvelopeEnvelope(envelope)) {
+            if (FileStorageEnvelopeType.validate(envelope)) {
                 FileEnvelopeLoader res = new FileEnvelopeLoader(storage,
                         FilenameUtils.getBaseName(file.getName().getBaseName()),
                         envelope.meta(),
@@ -41,11 +39,6 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
                 throw new StorageException("Is not a valid point loader file");
             }
         }
-    }
-
-    public static boolean isValidFileEnvelopeEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.OBJECT_LOADER_TYPE_CODE;
     }
 
     private final String filePath;
@@ -137,7 +130,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
             @Override
             public Envelope next() {
                 try {
-                    return DefaultEnvelopeReader.instance.readWithData(st);
+                    return DefaultEnvelopeReader.INSTANCE.readWithData(st);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }

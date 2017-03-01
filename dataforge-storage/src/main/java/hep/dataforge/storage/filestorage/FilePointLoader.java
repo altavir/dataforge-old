@@ -14,7 +14,6 @@ import hep.dataforge.names.Names;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.DefaultIndex;
-import hep.dataforge.storage.commons.EnvelopeCodes;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointParser;
@@ -29,18 +28,35 @@ import java.text.ParseException;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
-import static hep.dataforge.io.envelopes.Envelope.DATA_TYPE_KEY;
-import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
-
 /**
  * @author Alexander Nozik
  */
 public class FilePointLoader extends AbstractPointLoader {
 
+    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+            return fromEnvelope(storage,envelope);
+        }
+    }
+
+    public static FilePointLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
+        if (FileStorageEnvelopeType.validate(envelope, POINT_LOADER_TYPE)) {
+            FilePointLoader res = new FilePointLoader(storage,
+                    FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    envelope.meta(),
+                    envelope.getFile().getURL().toString());
+            res.setReadOnly(envelope.isReadOnly());
+            return res;
+        } else {
+            throw new StorageException("Is not a valid point loader file");
+        }
+    }
+
     private final String uri;
     //FIXME move to abstract
     private TableFormat format;
     private PointParser parser;
+
     /**
      * An envelope used for pushing
      */
@@ -54,22 +70,6 @@ public class FilePointLoader extends AbstractPointLoader {
     public FilePointLoader(Storage storage, String name, String uri) {
         super(storage, name);
         this.uri = uri;
-    }
-
-    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            FilePointLoader res = new FilePointLoader(storage,
-                    FilenameUtils.getBaseName(file.getName().getBaseName()),
-                    envelope.meta(),
-                    file.getURL().toString());
-            res.setReadOnly(readOnly);
-            return res;
-        }
-    }
-
-    public static boolean isValidFilePointLoaderEnvelope(FileEnvelope envelope) {
-        return envelope.getProperties().get(TYPE_KEY).intValue() == EnvelopeCodes.DATAFORGE_STORAGE_ENVELOPE_CODE
-                && envelope.getProperties().get(DATA_TYPE_KEY).intValue() == EnvelopeCodes.POINT_LOADER_TYPE_CODE;
     }
 
     @Override

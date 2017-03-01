@@ -15,6 +15,7 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.context.Global;
 import hep.dataforge.values.Value;
 
 import java.util.Collections;
@@ -31,13 +32,17 @@ public interface EnvelopeType {
     ServiceLoader<EnvelopeType> loader = ServiceLoader.load(EnvelopeType.class);
 
     static EnvelopeType resolve(int code) {
-        return StreamSupport.stream(loader.spliterator(), false)
-                .filter(it -> it.getCode() == code).findFirst().orElse(null);
+        synchronized (Global.instance()) {
+            return StreamSupport.stream(loader.spliterator(), false)
+                    .filter(it -> it.getCode() == code).findFirst().orElse(null);
+        }
     }
 
     static EnvelopeType resolve(String name) {
-        return StreamSupport.stream(loader.spliterator(), false)
-                .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+        synchronized (Global.instance()) {
+            return StreamSupport.stream(loader.spliterator(), false)
+                    .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+        }
     }
 
     int getCode();
