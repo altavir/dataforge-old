@@ -10,16 +10,18 @@ import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.io.XMLMetaReader;
 import hep.dataforge.io.XMLMetaWriter;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class XMLMetaType implements MetaType {
-    public static XMLMetaType instance = new XMLMetaType();
-
     public static final String XML_META_TYPE = "XML";
+    public static XMLMetaType instance = new XMLMetaType();
+    public static Short[] XML_META_CODES = {0x584d, 0};//XM
 
     @Override
-    public short getCode() {
-        return 0;
+    public List<Short> getCodes() {
+        return Arrays.asList(XML_META_CODES);
     }
 
     @Override

@@ -272,7 +272,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
             } catch (Exception ex) {
-                LoggerFactory.getLogger(getClass())
+                getContext().getLogger()
                         .warn("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
             } finally {
                 file.close();

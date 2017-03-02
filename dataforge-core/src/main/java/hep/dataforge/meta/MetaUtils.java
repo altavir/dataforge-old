@@ -247,7 +247,7 @@ public class MetaUtils {
      * @throws IOException
      * @throws ClassNotFoundException
      */
-    public static MetaBuilder readMeta(ObjectInput in, String name) throws IOException, ClassNotFoundException {
+    public static MetaBuilder readMeta(ObjectInput in, String name) throws IOException {
         MetaBuilder res = new MetaBuilder(name);
         if (name == null) {
             res.setName(in.readUTF());
@@ -255,7 +255,12 @@ public class MetaUtils {
         short valSize = in.readShort();
         for (int i = 0; i < valSize; i++) {
             String valName = in.readUTF();
-            Value val = ValueUtils.readValue(in);
+            Value val = null;
+            try {
+                val = ValueUtils.readValue(in);
+            } catch (ClassNotFoundException e) {
+                throw new IOException("Failed to read custom number value from input stream.", e);
+            }
             res.setValue(valName, val);
         }
         short nodeSize = in.readShort();
@@ -272,7 +277,7 @@ public class MetaUtils {
         return res;
     }
 
-    public static MetaBuilder readMeta(ObjectInput in) throws IOException, ClassNotFoundException {
+    public static MetaBuilder readMeta(ObjectInput in) throws IOException {
         return readMeta(in, null);
     }
 

@@ -26,15 +26,20 @@ public class EnvelopeTag {
     public static final byte[] START_SEQUENCE = {'#', '~'};
     public static final byte[] END_SEQUENCE = {'~', '#', '\r', '\n'};
     public static final String CUSTOM_PROPERTY_HEAD = "#?";
-
-    public static byte[] LEGACY_START_SEQUENCE = {'#', '!'};
-
     private static final int DEFAULT_BUFFER_SIZE = 1024;
-
+    public static byte[] LEGACY_START_SEQUENCE = {'#', '!'};
     private Map<String, Value> values = new HashMap<>();
     private MetaType metaType = XMLMetaType.instance;
     private EnvelopeType envelopeType = DefaultEnvelopeType.instance;
     private int length = -1;
+
+    public static EnvelopeTag from(InputStream stream) {
+        try {
+            return new EnvelopeTag().read(stream);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read envelope tag", e);
+        }
+    }
 
     /**
      * Get the length of tag in bytes. -1 means undefined size in case tag was modified
@@ -165,14 +170,6 @@ public class EnvelopeTag {
         }
     }
 
-    public static EnvelopeTag from(InputStream stream) {
-        try {
-            return new EnvelopeTag().read(stream);
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to read envelope tag", e);
-        }
-    }
-
 //    public static EnvelopeTag fromLegacy(InputStream stream) throws IOException {
 //        EnvelopeTag tag =  new EnvelopeTag();
 //        tag.setValues(readLegacyHeader(stream));
@@ -285,7 +282,7 @@ public class EnvelopeTag {
         buffer.put(START_SEQUENCE);
 
         buffer.putInt(envelopeType.getCode());
-        buffer.putShort(metaType.getCode());
+        buffer.putShort(metaType.getCodes().get(0));
         buffer.putInt((int) values.get(Envelope.META_LENGTH_KEY).longValue());
         buffer.putInt((int) values.get(Envelope.DATA_LENGTH_KEY).longValue());
         buffer.put(END_SEQUENCE);
