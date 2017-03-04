@@ -19,6 +19,7 @@ public interface MetaStreamWriter {
 
     /**
      * Set charset for this writer
+     *
      * @param charset
      * @return
      */
@@ -29,19 +30,22 @@ public interface MetaStreamWriter {
      * possible)
      *
      * @param stream
-     * @param meta
-     * charset is used
+     * @param meta   charset is used
      */
-    void write(OutputStream stream, Meta meta);
+    void write(OutputStream stream, Meta meta) throws IOException;
 
 
     default String writeString(Meta meta) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        write(baos, meta);
+        try {
+            write(baos, meta);
+        } catch (IOException e) {
+            throw new Error(e);
+        }
         return new String(baos.toByteArray(), Charset.forName("UTF-8"));
     }
 
-    default void writeToFile(File file, Meta meta) throws FileNotFoundException {
+    default void writeToFile(File file, Meta meta) throws IOException {
         write(new FileOutputStream(file), meta);
     }
 }

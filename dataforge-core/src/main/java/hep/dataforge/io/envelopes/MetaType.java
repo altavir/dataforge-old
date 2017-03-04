@@ -9,6 +9,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
@@ -31,7 +32,7 @@ public interface MetaType {
         //TODO add caching here?
         synchronized (Global.instance()) {
             return StreamSupport.stream(loader.spliterator(), false)
-                    .filter(it -> it.getCode() == code).findFirst().orElse(null);
+                    .filter(it -> it.getCodes().contains(code)).findFirst().orElse(null);
         }
     }
 
@@ -47,7 +48,7 @@ public interface MetaType {
         }
     }
 
-    short getCode();
+    List<Short> getCodes();
 
     String getName();
 

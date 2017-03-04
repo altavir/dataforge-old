@@ -1,5 +1,6 @@
 package hep.dataforge.meta
 
+import hep.dataforge.io.IOUtils
 import spock.lang.Specification
 
 /**
@@ -19,7 +20,7 @@ class MetaUtilsTest extends Specification {
         MetaUtils.writeMeta(new ObjectOutputStream(baos),meta);
         byte[] bytes = baos.toByteArray();
 
-        println "Serialized string: \n${new String(bytes)}\n"
+        println "Serialized string: \n${new String(bytes, IOUtils.ASCII_CHARSET)}\n"
 
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 

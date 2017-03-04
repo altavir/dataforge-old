@@ -9,14 +9,17 @@ import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.io.envelopes.MetaType;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 public class JSONMetaType implements MetaType {
     public static final JSONMetaType instance = new JSONMetaType();
+    public static Short[] JSON_META_CODES = {0x4a53, 1};//JS
 
     @Override
-    public short getCode() {
-        return 1;
+    public List<Short> getCodes() {
+        return Arrays.asList(JSON_META_CODES);
     }
 
     @Override
@@ -36,7 +39,7 @@ public class JSONMetaType implements MetaType {
 
     @Override
     public Predicate<String> fileNameFilter() {
-        return str-> str.toLowerCase().endsWith(".json");
+        return str -> str.toLowerCase().endsWith(".json");
     }
 
 }
