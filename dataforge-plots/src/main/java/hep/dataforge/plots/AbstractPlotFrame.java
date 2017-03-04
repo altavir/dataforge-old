@@ -121,7 +121,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
                 .putMetaValue(WRAPPED_TYPE_KEY, PLOT_WRAPPER_TYPE)
                 .putMetaValue("plotFrameClass", getClass().getName())
                 .putMetaNode("plotMeta", meta())
-                .setEnvelopeType(new WrapperEnvelopeType())
+                .setContentType("wrapper")
                 .setData(baos.toByteArray());
         return builder.build();
     }

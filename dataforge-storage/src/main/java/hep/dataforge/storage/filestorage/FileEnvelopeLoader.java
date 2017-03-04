@@ -98,7 +98,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
         if (!isReadOnly()) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DefaultEnvelopeWriter.instance.write(baos, env, true);
+                DefaultEnvelopeWriter.instance.write(baos, env);
                 file.append(baos.toByteArray());
             } catch (IOException ex) {
                 throw new StorageException("Can't push envelope to loader", ex);

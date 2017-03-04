@@ -24,10 +24,10 @@ public class WrapperUtils {
 
     public static Envelope wrapJavaObject(Serializable obj) {
 
-        EnvelopeBuilder builder = new EnvelopeBuilder();
-        builder.setEnvelopeType(new WrapperEnvelopeType());
-        builder.putMetaValue(WRAPPED_TYPE_KEY, JAVA_OBJECT_TYPE);
-        builder.putMetaValue(JAVA_CLASS_KEY, obj.getClass().getName());
+        EnvelopeBuilder builder = new EnvelopeBuilder()
+                .setContentType("wrapper")
+                .putMetaValue(WRAPPED_TYPE_KEY, JAVA_OBJECT_TYPE)
+                .putMetaValue(JAVA_CLASS_KEY, obj.getClass().getName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream stream = new ObjectOutputStream(baos)) {
             stream.writeObject(obj);

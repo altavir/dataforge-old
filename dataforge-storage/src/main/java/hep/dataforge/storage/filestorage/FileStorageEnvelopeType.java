@@ -16,9 +16,9 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
+import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
-
-import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
+import hep.dataforge.storage.commons.JSONMetaType;
 
 /**
  *
@@ -27,8 +27,13 @@ import static hep.dataforge.io.envelopes.Envelope.TYPE_KEY;
 public class FileStorageEnvelopeType extends DefaultEnvelopeType {
     public static final String FILE_STORAGE_ENVELOPE_TYPE = "storage";
 
+    /**
+     * Check that declared envelope content type is a storage or empty
+     * @param envelope
+     * @return
+     */
     public static boolean validate(Envelope envelope){
-        return FILE_STORAGE_ENVELOPE_TYPE.equals(envelope.getProperties().get(TYPE_KEY));
+        return envelope.getContentType(FILE_STORAGE_ENVELOPE_TYPE).equals(FILE_STORAGE_ENVELOPE_TYPE);
     }
 
     public static boolean validate(Envelope envelope, String loaderType){
@@ -43,6 +48,11 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
     @Override
     public String getName() {
         return FILE_STORAGE_ENVELOPE_TYPE;
+    }
+
+    @Override
+    public DefaultEnvelopeWriter getWriter() {
+        return super.getWriter().withMetaType(JSONMetaType.instance);
     }
 
     @Override

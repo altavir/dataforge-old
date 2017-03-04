@@ -18,7 +18,6 @@ package hep.dataforge.plots.data;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
@@ -121,7 +120,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
                 .putMetaValue("plottableClass", getClass().getName())
                 .putMetaValue("name", getName())
                 .putMetaNode("meta", new Laminate(meta()).setDescriptor(DescriptorUtils.buildDescriptor(this)))
-                .setEnvelopeType(new WrapperEnvelopeType());
+                .setContentType("wrapper");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream os = new ObjectOutputStream(baos)) {

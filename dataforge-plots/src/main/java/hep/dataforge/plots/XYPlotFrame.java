@@ -77,6 +77,8 @@ public abstract class XYPlotFrame extends AbstractPlotFrame<XYPlottable> {
             info = "The type of axis. By default number axis is used")
     @ValueDef(name = "axisTitle", info = "The title of the axis.")
     @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
+    @ValueDef(name = "range.from", type = "NUMBER", info = "Lower boundary for fixed range")
+    @ValueDef(name = "range.to", type = "NUMBER", info = "Upper boundary for fixed range")
     @ValueDef(name = "crosshair", def = "none",
             allowed = "[none, free, data]",
             info = "Appearance and type of crosshair")

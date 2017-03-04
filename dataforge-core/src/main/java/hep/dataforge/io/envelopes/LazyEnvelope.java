@@ -17,9 +17,7 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.values.Value;
-import java.util.HashMap;
-import java.util.Map;
+
 import java.util.function.Supplier;
 
 /**
@@ -28,14 +26,11 @@ import java.util.function.Supplier;
  * @author darksnake
  */
 public class LazyEnvelope implements Envelope {
-
-    private final Map<String, Value> properties;
     private final Meta meta;
     private Supplier<Binary> supplier;
     private Binary data = null;
 
-    public LazyEnvelope(Map<String, Value> properties, Meta meta, Supplier<Binary> supplier) {
-        this.properties = new HashMap<>(properties);
+    public LazyEnvelope( Meta meta, Supplier<Binary> supplier) {
         this.meta = meta;
         this.supplier = supplier;
     }
@@ -67,11 +62,6 @@ public class LazyEnvelope implements Envelope {
      */
     private Supplier<Binary> getDataSupplier() {
         return supplier;
-    }
-
-    @Override
-    public Map<String, Value> getProperties() {
-        return properties;
     }
 
 }

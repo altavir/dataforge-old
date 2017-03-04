@@ -19,10 +19,27 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
+ * The writer interface for the envelope
  *
  * @author Alexander Nozik
-
  */
 public interface EnvelopeWriter {
+//    /**
+//     * Write using custom tag
+//     *
+//     * @param stream
+//     * @param envelope
+//     * @param tag
+//     * @throws IOException
+//     */
+//    void write(OutputStream stream, Envelope envelope, Supplier<EnvelopeTag> tag) throws IOException;
+
+    /**
+     * Write using default tag
+     *
+     * @param stream
+     * @param envelope
+     * @throws IOException
+     */
     void write(OutputStream stream, Envelope envelope) throws IOException;
 }

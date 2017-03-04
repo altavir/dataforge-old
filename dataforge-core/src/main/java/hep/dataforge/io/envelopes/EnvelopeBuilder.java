@@ -19,55 +19,28 @@ import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.values.Value;
 
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.Map;
-
-import static hep.dataforge.io.envelopes.Envelope.*;
 
 /**
  * The convenient build for envelopes
  *
  * @author Alexander Nozik
  */
-public class EnvelopeBuilder {
+public class EnvelopeBuilder implements Envelope {
 
-    private Map<String, Value> properties = new HashMap<>();
     private MetaBuilder meta = new MetaBuilder("envelope");
 
     //initializing with empty buffer
     private Binary data = new BufferedBinary(new byte[0]);
 
     public EnvelopeBuilder(Envelope envelope) {
-        this.properties = envelope.getProperties();
         this.meta = envelope.meta().getBuilder();
         this.data = envelope.getData();
     }
 
     public EnvelopeBuilder() {
 
-    }
-
-    public EnvelopeBuilder setProperty(String name, Value value) {
-        properties.put(name, value);
-        return this;
-    }
-
-    public EnvelopeBuilder setProperty(String name, String value) {
-        return setProperty(name, Value.of(value));
-    }
-
-    public EnvelopeBuilder setProperty(String name, Number value) {
-        return setProperty(name, Value.of(value));
-    }
-
-    public EnvelopeBuilder setProperties(Map<String, Value> properties) {
-        for (Map.Entry<String, Value> entry : properties.entrySet()) {
-            setProperty(entry.getKey(), entry.getValue());
-        }
-        return this;
     }
 
     public EnvelopeBuilder setMeta(Meta annotation) {
@@ -112,14 +85,6 @@ public class EnvelopeBuilder {
         return this;
     }
 
-    public EnvelopeBuilder setMetaType(MetaType metaType) {
-        return setProperty(META_TYPE_KEY, metaType.getName());
-    }
-
-    public EnvelopeBuilder setMetaEncoding(String metaEncoding) {
-        return setProperty(META_ENCODING_KEY, metaEncoding);
-    }
-
     public EnvelopeBuilder setData(Binary data) {
         this.data = data;
         return this;
@@ -135,26 +100,22 @@ public class EnvelopeBuilder {
         return this;
     }
 
-    public EnvelopeBuilder setEnvelopeType(EnvelopeType type) {
-        return this.setProperty(TYPE_KEY, type.getName());
+    public EnvelopeBuilder setContentType(String type){
+        putMetaValue("@envelope.type",type);
+        return this;
     }
 
-    //    public EnvelopeBuilder setTime(LocalDateTime time){
-//        return this.setProperty(OPT_KEY, time.toEpochSecond(ZoneOffset.UTC));
-//    }
-    public EnvelopeBuilder setInfiniteDataSize() {
-        return setProperty(DATA_LENGTH_KEY, -1);
-    }
-
-    public EnvelopeBuilder setInfiniteMetaSize() {
-        return setProperty(META_LENGTH_KEY, -1);
-    }
-
-    public Map<String, Value> getProperties() {
-        return properties;
+    public EnvelopeBuilder setContentDescription(String description){
+        putMetaValue("@envelope.description",description);
+        return this;
     }
 
     public Meta getMeta() {
+        return meta;
+    }
+
+    @Override
+    public Meta meta() {
         return meta;
     }
 
@@ -163,6 +124,6 @@ public class EnvelopeBuilder {
     }
 
     public Envelope build() {
-        return new SimpleEnvelope(properties, meta, data);
+        return new SimpleEnvelope(meta, data);
     }
 }

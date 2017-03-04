@@ -21,7 +21,6 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeTag;
 import hep.dataforge.io.envelopes.EnvelopeType;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.values.Value;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.RandomAccessContent;
 import org.apache.commons.vfs2.VFS;
@@ -35,7 +34,6 @@ import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
-import java.util.Map;
 
 /**
  * A specific envelope to handle file storage format.
@@ -102,12 +100,6 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             }
         }
         return meta;
-    }
-
-    @Override
-    public Map<String, Value> getProperties() {
-        ensureOpen();
-        return tag.getValues();
     }
 
     public String readLine(int offset) throws IOException {

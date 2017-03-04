@@ -17,7 +17,6 @@ package hep.dataforge.storage.commons;
 
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.MetaType;
 
 /**
  * A factory for messages with fixed format
@@ -45,7 +44,7 @@ public class MessageFactory {
      * @return
      */
     public EnvelopeBuilder responseBase(Envelope request) {
-        EnvelopeBuilder res = new EnvelopeBuilder().setProperties(request.getProperties());
+        EnvelopeBuilder res = new EnvelopeBuilder();
         String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
         if (!type.isEmpty()) {
             res.putMetaValue(MESSAGE_TYPE_KEY, type + RESPONSE_TYPE_SUFFIX);
@@ -60,8 +59,7 @@ public class MessageFactory {
      * @return
      */
     public EnvelopeBuilder responseBase(String type) {
-        EnvelopeBuilder res = new EnvelopeBuilder()
-                .setMetaType(metaType());
+        EnvelopeBuilder res = new EnvelopeBuilder();
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
                 type += RESPONSE_TYPE_SUFFIX;
@@ -78,8 +76,7 @@ public class MessageFactory {
      * @return
      */
     public EnvelopeBuilder requestBase(String type) {
-        EnvelopeBuilder res = new EnvelopeBuilder()
-                .setMetaType(metaType());
+        EnvelopeBuilder res = new EnvelopeBuilder();
         if (type != null && !type.isEmpty()) {
             res.putMetaValue(MESSAGE_TYPE_KEY, type);
         }
@@ -110,7 +107,7 @@ public class MessageFactory {
     }
 
     public EnvelopeBuilder okResponseBase(Envelope request, boolean hasMeta, boolean hasData) {
-        EnvelopeBuilder res = new EnvelopeBuilder().setProperties(request.getProperties())
+        EnvelopeBuilder res = new EnvelopeBuilder()
                 .putMetaValue(MESSAGE_META_KEY, MESSAGE_OK);
         String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
         if (type != null && !type.isEmpty()) {
@@ -136,7 +133,6 @@ public class MessageFactory {
      */
     public EnvelopeBuilder okResponseBase(String type, boolean hasMeta, boolean hasData) {
         EnvelopeBuilder res = new EnvelopeBuilder()
-                .setMetaType(metaType())
                 .putMetaValue(MESSAGE_META_KEY, MESSAGE_OK);
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
@@ -149,10 +145,6 @@ public class MessageFactory {
         }
 
         return res;
-    }
-
-    protected MetaType metaType() {
-        return JSONMetaType.instance;
     }
 
     /**

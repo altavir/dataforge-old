@@ -186,6 +186,24 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             String crosshair = axisMeta.getString("crosshair",
                     plotMeta.getString("crosshair", "none"));
 
+
+            double from = axisMeta.getDouble("range.from", Double.NEGATIVE_INFINITY);
+
+            if(Double.isFinite(from)){
+                axis.setLowerBound(from);
+            }
+
+            double to = axisMeta.getDouble("range.to", Double.NEGATIVE_INFINITY);
+
+            if(Double.isFinite(to)){
+                axis.setUpperBound(to);
+            }
+//            if (Double.isFinite(from) && Double.isFinite(to)) {
+//                axis.setRange(from,to);
+//            } else {
+//                axis.setAutoRange(true);
+//            }
+
             switch (axisName) {
                 case "x":
                     plot.setDomainAxis(axis);

@@ -17,6 +17,7 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -41,9 +42,18 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
 
     public static final DefaultEnvelopeWriter instance = new DefaultEnvelopeWriter();
 
+    private MetaType metaType = XMLMetaType.instance;
+
+    public DefaultEnvelopeWriter withMetaType(@NotNull MetaType metaType) {
+        DefaultEnvelopeWriter newInstance = new DefaultEnvelopeWriter();
+        newInstance.metaType = metaType;
+        return newInstance;
+    }
+
     @Override
     public void write(OutputStream stream, Envelope envelope) throws IOException {
-        write(stream, envelope, true);
+        EnvelopeTag tag = new EnvelopeTag().setMetaType(metaType);
+        write(stream, tag, envelope);
     }
 
     /**
@@ -52,13 +62,9 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
      *
      * @param stream
      * @param envelope
-     * @param useTag
      * @throws IOException
      */
-    public void write(OutputStream stream, Envelope envelope, boolean useTag) throws IOException {
-
-        EnvelopeTag tag = new EnvelopeTag();
-        tag.setValues(envelope.getProperties());
+    protected final void write(OutputStream stream, EnvelopeTag tag, Envelope envelope) throws IOException {
 
         MetaStreamWriter writer = tag.getMetaType().getWriter();
         byte[] meta;
@@ -78,12 +84,10 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
         long dataSize = envelope.getData().size();
         tag.setValue(DATA_LENGTH_KEY, dataSize);
 
-        if (useTag) {
-            stream.write(tag.byteHeader());
-        }
+        stream.write(tag.byteHeader());
 
         for (Map.Entry<String, Value> entry : tag.getValues().entrySet()) {
-            if (useTag && TAG_PROPERTIES.contains(entry.getKey())) {
+            if (TAG_PROPERTIES.contains(entry.getKey())) {
             } else {
                 stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
                 stream.write(SEPARATOR);

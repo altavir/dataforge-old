@@ -24,6 +24,8 @@ import java.util.Map;
  */
 public class JSONMetaWriter implements MetaStreamWriter {
 
+    public static JSONMetaWriter instance = new JSONMetaWriter();
+
     private boolean prettify = true;
     private Charset charset = IOUtils.UTF8_CHARSET;
 
@@ -35,9 +37,10 @@ public class JSONMetaWriter implements MetaStreamWriter {
     }
 
     @Override
-    public MetaStreamWriter withCharset(Charset charset) {
-        this.charset = charset;
-        return this;
+    public JSONMetaWriter withCharset(Charset charset) {
+        JSONMetaWriter res = new JSONMetaWriter();
+        res.charset = charset;
+        return res;
     }
 
     @Override

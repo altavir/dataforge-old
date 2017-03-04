@@ -19,10 +19,8 @@ import ch.qos.logback.classic.Level;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.XMLMetaType;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.*;
@@ -41,6 +39,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.time.Instant;
 
+import static hep.dataforge.storage.filestorage.FileStorageEnvelopeType.FILE_STORAGE_ENVELOPE_TYPE;
 import static org.apache.commons.vfs2.FileType.FOLDER;
 
 /**
@@ -345,14 +344,10 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 dataFile.createFile();
                 try (OutputStream stream = dataFile.getContent().getOutputStream()) {
                     Envelope emptyEnvelope = new EnvelopeBuilder()
-                            .setEnvelopeType(new FileStorageEnvelopeType())
+                            .setContentType(FILE_STORAGE_ENVELOPE_TYPE)
                             .setMeta(an)
-                            .setMetaType(XMLMetaType.instance)
-                            .setMetaEncoding("UTF-8")
-                            .setInfiniteDataSize()
                             .build();
-                    DefaultEnvelopeWriter.instance.write(stream, emptyEnvelope, true);
-
+                    new FileStorageEnvelopeType().getWriter().write(stream, emptyEnvelope);
                 }
             }
             refresh();

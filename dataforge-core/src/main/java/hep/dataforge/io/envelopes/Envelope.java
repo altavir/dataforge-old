@@ -16,39 +16,46 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.data.binary.Binary;
+import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.values.Value;
-
-import java.util.Map;
+import hep.dataforge.meta.Meta;
 
 /**
  * The message is a pack that can include three principal parts:
  * <ul>
- * <li>Envelope properties</li>
  * <li>Envelope meta-data</li>
  * <li>binary data</li>
  * </ul>
  *
  * @author Alexander Nozik
  */
+@NodeDef(name = "@envelope", info = "An optional envelope service info node")
+@ValueDef(name = "@envelope.type", info = "Type of the envelope content")
+@ValueDef(name = "@envelope.description", info = "Description of the envelope content")
 public interface Envelope extends Annotated {
-
     //Constants
     /**
-     * Primary tag keys
+     * Properties keys
      */
     String TYPE_KEY = "type";
     String META_TYPE_KEY = "metaType";
     String META_LENGTH_KEY = "metaLength";
     String DATA_LENGTH_KEY = "dataLength";
 
-    /**
-     * Auxiliary keys
-     */
-    String META_ENCODING_KEY = "metaEncoding";
-    String DATA_TYPE_KEY = "dataType";
+//    /**
+//     * Properties are used only for envelope transport and interpretation
+//     * @return
+//     */
+//    Map<String, Value> getProperties();
 
-    Map<String, Value> getProperties();
+    /**
+     * Meta part of the envelope
+     *
+     * @return
+     */
+    @Override
+    Meta meta();
 
     /**
      * Read data into buffer. This operation could take a lot of time so be
@@ -57,5 +64,13 @@ public interface Envelope extends Annotated {
      * @return
      */
     Binary getData();
+
+    default String getContentType(String def){
+        return meta().getString("@envelope.type",def);
+    }
+
+    default String getContentDescription(){
+        return meta().getString("@envelope.description","");
+    }
 
 }

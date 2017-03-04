@@ -80,7 +80,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             }
         };
 
-        return new LazyEnvelope(tag.getValues(), meta, supplier);
+        return new LazyEnvelope(meta, supplier);
     }
 
     protected byte[] separator() {

@@ -51,7 +51,7 @@ public class DefaultEnvelopeType implements EnvelopeType {
     }
 
     @Override
-    public EnvelopeWriter getWriter() {
+    public DefaultEnvelopeWriter getWriter() {
         return DefaultEnvelopeWriter.instance;
     }
 

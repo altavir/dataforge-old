@@ -214,7 +214,7 @@ public class EnvelopeTag {
             if (type != null) {
                 envelopeType = type;
             } else {
-                LoggerFactory.getLogger(getClass()).debug("Can't resolve envelope type");
+                LoggerFactory.getLogger(getClass()).trace("Can't resolve envelope type");
             }
         } else if (Envelope.META_TYPE_KEY.equals(name)) {
             MetaType type = value.valueType() == ValueType.NUMBER ? MetaType.resolve((short) value.intValue()) : MetaType.resolve(value.stringValue());
@@ -240,8 +240,18 @@ public class EnvelopeTag {
         return metaType;
     }
 
+    public EnvelopeTag setMetaType(MetaType type) {
+        this.metaType = type;
+        return this;
+    }
+
     public EnvelopeType getEnvelopeType() {
         return envelopeType;
+    }
+
+    public EnvelopeTag setEnvelopeType(EnvelopeType type) {
+        this.envelopeType = envelopeType;
+        return this;
     }
 
     public EnvelopeTag read(InputStream stream) throws IOException {

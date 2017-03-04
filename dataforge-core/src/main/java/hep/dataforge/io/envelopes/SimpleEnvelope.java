@@ -17,27 +17,18 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.values.Value;
-import java.util.Map;
 
 /**
  *
  * @author Alexander Nozik
  */
 public class SimpleEnvelope implements Envelope {
-    protected final Map<String, Value> properties;
     protected final Meta meta;
     protected final Binary data;
 
-    public SimpleEnvelope(Map<String, Value> properties, Meta meta, Binary data) {
-        this.properties = properties;
+    public SimpleEnvelope(Meta meta, Binary data) {
         this.meta = meta;
         this.data = data;
-    }
-
-    @Override
-    public Map<String, Value> getProperties() {
-        return properties;
     }
 
     @Override
