@@ -37,6 +37,10 @@ import java.util.stream.Collectors;
  */
 public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements GenericBuilder<Meta, MetaBuilder> {
 
+    public MetaBuilder(){
+        super();
+    }
+
     //    private ValueProvider valueContext;
     public MetaBuilder(String name) {
         super(name);

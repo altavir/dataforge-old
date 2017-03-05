@@ -56,7 +56,7 @@ public class XYAdapter extends AxisPointAdapter {
     private String[] yErrors;
 
 
-    protected XYAdapter() {
+    public XYAdapter() {
         this(Meta.buildEmpty(DATA_ADAPTER_KEY));
     }
 

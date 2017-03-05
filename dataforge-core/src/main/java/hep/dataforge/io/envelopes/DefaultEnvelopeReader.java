@@ -76,7 +76,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
                 if (metaLength == -1) {
                     bis.skip(separator().length);
                 }
-                return readData(stream, dataLength);
+                return readData(bis, dataLength);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

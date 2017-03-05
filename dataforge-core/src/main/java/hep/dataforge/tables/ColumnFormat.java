@@ -19,6 +19,9 @@ import java.util.Arrays;
 @ValueDef(name = "precision", type = "NUMBER", info = "Expected precision for number values or length for string values")
 public class ColumnFormat extends BaseMetaHolder implements MetaMorph, Named {
 
+    public ColumnFormat() {
+    }
+
     public ColumnFormat(Meta meta) {
         super(meta);
     }

@@ -85,28 +85,34 @@ public class CachePlugin extends BasicPlugin {
                 public void run() {
                     //TODO add executor
                     if (data.getGoal().isDone()) {
-                        //TODO check for exception or cancellation
-                        result.complete(data.get());
+                        data.getInFuture().thenAccept(val-> result.complete(val));
                     } else if (cache.containsKey(id)) {
                         CompletableFuture.supplyAsync(() -> cache.get(id)).whenComplete((res, err) -> {
-                            if (err != null) {
-                                //TODO reevaluate on cache failure
-                                result.completeExceptionally(err);
-                            } else {
+                            if (res != null) {
                                 result.complete(res);
+                            } else {
+                                evalData();
+                            }
+
+                            if (err != null) {
+                                getContext().getLogger().error("Failed to load data from cache", err);
                             }
                         });
                     } else {
-                        data.getGoal().run();
-                        data.getGoal().result().whenComplete((res, err) -> {
-                            if (err != null) {
-                                result.completeExceptionally(err);
-                            } else {
-                                cache.put(id, res);
-                                result.complete(res);
-                            }
-                        });
+                        evalData();
                     }
+                }
+
+                private void evalData(){
+                    data.getGoal().run();
+                    data.getGoal().result().whenComplete((res, err) -> {
+                        if (err != null) {
+                            result.completeExceptionally(err);
+                        } else {
+                            cache.put(id, res);
+                            result.complete(res);
+                        }
+                    });
                 }
 
                 @Override

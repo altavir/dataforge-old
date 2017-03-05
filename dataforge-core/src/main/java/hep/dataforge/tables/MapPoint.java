@@ -40,7 +40,7 @@ public class MapPoint implements DataPoint, MetaMorph {
 
     private Map<String, Value> valueMap;
 
-    private MapPoint() {
+    public MapPoint() {
         this.valueMap = new LinkedHashMap<>();
     }
 

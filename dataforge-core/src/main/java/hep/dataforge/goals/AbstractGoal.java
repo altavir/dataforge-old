@@ -49,7 +49,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                                 dep.run();//starting all dependencies
                                 return dep.result();
                             })
-                            .<CompletableFuture<?>>toArray(num -> new CompletableFuture[num]))
+                            .toArray(num -> new CompletableFuture[num]))
                     .whenCompleteAsync((res, err) -> {
                         if (err != null) {
                             this.result.completeExceptionally(err);

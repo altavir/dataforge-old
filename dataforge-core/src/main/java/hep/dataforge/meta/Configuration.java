@@ -49,6 +49,10 @@ public class Configuration extends MutableMetaNode<Configuration> {
         super(name);
     }
 
+    public Configuration(){
+        super();
+    }
+
     /**
      * Create a root configuration populated by given meta
      *

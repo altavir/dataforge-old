@@ -54,6 +54,12 @@ public class ListTable implements Table {
     }
 
     /**
+     * constructor for deserialization
+     */
+    public ListTable() {
+    }
+
+    /**
      * Проверяет, что все точки соответствуют формату
      *
      * @param format a {@link hep.dataforge.tables.TableFormat} object.

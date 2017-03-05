@@ -25,6 +25,10 @@ import hep.dataforge.values.Value;
  */
 public class XYPoissonAdapter extends XYAdapter {
 
+    public XYPoissonAdapter(){
+        super();
+    }
+
     public XYPoissonAdapter(Meta adapterAnnotation) {
         super(adapterAnnotation);
     }

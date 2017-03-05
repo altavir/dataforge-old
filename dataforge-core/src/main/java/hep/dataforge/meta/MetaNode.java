@@ -63,6 +63,10 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         return res;
     }
 
+    public MetaNode(){
+        this("");
+    }
+
     public MetaNode(String name) {
         this.name = name;
         values = new LinkedHashMap<>();

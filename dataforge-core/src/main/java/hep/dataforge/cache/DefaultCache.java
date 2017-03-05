@@ -66,10 +66,10 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
         if (cacheDir.exists()) {
             hardCache.clear();
             Stream.of(cacheDir.listFiles((dir, name) -> name.endsWith(".dfcache"))).forEach(file -> {
-                try {
-                    Envelope envelope = read(file);
+                try (FileInputStream fis = new FileInputStream(file)) {
+                    Envelope envelope = reader.read(fis);
                     hardCache.put(envelope.meta(), file);
-                } catch (Exception ex) {
+                } catch (Exception e) {
                     getLogger().error("Failed to read cache file {}", file.getName());
                     file.delete();
                 }
@@ -81,22 +81,22 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     public V get(Meta id) {
         if (getSoftCache().containsKey(id)) {
             return (V) getSoftCache().get(id);
-        } else if (hardCache.containsKey(id)) {
-            //work around for meta numeric hashcode inequality
-            File cacheFile = hardCache.entrySet().stream().filter(entry-> entry.getKey().equals(id)).findFirst().get().getValue();
-            Envelope envelope = read(cacheFile);
-            try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
-                V res = (V) ois.readObject();
-                getSoftCache().put(id, res);
-                return res;
-            } catch (Exception ex) {
-                getLogger().error("Failed to read cached object with id '{}' from file with message: {}", id.toString(), ex.getMessage());
-                cacheFile.delete();
-                hardCache.remove(id);
-                return null;
-            }
         } else {
-            return null;
+            return getFromHardCache(id).map(cacheFile -> {
+                Envelope envelope = read(cacheFile);
+                try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
+                    V res = (V) ois.readObject();
+                    getSoftCache().put(id, res);
+                    return res;
+                } catch (Exception ex) {
+                    getLogger().error("Failed to read cached object with id '{}' from file with message: {}", id.toString(), ex.getMessage());
+                    cacheFile.delete();
+                    hardCache.remove(id);
+                    return null;
+                }
+            }).orElse(null);
+
+
         }
     }
 
@@ -109,7 +109,12 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     @Override
     public boolean containsKey(Meta key) {
         return getSoftCache().containsKey(key) ||
-                hardCache.keySet().stream().filter(it->it.equals(key)).findFirst().isPresent();//work around for meta numeric hashcode inequality
+                getFromHardCache(key).isPresent();
+    }
+
+    private Optional<File> getFromHardCache(Meta id) {
+        //work around for meta numeric hashcode inequality
+        return hardCache.entrySet().stream().filter(entry -> entry.getKey().equals(id)).findFirst().map(it -> it.getValue());
     }
 
     @Override

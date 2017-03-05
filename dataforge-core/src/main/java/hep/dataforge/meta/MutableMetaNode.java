@@ -37,6 +37,10 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
     protected T parent;
 
+    public MutableMetaNode(){
+        super();
+    }
+
     public MutableMetaNode(String name) {
         super(name);
         this.parent = null;
