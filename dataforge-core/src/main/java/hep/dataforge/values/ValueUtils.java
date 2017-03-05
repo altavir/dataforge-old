@@ -154,7 +154,7 @@ public class ValueUtils {
                 byte[] intBytes = new byte[intSize];
                 ois.read(intBytes);
                 int scale = ois.readInt();
-                BigDecimal bdc = new BigDecimal(new BigInteger(intBytes),scale);
+                BigDecimal bdc = new BigDecimal(new BigInteger(intBytes), scale);
                 return Value.of(bdc);
             case 'N':
                 return Value.of(ois.readObject());
@@ -177,11 +177,16 @@ public class ValueUtils {
     }
 
     private static class NumberComparator implements Comparator<Number>, Serializable {
+        private static final double RELATIVE_NUMERIC_PRECISION = 1e-5;
 
         @Override
         public int compare(final Number x, final Number y) {
-            if (isSpecial(x) || isSpecial(y)) {
-                return Double.compare(x.doubleValue(), y.doubleValue());
+            double d1 = x.doubleValue();
+            double d2 = y.doubleValue();
+            if ((d1 != 0) && (1d - d2 / d1 < RELATIVE_NUMERIC_PRECISION)) {
+                return 0;
+            } else if (isSpecial(x) || isSpecial(y)) {
+                return Double.compare(d1, d2);
             } else {
                 return toBigDecimal(x).compareTo(toBigDecimal(y));
             }

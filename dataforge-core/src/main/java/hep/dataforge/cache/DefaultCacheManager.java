@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     private final Context context;
-    private Map<String, DefaultCache> map = new ConcurrentHashMap<>();
+    private Map<String, DefaultCache> map;
 
     public DefaultCacheManager(Context context) {
         this.context = context;
@@ -63,26 +63,26 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
-        return map.computeIfAbsent(cacheName, name -> new DefaultCache(name, this, valueType));
+        return getMap().computeIfAbsent(cacheName, name -> new DefaultCache(name, this, valueType));
     }
 
     @Override
     public <K, V> Cache<K, V> getCache(String cacheName) {
-        return map.computeIfAbsent(cacheName, name -> new DefaultCache(name, this, Object.class));
+        return getMap().computeIfAbsent(cacheName, name -> new DefaultCache(name, this, Object.class));
     }
 
     @Override
     public Iterable<String> getCacheNames() {
-        return map.keySet();
+        return getMap().keySet();
     }
 
     @Override
     public void destroyCache(String cacheName) {
-        Cache cache = map.get(cacheName);
+        Cache cache = getMap().get(cacheName);
         if (cache != null) {
             cache.clear();
             cache.close();
-            map.remove(cacheName);
+            getMap().remove(cacheName);
         }
     }
 
@@ -98,13 +98,13 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public void close() {
-        map.values().forEach(it -> it.close());
+        getMap().values().forEach(it -> it.close());
         map = null;
     }
 
     @Override
     public boolean isClosed() {
-        return map == null;
+        return getMap() == null;
     }
 
     @Override
@@ -119,5 +119,12 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
     @Override
     public Context getContext() {
         return context;
+    }
+
+    private synchronized Map<String, DefaultCache> getMap() {
+        if (map == null) {
+            map = new ConcurrentHashMap<>();
+        }
+        return map;
     }
 }

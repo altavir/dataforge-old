@@ -23,9 +23,6 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.workspace.identity.Identity;
-import hep.dataforge.workspace.identity.MetaIdentity;
-import hep.dataforge.workspace.identity.ValueIdentity;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -165,15 +162,15 @@ public class ActionUtils {
                 cache = context.getPlugin(CachePlugin.class);
             }
 
-            Identity id = new ValueIdentity(context.getName());
+            MetaBuilder id = new MetaBuilder("action").setValue("context", context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
-                id = id.and(actionMeta);
+                id = id.setNode("meta",actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
                 Action action = buildAction(context, actionType);
                 res = action.run(context, res, actionMeta);
                 if (cache != null && actionMeta.getBoolean("cacheResult", false)) {
                     //FIXME add context identity here
-                    res = cache.cacheNode(action.getName(), new MetaIdentity(actionMeta), res);
+                    res = cache.cacheNode(action.getName(), id, res);
                 }
             }
             return res;

@@ -15,7 +15,6 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.workspace.identity.Identity;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -65,11 +64,11 @@ public class CachePlugin extends BasicPlugin {
         return manager;
     }
 
-    public <V> Data<V> cache(String cacheName, Identity id, Data<V> data) {
+    public <V> Data<V> cache(String cacheName, Meta id, Data<V> data) {
         if (bypass.test(data)) {
             return data;
         } else {
-            Cache<Identity, V> cache = getCache(cacheName, data.type());
+            Cache<Meta, V> cache = getCache(cacheName, data.type());
             Goal<V> cachedGoal = new Goal<V>() {
                 CompletableFuture<V> result = new CompletableFuture<V>();
 
@@ -124,7 +123,7 @@ public class CachePlugin extends BasicPlugin {
         }
     }
 
-    public <V> DataNode<V> cacheNode(String cacheName, Identity nodeId, DataNode<V> node) {
+    public <V> DataNode<V> cacheNode(String cacheName, Meta nodeId, DataNode<V> node) {
         DataTree.Builder<V> builder = DataTree.builder(node.type()).setName(node.getName()).setMeta(node.getMeta());
         //recursively caching nodes
         node.nodeStream(false).forEach(child -> {
@@ -132,13 +131,13 @@ public class CachePlugin extends BasicPlugin {
         });
         //caching direct data children
         node.dataStream(false).forEach((NamedData<? extends V> datum) -> {
-            builder.putData(datum.getName(), cache(cacheName, nodeId.and(datum.getName()), datum));
+            builder.putData(datum.getName(), cache(cacheName, nodeId.getBuilder().setValue("dataName", datum.getName()), datum));
         });
         return builder.build();
     }
 
-    private <V> Cache<Identity, V> getCache(String name, Class<V> type) {
-        return getManager().getCache(name, Identity.class, type);
+    private <V> Cache<Meta, V> getCache(String name, Class<V> type) {
+        return getManager().getCache(name, Meta.class, type);
     }
 
     @Override

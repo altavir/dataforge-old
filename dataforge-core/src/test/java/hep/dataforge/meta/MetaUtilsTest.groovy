@@ -1,6 +1,8 @@
 package hep.dataforge.meta
 
 import hep.dataforge.io.IOUtils
+import hep.dataforge.io.XMLMetaReader
+import hep.dataforge.io.XMLMetaWriter
 import spock.lang.Specification
 
 /**
@@ -12,7 +14,9 @@ class MetaUtilsTest extends Specification {
 
         Meta meta = new MetaBuilder("test")
                 .setValue("childValue", 18.5)
+                .setValue("numeric", 6.2e-8)
                 .setNode(new MetaBuilder("childNode").setValue("listValue", [2, 4, 6]).setValue("grandChildValue", true))
+
         println "initial meta: \n${meta.toString()}"
         when:
 
@@ -25,6 +29,31 @@ class MetaUtilsTest extends Specification {
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
 
         Meta reconstructed = MetaUtils.readMeta(new ObjectInputStream(bais))
+        println "reconstructed meta: \n${reconstructed.toString()}"
+        then:
+        reconstructed == meta
+    }
+
+    def "XML reconstruction test"() {
+        given:
+
+        Meta meta = new MetaBuilder("test")
+                .setValue("childValue", 18.5)
+                .setValue("numeric", 6.2e-8)
+                .setNode(new MetaBuilder("childNode").setValue("listValue", [2, 4, 6]).setValue("grandChildValue", true))
+
+        println "initial meta: \n${meta.toString()}"
+        when:
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        new XMLMetaWriter().write(baos,meta);
+        byte[] bytes = baos.toByteArray();
+
+        println "XML : \n${new String(bytes, IOUtils.UTF8_CHARSET)}\n"
+
+        ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
+
+        Meta reconstructed = new XMLMetaReader().read(bais)
         println "reconstructed meta: \n${reconstructed.toString()}"
         then:
         reconstructed == meta

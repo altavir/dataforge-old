@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import java.math.BigDecimal;
+import java.math.MathContext;
 import java.time.Instant;
 import java.util.Objects;
 
@@ -30,7 +32,7 @@ class NumberValue extends AbstractValue {
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 59 * hash + Objects.hashCode(this.value);
+        hash = 59 * hash + Objects.hashCode(new BigDecimal(this.value.doubleValue(), MathContext.DECIMAL32));
         return hash;
     }
 

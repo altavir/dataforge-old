@@ -22,7 +22,7 @@ import java.util.stream.Stream
 @ValuesDefs([
         @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
         @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value"),
-        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "true", info = "Apply result hooks for each element of collection or stream")
+        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "false", info = "Apply result hooks for each element of collection or stream")
 ])
 class GrindShell extends SimpleConfigurable implements Encapsulated {
 
@@ -88,7 +88,7 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
             res.dataStream().forEach { postEval(it) };
         }
 
-        if (getConfig().getBoolean("unwrap", true)) {
+        if (getConfig().getBoolean("unwrap", false)) {
             if (res instanceof Iterable) {
                 res.forEach { postEval(it) }
             } else if (res instanceof Stream) {

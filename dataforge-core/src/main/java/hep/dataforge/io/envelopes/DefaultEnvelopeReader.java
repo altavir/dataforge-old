@@ -22,6 +22,7 @@ import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.Meta;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -53,7 +54,8 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
      */
     @Override
     public Envelope read(@NotNull InputStream stream, @NotNull Function<InputStream,EnvelopeTag> tagReader) throws IOException {
-        EnvelopeTag tag = tagReader.apply(stream);
+        BufferedInputStream bis = new BufferedInputStream(stream);
+        EnvelopeTag tag = tagReader.apply(bis);
         MetaStreamReader parser = tag.getMetaType().getReader();
         int metaLength = (int) tag.getMetaSize();
         Meta meta;
@@ -61,7 +63,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             meta = Meta.buildEmpty("meta");
         } else {
             try {
-                meta = parser.read(stream, metaLength);
+                meta = parser.read(bis, metaLength);
             } catch (ParseException ex) {
                 throw new EnvelopeFormatException("Error parsing annotation", ex);
             }
@@ -72,7 +74,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             try {
                 //skipping separator for automatic meta reading
                 if (metaLength == -1) {
-                    stream.skip(separator().length);
+                    bis.skip(separator().length);
                 }
                 return readData(stream, dataLength);
             } catch (IOException ex) {

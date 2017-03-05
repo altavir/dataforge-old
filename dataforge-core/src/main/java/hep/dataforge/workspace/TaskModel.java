@@ -12,12 +12,11 @@ import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
-import hep.dataforge.workspace.identity.Identity;
-import hep.dataforge.workspace.identity.ValueIdentity;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
@@ -186,9 +185,10 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         data(mask, str -> as);
     }
 
-    public Identity getIdentity() {
-        //FIXME make more complex identity
-        return new ValueIdentity(getName()).and(meta());
+    public Meta getIdentity() {
+        return new MetaBuilder("task")
+                .setValue("name",getName())
+                .setNode("meta",meta());
     }
 
     /**

@@ -6,11 +6,11 @@ import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Misc;
 import hep.dataforge.values.Value;
-import hep.dataforge.workspace.identity.Identity;
 import org.slf4j.Logger;
 
 import javax.cache.Cache;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  * Default implementation for
  * Created by darksnake on 10-Feb-17.
  */
-public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identity, V>, Encapsulated {
+public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V>, Encapsulated {
 
     private static DefaultEnvelopeReader reader = new DefaultEnvelopeReader();
     private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter();
@@ -38,8 +38,8 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     private DefaultCacheManager manager;
     private final Class<V> valueType;
 
-    private Map<Identity, V> softCache;
-    private Map<Identity, File> hardCache = new HashMap<>();
+    private Map<Meta, V> softCache;
+    private Map<Meta, File> hardCache = new HashMap<>();
     private File cacheDir;
 
     public DefaultCache(String name, DefaultCacheManager manager, Class<V> valueType) {
@@ -68,7 +68,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
             Stream.of(cacheDir.listFiles((dir, name) -> name.endsWith(".dfcache"))).forEach(file -> {
                 try {
                     Envelope envelope = read(file);
-                    hardCache.put(Identity.from(envelope.meta()), file);
+                    hardCache.put(envelope.meta(), file);
                 } catch (Exception ex) {
                     getLogger().error("Failed to read cache file {}", file.getName());
                     file.delete();
@@ -78,11 +78,12 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     }
 
     @Override
-    public V get(Identity id) {
+    public V get(Meta id) {
         if (getSoftCache().containsKey(id)) {
             return (V) getSoftCache().get(id);
         } else if (hardCache.containsKey(id)) {
-            File cacheFile = hardCache.get(id);
+            //work around for meta numeric hashcode inequality
+            File cacheFile = hardCache.entrySet().stream().filter(entry-> entry.getKey().equals(id)).findFirst().get().getValue();
             Envelope envelope = read(cacheFile);
             try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
                 V res = (V) ois.readObject();
@@ -101,22 +102,23 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
 
 
     @Override
-    public Map<Identity, V> getAll(Set<? extends Identity> keys) {
+    public Map<Meta, V> getAll(Set<? extends Meta> keys) {
         return null;
     }
 
     @Override
-    public boolean containsKey(Identity key) {
-        return getSoftCache().containsKey(key) || hardCache.containsKey(key);
+    public boolean containsKey(Meta key) {
+        return getSoftCache().containsKey(key) ||
+                hardCache.keySet().stream().filter(it->it.equals(key)).findFirst().isPresent();//work around for meta numeric hashcode inequality
     }
 
     @Override
-    public void loadAll(Set<? extends Identity> keys, boolean replaceExistingValues, CompletionListener completionListener) {
+    public void loadAll(Set<? extends Meta> keys, boolean replaceExistingValues, CompletionListener completionListener) {
 
     }
 
     @Override
-    public synchronized void put(Identity id, V data) {
+    public synchronized void put(Meta id, V data) {
         getSoftCache().put(id, data);
         if (data instanceof Serializable) {
             String fileName = data.getClass().getSimpleName();
@@ -135,7 +137,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(data);
-                EnvelopeBuilder builder = new EnvelopeBuilder().setMeta(id.toMeta()).setData(baos.toByteArray());
+                EnvelopeBuilder builder = new EnvelopeBuilder().setMeta(id).setData(baos.toByteArray());
                 baos.close();
                 writer.write(fos, builder.build());
                 hardCache.put(id, file);
@@ -146,52 +148,52 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     }
 
     @Override
-    public V getAndPut(Identity key, V value) {
+    public V getAndPut(Meta key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void putAll(Map<? extends Identity, ? extends V> map) {
+    public void putAll(Map<? extends Meta, ? extends V> map) {
         map.forEach((id, data) -> put(id, data));
     }
 
     @Override
-    public boolean putIfAbsent(Identity key, V value) {
+    public boolean putIfAbsent(Meta key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(Identity key) {
+    public boolean remove(Meta key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean remove(Identity key, V oldValue) {
+    public boolean remove(Meta key, V oldValue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public V getAndRemove(Identity key) {
+    public V getAndRemove(Meta key) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean replace(Identity key, V oldValue, V newValue) {
+    public boolean replace(Meta key, V oldValue, V newValue) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public boolean replace(Identity key, V value) {
+    public boolean replace(Meta key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public V getAndReplace(Identity key, V value) {
+    public V getAndReplace(Meta key, V value) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void removeAll(Set<? extends Identity> keys) {
+    public void removeAll(Set<? extends Meta> keys) {
         throw new UnsupportedOperationException();
     }
 
@@ -209,12 +211,12 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     }
 
     @Override
-    public <T> T invoke(Identity key, EntryProcessor<Identity, V, T> entryProcessor, Object... arguments) throws EntryProcessorException {
+    public <T> T invoke(Meta key, EntryProcessor<Meta, V, T> entryProcessor, Object... arguments) throws EntryProcessorException {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <T> Map<Identity, EntryProcessorResult<T>> invokeAll(Set<? extends Identity> keys, EntryProcessor<Identity, V, T> entryProcessor, Object... arguments) {
+    public <T> Map<Meta, EntryProcessorResult<T>> invokeAll(Set<? extends Meta> keys, EntryProcessor<Meta, V, T> entryProcessor, Object... arguments) {
         throw new UnsupportedOperationException();
     }
 
@@ -244,25 +246,25 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
     }
 
     @Override
-    public void registerCacheEntryListener(CacheEntryListenerConfiguration<Identity, V> cacheEntryListenerConfiguration) {
+    public void registerCacheEntryListener(CacheEntryListenerConfiguration<Meta, V> cacheEntryListenerConfiguration) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<Identity, V> cacheEntryListenerConfiguration) {
+    public void deregisterCacheEntryListener(CacheEntryListenerConfiguration<Meta, V> cacheEntryListenerConfiguration) {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public Iterator<Entry<Identity, V>> iterator() {
+    public Iterator<Entry<Meta, V>> iterator() {
         return softCache.entrySet().stream()
-                .<Entry<Identity, V>>map(entry -> new DefaultEntry(entry.getKey(), () -> entry.getValue()))
+                .<Entry<Meta, V>>map(entry -> new DefaultEntry(entry.getKey(), () -> entry.getValue()))
                 .iterator();
     }
 
 
     @Override
-    public <C extends Configuration<Identity, V>> C getConfiguration(Class<C> clazz) {
+    public <C extends Configuration<Meta, V>> C getConfiguration(Class<C> clazz) {
         return clazz.cast(new MetaCacheConfiguration<V>(getConfig(), valueType));
     }
 
@@ -276,31 +278,31 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Identit
         super.applyValueChange(name, oldItem, newItem);
         //update cache size preserving all of the elements
         if (Objects.equals(name, "softCache.size") && softCache != null) {
-            Map<Identity, V> lru = Misc.getLRUCache(newItem.intValue());
+            Map<Meta, V> lru = Misc.getLRUCache(newItem.intValue());
             lru.putAll(softCache);
             softCache = lru;
         }
     }
 
-    private synchronized Map<Identity, V> getSoftCache() {
+    private synchronized Map<Meta, V> getSoftCache() {
         if (softCache == null) {
             softCache = Misc.getLRUCache(getConfig().getInt("softCache.size", 500));
         }
         return softCache;
     }
 
-    private class DefaultEntry implements Entry<Identity, V> {
+    private class DefaultEntry implements Entry<Meta, V> {
 
-        private Identity key;
+        private Meta key;
         private Supplier<V> supplier;
 
-        public DefaultEntry(Identity key, Supplier<V> supplier) {
+        public DefaultEntry(Meta key, Supplier<V> supplier) {
             this.key = key;
             this.supplier = supplier;
         }
 
         @Override
-        public Identity getKey() {
+        public Meta getKey() {
             return key;
         }
 
