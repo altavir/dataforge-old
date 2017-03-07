@@ -23,7 +23,7 @@ public class NodeWrapper<T> implements DataNode<T> {
         } else {
             this.overrideMeta = new Laminate(node.meta(), parentMeta);
         }
-        this.overrideName = Name.joinString(parentName, node.getName());
+        this.overrideName = parentName.isEmpty() ? node.getName() : Name.joinString(parentName, node.getName());
         this.node = node;
     }
 

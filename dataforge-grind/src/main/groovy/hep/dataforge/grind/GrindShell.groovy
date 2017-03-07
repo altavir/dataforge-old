@@ -88,8 +88,8 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
             res.dataStream().forEach { postEval(it) };
         }
 
-        if (getConfig().getBoolean("unwrap", false)) {
-            if (res instanceof Iterable) {
+        if (getConfig().getBoolean("unwrap", true)) {
+            if (res instanceof Collection) {
                 res.forEach { postEval(it) }
             } else if (res instanceof Stream) {
                 res.forEach { postEval(it) }

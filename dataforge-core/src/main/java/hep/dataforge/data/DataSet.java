@@ -85,7 +85,6 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                 .filter(it -> it != Name.EMPTY)
                 .filter(it -> recursive || it.length() == 1)
                 .map(it -> it.toString())
-//                .distinct()
                 .map((String str) -> new NodeWrapper<>(getNode(str).get(), str, meta()));
     }
 
@@ -140,7 +139,10 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
         String prefix = nodeName + ".";
         dataStream()
                 .filter(data -> data.getName().startsWith(prefix))
-                .forEach(data -> builder.putData(data));
+                .forEach(data -> {
+                    String dataName = Name.of(data.getName()).cutFirst().toString();
+                    builder.putData(dataName, data.anonymize());
+                });
         if (builder.dataMap.size() > 0) {
             return Optional.of(builder.build());
         } else {
