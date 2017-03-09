@@ -34,11 +34,7 @@ public class EnvelopeHandler implements Handler, Responder {
 
             builder.setMeta(meta);
             builder.setData(data);
-            request.forEach((key, value) -> {
-                if (!key.equals("meta")) {
-                    builder.setProperty(key, value);
-                }
-            });
+
             Envelope response = respond(builder.build());
             ctx.render(new JSONMetaWriter().writeString(response.meta()));
         });

@@ -35,9 +35,8 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter();
 
     private final String name;
-    private DefaultCacheManager manager;
     private final Class<V> valueType;
-
+    private DefaultCacheManager manager;
     private Map<Meta, V> softCache;
     private Map<Meta, File> hardCache = new HashMap<>();
     private File cacheDir;
@@ -147,7 +146,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
                 writer.write(fos, builder.build());
                 hardCache.put(id, file);
             } catch (IOException ex) {
-                getLogger().error("Failed to write data with id '{}' to file with message: {}", id.toString(), ex.getMessage());
+                getLogger().error("Failed to write data with id hashcode '{}' to file with message: {}", id.hashCode(), ex.getMessage());
             }
         }
     }

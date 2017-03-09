@@ -18,6 +18,8 @@ package hep.dataforge.values
 
 import spock.lang.Specification
 
+import java.time.Instant
+
 /**
  * Created by darksnake on 02-Oct-16.
  */
@@ -30,7 +32,7 @@ class ValueUtilsTest extends Specification {
     def "ValueIO"() {
         given:
 
-        def timeValue = Value.of(DateTimeUtils.now());
+        def timeValue = Value.of(Instant.now());
         def stringValue = Value.of("The string с русскими буквами");
         def listValue = Value.of(1d, 2d, 3d);
         def booleanValue = Value.of(true);

@@ -179,19 +179,6 @@ public class ValueUtils {
     private static class NumberComparator implements Comparator<Number>, Serializable {
         private static final double RELATIVE_NUMERIC_PRECISION = 1e-5;
 
-        @Override
-        public int compare(final Number x, final Number y) {
-            double d1 = x.doubleValue();
-            double d2 = y.doubleValue();
-            if ((d1 != 0) && (1d - d2 / d1 < RELATIVE_NUMERIC_PRECISION)) {
-                return 0;
-            } else if (isSpecial(x) || isSpecial(y)) {
-                return Double.compare(d1, d2);
-            } else {
-                return toBigDecimal(x).compareTo(toBigDecimal(y));
-            }
-        }
-
         private static boolean isSpecial(final Number x) {
             boolean specialDouble = x instanceof Double
                     && (Double.isNaN((Double) x) || Double.isInfinite((Double) x));
@@ -221,6 +208,19 @@ public class ValueUtils {
                 throw new RuntimeException("The given number (\"" + number
                         + "\" of class " + number.getClass().getName()
                         + ") does not have a parsable string representation", e);
+            }
+        }
+
+        @Override
+        public int compare(final Number x, final Number y) {
+            double d1 = x.doubleValue();
+            double d2 = y.doubleValue();
+            if ((d1 != 0 || d2 != 0) && (Math.abs(d1 - d2) / Math.max(d1, d2) < RELATIVE_NUMERIC_PRECISION)) {
+                return 0;
+            } else if (isSpecial(x) || isSpecial(y)) {
+                return Double.compare(d1, d2);
+            } else {
+                return toBigDecimal(x).compareTo(toBigDecimal(y));
             }
         }
     }

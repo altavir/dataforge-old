@@ -15,7 +15,7 @@ class TestTask extends MultiStageTask {
     }
 
     @Override
-    protected void transform(TaskModel model, MultiStageTaskState state) {
+    protected void transform(TaskModel model, MultiStageTask.MultiStageTaskState state) {
         DataSet.Builder b = DataSet.builder()
         context.getProperties().forEach { key, value ->
             b.putStatic(key, value);
