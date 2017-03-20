@@ -1,6 +1,7 @@
 package hep.dataforge.goals;
 
 import hep.dataforge.context.Global;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.concurrent.Executor;
 
@@ -19,19 +20,24 @@ public interface GoalListener<T> {
 
     /**
      * Execute when goal is completed successfully
+     *
      * @param goalExecutor the executor of completed goal
      * @param result
      */
-    void onGoalComplete(Executor goalExecutor, T result);
+    default void onGoalComplete(Executor goalExecutor, T result) {
+
+    }
 
     default void onGoalComplete(T result) {
         onGoalComplete(getDefaultExecutor(), result);
     }
 
-   void onGoalFailed(Executor goalExecutor);
+    default void onGoalFailed(Executor goalExecutor, @Nullable Exception ex) {
 
-    default void onGoalFailed() {
-        onGoalFailed(getDefaultExecutor());
+    }
+
+    default void onGoalFailed(@Nullable Exception ex) {
+        onGoalFailed(getDefaultExecutor(), ex);
     }
 
     default Executor getDefaultExecutor() {

@@ -10,7 +10,7 @@ import java.util.function.BiConsumer;
 import java.util.stream.Stream;
 
 /**
- * A simple link in a goals chain
+ * An elementary lazy calculation which could be linked into a chain. By default, Goal wraps a CompletableFuture which is triggered with {@code run} method.
  *
  * @author Alexander Nozik
  */
@@ -29,8 +29,7 @@ public interface Goal<T> extends RunnableFuture<T> {
     void run();
 
     /**
-     * Get goal result for given slot. Does not trigger goal goals.
-     * Canceling this future aborts all subsequent goals
+     * The encapsulated {@link CompletableFuture}. Used to build goal chains.
      *
      * @return
      */
@@ -67,24 +66,79 @@ public interface Goal<T> extends RunnableFuture<T> {
     }
 
     /**
-     * Complete this goal externally with given result. Try to cancel
-     * current execution
+     * Register a listener. Result listeners are triggered before {@code result} is set so they will be evaluated before any subsequent goals are started.
      *
-     * @param result
+     * @param listener
      */
-    default boolean complete(T result) {
-        return result().complete(result);
+    void registerListener(GoalListener<T> listener);
+
+    /**
+     * Add on start hook which is executed in goal thread
+     *
+     * @param r
+     */
+    default void onStart(Runnable r) {
+        registerListener(new GoalListener<T>() {
+            @Override
+            public void onGoalStart() {
+                r.run();
+            }
+
+        });
     }
 
+    /**
+     * Add on start hook which is executed using custom executor
+     *
+     * @param executor
+     * @param r
+     */
+    default void onStart(Executor executor, Runnable r) {
+        registerListener(new GoalListener<T>() {
+            @Override
+            public void onGoalStart() {
+                executor.execute(r);
+            }
 
-    void onStart(Runnable hook);
-
-    default void onComplete(BiConsumer<? super T, ? super Throwable> hook) {
-        //TODO replace by some default command thread executor
-        this.result().whenCompleteAsync(hook, command -> new Thread(command).start());
+        });
     }
 
-    default void onComplete(Executor executor, BiConsumer<? super T, ? super Throwable> hook) {
-        this.result().whenCompleteAsync(hook, executor);
+    /**
+     * Handle results using goal executor.
+     *
+     * @param consumer
+     */
+    default void onComplete(BiConsumer<T, Exception> consumer) {
+        registerListener(new GoalListener<T>() {
+            @Override
+            public void onGoalComplete(Executor goalExecutor, T result) {
+                goalExecutor.execute(() -> consumer.accept(result, null));
+            }
+
+            @Override
+            public void onGoalFailed(Executor goalExecutor, Exception ex) {
+                goalExecutor.execute(() -> consumer.accept(null, ex));
+            }
+        });
+    }
+
+    /**
+     * handle using custom executor
+     *
+     * @param exec
+     * @param consumer
+     */
+    default void onComplete(Executor exec, BiConsumer<T, Exception> consumer) {
+        registerListener(new GoalListener<T>() {
+            @Override
+            public void onGoalComplete(Executor goalExecutor, T result) {
+                exec.execute(() -> consumer.accept(result, null));
+            }
+
+            @Override
+            public void onGoalFailed(Executor goalExecutor, Exception ex) {
+                exec.execute(() -> consumer.accept(null, ex));
+            }
+        });
     }
 }

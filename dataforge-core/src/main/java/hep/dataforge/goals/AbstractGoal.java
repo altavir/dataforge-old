@@ -5,11 +5,10 @@
  */
 package hep.dataforge.goals;
 
+import hep.dataforge.utils.ReferenceRegistry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ForkJoinPool;
@@ -19,9 +18,10 @@ import java.util.concurrent.ForkJoinPool;
  */
 public abstract class AbstractGoal<T> implements Goal<T> {
 
+    private final ReferenceRegistry<GoalListener<T>> listeners = new ReferenceRegistry<>();
+
     private final Executor executor;
     private final CompletableFuture<T> result;
-    private final List<Runnable> onStartHooks = new ArrayList<>();
     private CompletableFuture<?> computation;
     private Thread thread;
 
@@ -58,10 +58,14 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                         try {
                             thread = Thread.currentThread();
                             //trigger start hooks
-                            onStartHooks.forEach(action -> action.run());
-                            this.result.complete(compute());
+                            listeners.forEach(listener -> listener.onGoalStart());
+                            T r = compute();
+                            //triggering result hooks
+                            listeners.forEach(listener -> listener.onGoalComplete(getExecutor(), r));
+                            this.result.complete(r);
                         } catch (Exception ex) {
-//                            getLogger().error("Exception while executing goal", ex);
+                            //trigger exception hooks
+                            listeners.forEach(listener -> listener.onGoalFailed(getExecutor(), ex));
                             this.result.completeExceptionally(ex);
                         } finally {
                             thread = null;
@@ -73,11 +77,6 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     public Executor getExecutor() {
         return executor;
     }
-
-    public synchronized void onStart(Runnable hook) {
-        this.onStartHooks.add(hook);
-    }
-
 
     protected abstract T compute() throws Exception;
 
@@ -106,7 +105,6 @@ public abstract class AbstractGoal<T> implements Goal<T> {
      *
      * @param result
      */
-    @Override
     public final synchronized boolean complete(T result) {
         abort();
         return this.result.complete(result);
@@ -115,6 +113,11 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     @Override
     public CompletableFuture<T> result() {
         return result;
+    }
+
+    @Override
+    public void registerListener(GoalListener<T> listener) {
+        listeners.add(listener);
     }
 
     protected class GoalResult extends CompletableFuture<T> {

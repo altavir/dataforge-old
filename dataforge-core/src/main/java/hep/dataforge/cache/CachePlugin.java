@@ -13,6 +13,7 @@ import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.goals.Goal;
+import hep.dataforge.goals.GoalListener;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 
@@ -121,8 +122,8 @@ public class CachePlugin extends BasicPlugin {
                 }
 
                 @Override
-                public void onStart(Runnable hook) {
-                    //ignore
+                public void registerListener(GoalListener<V> listener) {
+                    //do nothing
                 }
             };
             return new Data<V>(cachedGoal, data.type(), data.meta());
