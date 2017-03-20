@@ -6,7 +6,6 @@
 package hep.dataforge.fx.work;
 
 import hep.dataforge.fx.FXUtils;
-import hep.dataforge.goals.Work;
 import javafx.application.Platform;
 import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;

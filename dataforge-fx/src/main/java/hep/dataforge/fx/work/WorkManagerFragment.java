@@ -5,9 +5,7 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.fx.fragments.Fragment;
-import hep.dataforge.goals.WorkManager;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import org.jetbrains.annotations.NotNull;
@@ -28,16 +26,16 @@ public class WorkManagerFragment extends Fragment {
         setManager(manager);
     }
 
-    /**
-     * Build new FXProcessManager, attach it to context and create window for it
-     *
-     * @param context
-     * @return
-     */
-    public static WorkManagerFragment attachToContext(Context context) {
-        WorkManager manager = context.getWorkManager();
-        return new WorkManagerFragment(manager);
-    }
+//    /**
+//     * Build new FXProcessManager, attach it to context and create window for it
+//     *
+//     * @param context
+//     * @return
+//     */
+//    public static WorkManagerFragment start(Context context) {
+//        WorkManager manager = context.getPlugin(WorkManager.class);
+//        return new WorkManagerFragment(manager);
+//    }
 
 
     public WorkManager getManager() {

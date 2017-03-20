@@ -17,7 +17,6 @@ package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
-import hep.dataforge.goals.WorkManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Logable;
@@ -33,6 +32,8 @@ import org.slf4j.LoggerFactory;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 /**
  * <p>
@@ -57,9 +58,11 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     private final PluginManager pm;
     protected Logger logger;
     protected Log rootLog;
-    protected WorkManager workManager = null;
     protected IOManager io = null;
     private Context parent = null;
+
+    protected ExecutorService parallelExecutor;
+    protected ExecutorService singleThreadExecutor;
 
 
     /**
@@ -192,18 +195,6 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         return this.pm;
     }
 
-    public WorkManager getWorkManager() {
-        if (this.workManager == null) {
-            if (getParent() != null) {
-                return getParent().getWorkManager();
-            } else {
-                return Global.instance().getWorkManager();
-            }
-        } else {
-            return workManager;
-        }
-    }
-
     /**
      * {@inheritDoc}
      *
@@ -312,9 +303,48 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         pluginManager().close();
 
         //stopping all works in this context
-        if (this.workManager != null) {
-            workManager.shutdown();
+        if (parallelExecutor != null) {
+            parallelExecutor.shutdown();
+            parallelExecutor = null;
         }
+
+        if (singleThreadExecutor != null) {
+            singleThreadExecutor.shutdown();
+            singleThreadExecutor = null;
+        }
+    }
+
+    /**
+     * Get parallelExecutor for given process name. By default uses one thread
+     * pool parallelExecutor for all processes
+     *
+     * @return
+     */
+    public ExecutorService parallelExecutor() {
+        if (this.parallelExecutor == null) {
+            getLogger().info("Initializing parallel executor in {}", getName());
+            this.parallelExecutor = Executors.newWorkStealingPool();
+        }
+        return parallelExecutor;
+    }
+
+    /**
+     * An executor for tasks that do not allow parallelization
+     *
+     * @return
+     */
+    public ExecutorService singleThreadExecutor() {
+        if (this.singleThreadExecutor == null) {
+            getLogger().info("Initializing single thread executor in {}", getName());
+            this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
+                        Thread thread = new Thread(r);
+                        thread.setDaemon(false);
+                        thread.setName(getName() + "_single");
+                        return thread;
+                    }
+            );
+        }
+        return singleThreadExecutor;
     }
 
     /**

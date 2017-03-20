@@ -6,10 +6,8 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataTree;
-import hep.dataforge.goals.Work;
 import hep.dataforge.meta.Meta;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * Some utility methods to work with tasks
@@ -61,14 +59,22 @@ public class TaskUtils {
         return applyDataModel(model, dependencyMeta);
     }
 
-    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
-        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");
+    public static DataTree.Builder gather(TaskModel model) {
         DataTree.Builder builder = DataTree.builder();
-        gatherWork.setMaxProgress(model.dependencies().size());
         model.dependencies().forEach(dep -> {
             dep.apply(builder, model.getWorkspace());
-            gatherWork.increaseProgress(1.0);
         });
         return builder;
     }
+
+//    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
+//        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");
+//        DataTree.Builder builder = DataTree.builder();
+//        gatherWork.setMaxProgress(model.dependencies().size());
+//        model.dependencies().forEach(dep -> {
+//            dep.apply(builder, model.getWorkspace());
+//            gatherWork.increaseProgress(1.0);
+//        });
+//        return builder;
+//    }
 }

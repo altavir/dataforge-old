@@ -17,7 +17,6 @@ package hep.dataforge.context;
 
 import hep.dataforge.actions.ActionManager;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.goals.WorkManager;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.LogEntry;
@@ -32,11 +31,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * Глобальный контекст. Хранит не только глобальные настройки, но и
- * контроллирует загрузку и выгрузку модулей
+ * A singleton global context. Automatic root for the whole context hierarchy. Also stores the registry for active contexts.
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public class Global extends Context {
 
@@ -70,17 +67,18 @@ public class Global extends Context {
         return instance;
     }
 
-    public static Logger logger(){
+    public static Logger logger() {
         return instance.logger;
     }
 
     /**
      * Get previously build context o build a new one
+     *
      * @param name
      * @return
      */
     public static synchronized Context getContext(String name) {
-        return contextRegistry.findFirst(ctx -> ctx.getName().equals(name)).orElseGet(()-> {
+        return contextRegistry.findFirst(ctx -> ctx.getName().equals(name)).orElseGet(() -> {
             Context ctx = new Context(name);
             contextRegistry.add(ctx);
             return ctx;
@@ -98,22 +96,13 @@ public class Global extends Context {
     /**
      * Close all contexts and terminate framework
      */
-    public static void terminate(){
+    public static void terminate() {
         org.slf4j.Logger logger = instance().getLogger();
         try {
             instance().close();
         } catch (Exception e) {
             logger.error("Exception while terminating DataForge framework");
         }
-    }
-
-    @Override
-    public WorkManager getWorkManager() {
-        if (workManager == null) {
-            this.workManager = new WorkManager();
-            this.workManager.attach(this);
-        }
-        return super.getWorkManager();
     }
 
     @Override

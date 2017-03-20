@@ -17,9 +17,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
-import hep.dataforge.goals.Work;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,33 +32,33 @@ public abstract class AbstractTask<R> implements Task {
         //validate model
         validate(model);
 
-        Work work = getWork(model, "");
+//        Work work = getWork(model, "");
+//
+//        work.setTitle(getName());
+//        work.setStatus("Gathering...");
 
-        work.setTitle(getName());
-        work.setStatus("Gathering...");
-
-        DataNode input = TaskUtils.gather(model, work).build();
-        work.setStatus("Evaluating...");
+        DataNode input = TaskUtils.gather(model).build();
+//        work.setStatus("Evaluating...");
 
         DataNode<R> output = run(model, input);
 
         model.outs().forEach(reporter -> output.handle(reporter.getExecutor(), reporter));
 
-        work.setStatus("Complete");
+//        work.setStatus("Complete");
 
         return output;
     }
 
     protected abstract DataNode<R> run(TaskModel model, DataNode<?> data);
 
-    protected Work getWork(TaskModel model, String name) {
-        return model.getContext().getWorkManager().getWork(Name.joinString(getName(), Integer.toUnsignedString(model.hashCode()), name));
-    }
+//    protected Work getWork(TaskModel model, String name) {
+//        return model.getContext().getWorkManager().getWork(Name.joinString(getName(), Integer.toUnsignedString(model.hashCode()), name));
+//    }
 
 
     @Override
     public void validate(TaskModel model) {
-        //TODO add validation here
+        //TODO add basic validation here
     }
 
 
@@ -86,7 +84,6 @@ public abstract class AbstractTask<R> implements Task {
     }
 
     public Logger getLogger(TaskModel model) {
-        //TODO replace by context logger
         return model.getContext().getLogger();
     }
 

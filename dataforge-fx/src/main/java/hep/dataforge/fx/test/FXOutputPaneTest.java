@@ -5,7 +5,7 @@
  */
 package hep.dataforge.fx.test;
 
-import hep.dataforge.fx.FXDataOutputPane;
+import hep.dataforge.fx.output.FXOutputPane;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
@@ -26,7 +26,7 @@ public class FXOutputPaneTest extends Application {
     @Override
     public void start(Stage primaryStage) {
 
-        FXDataOutputPane out = new FXDataOutputPane();
+        FXOutputPane out = new FXOutputPane();
         out.setMaxLines(5);
 
         for (int i = 0; i < 12; i++) {

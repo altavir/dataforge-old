@@ -16,7 +16,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
-import hep.dataforge.goals.Work;
 import org.slf4j.Logger;
 
 import java.util.LinkedHashMap;
@@ -39,10 +38,10 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
     protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         MultiStageTaskState state = new MultiStageTaskState(data);
         Logger logger = getLogger(model);
-        Work work = getWork(model, data.getName());
+//        Work work = getWork(model, data.getName());
 
         logger.debug("Starting transformation phase");
-        work.setStatus("Data transformation...");
+//        work.setStatus("Data transformation...");
         transform(model, state);
         if (!state.isFinished) {
             logger.warn("Task state is not finalized. Using last applied state as a result");
@@ -50,7 +49,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
         }
         logger.debug("Starting result phase");
 
-        work.setStatus("Task result generation...");
+//        work.setStatus("Task result generation...");
         DataNode<R> res = result(model, state);
 
         return res;

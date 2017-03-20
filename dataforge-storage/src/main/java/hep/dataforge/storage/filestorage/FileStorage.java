@@ -31,6 +31,7 @@ import org.apache.commons.vfs2.FileListener;
 import org.apache.commons.vfs2.FileObject;
 import org.apache.commons.vfs2.FileSystemException;
 import org.apache.commons.vfs2.impl.DefaultFileMonitor;
+import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -182,8 +183,11 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private static boolean checkIfEnvelope(FileObject file) {
-        return true;
-        //TODO implement check
+        try {
+            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readChar() == '#';
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     private void startup() throws FileSystemException, StorageException {
@@ -272,7 +276,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 }
             } catch (Exception ex) {
                 getContext().getLogger()
-                        .warn("Can't create a loader from file {} at {}", file.getName(), getDataDir().getName().getPath());
+                        .warn("Can't create a loader from {}", file.getName());
             } finally {
                 file.close();
             }

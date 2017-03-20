@@ -9,14 +9,16 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.AppenderBase;
-import hep.dataforge.fx.FXDataOutputPane;
 import hep.dataforge.fx.FXUtils;
+import hep.dataforge.fx.output.FXOutputPane;
 import javafx.scene.Parent;
-import org.apache.commons.io.output.TeeOutputStream;
 import org.slf4j.LoggerFactory;
 
 import java.io.PrintStream;
 import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.function.BiConsumer;
 
 /**
@@ -24,31 +26,34 @@ import java.util.function.BiConsumer;
  */
 public class LogFragment extends Fragment implements AutoCloseable {
 
-    public final static PrintStream STD_OUT = System.out;
-    public final static PrintStream STD_ERR = System.err;
+    private DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME;
 
-    public static final String CONSOLE_LOG_APPENDER_NAME = "hep.dataforge.fx.ConsoleWindow";
+    private final static PrintStream STD_OUT = System.out;
+    private final static PrintStream STD_ERR = System.err;
 
-    private FXDataOutputPane outputPane;
-    private BiConsumer<FXDataOutputPane, String> formatter;
-    private BiConsumer<FXDataOutputPane, ILoggingEvent> loggerFormatter = (FXDataOutputPane pane, ILoggingEvent eventObject) -> {
+    private static final String FX_LOG_APPENDER_NAME = "hep.dataforge.fx";
+
+    private FXOutputPane outputPane;
+    private BiConsumer<FXOutputPane, String> formatter;
+    private BiConsumer<FXOutputPane, ILoggingEvent> loggerFormatter = (FXOutputPane pane, ILoggingEvent eventObject) -> {
         String style;
         switch (eventObject.getLevel().toString()) {
             case "DEBUG":
-                style = "-fx-color: green";
+                style = "-fx-fill: green";
                 break;
             case "WARN":
-                style = "-fx-color: orange";
+                style = "-fx-fill: orange";
                 break;
             case "ERROR":
-                style = "-fx-color: red";
+                style = "-fx-fill: red";
                 break;
             default:
-                style = "-fx-color: black";
+                style = "-fx-fill: black";
         }
 
         FXUtils.runNow(() -> {
-            pane.appendColored(Instant.ofEpochMilli(eventObject.getTimeStamp()).toString() + ": ", "gray");
+            Instant time = Instant.ofEpochMilli(eventObject.getTimeStamp());
+            pane.appendColored(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ", "gray");
             pane.appendStyled(eventObject.getFormattedMessage().replace("\n", "\n\t") + "\r\n", style);
         });
 
@@ -58,8 +63,8 @@ public class LogFragment extends Fragment implements AutoCloseable {
     private boolean stdHooked = false;
 
     public LogFragment() {
-        super("DataForge console", 800, 200);
-        outputPane = new FXDataOutputPane();
+        super("DataForge output log", 800, 200);
+        outputPane = new FXOutputPane();
 
         outputPane.setMaxLines(2000);
         logAppender = new AppenderBase<ILoggingEvent>() {
@@ -70,7 +75,7 @@ public class LogFragment extends Fragment implements AutoCloseable {
                 }
             }
         };
-        logAppender.setName(CONSOLE_LOG_APPENDER_NAME);
+        logAppender.setName(FX_LOG_APPENDER_NAME);
 //        logAppender.setContext(Global.instance().getLogger().getLoggerContext());
         logAppender.start();
     }
@@ -80,7 +85,7 @@ public class LogFragment extends Fragment implements AutoCloseable {
      *
      * @param formatter
      */
-    public void setFormatter(BiConsumer<FXDataOutputPane, String> formatter) {
+    public void setFormatter(BiConsumer<FXOutputPane, String> formatter) {
         this.formatter = formatter;
     }
 
@@ -96,7 +101,7 @@ public class LogFragment extends Fragment implements AutoCloseable {
         appendText(text + "\r\n");
     }
 
-    public FXDataOutputPane getOutputPane() {
+    public FXOutputPane getOutputPane() {
         return outputPane;
     }
 
@@ -122,8 +127,10 @@ public class LogFragment extends Fragment implements AutoCloseable {
      */
     public void hookStd() {
         if (!stdHooked) {
-            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_OUT)));
-            System.setErr(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_ERR)));
+//            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_OUT)));
+//            System.setErr(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_ERR)));
+            System.setOut(new PrintStream(outputPane.getStream()));
+            System.setErr(new PrintStream(outputPane.getStream()));
             stdHooked = true;
         }
     }

@@ -231,7 +231,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      */
     public interface OutputHook<T> extends Consumer<DataNode<T>>, Encapsulated {
         default Executor getExecutor() {
-            return getContext().getWorkManager().singleThreadExecutor();
+            return getContext().singleThreadExecutor();
         }
     }
 

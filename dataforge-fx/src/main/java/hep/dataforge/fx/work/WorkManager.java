@@ -3,23 +3,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.goals;
+package hep.dataforge.fx.work;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.PluginDef;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 
 /**
  * @author Alexander Nozik
  */
+@PluginDef(name = "work", group = "hep.dataforge", description = "Visual process manager")
 public class WorkManager extends BasicPlugin {
-
-    protected ExecutorService parallelExecutor;
-    protected ExecutorService singleThreadExecutor;
 
     /**
      * root process
@@ -61,7 +58,7 @@ public class WorkManager extends BasicPlugin {
      * @param runnable
      */
     protected void execute(String processName, Runnable runnable) {
-        parallelExecutor().execute(() -> {
+        getContext().parallelExecutor().execute(() -> {
             Thread.currentThread().setName(processName);
             runnable.run();
         });
@@ -84,38 +81,6 @@ public class WorkManager extends BasicPlugin {
         return work;
     }
 
-    /**
-     * Get parallelExecutor for given process name. By default uses one thread
-     * pool parallelExecutor for all processes
-     *
-     * @return
-     */
-    public ExecutorService parallelExecutor() {
-        if (this.parallelExecutor == null) {
-            getContext().getLogger().info("Initializing parallel executor");
-            this.parallelExecutor = Executors.newWorkStealingPool();
-        }
-        return parallelExecutor;
-    }
-
-    /**
-     * An executor for tasks that do not allow parallelization
-     *
-     * @return
-     */
-    public ExecutorService singleThreadExecutor() {
-        if (this.singleThreadExecutor == null) {
-            getContext().getLogger().info("Initializing single thread executor");
-            this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
-                        Thread thread = new Thread(r);
-                        thread.setDaemon(false);
-                        thread.setName(getContext().getName() + "_single");
-                        return thread;
-                    }
-            );
-        }
-        return singleThreadExecutor;
-    }
 
     /**
      * This method is called internally on process start
@@ -153,14 +118,6 @@ public class WorkManager extends BasicPlugin {
      */
     public void shutdown() {
         this.root.cancel(true);
-        if (parallelExecutor != null) {
-            parallelExecutor.shutdownNow();
-            parallelExecutor = null;
-        }
-        if (singleThreadExecutor != null) {
-            singleThreadExecutor.shutdownNow();
-            singleThreadExecutor = null;
-        }
     }
 
 }

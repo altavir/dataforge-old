@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.output;
 
+import hep.dataforge.fx.FXUtils;
 import hep.dataforge.io.reports.LogEntry;
 
 import java.time.ZoneId;
@@ -18,9 +19,9 @@ import java.util.function.Consumer;
 public class FXReportListener implements Consumer<LogEntry> {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
-    private final FXDataOutputPane pane;
+    private final FXOutputPane pane;
 
-    public FXReportListener(FXDataOutputPane pane) {
+    public FXReportListener(FXOutputPane pane) {
         this.pane = pane;
     }
 

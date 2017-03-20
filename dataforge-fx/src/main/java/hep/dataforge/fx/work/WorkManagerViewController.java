@@ -5,8 +5,6 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.goals.Work;
-import hep.dataforge.goals.WorkManager;
 import hep.dataforge.utils.Misc;
 import javafx.application.Platform;
 import javafx.collections.MapChangeListener;

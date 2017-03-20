@@ -3,11 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx;
+package hep.dataforge.fx.output;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import hep.dataforge.fx.FXUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
@@ -16,17 +14,21 @@ import javafx.scene.layout.AnchorPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.ReadOnlyStyledDocument;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+
 /**
  * OutputPane for formatted data
  *
  * @author Alexander Nozik
  */
-public class FXDataOutputPane {
+public class FXOutputPane {
 
     private static final int DEFAULT_TAB_STOP_SIZE = 15;
 
     private final AnchorPane holder;
-    private final InlineCssTextArea textArea;
+    private final InlineCssTextArea textArea = new InlineCssTextArea();
 
     private final IntegerProperty maxLinesProperty = new SimpleIntegerProperty(-1);
 
@@ -40,8 +42,8 @@ public class FXDataOutputPane {
      */
     private int currentTab = 0;
 
-    public FXDataOutputPane() {
-        textArea = new InlineCssTextArea();
+    public FXOutputPane() {
+//        textArea = new InlineCssTextArea();
         textArea.setEditable(false);
 //        textArea.setWrapText(true);
         holder = new AnchorPane(textArea);
@@ -50,12 +52,12 @@ public class FXDataOutputPane {
         AnchorPane.setLeftAnchor(textArea, 5d);
         AnchorPane.setRightAnchor(textArea, 5d);
     }
-    
-    public void setWrapText(boolean wrapText){
+
+    public void setWrapText(boolean wrapText) {
         textArea.setWrapText(wrapText);
     }
-    
-    public BooleanProperty wrapTextProperty(){
+
+    public BooleanProperty wrapTextProperty() {
         return textArea.wrapTextProperty();
     }
 
@@ -76,6 +78,11 @@ public class FXDataOutputPane {
         this.maxLinesProperty.set(maxLines);
     }
 
+    /**
+     * Append a text using given css style. Automatically detect newlines and tabs
+     * @param text
+     * @param style
+     */
     private synchronized void append(String text, String style) {
         // Unifying newlines
         String t = text.replace("\r\n", "\n");
