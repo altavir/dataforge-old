@@ -33,22 +33,20 @@ import java.util.stream.Collectors;
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 
 /**
- *
  * @author Alexander Nozik
- * @param <T>
  */
-public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfigurable implements PlotFrame<T> {
+public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
 
-    protected ObservableList<T> plottables = FXCollections.observableArrayList();
+    protected ObservableList<Plottable> plottables = FXCollections.observableArrayList();
 
-//    private String name;
+    //    private String name;
     @Override
-    public T get(String name) {
+    public Plottable get(String name) {
         return plottables.stream().filter(pl -> name.equals(pl.getName())).findFirst().orElse(null);
     }
 
     @Override
-    public ObservableList<T> plottables() {
+    public ObservableList<Plottable> plottables() {
         return FXCollections.unmodifiableObservableList(plottables);
     }
 
@@ -56,7 +54,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     public synchronized void remove(String plotName) {
         get(plotName).removeListener(this);
         FXUtils.runNow(() -> {
-            T pl = get(plotName);
+            Plottable pl = get(plotName);
             if (pl != null) {
                 pl.removeListener(this);
             }
@@ -71,7 +69,7 @@ public abstract class AbstractPlotFrame<T extends Plottable> extends SimpleConfi
     }
 
     @Override
-    public synchronized void add(T plottable) {
+    public synchronized void add(Plottable plottable) {
         String pName = plottable.getName();
         plottables.add(plottable);
         plottable.addListener(this);

@@ -27,10 +27,9 @@ import java.io.OutputStream;
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
  *
  * @author Alexander Nozik
- * @param <T>
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-public interface PlotFrame<T extends Plottable> extends PlotStateListener, Configurable, Wrappable {
+public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
 
     /**
      * Заменить серию с данным именем и перерисовать соответствующий график или
@@ -38,14 +37,14 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      *
      * @param plotable
      */
-    void add(T plotable);
+    void add(Plottable plotable);
     
     /**
      * Add all plottables to the frame
      * @param plottables 
      */
-    default void addAll(Iterable<? extends T> plottables){
-        for(T pl : plottables){
+    default void addAll(Iterable<? extends Plottable> plottables){
+        for(Plottable pl : plottables){
             add(pl);
         }
     }
@@ -68,14 +67,14 @@ public interface PlotFrame<T extends Plottable> extends PlotStateListener, Confi
      * @param name
      * @return
      */
-    T get(String name);
+    Plottable get(String name);
 
     /**
      * List of all plottables
      *
      * @return
      */
-    ObservableList<T> plottables();
+    ObservableList<Plottable> plottables();
 
     
     /**

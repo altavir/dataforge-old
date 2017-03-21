@@ -5,6 +5,7 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.tables.*;
 import hep.dataforge.values.Value;
@@ -19,7 +20,7 @@ import java.util.stream.Stream;
 public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
-        List<XYPlottable> plottables = new ArrayList<>(frame.plottables());
+        List<Plottable> plottables = new ArrayList<>(frame.plottables());
 
         if (visibleOnly) {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
@@ -29,8 +30,8 @@ public class PlotDataUtils {
         List<String> names = new ArrayList<>();
         names.add("x");
 
-        for (XYPlottable pl : plottables) {
-            XYAdapter adapter = pl.getAdapter();
+        for (Plottable pl : plottables) {
+            XYAdapter adapter = XYAdapter.from(pl.getAdapter());
 
             names.add(pl.getName());
             pl.getData().stream().forEach(point -> {

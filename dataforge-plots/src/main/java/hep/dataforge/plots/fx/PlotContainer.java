@@ -56,7 +56,7 @@ public class PlotContainer implements Initializable {
     @FXML
     private SplitPane split;
 
-    private FXPlotFrame<Plottable> plot;
+    private FXPlotFrame plot;
     private Map<Configuration, Stage> configWindows = new HashMap<>();
     private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
     private double lastDividerPosition = -1;
@@ -284,7 +284,6 @@ public class PlotContainer implements Initializable {
         private void clearContent() {
             setText(null);
             setGraphic(null);
-
         }
 
         private synchronized void setContent(Plottable item) {

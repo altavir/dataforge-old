@@ -28,18 +28,18 @@ import java.util.function.Supplier;
 public class DefaultPlotHolder implements PlotHolder, Encapsulated {
     private final Map<String, PlotContainer> containers = new HashMap<>();
     private final Context context;
-    private Supplier<FXPlotFrame<?>> plotFrameFactory = () -> new FXLineChartFrame();
+    private Supplier<FXPlotFrame> plotFrameFactory = () -> new FXLineChartFrame();
 
     public DefaultPlotHolder(Context context) {
         this.context = context;
     }
 
-    public DefaultPlotHolder(Context context, Supplier<FXPlotFrame<?>> plotFrameFactory) {
+    public DefaultPlotHolder(Context context, Supplier<FXPlotFrame> plotFrameFactory) {
         this(context);
         this.plotFrameFactory = plotFrameFactory;
     }
 
-    protected FXPlotFrame<?> buildFrame() {
+    protected FXPlotFrame buildFrame() {
         return plotFrameFactory.get();
     }
 
@@ -54,7 +54,7 @@ public class DefaultPlotHolder implements PlotHolder, Encapsulated {
     @Override
     public synchronized PlotFrame buildPlotFrame(String stage, String name, Meta annotation) {
         if (!containers.containsKey(name)) {
-            FXPlotFrame<?> frame = buildFrame();
+            FXPlotFrame frame = buildFrame();
             frame.configure(annotation);
             PlotContainer container = showPlot(name, frame);
             containers.put(name, container);
