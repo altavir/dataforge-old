@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
@@ -53,6 +54,14 @@ public class PluginManager implements Encapsulated, AutoCloseable {
             return null;
         } else {
             return getContext().getParent().pluginManager();
+        }
+    }
+
+    public Stream<Plugin> listPlugins(boolean recursive){
+        if(recursive && getParent() != null ){
+            return Stream.concat(plugins.values().stream(),getParent().listPlugins(true));
+        } else {
+            return plugins.values().stream();
         }
     }
 

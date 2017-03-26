@@ -1,7 +1,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.actions.Action;
-import hep.dataforge.actions.ActionManager;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 
@@ -144,16 +143,21 @@ public class CustomTask extends AbstractTask<Object> {
         return then(action, model -> model.meta().getNodeOrEmpty(action.getName()));
     }
 
-    public CustomTask then(Class<Action> actionType, Function<TaskModel, Meta> actionMetaGenerator) {
-        return new CustomTask(name,
-                modelTransformation,
-                model -> data -> {
-                    Action action = ActionManager.buildFrom(model.getContext()).build(actionType);
-                    return action.run(
-                            model.getContext(),
-                            transformationFactory.apply(model).apply(data),
-                            actionMetaGenerator.apply(model)
-                    );
-                });
-    }
+//    public CustomTask then(Class<Action> actionType, Function<TaskModel, Meta> actionMetaGenerator) {
+//        return new CustomTask(name,
+//                modelTransformation,
+//                model -> data -> {
+//                    Action action = null;
+//                    try {
+//                        action = actionType.newInstance();
+//                    } catch (Exception e) {
+//                        throw new Error("Cant istanti")
+//                    }
+//                    return action.run(
+//                            model.getContext(),
+//                            transformationFactory.apply(model).apply(data),
+//                            actionMetaGenerator.apply(model)
+//                    );
+//                });
+//    }
 }

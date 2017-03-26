@@ -17,8 +17,8 @@ package hep.dataforge.context;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Annotated;
-import hep.dataforge.meta.Configurable;
 import hep.dataforge.names.Named;
+import hep.dataforge.providers.Provider;
 
 /**
  * The interface to define a Context plugin. A plugin could be loaded into the
@@ -27,7 +27,7 @@ import hep.dataforge.names.Named;
  * @author Alexander Nozik
  */
 @ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
-public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
+public interface Plugin extends Annotated, Named, Encapsulated, Provider {
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -70,20 +70,5 @@ public interface Plugin extends Annotated, Named, Encapsulated, Configurable {
     default String getName() {
         return getTag().getName();
     }
-
-//    /**
-//     * Return new blank instance of this plugin. This method is used only to
-//     * avoid separate factory class;
-//     *
-//     * @return
-//     */
-//    default Plugin newInstance() {
-//        //FIXME a bad solution
-//        try {
-//            return getClass().getDeclaredConstructor().newInstance();
-//        } catch (Exception ex) {
-//            throw new RuntimeException("Failed to create instance of the plugin", ex);
-//        }
-//    }
 
 }

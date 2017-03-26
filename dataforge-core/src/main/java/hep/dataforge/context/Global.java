@@ -15,7 +15,6 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.actions.ActionManager;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
@@ -50,8 +49,6 @@ public class Global extends Context {
     private Global() {
         super("GLOBAL");
         Locale.setDefault(Locale.US);
-        ActionManager actions = new ActionManager();
-        pluginManager().loadPlugin(actions);
     }
 
     /**

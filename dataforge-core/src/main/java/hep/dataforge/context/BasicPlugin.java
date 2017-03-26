@@ -15,8 +15,10 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.providers.Path;
 
 /**
  * A base for plugin implementation
@@ -58,7 +60,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     }
 
     /**
-     * If tag is not defined, than the name of class is used
+     * If tag is not defined, then the name of class is used
      *
      * @return
      */
@@ -97,5 +99,15 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     @Override
     public final Context getContext() {
         return context;
+    }
+
+    @Override
+    public Object provide(Path path) {
+        throw new NameNotFoundException(path.nameString());
+    }
+
+    @Override
+    public boolean provides(Path path) {
+        return false;
     }
 }

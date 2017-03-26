@@ -262,4 +262,8 @@ public interface Name {
     }
 
     String[] asArray();
+
+    default boolean equals(String name){
+        return this.toString().equals(name);
+    }
 }
