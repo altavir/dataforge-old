@@ -15,9 +15,10 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.names.Name;
+import hep.dataforge.providers.AbstractProvider;
 import hep.dataforge.providers.Path;
 
 /**
@@ -28,6 +29,8 @@ import hep.dataforge.providers.Path;
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
+
+    private final ProviderDelegate providerDelegate = new ProviderDelegate();
 
     protected MetaBuilder getDefinition() {
         MetaBuilder builder = new MetaBuilder("plugin");
@@ -102,12 +105,35 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     }
 
     @Override
-    public Object provide(Path path) {
-        throw new NameNotFoundException(path.nameString());
+    public final Object provide(Path path) {
+        return providerDelegate.provide(path);
     }
 
     @Override
-    public boolean provides(Path path) {
+    public final boolean provides(Path path) {
+        return providerDelegate.provides(path);
+    }
+
+    protected boolean provides(String target, Name name) {
         return false;
     }
+
+    protected Object provide(String target, Name name) {
+        return null;
+    }
+
+    private class ProviderDelegate extends AbstractProvider{
+
+        @Override
+        protected boolean provides(String target, Name name) {
+            return BasicPlugin.this.provides(target,name);
+        }
+
+        @Override
+        protected Object provide(String target, Name name) {
+            return BasicPlugin.this.provide(target,name);
+        }
+    }
+
+
 }

@@ -24,7 +24,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Logable;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.providers.Path;
+import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
@@ -61,12 +61,24 @@ public class FitManager extends BasicPlugin implements Provider {
 
 
     @Override
-    public Object provide(Path path) {
-        switch (path.target()) {
+    protected boolean provides(String target, Name name) {
+        switch (target) {
             case FIT_ENGINE_PROVIDER_KEY:
-                return engineList.get(path.name());
+                return engineList.containsKey(name.toString());
             case Action.ACTION_PROVIDER_KEY:
-                if(path.name().equals(FitAction.FIT_ACTION_NAME)){
+                return name.toString().equals(FitAction.FIT_ACTION_NAME);
+            default:
+                return false;
+        }
+    }
+
+    @Override
+    protected Object provide(String target, Name name) {
+        switch (target) {
+            case FIT_ENGINE_PROVIDER_KEY:
+                return engineList.get(name.toString());
+            case Action.ACTION_PROVIDER_KEY:
+                if(name.toString().equals(FitAction.FIT_ACTION_NAME)){
                     return new FitAction();
                 }
             default:
@@ -74,17 +86,6 @@ public class FitManager extends BasicPlugin implements Provider {
         }
     }
 
-    @Override
-    public boolean provides(Path path) {
-        switch (path.target()) {
-            case FIT_ENGINE_PROVIDER_KEY:
-                return engineList.containsKey(path.name());
-            case Action.ACTION_PROVIDER_KEY:
-                return path.name().equals(FitAction.FIT_ACTION_NAME);
-            default:
-                return false;
-        }
-    }
 
     public FitEngine buildEngine(String name) {
         if (name == null || name.isEmpty()) {

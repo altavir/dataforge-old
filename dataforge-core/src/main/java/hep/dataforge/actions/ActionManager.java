@@ -9,7 +9,7 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.providers.Path;
+import hep.dataforge.names.Name;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import org.slf4j.LoggerFactory;
@@ -142,16 +142,17 @@ public class ActionManager extends BasicPlugin {
     }
 
     @Override
-    public Object provide(Path path) {
-        if (path.target().equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.get(path.nameString());
+    protected boolean provides(String target, Name name) {
+        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
+            return actionMap.containsKey(name.toString());
         } else return false;
     }
 
     @Override
-    public boolean provides(Path path) {
-        if (path.target().equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.containsKey(path.nameString());
-        } else return false;
+    protected Object provide(String target, Name name) {
+        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
+            return actionMap.get(name.toString());
+        } else return null;
     }
+
 }
