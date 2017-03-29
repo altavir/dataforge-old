@@ -35,6 +35,10 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
 
     private final Map<String, PlotContainer> containers = new HashMap<>();
 
+    public FXPlotManager() {
+        super.configureValue(FX_FRAME_TYPE_KEY,"default");
+    }
+
     /**
      * Build an FX frame of the given type using spi.
      *
@@ -48,7 +52,7 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
     }
 
     protected FXPlotFrame buildFrame(Meta meta) {
-        return buildFXPlotFrame(new Laminate(meta, getConfig()));
+        return buildFXPlotFrame(new Laminate(meta, meta()));
     }
 
     protected synchronized PlotContainer showPlot(String name, FXPlotFrame frame) {

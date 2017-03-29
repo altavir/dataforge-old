@@ -4,7 +4,6 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.description.Described
-import hep.dataforge.fx.FXPlugin
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.BasicIOManager
@@ -14,6 +13,9 @@ import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Named
+import hep.dataforge.plots.PlotManager
+import hep.dataforge.plots.fx.FXPlotManager
+import hep.dataforge.plots.jfreechart.JFCFrameFactory
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
@@ -59,7 +61,7 @@ class GrindTerminal {
     GrindTerminal(Context context, Terminal terminal) {
 
         //start fx plugin in global
-        Global.instance().pluginManager().loadPlugin(new FXPlugin());
+        Global.instance().pluginManager().loadPlugin("hep.dataforge:fx");
 
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
@@ -69,6 +71,7 @@ class GrindTerminal {
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().loadPlugin("hep.dataforge:plots-fx")
+            context.getPlugin(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
         shell = new GrindShell(context)
