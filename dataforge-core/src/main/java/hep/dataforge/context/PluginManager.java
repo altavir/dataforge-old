@@ -57,9 +57,9 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         }
     }
 
-    public Stream<Plugin> listPlugins(boolean recursive){
+    public Stream<Plugin> stream(boolean recursive){
         if(recursive && getParent() != null ){
-            return Stream.concat(plugins.values().stream(),getParent().listPlugins(true));
+            return Stream.concat(plugins.values().stream(),getParent().stream(true));
         } else {
             return plugins.values().stream();
         }

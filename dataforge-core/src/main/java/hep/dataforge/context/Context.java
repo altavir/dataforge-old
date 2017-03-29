@@ -349,22 +349,20 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
 
     /**
      * Get typed plugin by its class
+     *
      * @param type
      * @param <T>
      * @return
      */
     //TODO move to utils
-    public <T extends Plugin> T getPlugin(Class<T> type) {
-        try {
-            String pluginName = type.getAnnotation(PluginDef.class).name();
-            if (pluginManager().hasPlugin(pluginName)) {
-                return (T) pluginManager().getPlugin(pluginName);
-            } else {
-                return (T) pluginManager().loadPlugin(pluginName);
-            }
-        } catch (Exception ex) {
-            throw new RuntimeException("Plugin could not be loaded by type", ex);
-        }
+    public <T> T getPlugin(Class<T> type) {
+        return pluginManager()
+                .stream(true)
+                .filter(it -> type.isInstance(it))
+                .findFirst()
+                .map(it -> type.cast(it))
+                .orElseThrow(() -> new RuntimeException("Plugin could not be loaded by type: " + type.getName()));
+
     }
 
 }

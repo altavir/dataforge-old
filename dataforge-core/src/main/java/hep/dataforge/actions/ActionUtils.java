@@ -105,7 +105,7 @@ public class ActionUtils {
             return new SequenceAction();
         } else {
             Path path = Path.of(actionName, Action.ACTION_PROVIDER_KEY);
-            return context.pluginManager().listPlugins(true)
+            return context.pluginManager().stream(true)
                     .filter(plugin -> plugin.provides(path))
                     .findFirst()
                     .map(plugin -> plugin.provide(path, Action.class))

@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots.tests;
+package hep.dataforge.plots.fx.test;
 
 import hep.dataforge.plots.fx.FXTimeAxis;
 import hep.dataforge.utils.DateTimeUtils;

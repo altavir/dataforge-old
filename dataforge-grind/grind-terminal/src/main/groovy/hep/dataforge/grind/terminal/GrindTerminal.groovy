@@ -59,7 +59,7 @@ class GrindTerminal {
     GrindTerminal(Context context, Terminal terminal) {
 
         //start fx plugin in global
-        Global.instance().getPlugin(FXPlugin);
+        Global.instance().pluginManager().loadPlugin(new FXPlugin());
 
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
@@ -68,7 +68,7 @@ class GrindTerminal {
         this.terminal = terminal
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
-            context.pluginManager().loadPlugin("hep.dataforge:plots-jfc")
+            context.pluginManager().loadPlugin("hep.dataforge:plots-fx")
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
         shell = new GrindShell(context)

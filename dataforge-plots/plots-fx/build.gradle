@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':dataforge-plots')
+    compile project(':dataforge-fx')
+}

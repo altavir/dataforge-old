@@ -15,13 +15,13 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 
 import java.awt.*;
 
 /**
- *
  * @author darksnake
  */
 public class PlotUtils {
@@ -76,9 +76,13 @@ public class PlotUtils {
                 .setValue("type", type);
         frame.getConfig().setNode(builder);
     }
-    
-    public static void setTitle(PlotFrame frame, String title){
+
+    public static void setTitle(PlotFrame frame, String title) {
         frame.configureValue("title", title);
     }
-    
+
+    public static PlotManager getPlotManager(Context context){
+        return context.getPlugin(PlotManager.class);
+    }
+
 }
