@@ -67,7 +67,7 @@ public abstract class AbstractWorkspace implements Workspace {
 
     protected synchronized CachePlugin getCache() {
         if (cache == null || cache.getContext() != this.getContext()) {
-            cache = context.getPlugin(CachePlugin.class);
+            cache = context.pluginManager().getOrLoadPlugin("hep.dataforge:dataCache");
         }
         return cache;
     }

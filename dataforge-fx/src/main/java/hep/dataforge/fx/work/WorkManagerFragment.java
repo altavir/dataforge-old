@@ -33,7 +33,7 @@ public class WorkManagerFragment extends Fragment {
 //     * @return
 //     */
 //    public static WorkManagerFragment start(Context context) {
-//        WorkManager manager = context.getPlugin(WorkManager.class);
+//        WorkManager manager = context.get(WorkManager.class);
 //        return new WorkManagerFragment(manager);
 //    }
 

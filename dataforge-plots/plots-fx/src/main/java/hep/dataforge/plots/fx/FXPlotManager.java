@@ -22,12 +22,14 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
 
+import static hep.dataforge.plots.fx.FXLinePlotFrameFactory.FX_LINE_FRAME_TYPE;
+
 /**
  * A plot holder using MDI-style JavaFX containers
  *
  * @author Alexander Nozik
  */
-@PluginDef(name = "plots-fx", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"},description = "Basic plottiong plugin")
+@PluginDef(name = "plots-fx", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"}, description = "Basic plottiong plugin")
 public class FXPlotManager extends BasicPlugin implements PlotManager {
     public static final String FX_FRAME_TYPE_KEY = "fxFrame.type";
 
@@ -36,7 +38,7 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
     private final Map<String, PlotContainer> containers = new HashMap<>();
 
     public FXPlotManager() {
-        super.configureValue(FX_FRAME_TYPE_KEY,"default");
+        super.configureValue(FX_FRAME_TYPE_KEY, FX_LINE_FRAME_TYPE);
     }
 
     /**
@@ -56,7 +58,7 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
     }
 
     protected synchronized PlotContainer showPlot(String name, FXPlotFrame frame) {
-        FXPlugin fx = getContext().getPlugin(FXPlugin.class);
+        FXPlugin fx = getContext().getFeature(FXPlugin.class);
         PlotContainer container = FXPlotUtils.displayContainer(fx, name, 800, 600);
         container.setPlot(frame);
         containers.put(name, container);

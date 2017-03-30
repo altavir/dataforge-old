@@ -38,7 +38,7 @@ public class StorageManager extends BasicPlugin {
      * @return
      */
     public static StorageManager buildFrom(Context context) {
-        return context.getPlugin(StorageManager.class);
+        return context.getFeature(StorageManager.class);
     }
 
     /**

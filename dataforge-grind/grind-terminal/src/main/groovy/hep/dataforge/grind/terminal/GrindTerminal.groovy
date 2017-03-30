@@ -71,7 +71,7 @@ class GrindTerminal {
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().loadPlugin("hep.dataforge:plots-fx")
-            context.getPlugin(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
+            context.getFeature(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
         shell = new GrindShell(context)

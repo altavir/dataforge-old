@@ -35,7 +35,7 @@ class PlotHelper {
 
     PlotHelper(Context context) {
 //        Global.instance().pluginManager().loadPlugin("plots-jfc");
-        this.manager = context.getPlugin(PlotManager)
+        this.manager = context.getFeature(PlotManager)
     }
 
 

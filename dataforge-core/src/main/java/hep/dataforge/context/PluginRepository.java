@@ -6,14 +6,13 @@
 package hep.dataforge.context;
 
 import java.util.List;
-import java.util.function.Predicate;
 
 /**
  * A resolution strategy for plugins
  *
  * @author Alexander Nozik
  */
-public interface PluginResolver {
+public interface PluginRepository {
 
     /**
      * Load the most suitable plugin of all provided by its tag
@@ -21,20 +20,11 @@ public interface PluginResolver {
      * @param tag
      * @return
      */
-    Plugin getPlugin(PluginTag tag);
+    Plugin get(PluginTag tag);
 
     /**
-     * List all available plugins matching given predicate
-     * @param predicate
+     * List tags provided by this repository
      * @return
      */
-    List<Plugin> listPlugins(Predicate<Plugin> predicate);
-
-    default List<Plugin> listPlugins() {
-        return listPlugins((tag) -> true);
-    }
-
-    default Plugin getPlugin(String name) {
-        return getPlugin(PluginTag.fromString(name));
-    }
+    List<PluginTag> listTags();
 }
