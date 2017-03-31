@@ -17,13 +17,12 @@
 package hep.dataforge.plots.fx;
 
 import hep.dataforge.plots.PlotFrame;
-import hep.dataforge.plots.Plottable;
 import javafx.scene.layout.AnchorPane;
 
 /**
  * Created by darksnake on 04-Sep-16.
  */
-public interface FXPlotFrame<T extends Plottable> extends PlotFrame<T> {
+public interface FXPlotFrame extends PlotFrame {
     /**
      * Display plot in JavaFx container
      *

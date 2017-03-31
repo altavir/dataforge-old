@@ -11,6 +11,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
+import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.workspace.BasicWorkspace
@@ -61,9 +62,11 @@ class WorkspaceSpec {
                 if (res.pluginManager().hasPlugin(key)) {
                     plugin = res.pluginManager().getPlugin(key)
                 } else {
-                    plugin = res.pluginManager().loadPlugin(key.toString())
+                    plugin = res.pluginManager().load(key.toString())
                 }
-                plugin.configure(meta)
+                if(plugin instanceof Configurable) {
+                    (plugin as Configurable).configure(meta)
+                }
             }
             return res
         }

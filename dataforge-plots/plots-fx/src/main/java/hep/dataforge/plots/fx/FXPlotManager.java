@@ -3,48 +3,62 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots.fx;
 
-import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.BasicPlugin;
+import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.fx.FXPlugin;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.fx.FXLineChartFrame;
-import hep.dataforge.plots.fx.FXPlotFrame;
-import hep.dataforge.plots.fx.FXPlotUtils;
-import hep.dataforge.plots.fx.PlotContainer;
+import hep.dataforge.plots.PlotFrame;
+import hep.dataforge.plots.PlotManager;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.ServiceLoader;
+import java.util.stream.StreamSupport;
+
+import static hep.dataforge.plots.fx.FXLinePlotFrameFactory.FX_LINE_FRAME_TYPE;
 
 /**
+ * A plot holder using MDI-style JavaFX containers
+ *
  * @author Alexander Nozik
  */
-public class DefaultPlotHolder implements PlotHolder, Encapsulated {
+@PluginDef(name = "plots-fx", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"}, description = "Basic plottiong plugin")
+public class FXPlotManager extends BasicPlugin implements PlotManager {
+    public static final String FX_FRAME_TYPE_KEY = "fxFrame.type";
+
+    private static ServiceLoader<FXPlotFrameFactory> fxPlotFrameFactoryServiceLoader = ServiceLoader.load(FXPlotFrameFactory.class);
+
     private final Map<String, PlotContainer> containers = new HashMap<>();
-    private final Context context;
-    private Supplier<FXPlotFrame<?>> plotFrameFactory = () -> new FXLineChartFrame();
 
-    public DefaultPlotHolder(Context context) {
-        this.context = context;
+    public FXPlotManager() {
+        super.configureValue(FX_FRAME_TYPE_KEY, FX_LINE_FRAME_TYPE);
     }
 
-    public DefaultPlotHolder(Context context, Supplier<FXPlotFrame<?>> plotFrameFactory) {
-        this(context);
-        this.plotFrameFactory = plotFrameFactory;
+    /**
+     * Build an FX frame of the given type using spi.
+     *
+     * @return
+     */
+    public static FXPlotFrame buildFXPlotFrame(Meta meta) {
+        String type = meta.getString(FX_FRAME_TYPE_KEY);
+        return StreamSupport.stream(fxPlotFrameFactoryServiceLoader.spliterator(), false)
+                .filter(it -> it.getName().equals(type)).findFirst().orElseThrow(() -> new NameNotFoundException(type))
+                .build(meta);
     }
 
-    protected FXPlotFrame<?> buildFrame() {
-        return plotFrameFactory.get();
+    protected FXPlotFrame buildFrame(Meta meta) {
+        return buildFXPlotFrame(new Laminate(meta, meta()));
     }
 
     protected synchronized PlotContainer showPlot(String name, FXPlotFrame frame) {
-        FXPlugin fx = context.getPlugin(FXPlugin.class);
+        FXPlugin fx = getContext().getFeature(FXPlugin.class);
         PlotContainer container = FXPlotUtils.displayContainer(fx, name, 800, 600);
         container.setPlot(frame);
         containers.put(name, container);
@@ -52,10 +66,10 @@ public class DefaultPlotHolder implements PlotHolder, Encapsulated {
     }
 
     @Override
-    public synchronized PlotFrame buildPlotFrame(String stage, String name, Meta annotation) {
+    public synchronized PlotFrame buildPlotFrame(String stage, String name, Meta meta) {
         if (!containers.containsKey(name)) {
-            FXPlotFrame<?> frame = buildFrame();
-            frame.configure(annotation);
+            FXPlotFrame frame = buildFrame(meta);
+            frame.configure(meta);
             PlotContainer container = showPlot(name, frame);
             containers.put(name, container);
         }
@@ -83,8 +97,4 @@ public class DefaultPlotHolder implements PlotHolder, Encapsulated {
         return containers.containsKey(name);
     }
 
-    @Override
-    public Context getContext() {
-        return context;
-    }
 }

@@ -42,6 +42,20 @@ public class XYAdapter extends AxisPointAdapter {
 
     public static final XYAdapter DEFAULT_ADAPTER = new XYAdapter();
 
+    /**
+     * Convert any adapter to XY adapter using meta conversion. If input adapter already is XY adapter,
+     * then it is returned as is (since it is immutable)
+     * @param adapter
+     * @return
+     */
+    public static XYAdapter from(PointAdapter adapter){
+        if(adapter instanceof XYAdapter){
+            return (XYAdapter) adapter;
+        } else {
+            return new XYAdapter(adapter.meta());
+        }
+    }
+
     private static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
         return new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
                 .putValue(X_VALUE_KEY, xName)

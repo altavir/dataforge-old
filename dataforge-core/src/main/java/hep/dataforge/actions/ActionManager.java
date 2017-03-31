@@ -6,30 +6,24 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.names.Name;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 
 /**
- *
  * @author Alexander Nozik
  */
 @PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
 public class ActionManager extends BasicPlugin {
 
     private final Map<String, Action> actionMap = new HashMap<>();
-
-    public static ActionManager buildFrom(Context context) {
-        return context.getPlugin(ActionManager.class);
-    }
 
     public ActionManager() {
         register(TransformTableAction.class);
@@ -48,10 +42,11 @@ public class ActionManager extends BasicPlugin {
 
     /**
      * Build action using its type and default empty constructor
+     *
      * @param type
      * @return
      */
-    public Action build(Class<Action> type){
+    public Action build(Class<Action> type) {
         try {
             Constructor<Action> constructor = type.getConstructor();
             return constructor.newInstance();
@@ -65,6 +60,7 @@ public class ActionManager extends BasicPlugin {
 
     /**
      * Build action using class name
+     *
      * @param type
      * @return
      * @throws ClassNotFoundException
@@ -74,7 +70,6 @@ public class ActionManager extends BasicPlugin {
     }
 
     /**
-     *
      * @param name
      * @return
      */
@@ -108,10 +103,10 @@ public class ActionManager extends BasicPlugin {
      */
     public final void register(Class<? extends Action> actionClass) {
         try {
-            put(actionClass.getDeclaredConstructor().newInstance());
-        } catch (NoSuchMethodException ex) {
+            put(actionClass.newInstance());
+        } catch (IllegalAccessException ex) {
             throw new RuntimeException("Action must have default empty constructor to be registered.");
-        } catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException ex) {
+        } catch (InstantiationException ex) {
             throw new RuntimeException("Error while constructing Action", ex);
         }
     }
@@ -144,6 +139,20 @@ public class ActionManager extends BasicPlugin {
 
         Collections.sort(list, (ActionDescriptor o1, ActionDescriptor o2) -> o1.getName().compareTo(o2.getName()));
         return list;
+    }
+
+    @Override
+    protected boolean provides(String target, Name name) {
+        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
+            return actionMap.containsKey(name.toString());
+        } else return false;
+    }
+
+    @Override
+    protected Object provide(String target, Name name) {
+        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
+            return actionMap.get(name.toString());
+        } else return null;
     }
 
 }

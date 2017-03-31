@@ -1,9 +1,13 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
 include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
+
 include ':dataforge-plots' // plot library
+include ':dataforge-plots:plots-fx'
 include ':dataforge-plots:plots-viewer' // Viewer application for exported plots
 include ':dataforge-plots:plots-jfc'
+include ':dataforge-plots:plots-jzy3d'
+
 include ':dataforge-maths' // mathematical tools
 include ':dataforge-maths:groovymath' // groovy mathematical extension
 include ':dataforge-fx' // gui tools using JavaFx

@@ -27,15 +27,6 @@ import hep.dataforge.meta.Meta;
 public interface FitEngine {
 
     /**
-     *
-     * @param name
-     * @return
-     */
-    static FitEngine forName(String name) {
-        return FitEngineFactory.buildEngine(name);
-    }
-
-    /**
      * Run the fit with given fit state and fit task
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.

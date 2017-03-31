@@ -1,6 +1,7 @@
 package hep.dataforge.io.markup;
 
 import hep.dataforge.description.Described;
+import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.DescriptorException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.DataPoint;
@@ -20,6 +21,12 @@ public class MarkupUtils {
         MarkupBuilder builder = new MarkupBuilder();
         applyDescriptorHead(builder, obj);
         applyDescriptorNode(builder, obj.getDescriptor().getMeta());
+        return builder.build();
+    }
+
+    public static Markup markupDescriptor(NodeDescriptor d) {
+        MarkupBuilder builder = new MarkupBuilder();
+        applyDescriptorNode(builder, d.getMeta());
         return builder.build();
     }
 

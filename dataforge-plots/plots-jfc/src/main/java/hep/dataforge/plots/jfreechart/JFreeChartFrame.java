@@ -17,13 +17,11 @@ package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.fx.FXUtils;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
@@ -63,7 +61,7 @@ import java.util.TimeZone;
 /**
  * @author Alexander Nozik
  */
-public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlotFrame<XYPlottable> {
+public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlotFrame {
 
     private final JFreeChart chart;
     private final XYPlot plot;
@@ -88,7 +86,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     @Override
     public void display(AnchorPane container) {
         mode = Mode.JAVAFX;
-        Runnable run = () -> {
+        Platform.runLater(() -> {
             ChartViewer viewer = new ChartViewer(getChart());
 
             FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
@@ -98,9 +96,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             AnchorPane.setTopAnchor(viewer, 0d);
             AnchorPane.setLeftAnchor(viewer, 0d);
             AnchorPane.setRightAnchor(viewer, 0d);
-        };
+        });
 
-        FXUtils.runNow(run);
     }
 
     public JFreeChartFrame display(Container panel) {
@@ -189,13 +186,13 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 
             double from = axisMeta.getDouble("range.from", Double.NEGATIVE_INFINITY);
 
-            if(Double.isFinite(from)){
+            if (Double.isFinite(from)) {
                 axis.setLowerBound(from);
             }
 
             double to = axisMeta.getDouble("range.to", Double.NEGATIVE_INFINITY);
 
-            if(Double.isFinite(to)){
+            if (Double.isFinite(to)) {
                 axis.setUpperBound(to);
             }
 //            if (Double.isFinite(from) && Double.isFinite(to)) {
@@ -288,7 +285,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     @Override
     protected synchronized void updatePlotData(String name) {
         //removing data set if necessary
-        XYPlottable plottable = get(name);
+        Plottable plottable = get(name);
         if (plottable == null) {
             index.remove(name);
             run(() -> {

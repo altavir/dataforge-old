@@ -50,7 +50,7 @@ public class MINUITPlugin extends BasicPlugin {
      * <p>
      * logStatic.</p>
      *
-     * @param str a {@link java.lang.String} object.
+     * @param str  a {@link java.lang.String} object.
      * @param pars a {@link java.lang.Object} object.
      */
     public static void logStatic(String str, Object... pars) {
@@ -66,7 +66,7 @@ public class MINUITPlugin extends BasicPlugin {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        FitEngineFactory.addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
+        context.getFeature(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
         clearStaticLog();
     }
 

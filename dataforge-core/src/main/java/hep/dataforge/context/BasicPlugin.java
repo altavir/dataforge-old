@@ -17,6 +17,9 @@ package hep.dataforge.context;
 
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.names.Name;
+import hep.dataforge.providers.AbstractProvider;
+import hep.dataforge.providers.Path;
 
 /**
  * A base for plugin implementation
@@ -26,6 +29,8 @@ import hep.dataforge.meta.SimpleConfigurable;
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
+
+    private final ProviderDelegate providerDelegate = new ProviderDelegate();
 
     protected MetaBuilder getDefinition() {
         MetaBuilder builder = new MetaBuilder("plugin");
@@ -58,7 +63,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     }
 
     /**
-     * If tag is not defined, than the name of class is used
+     * If tag is not defined, then the name of class is used
      *
      * @return
      */
@@ -78,14 +83,11 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
         if (getContext() != null && !Global.instance().equals(getContext())) {
             Global.instance().getLogger().warn("Loading plugin as global from non-global context");
         }
-        Global.instance().pluginManager().loadPlugin(this);
+        Global.instance().pluginManager().load(this);
     }
 
     @Override
     public void attach(Context context) {
-        if (context.pluginManager().hasPlugin(getName())) {
-            context.getLogger().warn("Overriding existing plugin");
-        }
         this.context = context;
     }
 
@@ -98,4 +100,37 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     public final Context getContext() {
         return context;
     }
+
+    @Override
+    public final Object provide(Path path) {
+        return providerDelegate.provide(path);
+    }
+
+    @Override
+    public final boolean provides(Path path) {
+        return providerDelegate.provides(path);
+    }
+
+    protected boolean provides(String target, Name name) {
+        return false;
+    }
+
+    protected Object provide(String target, Name name) {
+        return null;
+    }
+
+    private class ProviderDelegate extends AbstractProvider{
+
+        @Override
+        protected boolean provides(String target, Name name) {
+            return BasicPlugin.this.provides(target,name);
+        }
+
+        @Override
+        protected Object provide(String target, Name name) {
+            return BasicPlugin.this.provide(target,name);
+        }
+    }
+
+
 }

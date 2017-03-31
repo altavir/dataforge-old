@@ -18,8 +18,10 @@ package hep.dataforge.context;
 import hep.dataforge.exceptions.NameNotFoundException;
 
 import java.util.Collection;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * The manager for plugin system. Should monitor plugin dependencies and locks.
@@ -28,19 +30,24 @@ import java.util.Map;
  */
 public class PluginManager implements Encapsulated, AutoCloseable {
 
-    private final Map<String, Plugin> plugins = new HashMap<>();
+    /**
+     * A set of loaded plugins
+     */
+    private final Set<Plugin> plugins = new HashSet<>();
+
     /**
      * A context for this plugin manager
      */
     private final Context context;
+
     /**
      * A class path resolver
      */
-    private PluginResolver pluginResolver;
+    private PluginRepository pluginRepository;
 
     public PluginManager(Context context) {
         this.context = context;
-        pluginResolver = new ClassPathPluginResolver(context);
+        pluginRepository = new ClassPathPluginRepository(context);
     }
 
     @Override
@@ -56,24 +63,40 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         }
     }
 
-    public PluginResolver getPluginResolver() {
-        return pluginResolver;
+    public Stream<Plugin> stream(boolean recursive) {
+        if (recursive && getParent() != null) {
+            return Stream.concat(plugins.stream(), getParent().stream(true));
+        } else {
+            return plugins.stream();
+        }
     }
 
-    public void setPluginResolver(PluginResolver pluginResolver) {
-        this.pluginResolver = pluginResolver;
+    public PluginRepository getPluginRepository() {
+        return pluginRepository;
+    }
+
+    public void setPluginRepository(PluginRepository pluginRepository) {
+        this.pluginRepository = pluginRepository;
     }
 
     public boolean hasPlugin(String name) {
-        return plugins.containsKey(name) || (getParent() != null && getParent().hasPlugin(name));
+        return optPlugin(PluginTag.fromString(name)).isPresent();
     }
 
     public boolean hasPlugin(PluginTag tag) {
-        return plugins.containsKey(tag.getName()) || (getParent() != null && getParent().hasPlugin(tag));
+        return optPlugin(tag).isPresent();
     }
 
-    public Plugin loadPlugin(String name) {
-        return loadPlugin(PluginTag.fromString(name));
+    public Optional<Plugin> optPlugin(PluginTag tag) {
+        //Check for ambiguous tag
+        if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
+            getContext().getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
+        }
+        return stream(true).filter(it -> tag.matches(it.getTag())).findFirst();
+    }
+
+    public Plugin getPlugin(PluginTag tag) {
+        return optPlugin(tag).get();
     }
 
     /**
@@ -83,14 +106,29 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     public Plugin getPlugin(String name) {
-        if (plugins.containsKey(name)) {
-            return plugins.get(name);
-        } else if (getParent() != null) {
-            getContext().getLogger()
-                    .trace("The plugin with name `{}` not found in current context, searching parent context.", name);
-            return getParent().getPlugin(name);
+        return optPlugin(PluginTag.fromString(name)).get();
+    }
+
+    /**
+     * Load given plugin into this manager and return loaded instance
+     *
+     * @param plugin
+     * @return
+     */
+    public synchronized void load(Plugin plugin) {
+        if (!this.plugins.stream().anyMatch(it -> it.getTag().matches(plugin.getTag()))) {
+            for (PluginTag tag : plugin.dependsOn()) {
+                //If dependency not loaded
+                if (!hasPlugin(tag)) {
+                    //Load dependency
+                    load(tag);
+                }
+            }
+            getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
+            plugin.attach(getContext());
+            plugins.add(plugin);
         } else {
-            throw new NameNotFoundException(name, "Plugin not found");
+            getContext().getLogger().warn("Plugin with tag {} already exists in {}", plugin.getTag(), getContext().getName());
         }
     }
 
@@ -100,42 +138,47 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @param tag
      * @return
      */
-    public Plugin loadPlugin(PluginTag tag) {
-        Plugin plugin = pluginResolver.getPlugin(tag);
+    public Plugin load(PluginTag tag) {
+        Plugin plugin = pluginRepository.get(tag);
         if (plugin == null) {
             throw new NameNotFoundException(tag.toString(), "Plugin not found");
         }
-        return loadPlugin(plugin);
+        load(plugin);
+        return plugin;
     }
 
-    /**
-     * Load given plugin into this manager and return loaded instance
-     *
-     * @param plugin
-     * @param <T>
-     * @return
-     */
-    public synchronized <T extends Plugin> T loadPlugin(T plugin) {
-        if (!this.plugins.containsKey(plugin.getName())) {
-            for (PluginTag tag : plugin.dependsOn()) {
-                //If dependency not loaded
-                if (!hasPlugin(tag)) {
-                    //Load dependency
-                    loadPlugin(tag);
-                }
-            }
-            getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
-            plugin.attach(getContext());
-            plugins.put(plugin.getName(), plugin);
-        } else {
-            getContext().getLogger().debug("Plugin with name {} already exists in {}", plugin.getName(), getContext().getName());
-        }
-        return plugin;
+    public Plugin load(String name) {
+        return load(PluginTag.fromString(name));
+    }
+
+    public Plugin getOrLoad(PluginTag tag) {
+        return optPlugin(tag).orElseGet(() -> pluginRepository.get(tag));
+    }
+
+    public Plugin getOrLoad(String tag) {
+        return getOrLoad(PluginTag.fromString(tag));
+    }
+
+    public <T extends Plugin> T getOrLoad(T plugin) {
+        return optPlugin(plugin.getTag()).map(it -> (T) it).orElse(plugin);
+    }
+
+    public <T extends Plugin> T getByType(Class<T> type) {
+        return plugins.stream().filter(it -> type.isInstance(it))
+                .map(it -> type.cast(it))
+                .findFirst()
+                .orElseGet(() -> {
+                    try {
+                        return type.newInstance();
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to create plugin instance", e);
+                    }
+                });
     }
 
     @Override
     public void close() throws Exception {
-        this.plugins.values().forEach(Plugin::detach);
+        this.plugins.forEach(Plugin::detach);
     }
 
     /**
@@ -144,6 +187,6 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     public Collection<Plugin> list() {
-        return this.plugins.values();
+        return this.plugins;
     }
 }

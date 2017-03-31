@@ -96,6 +96,10 @@ public class DescriptorUtils {
         return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e)));
     }
 
+    public static NodeDescriptor buildDescriptor(String path) {
+        return buildDescriptor(findAnnotatedElement(path));
+    }
+
     public static NodeDescriptor buildDescriptor(String name, AnnotatedElement element) {
         if (name == null || name.isEmpty()) {
             return buildDescriptor(element);

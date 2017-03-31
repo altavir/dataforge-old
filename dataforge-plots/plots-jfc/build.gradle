@@ -4,5 +4,5 @@ dependencies {
     //JFreeChart dependancies
     compile 'org.jfree:fxgraphics2d:1.3'
     compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile project(':dataforge-plots')
+    compile project(':dataforge-plots:plots-fx')
 }

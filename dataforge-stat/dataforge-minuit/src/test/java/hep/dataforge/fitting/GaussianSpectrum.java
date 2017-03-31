@@ -58,7 +58,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         XYModel model = new XYModel( new GaussianSpectrum());
         FitState state = new FitState(data, model, pars);
 
-        return fm.runTask(state, engine, "run", "pos");
+        return fm.runStage(state, engine, "run", "pos");
     }
 
     public static void printInvHessian(Table data, ParamSet pars) {

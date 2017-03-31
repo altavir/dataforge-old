@@ -66,7 +66,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
     protected FitState execute(Context context, String name, Table input, Laminate meta) {
         FitManager fm;
         if (context.provides("fitting")) {
-            fm = context.provide("fitting", FitPlugin.class).getFitManager();
+            fm = context.provide("fitting", FitManager.class);
         } else {
             fm = new FitManager(context);
         }
@@ -83,7 +83,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
 
         for (FitStage task : stages) {
             Misc.checkThread();// check if action is cacneled
-            res = fm.runTask(res, task, writer, getReport(context, name));
+            res = fm.runStage(res, task, writer, getReport(context, name));
         }
         getReport(context, name).print(writer);
         return res;

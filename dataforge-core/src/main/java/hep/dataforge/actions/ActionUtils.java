@@ -20,9 +20,11 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.providers.Path;
 
 import java.io.IOException;
 import java.text.ParseException;
@@ -90,15 +92,27 @@ public class ActionUtils {
         return buildAction(context, actionType).run(context, data, actionMeta);
     }
 
-    public static Action buildAction(Context context, String actionName) {
-        Action res;
+    /**
+     * Search for an Action in context plugins and up the parent plugin. Throw an exception if action not found.
+     * @param context
+     * @param actionName
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> Action<T, R> buildAction(Context context, String actionName) {
         if (SEQUENCE_ACTION_TYPE.equals(actionName)) {
-            res = new SequenceAction();
+            return new SequenceAction();
         } else {
-            res = ActionManager.buildFrom(context).build(actionName);
+            Path path = Path.of(actionName, Action.ACTION_PROVIDER_KEY);
+            return context.pluginManager().stream(true)
+                    .filter(plugin -> plugin.provides(path))
+                    .findFirst()
+                    .map(plugin -> plugin.provide(path, Action.class))
+                    .orElseThrow(() -> new NameNotFoundException(actionName));
         }
-        return res;
     }
+
 
     /**
      * Compose two actions with complementary types into one.
@@ -159,12 +173,12 @@ public class ActionUtils {
             CachePlugin cache = null;
             //Set data cache if it is defined in context
             if (context.getBoolean("enableCache", false)) {
-                cache = context.getPlugin(CachePlugin.class);
+                cache = context.getFeature(CachePlugin.class);
             }
 
             MetaBuilder id = new MetaBuilder("action").setValue("context", context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
-                id = id.setNode("meta",actionMeta);
+                id = id.setNode("meta", actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
                 Action action = buildAction(context, actionType);
                 res = action.run(context, res, actionMeta);

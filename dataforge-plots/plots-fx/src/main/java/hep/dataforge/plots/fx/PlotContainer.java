@@ -34,7 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.*;
-import java.util.function.Consumer;
 
 /**
  * FXML Controller class
@@ -56,6 +55,7 @@ public class PlotContainer implements Initializable {
     private Button frameOptionsButton;
     @FXML
     private SplitPane split;
+
     private FXPlotFrame plot;
     private Map<Configuration, Stage> configWindows = new HashMap<>();
     private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
@@ -244,22 +244,12 @@ public class PlotContainer implements Initializable {
 
     @FXML
     private void onShowAll(ActionEvent event) {
-        this.plot.plottables().forEach(new Consumer<Plottable>() {
-            @Override
-            public void accept(Plottable pl) {
-                pl.configureValue("visible", true);
-            }
-        });
+        this.plot.plottables().forEach(pl -> pl.configureValue("visible", true));
     }
 
     @FXML
     private void onHideAll(ActionEvent event) {
-        this.plot.plottables().forEach(new Consumer<Plottable>() {
-            @Override
-            public void accept(Plottable pl) {
-                pl.configureValue("visible", false);
-            }
-        });
+        this.plot.plottables().forEach(pl -> pl.configureValue("visible", false));
     }
 
     protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
@@ -267,6 +257,7 @@ public class PlotContainer implements Initializable {
         private HBox content;
         private CheckBox title;
         private Button configButton;
+
         /**
          * Configuration to which this cell is bound
          */
@@ -275,10 +266,13 @@ public class PlotContainer implements Initializable {
         @Override
         protected synchronized void updateItem(Plottable item, boolean empty) {
             super.updateItem(item, empty);
+
+            //cleaning up after item with different config
+            if (config != null) {
+                config.removeObserver(this);
+            }
+
             if (empty) {
-                if (config != null) {
-                    config.removeObserver(this);
-                }
                 clearContent();
             } else {
                 config = item.getConfig();
@@ -290,10 +284,9 @@ public class PlotContainer implements Initializable {
         private void clearContent() {
             setText(null);
             setGraphic(null);
-
         }
 
-        private void setContent(Plottable item) {
+        private synchronized void setContent(Plottable item) {
             setText(null);
 
             title = new CheckBox();

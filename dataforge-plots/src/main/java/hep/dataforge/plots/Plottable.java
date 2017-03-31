@@ -77,48 +77,4 @@ public interface Plottable extends Named, Annotated, Configurable, Wrappable, De
      */
     PointAdapter getAdapter();
 
-//    /**
-//     * Set custom adapter for this plottable. This method should be used with
-//     * caution since it does not guarantee wrapping/unwrapping invariance
-//     *
-//     * @param adapter
-//     */
-//    void setAdapter(T adapter);
-
-//    /**
-//     * Set adapter generated from given meta
-//     *
-//     * @param adapterMeta
-//     */
-//    void setAdapter(Meta adapterMeta);
-
-    /**
-     //     * Stream of data for plotting with default configuration
-     //     *
-     //     * @return
-     //     */
-//    default Stream<DataPoint> dataStream() {
-//        return dataStream(Meta.empty());
-//    }
-//
-//    /**
-//     * Stream of data for plotting using given configuration (range, number of
-//     * points, etc.)
-//     *
-//     * @param dataConfiguration
-//     * @return
-//     */
-//    Stream<DataPoint> dataStream(Meta dataConfiguration);
-//
-//    /**
-//     * Get the point with number i without queries. Default implementation of this method is rather slow,
-//     * but static data structures could override it with random access.
-//     *
-//     * @param i
-//     * @return
-//     */
-//    default DataPoint getPoint(int i) {
-//        return dataStream().skip(i).findFirst().get();
-//    }
-
 }

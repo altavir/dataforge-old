@@ -16,6 +16,7 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -23,7 +24,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public interface PlotHolder {
+public interface PlotManager extends Configurable {
     String DEFAULT_STAGE_NAME = "";
     
     /**
@@ -36,7 +37,7 @@ public interface PlotHolder {
     PlotFrame buildPlotFrame(String stage, String name, Meta annotation);
     
     default PlotFrame buildPlotFrame(String name, Meta annotation){
-        return PlotHolder.this.buildPlotFrame(DEFAULT_STAGE_NAME, name, annotation);
+        return PlotManager.this.buildPlotFrame(DEFAULT_STAGE_NAME, name, annotation);
     }
 
     /**

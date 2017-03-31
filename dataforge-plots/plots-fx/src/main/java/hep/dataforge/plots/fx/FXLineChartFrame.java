@@ -16,6 +16,7 @@
 package hep.dataforge.plots.fx;
 
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.DataPoint;
@@ -39,7 +40,7 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Nozik
  */
-public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlottable> {
+public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
 
     LineChart<Number, Number> chart;
 
@@ -73,7 +74,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlott
 
     @Override
     protected void updatePlotData(String name) {
-        XYPlottable plottable = get(name);
+        Plottable plottable = get(name);
         XYChart.Series<Number, Number> series = getSeries(name);
 
         if (series == null) {
@@ -88,7 +89,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame<XYPlott
             LoggerFactory.getLogger(getClass()).warn("The provided Plottable is not a subclass of XYPlottable");
         }
 
-        XYAdapter adapter = plottable.getAdapter();
+        XYAdapter adapter = XYAdapter.from(plottable.getAdapter());
 
         Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
         Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();

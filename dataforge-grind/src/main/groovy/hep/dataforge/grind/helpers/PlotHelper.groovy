@@ -17,8 +17,7 @@
 package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
-import hep.dataforge.plots.PlotHolder
-import hep.dataforge.plots.PlotsPlugin
+import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.data.PlottableData
 import hep.dataforge.plots.data.PlottableXYFunction
 import hep.dataforge.plots.data.XYPlottable
@@ -32,28 +31,28 @@ import java.util.function.Function
  */
 class PlotHelper {
     static final String DEFAULT_FRAME = "default";
-    PlotHolder holder;
+    PlotManager manager;
 
     PlotHelper(Context context) {
-//        Global.instance().pluginManager().loadPlugin("plots-jfc");
-        this.holder = PlotsPlugin.buildFrom(context);
+//        Global.instance().pluginManager().load("plots-jfc");
+        this.manager = context.getFeature(PlotManager)
     }
 
 
     def configure(String frame, Closure config) {
-        holder.getPlotFrame(frame).configure(config);
+        manager.getPlotFrame(frame).configure(config);
     }
 
     def configure(Closure config) {
-        holder.getPlotFrame(DEFAULT_FRAME).configure(config);
+        manager.getPlotFrame(DEFAULT_FRAME).configure(config);
     }
 
     def configure(String frame, Map values, Closure config) {
-        holder.getPlotFrame(frame).configure(values, config);
+        manager.getPlotFrame(frame).configure(values, config);
     }
 
     def configure(Map values, Closure config) {
-        holder.getPlotFrame(DEFAULT_FRAME).configure(values, config);
+        manager.getPlotFrame(DEFAULT_FRAME).configure(values, config);
     }
 
     /**
@@ -69,7 +68,7 @@ class PlotHelper {
         int numPoints = parameters.get("numPoints", 100) as Integer;
         Function<Double, Double> func = { Double x -> function.call(x) as Double } as Function
         PlottableXYFunction res = PlottableXYFunction.plotFunction(pltName, func, from, to, numPoints);
-        holder.getPlotFrame(frameName).add(res)
+        manager.getPlotFrame(frameName).add(res)
         return res;
     }
 
@@ -79,13 +78,13 @@ class PlotHelper {
 
     XYPlottable plot(double[] x, double[] y, String name = "data", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, x, y);
-        holder.getPlotFrame(frame).add(res)
+        manager.getPlotFrame(frame).add(res)
         return res;
     }
 
     XYPlottable plot(List x, List y, String name = "data", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, x as double[], y as double[]);
-        holder.getPlotFrame(frame).add(res)
+        manager.getPlotFrame(frame).add(res)
         return res;
     }
 
@@ -101,7 +100,7 @@ class PlotHelper {
 
     XYPlottable plot(PointSource source, XYAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, adapter, source);
-        holder.getPlotFrame(frame).add(res)
+        manager.getPlotFrame(frame).add(res)
         return res;
     }
 
