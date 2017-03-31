@@ -79,6 +79,7 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
     
     /**
      * Generate a snapshot
+     * PENDING move to FX?
      * @param config
      */
     @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")

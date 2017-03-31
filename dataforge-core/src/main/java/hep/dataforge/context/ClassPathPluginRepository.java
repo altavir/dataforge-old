@@ -5,12 +5,13 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.names.AlphanumComparator;
+
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
 import java.util.ServiceLoader;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -20,13 +21,13 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-public class ClassPathPluginResolver implements PluginResolver {
+public class ClassPathPluginRepository implements PluginRepository {
     public static final String PLUGIN_LOCATION_CONTEXT_KEY = "df.pluginLocation";
 
     private final ServiceLoader<Plugin> loader;
 
 
-    public ClassPathPluginResolver(Context context) {
+    public ClassPathPluginRepository(Context context) {
         ClassLoader cl = context.getClass().getClassLoader();
         if (context.hasValue(PLUGIN_LOCATION_CONTEXT_KEY)) {
             context.logger.info("Loading plugins from {}", context.getValue(PLUGIN_LOCATION_CONTEXT_KEY));
@@ -44,17 +45,16 @@ public class ClassPathPluginResolver implements PluginResolver {
     }
 
     @Override
-    public Plugin getPlugin(PluginTag tag) {
+    public Plugin get(PluginTag tag) {
         return StreamSupport.stream(loader.spliterator(), false)
                 .filter(plugin -> tag.matches(plugin.getTag()))
+                .sorted((p1, p2) -> -AlphanumComparator.INSTANCE.compare(p1.getTag().getVersion(), p2.getTag().getVersion()))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("No plugin matching criterion: " + tag.toString()));
     }
 
     @Override
-    public List<Plugin> listPlugins(Predicate<Plugin> predicate) {
-        return StreamSupport.stream(loader.spliterator(), false)
-                .filter(predicate::test)
-                .collect(Collectors.toList());
+    public List<PluginTag> listTags() {
+        return StreamSupport.stream(loader.spliterator(), false).map(it -> it.getTag()).collect(Collectors.toList());
     }
 }

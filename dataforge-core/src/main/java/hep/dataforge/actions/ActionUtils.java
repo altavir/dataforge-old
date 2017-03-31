@@ -173,7 +173,7 @@ public class ActionUtils {
             CachePlugin cache = null;
             //Set data cache if it is defined in context
             if (context.getBoolean("enableCache", false)) {
-                cache = context.getPlugin(CachePlugin.class);
+                cache = context.getFeature(CachePlugin.class);
             }
 
             MetaBuilder id = new MetaBuilder("action").setValue("context", context.getName());

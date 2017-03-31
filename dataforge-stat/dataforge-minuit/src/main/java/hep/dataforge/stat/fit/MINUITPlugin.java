@@ -66,7 +66,7 @@ public class MINUITPlugin extends BasicPlugin {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        context.getPlugin(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
+        context.getFeature(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
         clearStaticLog();
     }
 

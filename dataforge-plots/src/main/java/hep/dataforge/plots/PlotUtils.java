@@ -82,7 +82,7 @@ public class PlotUtils {
     }
 
     public static PlotManager getPlotManager(Context context){
-        return context.getPlugin(PlotManager.class);
+        return context.getFeature(PlotManager.class);
     }
 
 }

@@ -67,7 +67,11 @@ public abstract class AbstractWorkspace implements Workspace {
 
     protected synchronized CachePlugin getCache() {
         if (cache == null || cache.getContext() != this.getContext()) {
-            cache = context.getPlugin(CachePlugin.class);
+            cache = context.optFeature(CachePlugin.class).orElseGet(() -> {
+                CachePlugin pl = new CachePlugin();
+                context.pluginManager().load(pl);
+                return pl;
+            });
         }
         return cache;
     }
@@ -77,7 +81,7 @@ public abstract class AbstractWorkspace implements Workspace {
         Task<T> task = getTask(model.getName());
         //Cache result if cache is available and caching is not blocked
         if (cacheEnabled() && model.meta().getBoolean("cache.enabled", true)) {
-            return getCache().cacheNode(model.getName(), model.getIdentity(),task.run(model));
+            return getCache().cacheNode(model.getName(), model.getIdentity(), task.run(model));
         } else {
             return task.run(model);
         }

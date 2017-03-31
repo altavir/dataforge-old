@@ -62,7 +62,7 @@ class WorkspaceSpec {
                 if (res.pluginManager().hasPlugin(key)) {
                     plugin = res.pluginManager().getPlugin(key)
                 } else {
-                    plugin = res.pluginManager().loadPlugin(key.toString())
+                    plugin = res.pluginManager().load(key.toString())
                 }
                 if(plugin instanceof Configurable) {
                     (plugin as Configurable).configure(meta)

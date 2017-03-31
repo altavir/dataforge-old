@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -59,10 +60,9 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     protected Logger logger;
     protected Log rootLog;
     protected IOManager io = null;
-    private Context parent = null;
-
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;
+    private Context parent = null;
 
 
     /**
@@ -218,7 +218,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         if ("value".equals(target)) {
             return (T) getValue(name.toString());
         } else if (target.isEmpty() || "plugin".equals(target)) {
-            return (T) pluginManager().getPlugin(name.toString());
+            return (T) pluginManager().getOrLoad(name.toString());
         } else {
             throw new TargetNotProvidedException();
         }
@@ -348,21 +348,30 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
     }
 
     /**
-     * Get typed plugin by its class
+     * Get a plugin extending given class
      *
      * @param type
      * @param <T>
      * @return
      */
-    //TODO move to utils
-    public <T> T getPlugin(Class<T> type) {
+    public <T> T getFeature(Class<T> type) {
+        return optFeature(type)
+                .orElseThrow(() -> new RuntimeException("Feature could not be loaded by type: " + type.getName()));
+    }
+
+    /**
+     *  Opt a plugin extending given class
+     * @param type
+     * @param <T>
+     * @return
+     */
+    public <T> Optional<T> optFeature(Class<T> type) {
         return pluginManager()
                 .stream(true)
                 .filter(it -> type.isInstance(it))
                 .findFirst()
-                .map(it -> type.cast(it))
-                .orElseThrow(() -> new RuntimeException("Plugin could not be loaded by type: " + type.getName()));
-
+                .map(it -> type.cast(it));
     }
+
 
 }
