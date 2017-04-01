@@ -26,6 +26,8 @@ import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.AttributedStyle
 
+import java.util.function.Consumer
+
 /**
  * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
@@ -76,28 +78,8 @@ class GrindTerminal {
         }
         shell = new GrindShell(context)
         shell.getConfig().setValue("evalData", true) // force to eval data
-        //.configure(evalData: true) - does not work
 
-        //add terminal hook for marked up objects
-        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
-        Meta markupConfig = Grind.buildMeta(target: "terminal")
-        shell.hook(Markedup) {
-            renderer.ln()
-            if (it instanceof Named) {
-                renderer.render(MarkupBuilder.text(it.name, "red").build())
-                renderer.ln()
-            }
-            renderer.render(it.markup(markupConfig))
-        }
-        //add terminal hook for described elements
-        shell.hook(Described) {
-//            if (it instanceof Named) {
-//                renderer.render(MarkupBuilder.text(it.name, "red").build())
-//                renderer.ln()
-//            }
-            renderer.render(MarkupUtils.markupDescriptor(it))
-            renderer.ln()
-        }
+        shell.setDisplay(new TerminalDisplay());
 
         //define help closure
         def help = this.&help;
@@ -121,7 +103,7 @@ class GrindTerminal {
         }
     }
 
-    private Terminal getTerminal() {
+    def Terminal getTerminal() {
         return terminal;
     }
 
@@ -201,6 +183,28 @@ class GrindTerminal {
     def launch(Closure closure) {
         this.with(closure)
         launch()
+    }
+
+    private class TerminalDisplay implements Consumer<Object> {
+        Meta markupConfig = Grind.buildMeta(target: "terminal")
+        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
+
+        @Override
+        void accept(Object obj) {
+            shell.unwrap(obj) { res ->
+                if (res instanceof Markedup) {
+                    renderer.ln()
+                    if (res instanceof Named) {
+                        renderer.render(MarkupBuilder.text((res as Named).name, "red").build())
+                        renderer.ln()
+                    }
+                    renderer.render((res as Markedup).markup(markupConfig))
+                } else if (res instanceof Described) {
+                    renderer.render(MarkupUtils.markupDescriptor(res as Described))
+                    renderer.ln()
+                }
+            }
+        }
     }
 
 }

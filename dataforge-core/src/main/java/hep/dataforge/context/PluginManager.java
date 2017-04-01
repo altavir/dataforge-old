@@ -30,6 +30,7 @@ import java.util.stream.Stream;
  */
 public class PluginManager implements Encapsulated, AutoCloseable {
 
+
     /**
      * A set of loaded plugins
      */
@@ -151,6 +152,11 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         return load(PluginTag.fromString(name));
     }
 
+    /**
+     * Get a plugin if it is loaded in this manager or parent manager. If it is not, load and get it.
+     * @param tag
+     * @return
+     */
     public Plugin getOrLoad(PluginTag tag) {
         return optPlugin(tag).orElseGet(() -> pluginRepository.get(tag));
     }

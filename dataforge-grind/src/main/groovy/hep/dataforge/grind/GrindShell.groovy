@@ -29,7 +29,7 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
     private Context context;
     private Binding binding = new Binding();
     private final GroovyShell shell;
-    private Set<Hook> hooks = new HashSet<>();
+//    private Set<Hook> hooks = new HashSet<>();
 
     GrindShell(Context context = Global.instance()) {
         this.context = context
@@ -49,12 +49,16 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
         binding.setProperty(key, value)
     }
 
-    def <T> void hook(Class<T> type, Consumer<T> con) {
-        hooks.add(new Hook(type, con));
-    }
+//    def <T> void hook(Class<T> type, Consumer<T> con) {
+//        hooks.add(new Hook(type, con));
+//    }
+//
+//    def hook(Consumer<?> con) {
+//        hooks.add(new Hook(java.lang.Object, con));
+//    }
 
-    def hook(Consumer<?> con) {
-        hooks.add(new Hook(java.lang.Object, con));
+    def setDisplay(Consumer<?> display) {
+        bind("show") { it -> display.accept(it) }
     }
 
     @Override
@@ -67,15 +71,15 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
         //remembering last answer
         bind("res", res);
         //TODO remember n last answers
-        return postEval(res);
+        return res;
     }
 
     /**
-     * Post evaluate result. Compute lazy data and use smart data visualization
+     * Apply some closure to each of sub-results using shell configuration
      * @param res
      * @return
      */
-    protected Object postEval(Object res) {
+    def unwrap(Object res, Closure cl) {
         if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
             res = res.call()
         }
@@ -85,22 +89,17 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
         }
 
         if (res instanceof DataNode) {
-            res.dataStream().forEach { postEval(it) };
+            res.dataStream().forEach { unwrap(it, cl) };
         }
 
         if (getConfig().getBoolean("unwrap", true)) {
             if (res instanceof Collection) {
-                res.forEach { postEval(it) }
+                res.forEach { unwrap(it, cl) }
             } else if (res instanceof Stream) {
-                res.forEach { postEval(it) }
+                res.forEach { unwrap(it, cl) }
             }
         }
-
-        hooks.each {
-            it.accept(res);
-        }
-
-        return res;
+        cl.call(res);
     }
 
     @Override
@@ -108,24 +107,24 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
 
     }
 
-    /**
-     * A consumer that applies only to given type
-     * @param < T >
-     */
-    class Hook<T> {
-        private final Class<T> type;
-        private final Consumer<T> consumer;
-
-        Hook(Class<T> type, Consumer<T> consumer) {
-            this.type = type
-            this.consumer = consumer
-        }
-
-        void accept(Object t) {
-            if (type.isInstance(t)) {
-                consumer.accept(t as T);
-            }
-        }
-    }
+//    /**
+//     * A consumer that applies only to given type
+//     * @param < T >
+//     */
+//    class Hook<T> {
+//        private final Class<T> type;
+//        private final Consumer<T> consumer;
+//
+//        Hook(Class<T> type, Consumer<T> consumer) {
+//            this.type = type
+//            this.consumer = consumer
+//        }
+//
+//        void accept(Object t) {
+//            if (type.isInstance(t)) {
+//                consumer.accept(t as T);
+//            }
+//        }
+//    }
 }
 
