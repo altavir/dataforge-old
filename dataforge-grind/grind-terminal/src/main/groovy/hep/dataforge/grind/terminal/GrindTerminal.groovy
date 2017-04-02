@@ -3,7 +3,11 @@ package hep.dataforge.grind.terminal
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.data.Data
+import hep.dataforge.data.DataNode
 import hep.dataforge.description.Described
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValuesDefs
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.BasicIOManager
@@ -12,10 +16,12 @@ import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
 import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.fx.FXPlotManager
 import hep.dataforge.plots.jfreechart.JFCFrameFactory
+import org.jline.reader.EndOfFileException
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
 import org.jline.reader.UserInterruptException
@@ -26,14 +32,19 @@ import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.AttributedStyle
 
-import java.util.function.Consumer
+import java.util.stream.Stream
 
 /**
  * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
  */
 @CompileStatic
-class GrindTerminal {
+@ValuesDefs([
+        @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
+        @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value"),
+        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "false", info = "Apply result hooks for each element of collection or stream")
+])
+class GrindTerminal extends SimpleConfigurable {
     private static final AttributedStyle RES = AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);
     private static final AttributedStyle PROMPT = AttributedStyle.BOLD.foreground(AttributedStyle.CYAN);
     private static final AttributedStyle DEFAULT = AttributedStyle.DEFAULT;
@@ -57,34 +68,84 @@ class GrindTerminal {
     }
 
     static GrindTerminal dumb(Context context = Global.instance()) {
-        return new GrindTerminal(context, null);
+        return new GrindTerminal(context);
     }
 
-    GrindTerminal(Context context, Terminal terminal) {
+    /**
+     * Apply some closure to each of sub-results using shell configuration
+     * @param res
+     * @return
+     */
+    def unwrap(Object res, Closure cl) {
+        if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
+            res = (res as Closure).call()
+        } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
+            res = (res as Data).get();
+        } else if (res instanceof DataNode) {
+            (res as DataNode).dataStream().forEach { unwrap(it, cl) };
+        }
+
+        if (getConfig().getBoolean("unwrap", true)) {
+            if (res instanceof Collection) {
+                (res as Collection).forEach { unwrap(it, cl) }
+            } else if (res instanceof Stream) {
+                (res as Stream).forEach { unwrap(it, cl) }
+            }
+        }
+        cl.call(res);
+    }
+
+    GrindTerminal(Context context, Terminal terminal = null) {
 
         //start fx plugin in global
         Global.instance().pluginManager().load("hep.dataforge:fx");
 
+        //define terminal if it is not defined
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
         }
+
         this.terminal = terminal
+
+        //build shell context
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
             context.getFeature(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
             context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
         }
+
+        //create the shell
         shell = new GrindShell(context)
-        shell.getConfig().setValue("evalData", true) // force to eval data
 
-        shell.setDisplay(new TerminalDisplay());
+        Meta markupConfig = Grind.buildMeta(target: "terminal")
+        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
 
-        //define help closure
-        def help = this.&help;
+        //bind helper commands
+
+        shell.bind("show") { res ->
+            if (res instanceof Markedup) {
+                renderer.ln()
+                if (res instanceof Named) {
+                    renderer.render(MarkupBuilder.text((res as Named).name, "red").build())
+                    renderer.ln()
+                }
+                renderer.render((res as Markedup).markup(markupConfig))
+            }
+            return null;
+        }
+
+        shell.bind("describe"){it->
+            if (it instanceof Described) {
+                renderer.render(MarkupUtils.markupDescriptor(it as Described))
+                renderer.ln()
+            }
+            return null;
+        }
+
         //binding.setProperty("man", help);
-        shell.bind("help", help);
+        shell.bind("help", this.&help);
     }
 
     def help() {
@@ -168,7 +229,7 @@ class GrindTerminal {
             }
         } catch (UserInterruptException ex) {
             writer.println("Interrupted by user")
-        } catch (EndOfFileException) {
+        } catch (EndOfFileException ex1) {
             writer.println("Terminated by user")
         } finally {
             getTerminal().close()
@@ -185,26 +246,5 @@ class GrindTerminal {
         launch()
     }
 
-    private class TerminalDisplay implements Consumer<Object> {
-        Meta markupConfig = Grind.buildMeta(target: "terminal")
-        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
-
-        @Override
-        void accept(Object obj) {
-            shell.unwrap(obj) { res ->
-                if (res instanceof Markedup) {
-                    renderer.ln()
-                    if (res instanceof Named) {
-                        renderer.render(MarkupBuilder.text((res as Named).name, "red").build())
-                        renderer.ln()
-                    }
-                    renderer.render((res as Markedup).markup(markupConfig))
-                } else if (res instanceof Described) {
-                    renderer.render(MarkupUtils.markupDescriptor(res as Described))
-                    renderer.ln()
-                }
-            }
-        }
-    }
 
 }

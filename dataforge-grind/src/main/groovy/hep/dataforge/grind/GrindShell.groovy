@@ -1,35 +1,23 @@
 package hep.dataforge.grind
 
+import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Encapsulated
 import hep.dataforge.context.Global
-import hep.dataforge.data.Data
-import hep.dataforge.data.DataNode
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValuesDefs
 import hep.dataforge.grind.helpers.PlotHelper
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.SimpleConfigurable
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
-
-import java.util.function.Consumer
-import java.util.stream.Stream
 
 /**
  * Created by darksnake on 15-Dec-16.
  */
-@ValuesDefs([
-        @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
-        @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value"),
-        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "false", info = "Apply result hooks for each element of collection or stream")
-])
-class GrindShell extends SimpleConfigurable implements Encapsulated {
+
+@CompileStatic
+class GrindShell implements Encapsulated {
 
     private Context context;
     private Binding binding = new Binding();
     private final GroovyShell shell;
-//    private Set<Hook> hooks = new HashSet<>();
 
     GrindShell(Context context = Global.instance()) {
         this.context = context
@@ -49,18 +37,6 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
         binding.setProperty(key, value)
     }
 
-//    def <T> void hook(Class<T> type, Consumer<T> con) {
-//        hooks.add(new Hook(type, con));
-//    }
-//
-//    def hook(Consumer<?> con) {
-//        hooks.add(new Hook(java.lang.Object, con));
-//    }
-
-    def setDisplay(Consumer<?> display) {
-        bind("show") { it -> display.accept(it) }
-    }
-
     @Override
     Context getContext() {
         return context;
@@ -69,62 +45,11 @@ class GrindShell extends SimpleConfigurable implements Encapsulated {
     synchronized Object eval(String expression) {
         Object res = shell.evaluate(expression);
         //remembering last answer
-        bind("res", res);
+        if (res != null) {
+            bind("res", res)
+        };
         //TODO remember n last answers
         return res;
     }
-
-    /**
-     * Apply some closure to each of sub-results using shell configuration
-     * @param res
-     * @return
-     */
-    def unwrap(Object res, Closure cl) {
-        if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
-            res = res.call()
-        }
-
-        if (getConfig().getBoolean("evalData", false) && res instanceof Data) {
-            res = res.get();
-        }
-
-        if (res instanceof DataNode) {
-            res.dataStream().forEach { unwrap(it, cl) };
-        }
-
-        if (getConfig().getBoolean("unwrap", true)) {
-            if (res instanceof Collection) {
-                res.forEach { unwrap(it, cl) }
-            } else if (res instanceof Stream) {
-                res.forEach { unwrap(it, cl) }
-            }
-        }
-        cl.call(res);
-    }
-
-    @Override
-    protected void applyConfig(Meta config) {
-
-    }
-
-//    /**
-//     * A consumer that applies only to given type
-//     * @param < T >
-//     */
-//    class Hook<T> {
-//        private final Class<T> type;
-//        private final Consumer<T> consumer;
-//
-//        Hook(Class<T> type, Consumer<T> consumer) {
-//            this.type = type
-//            this.consumer = consumer
-//        }
-//
-//        void accept(Object t) {
-//            if (type.isInstance(t)) {
-//                consumer.accept(t as T);
-//            }
-//        }
-//    }
 }
 

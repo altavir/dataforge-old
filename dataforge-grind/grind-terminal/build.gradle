@@ -19,7 +19,7 @@ description = 'The grind plugin for dataforge framework'
 dependencies {
     compile project(':dataforge-grind')
     compile project(':dataforge-plots:plots-jfc')
-    compile group: 'org.jline', name: 'jline', version: '3.0.1'
+    compile group: 'org.jline', name: 'jline', version: '3.2.0'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.2.2'
     compile group: 'org.fusesource.jansi', name: 'jansi', version: '1.14'
 }
