@@ -19,7 +19,6 @@ import static hep.dataforge.storage.servlet.StorageRenderer.renderStorage;
 /**
  * Created by darksnake on 13-Dec-15.
  */
-@SuppressWarnings("unchecked")
 public class StorageRatpackHandler implements Handler {
 
     private final Storage root;

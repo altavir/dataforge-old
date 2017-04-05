@@ -11,8 +11,7 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 
 import java.util.*;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A fast access index based on treeMap. It needs to be updated prior to any use
@@ -55,34 +54,34 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
      */
     protected abstract void update() throws StorageException;
 
-    private List<Supplier<T>> transform(List<K> list) {
-        if (list == null) {
-            return Collections.emptyList();
-        }
-        return list.stream().<Supplier<T>>map(k -> () -> transform(k)).collect(Collectors.toList());
-    }
+//    private List<Supplier<T>> transform(List<K> list) {
+//        if (list == null) {
+//            return Collections.emptyList();
+//        }
+//        return list.stream().<Supplier<T>>map(k -> () -> transform(k)).collect(Collectors.toList());
+//    }
 
     @Override
-    public List<Supplier<T>> pull(Value value) throws StorageException {
+    public Stream<T> pull(Value value) throws StorageException {
         update();
-        return transform(map.get(value));
+        return map.get(value).stream().map(this::transform);
     }
 
     @Override
-    public Supplier<T> pullOne(Value value) throws StorageException {
+    public Optional<T> pullOne(Value value) throws StorageException {
         Map.Entry<Value, List<K>> entry = map.ceilingEntry(value);
         if (entry != null) {
-            return transform(entry.getValue()).get(0);
+            return entry.getValue().stream().map(this::transform).findFirst();
         } else {
-            return null;
+            return Optional.empty();
         }
     }
 
     @Override
-    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
+    public Stream<T> pull(Value from, Value to) throws StorageException {
         update();
         if(map.isEmpty()){
-            return Collections.emptyList();
+            return Stream.empty();
         }
         //If null, use the whole range
         if (from == Value.NULL) {
@@ -93,9 +92,8 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
             to = map.lastKey();
         }
 
-        List<Supplier<T>> res = new ArrayList<>();
-        map.subMap(from, true, to, true).forEach((Value t, List<K> u) -> res.addAll(transform(u)));
-        return res;
+
+        return map.subMap(from, true, to, true).values().stream().flatMap(u -> u.stream().map(this::transform));
     }
 
 

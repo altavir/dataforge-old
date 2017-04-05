@@ -26,6 +26,7 @@ public class PlottableUnWrapper implements UnWrapper<Plottable>{
         return "df.plots.Plottable";
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Plottable unWrap(Envelope envelope) {
         try {

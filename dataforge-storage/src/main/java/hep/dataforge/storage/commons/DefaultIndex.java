@@ -12,12 +12,10 @@ import hep.dataforge.values.ValueUtils;
 import javafx.util.Pair;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -56,26 +54,23 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
 
 
     @Override
-    public List<Supplier<T>> pull(Value value) throws StorageException {
+    public Stream<T> pull(Value value) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> value.intValue() == pair.getKey())
-                .<Supplier<T>>map(pair -> () -> pair.getValue())
-                .collect(Collectors.toList());
+                .map(pair -> pair.getValue());
     }
 
     @Override
-    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
+    public Stream<T> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(spliterator(), true)
                 .filter(pair -> ValueUtils.isBetween(pair.getKey(), from, to))
-                .<Supplier<T>>map(pair -> () -> pair.getValue())
-                .collect(Collectors.toList());
+                .map(pair -> pair.getValue());
     }
 
-    public List<Supplier<T>> pull(Predicate<Integer> predicate) {
+    public Stream<T> pull(Predicate<Integer> predicate) {
         return StreamSupport.stream(spliterator(), true)
                 .filter(t -> predicate.test(t.getKey()))
-                .<Supplier<T>>map(pair -> () -> pair.getValue())
-                .collect(Collectors.toList());
+                .map(pair -> pair.getValue());
     }
 
     @Override

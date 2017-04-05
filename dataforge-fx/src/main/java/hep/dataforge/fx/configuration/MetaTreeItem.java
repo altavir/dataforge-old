@@ -211,7 +211,7 @@ public class MetaTreeItem extends TreeItem<MetaTree> {
             if (!getValue().hasDescriptor()) {
                 getParent().getChildren().remove(this);
             } else {
-                Event.fireEvent(getParent(), new TreeModificationEvent(valueChangedEvent(), this));
+                Event.fireEvent(getParent(), new TreeModificationEvent<>(valueChangedEvent(), this));
             }
         }
     }

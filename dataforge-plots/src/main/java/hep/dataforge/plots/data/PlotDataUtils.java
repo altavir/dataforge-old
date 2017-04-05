@@ -70,7 +70,7 @@ public class PlotDataUtils {
         }).collect(Collectors.toList());
         plottables.forEach(pl-> pl.setData(points));
 
-        return new PlottableGroup<>(plottables);
+        return new PlottableGroup<PlottableData>(plottables);
     }
 
 }

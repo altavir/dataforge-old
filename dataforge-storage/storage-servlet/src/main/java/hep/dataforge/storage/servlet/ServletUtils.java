@@ -5,12 +5,8 @@
  */
 package hep.dataforge.storage.servlet;
 
-import com.google.visualization.datasource.datatable.value.*;
-import com.ibm.icu.util.GregorianCalendar;
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
-
-import java.util.Date;
 
 /**
  *
@@ -68,18 +64,18 @@ public class ServletUtils {
 //        return table;
 //    }
     
-    private static Value toGoogleValue(hep.dataforge.values.Value val) {
-        switch (val.valueType()) {
-            case NUMBER:
-                return new NumberValue(val.doubleValue());
-            case BOOLEAN:
-                return val.booleanValue() ? BooleanValue.TRUE : BooleanValue.FALSE;
-            case TIME:
-                GregorianCalendar gr = new GregorianCalendar();
-                gr.setTime(Date.from(val.timeValue()));
-                return new DateTimeValue(gr);
-            default:
-                return new TextValue(val.stringValue());
-        }
-    }
+//    private static Value toGoogleValue(hep.dataforge.values.Value val) {
+//        switch (val.valueType()) {
+//            case NUMBER:
+//                return new NumberValue(val.doubleValue());
+//            case BOOLEAN:
+//                return val.booleanValue() ? BooleanValue.TRUE : BooleanValue.FALSE;
+//            case TIME:
+//                GregorianCalendar gr = new GregorianCalendar();
+//                gr.setTime(Date.from(val.timeValue()));
+//                return new DateTimeValue(gr);
+//            default:
+//                return new TextValue(val.stringValue());
+//        }
+//    }
 }

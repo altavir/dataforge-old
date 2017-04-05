@@ -52,15 +52,7 @@ public interface Provider {
      * @return
      */
     default <T> T provide(Path path, Class<T> type) {
-        Object obj = provide(path);
-        if (type.isInstance(obj)) {
-            return (T) obj;
-        } else {
-            throw new IllegalStateException(
-                    String.format("Error in type checked provide method. %s object expected, but %s provided", 
-                            type.getName(), obj.getClass().getName())
-            );
-        }
+        return type.cast(provide(path));
     }
 
     default boolean provides(String path) {

@@ -1,7 +1,33 @@
 allprojects{
-    apply from: file('dataforge.gradle')
+    apply plugin: 'java'
+    apply plugin: 'idea'
+
+    group = 'hep.dataforge'
+    version = '0.4.0 - SNAPSHOT'
+
+
+    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+
+    sourceCompatibility = 1.8
+    targetCompatibility = 1.8
+
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
+
+    tasks.withType(JavaCompile) {
+        options.compilerArgs << "-Xlint:deprecation" << "-Xlint:unchecked"
+    }
+
+    dependencies {
+        testCompile 'org.codehaus.groovy:groovy-all:2.4.+'
+        testCompile group: 'junit', name: 'junit', version: '4.+'
+        testCompile "org.spockframework:spock-core:1.0-groovy-2.+"
+    }
+
 }
 
-task setWrapper(type: Wrapper) {
+task wrapper(type: Wrapper) {
     gradleVersion = '3.4.1'
 }

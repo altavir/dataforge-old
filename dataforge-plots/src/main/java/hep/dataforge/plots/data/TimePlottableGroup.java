@@ -41,7 +41,7 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
     public static TimePlottableGroup buildSet(String... names) {
         TimePlottableGroup set = new TimePlottableGroup();
         for (String name : names) {
-            set.addPlottable(new TimePlottable(name, name));
+            set.add(new TimePlottable(name, name));
         }
         return set;
     }

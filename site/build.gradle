@@ -109,7 +109,7 @@ clean.doLast { ant.delete(dir: '.cache'); ant.delete(dir: 'target') }
 
 task buildDocs(type: Javadoc) {
     def documentedProjects = rootProject.subprojects.findAll {it.group.startsWith("hep.dataforge")}
-    def version = rootProject.version == 'unspecified'? project(':dataforge').version : rootProject.version
+    def version = rootProject.version
 
     title "DataForge framework ${version}"
     source documentedProjects.collect { it.sourceSets.main.allJava }
