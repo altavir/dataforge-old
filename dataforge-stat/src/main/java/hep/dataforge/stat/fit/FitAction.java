@@ -64,12 +64,7 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      */
     @Override
     protected FitState execute(Context context, String name, Table input, Laminate meta) {
-        FitManager fm;
-        if (context.provides("fitting")) {
-            fm = context.provide("fitting", FitManager.class);
-        } else {
-            fm = new FitManager(context);
-        }
+        FitManager fm = context.pluginManager().getOrLoad(new FitManager());
 
         List<FitStage> stages = buildStageList(meta);
 

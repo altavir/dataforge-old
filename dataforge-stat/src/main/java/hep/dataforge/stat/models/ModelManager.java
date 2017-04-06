@@ -42,14 +42,8 @@ public class ModelManager implements Encapsulated {
     public static String MODEL_NAME = "modelName";
     private final HashMap<String, ContextMetaFactory<Model>> modelList = new HashMap<>();
     private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
-    //TODO remove this
-    private ModelManager defaultManager;
     private Context context;
 
-    public ModelManager(Context context, ModelManager defaultManager) {
-        this(context);
-        this.defaultManager = defaultManager;
-    }
 
     public ModelManager(Context context) {
         this.context = context;
@@ -84,11 +78,7 @@ public class ModelManager implements Encapsulated {
         String modelName = a.getString(MODEL_NAME);
         ContextMetaFactory<Model> factory = modelList.get(modelName.toLowerCase());
         if (factory == null) {
-            if (defaultManager == null) {
-                throw new NameNotFoundException(modelName);
-            } else {
-                return defaultManager.buildModel(a);
-            }
+            throw new NameNotFoundException(modelName);
         }
         return factory.build(context, a);
     }
@@ -96,11 +86,7 @@ public class ModelManager implements Encapsulated {
     public Model buildModel(String name) throws NameNotFoundException {
         ContextMetaFactory<Model> factory = modelList.get(name.toLowerCase());
         if (factory == null) {
-            if (defaultManager == null) {
-                throw new NameNotFoundException(name);
-            } else {
-                return defaultManager.buildModel(name);
-            }
+            throw new NameNotFoundException(name);
         }
         return factory.build(context, Meta.buildEmpty("model"));
     }

@@ -41,24 +41,19 @@ import java.util.HashMap;
 public class FitManager extends BasicPlugin implements Provider {
 
     public static final String FIT_ENGINE_PROVIDER_KEY = "engine";
-    protected final ModelManager modelManager;
+    private ModelManager modelManager;
     private HashMap<String, FitEngine> engineList = new HashMap<>();
 
     public FitManager() {
-        this(Global.instance());
-    }
-
-    public FitManager(Context context) {
-        this(context, new ModelManager(context));
-    }
-
-    public FitManager(Context context, ModelManager modelManager) {
-        attach(context);
-        this.modelManager = modelManager;
         addEngine("QOW", new QOWFitEngine());
         addEngine("CM", new CMFitEngine());
     }
 
+    @Override
+    public void attach(Context context) {
+        super.attach(context);
+        modelManager = new ModelManager(context);
+    }
 
     @Override
     protected boolean provides(String target, Name name) {
@@ -132,6 +127,9 @@ public class FitManager extends BasicPlugin implements Provider {
     }
 
     public ModelManager getModelManager() {
+        if (modelManager == null) {
+            throw new RuntimeException("Fit manager not attached to context");
+        }
         return modelManager;
     }
 

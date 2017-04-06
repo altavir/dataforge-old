@@ -166,7 +166,10 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public <T extends Plugin> T getOrLoad(T plugin) {
-        return optPlugin(plugin.getTag()).map(it -> (T) it).orElse(plugin);
+        return optPlugin(plugin.getTag()).map(it -> (T) it).orElseGet(() -> {
+            load(plugin);
+            return plugin;
+        });
     }
 
     public <T extends Plugin> T getByType(Class<T> type) {
