@@ -51,7 +51,7 @@ public class Data<T> implements Annotated {
     }
 
     public static <T> Data<T> buildStatic(T content, Meta meta) {
-        return new Data(new StaticGoal(content), content.getClass(), meta);
+        return new Data(new StaticGoal<>(content), content.getClass(), meta);
     }
 
     public static <T> Data<T> buildStatic(T content) {

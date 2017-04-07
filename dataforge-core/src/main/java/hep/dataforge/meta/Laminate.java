@@ -49,7 +49,7 @@ public class Laminate extends Meta implements Described {
 
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
-        this.layers = new ArrayList(layers);
+        this.layers = new ArrayList<>(layers);
         this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
     }
 

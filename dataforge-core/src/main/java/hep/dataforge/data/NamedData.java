@@ -27,7 +27,7 @@ public class NamedData<T> extends Data<T> implements Named {
     }
 
     public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
-        return new NamedData(name, new StaticGoal(content), content.getClass(), meta);
+        return new NamedData(name, new StaticGoal<>(content), content.getClass(), meta);
     }
 
     /**

@@ -87,7 +87,7 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static ObjectLoader<?> buildObjectLoder(Storage storage, String loaderName, String shelfName)
+    public static <T> ObjectLoader<T> buildObjectLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         if (shelfName != null && !shelfName.isEmpty()) {
             if (!storage.hasShelf(shelfName)) {
@@ -101,7 +101,7 @@ public class LoaderFactory {
                 .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
                 .build();
 
-        return (ObjectLoader<?>) storage.buildLoader(loaderAn);
+        return (ObjectLoader<T>) storage.buildLoader(loaderAn);
     }    
     
     /**

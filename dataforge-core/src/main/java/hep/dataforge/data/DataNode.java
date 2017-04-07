@@ -67,6 +67,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      */
     Optional<Data<? extends T>> getData(String name);
 
+    @SuppressWarnings("unchecked")
     default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
         Data<? extends T> data = getData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
         if (type.isAssignableFrom(data.type())) {
@@ -154,6 +155,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param type
      * @param consumer
      */
+    @SuppressWarnings("unchecked")
     default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
         dataStream().filter(d -> type.isAssignableFrom(d.type()))
                 .forEach(d -> consumer.accept((NamedData<R>) d));
@@ -255,6 +257,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param <R>
      * @return
      */
+    @SuppressWarnings("unchecked")
     default <R> DataNode<R> checked(Class<R> checkType) {
         if (this.type().equals(checkType)) {
             return (DataNode<R>) this;

@@ -16,17 +16,14 @@
 package hep.dataforge.values;
 
 import hep.dataforge.utils.NamingUtils;
+
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 /**
  * An immutable wrapper class that can hold Numbers, Strings and Instant
@@ -140,8 +137,8 @@ public interface Value extends Serializable {
         return of(Arrays.asList(list));
     }
     
-    static Value of(Collection list) {
-        List l = new ArrayList<>();
+    static Value of(Collection<Object> list) {
+        List<Object> l = new ArrayList<>();
         l.addAll(list);
         if (l.isEmpty()) {
             return getNull();
