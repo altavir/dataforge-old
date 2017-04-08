@@ -192,29 +192,11 @@ class GrindWorkspaceBuilder {
      */
     def getTasks() {
         return build().tasks.collect(Collectors.toList())
-//        Workspace ws = build();
-//        StringWriter writer = new StringWriter();
-//
-//        TextDescriptorFormatter formatter = new TextDescriptorFormatter(new PrintWriter(writer, true));
-//        ws.getTasks().forEach {
-//            formatter.showDescription(it.name, it.descriptor);
-//        }
-//        writer.flush()
-//        return writer.toString();
     }
 
 
     def getTargets() {
         return build().targets.collect(Collectors.toList())
-//        Workspace ws = build();
-//        StringWriter writer = new StringWriter();
-//
-//        ws.getTargets().forEach {
-//            writer.println(it)
-//        }
-//
-//        writer.flush()
-//        return writer.toString();
     }
 
     def clean() {

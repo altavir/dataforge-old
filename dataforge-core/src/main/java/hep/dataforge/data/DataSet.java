@@ -73,19 +73,15 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
      */
     @Override
     public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        if (recursive) {
+            throw new Error("Not implemented");
+        }
         return dataStream()
-                .map(data -> {
-                    Name dataName = Name.of(data.getName());
-                    if (dataName.length() > 1) {
-                        return dataName.cutLast();
-                    } else {
-                        return Name.EMPTY;
-                    }
-                })
-                .filter(it -> it != Name.EMPTY)
-                .filter(it -> recursive || it.length() == 1)
-                .map(it -> it.toString())
-                .map((String str) -> new NodeWrapper<>(getNode(str).get(), str, meta()));
+                .map(data -> Name.of(data.getName())) // converting strings to Names
+                .filter(name -> name.length() > 1) //selecting only composite names
+                .map(name -> name.getFirst().toString())
+                .distinct()
+                .map(str -> new NodeWrapper<>(getNode(str), str, meta()));
     }
 
     @Override
@@ -132,7 +128,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
         Builder<T> builder = new Builder<>(type)
                 .setName(nodeName)
                 .setMeta(meta());

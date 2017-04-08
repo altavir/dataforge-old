@@ -278,7 +278,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
         return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 

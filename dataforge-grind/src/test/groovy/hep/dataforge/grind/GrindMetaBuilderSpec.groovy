@@ -39,7 +39,7 @@ class GrindMetaBuilderSpec extends Specification {
         }
         
         then:
-        println new XMLMetaWriter().writeString(root,null)
+        println new XMLMetaWriter().writeString(root)
         root.getInt("otherChildNode.grandChildNode.a") == 22
     }
 

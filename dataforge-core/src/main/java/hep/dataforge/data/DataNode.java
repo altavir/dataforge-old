@@ -107,7 +107,11 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param nodeName
      * @return
      */
-    Optional<DataNode<? extends T>> getNode(String nodeName);
+    Optional<DataNode<? extends T>> optNode(String nodeName);
+
+    default DataNode<? extends T> getNode(String nodeName){
+        return optNode(nodeName).get();
+    }
 
     /**
      * Get the node assuming it have specific type with type check
@@ -122,7 +126,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         if (nodeName.isEmpty()) {
             node = this;
         } else {
-            node = getNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
+            node = optNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
         }
 
         return node.checked(type);

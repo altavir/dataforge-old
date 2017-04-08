@@ -41,8 +41,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
-        return node.getNode(nodeName).flatMap(n -> {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+        return node.optNode(nodeName).flatMap(n -> {
             if (type.isAssignableFrom(n.type())) {
                 return Optional.of((DataNode<? extends T>) n);
             } else {

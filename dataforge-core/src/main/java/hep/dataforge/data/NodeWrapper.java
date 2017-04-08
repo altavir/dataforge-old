@@ -33,8 +33,8 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
-        return node.getNode(nodeName);
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+        return node.optNode(nodeName);
     }
 
     @Override
