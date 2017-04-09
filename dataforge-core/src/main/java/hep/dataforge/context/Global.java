@@ -39,12 +39,23 @@ public class Global extends Context {
     private static final ReferenceRegistry<Context> contextRegistry = new ReferenceRegistry();
     private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread res = new Thread(r, "DF_DISPATCH");
-//        res.setDaemon(false);
         res.setPriority(Thread.MAX_PRIORITY);
         return res;
     });
-    private static Global instance = new Global();
 
+    private static Global instance = new Global();
+    private static Context defaultContext;
+
+    /**
+     * Use that context when the context for some reason is not provided. By default throws a runtime exception.
+     * @return
+     */
+    public static Context getDefaultContext() {
+        if(defaultContext == null){
+            throw new RuntimeException("Context not specified");
+        }
+        return defaultContext;
+    }
 
     private Global() {
         super("GLOBAL");

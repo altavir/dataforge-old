@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -81,7 +82,13 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
                 .filter(name -> name.length() > 1) //selecting only composite names
                 .map(name -> name.getFirst().toString())
                 .distinct()
-                .map(str -> new NodeWrapper<>(getNode(str), str, meta()));
+                .map(str -> new DataSet<>(str, meta, type, subMap(str + ".")));
+    }
+
+    private Map<String, Data<? extends T>> subMap(String prefix) {
+        return dataMap.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(prefix))
+                .collect(Collectors.toMap(entry -> entry.getKey().substring(prefix.length()), entry -> entry.getValue()));
     }
 
     @Override

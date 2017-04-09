@@ -26,7 +26,7 @@ public class MathPlugin extends BasicPlugin {
     private final FunctionDispatcher<BivariateFunction> bivariateFactory = new FunctionDispatcher<>();
 
     public static MathPlugin buildFrom(Context context) {
-        MathPlugin plugin = context.pluginManager().getOrLoad(new MathPlugin());
+        MathPlugin plugin = context.pluginManager().getOrLoad(MathPlugin.class);
         return plugin;
     }
 

@@ -50,8 +50,9 @@ public class Data<T> implements Annotated {
         this.type = type;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Data<T> buildStatic(T content, Meta meta) {
-        return new Data(new StaticGoal<>(content), content.getClass(), meta);
+        return new Data<T>(new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
     }
 
     public static <T> Data<T> buildStatic(T content) {

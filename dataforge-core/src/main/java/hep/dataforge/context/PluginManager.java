@@ -154,6 +154,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
 
     /**
      * Get a plugin if it is loaded in this manager or parent manager. If it is not, load and get it.
+     *
      * @param tag
      * @return
      */
@@ -165,9 +166,20 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         return getOrLoad(PluginTag.fromString(tag));
     }
 
-    public <T extends Plugin> T getOrLoad(T plugin) {
-        return optPlugin(plugin.getTag()).map(it -> (T) it).orElseGet(() -> {
-            load(plugin);
+    public <T extends Plugin> T getOrLoad(Class<T> type) {
+        PluginTag tag = Plugin.resolveTag(type);
+        return optPlugin(tag).map(it -> type.cast(it)).orElseGet(() -> {
+            T plugin;
+            try {
+                plugin = type.cast(load(tag));
+            } catch (NameNotFoundException ex) {
+
+                try {
+                    plugin = type.newInstance();
+                } catch (Exception e) {
+                    throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
+                }
+            }
             return plugin;
         });
     }

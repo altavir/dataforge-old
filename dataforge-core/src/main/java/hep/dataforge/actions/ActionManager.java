@@ -65,6 +65,7 @@ public class ActionManager extends BasicPlugin {
      * @return
      * @throws ClassNotFoundException
      */
+    @SuppressWarnings("unchecked")
     public Action buildByType(String type) throws ClassNotFoundException {
         return build((Class<Action>) Class.forName(type));
     }

@@ -26,8 +26,9 @@ public class NamedData<T> extends Data<T> implements Named {
         this.name = name;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
-        return new NamedData(name, new StaticGoal<>(content), content.getClass(), meta);
+        return new NamedData<T>(name, new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
     }
 
     /**

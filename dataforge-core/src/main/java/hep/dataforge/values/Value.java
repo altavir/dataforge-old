@@ -171,6 +171,7 @@ public interface Value extends Serializable {
      * @param obj a {@link java.lang.Object} object.
      * @return a {@link hep.dataforge.values.Value} object.
      */
+    @SuppressWarnings("unchecked")
     static Value of(Object obj) {
         if (obj == null) {
             return Value.NULL;
@@ -189,7 +190,7 @@ public interface Value extends Serializable {
         } else if (obj instanceof String) {
             return of((String) obj);
         } else if (obj instanceof Collection) {
-            return of((Collection<Object>) obj);
+            return of((Collection) obj);
         } else if (obj instanceof Object[]) {
             return of((Object[]) obj);
         } else {

@@ -261,11 +261,10 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         }
         this.name = meta.getName();
 
-        if (!(meta instanceof MetaNode)) {
-            meta = from(meta);
-        }
-        this.values.putAll(((MetaNode) meta).values);
-        this.nodes.putAll(((MetaNode) meta).nodes);
+        MetaNode node = (meta instanceof MetaNode)? (MetaNode) meta : from(meta);
+
+        this.values.putAll(node.values);
+        this.nodes.putAll(node.nodes);
     }
 
 //    /**
