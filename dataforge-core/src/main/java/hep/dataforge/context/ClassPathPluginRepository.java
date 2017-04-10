@@ -5,15 +5,11 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.names.AlphanumComparator;
-
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
-import java.util.List;
-import java.util.Optional;
 import java.util.ServiceLoader;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -22,7 +18,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-public class ClassPathPluginRepository implements PluginRepository {
+public class ClassPathPluginRepository extends AbstractPluginRepository {
     public static final String PLUGIN_LOCATION_CONTEXT_KEY = "df.pluginLocation";
 
     private final ServiceLoader<Plugin> loader;
@@ -46,15 +42,7 @@ public class ClassPathPluginRepository implements PluginRepository {
     }
 
     @Override
-    public Optional<Plugin> opt(PluginTag tag) {
-        return StreamSupport.stream(loader.spliterator(), false)
-                .filter(plugin -> tag.matches(plugin.getTag()))
-                .sorted((p1, p2) -> -AlphanumComparator.INSTANCE.compare(p1.getTag().getVersion(), p2.getTag().getVersion()))
-                .findFirst();
-    }
-
-    @Override
-    public List<PluginTag> listTags() {
-        return StreamSupport.stream(loader.spliterator(), false).map(it -> it.getTag()).collect(Collectors.toList());
+    protected Stream<Plugin> stream() {
+        return StreamSupport.stream(loader.spliterator(), false);
     }
 }
