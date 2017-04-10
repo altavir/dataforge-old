@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.List;
+import java.util.Optional;
 import java.util.ServiceLoader;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -45,12 +46,11 @@ public class ClassPathPluginRepository implements PluginRepository {
     }
 
     @Override
-    public Plugin get(PluginTag tag) {
+    public Optional<Plugin> opt(PluginTag tag) {
         return StreamSupport.stream(loader.spliterator(), false)
                 .filter(plugin -> tag.matches(plugin.getTag()))
                 .sorted((p1, p2) -> -AlphanumComparator.INSTANCE.compare(p1.getTag().getVersion(), p2.getTag().getVersion()))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("No plugin matching criterion: " + tag.toString()));
+                .findFirst();
     }
 
     @Override

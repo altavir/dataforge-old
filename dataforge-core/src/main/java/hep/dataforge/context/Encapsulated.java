@@ -22,21 +22,11 @@ package hep.dataforge.context;
  * @version $Id: $Id
  */
 public interface Encapsulated {
-
-//    default Context getContext() {
-//        try {
-//            Field contextField = getClass().getField("context");
-//            if (contextField.getClass().isAssignableFrom(Context.class)) {
-//                return (Context) contextField.get(this);
-//            }
-//        } catch (Exception e) {
-//            return Global.instance();
-//        }
-//    }
-
     /**
      * Get context for this object
      * @return
      */
-    Context getContext();
+    default Context getContext(){
+        return Global.getDefaultContext();
+    }
 }

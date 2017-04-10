@@ -58,12 +58,7 @@ class WorkspaceSpec {
             Context res = Global.getContext(name).withParent(context)
             properties.each { key, value -> res.putValue(key.toString(), value) }
             pluginMap.forEach { String key, Meta meta ->
-                Plugin plugin
-                if (res.pluginManager().hasPlugin(key)) {
-                    plugin = res.pluginManager().getPlugin(key)
-                } else {
-                    plugin = res.pluginManager().load(key.toString())
-                }
+                Plugin plugin = res.pluginManager().getOrLoad(key)
                 if(plugin instanceof Configurable) {
                     (plugin as Configurable).configure(meta)
                 }

@@ -235,7 +235,7 @@ public class Context extends AbstractProvider implements ValueProvider, Logable,
         if ("value".equals(target)) {
             return hasValue(name.toString());
         } else if (target.isEmpty() || "plugin".equals(target)) {
-            return pluginManager().hasPlugin(name.toString());
+            return pluginManager().has(name.toString());
         } else {
             return false;
         }
