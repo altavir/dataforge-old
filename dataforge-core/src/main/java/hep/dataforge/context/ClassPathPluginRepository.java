@@ -8,6 +8,7 @@ package hep.dataforge.context;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -35,7 +36,7 @@ public class ClassPathPluginRepository extends AbstractPluginRepository {
                     context.getLogger().error("Malformed plugin location", e);
                     return null;
                 }
-            }).filter(it -> it != null).toArray(i -> new URL[i]);
+            }).filter(Objects::nonNull).toArray(URL[]::new);
             cl = new URLClassLoader(urls, cl);
         }
         loader = ServiceLoader.load(Plugin.class, cl);

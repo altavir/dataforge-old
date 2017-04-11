@@ -1,13 +1,18 @@
-//plugins{
-//    id 'groovy'
-//}
+buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath 'io.ratpack:ratpack-gradle:1.4.5'
+    }
+}
 
+apply plugin: "io.ratpack.ratpack-java"
 description = 'A servlet for remote view of repository'
 
 dependencies {
     compile project(':dataforge-storage')
     compile 'org.freemarker:freemarker:2.3.25-incubating'
-    compile 'io.ratpack:ratpack-core:1.4.+'
 
     //compile project(':dataforge-grind')
     //compile 'com.google.visualization:visualization-datasource:1.1.1'

@@ -1,6 +1,7 @@
 description = 'dataforge-storage'
 
 //configurations {
+//configurations {
 //    all*.exclude group: 'commons-logging'
 //}
 
