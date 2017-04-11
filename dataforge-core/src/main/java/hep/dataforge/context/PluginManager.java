@@ -161,6 +161,22 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         );
     }
 
+    public <T extends Plugin> T load(Class<T> type) {
+        PluginTag tag = Plugin.resolveTag(type);
+        T plugin;
+        try {
+            plugin = type.cast(load(tag));
+        } catch (NameNotFoundException ex) {
+            getContext().getLogger().warn("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
+            try {
+                plugin = type.newInstance();
+            } catch (Exception e) {
+                throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
+            }
+        }
+        return plugin;
+    }
+
     public Plugin load(String name) {
         return load(PluginTag.fromString(name));
     }
@@ -180,21 +196,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public <T extends Plugin> T getOrLoad(Class<T> type) {
-        PluginTag tag = Plugin.resolveTag(type);
-        return opt(tag).map(it -> type.cast(it)).orElseGet(() -> {
-            T plugin;
-            try {
-                plugin = type.cast(load(tag));
-            } catch (NameNotFoundException ex) {
-                getContext().getLogger().warn("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
-                try {
-                    plugin = type.newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
-                }
-            }
-            return plugin;
-        });
+        return opt(Plugin.resolveTag(type)).map(type::cast).orElseGet(() -> load(type));
     }
 
     @Override

@@ -184,7 +184,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     private static boolean checkIfEnvelope(FileObject file) {
         try {
-            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readChar() == '#';
+            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readByte() == '#';
         } catch (IOException e) {
             return false;
         }

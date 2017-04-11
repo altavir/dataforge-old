@@ -91,12 +91,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public synchronized Meta meta() {
-        if(meta == null){
+        if (meta == null) {
             ensureOpen();
-            try (InputStream stream =  getFile().getContent().getInputStream()){
+            try (InputStream stream = getFile().getContent().getInputStream()) {
                 meta = type.getReader().read(stream).meta();
-            } catch (IOException e) {
-                throw new RuntimeException("Can't read meta from file Envelope");
+            } catch (Exception e) {
+                throw new RuntimeException("Can't read meta from file Envelope", e);
             }
         }
         return meta;
@@ -307,13 +307,13 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     /**
      * ensure envelope is initialized
      */
-    private synchronized void ensureOpen(){
-        if(!isOpen()){
+    private synchronized void ensureOpen() {
+        if (!isOpen()) {
             open();
         }
     }
 
-    public boolean isOpen(){
-        return tag!=null;
+    public boolean isOpen() {
+        return tag != null;
     }
 }
