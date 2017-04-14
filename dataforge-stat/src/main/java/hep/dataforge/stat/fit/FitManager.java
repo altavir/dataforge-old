@@ -22,7 +22,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.FittingIOUtils;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provider;
@@ -133,34 +133,34 @@ public class FitManager extends BasicPlugin implements Provider {
         return modelManager;
     }
 
-//    public FitTaskResult runDefaultEngineTask(FitState state, String taskName, Logable log, String... freePars) {
+//    public FitResult runDefaultEngineTask(FitState state, String taskName, Loggable log, String... freePars) {
 //        FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, taskName, freePars);
 //        return runStage(state, task, log);
 //    }
 
-    public FitTaskResult runDefaultStage(FitState state, Logable log, String... freePars) {
+    public FitResult runDefaultStage(FitState state, Loggable log, String... freePars) {
         FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN, freePars);
         return runStage(state, task, log);
     }
 
-    public FitTaskResult runDefaultStage(FitState state, String... freePars) {
+    public FitResult runDefaultStage(FitState state, String... freePars) {
         return runDefaultStage(state, getContext(), freePars);
     }
 
-    public FitTaskResult runStage(FitState state, String engineName, String taskName, Logable log, String... freePars) {
+    public FitResult runStage(FitState state, String engineName, String taskName, Loggable log, String... freePars) {
         FitStage task = new FitStage(engineName, taskName, freePars);
         return runStage(state, task, log);
     }
 
-    public FitTaskResult runStage(FitState state, String engineName, String taskName, String... freePars) {
+    public FitResult runStage(FitState state, String engineName, String taskName, String... freePars) {
         return runStage(state, engineName, taskName, getContext(), freePars);
     }
 
-    public FitTaskResult runStage(FitState state, FitStage task, Logable log) {
+    public FitResult runStage(FitState state, FitStage task, Loggable log) {
         return runStage(state, task, Global.out(), log);
     }
 
-    public FitTaskResult runStage(FitState state, FitStage task, PrintWriter writer, Logable log) {
+    public FitResult runStage(FitState state, FitStage task, PrintWriter writer, Loggable log) {
         if (log == null) {
             log = getContext();
         }
@@ -170,13 +170,13 @@ public class FitManager extends BasicPlugin implements Provider {
             throw new IllegalArgumentException("The fit state is not defined");
         }
 
-        FitTaskResult newState;
+        FitResult newState;
 
         switch (task.getName()) {
             //Тут идет обработка задач общих для всех движков
             case "print":
                 state.print(writer);
-                return new FitTaskResult(state, FitTaskResult.emptyTask("print"));
+                return new FitResult(state, FitResult.emptyTask("print"));
             case "residuals":
                 writer.printf("%n***RESIDUALS***%n");
                 if (state.getModel() instanceof XYModel) {
@@ -184,7 +184,7 @@ public class FitManager extends BasicPlugin implements Provider {
                 } else {
                     FittingIOUtils.printResiduals(writer, state);
                 }
-                return new FitTaskResult(state, FitTaskResult.emptyTask("residuals"));
+                return new FitResult(state, FitResult.emptyTask("residuals"));
             default:
                 log.report("Starting task {}", task.toString());
                 newState = engine.run(state, task, log);

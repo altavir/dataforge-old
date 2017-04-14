@@ -22,7 +22,7 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -115,7 +115,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected void buildReport(Context context, String name, Data<? extends T> data) {
-        Logable parent;
+        Loggable parent;
         if (data != null && data instanceof ActionResult) {
             Log actionLog = ((ActionResult) data).log();
             if (actionLog.getParent() != null) {

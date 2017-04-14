@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
@@ -52,7 +52,7 @@ import java.util.concurrent.Executors;
  *
  * @author Alexander Nozik
  */
-public class Context extends AbstractProvider implements ValueProvider, Logable, Named, AutoCloseable {
+public class Context extends AbstractProvider implements ValueProvider, Loggable, Named, AutoCloseable {
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final String name;

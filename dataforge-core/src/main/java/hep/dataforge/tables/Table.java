@@ -15,13 +15,11 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.Value;
 
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -33,25 +31,9 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends PointSource, MetaMorph, Markedup {
+public interface Table extends PointSource, MetaMorph, Markedup, RowProvider {
 
-    DataPoint getRow(int i);
-
-    Column getColumn(String name) throws NameNotFoundException;
-
-    default Value getValue(int index, String name) throws NameNotFoundException {
-        return getRow(index).getValue(name);
-    }
-
-    /**
-     * Number of rows in the table
-     *
-     * @return
-     */
-    int size();
-
-
-    //PENDING replace by stream provider + default table factory?
+    Column getColumn(String name);
 
     /**
      * Apply row-based transformation

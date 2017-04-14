@@ -32,15 +32,15 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Log implements Logable, Named {
+public class Log implements Loggable, Named {
 
     private static int MAX_LOG_SIZE = 1000;
     private final String name;
     private final ReferenceRegistry<Consumer<LogEntry>> listeners = new ReferenceRegistry<>();
     protected ConcurrentLinkedQueue<LogEntry> entries = new ConcurrentLinkedQueue<>();
-    private Logable parent;
+    private Loggable parent;
 
-    public Log(String name, Logable parent) {
+    public Log(String name, Loggable parent) {
         if (name == null || name.isEmpty()) {
             throw new AnonymousNotAlowedException();
         }
@@ -52,7 +52,7 @@ public class Log implements Logable, Named {
         this(name, Global.instance());
     }
 
-    public void setParent(Logable parent) {
+    public void setParent(Loggable parent) {
         this.parent = parent;
     }
 
@@ -94,7 +94,7 @@ public class Log implements Logable, Named {
         entries.clear();
     }
 
-    public Logable getParent() {
+    public Loggable getParent() {
         return parent;
     }
 

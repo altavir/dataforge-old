@@ -24,7 +24,7 @@ package hep.dataforge.io.reports;
  *
  * @author Alexander Nozik
  */
-public interface Logable {
+public interface Loggable {
 
     Log getLog();
 

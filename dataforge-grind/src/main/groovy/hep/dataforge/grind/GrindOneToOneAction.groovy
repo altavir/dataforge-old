@@ -3,7 +3,7 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
-import hep.dataforge.io.reports.Logable
+import hep.dataforge.io.reports.Loggable
 import hep.dataforge.meta.Laminate
 
 /**
@@ -54,12 +54,12 @@ class GrindOneToOneAction extends OneToOneAction {
     }
 
     private static class OneToOneCallable {
-        Logable log
+        Loggable log
         String name
         Laminate meta
         Object input
 
-        OneToOneCallable(Logable log, String name, Laminate meta, Object input) {
+        OneToOneCallable(Loggable log, String name, Laminate meta, Object input) {
             this.log = log
             this.name = name
             this.meta = meta

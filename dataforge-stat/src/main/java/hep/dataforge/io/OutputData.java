@@ -64,7 +64,7 @@ public class OutputData {
      * @param points an array of double.
      * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    public static Table getUnivariateFunctionData(UnivariateFunction func, double[] points) {
+    public static RowProvider getUnivariateFunctionData(UnivariateFunction func, double[] points) {
         final String[] format = {"point", "value"};
         ListTable.Builder res = new ListTable.Builder(format);
         Double[] values = new Double[2];

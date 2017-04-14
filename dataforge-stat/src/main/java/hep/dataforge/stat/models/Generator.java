@@ -16,7 +16,7 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.Table;
+import hep.dataforge.tables.RowProvider;
 
 /**
  * <p>Generator interface.</p>
@@ -33,7 +33,7 @@ public interface Generator {
      * @param config a {@link java.lang.Iterable} object.
      * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    Table generateData(Iterable<DataPoint> config);
+    RowProvider generateData(Iterable<DataPoint> config);
 
     /**
      * <p>generateDataPoint.</p>

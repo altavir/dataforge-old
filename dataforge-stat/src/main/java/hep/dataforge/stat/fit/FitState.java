@@ -22,6 +22,7 @@ import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.RowProvider;
 import hep.dataforge.tables.Table;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -44,7 +45,7 @@ import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
 //TODO добавить параметры по-умолчанию в модель
 public class FitState implements Serializable {
 
-    private final Table dataSet;
+    private final RowProvider dataSet;
 
     private final Model model;
 
@@ -56,7 +57,7 @@ public class FitState implements Serializable {
 
     private final ParamSet pars;
 
-    public FitState(Table dataSet, Model model, ParamSet pars) {
+    public FitState(RowProvider dataSet, Model model, ParamSet pars) {
         this.dataSet = dataSet;
         this.model = model;
         this.prior = null;
@@ -65,7 +66,7 @@ public class FitState implements Serializable {
         this.interval = null;
     }
 
-    public FitState(Table dataSet, Model model, ParamSet pars,
+    public FitState(RowProvider dataSet, Model model, ParamSet pars,
                     NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
         this.dataSet = dataSet;
         this.model = model;
@@ -355,7 +356,7 @@ public class FitState implements Serializable {
         return model.size();
     }
 
-    public Table getDataSet() {
+    public RowProvider getDataSet() {
         return dataSet;
     }
 
@@ -368,7 +369,7 @@ public class FitState implements Serializable {
      */
     public static class Builder {
 
-        private Table dataSet;
+        private RowProvider dataSet;
         private IntervalEstimate interval;
         private Model model;
         private ParamSet pars;

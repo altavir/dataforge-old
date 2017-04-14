@@ -26,12 +26,12 @@ import static hep.dataforge.io.FittingIOUtils.printParamSet;
  * An extension of FitState containing information about last fit stage
  * @author Alexander Nozik
  */
-public class FitTaskResult extends FitState {
+public class FitResult extends FitState {
     
     private final FitStage lastTask;
     private boolean isValid = true;
 
-    public FitTaskResult(FitState state, FitStage lastTask) {
+    public FitResult(FitState state, FitStage lastTask) {
         super(state);
         this.lastTask = lastTask;
     }
@@ -40,16 +40,16 @@ public class FitTaskResult extends FitState {
         return new FitStage(name);
     }
 
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars) {
-        return new FitTaskResult(state.edit().setPars(allPars).build(), lastTask);
+    public static FitResult buildResult(FitState state, FitStage lastTask, ParamSet allPars) {
+        return new FitResult(state.edit().setPars(allPars).build(), lastTask);
     }
 
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, ParamSet allPars, NamedMatrix covariance) {
-        return new FitTaskResult(state.edit().setPars(allPars).setCovariance(covariance, true).build(), lastTask);
+    public static FitResult buildResult(FitState state, FitStage lastTask, ParamSet allPars, NamedMatrix covariance) {
+        return new FitResult(state.edit().setPars(allPars).setCovariance(covariance, true).build(), lastTask);
     }
 
-    public static FitTaskResult buildResult(FitState state, FitStage lastTask, NamedMatrix covariance) {
-        return new FitTaskResult(state.edit().setCovariance(covariance, true).build(), lastTask);
+    public static FitResult buildResult(FitState state, FitStage lastTask, NamedMatrix covariance) {
+        return new FitResult(state.edit().setCovariance(covariance, true).build(), lastTask);
     }
 
     public String[] getFreePars() {
