@@ -6,11 +6,11 @@ import hep.dataforge.values.Value;
 /**
  * Created by darksnake on 14-Apr-17.
  */
-public interface RowProvider extends Iterable<DataPoint> {
-    DataPoint getRow(int i);
+public interface NavigablePointSource extends PointSource{
+    DataPoint getPoint(int i);
 
     default Value getValue(int index, String name) throws NameNotFoundException {
-        return getRow(index).getValue(name);
+        return getPoint(index).getValue(name);
     }
 
     /**

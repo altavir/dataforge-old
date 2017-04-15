@@ -31,7 +31,7 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends PointSource, MetaMorph, Markedup, RowProvider {
+public interface Table extends MetaMorph, Markedup, NavigablePointSource {
 
     Column getColumn(String name);
 
@@ -60,4 +60,11 @@ public interface Table extends PointSource, MetaMorph, Markedup, RowProvider {
         });
         return builder.build();
     }
+
+    /**
+     * A minimal set of fields to be displayed in this table. Could return empty format if source is unformatted
+     *
+     * @return
+     */
+    TableFormat getFormat();
 }

@@ -7,7 +7,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.RowProvider;
+import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.XYAdapter;
 import org.jetbrains.annotations.NotNull;
 
@@ -33,18 +33,18 @@ public class FitHelper {
         return manager;
     }
 
-    public FitBuilder fit(RowProvider data) {
+    public FitBuilder fit(NavigablePointSource data) {
         return new FitBuilder(data);
     }
 
     public class FitBuilder {
-        RowProvider data;
+        NavigablePointSource data;
         Model model;
         ParamSet startPars = new ParamSet();
         Loggable log = null;
         List<FitStage> stages = new ArrayList<>();
 
-        public FitBuilder(@NotNull RowProvider data) {
+        public FitBuilder(@NotNull NavigablePointSource data) {
             this.data = data;
         }
 

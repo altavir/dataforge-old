@@ -15,15 +15,17 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.stat.parametric.MultiFunction;
 import hep.dataforge.maths.Domain;
 import hep.dataforge.maths.UniformRandomVectorGenerator;
-import static hep.dataforge.utils.ArgumentChecker.checkEqualDimensions;
-import java.io.PrintWriter;
-import java.util.List;
+import hep.dataforge.stat.parametric.MultiFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NullArgumentException;
+
+import java.io.PrintWriter;
+import java.util.List;
+
+import static hep.dataforge.utils.ArgumentChecker.checkEqualDimensions;
 
 /**
  * <p>PrintFunction class.</p>

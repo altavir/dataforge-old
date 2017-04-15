@@ -10,7 +10,7 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 
 /**
  * A handler to evaluate Google visualization library requests to point loaders
@@ -30,7 +30,7 @@ public class PointLoaderDataHandler extends DataHandler {
     }
 
     @Override
-    protected PointSource getData(Meta query) {
+    protected Table getData(Meta query) {
         ValueIndex<DataPoint> index;
 
         //use custom index if needed

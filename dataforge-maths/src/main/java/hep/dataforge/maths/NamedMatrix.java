@@ -186,7 +186,7 @@ public class NamedMatrix implements NameSetContainer, Serializable {
 
     /**
      * <p>
-     * getRow.</p>
+     * getPoint.</p>
      *
      * @param name a {@link java.lang.String} object.
      * @return a {@link org.apache.commons.math3.linear.RealVector} object.

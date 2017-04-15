@@ -45,7 +45,6 @@ public interface PointLoader extends Loader, PointSource {
      *
      * @return
      */
-    @Override
     TableFormat getFormat();
 
     /**

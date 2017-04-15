@@ -16,7 +16,7 @@
 package hep.dataforge.io;
 
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.Misc;
 import org.slf4j.LoggerFactory;
@@ -159,7 +159,7 @@ public class ColumnedDataWriter implements AutoCloseable {
 
     /**
      * <p>
-     * writeDataSet.</p>
+     * writeTable.</p>
      *
      * @param file   a {@link java.io.File} object.
      * @param data   a {@link hep.dataforge.tables.Table} object.
@@ -168,13 +168,13 @@ public class ColumnedDataWriter implements AutoCloseable {
      * @param names  a {@link java.lang.String} object.
      * @throws java.io.FileNotFoundException if any.
      */
-    public static void writeDataSet(File file, PointSource data, String head, boolean append, String... names) throws IOException {
+    public static void writeTable(File file, Table data, String head, boolean append, String... names) throws IOException {
         try (FileOutputStream os = new FileOutputStream(file, append)) {
-            writeDataSet(os, data, head, names);
+            writeTable(os, data, head, names);
         }
     }
 
-    public static void writeDataSet(OutputStream stream, PointSource data, String head, String... names) {
+    public static void writeTable(OutputStream stream, Table data, String head, String... names) {
         ColumnedDataWriter writer;
         TableFormat format;
         if (data.getFormat().isEmpty()) {

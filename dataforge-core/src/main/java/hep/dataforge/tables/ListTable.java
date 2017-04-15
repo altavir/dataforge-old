@@ -124,7 +124,7 @@ public class ListTable implements Table {
      * @return
      */
     @Override
-    public DataPoint getRow(int i) {
+    public DataPoint getPoint(int i) {
         return data.get(i);
     }
 

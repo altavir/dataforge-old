@@ -4,7 +4,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.ColumnFormat;
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
@@ -127,11 +127,11 @@ public abstract class DataHandler implements Handler {
         return res;
     }
 
-    protected JsonObjectBuilder makeTable(PointSource source){
+    protected JsonObjectBuilder makeTable(Table source){
         return makeTable(source.getFormat(),source);
     }
 
-    protected abstract PointSource getData(Meta query);
+    protected abstract Table getData(Meta query);
 
     @Override
     public void handle(Context ctx) throws Exception {

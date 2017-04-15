@@ -33,7 +33,6 @@ public class SimplePointSource implements PointSource {
         this.points = new ArrayList<>();
     }
 
-    @Override
     public TableFormat getFormat() {
         return format;
     }

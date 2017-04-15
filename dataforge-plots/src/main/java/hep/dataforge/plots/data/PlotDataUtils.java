@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  */
 public class PlotDataUtils {
 
-    public static RowProvider collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
+    public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
         List<Plottable> plottables = new ArrayList<>(frame.plottables());
 
         if (visibleOnly) {

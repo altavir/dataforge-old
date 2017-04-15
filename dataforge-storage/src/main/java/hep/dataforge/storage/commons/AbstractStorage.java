@@ -35,6 +35,8 @@ import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -221,26 +223,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     @Override
     public boolean hasLoader(String name) {
         return loaders.containsKey(name);
-//        if (loaders.containsKey(name)) {
-//            return true;
-//        } else {
-//            Name loaderName = Name.of(name);
-//            if (loaderName.length() == 1) {
-//                return false;
-//            }
-//            try {
-//                Name shelfName = loaderName.cutLast();
-//                Storage childShelf = getShelf(shelfName.toString());
-//                if (childShelf == null) {
-//                    return false;
-//                } else {
-//                    return childShelf.hasLoader(shelfName.getLast().toString());
-//                }
-//            } catch (StorageException ex) {
-//                LoggerFactory.getLogger(getClass()).error("Error while triyngto find shelf", ex);
-//                return false;
-//            }
-//        }
     }
 
     @Override
@@ -251,23 +233,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
         } else {
             return null;
         }
-//            Name loaderName = Name.of(name);
-//            if (loaderName.length() == 1) {
-//                return null;
-//            }
-//            try {
-//                Name shelfName = loaderName.cutLast();
-//                Storage childShelf = getShelf(shelfName.toString());
-//                if (childShelf == null) {
-//                    return null;
-//                } else {
-//                    return childShelf.getLoader(shelfName.getLast().toString());
-//                }
-//            } catch (StorageException ex) {
-//                LoggerFactory.getLogger(getClass()).error("Error while triyngto find shelf", ex);
-//                return null;
-//            }
-//        }
     }
 
     @Override
@@ -320,15 +285,13 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
      * @throws StorageException
      */
     @Override
-    public Map<String, Loader> loaders() throws StorageException {
-        return new HashMap<>(loaders);
-        //return Collections.unmodifiableMap(loaders);
+    public Collection<Loader> loaders() throws StorageException {
+        return Collections.unmodifiableCollection(loaders.values());
     }
 
     @Override
-    public Map<String, Storage> shelves() throws StorageException {
-        return new HashMap<>(shelves);
-//        return Collections.unmodifiableMap(shelves);
+    public Collection<Storage> shelves() throws StorageException {
+        return Collections.unmodifiableCollection(shelves.values());
     }
 
     /**

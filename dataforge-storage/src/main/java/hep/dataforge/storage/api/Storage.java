@@ -26,7 +26,7 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 
-import java.util.Map;
+import java.util.Collection;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -95,7 +95,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Map<String, Loader> loaders() throws StorageException;
+    Collection<Loader> loaders() throws StorageException;
 
     /**
      * A map of all shelfs in this storage and their annotations
@@ -103,7 +103,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Map<String, Storage> shelves() throws StorageException;
+    Collection<Storage> shelves() throws StorageException;
 
     /**
      * Check if the loader with given name is registered. Chain path not

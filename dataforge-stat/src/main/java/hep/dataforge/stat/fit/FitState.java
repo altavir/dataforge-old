@@ -22,7 +22,7 @@ import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.RowProvider;
+import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.Table;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -45,7 +45,7 @@ import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
 //TODO добавить параметры по-умолчанию в модель
 public class FitState implements Serializable {
 
-    private final RowProvider dataSet;
+    private final NavigablePointSource dataSet;
 
     private final Model model;
 
@@ -57,7 +57,7 @@ public class FitState implements Serializable {
 
     private final ParamSet pars;
 
-    public FitState(RowProvider dataSet, Model model, ParamSet pars) {
+    public FitState(NavigablePointSource dataSet, Model model, ParamSet pars) {
         this.dataSet = dataSet;
         this.model = model;
         this.prior = null;
@@ -66,7 +66,7 @@ public class FitState implements Serializable {
         this.interval = null;
     }
 
-    public FitState(RowProvider dataSet, Model model, ParamSet pars,
+    public FitState(NavigablePointSource dataSet, Model model, ParamSet pars,
                     NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
         this.dataSet = dataSet;
         this.model = model;
@@ -220,7 +220,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDis(int i, ParamSet pars) {
-        return model.distance(dataSet.getRow(i), pars);
+        return model.distance(dataSet.getPoint(i), pars);
     }
 
     /**
@@ -235,7 +235,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        DataPoint dp = dataSet.getRow(i);
+        DataPoint dp = dataSet.getPoint(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -253,7 +253,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDispersion(int i, ParamSet pars) {
-        double res = model.dispersion(dataSet.getRow(i), pars);
+        double res = model.dispersion(dataSet.getPoint(i), pars);
         if (res > 0) {
             return res;
         } else {
@@ -356,7 +356,7 @@ public class FitState implements Serializable {
         return model.size();
     }
 
-    public RowProvider getDataSet() {
+    public NavigablePointSource getDataSet() {
         return dataSet;
     }
 
@@ -369,7 +369,7 @@ public class FitState implements Serializable {
      */
     public static class Builder {
 
-        private RowProvider dataSet;
+        private NavigablePointSource dataSet;
         private IntervalEstimate interval;
         private Model model;
         private ParamSet pars;

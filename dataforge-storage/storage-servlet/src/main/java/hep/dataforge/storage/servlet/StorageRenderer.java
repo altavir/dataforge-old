@@ -1,8 +1,11 @@
 package hep.dataforge.storage.servlet;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.names.Named;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
+
+import java.util.Comparator;
 
 /**
  * Created by darksnake on 13-Oct-16.
@@ -14,8 +17,8 @@ public class StorageRenderer {
         if (!storage.loaders().isEmpty()) {
             b.append("<div class=\"leaf\">\n"
                     + "<ul>");
-            storage.loaders().values().stream()
-                    .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()))
+            storage.loaders().stream()
+                    .sorted(Comparator.comparing(Named::getName))
                     .forEach(loader -> renderLoaderEntry(b, loader));
 
             b.append("</ul>"
@@ -23,8 +26,8 @@ public class StorageRenderer {
         }
         if (!storage.shelves().isEmpty()) {
             b.append("<ul>\n");
-            storage.shelves().values().stream()
-                    .sorted((o1, o2) -> o1.getName().compareTo(o2.getName()))
+            storage.shelves().stream()
+                    .sorted(Comparator.comparing(Named::getName))
                     .forEach(shelf -> {
                         b.append(String.format("<li><strong>+ %s</strong></li>%n", shelf.getName()));
                         try {

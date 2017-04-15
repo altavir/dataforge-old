@@ -106,9 +106,11 @@ public class StorageUtils {
     public static Stream<Pair<String, Loader>> loaderStream(Storage storage) {
         try {
             return Stream.concat(
-                    storage.shelves().entrySet().stream().flatMap(entry -> loaderStream(entry.getValue())
-                            .map(pair -> new Pair<>(Name.joinString(entry.getKey(), pair.getKey()), pair.getValue()))),
-                    storage.loaders().entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
+                    storage.shelves().stream().flatMap(entry ->
+                            loaderStream(entry)
+                                    .map(pair -> new Pair<>(Name.joinString(entry.getName(), pair.getKey()), pair.getValue()))
+                    ),
+                    storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry))
             );
         } catch (StorageException ex) {
             throw new RuntimeException(ex);

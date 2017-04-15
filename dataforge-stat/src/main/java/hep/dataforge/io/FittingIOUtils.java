@@ -15,59 +15,33 @@
  */
 package hep.dataforge.io;
 
+import hep.dataforge.maths.GridCalculator;
+import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
+import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.Function;
 import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import static hep.dataforge.io.OutputData.getNamedFunctionData;
-import static hep.dataforge.io.OutputData.printDataSet;
-import static hep.dataforge.io.PrintFunction.printFunctionSimple;
-import hep.dataforge.stat.likelihood.LogLikelihood;
-import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.maths.NamedMatrix;
-import hep.dataforge.maths.NamedVector;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.Table;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.tables.*;
 import hep.dataforge.values.NamedValueSet;
-import java.io.PrintWriter;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.lang.Math.sqrt;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Scanner;
-import java.util.logging.Logger;
-import static java.util.Locale.setDefault;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import hep.dataforge.stat.parametric.ParametricValue;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
-import static java.util.Locale.setDefault;
-import static java.lang.Math.max;
-import static java.lang.Math.min;
+
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.util.*;
+import java.util.logging.Logger;
+
+import static hep.dataforge.io.PrintFunction.printFunctionSimple;
+import static hep.dataforge.names.NamedUtils.combineNames;
+import static java.lang.Math.*;
 import static java.util.Locale.setDefault;
 
 /**
@@ -77,6 +51,21 @@ import static java.util.Locale.setDefault;
  * @version $Id: $Id
  */
 public class FittingIOUtils {
+
+    public static Table getNamedFunctionData(ParametricValue func, List<NamedVector> points) {
+        final String[] format = combineNames(func.namesAsArray(), "value");
+        ListTable.Builder res = new ListTable.Builder(format);
+        Double[] values = new Double[func.size() + 1];
+        for (NamedVector point : points) {
+            for (int j = 0; j < func.size(); j++) {
+                values[j] = point.getVector().getEntry(j);
+            }
+            values[values.length - 1] = func.apply(point);
+            DataPoint dp = new MapPoint(format, values);
+            res.row(dp);
+        }
+        return res.build();
+    }
 
     public static NamedValueSet getValueSet(String names, String doubles){
         Logger.getAnonymousLogger().warning("Using obsolete input method.");
@@ -190,7 +179,7 @@ public class FittingIOUtils {
      * @param num2 a int.
      * @param scale - на сколько ошибоку нужно отступать от максимума
      */
-    public static void printLike2D(PrintWriter out, String head, FitState res, String par1, String par2, int num1, int num2, double scale) {
+    public static void printLike2D(OutputStream out, String head, FitState res, String par1, String par2, int num1, int num2, double scale) {
 
         double val1 = res.getParameters().getDouble(par1);
         double val2 = res.getParameters().getDouble(par2);
@@ -220,7 +209,7 @@ public class FittingIOUtils {
 
         Table data = getNamedFunctionData(func, points);
 
-        printDataSet(out, data, head);
+        ColumnedDataWriter.writeTable(out, data, head);
     }
 
     public static void printLogProb1D(PrintWriter out, FitState res, int numpoints, double scale, String name) {
@@ -243,7 +232,7 @@ public class FittingIOUtils {
      * @param scale a double.
      * @param names a {@link java.lang.String} object.
      */
-    public static void printLogProbRandom(PrintWriter out, String head, FitState res, int numpoints, double scale, String... names) {
+    public static void printLogProbRandom(OutputStream out, String head, FitState res, int numpoints, double scale, String... names) {
 
         assert names.length > 0;
         LogLikelihood like = res.getLogLike();
@@ -264,7 +253,7 @@ public class FittingIOUtils {
 
         Table data = getNamedFunctionData(func, points);
 
-        printDataSet(out, data, head);
+        ColumnedDataWriter.writeTable(out, data, head);
     }
 
     public static void printNamedMatrix(PrintWriter out, NamedMatrix matrix) {
