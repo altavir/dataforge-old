@@ -57,6 +57,10 @@ public class Global extends Context {
         return defaultContext;
     }
 
+    public static void setDefaultContext(Context defaultContext) {
+        Global.defaultContext = defaultContext;
+    }
+
     private Global() {
         super("GLOBAL");
         Locale.setDefault(Locale.US);
