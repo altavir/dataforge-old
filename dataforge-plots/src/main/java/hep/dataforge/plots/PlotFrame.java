@@ -22,6 +22,8 @@ import hep.dataforge.meta.Meta;
 import javafx.collections.ObservableList;
 
 import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
@@ -32,15 +34,13 @@ import java.io.OutputStream;
 public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
 
     /**
-     * Заменить серию с данным именем и перерисовать соответствующий график или
-     * добавить новую серию.
-     *
+     * Add or replace registered plottable
      * @param plotable
      */
     void add(Plottable plotable);
     
     /**
-     * Add all plottables to the frame
+     * Add (replace) all plottables to the frame
      * @param plottables 
      */
     default void addAll(Iterable<? extends Plottable> plottables){
@@ -48,6 +48,12 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
             add(pl);
         }
     }
+
+    /**
+     * Update all plottables. Remove the ones not present in a new set
+     * @param plottables
+     */
+    void setAll(Collection<? extends Plottable> plottables);
 
     /**
      * Remove plottable with given name
@@ -62,19 +68,22 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
     void clear();
 
     /**
-     * Возвращает загруженную серию, если она есть. Иначе возвращает null
-     *
+     * Opt the plottable with the given name
      * @param name
      * @return
      */
-    Plottable get(String name);
+    Optional<Plottable> opt(String name);
+
+    default Plottable get(String name){
+        return opt(name).get();
+    }
 
     /**
-     * List of all plottables
+     * Unmodifiable observable List of all plottables.
      *
      * @return
      */
-    ObservableList<Plottable> plottables();
+    ObservableList<Plottable> getPlottables();
 
     
     /**

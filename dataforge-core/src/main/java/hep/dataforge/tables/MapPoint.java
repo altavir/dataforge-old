@@ -110,7 +110,6 @@ public class MapPoint implements DataPoint, MetaMorph {
      */
     @Override
     public Value getValue(String name) throws NameNotFoundException {
-        assert valueMap != null;
         Value res = valueMap.get(name);
         if (res == null) {
             throw new NameNotFoundException(name);

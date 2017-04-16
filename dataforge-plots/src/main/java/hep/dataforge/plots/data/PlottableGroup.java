@@ -76,7 +76,7 @@ public class PlottableGroup<T extends Plottable> implements Iterable<T> {
     }
 
     /**
-     * Apply configuration to plottables considering each plottable described
+     * Apply configuration to getPlottables considering each plottable described
      * with appropriate {@code plot} node.
      * <p>
      * <p>

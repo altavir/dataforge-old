@@ -62,7 +62,7 @@ public class PlotContainer implements Initializable {
     private double lastDividerPosition = -1;
 
     public PlotContainer() {
-        FXMLLoader loader = new FXMLLoader(MetaEditor.class.getResource("/fxml/PlotContainer.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PlotContainer.fxml"));
         root = new AnchorPane();
         loader.setRoot(root);
         loader.setController(this);
@@ -140,7 +140,7 @@ public class PlotContainer implements Initializable {
     }
 
     /**
-     * A list of plottables in the sidebar
+     * A list of getPlottables in the sidebar
      *
      * @return
      */
@@ -190,7 +190,7 @@ public class PlotContainer implements Initializable {
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
             this.plot.display(plotPane);
-            plottableslList.setItems(plot.plottables());
+            plottableslList.setItems(plot.getPlottables());
         });
     }
 
@@ -244,12 +244,12 @@ public class PlotContainer implements Initializable {
 
     @FXML
     private void onShowAll(ActionEvent event) {
-        this.plot.plottables().forEach(pl -> pl.configureValue("visible", true));
+        this.plot.getPlottables().forEach(pl -> pl.configureValue("visible", true));
     }
 
     @FXML
     private void onHideAll(ActionEvent event) {
-        this.plot.plottables().forEach(pl -> pl.configureValue("visible", false));
+        this.plot.getPlottables().forEach(pl -> pl.configureValue("visible", false));
     }
 
     protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {

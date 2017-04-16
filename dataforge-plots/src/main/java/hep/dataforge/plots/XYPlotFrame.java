@@ -22,6 +22,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.XYAdapter;
 
 /**
+ * Two-axis plot frame
  * @author Alexander Nozik
  */
 @NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")

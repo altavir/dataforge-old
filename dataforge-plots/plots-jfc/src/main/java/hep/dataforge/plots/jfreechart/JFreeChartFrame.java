@@ -27,6 +27,7 @@ import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
 import javafx.scene.layout.AnchorPane;
+import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -44,7 +45,6 @@ import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.Range;
 import org.jfree.data.general.DatasetChangeEvent;
-import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +53,9 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -69,7 +69,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     /**
      * Index mapping names to datasets
      */
-    List<String> index = new ArrayList<>();
+    private final Map<String, JFCDataWrapper> index = new HashMap<>();
+//    private final Map<String, Integer> index = new HashMap<>();
 
     private Mode mode = Mode.NONE;
 
@@ -160,6 +161,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         return logAxis;
     }
 
+    @NotNull
     private Range getRange(Meta meta) {
         return new Range(meta.getDouble("lower", Double.NEGATIVE_INFINITY), meta.getDouble("upper", Double.POSITIVE_INFINITY));
     }
@@ -282,40 +284,46 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        }
 //    }
 
+
     @Override
     protected synchronized void updatePlotData(String name) {
+        Optional<Plottable> opt = opt(name);
+
+        opt.ifPresent(plottable -> {
+            if (!index.containsKey(name)) {
+                JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
+                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(0) + 1);
+                index.put(name, wrapper);
+                run(() -> {
+                    plot.setDataset(wrapper.getIndex(), wrapper);
+                });
+            } else {
+                JFCDataWrapper wrapper = index.get(name);
+                wrapper.setPlottable(plottable);
+                wrapper.invalidateData();
+                run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
+            }
+        });
+
+
         //removing data set if necessary
-        Plottable plottable = get(name);
-        if (plottable == null) {
-            index.remove(name);
-            run(() -> {
-                plot.setDataset(index.indexOf(name), null);
-            });
-            return;
-        }
-
-        if (!index.contains(name)) {
-            IntervalXYDataset data = new JFCDataWrapper(plottable);
-            index.add(plottable.getName());
-
-            run(() -> {
-                plot.setDataset(index.indexOf(name), data);
-            });
-        } else {
-            JFCDataWrapper wrapper = (JFCDataWrapper) plot.getDataset(index.indexOf(name));
-            //TODO add support for ObservableLists and dynamic data sets
-            wrapper.invalidateData();
-            run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
+        if (!opt.isPresent()) {
+            if (index.containsKey(name)) {
+                run(() -> {
+                    plot.setDataset(index.get(name).getIndex(), null);
+                });
+                index.remove(name);
+            }
         }
     }
 
     @Override
     protected synchronized void updatePlotConfig(String name) {
-        final Plottable plottable = get(name);
-        if (!index.contains(plottable.getName())) {
-            index.add(plottable.getName());
+        Plottable plottable = opt(name).orElseThrow(() -> new NameNotFoundException("Plot with given name not found", name));
+
+        if (!index.containsKey(name)) {
+            updatePlotData(name);
         }
-        int num = index.indexOf(name);
 
         Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
         run(() -> {
@@ -342,7 +350,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 
             //Build Legend map to avoid serialization issues
 //            Map<String, String> titleMap = new HashMap<>();
-//            plottables.entrySet().stream().forEach((entry) -> {
+//            getPlottables.entrySet().stream().forEach((entry) -> {
 //                titleMap.put(entry.getKey(), entry.getValue().getConfig().getString("title", entry.getKey()));
 //            });
 //
@@ -359,7 +367,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             }
 
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-            plot.setRenderer(num, render);
+            plot.setRenderer(index.get(name).getIndex(), render);
 
             // update configuration to default colors
             if (color == null) {

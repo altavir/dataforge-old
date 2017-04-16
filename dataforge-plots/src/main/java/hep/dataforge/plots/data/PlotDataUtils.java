@@ -20,7 +20,7 @@ import java.util.stream.Stream;
 public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
-        List<Plottable> plottables = new ArrayList<>(frame.plottables());
+        List<Plottable> plottables = new ArrayList<>(frame.getPlottables());
 
         if (visibleOnly) {
             plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
