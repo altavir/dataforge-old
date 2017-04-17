@@ -18,10 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
-import hep.dataforge.meta.Meta;
-import javafx.collections.ObservableList;
 
-import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -31,7 +28,7 @@ import java.util.Optional;
  * @author Alexander Nozik
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
+public interface PlotFrame extends PlotStateListener, Configurable, Wrappable, Iterable<Plottable> {
 
     /**
      * Add or replace registered plottable
@@ -78,21 +75,4 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
         return opt(name).get();
     }
 
-    /**
-     * Unmodifiable observable List of all plottables.
-     *
-     * @return
-     */
-    ObservableList<Plottable> getPlottables();
-
-    
-    /**
-     * Generate a snapshot
-     * PENDING move to FX?
-     * @param config
-     */
-    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
-    void snapshot(OutputStream stream, Meta config);
-    
 }

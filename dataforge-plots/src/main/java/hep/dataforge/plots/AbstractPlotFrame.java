@@ -21,18 +21,18 @@ import hep.dataforge.io.envelopes.EnvelopeWriter;
 import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.SimpleConfigurable;
-import javafx.beans.binding.ListBinding;
+import javafx.beans.InvalidationListener;
+import javafx.beans.Observable;
 import javafx.collections.FXCollections;
 import javafx.collections.MapChangeListener;
-import javafx.collections.ObservableList;
 import javafx.collections.ObservableMap;
-import org.reactfx.collection.LiveArrayList;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Collection;
-import java.util.Objects;
+import java.util.Iterator;
 import java.util.Optional;
 
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
@@ -40,21 +40,9 @@ import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 /**
  * @author Alexander Nozik
  */
-public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
+public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame, Observable {
 
     private final ObservableMap<String, Plottable> plottables = FXCollections.observableHashMap();
-
-    private final ListBinding<Plottable> list = new ListBinding<Plottable>() {
-        {
-            super.bind(plottables);
-        }
-
-        @Override
-        protected ObservableList<Plottable> computeValue() {
-            return new LiveArrayList<>(plottables.values());
-        }
-
-    };
 
 
     public AbstractPlotFrame(Configuration configuration) {
@@ -75,7 +63,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
 
                 if (removed != null) {
                     removed.removeListener(AbstractPlotFrame.this);
-                    if (!Objects.equals(added.getName(), removed.getName())) {
+                    if (removed != added) {
                         updatePlotData(change.getKey());
                     }
                 }
@@ -90,15 +78,15 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         });
     }
 
-    //    private String name;
+    @NotNull
     @Override
-    public Optional<Plottable> opt(String name) {
-        return Optional.ofNullable(plottables.get(name));
+    public Iterator<Plottable> iterator() {
+        return plottables.values().iterator();
     }
 
     @Override
-    public ObservableList<Plottable> getPlottables() {
-        return list;
+    public Optional<Plottable> opt(String name) {
+        return Optional.ofNullable(plottables.get(name));
     }
 
     @Override
@@ -147,10 +135,20 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     }
 
     @Override
+    public void addListener(InvalidationListener listener) {
+        plottables.addListener(listener);
+    }
+
+    @Override
+    public void removeListener(InvalidationListener listener) {
+        plottables.removeListener(listener);
+    }
+
+    @Override
     public Envelope wrap() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EnvelopeWriter writer = new WrapperEnvelopeType().getWriter();
-        for (Plottable pl : getPlottables()) {
+        for (Plottable pl : this) {
             try {
                 writer.write(baos, pl.wrap());
             } catch (IOException ex) {

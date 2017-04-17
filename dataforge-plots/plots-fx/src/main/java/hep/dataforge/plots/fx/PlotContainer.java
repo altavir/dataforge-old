@@ -14,10 +14,12 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
+import javafx.beans.binding.ListBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -34,6 +36,8 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 /**
  * FXML Controller class
@@ -190,7 +194,20 @@ public class PlotContainer implements Initializable {
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
             this.plot.display(plotPane);
-            plottableslList.setItems(plot.getPlottables());
+
+            ListBinding<Plottable> list = new ListBinding<Plottable>() {
+                {
+                    super.bind(plot);
+                }
+
+                @Override
+                protected ObservableList<Plottable> computeValue() {
+                    return FXCollections.observableList(StreamSupport.stream(plot.spliterator(),false).collect(Collectors.toList()));
+                }
+
+            };
+
+            plottableslList.setItems(list);
         });
     }
 
@@ -244,12 +261,12 @@ public class PlotContainer implements Initializable {
 
     @FXML
     private void onShowAll(ActionEvent event) {
-        this.plot.getPlottables().forEach(pl -> pl.configureValue("visible", true));
+        this.plot.forEach(pl -> pl.configureValue("visible", true));
     }
 
     @FXML
     private void onHideAll(ActionEvent event) {
-        this.plot.getPlottables().forEach(pl -> pl.configureValue("visible", false));
+        this.plot.forEach(pl -> pl.configureValue("visible", false));
     }
 
     protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {

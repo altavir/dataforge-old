@@ -26,7 +26,7 @@ import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
 import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -85,20 +85,12 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     }
 
     @Override
-    public void display(AnchorPane container) {
+    public Node getRoot() {
         mode = Mode.JAVAFX;
-        Platform.runLater(() -> {
-            ChartViewer viewer = new ChartViewer(getChart());
+        ChartViewer viewer = new ChartViewer(getChart());
 
-            FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
-
-            container.getChildren().add(viewer);
-            AnchorPane.setBottomAnchor(viewer, 0d);
-            AnchorPane.setTopAnchor(viewer, 0d);
-            AnchorPane.setLeftAnchor(viewer, 0d);
-            AnchorPane.setRightAnchor(viewer, 0d);
-        });
-
+        FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
+        return viewer;
     }
 
     public JFreeChartFrame display(Container panel) {
