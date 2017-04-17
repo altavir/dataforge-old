@@ -263,7 +263,7 @@ public class Work implements Named {
     }
 
     public double getProgress() {
-        return curProgress.get() + children.values().stream().mapToDouble(it -> it.getProgress()).sum();
+        return curProgress.get() + children.values().stream().mapToDouble(Work::getProgress).sum();
     }
 
     /**
@@ -276,7 +276,7 @@ public class Work implements Named {
     }
 
     public double getMaxProgress() {
-        return curMaxProgress.get() + children.values().stream().mapToDouble(it -> it.getMaxProgress()).sum();
+        return curMaxProgress.get() + children.values().stream().mapToDouble(Work::getMaxProgress).sum();
     }
 
     public void setMaxProgress(double maxProgress) {
