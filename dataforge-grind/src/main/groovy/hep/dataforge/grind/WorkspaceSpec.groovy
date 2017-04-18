@@ -62,6 +62,7 @@ class WorkspaceSpec {
                 if(plugin instanceof Configurable) {
                     (plugin as Configurable).configure(meta)
                 }
+
             }
             return res
         }

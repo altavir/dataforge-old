@@ -188,7 +188,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     public Plugin getOrLoad(PluginTag tag) {
-        return opt(tag).orElseGet(() -> pluginRepository.get(tag));
+        return opt(tag).orElseGet(() -> load(pluginRepository.get(tag)));
     }
 
     public Plugin getOrLoad(String tag) {
