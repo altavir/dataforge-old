@@ -20,6 +20,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * <p>
@@ -69,8 +70,8 @@ public class MaskPoint implements DataPoint {
      * {@inheritDoc}
      */
     @Override
-    public Value getValue(String name) throws NameNotFoundException {
-        return source.getValue(nameMap.get(name));
+    public Optional<Value> optValue(String name) throws NameNotFoundException {
+        return source.optValue(nameMap.get(name));
     }
 
 }

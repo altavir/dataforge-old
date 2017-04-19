@@ -8,7 +8,6 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
-import hep.dataforge.context.Global
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.meta.Configurable
@@ -41,7 +40,7 @@ class WorkspaceSpec {
         def code = cl.rehydrate(contextSpec, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
-        builder.setContext(contextSpec.build().withParent(context))
+        builder.setContext(contextSpec.build())
     }
 
     Workspace.Builder build() {
@@ -55,7 +54,7 @@ class WorkspaceSpec {
 
         Context build() {
             //using current context as a parent for workspace context
-            Context res = Global.getContext(name).withParent(context)
+            Context res = Context.builder(name).parent(context).build()
             properties.each { key, value -> res.putValue(key.toString(), value) }
             pluginMap.forEach { String key, Meta meta ->
                 Plugin plugin = res.pluginManager().getOrLoad(key)
@@ -182,16 +181,16 @@ class WorkspaceSpec {
 
     private class MetaSpec {
         def methodMissing(String methodName, Closure par) {
-            WorkspaceSpec.this.builder.loadMeta(Grind.buildMeta(methodName, par))
+            WorkspaceSpec.this.builder.target(Grind.buildMeta(methodName, par))
         }
     }
 
     def configuration(String name, Closure closure) {
-        this.builder.loadMeta(Grind.buildMeta(name, closure))
+        this.builder.target(Grind.buildMeta(name, closure))
     }
 
     def configuration(Meta meta) {
-        this.builder.loadMeta(meta)
+        this.builder.target(meta)
     }
 
 //    def meta(String name, Meta template, Map map) {

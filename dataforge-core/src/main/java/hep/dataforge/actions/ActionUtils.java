@@ -22,16 +22,23 @@ import hep.dataforge.data.FileDataFactory;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.providers.Path;
+import hep.dataforge.utils.ContextMetaFactory;
+import hep.dataforge.utils.MetaFactory;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class ActionUtils {
+
+    public static final String DEFAULT_ACTION_NAME = "";
 
     public static final String ACTION_TYPE = "type";
 
@@ -94,6 +101,7 @@ public class ActionUtils {
 
     /**
      * Search for an Action in context plugins and up the parent plugin. Throw an exception if action not found.
+     *
      * @param context
      * @param actionName
      * @param <T>
@@ -195,5 +203,135 @@ public class ActionUtils {
             return SEQUENCE_ACTION_TYPE;
         }
 
+    }
+
+
+    /**
+     * Build simple anonymous mapping unconfigurable action using provided transformation.
+     *
+     * @param transformation
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> OneToOneAction<T, R> map(Function<T, R> transformation) {
+        return new OneToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return transformation.apply(input);
+            }
+        };
+    }
+
+    /**
+     * Use provided transformation factory with action input as a parameter and then apply transformation to the data.
+     * Context and data name are ignored. For anything more complex one needs to subclass {@link OneToOneAction}
+     *
+     * @param factory
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> OneToOneAction<T, R> map(MetaFactory<Function<T, R>> factory) {
+        return new OneToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return factory.build(inputMeta).apply(input);
+            }
+        };
+    }
+
+    public static <T, R> OneToOneAction<T, R> map(ContextMetaFactory<Function<T, R>> factory) {
+        return new OneToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return factory.build(context, inputMeta).apply(input);
+            }
+        };
+    }
+
+
+    /**
+     * Type checked one-to-one action
+     *
+     * @param inputType
+     * @param outputType
+     * @param factory
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> OneToOneAction<T, R> map(Class<T> inputType, Class<R> outputType, ContextMetaFactory<Function<T, R>> factory) {
+        return new OneToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String name, T input, Laminate inputMeta) {
+                return factory.build(context, inputMeta).apply(input);
+            }
+
+            @Override
+            public Class getInputType() {
+                return inputType;
+            }
+
+            @Override
+            public Class getOutputType() {
+                return outputType;
+            }
+        };
+    }
+
+    public static <T, R> ManyToOneAction<T, R> join(Function<Map<String, T>, R> transformation) {
+        return new ManyToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return transformation.apply(input);
+            }
+        };
+    }
+
+    public static <T, R> ManyToOneAction<T, R> join(MetaFactory<Function<Map<String, T>, R>> factory) {
+        return new ManyToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return factory.build(meta).apply(input);
+            }
+        };
+    }
+
+    public static <T, R> ManyToOneAction<T, R> join(ContextMetaFactory<Function<Map<String, T>, R>> factory) {
+        return new ManyToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return factory.build(context, meta).apply(input);
+            }
+        };
+    }
+
+    /**
+     * Type checked many-to-one action
+     * @param inputType
+     * @param outputType
+     * @param factory
+     * @param <T>
+     * @param <R>
+     * @return
+     */
+    public static <T, R> ManyToOneAction<T, R> join(Class<T> inputType, Class<R> outputType, ContextMetaFactory<Function<Map<String, T>, R>> factory) {
+        return new ManyToOneAction<T, R>(DEFAULT_ACTION_NAME) {
+            @Override
+            protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
+                return factory.build(context, meta).apply(input);
+            }
+
+            @Override
+            public Class getInputType() {
+                return inputType;
+            }
+
+            @Override
+            public Class getOutputType() {
+                return outputType;
+            }
+        };
     }
 }

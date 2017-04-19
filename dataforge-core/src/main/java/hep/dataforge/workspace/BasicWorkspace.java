@@ -10,6 +10,7 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A basic non-caching workspace
@@ -20,6 +21,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
     DataTree.Builder data = DataTree.builder();
 
+    @NotNull
     public static Builder builder() {
         return new Builder();
     }
@@ -92,7 +94,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadMeta(String name, Meta meta) {
+        public Builder target(String name, Meta meta) {
             w.targets.put(name, meta);
             return self();
         }

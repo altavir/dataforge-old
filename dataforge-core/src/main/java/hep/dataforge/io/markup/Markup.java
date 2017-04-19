@@ -7,10 +7,12 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -100,8 +102,8 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
     }
 
     @Override
-    public Value getValue(String path) {
-        return meta().getValue(path, () -> getStyle().getValue(path));
+    public Optional<Value> optValue(String path) {
+        return Optionals.either(meta().optValue(path)).or(()->getStyle().optValue(path)).opt();
     }
 
     /**

@@ -17,6 +17,7 @@ package hep.dataforge.context;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.TargetNotProvidedException;
+import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Loggable;
@@ -24,11 +25,13 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.AbstractProvider;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -54,12 +57,15 @@ import java.util.concurrent.Executors;
  */
 public class Context extends AbstractProvider implements ValueProvider, Loggable, Named, AutoCloseable {
 
+    public static Builder builder(String name) {
+        return new Builder(name);
+    }
+
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final String name;
     private final PluginManager pm;
     protected Logger logger;
     protected Log rootLog;
-    protected IOManager io = null;
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;
     private Context parent = null;
@@ -74,23 +80,6 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
         this.pm = new PluginManager(this);
         this.rootLog = new Log(name);
         this.name = name;
-    }
-
-    public Context withParent(Context parent) {
-        this.parent = parent;
-        rootLog.setParent(parent);
-        return this;
-    }
-
-    public Context withProperties(Meta config) {
-        if (config != null) {
-            if (config.hasMeta("property")) {
-                config.getMetaList("property").stream().forEach((propertyNode) -> {
-                    properties.put(propertyNode.getString("key"), propertyNode.getValue("value"));
-                });
-            }
-        }
-        return this;
     }
 
     public Logger getLogger() {
@@ -110,23 +99,12 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
      * {@inheritDoc} namespace does not work
      */
     @Override
-    public Value getValue(String path) {
-        Value res = properties.get(path);
-        if (res != null) {
-            return res;
-        } else if (parent != null) {
-            return parent.getValue(path);
-        } else {
-            throw new NameNotFoundException(path);
+    public Optional<Value> optValue(String path) {
+        Optionals<Value> opts = Optionals.either(Optional.ofNullable(properties.get(path)));
+        if (getParent() != null) {
+            opts = opts.or(() -> getParent().optValue(path));
         }
-    }
-
-    /**
-     * {@inheritDoc} namespace does not work
-     */
-    @Override
-    public boolean hasValue(String path) {
-        return properties.containsKey(path) || (parent != null && parent.hasValue(path));
+        return opts.opt();
     }
 
     /**
@@ -149,40 +127,12 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
      * @return the io
      */
     public IOManager io() {
-        if (io == null) {
-            return parent.io();
-        } else {
-            return io;
-        }
-    }
-
-    /**
-     * Set IO manager for this context
-     *
-     * @param io
-     */
-    public synchronized void setIO(IOManager io) {
-        //detaching old io manager
-        if (this.io != null) {
-            stopLoggerAppender();
-            this.io.detach();
-        }
-
-        io.attach(this);
-        this.io = io;
-        getLog().addListener(io().getLogEntryHandler());
-        startLoggerAppender();
+        return pluginManager().opt(IOManager.class).orElseGet(() -> Global.instance().io());
     }
 
     private void startLoggerAppender() {
         if (getLogger() instanceof ch.qos.logback.classic.Logger) {
             io().addLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
-        }
-    }
-
-    private void stopLoggerAppender() {
-        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
-            io().removeLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
         }
     }
 
@@ -360,7 +310,8 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
     }
 
     /**
-     *  Opt a plugin extending given class
+     * Opt a plugin extending given class
+     *
      * @param type
      * @param <T>
      * @return
@@ -371,6 +322,66 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
                 .filter(it -> type.isInstance(it))
                 .findFirst()
                 .map(it -> type.cast(it));
+    }
+
+    public static class Builder {
+        Context ctx;
+
+        public Builder(String name) {
+            this.ctx = new Context(name);
+        }
+
+        public Builder parent(Context parent) {
+            ctx.parent = parent;
+            return this;
+        }
+
+        public Builder properties(Meta config) {
+            if (config != null) {
+                if (config.hasMeta("property")) {
+                    config.getMetaList("property").stream().forEach((propertyNode) -> {
+                        ctx.putValue(propertyNode.getString("key"), propertyNode.getValue("value"));
+                    });
+                }
+            }
+            return this;
+        }
+
+        /**
+         * Load and configure a plugin
+         *
+         * @param type
+         * @param configuration
+         * @return
+         */
+        public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
+            ctx.pluginManager().load(type).configure(configuration);
+            return this;
+        }
+
+        public Builder plugin(Class<? extends Plugin> type) {
+            ctx.pluginManager().load(type);
+            return this;
+        }
+
+        /**
+         * Create new IO manager for this context if needed (using default input and output of parent) and set its root
+         *
+         * @param rootDir
+         * @return
+         */
+        public Builder setRootDir(File rootDir) {
+            if (!ctx.pluginManager().opt(IOManager.class).isPresent()) {
+                ctx.pluginManager().load(new BasicIOManager(ctx.getParent().io().in(), ctx.getParent().io().out()));
+            }
+            ctx.putValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir.getAbsoluteFile());
+            return this;
+        }
+
+
+        public Context build() {
+            return ctx;
+        }
     }
 
 

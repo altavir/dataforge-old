@@ -178,13 +178,8 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
     }
 
     @Override
-    public Value getValue(String name) {
-        Value item = getValueItem(Name.of(name));
-        if (item == null) {
-            throw new NameNotFoundException(name);
-        } else {
-            return item;
-        }
+    public Optional<Value> optValue(String name) {
+        return Optional.ofNullable(getValueItem(Name.of(name)));
     }
 
     /**

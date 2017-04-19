@@ -20,6 +20,8 @@ import hep.dataforge.names.Names;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
 
+import java.util.Optional;
+
 import static java.lang.Math.sqrt;
 
 /**
@@ -156,6 +158,11 @@ public class HistogramBin implements DataPoint {
             default:
                 throw new NotDefinedException();
         }
+    }
+
+    @Override
+    public Optional<Value> optValue(String path) {
+        return Optional.ofNullable(getValue(path));
     }
 
     /**

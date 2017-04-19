@@ -115,6 +115,16 @@ public interface Workspace extends Encapsulated {
     }
 
     /**
+     * Run task for target with the same name as task name
+     * @param taskName
+     * @param <T>
+     * @return
+     */
+    default <T> DataNode<T> runTask(String taskName) {
+        return runTask(taskName, taskName);
+    }
+
+    /**
      * Run task with given model.
      *
      * @param model
@@ -177,7 +187,7 @@ public interface Workspace extends Encapsulated {
             }
             if (meta.hasMeta("config")) {
                 meta.getMetaList("config").forEach((Meta configMeta) -> {
-                    loadMeta(configMeta.getString("name"), configMeta.getMeta("meta"));
+                    target(configMeta.getString("name"), configMeta.getMeta("meta"));
                 });
             }
 
@@ -211,6 +221,7 @@ public interface Workspace extends Encapsulated {
 
         /**
          * Load data using data factory serviceLoader
+         *
          * @param place
          * @param factoryType
          * @param dataConfig
@@ -228,10 +239,10 @@ public interface Workspace extends Encapsulated {
             return loadFileData(dataName, filePath, Meta.empty());
         }
 
-        B loadMeta(String name, Meta meta);
+        B target(String name, Meta meta);
 
-        default B loadMeta(Meta meta) {
-            return loadMeta(meta.getName(), meta);
+        default B target(Meta meta) {
+            return target(meta.getName(), meta);
         }
 
         B loadTask(Task task);

@@ -32,8 +32,6 @@ import java.io.*;
 @PluginDef(name = "io", group = "hep.dataforge", description = "Basic input and output plugin")
 public class BasicIOManager extends BasicPlugin implements IOManager {
 
-    private Context context;
-
     private OutputStream out;
     private InputStream in;
 
@@ -44,11 +42,27 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
         this.out = out;
     }
 
-    public BasicIOManager(OutputStream out, InputStream in) {
+    public BasicIOManager(InputStream in, OutputStream out) {
         this.out = out;
         this.in = in;
     }
 
+    @Override
+    public void attach(Context context) {
+        super.attach(context);
+        context.getLog().addListener(getLogEntryHandler());
+        if (context.getLogger() instanceof ch.qos.logback.classic.Logger) {
+            addLoggerAppender((ch.qos.logback.classic.Logger) context.getLogger());
+        }
+    }
+
+    @Override
+    public void detach() {
+        if (getContext().getLogger() instanceof ch.qos.logback.classic.Logger) {
+            removeLoggerAppender((ch.qos.logback.classic.Logger) getContext().getLogger());
+        }
+        super.detach();
+    }
 
 
     @Override
@@ -105,7 +119,6 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
         }
         return root;
     }
-
 
 
     @Override

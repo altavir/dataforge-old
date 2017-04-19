@@ -27,6 +27,7 @@ import hep.dataforge.values.Value;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Реализация DataPoint на HashMap. В конструкторе дополнительно проверяется,
@@ -109,13 +110,8 @@ public class MapPoint implements DataPoint, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Value getValue(String name) throws NameNotFoundException {
-        Value res = valueMap.get(name);
-        if (res == null) {
-            throw new NameNotFoundException(name);
-        } else {
-            return res;
-        }
+    public Optional<Value> optValue(String name) throws NameNotFoundException {
+        return Optional.ofNullable(valueMap.get(name));
     }
 
     /**

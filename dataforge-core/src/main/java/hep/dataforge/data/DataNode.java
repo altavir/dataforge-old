@@ -109,7 +109,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      */
     Optional<DataNode<? extends T>> optNode(String nodeName);
 
-    default DataNode<? extends T> getNode(String nodeName){
+    default DataNode<? extends T> getNode(String nodeName) {
         return optNode(nodeName).get();
     }
 
@@ -287,6 +287,10 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
 
         default B putData(String key, Data<? extends T> data) {
             return putData(key, data, false);
+        }
+
+        default B putData(String key, T data, Meta meta) {
+            return putData(key, Data.buildStatic(data, meta));
         }
 
         B putNode(String as, DataNode<? extends T> node);

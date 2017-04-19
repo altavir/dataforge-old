@@ -106,6 +106,19 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     /**
+     * Search for a plugin inside current context
+     * @param tag
+     * @return
+     */
+    public Optional<Plugin> optInContext(PluginTag tag) {
+        //Check for ambiguous tag
+        if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
+            getContext().getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
+        }
+        return stream(false).filter(it -> tag.matches(it.getTag())).findFirst();
+    }
+
+    /**
      * Find a loaded plugin and cast it to a specific plugin class
      *
      * @param tag
@@ -118,7 +131,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public <T extends Plugin> Optional<T> opt(Class<T> type) {
-        return this.<T>opt(Plugin.resolveTag(type), type);
+        return stream(true).filter(it -> type.isInstance(it)).findFirst().map(it -> type.cast(it));
     }
 
     /**
@@ -129,7 +142,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     public synchronized <T extends Plugin> T load(T plugin) {
-        Optional<Plugin> loadedPlugin = opt(plugin.getTag());
+        Optional<Plugin> loadedPlugin = optInContext(plugin.getTag());
 
         if (loadedPlugin.isPresent()) {
             getContext().getLogger().warn("Plugin with tag {} already exists in {}", plugin.getTag(), getContext().getName());
@@ -165,16 +178,16 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         PluginTag tag = Plugin.resolveTag(type);
         T plugin;
         try {
-            plugin = type.cast(load(tag));
-        } catch (NameNotFoundException ex) {
-            getContext().getLogger().warn("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
+            plugin = type.cast(getPluginRepository().get(tag));
+        } catch (Exception ex) {
+            getContext().getLogger().debug("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
             try {
                 plugin = type.newInstance();
             } catch (Exception e) {
                 throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
             }
         }
-        return plugin;
+        return load(plugin);
     }
 
     public Plugin load(String name) {

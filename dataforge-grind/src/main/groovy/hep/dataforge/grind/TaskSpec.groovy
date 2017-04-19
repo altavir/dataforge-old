@@ -45,12 +45,7 @@ class TaskSpec {
         prototype(proto.newInstance());
     }
 
-//    def action(Map params, Closure action){
-//        switch (params.getOrDefault("type","pipe")){
-//            case "pipe":
-//
-//        }
-//    }
+
 
     DynamicTask build() {
         return new DynamicTask();

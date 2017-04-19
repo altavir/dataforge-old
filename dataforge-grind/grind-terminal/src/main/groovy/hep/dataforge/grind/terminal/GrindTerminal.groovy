@@ -113,7 +113,7 @@ class GrindTerminal extends SimpleConfigurable {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
             context.getFeature(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
-            context.setIO(new BasicIOManager(terminal.output(), terminal.input()));
+            context.pluginManager().load(new BasicIOManager(terminal.input(),terminal.output()));
         }
 
         //create the shell

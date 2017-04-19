@@ -105,14 +105,14 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
 //        return getMetaList(name);
 //    }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param path
-     * @return
-     */
-    @Override
-    public abstract Value getValue(String path);
+//    /**
+//     * {@inheritDoc}
+//     *
+//     * @param path
+//     * @return
+//     */
+//    @Override
+//    public abstract Value getValue(String path);
 
     public boolean hasChildren() {
         return !getNodeNames().isEmpty();

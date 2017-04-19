@@ -26,10 +26,7 @@ import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.Scanner;
+import java.util.*;
 
 /**
  * Реализация набора параметров, которая будет потом использоваться в Result,
@@ -128,8 +125,8 @@ public class ParamSet implements NamedValueSet, Serializable {
     }
 
     @Override
-    public Value getValue(String path) {
-        return Value.of(getDouble(path));
+    public Optional<Value> optValue(String path) {
+        return optByName(path).map(par -> Value.of(par.value()));
     }
 
 
@@ -152,6 +149,10 @@ public class ParamSet implements NamedValueSet, Serializable {
         } else {
             throw new NameNotFoundException(str);
         }
+    }
+
+    public Optional<Param> optByName(String str) {
+        return Optional.ofNullable(this.params.get(str));
     }
 
     /**

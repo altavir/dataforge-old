@@ -149,6 +149,10 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param data
      */
     protected void putData(Name name, Data<? extends T> data, boolean replace) {
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("Name must not be empty");
+        }
+
         if (name.length() == 1) {
             String key = name.toString();
             checkedPutData(key, data, replace);
@@ -166,7 +170,9 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     protected void putNode(Name name, DataNode<? extends T> node) {
-        if (name.length() == 1) {
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("Can't put node with empty name");
+        } else if (name.length() == 1) {
             String key = name.toString();
             checkedPutNode(key, node);
         } else {
@@ -427,7 +433,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
             return this.tree.meta();
         }
 
-        public boolean isEmpty(){
+        public boolean isEmpty() {
             return this.tree.isEmpty();
         }
     }

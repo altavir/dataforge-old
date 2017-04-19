@@ -51,6 +51,16 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@resultGroup";
     public static final String RESULT_NAME_KEY = "@resultName";
     public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
+
+    private String name = null;
+
+    public GenericAction(String name) {
+        this.name = name;
+    }
+
+    public GenericAction() {
+    }
+
     //TODO move to separate manager
     private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
@@ -83,6 +93,10 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @return
      */
     protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>> result) {
+        if(name.isEmpty()){
+            name = getName();
+        }
+
         DataSet.Builder<R> builder = DataSet.builder(getOutputType());
         result.forEach(builder::putData);
         builder.setName(name);
@@ -173,11 +187,15 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     @Override
     public String getName() {
-        TypedActionDef def = getDef();
-        if (def != null && !def.name().isEmpty()) {
-            return def.name();
+        if(name == null) {
+            TypedActionDef def = getDef();
+            if (def != null && !def.name().isEmpty()) {
+                return def.name();
+            } else {
+                throw new RuntimeException("Name not defined");
+            }
         } else {
-            throw new RuntimeException("Name not defined");
+            return name;
         }
     }
 

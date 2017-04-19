@@ -23,7 +23,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
 
-import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.function.UnaryOperator;
@@ -38,9 +37,7 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable implements Table {
-
-    private final ArrayList<DataPoint> data = new ArrayList<>();
+public class ListTable extends ListOfPoints implements Table {
 
     /**
      * Формат описывает набор полей, которые ОБЯЗАТЕЛЬНО присутствуют в каждой
@@ -92,23 +89,12 @@ public class ListTable implements Table {
         addRows(points);
     }
 
-    /**
-     * Если formatter == null, то могут быть любые точки
-     *
-     * @param e a {@link hep.dataforge.tables.DataPoint} object.
-     * @throws hep.dataforge.exceptions.NamingException if any.
-     */
-    private void addRow(DataPoint e) throws NamingException {
+
+    protected void addRow(DataPoint e) throws NamingException {
         if (format.names().size() == 0 || e.names().contains(format.names())) {
             this.data.add(e);
         } else {
             throw new DataFormatException("The input data point doesn't contain all required fields.");
-        }
-    }
-
-    private void addRows(Iterable<? extends DataPoint> points) {
-        for (DataPoint dp : points) {
-            addRow(dp);
         }
     }
 
@@ -119,29 +105,10 @@ public class ListTable implements Table {
 
     /**
      * {@inheritDoc}
-     *
-     * @param i
-     * @return
-     */
-    @Override
-    public DataPoint getPoint(int i) {
-        return data.get(i);
-    }
-
-    /**
-     * {@inheritDoc}
      */
     @Override
     public TableFormat getFormat() {
         return format;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Value getValue(int index, String name) throws NameNotFoundException {
-        return this.data.get(index).getValue(name);
     }
 
     /**
@@ -200,29 +167,6 @@ public class ListTable implements Table {
      */
     public Column getColumnCopy(String columnName) {
         return new ListColumn(getFormat().getColumnMeta(columnName), getColumn(columnName).asList());
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Iterator<DataPoint> iterator() {
-        return data.iterator();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return data.size();
-    }
-
-    /**
-     * Clear all data in the Table. Does not affect annotation.
-     */
-    public void clear() {
-        this.data.clear();
     }
 
     @Override

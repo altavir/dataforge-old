@@ -82,6 +82,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public final Context getContext() {
+        if(context == null){
+            throw new RuntimeException("Plugin not attached");
+        }
         return context;
     }
 

@@ -102,7 +102,13 @@ public class FitHelper {
                 state = manager.runDefaultStage(state, log);
             } else {
                 for (FitStage stage : stages) {
-                    state = manager.runStage(state, stage, log);
+                    try {
+                        state = manager.runStage(state, stage, log);
+                    }catch (Exception ex){
+                        FitResult res = new FitResult(state,stage);
+                        res.setValid(false);
+                        state = res;
+                    }
                 }
             }
             return FitResult.class.cast(state);

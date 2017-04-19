@@ -19,6 +19,7 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -247,20 +248,20 @@ public class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Value getValue(String path) {
+    public Optional<Value> optValue(String path) {
+        Optionals<Value> opts = Optionals.either();
+
         //searching layers for value
         for (Meta m : layers) {
-            if (m.hasValue(path)) {
-                return MetaUtils.transformValue(m.getValue(path), valueContext());
-            }
+            opts = opts.or(() -> m.optValue(path));
         }
 
         // if descriptor layer is definded, searching it for value
-        if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
-            return MetaUtils.transformValue(descriptorLayer.getValue(path), valueContext());
+        if (descriptorLayer != null) {
+            opts = opts.or(() -> descriptorLayer.optValue(path));
         }
 
-        throw new NameNotFoundException(path);
+        return opts.opt().map(it -> MetaUtils.transformValue(it, valueContext()));
     }
 
     @Override
@@ -339,6 +340,7 @@ public class Laminate extends Meta implements Described {
 
     /**
      * Same as above but uses fixed meta value with given key as identity
+     *
      * @param nodeName
      * @param key
      * @return

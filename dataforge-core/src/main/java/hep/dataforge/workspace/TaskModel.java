@@ -21,6 +21,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
@@ -99,8 +100,9 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      *
      * @param hook
      */
-    public void handle(OutputHook hook) {
+    public TaskModel handle(OutputHook hook) {
         this.outs.add(hook);
+        return this;
     }
 
     @Override
@@ -119,8 +121,9 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param model
      * @param as
      */
-    public void dependsOn(TaskModel model, String as) {
+    public TaskModel dependsOn(TaskModel model, String as) {
         this.deps.add(new TaskDependency(model, as));
+        return this;
     }
 
     /**
@@ -128,8 +131,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      *
      * @param model
      */
-    public void dependsOn(TaskModel model) {
-        dependsOn(model, model.getName());
+    public TaskModel dependsOn(TaskModel model) {
+        return dependsOn(model, model.getName());
     }
 
     /**
@@ -138,8 +141,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param taskName
      * @param taskMeta
      */
-    public void dependsOn(String taskName, Meta taskMeta) {
-        dependsOn(taskName, taskMeta, "");
+    public TaskModel dependsOn(String taskName, Meta taskMeta) {
+        return dependsOn(taskName, taskMeta, "");
     }
 
     /**
@@ -149,20 +152,35 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param taskMeta
      * @param as
      */
-    public void dependsOn(String taskName, Meta taskMeta, String as) {
-        dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
+    public TaskModel dependsOn(String taskName, Meta taskMeta, String as) {
+        return dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
     }
 
     /**
      * Add data dependency rule using data path mask and name transformation
      * rule.
+     * <p>
+     * Name change rule should be "pure" to avoid runtime model changes
      *
      * @param mask
      * @param rule
      */
-    //FIXME Name change rule should be "pure" to avoid runtime model changes
-    public void data(String mask, UnaryOperator<String> rule) {
+    public TaskModel data(String mask, UnaryOperator<String> rule) {
         this.deps.add(new DataDependency(mask, rule));
+        return this;
+    }
+
+    /**
+     * Type checked data dependency
+     *
+     * @param type
+     * @param mask
+     * @param rule
+     * @return
+     */
+    public TaskModel data(Class<?> type, String mask, UnaryOperator<String> rule) {
+        this.deps.add(new DataDependency(type, mask, rule));
+        return this;
     }
 
     /**
@@ -170,8 +188,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      *
      * @param mask
      */
-    public void data(String mask) {
-        data(mask, UnaryOperator.identity());
+    public TaskModel data(String mask) {
+        return data(mask, UnaryOperator.identity());
     }
 
     /**
@@ -180,29 +198,55 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param mask
      * @param as
      */
-    public void data(String mask, String as) {
+    public TaskModel data(String mask, String as) {
         //FIXME make smart name transformation here
-        data(mask, str -> as);
+        return data(mask, str -> as);
+    }
+
+    /**
+     * Add a dependency on a type checked node
+     *
+     * @param type
+     * @param sourceNodeName
+     * @param targetNodeName
+     * @return
+     */
+    public TaskModel dataNode(Class<?> type, String sourceNodeName, String targetNodeName) {
+        this.deps.add(new DataNodeDependency(type, sourceNodeName, targetNodeName));
+        return this;
+    }
+
+    /**
+     * Source and target node have the same name
+     * @param type
+     * @param nodeName
+     * @return
+     */
+    public TaskModel dataNode(Class<?> type, String nodeName) {
+        this.deps.add(new DataNodeDependency(type, nodeName, nodeName));
+        return this;
     }
 
     public Meta getIdentity() {
         return new MetaBuilder("task")
-                .setValue("name",getName())
-                .setNode("meta",meta());
+                .setValue("name", getName())
+                .setNode("meta", meta());
     }
 
     /**
      * Convenience method. Equals {@code meta().getValue(path)}
+     *
      * @param path
      * @return
      */
     @Override
-    public Value getValue(String path) {
-        return meta().getValue(path);
+    public Optional<Value> optValue(String path) {
+        return meta().optValue(path);
     }
 
     /**
      * Convenience method. Equals {@code meta().hasValue(path)}
+     *
      * @param path
      * @return
      */
@@ -261,6 +305,19 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         }
 
         /**
+         * Data dependency w
+         *
+         * @param type
+         * @param mask
+         * @param rule
+         */
+        public DataDependency(Class<?> type, String mask, UnaryOperator<String> rule) {
+            this.gatherer = (w) -> w.getData().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName())
+                    && type.isAssignableFrom(data.type()));
+            this.pathTransformationRule = rule;
+        }
+
+        /**
          * Place data
          *
          * @param tree
@@ -270,6 +327,23 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         public void apply(DataTree.Builder tree, Workspace workspace) {
             gatherer.apply(workspace)
                     .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
+        }
+    }
+
+    static class DataNodeDependency implements Dependency {
+        private final String sourceNodeName;
+        private final String targetNodeName;
+        private final Class<?> type;
+
+        public DataNodeDependency(Class<?> type, String sourceNodeName, String targetNodeName) {
+            this.sourceNodeName = sourceNodeName;
+            this.targetNodeName = targetNodeName;
+            this.type = type;
+        }
+
+        @Override
+        public void apply(DataTree.Builder tree, Workspace workspace) {
+            tree.putNode(targetNodeName, workspace.getData().getCheckedNode(sourceNodeName, type));
         }
     }
 

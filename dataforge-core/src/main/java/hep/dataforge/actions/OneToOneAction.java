@@ -26,10 +26,7 @@ import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.utils.ContextMetaFactory;
-import hep.dataforge.utils.MetaFactory;
 
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -43,46 +40,11 @@ import java.util.stream.Collectors;
  */
 public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
-    /**
-     * Build simple pipe unconfigurable action using provided transformation.
-     * @param transformation
-     * @param <T>
-     * @param <R>
-     * @return
-     */
-    public static <T, R> OneToOneAction<T, R> transform(Function<T, R> transformation) {
-        return new OneToOneAction<T, R>() {
-            @Override
-            protected R execute(Context context, String name, T input, Laminate inputMeta) {
-                return transformation.apply(input);
-            }
-        };
+    public OneToOneAction(String name) {
+        super(name);
     }
 
-    /**
-     * Use provided transformation factory with action input as a parameter and then apply transformation to the data.
-     * Context and data name are ignored. For anything more complex one needs to subclass {@link OneToOneAction}
-     * @param factory
-     * @param <T>
-     * @param <R>
-     * @return
-     */
-    public static <T, R> OneToOneAction<T, R> transform(MetaFactory<Function<T, R>> factory) {
-        return new OneToOneAction<T, R>() {
-            @Override
-            protected R execute(Context context, String name, T input, Laminate inputMeta) {
-                return factory.build(inputMeta).apply(input);
-            }
-        };
-    }
-
-    public static <T, R> OneToOneAction<T, R> transform(ContextMetaFactory<Function<T, R>> factory) {
-        return new OneToOneAction<T, R>() {
-            @Override
-            protected R execute(Context context, String name, T input, Laminate inputMeta) {
-                return factory.build(context,inputMeta).apply(input);
-            }
-        };
+    public OneToOneAction() {
     }
 
     /**
@@ -177,7 +139,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     protected Meta outputMeta(NamedData<? extends T> data, Meta inputMeta) {
-        return data.meta();
+        return inputMeta;
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {
