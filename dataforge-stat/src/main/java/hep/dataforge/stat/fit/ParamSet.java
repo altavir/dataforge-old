@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.Serializable;
 import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * Реализация набора параметров, которая будет потом использоваться в Result,
@@ -291,71 +292,42 @@ public class ParamSet implements NamedValueSet, Serializable {
         return this;
     }
 
-    /**
-     * <p>
-     * setPar.</p>
-     *
-     * @param name  a {@link java.lang.String} object.
-     * @param value a double.
-     * @param error a double.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     */
+
+    private ParamSet upadatePar(String name, Consumer<Param> consumer){
+        Param par;
+        if (!params.containsKey(name)) {
+            LoggerFactory.getLogger(getClass())
+                    .debug("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
+            par = new Param(name);
+            this.params.put(name, par);
+        } else {
+            par = getByName(name);
+        }
+        consumer.accept(par);
+        return this;
+    }
+
     public ParamSet setPar(String name, double value, double error) {
-        Param par;
-        if (!params.containsKey(name)) {
-            LoggerFactory.getLogger(getClass())
-                    .debug("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
-            par = new Param(name);
-            this.params.put(name, par);
-        } else {
-            par = getByName(name);
-        }
-
-        par.setValue(value);
-        par.setErr(error);
-
-        return this;
+        return upadatePar(name, (par)-> {
+            par.setValue(value);
+            par.setErr(error);
+        });
     }
 
-    /**
-     * <p>
-     * setPar.</p>
-     *
-     * @param name  a {@link java.lang.String} object.
-     * @param value a double.
-     * @param error a double.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     */
     public ParamSet setPar(String name, double value, double error, Double lower, Double upper) {
-        Param par;
-        if (!params.containsKey(name)) {
-            LoggerFactory.getLogger(getClass())
-                    .debug("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
-            par = new Param(name);
-            this.params.put(name, par);
-        } else {
-            par = getByName(name);
-        }
-
-        par.setValue(value);
-        par.setErr(error);
-        par.setDomain(lower, upper);
-
-        return this;
+        return upadatePar(name, (par)-> {
+            par.setValue(value);
+            par.setErr(error);
+            par.setDomain(lower, upper);
+        });
     }
 
-    /**
-     * <p>
-     * setParDomain.</p>
-     *
-     * @param name  a {@link java.lang.String} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
+    public ParamSet setParValue(String name, double value) {
+        return upadatePar(name, (par)-> {
+            par.setValue(value);
+        });
+    }
+
     public ParamSet setParDomain(String name, Double lower, Double upper) throws NameNotFoundException {
         Param Par;
         Par = getByName(name);
@@ -364,15 +336,6 @@ public class ParamSet implements NamedValueSet, Serializable {
         return this;
     }
 
-    /**
-     * <p>
-     * setParError.</p>
-     *
-     * @param name  a {@link java.lang.String} object.
-     * @param value a double.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
-     */
     public ParamSet setParError(String name, double value) throws NameNotFoundException {
         Param Par;
         Par = getByName(name);
@@ -394,29 +357,6 @@ public class ParamSet implements NamedValueSet, Serializable {
         for (String name : errors.names()) {
             this.setParError(name, errors.getDouble(name));
         }
-        return this;
-    }
-
-    /**
-     * <p>
-     * setParValue.</p>
-     *
-     * @param name  parameter name.
-     * @param value a double.
-     * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
-     */
-    public ParamSet setParValue(String name, double value) {
-        Param par;
-        if (!params.containsKey(name)) {
-            LoggerFactory.getLogger(getClass())
-                    .debug("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
-            par = new Param(name);
-            this.params.put(name, par);
-        } else {
-            par = getByName(name);
-        }
-
-        par.setValue(value);
         return this;
     }
 

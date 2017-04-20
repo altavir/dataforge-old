@@ -26,6 +26,7 @@ import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.slf4j.Logger;
 
 import java.util.stream.Collectors;
 
@@ -45,6 +46,19 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     public OneToOneAction() {
+    }
+
+
+    @Override
+    public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
+        checkInput(set);
+        if (set.isEmpty()) {
+            throw new RuntimeException("Running 1 to 1 action on empty data node");
+        }
+
+        return wrap(set.getName(), set.meta(),
+                set.dataStream(true).collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
+                        data -> runOne(context, data, actionMeta))));
     }
 
     /**
@@ -89,18 +103,6 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
     }
 
-    @Override
-    public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
-        checkInput(set);
-        if (set.isEmpty()) {
-            throw new RuntimeException("Running 1 to 1 action on empty data node");
-        }
-
-        return wrap(set.getName(), set.meta(),
-                set.dataStream(true).collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
-                        data -> runOne(context, data, actionMeta))));
-    }
-
     /**
      * @param name      name of the input item
      * @param input     input data
@@ -143,7 +145,12 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {
-        getLogger(meta).info("Action '{}[{}]' is finished", getName(), name);
+        Logger logger = getLogger(meta);
+        if (res == null) {
+            logger.error("Action {} returned 'null' on data {}", getName(), name);
+            throw new RuntimeException("Null result of action");//TODO add emty data to handle this
+        }
+        logger.info("Action '{}[{}]' is finished", getName(), name);
     }
 
     protected void beforeAction(Context context, String name, T datum, Laminate meta) {

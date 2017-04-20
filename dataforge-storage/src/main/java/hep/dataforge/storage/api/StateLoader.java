@@ -43,9 +43,6 @@ public interface StateLoader extends Loader, ValueProvider {
         setValue(path, Value.of(value));
     }
 
-    @Override
-    Value getValue(String path);
-
     /**
      * List of all available state names (including default values if they are
      * available)
