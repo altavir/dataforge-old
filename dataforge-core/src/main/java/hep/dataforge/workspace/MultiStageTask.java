@@ -34,6 +34,12 @@ import java.util.Map;
  */
 public abstract class MultiStageTask<R> extends AbstractTask<R> {
 
+    protected final Class<R> type;
+
+    public MultiStageTask(Class<R> type) {
+        this.type = type;
+    }
+
     @Override
     protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         MultiStageTaskState state = new MultiStageTaskState(data);
@@ -70,8 +76,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      * @return
      */
     protected DataNode<R> result(TaskModel model, MultiStageTaskState state) {
-        //FIXME check for type cast
-        return (DataNode<R>) state.getResult();
+        return state.getResult().checked(type);
     }
 
     /**

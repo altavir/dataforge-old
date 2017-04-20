@@ -75,7 +75,7 @@ public class FitResult extends FitState {
 
     /** {@inheritDoc} */
     @Override
-    public void print(PrintWriter out) {
+    public void printState(PrintWriter out) {
         out.println("***FITTING RESULT***");
         this.printAllValues(out);
         this.printFitParsValues(out);

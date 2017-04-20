@@ -218,6 +218,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
 
     /**
      * Source and target node have the same name
+     *
      * @param type
      * @param nodeName
      * @return
@@ -273,9 +274,13 @@ public class TaskModel implements Named, Annotated, ValueProvider {
     /**
      * Task output handler
      */
-    public interface OutputHook<T> extends Consumer<DataNode<T>>, Encapsulated {
+    public interface OutputHook<T> extends BiConsumer<TaskModel, DataNode<T>>, Encapsulated {
         default Executor getExecutor() {
             return getContext().singleThreadExecutor();
+        }
+
+        default Consumer<DataNode<T>> handler(TaskModel model) {
+            return node -> this.accept(model, node);
         }
     }
 

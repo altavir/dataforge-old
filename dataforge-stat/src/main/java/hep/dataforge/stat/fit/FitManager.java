@@ -175,7 +175,7 @@ public class FitManager extends BasicPlugin implements Provider {
         switch (task.getName()) {
             //Тут идет обработка задач общих для всех движков
             case "print":
-                state.print(writer);
+                state.printState(writer);
                 return new FitResult(state, FitResult.emptyTask("print"));
             case "residuals":
                 writer.printf("%n***RESIDUALS***%n");

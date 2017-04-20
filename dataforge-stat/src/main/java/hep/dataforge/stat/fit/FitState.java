@@ -143,6 +143,7 @@ public class FitState implements Serializable {
 
     /**
      * Shows if state has defined covariance. Otherwise singular covariance is used
+     *
      * @return
      */
     public boolean hasCovariance() {
@@ -155,40 +156,6 @@ public class FitState implements Serializable {
 
     public ParamSet getParameters() {
         return pars;
-    }
-
-    public void print(PrintWriter out) {
-        out.println("***FITTING RESULT***");
-        this.printAllValues(out);
-        if (covariance != null) {
-            out.println();
-            out.println("Correlation marix:");
-            FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
-        }
-        if (this.interval != null) {
-            this.interval.print(out);
-        }
-        out.println();
-        double chi2 = getChi2();
-        out.printf("Chi squared: %g%n", chi2);
-        out.println();
-        out.flush();
-    }
-
-    protected void printAllValues(PrintWriter out) {
-        out.println();
-        out.println("All function parameters are: ");
-        printParamSet(out, this.pars);
-    }
-
-    private void printCovariance(PrintWriter out) {
-        if (getCovariance() != null) {
-            out.println();
-            out.printf("%n***COVARIANCE***%n");
-
-            FittingIOUtils.printNamedMatrix(out, getCovariance());
-
-        }
     }
 
     /**
@@ -362,6 +329,49 @@ public class FitState implements Serializable {
 
     public int getDataSize() {
         return dataSet.size();
+    }
+
+//    @Override
+//    public Markup markup(Meta configuration) {
+//        MarkupBuilder b = new MarkupBuilder()
+//                .addText("***FITTING RESULT***\n")//TODO replace by header
+//                .
+//
+//        return null;
+//    }
+
+    public void printState(PrintWriter out) {
+        out.println("***FITTING RESULT***");
+        this.printAllValues(out);
+        if (covariance != null) {
+            out.println();
+            out.println("Correlation marix:");
+            FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
+        }
+        if (this.interval != null) {
+            this.interval.print(out);
+        }
+        out.println();
+        double chi2 = getChi2();
+        out.printf("Chi squared: %g%n", chi2);
+        out.println();
+        out.flush();
+    }
+
+    protected void printAllValues(PrintWriter out) {
+        out.println();
+        out.println("All function parameters are: ");
+        printParamSet(out, this.pars);
+    }
+
+    private void printCovariance(PrintWriter out) {
+        if (getCovariance() != null) {
+            out.println();
+            out.printf("%n***COVARIANCE***%n");
+
+            FittingIOUtils.printNamedMatrix(out, getCovariance());
+
+        }
     }
 
     /**

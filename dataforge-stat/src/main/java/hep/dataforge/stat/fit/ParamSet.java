@@ -297,7 +297,7 @@ public class ParamSet implements NamedValueSet, Serializable {
         Param par;
         if (!params.containsKey(name)) {
             LoggerFactory.getLogger(getClass())
-                    .debug("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
+                    .trace("Parameter with name '{}' not found. Adding a new parameter with this name.", name);
             par = new Param(name);
             this.params.put(name, par);
         } else {

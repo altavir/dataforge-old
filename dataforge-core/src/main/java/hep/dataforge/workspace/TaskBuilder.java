@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
@@ -18,28 +19,42 @@ import java.util.function.UnaryOperator;
  * A task defined as a composition of multiple actions. No compile-time type checks (runtime type check are working fine)
  * Created by darksnake on 28-Jan-17.
  */
-public class TaskBuilder extends MultiStageTask<Object> {
+public class TaskBuilder<T> extends MultiStageTask<T> {
+
+    @NotNull
+    public static <T> TaskBuilder<T> build(String name, Class<T> type) {
+        return new TaskBuilder<>(name, type);
+    }
+
+    @NotNull
+    public static TaskBuilder<?> build(String name) {
+        return new TaskBuilder<>(name, Object.class);
+    }
 
 
     private final String name;
-    private final Function<TaskModel, TaskModel> modelTransformation;
-    private final List<TaskAction> actions;
+    private Function<TaskModel, TaskModel> modelTransformation;
+    private List<TaskAction> actions;
 
-    public TaskBuilder(String name, @NotNull Function<TaskModel, TaskModel> modelTransformation, @NotNull List<TaskAction> actions) {
-        this.name = name;
-        this.modelTransformation = modelTransformation;
-        this.actions = actions;
-    }
 
     /**
      * An empty task that could be built upon
      *
      * @param name
      */
-    public TaskBuilder(String name) {
+    private TaskBuilder(String name, Class<T> type) {
+        super(type);
         this.name = name;
         modelTransformation = UnaryOperator.identity();
         actions = new ArrayList<>();
+    }
+
+    private TaskBuilder<T> copy(Consumer<TaskBuilder> cons) {
+        TaskBuilder<T> res = new TaskBuilder<>(name, type);
+        res.modelTransformation = this.modelTransformation;
+        res.actions = this.actions;
+        cons.accept(res);
+        return res;
     }
 
     @Override
@@ -61,7 +76,12 @@ public class TaskBuilder extends MultiStageTask<Object> {
                 state.setData(action.getName(), data);
             }
         }
-        state.finish();
+         state.finish();
+
+//        if (reporter != null && state.isFinished) {
+//            data.nodeGoal().onComplete((v, ex) -> reporter.accept(model, state));
+//            reporter.accept(model, state);
+//        }
     }
 
     @Override
@@ -70,11 +90,7 @@ public class TaskBuilder extends MultiStageTask<Object> {
     }
 
     public TaskBuilder transformModel(Function<TaskModel, TaskModel> transform) {
-        return new TaskBuilder(
-                name,
-                modelTransformation.andThen(transform),
-                actions
-        );
+        return copy(tb -> tb.modelTransformation = modelTransformation.andThen(transform));
     }
 
     public TaskBuilder dependsOn(String taskName, Meta taskMeta, String as) {
@@ -111,11 +127,7 @@ public class TaskBuilder extends MultiStageTask<Object> {
     public TaskBuilder doLast(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
         List<TaskAction> newActions = new ArrayList<>(actions);
         newActions.add(new TaskAction(actionFactory, metaFactory));
-        return new TaskBuilder(
-                name,
-                modelTransformation,
-                newActions
-        );
+        return copy(tb -> tb.actions = newActions);
     }
 
     public TaskBuilder doLast(String actionName) {
@@ -178,12 +190,12 @@ public class TaskBuilder extends MultiStageTask<Object> {
     public TaskBuilder doFirst(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
         List<TaskAction> newActions = new ArrayList<>(actions);
         newActions.add(0, new TaskAction(actionFactory, metaFactory));
-        return new TaskBuilder(
-                name,
-                modelTransformation,
-                newActions
-        );
+        return copy(tb -> tb.actions = newActions);
     }
+
+//    public TaskBuilder report(BiConsumer<TaskModel, DataNode<T>> reporter) {
+//        return transformModel(model -> model.handle(reporter));
+//    }
 
     private static class TaskAction {
         final Function<TaskModel, Action> actionFactory;

@@ -42,7 +42,7 @@ public abstract class AbstractTask<R> implements Task {
 
         DataNode<R> output = run(model, input);
 
-        model.outs().forEach(reporter -> output.handle(reporter.getExecutor(), reporter));
+        model.outs().forEach(reporter -> output.handle(reporter.getExecutor(), reporter.handler(model)));
 
 //        work.setStatus("Complete");
 
@@ -89,9 +89,10 @@ public abstract class AbstractTask<R> implements Task {
 
     /**
      * Get default logger for this task
+     *
      * @return
      */
-    public Logger getLogger(){
+    public Logger getLogger() {
         return LoggerFactory.getLogger(getName());
     }
 }

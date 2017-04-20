@@ -20,22 +20,25 @@ import static hep.dataforge.actions.ActionUtils.*;
  *
  * @author Alexander Nozik
  */
-public abstract class TemplateTask extends MultiStageTask {
+public abstract class TemplateTask<T> extends MultiStageTask<T> {
 
     private final String name;
     private final UnaryOperator<Meta> template;
 
-    public TemplateTask(String name, Template template) {
+    public TemplateTask(String name, Class<T> type, Template template) {
+        super(type);
         this.name = name;
         this.template = template;
     }
 
-    public TemplateTask(String name, Meta template) {
+    public TemplateTask(String name, Class<T> type, Meta template) {
+        super(type);
         this.name = name;
         this.template = new Template(template);
     }
 
-    public TemplateTask(String name) {
+    public TemplateTask(String name, Class<T> type) {
+        super(type);
         this.name = name;
         this.template = UnaryOperator.identity();
     }
