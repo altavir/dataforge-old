@@ -64,7 +64,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
      * Load this plugin to the Global without annotation
      */
     public void startGlobal() {
-        if (getContext() != null && !Global.instance().equals(getContext())) {
+        if (context != null && !Global.instance().equals(getContext())) {
             Global.instance().getLogger().warn("Loading plugin as global from non-global context");
         }
         Global.instance().pluginManager().load(this);
