@@ -68,7 +68,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             reportName = getName();
         }
 
-        return new ActionResult<>(getReport(context, reportName), goal, outputMeta, getOutputType());
+        return new ActionResult<>(context.getLog(reportName), goal, outputMeta, getOutputType());
     }
 
     protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {
@@ -132,6 +132,15 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     }
 
+    /**
+     * Action  goal {@code fainOnError()} delegate
+     *
+     * @return
+     */
+    protected boolean failOnError() {
+        return true;
+    }
+
     private class ManyToOneGoal extends AbstractGoal<R> {
 
         private final Context context;
@@ -148,6 +157,11 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         @Override
+        protected boolean failOnError() {
+            return ManyToOneAction.this.failOnError();
+        }
+
+        @Override
         public Stream<Goal> dependencies() {
             return data.nodeGoal().dependencies();
         }
@@ -156,11 +170,11 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         protected R compute() throws Exception {
             Laminate meta = inputMeta(context, data.meta(), actionMeta);
             Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), data.getName()));
-//            workListener(actionMeta).submit(data.getName(), this.result());
             beforeGroup(context, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()
-                    .collect(Collectors.toMap(data -> data.getName(), data -> data.get()));
+                    .filter(it -> it.isValid()) // filter valid data only
+                    .collect(Collectors.toMap(d -> d.getName(), d -> d.get()));
             R res = execute(context, data.getName(), collection, meta);
             afterGroup(context, data.getName(), outputMeta, res);
             return res;

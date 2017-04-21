@@ -9,6 +9,7 @@ import hep.dataforge.utils.ContextMetaFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -34,6 +35,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
 
     private final String name;
     private Function<TaskModel, TaskModel> modelTransformation;
+    private Map<String, Consumer<DataNode<?>>> listeners = new HashMap<>();
     private List<TaskAction> actions;
 
 
@@ -53,6 +55,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
         TaskBuilder<T> res = new TaskBuilder<>(name, type);
         res.modelTransformation = this.modelTransformation;
         res.actions = this.actions;
+        res.listeners = this.listeners;
         cons.accept(res);
         return res;
     }
@@ -63,25 +66,24 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     }
 
     @Override
-    protected void transform(TaskModel model, MultiStageTaskState state) {
+    protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
         DataNode data = state.getData();
         for (TaskAction ta : actions) {
             Action<?, ?> action = ta.buildAction(model);
             if (action instanceof GenericAction) {
                 data = data.getCheckedNode("", ((GenericAction) action).getInputType());
-                getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.dataSize(true));
+                model.getContext().getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.dataSize(true));
             }
             data = action.run(model.getContext(), data, ta.buildMeta(model));
             if (!action.getName().equals(ActionUtils.DEFAULT_ACTION_NAME)) {
                 state.setData(action.getName(), data);
+                //handling individual stages result
+                if (listeners.containsKey(action.getName())) {
+                    data.handle(model.getContext().singleThreadExecutor(), listeners.get(action.getName()));
+                }
             }
         }
-         state.finish();
-
-//        if (reporter != null && state.isFinished) {
-//            data.nodeGoal().onComplete((v, ex) -> reporter.accept(model, state));
-//            reporter.accept(model, state);
-//        }
+        return state.finish(data);
     }
 
     @Override
@@ -193,9 +195,15 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
         return copy(tb -> tb.actions = newActions);
     }
 
-//    public TaskBuilder report(BiConsumer<TaskModel, DataNode<T>> reporter) {
-//        return transformModel(model -> model.handle(reporter));
-//    }
+    public TaskBuilder handle(String stage, Consumer<DataNode<?>> handler) {
+        HashMap<String, Consumer<DataNode<?>>> newListeners = new HashMap<>(listeners);
+        if (newListeners.containsKey(stage)) {
+            newListeners.put(stage, newListeners.get(stage).andThen(handler));
+        } else {
+            newListeners.put(stage, handler);
+        }
+        return copy(tb -> tb.listeners = newListeners);
+    }
 
     private static class TaskAction {
         final Function<TaskModel, Action> actionFactory;

@@ -108,7 +108,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      *
      * @param consumer
      */
-    default void onComplete(BiConsumer<T, Exception> consumer) {
+    default void onComplete(BiConsumer<T, Throwable> consumer) {
         registerListener(new GoalListener<T>() {
             @Override
             public void onGoalComplete(Executor goalExecutor, T result) {
@@ -116,7 +116,7 @@ public interface Goal<T> extends RunnableFuture<T> {
             }
 
             @Override
-            public void onGoalFailed(Executor goalExecutor, Exception ex) {
+            public void onGoalFailed(Executor goalExecutor, Throwable ex) {
                 goalExecutor.execute(() -> consumer.accept(null, ex));
             }
         });
@@ -128,15 +128,15 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param exec
      * @param consumer
      */
-    default void onComplete(Executor exec, BiConsumer<T, Exception> consumer) {
+    default void onComplete(Executor exec, BiConsumer<T, Throwable> consumer) {
         registerListener(new GoalListener<T>() {
             @Override
-            public void onGoalComplete(Executor goalExecutor, T result) {
+            public void onGoalComplete(T result) {
                 exec.execute(() -> consumer.accept(result, null));
             }
 
             @Override
-            public void onGoalFailed(Executor goalExecutor, Exception ex) {
+            public void onGoalFailed(Throwable ex) {
                 exec.execute(() -> consumer.accept(null, ex));
             }
         });

@@ -6,7 +6,6 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
@@ -23,9 +22,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -42,14 +39,14 @@ public class TaskModel implements Named, Annotated, ValueProvider {
     private final String taskName;
     private final Meta taskMeta;
     private final Set<Dependency> deps;
-    private final Set<OutputHook> outs;
+//    private final Set<OutputHook> outs;
 
-    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps, Set<OutputHook> outs) {
+    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps) {
         this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         this.deps = deps;
-        this.outs = outs;
+//        this.outs = outs;
     }
 
     public TaskModel(Workspace workspace, String taskName, Meta taskMeta) {
@@ -57,7 +54,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         deps = new LinkedHashSet<>();
-        outs = new LinkedHashSet<>();
+//        outs = new LinkedHashSet<>();
     }
 
     public Workspace getWorkspace() {
@@ -74,7 +71,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @return
      */
     public TaskModel copy() {
-        return new TaskModel(workspace, taskName, taskMeta, deps, outs);
+        return new TaskModel(workspace, taskName, taskMeta, deps);
     }
 
     /**
@@ -85,25 +82,25 @@ public class TaskModel implements Named, Annotated, ValueProvider {
     public Collection<Dependency> dependencies() {
         return deps;
     }
+//
+//    /**
+//     * An ordered collection of task outputs
+//     *
+//     * @return
+//     */
+//    public Collection<OutputHook> outs() {
+//        return outs;
+//    }
 
-    /**
-     * An ordered collection of task outputs
-     *
-     * @return
-     */
-    public Collection<OutputHook> outs() {
-        return outs;
-    }
-
-    /**
-     * handle result using
-     *
-     * @param hook
-     */
-    public TaskModel handle(OutputHook hook) {
-        this.outs.add(hook);
-        return this;
-    }
+//    /**
+//     * handle result using
+//     *
+//     * @param hook
+//     */
+//    public TaskModel handle(OutputHook hook) {
+//        this.outs.add(hook);
+//        return this;
+//    }
 
     @Override
     public String getName() {
@@ -271,18 +268,18 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         void apply(DataTree.Builder tree, Workspace workspace);
     }
 
-    /**
-     * Task output handler
-     */
-    public interface OutputHook<T> extends BiConsumer<TaskModel, DataNode<T>>, Encapsulated {
-        default Executor getExecutor() {
-            return getContext().singleThreadExecutor();
-        }
-
-        default Consumer<DataNode<T>> handler(TaskModel model) {
-            return node -> this.accept(model, node);
-        }
-    }
+//    /**
+//     * Task output handler
+//     */
+//    public interface OutputHook<T> extends BiConsumer<TaskModel, DataNode<T>>, Encapsulated {
+//        default Executor getExecutor() {
+//            return getContext().singleThreadExecutor();
+//        }
+//
+//        default Consumer<DataNode<T>> handler(TaskModel model) {
+//            return node -> this.accept(model, node);
+//        }
+//    }
 
     /**
      * Data dependency

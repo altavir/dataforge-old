@@ -23,7 +23,6 @@ import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.markup.MarkupBuilder;
-import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -32,7 +31,6 @@ import org.slf4j.LoggerFactory;
 
 import java.io.OutputStream;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 
 import static hep.dataforge.actions.GenericAction.*;
@@ -48,9 +46,9 @@ import static hep.dataforge.actions.GenericAction.*;
 @ValueDef(name = RESULT_NAME_KEY, info = "The override for resulting data name. If not presented, then input data name is used.")
 @ValueDef(name = ALLOW_PARALLEL_KEY, type = "BOOLEAN", def = "true", info = "A flag to allow or forbid parallel execution of this action")
 public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
-    public static final String RESULT_GROUP_KEY = "@resultGroup";
-    public static final String RESULT_NAME_KEY = "@resultName";
-    public static final String ALLOW_PARALLEL_KEY = "@allowParallel";
+    public static final String RESULT_GROUP_KEY = "@action.resultGroup";
+    public static final String RESULT_NAME_KEY = "@action.resultName";
+    public static final String ALLOW_PARALLEL_KEY = "@action.allowParallel";
 
     private String name = null;
 
@@ -61,8 +59,6 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public GenericAction() {
     }
 
-    //TODO move to separate manager
-    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
 
     protected boolean isParallelExecutionAllowed(Meta meta) {
         return meta.getBoolean("@allowParallel", true);
@@ -243,14 +239,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         return context.io().out(getName(), name);
     }
 
-    protected Log getReport(Context context, String reportName) {
-        return reportCache.computeIfAbsent(reportName, (n) -> {
-            Log parent = new Log(n, context);
-            return new Log(getName(), parent);
-        });
-    }
-
     protected final void report(Context context, String reportName, String entry, Object... params) {
-        getReport(context, reportName).report(entry, params);
+        context.getLog(reportName).report(entry, params);
     }
 }

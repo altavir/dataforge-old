@@ -32,11 +32,11 @@ public interface GoalListener<T> {
         onGoalComplete(getDefaultExecutor(), result);
     }
 
-    default void onGoalFailed(Executor goalExecutor, @Nullable Exception ex) {
+    default void onGoalFailed(Executor goalExecutor, @Nullable Throwable ex) {
 
     }
 
-    default void onGoalFailed(@Nullable Exception ex) {
+    default void onGoalFailed(@Nullable Throwable ex) {
         onGoalFailed(getDefaultExecutor(), ex);
     }
 

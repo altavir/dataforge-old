@@ -44,7 +44,7 @@ public abstract class TemplateTask<T> extends MultiStageTask<T> {
     }
 
     @Override
-    protected void transform(TaskModel model, MultiStageTaskState state) {
+    protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
         DataNode res = state.getData();
         Meta config = template.apply(model.meta());
         for (Meta actionMeta : config.getMetaList(ACTION_NODE_KEY)) {
@@ -54,6 +54,7 @@ public abstract class TemplateTask<T> extends MultiStageTask<T> {
             state.setData(actionType, res);
         }
         state.finish(res);
+        return state;
     }
 
     @Override

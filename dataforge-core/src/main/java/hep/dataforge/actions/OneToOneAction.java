@@ -87,7 +87,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 //        //PENDING a bit ugly solution
 //        goal.onStart(() -> workListener(actionMeta).submit(resultName, goal.result()));
 
-        return new ActionResult<>(getReport(context, resultName), goal, outputMeta(data, meta), getOutputType());
+        return new ActionResult<>(context.getLog(resultName), goal, outputMeta(data, meta), getOutputType());
     }
 
     protected void buildReport(Context context, String name, Data<? extends T> data) {

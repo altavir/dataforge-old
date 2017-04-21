@@ -46,7 +46,7 @@ class GrindOneToOneAction extends OneToOneAction {
     @Override
     protected Object execute(Context context, String name, Object input, Laminate meta) {
         if (action != null) {
-            return new OneToOneCallable(getReport(context, name), name, meta, input).execute(action);
+            return new OneToOneCallable(context.getLog(name), name, meta, input).execute(action);
         } else {
             return input;
         }

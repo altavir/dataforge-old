@@ -3,22 +3,30 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.Misc;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
+
+import static hep.dataforge.stat.fit.FitStage.STAGE_KEY;
 
 /**
  * A helper class to run simple fits without building context and generating meta
  * Created by darksnake on 14-Apr-17.
  */
 public class FitHelper {
+    public static final String MODEL_KEY = "model";
+
     private FitManager manager;
 
     public FitHelper(Context context) {
@@ -31,6 +39,26 @@ public class FitHelper {
 
     public FitManager getManager() {
         return manager;
+    }
+
+    private List<FitStage> buildStageList(Meta meta) {
+        if (meta.hasMeta(STAGE_KEY)) {
+            return meta.getMetaList(STAGE_KEY).stream().map(m -> new FitStage(m)).collect(Collectors.toList());
+        } else {
+            return Collections.emptyList();
+        }
+    }
+
+
+    /**
+     * Meta as described in {@link FitAction}
+     *
+     * @param data
+     * @param meta
+     * @return
+     */
+    public FitBuilder fit(NavigablePointSource data, Meta meta) {
+        return new FitBuilder(data).update(meta);
     }
 
     public FitBuilder fit(NavigablePointSource data) {
@@ -48,6 +76,30 @@ public class FitHelper {
             this.data = data;
         }
 
+        public FitBuilder update(Meta meta) {
+            if (meta.hasMeta(MODEL_KEY)) {
+                model(meta.getMeta(MODEL_KEY));
+            } else if(meta.hasValue(MODEL_KEY)) {
+                model(meta.getString(MODEL_KEY));
+            }
+            List<FitStage> stages = buildStageList(meta);
+            if (!stages.isEmpty()) {
+                allStages(buildStageList(meta));
+            }
+            params(meta);
+            return this;
+        }
+
+        public FitBuilder report(Loggable report) {
+            this.log = report;
+            return this;
+        }
+
+        public FitBuilder report(String reportName) {
+            this.log = getManager().getContext().getLog(reportName);
+            return this;
+        }
+
         public FitBuilder model(String name) {
             this.model = manager.buildModel(name);
             return this;
@@ -61,6 +113,19 @@ public class FitHelper {
         public FitBuilder function(ParametricFunction func, XYAdapter adapter) {
             this.model = new XYModel(func, adapter);
             return this;
+        }
+
+        public FitBuilder params(Meta meta) {
+            if (meta instanceof Laminate) {
+                ParamSet set = new ParamSet();
+                Laminate laminate = (Laminate) meta;
+                laminate.layersInverse().stream().forEach((layer) -> {
+                    set.updateFrom(ParamSet.fromMeta(layer));
+                });
+                return params(set);
+            } else {
+                return params(ParamSet.fromMeta(meta));
+            }
         }
 
         public FitBuilder params(ParamSet params) {
@@ -77,6 +142,23 @@ public class FitHelper {
         public FitBuilder stage(FitStage stage) {
             stages.add(stage);
             return this;
+        }
+
+        /**
+         * Set all fit stages clearing old ones
+         *
+         * @param stages
+         * @return
+         */
+        public FitBuilder allStages(List<FitStage> stages) {
+            stages.clear();
+            this.stages.addAll(stages);
+            return this;
+        }
+
+        public FitBuilder showReult(){
+            return stage(new FitStage("print"))
+                    .stage(new FitStage("residuals"));
         }
 
         public FitBuilder stage(String engineName, String taskName, String... freeParameters) {
@@ -102,15 +184,17 @@ public class FitHelper {
                 state = manager.runDefaultStage(state, log);
             } else {
                 for (FitStage stage : stages) {
+                    Misc.checkThread();
                     try {
                         state = manager.runStage(state, stage, log);
-                    }catch (Exception ex){
-                        FitResult res = new FitResult(state,stage);
+                    } catch (Exception ex) {
+                        FitResult res = new FitResult(state, stage);
                         res.setValid(false);
                         state = res;
                     }
                 }
             }
+
             return FitResult.class.cast(state);
         }
     }

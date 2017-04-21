@@ -81,7 +81,7 @@ public class FitResult extends FitState {
         this.printFitParsValues(out);
         if (hasCovariance()) {
             out.println();
-            out.println("Corellation marix:");
+            out.println("Correlation matrix:");
             FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
         }
         if (this.getIntervalEstimate() != null) {

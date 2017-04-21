@@ -22,13 +22,14 @@ import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.Arrays;
 
-import static hep.dataforge.stat.fit.FitAction.STAGE_KEY;
 
 /**
  * The description of fit stage to run
  * @author Alexander Nozik
  */
 public class FitStage extends SimpleMetaMorph implements Named {
+
+    public static final String STAGE_KEY = "stage";
 
     public static final String TASK_RUN = "fit";
     public static final String TASK_SINGLE = "single";

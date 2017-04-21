@@ -43,7 +43,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
     @Override
     protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         MultiStageTaskState state = new MultiStageTaskState(data);
-        Logger logger = getLogger(model);
+        Logger logger = model.getContext().getLogger();
 //        Work work = getWork(model, data.getName());
 
         logger.debug("Starting transformation phase");
@@ -67,7 +67,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      * @param model
      * @param state
      */
-    protected abstract void transform(TaskModel model, MultiStageTaskState state);
+    protected abstract MultiStageTaskState transform(TaskModel model, MultiStageTaskState state);
 
     /**
      * Generating finish and storing it in workspace.

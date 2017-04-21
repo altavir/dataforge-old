@@ -66,6 +66,10 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
     private final PluginManager pm;
     protected Logger logger;
     protected Log rootLog;
+
+    //TODO move to separate manager
+    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
+
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;
     private Context parent = null;
@@ -214,6 +218,13 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
     @Override
     public Log getLog() {
         return this.rootLog;
+    }
+
+    public Log getLog(String reportName) {
+        return reportCache.computeIfAbsent(reportName, (n) -> {
+            Log parent = new Log(n, this);
+            return new Log(getName(), parent);
+        });
     }
 
     @Override

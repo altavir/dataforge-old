@@ -235,6 +235,11 @@ public class ListTable extends ListOfPoints implements Table {
             table.addRows(points);
             return this;
         }
+
+        public Builder rows(Stream<? extends DataPoint> stream) {
+            stream.forEach(it->table.addRow(it));
+            return this;
+        }
         //TODO make methods to add virtual columns
 
         public Table build() {

@@ -52,7 +52,10 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             .toArray(num -> new CompletableFuture[num]))
                     .whenCompleteAsync((res, err) -> {
                         if (err != null) {
-                            this.result.completeExceptionally(err);
+                            getLogger().error("One of goal dependencies failed with exception", err);
+                            if (failOnError()) {
+                                this.result.completeExceptionally(err);
+                            }
                         }
 
                         try {
@@ -79,6 +82,16 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     }
 
     protected abstract T compute() throws Exception;
+
+    /**
+     * If true the goal will result in error if any of dependencies throws exception.
+     * Otherwise it will be calculated event if some of dependencies are failed.
+     *
+     * @return
+     */
+    protected boolean failOnError() {
+        return true;
+    }
 
     /**
      * Abort internal goals process without canceling result. Use with
