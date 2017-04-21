@@ -339,7 +339,7 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
         Context ctx;
 
         public Builder(String name) {
-            this.ctx = new Context(name);
+            this.ctx = Global.getContext(name);
         }
 
         public Builder parent(Context parent) {

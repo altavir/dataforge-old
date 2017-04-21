@@ -59,7 +59,7 @@ public class GoalGroup implements Goal<Void> {
 
     @Override
     public void registerListener(GoalListener<Void> listener) {
-        listeners.add(listener);
+        listeners.add(listener,true);
     }
 
 
