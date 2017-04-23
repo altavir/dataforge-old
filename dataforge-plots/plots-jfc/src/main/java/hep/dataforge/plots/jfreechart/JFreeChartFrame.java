@@ -75,13 +75,13 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     private Mode mode = Mode.NONE;
 
     public JFreeChartFrame() {
-        plot = new XYPlot();
-        chart = new JFreeChart(plot);
+        this(Meta.empty());
     }
 
     public JFreeChartFrame(Meta frameMeta) {
-        this();
-        super.configure(frameMeta);
+        plot = new XYPlot();
+        chart = new JFreeChart(plot);
+        configure(frameMeta);
     }
 
     @Override

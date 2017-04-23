@@ -48,7 +48,7 @@ public class PlotContainer implements Initializable {
 
     private AnchorPane root;
     @FXML
-    private AnchorPane plotPane;
+    private BorderPane plotPane;
     @FXML
     private VBox sideBar;
     @FXML
@@ -193,7 +193,7 @@ public class PlotContainer implements Initializable {
         this.plot = plot;
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
-            this.plot.display(plotPane);
+            plotPane.setCenter(plot.getRoot());
 
             ListBinding<Plottable> list = new ListBinding<Plottable>() {
                 {

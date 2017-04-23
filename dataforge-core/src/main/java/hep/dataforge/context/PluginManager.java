@@ -21,6 +21,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -107,6 +108,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
 
     /**
      * Search for a plugin inside current context
+     *
      * @param tag
      * @return
      */
@@ -174,7 +176,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         );
     }
 
-    public <T extends Plugin> T load(Class<T> type) {
+    public <T extends Plugin> T load(Class<T> type, Consumer<T> initializer) {
         PluginTag tag = Plugin.resolveTag(type);
         T plugin;
         try {
@@ -187,7 +189,15 @@ public class PluginManager implements Encapsulated, AutoCloseable {
                 throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
             }
         }
+        initializer.accept(plugin);
         return load(plugin);
+    }
+
+    public <T extends Plugin> T load(Class<T> type) {
+        return load(type,
+                t -> {
+                }
+        );
     }
 
     public Plugin load(String name) {

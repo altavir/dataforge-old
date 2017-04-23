@@ -4,7 +4,7 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Font?>
 <?import java.net.URL?>
-<fx:root id="AnchorPane" prefHeight="400.0" prefWidth="600.0" styleClass="mainFxmlClass" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
+<fx:root id="AnchorPane" styleClass="mainFxmlClass" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1">
     <stylesheets>
         <URL value="@styles/plotcontainer.css" />
     </stylesheets>
@@ -13,7 +13,7 @@
         <items>
             <StackPane>
                <children>
-                <AnchorPane fx:id="plotPane" minHeight="300.0" minWidth="300.0" />
+                <BorderPane fx:id="plotPane" minHeight="300.0" minWidth="300.0" />
                   <Button fx:id="optionsPannelButton" graphicTextGap="0.0" mnemonicParsing="false" opacity="0.4" text="&gt;&gt;" textAlignment="JUSTIFY" StackPane.alignment="TOP_RIGHT">
                      <font>
                         <Font name="System Bold" size="12.0" />

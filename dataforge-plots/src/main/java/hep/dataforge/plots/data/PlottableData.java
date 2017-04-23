@@ -31,7 +31,7 @@ import java.util.List;
  */
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
-@ValueDef(name = "showErrors", def = "true", info = "Show errors for points.")
+@ValueDef(name = "showErrors", type = "BOOLEAN", def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 
     //TODO replace by ObservableList and allow external modification
@@ -127,7 +127,7 @@ public class PlottableData extends XYPlottable {
         notifyDataChanged();
     }
 
-    public void append(double x, double y) {
+    public void append(Number x, Number y) {
         append(new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
     }
 

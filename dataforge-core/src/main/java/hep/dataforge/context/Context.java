@@ -38,6 +38,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.function.Consumer;
 
 /**
  * <p>
@@ -366,7 +367,12 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
          * @return
          */
         public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
-            ctx.pluginManager().load(type).configure(configuration);
+            ctx.pluginManager().load(type,pl -> pl.configure(configuration));
+            return this;
+        }
+
+        public <T extends Plugin> Builder plugin(Class<T> type, Consumer<T> initializer) {
+            ctx.pluginManager().load(type,initializer);
             return this;
         }
 
