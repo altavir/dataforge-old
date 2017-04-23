@@ -16,14 +16,11 @@
 package hep.dataforge.data;
 
 import hep.dataforge.goals.Goal;
-import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.goals.StaticGoal;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Function;
 
 /**
  * A piece of data which is basically calculated asynchronously
@@ -104,22 +101,6 @@ public class Data<T> implements Annotated {
         return meta;
     }
 
-    /**
-     * Apply lazy transformation of the data using default executor. The meta of the result is the same as meta of input
-     *
-     * @param target
-     * @param transformation
-     * @param <R>
-     * @return
-     */
-    public <R> Data<R> andThen(Class<R> target, Function<T, R> transformation) {
-        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), transformation);
-        return new Data<R>(goal, target, this.meta());
-    }
 
-    public <R> Data<R> andThen(Class<R> target, Executor executor, Function<T, R> transformation) {
-        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), executor, transformation);
-        return new Data<R>(goal, target, this.meta());
-    }
 
 }

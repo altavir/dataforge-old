@@ -18,8 +18,6 @@ import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
-import hep.dataforge.plots.PlotManager
-import hep.dataforge.plots.fx.FXPlotManager
 import hep.dataforge.plots.jfreechart.JFCFrameFactory
 import org.jline.reader.EndOfFileException
 import org.jline.reader.LineReader
@@ -112,7 +110,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
-            context.getFeature(PlotManager).configureValue(FXPlotManager.FX_FRAME_TYPE_KEY, JFCFrameFactory.JFREECHART_FRAME_TYPE);
+            JFCFrameFactory.setDefault(context);
             context.pluginManager().load(new BasicIOManager(terminal.input(),terminal.output()));
         }
 

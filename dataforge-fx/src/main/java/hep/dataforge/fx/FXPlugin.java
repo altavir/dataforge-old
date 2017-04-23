@@ -4,10 +4,13 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
+import hep.dataforge.description.ValueDef;
+import hep.dataforge.values.Value;
 import javafx.application.Platform;
 import javafx.stage.Stage;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
@@ -17,6 +20,7 @@ import java.util.function.Supplier;
  * Created by darksnake on 28-Oct-16.
  */
 @PluginDef(name = "fx", group = "hep.dataforge", description = "JavaFX window manager")
+@ValueDef(name = "implicitExit", type = "BOOLEAN", def = "false", info = "A Platfor implicitExit parameter")
 public class FXPlugin extends BasicPlugin {
 
     private Stage stage;
@@ -24,8 +28,8 @@ public class FXPlugin extends BasicPlugin {
 
     @Override
     public void attach(Context context) {
-        if (stage == null && context == Global.instance()) {
-            Platform.setImplicitExit(false);
+        if (stage == null) {
+            configureValue("implicitExit", false);
             context.getLogger().debug("FX application not found. Starting application surrogate.");
             ApplicationSurrogate.start();
             stage = ApplicationSurrogate.getStage();
@@ -50,6 +54,14 @@ public class FXPlugin extends BasicPlugin {
 
 
         super.detach();
+    }
+
+    @Override
+    protected void applyValueChange(String name, Value oldItem, Value newItem) {
+        super.applyValueChange(name, oldItem, newItem);
+        if (Objects.equals(name, "implicitExit")) {
+            Platform.setImplicitExit(newItem.booleanValue());
+        }
     }
 
     public synchronized Stage getStage() {

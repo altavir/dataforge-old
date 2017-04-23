@@ -22,8 +22,6 @@ import java.util.Map;
 import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
 
-import static hep.dataforge.plots.fx.FXLinePlotFrameFactory.FX_LINE_FRAME_TYPE;
-
 /**
  * A plot holder using MDI-style JavaFX containers
  *
@@ -37,19 +35,18 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
 
     private final Map<String, PlotContainer> containers = new HashMap<>();
 
-    public FXPlotManager() {
-        super.configureValue(FX_FRAME_TYPE_KEY, FX_LINE_FRAME_TYPE);
-    }
-
     /**
      * Build an FX frame of the given type using spi.
      *
      * @return
      */
     public static FXPlotFrame buildFXPlotFrame(Meta meta) {
-        String type = meta.getString(FX_FRAME_TYPE_KEY);
+        String type = meta.getString(FX_FRAME_TYPE_KEY, "");
         return StreamSupport.stream(fxPlotFrameFactoryServiceLoader.spliterator(), false)
-                .filter(it -> it.getName().equals(type)).findFirst().orElseThrow(() -> new NameNotFoundException(type))
+                .filter(it -> type.isEmpty()|| it.getName().equals(type))
+                .sorted()
+                .findFirst()
+                .orElseThrow(() -> new NameNotFoundException(type))
                 .build(meta);
     }
 

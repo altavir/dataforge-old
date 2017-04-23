@@ -18,9 +18,15 @@ package hep.dataforge.data;
 
 import hep.dataforge.goals.AbstractGoal;
 import hep.dataforge.goals.Goal;
+import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.meta.Meta;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.concurrent.Executor;
 import java.util.function.BiFunction;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -30,7 +36,8 @@ public class DataUtils {
     /**
      * Combine two data elements of different type into single data
      */
-    public static <R, S1, S2> Data<R> combine(Class<R> type, Data<? extends S1> data1, Data<? extends S2> data2,
+    public static <R, S1, S2> Data<R> combine(Data<? extends S1> data1, Data<? extends S2> data2,
+                                              Class<R> type,
                                               Meta meta,
                                               BiFunction<S1, S2, R> transform) {
         Goal<R> combineGoal = new AbstractGoal<R>() {
@@ -45,5 +52,83 @@ public class DataUtils {
             }
         };
         return new Data<R>(combineGoal, type, meta);
+    }
+
+
+    /**
+     * Join a uniform list of elements into a single datum
+     */
+    public static <R, S> Data<R> join(Collection<Data<? extends S>> data,
+                                      Class<R> type,
+                                      Meta meta,
+                                      Function<List<S>, R> transform) {
+        Goal<R> combineGoal = new AbstractGoal<R>() {
+            @Override
+            protected R compute() throws Exception {
+                return transform.apply(data.stream().map(it -> it.get()).collect(Collectors.toList()));
+            }
+
+            @Override
+            public Stream<Goal> dependencies() {
+                return data.stream().map(it -> it.getGoal());
+            }
+        };
+        return new Data<R>(combineGoal, type, meta);
+    }
+
+    public static <R, S> Data<R> join(DataNode<S> dataNode,
+                                      Class<R> type,
+                                      Function<List<S>, R> transform) {
+        Goal<R> combineGoal = new AbstractGoal<R>() {
+            @Override
+            protected R compute() throws Exception {
+                return transform.apply(dataNode.dataStream()
+                        .filter(it -> it.isValid())
+                        .map(it -> it.get())
+                        .collect(Collectors.toList())
+                );
+            }
+
+            @Override
+            public Stream<Goal> dependencies() {
+                return dataNode.dataStream().map(it -> it.getGoal());
+            }
+        };
+        return new Data<R>(combineGoal, type, dataNode.meta());
+    }
+
+    /**
+     * Apply lazy transformation of the data using default executor. The meta of the result is the same as meta of input
+     *
+     * @param target
+     * @param transformation
+     * @param <R>
+     * @return
+     */
+    public static <T, R> Data<R> transform(Data<T> data, Class<R> target, Function<T, R> transformation) {
+        Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), transformation);
+        return new Data<R>(goal, target, data.meta());
+    }
+
+    public static <T, R> NamedData<R> transform(NamedData<T> data, Class<R> target, Function<T, R> transformation) {
+        Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), transformation);
+        return new NamedData<R>(data.getName(), goal, target, data.meta());
+    }
+
+    public static <T, R> Data<R> transform(Data<T> data, Class<R> target, Executor executor, Function<T, R> transformation) {
+        Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), executor, transformation);
+        return new Data<R>(goal, target, data.meta());
+    }
+
+    /**
+     * A node containing single data fragment
+     *
+     * @param nodeName
+     * @param data
+     * @param <T>
+     * @return
+     */
+    public static <T> DataNode<T> singletonNode(String nodeName, Data<T> data) {
+        return DataSet.builder(data.type()).putData(DataNode.DEFAULT_DATA_FRAGMENT_NAME, data).build();
     }
 }
