@@ -1,4 +1,4 @@
-package hep.dataforge.groovymath.extensions
+package hep.dataforge.maths.extensions
 
 import spock.lang.Specification
 

@@ -4,5 +4,5 @@ extensionClasses = \
   hep.dataforge.groovymath.extensions.UnivariateFunctionExtension,\
   hep.dataforge.groovymath.extensions.UnivariateDifferentiableFunctionExtension,\
   hep.dataforge.groovymath.extensions.RealVectorExtension,\
-  hep.dataforge.groovymath.extensions.RealMatrixExtension,\
+  hep.dataforge.maths.extensions.RealMatrixExtension,\
   hep.dataforge.groovymath.extensions.NumberExtension

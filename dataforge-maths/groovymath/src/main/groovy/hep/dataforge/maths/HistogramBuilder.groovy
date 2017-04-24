@@ -1,6 +1,6 @@
-package hep.dataforge.groovymath
+package hep.dataforge.maths
 
-import hep.dataforge.groovymath.tables.GTable
+import hep.dataforge.maths.tables.GTable
 
 import java.util.concurrent.atomic.AtomicInteger
 import java.util.stream.Stream

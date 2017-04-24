@@ -1,4 +1,4 @@
-# Groovy maths#
+# Groovy maths #
 This project contains some useful tools to work with mathematical objects using Groovy. Some tools are just thin dynamic layer over [commons-maths library](https://commons.apache.org/proper/commons-math/) and some are completely new. The project is primarily intended for [Beaker](http://beakernotebook.com/) but also will be later used in [GrindStone DataForge module](http://www.inr.ru/~nozik/dataforge/modules.html).
 
 

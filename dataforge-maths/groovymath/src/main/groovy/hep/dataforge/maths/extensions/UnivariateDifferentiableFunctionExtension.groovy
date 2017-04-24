@@ -1,4 +1,4 @@
-package hep.dataforge.groovymath.extensions
+package hep.dataforge.maths.extensions
 
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 import org.apache.commons.math3.analysis.differentiation.UnivariateDifferentiableFunction

@@ -10,6 +10,7 @@ include ':dataforge-plots:plots-jzy3d'
 
 include ':dataforge-maths' // mathematical tools
 include ':dataforge-maths:groovymath' // groovy mathematical extension
+include ':dataforge-maths:kmath' // kotlin mathematical extension
 include ':dataforge-fx' // gui tools using JavaFx
 
 include ':dataforge-grind' // GRoovy INteractive Dataforge
