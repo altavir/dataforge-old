@@ -55,6 +55,7 @@ class GrindTerminal extends SimpleConfigurable {
      * @return
      */
     static GrindTerminal system(Context context = Global.instance()) {
+        context.logger.debug("Starting grind terminal using system shell")
         return new GrindTerminal(context,
                 TerminalBuilder.builder()
                         .name("df")
@@ -66,6 +67,7 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     static GrindTerminal dumb(Context context = Global.instance()) {
+        context.logger.debug("Starting grind terminal using dumb shell")
         return new GrindTerminal(context);
     }
 
@@ -162,7 +164,7 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
-    def Terminal getTerminal() {
+    Terminal getTerminal() {
         return terminal;
     }
 
@@ -199,6 +201,7 @@ class GrindTerminal extends SimpleConfigurable {
             while (true) {
                 String expression = reader.readLine(promptLine);
                 if ("exit" == expression || expression == null) {
+                    shell.getContext().logger.debug("Exit command received")
                     break;
                 }
                 try {
@@ -230,7 +233,9 @@ class GrindTerminal extends SimpleConfigurable {
         } catch (EndOfFileException ex1) {
             writer.println("Terminated by user")
         } finally {
+            shell.getContext().logger.debug("Closing terminal")
             getTerminal().close()
+            shell.getContext().logger.debug("Terminal closed")
         }
 
     }
