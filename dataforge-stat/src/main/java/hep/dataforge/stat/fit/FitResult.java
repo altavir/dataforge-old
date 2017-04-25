@@ -73,6 +73,10 @@ public class FitResult extends FitState {
         return this.getDataSize() - this.getFreePars().length;
     }
 
+    public double normedChi2(){
+        return getChi2()/ndf();
+    }
+
     /** {@inheritDoc} */
     @Override
     public void printState(PrintWriter out) {
