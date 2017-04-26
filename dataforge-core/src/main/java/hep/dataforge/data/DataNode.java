@@ -11,6 +11,7 @@ import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
 import hep.dataforge.utils.GenericBuilder;
 
 import java.util.Collection;
@@ -65,11 +66,12 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param name
      * @return
      */
-    Optional<Data<? extends T>> getData(String name);
+    @Provides(DATA_TARGET)
+    Optional<Data<? extends T>> optData(String name);
 
     @SuppressWarnings("unchecked")
     default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
-        Data<? extends T> data = getData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
+        Data<? extends T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
         if (type.isAssignableFrom(data.type())) {
             return (Data<R>) data;
         } else {
@@ -84,7 +86,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default T compute(String name) {
-        return getData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
+        return optData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
     }
 
     /**
@@ -94,7 +96,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default Data<? extends T> getData() {
-        return getData(DEFAULT_DATA_FRAGMENT_NAME)
+        return optData(DEFAULT_DATA_FRAGMENT_NAME)
                 .orElse(dataStream(true).findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
     }
 
@@ -107,6 +109,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param nodeName
      * @return
      */
+    @Provides(NODE_TARGET)
     Optional<DataNode<? extends T>> optNode(String nodeName);
 
     default DataNode<? extends T> getNode(String nodeName) {

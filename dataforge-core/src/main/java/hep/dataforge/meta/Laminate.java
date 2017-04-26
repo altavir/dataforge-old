@@ -157,7 +157,7 @@ public class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Meta getMeta(String path) {
+    public Optional<Meta> optMeta(String path) {
         List<Meta> childLayers = new ArrayList<>();
         layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
             //FIXME child elements are not chained!
@@ -170,14 +170,15 @@ public class Laminate extends Meta implements Described {
                 laminate.setDescriptor(descriptor.childDescriptor(path));
             }
             laminate.setValueContext(valueContext());
-            return laminate;
+            return Optional.of(laminate);
         } else //if node not found, using descriptor layer if it is defined
             if (descriptorLayer != null) {
-                return descriptorLayer.getMeta(path);
+                return descriptorLayer.optMeta(path);
             } else {
-                throw new NameNotFoundException(path);
+                return Optional.empty();
             }
     }
+
 
     /**
      * Get the first occurrence of meta node with the given name without merging. If not found, uses description.
@@ -304,7 +305,7 @@ public class Laminate extends Meta implements Described {
     public <A> Meta collectNode(String nodeName, Collector<Meta, A, Meta> collector) {
         return layers.stream()
                 .filter(layer -> layer.hasMeta(nodeName))
-                .map(layer -> layer.getNode(nodeName))
+                .map(layer -> layer.getMeta(nodeName))
                 .collect(collector);
     }
 

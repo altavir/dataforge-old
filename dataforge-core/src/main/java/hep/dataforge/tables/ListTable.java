@@ -184,8 +184,8 @@ public class ListTable extends ListOfPoints implements Table {
         if (this.format != null || !data.isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
-        format = new TableFormat(meta.getNode("format"));
-        data.addAll(DataPoint.buildFromMeta(meta.getNode("data")));
+        format = new TableFormat(meta.getMeta("format"));
+        data.addAll(DataPoint.buildFromMeta(meta.getMeta("data")));
     }
 
     public static class Builder {

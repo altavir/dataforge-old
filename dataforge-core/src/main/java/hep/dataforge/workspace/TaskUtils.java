@@ -5,12 +5,18 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataTree;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.providers.Path;
 import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 /**
  * Some utility methods to work with tasks
+ *
  * @author Alexander Nozik
  */
 public class TaskUtils {
@@ -66,6 +72,26 @@ public class TaskUtils {
         });
         return builder;
     }
+
+    /**
+     * Search for an Action in context plugins and up the parent plugin. Throw an exception if action not found.
+     *
+     * @param context
+     * @param <R>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static <R> Task<R> buildTask(Context context, String taskName) {
+        Path path = Path.of(taskName, Task.TASK_PROVIDER_KEY);
+        return context.pluginManager().stream(true)
+                .map(plugin -> plugin.provide(path, Task.class))
+                .filter(Optional::isPresent)
+                .map(it -> (Task<R>) it.get())
+                .findFirst()
+                .orElseThrow(() -> new NameNotFoundException(taskName));
+
+    }
+
 
 //    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
 //        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");

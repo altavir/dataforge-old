@@ -9,9 +9,10 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.names.Name;
+import hep.dataforge.providers.Provides;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
+import hep.dataforge.utils.Optionals;
 import org.slf4j.LoggerFactory;
 
 import java.lang.reflect.Constructor;
@@ -22,6 +23,7 @@ import java.util.*;
  */
 @PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
 public class ActionManager extends BasicPlugin {
+    public static final String ACTION_TARGET = "action";
 
     private final Map<String, Action> actionMap = new HashMap<>();
 
@@ -32,10 +34,10 @@ public class ActionManager extends BasicPlugin {
     }
 
     protected ActionManager getParent() {
-        if (getContext() == null || getContext().getParent() == null || !getContext().getParent().provides("actions")) {
+        if (getContext() == null || getContext().getParent() == null) {
             return null;
         } else {
-            return getContext().getParent().provide("actions", ActionManager.class);
+            return getContext().getParent().provide("actions", ActionManager.class).orElse(null);
         }
     }
 
@@ -70,10 +72,6 @@ public class ActionManager extends BasicPlugin {
         return build((Class<Action>) Class.forName(type));
     }
 
-    /**
-     * @param name
-     * @return
-     */
     public Action build(String name) {
         if (actionMap.containsKey(name)) {
             return actionMap.get(name);
@@ -86,6 +84,13 @@ public class ActionManager extends BasicPlugin {
                 return parent.build(name);
             }
         }
+    }
+
+    @Provides(ACTION_TARGET)
+    public Optional<Action> optAction(String name) {
+        return Optionals.either(actionMap.get(name))
+                .or(Optional.ofNullable(getParent()).flatMap(parent -> parent.optAction(name)))
+                .opt();
     }
 
     private void put(Action action) {
@@ -140,20 +145,6 @@ public class ActionManager extends BasicPlugin {
 
         Collections.sort(list, (ActionDescriptor o1, ActionDescriptor o2) -> o1.getName().compareTo(o2.getName()));
         return list;
-    }
-
-    @Override
-    protected boolean provides(String target, Name name) {
-        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.containsKey(name.toString());
-        } else return false;
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.get(name.toString());
-        } else return null;
     }
 
 }

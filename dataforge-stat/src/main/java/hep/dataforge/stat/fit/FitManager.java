@@ -21,10 +21,11 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Name;
+import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
@@ -33,6 +34,7 @@ import hep.dataforge.tables.Table;
 
 import java.io.PrintWriter;
 import java.util.HashMap;
+import java.util.Optional;
 
 /**
  * @author Alexander Nozik
@@ -56,28 +58,18 @@ public class FitManager extends BasicPlugin implements Provider {
     }
 
     @Override
-    protected boolean provides(String target, Name name) {
-        switch (target) {
+    public Optional<?> provide(Path path) {
+        switch (path.target()) {
             case FIT_ENGINE_PROVIDER_KEY:
-                return engineList.containsKey(name.toString());
+                return Optional.ofNullable(engineList.get(path.nameString()));
             case Action.ACTION_PROVIDER_KEY:
-                return name.toString().equals(FitAction.FIT_ACTION_NAME);
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        switch (target) {
-            case FIT_ENGINE_PROVIDER_KEY:
-                return engineList.get(name.toString());
-            case Action.ACTION_PROVIDER_KEY:
-                if(name.toString().equals(FitAction.FIT_ACTION_NAME)){
-                    return new FitAction();
+                if(path.nameString().equals(FitAction.FIT_ACTION_NAME)){
+                    return Optional.of(new FitAction());
+                } else {
+                    return Optional.empty();
                 }
             default:
-                return false;
+                throw new TargetNotProvidedException(path.target());
         }
     }
 

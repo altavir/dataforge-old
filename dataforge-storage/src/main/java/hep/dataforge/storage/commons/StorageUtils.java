@@ -62,13 +62,7 @@ public class StorageUtils {
         if (loaderConfig.hasMeta("shelf")) {
             for (Meta an : loaderConfig.getMetaList("shelf")) {
                 String shelfName = shelfName(an);
-                Storage shelf;
-
-                if (storage.hasShelf(shelfName)) {
-                    shelf = storage.getShelf(shelfName);
-                } else {
-                    shelf = storage.buildShelf(shelfName(an), an);
-                }
+                Storage shelf = storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName(an), an));
                 setupLoaders(shelf, an);
             }
         }
@@ -77,14 +71,10 @@ public class StorageUtils {
             List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
             for (Meta la : loaderAns) {
                 String loaderName = loaderName(la);
-                if (!storage.hasLoader(loaderName)) {
-                    storage.buildLoader(la);
-                } else {
-                    Loader currentLoader = storage.getLoader(loaderName);
-                    //If the same annotation is used - do nothing
-                    if (!currentLoader.meta().equals(la)) {
-                        storage.buildLoader(loaderConfig);
-                    }
+                Loader current = storage.optLoader(loaderName).orElseGet(()->storage.buildLoader(la));
+                //If the same annotation is used - do nothing
+                if (!current.meta().equals(la)) {
+                    storage.buildLoader(loaderConfig);
                 }
             }
         }

@@ -18,6 +18,7 @@ package hep.dataforge.values;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
 
 import java.util.List;
 import java.util.Optional;
@@ -37,24 +38,14 @@ public interface ValueProvider {
         if (provider instanceof ValueProvider) {
             return (ValueProvider) provider;
         }
-        return new ValueProvider() {
-            @Override
-            public Optional<Value> optValue(String path) {
-                return Optional.ofNullable(provider.provide(Path.of(path, VALUE_TARGET), Value.class));
-            }
-
-            @Override
-            public boolean hasValue(String path) {
-                return provider.provides(Path.of(path, VALUE_TARGET));
-            }
-
-        };
+        return path -> provider.provide(Path.of(path, VALUE_TARGET)).map(it -> Value.class.cast(it));
     }
 
     default boolean hasValue(String path) {
         return optValue(path).isPresent();
     }
 
+    @Provides(VALUE_TARGET)
     Optional<Value> optValue(String path);
 
     default Value getValue(String path) {

@@ -67,7 +67,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
         @Override
         public Builder loadData(String as, Data data) {
-            if (w.getData().provides(as)) {
+            if (w.getData().optNode(as).isPresent()) {
                 getContext().getLogger().warn("Overriding non-empty data during workspace data fill");
             }
             getData().putData(as, data);

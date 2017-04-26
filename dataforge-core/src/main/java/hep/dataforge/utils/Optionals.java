@@ -2,6 +2,8 @@ package hep.dataforge.utils;
 
 import java.util.*;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Fork for optionals
@@ -11,6 +13,10 @@ public class Optionals<V> {
 
     public static <T> Optionals<T> either(Supplier<Optional<T>>... sups) {
         return new Optionals<T>(Arrays.asList(sups));
+    }
+
+    public static <T> Optionals<T> either(Stream<Supplier<Optional<T>>> stream) {
+        return new Optionals<T>(stream.collect(Collectors.toList()));
     }
 
     public static <T> Optionals<T> either(Optional<T> opt) {

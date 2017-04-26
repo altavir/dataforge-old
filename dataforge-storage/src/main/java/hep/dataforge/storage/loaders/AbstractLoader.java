@@ -25,7 +25,7 @@ import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.StorageUtils;
 
-import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET_TYPE;
+import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET;
 
 /**
  * @author Alexander Nozik
@@ -121,7 +121,7 @@ public abstract class AbstractLoader implements Loader {
     }
 
     public MessageValidator getValidator() {
-        return StorageUtils.defaultMessageValidator(LOADER_TARGET_TYPE, getName());
+        return StorageUtils.defaultMessageValidator(LOADER_TARGET, getName());
     }
 
     protected void checkOpen() {

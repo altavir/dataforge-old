@@ -7,7 +7,6 @@ package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
@@ -22,7 +21,7 @@ import java.util.stream.Stream;
  * @param <T>
  * @author Alexander Nozik
  */
-public class DataSet<T> extends AbstractProvider implements DataNode<T> {
+public class DataSet<T> implements DataNode<T> {
 
     private final String name;
     private final Meta meta;
@@ -92,7 +91,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String name) {
+    public Optional<Data<? extends T>> optData(String name) {
         return Optional.ofNullable(dataMap.get(name));
     }
 
@@ -118,20 +117,6 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return dataMap.isEmpty();
-    }
-
-    @Override
-    protected boolean provides(String target, Name name) {
-        return DATA_TARGET.equals(target) && dataMap.containsKey(name.toString());
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        if (DATA_TARGET.equals(target)) {
-            return dataMap.get(name.toString());
-        } else {
-            return null;
-        }
     }
 
     @Override

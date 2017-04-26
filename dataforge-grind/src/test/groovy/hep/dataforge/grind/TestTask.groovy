@@ -9,13 +9,17 @@ import hep.dataforge.workspace.TaskModel
  * Created by darksnake on 04-Aug-16.
  */
 class TestTask extends MultiStageTask {
+    TestTask() {
+        super(Object)
+    }
+
     @Override
     String getName() {
         return "testTask"
     }
 
     @Override
-    protected void transform(TaskModel model, MultiStageTask.MultiStageTaskState state) {
+    protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
         DataSet.Builder b = DataSet.builder()
         model.context.getProperties().forEach { key, value ->
             b.putStatic(key, value);

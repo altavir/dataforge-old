@@ -27,6 +27,7 @@ import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 
 import java.util.Collection;
+import java.util.Optional;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -40,6 +41,9 @@ import java.util.Collection;
  */
 @AnonimousNotAlowed
 public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
+
+    public static final String LOADER_TARGET = "loader";
+    public static final String STORAGE_TARGET = "storage";
 
     /**
      * Initialize this storage.
@@ -105,33 +109,24 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      */
     Collection<Storage> shelves() throws StorageException;
 
-    /**
-     * Check if the loader with given name is registered. Chain path not
-     * allowed.
-     *
-     * @param name
-     * @return
-     */
-    boolean hasLoader(String name);
+    @Override
+    default String defaultTarget() {
+        return STORAGE_TARGET;
+    }
+
+    @Override
+    default String defaultChainTarget() {
+        return LOADER_TARGET;
+    }
 
     /**
      * Get the loader with given name if it is registered in this storage. Chain
      * path not allowed.
      *
-     * @param name name of the loader or data set. In general is the name of
-     *             hierarchical root element for all data points
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    Loader getLoader(String name) throws StorageException;
-
-    /**
-     * Check if this storage has shelf with given name. Chain path not allowed.
-     *
      * @param name
      * @return
      */
-    boolean hasShelf(String name);
+    Optional<Loader> optLoader(String name);
 
     /**
      * Returns th shelf with given name. Chain path not allowed. Throws
@@ -141,7 +136,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Storage getShelf(String name) throws StorageException;
+    Optional<Storage> optShelf(String name);
 
     /**
      * Get superStorage of this storage. If null, than this storage is root

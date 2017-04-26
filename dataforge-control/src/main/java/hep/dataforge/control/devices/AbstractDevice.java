@@ -35,7 +35,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 /**
@@ -277,37 +276,37 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
     }
 
-    /**
-     * Perform some action for each connection with given role and/or connection
-     * predicate. Both role and predicate could be empty
-     *
-     * @param role
-     * @param predicate
-     * @param action
-     */
-    public void forEachConnection(String role, Predicate<Connection> predicate, Consumer<Connection> action) {
-        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
-
-        if (role != null && !role.isEmpty()) {
-            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
-        }
-
-        if (predicate != null) {
-            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> predicate.test(entry.getKey()));
-        }
-
-        stream.forEach((Map.Entry<Connection, List<String>> entry) -> action.accept(entry.getKey()));
-    }
-
-    /**
-     * For each connection with given role
-     *
-     * @param role
-     * @param action
-     */
-    public void forEachConnection(String role, Consumer<Connection> action) {
-        AbstractDevice.this.forEachConnection(role, null, action);
-    }
+//    /**
+//     * Perform some action for each connection with given role and/or connection
+//     * predicate. Both role and predicate could be empty
+//     *
+//     * @param role
+//     * @param predicate
+//     * @param action
+//     */
+//    public void forEachConnection(String role, Predicate<Connection> predicate, Consumer<Connection> action) {
+//        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
+//
+//        if (role != null && !role.isEmpty()) {
+//            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
+//        }
+//
+//        if (predicate != null) {
+//            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> predicate.test(entry.getKey()));
+//        }
+//
+//        stream.forEach((Map.Entry<Connection, List<String>> entry) -> action.accept(entry.getKey()));
+//    }
+//
+//    /**
+//     * For each connection with given role
+//     *
+//     * @param role
+//     * @param action
+//     */
+//    public void forEachConnection(String role, Consumer<Connection> action) {
+//        AbstractDevice.this.forEachConnection(role, null, action);
+//    }
 
     /**
      * For each connection of given class and role. Role may be empty, but type

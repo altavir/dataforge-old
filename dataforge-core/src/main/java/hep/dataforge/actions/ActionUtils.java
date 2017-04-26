@@ -114,9 +114,10 @@ public class ActionUtils {
         } else {
             Path path = Path.of(actionName, Action.ACTION_PROVIDER_KEY);
             return context.pluginManager().stream(true)
-                    .filter(plugin -> plugin.provides(path))
+                    .map(plugin -> plugin.provide(path))
+                    .filter(opt -> opt.isPresent())
+                    .map(opt -> opt.map(it -> Action.class.cast(it)).get())
                     .findFirst()
-                    .map(plugin -> plugin.provide(path, Action.class))
                     .orElseThrow(() -> new NameNotFoundException(actionName));
         }
     }
@@ -309,6 +310,7 @@ public class ActionUtils {
 
     /**
      * Type checked many-to-one action
+     *
      * @param inputType
      * @param outputType
      * @param factory

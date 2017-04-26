@@ -16,9 +16,6 @@
 package hep.dataforge.context;
 
 import hep.dataforge.meta.SimpleConfigurable;
-import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
-import hep.dataforge.providers.Path;
 
 /**
  * A base for plugin implementation
@@ -28,8 +25,6 @@ import hep.dataforge.providers.Path;
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
-
-    private final ProviderDelegate providerDelegate = new ProviderDelegate();
 
     @Override
     public PluginTag[] dependsOn() {
@@ -82,42 +77,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public final Context getContext() {
-        if(context == null){
+        if (context == null) {
             throw new RuntimeException("Plugin not attached");
         }
         return context;
     }
-
-    @Override
-    public final Object provide(Path path) {
-        return providerDelegate.provide(path);
-    }
-
-    @Override
-    public final boolean provides(Path path) {
-        return providerDelegate.provides(path);
-    }
-
-    protected boolean provides(String target, Name name) {
-        return false;
-    }
-
-    protected Object provide(String target, Name name) {
-        return null;
-    }
-
-    private class ProviderDelegate extends AbstractProvider {
-
-        @Override
-        protected boolean provides(String target, Name name) {
-            return BasicPlugin.this.provides(target, name);
-        }
-
-        @Override
-        protected Object provide(String target, Name name) {
-            return BasicPlugin.this.provide(target, name);
-        }
-    }
-
-
 }

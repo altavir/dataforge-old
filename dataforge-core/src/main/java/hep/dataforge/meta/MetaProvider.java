@@ -8,9 +8,11 @@ package hep.dataforge.meta;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
+
+import java.util.Optional;
 
 /**
- *
  * @author Alexander Nozik
  */
 public interface MetaProvider {
@@ -24,32 +26,39 @@ public interface MetaProvider {
      * @return
      */
     static MetaProvider buildFrom(Provider provider) {
-        if(provider instanceof MetaProvider){
+        if (provider instanceof MetaProvider) {
             return (MetaProvider) provider;
         }
-        return new MetaProvider() {
-            @Override
-            public Meta getMeta(String path) {
-                return provider.provide(Path.of(path, META_TARGET), Meta.class);
-            }
-
-            @Override
-            public boolean hasMeta(String path) {
-                return provider.provides(Path.of(path, META_TARGET));
-            }
-
-        };
+        return path -> provider.provide(Path.of(path, META_TARGET)).map(it -> Meta.class.cast(it));
     }
 
-    default boolean hasMeta(String path) {
-        try {
-            return getMeta(path) != null;
-        } catch (NameNotFoundException ex) {
-            return false;
-        }
+
+//    default boolean hasMeta(String path) {
+//        return optMeta(path).isPresent();
+//    }
+
+    @Provides(META_TARGET)
+    Optional<Meta> optMeta(String path);
+
+    default Meta getMeta(String path) {
+        return optMeta(path).orElseThrow(() -> new NameNotFoundException(path));
     }
 
-    Meta getMeta(String path);
+    /**
+     * Return a child node with given name or default if child node not found
+     *
+     * @param path
+     * @param def
+     * @return
+     */
+    default Meta getMeta(String path, Meta def) {
+        return optMeta(path).orElse(def);
+    }
+
+    default boolean hasMeta(String path){
+        return optMeta(path).isPresent();
+    }
+
 //
 //    @Override
 //    public default Value getValue(String path) {

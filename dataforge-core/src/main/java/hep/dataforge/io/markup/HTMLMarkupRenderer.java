@@ -51,11 +51,12 @@ public class HTMLMarkupRenderer extends GenericMarkupRenderer {
 
     /**
      * Build DOM without attaching it to document
+     *
      * @param document
      * @param markup
      * @return
      */
-    public Element buildDOM(Document document, Markup markup){
+    public Element buildDOM(Document document, Markup markup) {
         this.document = document;
         stack.clear();
         Element root = document.createElement("body");
@@ -72,7 +73,7 @@ public class HTMLMarkupRenderer extends GenericMarkupRenderer {
     public void render(Markup element) {
         try {
             Document document = buildDocument();
-            document.appendChild(buildDOM(document,element));
+            document.appendChild(buildDOM(document, element));
             printDocument();
         } catch (Exception ex) {
             throw new RuntimeException(ex);
@@ -140,8 +141,6 @@ public class HTMLMarkupRenderer extends GenericMarkupRenderer {
     }
 
     private void applyHTMLStyle(Element html, Markup markup) {
-        if (markup.meta().hasNode("html")) {
-            MetaUtils.valueStream(markup.meta().getMeta("html")).forEach(pair -> html.setAttribute(pair.getKey(), pair.getValue().stringValue()));
-        }
+        MetaUtils.valueStream(markup.meta().getMeta("html")).forEach(pair -> html.setAttribute(pair.getKey(), pair.getValue().stringValue()));
     }
 }

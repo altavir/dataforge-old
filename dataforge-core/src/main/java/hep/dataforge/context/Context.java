@@ -15,16 +15,15 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import hep.dataforge.providers.AbstractProvider;
+import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
@@ -32,6 +31,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 /**
  * <p>
@@ -56,7 +57,7 @@ import java.util.function.Consumer;
  *
  * @author Alexander Nozik
  */
-public class Context extends AbstractProvider implements ValueProvider, Loggable, Named, AutoCloseable {
+public class Context implements Provider, ValueProvider, Loggable, Named, AutoCloseable {
 
     public static Builder builder(String name) {
         return new Builder(name);
@@ -161,42 +162,6 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
     }
 
     /**
-     * Check if object is provided in this namespace as is
-     *
-     * @param <T>
-     * @param target a {@link java.lang.String} object.
-     * @param name   a {@link hep.dataforge.names.Name} object.
-     * @return a boolean.
-     */
-    @SuppressWarnings("unchecked")
-    public <T> T provideInNameSpace(String target, Name name) {
-        if ("value".equals(target)) {
-            return (T) getValue(name.toString());
-        } else if (target.isEmpty() || "plugin".equals(target)) {
-            return (T) pluginManager().getOrLoad(name.toString());
-        } else {
-            throw new TargetNotProvidedException();
-        }
-    }
-
-    /**
-     * Provide an object from namespace as is (without namespace substitution)
-     *
-     * @param target
-     * @param name
-     * @return
-     */
-    public boolean providesInNameSpace(String target, Name name) {
-        if ("value".equals(target)) {
-            return hasValue(name.toString());
-        } else if (target.isEmpty() || "plugin".equals(target)) {
-            return pluginManager().has(name.toString());
-        } else {
-            return false;
-        }
-    }
-
-    /**
      * <p>
      * putValue.</p>
      *
@@ -211,6 +176,98 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
         properties.put(name, Value.of(value));
     }
 
+    @Override
+    public String defaultTarget() {
+        return "plugin";
+    }
+
+    @Provides("plugin")
+    public Optional<Plugin> optPlugin(String pluginName) {
+        return pluginManager().opt(PluginTag.fromString(pluginName));
+    }
+
+    @ProvidesNames("plugin")
+    public Collection<String> listPluigns() {
+        return pluginManager().list().stream().map(Plugin::getName).collect(Collectors.toSet());
+    }
+
+    @ProvidesNames("value")
+    public Collection<String> listValues() {
+        return properties.keySet();
+    }
+//    @Override
+//    public Collection<String> listContent(String target) {
+//        if ("value".equals(target)) {
+//            return properties.keySet();
+//        } else if (target.isEmpty() || "plugin".equals(target)) {
+//            return pluginManager().list().stream().map(plugin -> plugin.getName()).collect(Collectors.toSet());
+//        } else {
+//            return Collections.emptySet();
+//        }
+//    }
+
+
+    //    /**
+//     * Check if object is provided in this namespace as is
+//     *
+//     * @param target a {@link java.lang.String} object.
+//     * @param name   a {@link hep.dataforge.names.Name} object.
+//     * @return a boolean.
+//     */
+//    public Object provideInNameSpace(String target, Name name) {
+//        if ("value".equals(target)) {
+//            return getValue(name.toString());
+//        } else if (target.isEmpty() || "plugin".equals(target)) {
+//            return pluginManager().getOrLoad(name.toString());
+//        } else {
+//            throw new TargetNotProvidedException(target);
+//        }
+//    }
+//
+//    @Override
+//    public Collection<String> listContent(String target) {
+//        if ("value".equals(target)) {
+//            return properties.keySet();
+//        } else if (target.isEmpty() || "plugin".equals(target)) {
+//            return pluginManager().list().stream().map(plugin -> plugin.getName()).collect(Collectors.toSet());
+//        } else {
+//            return Collections.emptySet();
+//        }
+//    }
+//    /**
+//     * Provide an object from namespace as is (without namespace substitution)
+//     *
+//     * @param target
+//     * @param name
+//     * @return
+//     */
+//    public boolean providesInNameSpace(String target, Name name) {
+//        if ("value".equals(target)) {
+//            return hasValue(name.toString());
+//        } else if (target.isEmpty() || "plugin".equals(target)) {
+//            return pluginManager().has(name.toString());
+//        } else {
+//            return false;
+//        }
+//    }
+//
+//    @Override
+//    public boolean provides(String target, Name name) {
+//        return providesInNameSpace(target, name)
+//                || (name.nameSpace().equals(getName()) && providesInNameSpace(target, name.toNameSpace("")));
+//    }
+//
+//    @Override
+//    public Object provide(String target, Name name) {
+//        if (providesInNameSpace(target, name)) {
+//            return provideInNameSpace(target, name);
+//        } else if (name.nameSpace().equals(getName())) {
+//            return provideInNameSpace(target, name.toNameSpace(""));
+//        } else {
+//            throw new NameNotFoundException(name.toString());
+//        }
+//    }
+
     /**
      * {@inheritDoc}
      *
@@ -221,6 +278,11 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
         return this.rootLog;
     }
 
+    @Provides("log")
+    public Optional<Log> optLog(String logName){
+        return Optional.ofNullable(reportCache.get(logName));
+    }
+
     public Log getLog(String reportName) {
         return reportCache.computeIfAbsent(reportName, (n) -> {
             Log parent = new Log(n, this);
@@ -228,27 +290,6 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
         });
     }
 
-    @Override
-    public boolean provides(String target, Name name) {
-        return providesInNameSpace(target, name)
-                || (name.nameSpace().equals(getName()) && providesInNameSpace(target, name.toNameSpace("")));
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public Object provide(String target, Name name) {
-        if (providesInNameSpace(target, name)) {
-            return provideInNameSpace(target, name);
-        } else if (name.nameSpace().equals(getName())) {
-            return provideInNameSpace(target, name.toNameSpace(""));
-        } else {
-            throw new NameNotFoundException(name.toString());
-        }
-    }
 
     public Map<String, Value> getProperties() {
         return Collections.unmodifiableMap(properties);
@@ -367,12 +408,12 @@ public class Context extends AbstractProvider implements ValueProvider, Loggable
          * @return
          */
         public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
-            ctx.pluginManager().load(type,pl -> pl.configure(configuration));
+            ctx.pluginManager().load(type, pl -> pl.configure(configuration));
             return this;
         }
 
         public <T extends Plugin> Builder plugin(Class<T> type, Consumer<T> initializer) {
-            ctx.pluginManager().load(type,initializer);
+            ctx.pluginManager().load(type, initializer);
             return this;
         }
 

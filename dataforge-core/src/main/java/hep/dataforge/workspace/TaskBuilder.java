@@ -104,7 +104,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     }
 
     public TaskBuilder dependsOn(String taskName) {
-        return transformModel(model -> model.dependsOn(taskName, model.meta().getNodeOrEmpty(taskName)));
+        return transformModel(model -> model.dependsOn(taskName, model.meta().getMetaOrEmpty(taskName)));
     }
 
     public TaskBuilder dependsOnData(String dataMask, String as) {
@@ -135,7 +135,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     public TaskBuilder doLast(String actionName) {
         return doLast(
                 model -> ActionUtils.buildAction(model.getContext(), actionName),
-                model -> model.getMeta().getNodeOrEmpty(actionName)
+                model -> model.getMeta().getMetaOrEmpty(actionName)
         );
     }
 

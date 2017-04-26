@@ -43,7 +43,7 @@ public interface Workspace extends Encapsulated {
      * @return
      */
     default Data getData(String dataPath) {
-        return getData().getData(dataPath).get();
+        return getData().optData(dataPath).get();
     }
 
     /**

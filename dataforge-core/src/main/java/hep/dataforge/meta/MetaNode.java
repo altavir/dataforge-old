@@ -63,7 +63,7 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         return res;
     }
 
-    public MetaNode(){
+    public MetaNode() {
         this("");
     }
 
@@ -91,6 +91,16 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         } else {
             throw new NameNotFoundException(path.toString());
         }
+    }
+
+    /**
+     * Type checked node
+     *
+     * @param path
+     * @return
+     */
+    protected Optional<T> optNode(String path) {
+        return getMetaList(path).stream().findFirst();
     }
 
     /**
@@ -173,11 +183,6 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
     }
 
     @Override
-    public T getMeta(String name) {
-        return getMetaList(name).get(0);
-    }
-
-    @Override
     public Optional<Value> optValue(String name) {
         return Optional.ofNullable(getValueItem(Name.of(name)));
     }
@@ -236,14 +241,6 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         return !(name.contains("[") || name.contains("]") || name.contains("$"));
     }
 
-    public T getMeta(String path, T def) {
-        if (this.hasMeta(path)) {
-            return this.getMeta(path);
-        } else {
-            return def;
-        }
-    }
-
     @Override
     public Meta toMeta() {
         return this;
@@ -256,7 +253,7 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         }
         this.name = meta.getName();
 
-        MetaNode node = (meta instanceof MetaNode)? (MetaNode) meta : from(meta);
+        MetaNode node = (meta instanceof MetaNode) ? (MetaNode) meta : from(meta);
 
         this.values.putAll(node.values);
         this.nodes.putAll(node.nodes);

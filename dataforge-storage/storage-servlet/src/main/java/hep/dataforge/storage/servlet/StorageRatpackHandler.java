@@ -49,7 +49,7 @@ public class StorageRatpackHandler implements Handler {
                 loader = cache.get(path).get();
             }
             if (loader == null) {
-                loader = root.provide(path, Loader.class);
+                loader = root.provide(path, Loader.class).get();
                 cache.put(path, new SoftReference<>(loader));
             }
 
