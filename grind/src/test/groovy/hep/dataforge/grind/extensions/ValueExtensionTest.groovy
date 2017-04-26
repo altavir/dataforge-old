@@ -3,8 +3,6 @@ package hep.dataforge.grind.extensions
 import hep.dataforge.values.Value
 import spock.lang.Specification
 
-import java.time.Instant
-
 /**
  * Created by darksnake on 05-Aug-16.
  */

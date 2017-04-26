@@ -9,12 +9,15 @@ include ':dataforge-plots:plots-jfc'
 include ':dataforge-plots:plots-jzy3d'
 
 include ':dataforge-maths' // mathematical tools
-include ':dataforge-maths:groovymath' // groovy mathematical extension
-include ':dataforge-maths:kmath' // kotlin mathematical extension
+
 include ':dataforge-fx' // gui tools using JavaFx
 
-include ':dataforge-grind' // GRoovy INteractive Dataforge
-include ':dataforge-grind:grind-terminal'
+include ':grind' // GRoovy INteractive Dataforge
+include ':grind:groovymath' // groovy mathematical extension
+include ':grind:grind-terminal'
+
+include ':kodex' // KOtlin Dataforge EXtension
+include ':kodex:kmath' // kotlin mathematical extension
 
 include ':dataforge-stat' // fitting tools
 include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting

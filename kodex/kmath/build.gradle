@@ -1,0 +1,4 @@
+dependencies {
+    compile project(':kodex')
+    compile project(':dataforge-maths')
+}

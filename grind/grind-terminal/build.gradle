@@ -17,7 +17,7 @@ mainClassName = mainClass
 description = 'The grind plugin for dataforge framework'
 
 dependencies {
-    compile project(':dataforge-grind')
+    compile project(':grind')
     compile project(':dataforge-plots:plots-jfc')
     compile group: 'org.jline', name: 'jline', version: '3.2.0'
     compile group: 'net.java.dev.jna', name: 'jna', version: '4.4.0'
