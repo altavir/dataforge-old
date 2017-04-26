@@ -176,7 +176,7 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         Name n = Name.of(name);
         List<T> item = getNodeItem(n);
         if (item == null) {
-            throw new NameNotFoundException(name);
+            return Collections.emptyList();
         } else {
             return item;
         }
