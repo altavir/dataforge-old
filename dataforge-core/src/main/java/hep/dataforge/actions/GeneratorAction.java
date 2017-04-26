@@ -31,7 +31,7 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
         Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
         //TODO add optional parallelization here
         nameStream().forEach(name -> {
-            Goal<R> goal = new GeneratorGoal<>(() -> generateData(name), executor(context, actionMeta));
+            Goal<R> goal = new GeneratorGoal<>(executor(context, actionMeta), () -> generateData(name));
             resultMap.put(name, new ActionResult<>(log, goal, generateMeta(name), getOutputType()));
         });
         return wrap(resultNodeName(), actionMeta, resultMap);

@@ -15,12 +15,15 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.StaticGoal;
 import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Supplier;
 
 /**
  * A piece of data which is basically calculated asynchronously
@@ -56,6 +59,14 @@ public class Data<T> implements Annotated {
         return buildStatic(content, Meta.empty());
     }
 
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(executor, sup), type, meta);
+    }
+
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(sup), type, meta);
+    }
+
     public Goal<T> getGoal() {
         return goal;
     }
@@ -89,7 +100,6 @@ public class Data<T> implements Annotated {
     }
 
     /**
-     *
      * @return false if goal is canceled or completed exceptionally
      */
     public boolean isValid() {
@@ -100,7 +110,6 @@ public class Data<T> implements Annotated {
     public Meta meta() {
         return meta;
     }
-
 
 
 }

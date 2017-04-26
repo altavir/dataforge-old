@@ -5,22 +5,26 @@
  */
 package hep.dataforge.goals;
 
-import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * A goal which has no dependencies but generates result in a lazy way
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 public class GeneratorGoal<T> extends AbstractGoal<T> {
 
     private final Supplier<T> sup;
 
-    public GeneratorGoal(Supplier<T> sup, ExecutorService executor) {
+    public GeneratorGoal(Executor executor, Supplier<T> sup) {
         super(executor);
+        this.sup = sup;
+    }
+
+    public GeneratorGoal(Supplier<T> sup) {
         this.sup = sup;
     }
 

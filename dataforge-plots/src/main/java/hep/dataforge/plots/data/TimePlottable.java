@@ -163,6 +163,11 @@ public class TimePlottable extends XYPlottable {
         return map.size();
     }
 
+    public void clear(){
+        this.map.clear();
+        notifyDataChanged();
+    }
+
 
     synchronized void cleanup(int maxAge, int maxItems, int prefItems) {
         Instant first = map.firstKey();
