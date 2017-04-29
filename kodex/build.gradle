@@ -1,5 +1,5 @@
 buildscript {
-    ext.kotlin_version = '1.1.1'
+    ext.kotlin_version = '1.1.2-2'
 
     repositories {
         mavenCentral()
@@ -22,10 +22,16 @@ allprojects{
     }
 
     dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
+        compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
     }
 
 }
 
+
 description = "KOtlin Dataforge EXtension"
+
+dependencies{
+    compile project(':dataforge-core')
+}
+
 
