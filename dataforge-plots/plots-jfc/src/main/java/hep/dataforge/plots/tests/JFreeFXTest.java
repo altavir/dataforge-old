@@ -22,7 +22,7 @@ import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.*;
 import javafx.application.Application;
 import javafx.scene.Scene;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.layout.BorderPane;
 import javafx.stage.Stage;
 
 import java.util.ArrayList;
@@ -43,10 +43,10 @@ public class JFreeFXTest extends Application {
 
     @Override
     public void start(Stage primaryStage) {
-        AnchorPane root = new AnchorPane();
+        BorderPane root = new BorderPane();
 
         JFreeChartFrame frame = new JFreeChartFrame();
-        frame.display(root);
+        root.setCenter(frame.getRoot());
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 

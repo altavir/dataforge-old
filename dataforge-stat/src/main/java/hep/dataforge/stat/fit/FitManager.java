@@ -62,7 +62,7 @@ public class FitManager extends BasicPlugin implements Provider {
         switch (path.target()) {
             case FIT_ENGINE_PROVIDER_KEY:
                 return Optional.ofNullable(engineList.get(path.nameString()));
-            case Action.ACTION_PROVIDER_KEY:
+            case Action.ACTION_TARGET:
                 if(path.nameString().equals(FitAction.FIT_ACTION_NAME)){
                     return Optional.of(new FitAction());
                 } else {

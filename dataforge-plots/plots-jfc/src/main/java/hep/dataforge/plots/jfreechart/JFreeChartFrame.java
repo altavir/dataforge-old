@@ -261,21 +261,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        });
     }
 
-//    protected double convertValue(Value v) {
-//        try {
-//            switch (v.valueType()) {
-//                case NULL:
-//                    return Double.NaN;
-////                case TIME:
-////                    return v.timeValue().toEpochMilli();
-//                default:
-//                    return v.doubleValue();
-//            }
-//        } catch (ValueConversionException ex) {
-//            return Double.NaN;
-//        }
-//    }
-
 
     @Override
     protected synchronized void updatePlotData(String name) {
@@ -337,8 +322,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                         render = new XYLineAndShapeRenderer();
                 }
             }
-            render.setBaseShapesVisible(showSymbols);
-            render.setBaseLinesVisible(showLines);
+            render.setDefaultShapesVisible(showSymbols);
+            render.setDefaultLinesVisible(showLines);
 
             //Build Legend map to avoid serialization issues
 //            Map<String, String> titleMap = new HashMap<>();

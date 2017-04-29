@@ -64,6 +64,7 @@ public class PlotContainer implements Initializable {
     private Map<Configuration, Stage> configWindows = new HashMap<>();
     private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
     private double lastDividerPosition = -1;
+    private BooleanProperty isUpdatingProperty = new SimpleBooleanProperty(false);
 
     public PlotContainer() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PlotContainer.fxml"));
@@ -86,6 +87,12 @@ public class PlotContainer implements Initializable {
         AnchorPane.setTopAnchor(container.getRoot(), 0d);
         AnchorPane.setLeftAnchor(container.getRoot(), 0d);
         AnchorPane.setRightAnchor(container.getRoot(), 0d);
+        return container;
+    }
+
+    public static PlotContainer centerIn(BorderPane pane) {
+        PlotContainer container = new PlotContainer();
+        pane.setCenter(container.getRoot());
         return container;
     }
 
@@ -202,7 +209,7 @@ public class PlotContainer implements Initializable {
 
                 @Override
                 protected ObservableList<Plottable> computeValue() {
-                    return FXCollections.observableList(StreamSupport.stream(plot.spliterator(),false).collect(Collectors.toList()));
+                    return FXCollections.observableList(StreamSupport.stream(plot.spliterator(), false).collect(Collectors.toList()));
                 }
 
             };

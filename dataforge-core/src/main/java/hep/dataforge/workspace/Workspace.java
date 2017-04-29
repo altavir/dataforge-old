@@ -57,10 +57,9 @@ public interface Workspace extends Encapsulated {
      * Get task by name. Throw {@link hep.dataforge.exceptions.NameNotFoundException} if task with given name does not exist.
      *
      * @param taskName
-     * @param <T>
      * @return
      */
-    <T> Task<T> getTask(String taskName);
+    Task<?> getTask(String taskName);
 
     /**
      * The stream of available tasks
@@ -78,8 +77,8 @@ public interface Workspace extends Encapsulated {
      * @param overlay  usegiven meta as overaly for existing meta with the same name
      * @return
      */
-    default <T> DataNode<T> runTask(String taskName, Meta config, boolean overlay) {
-        Task<T> task = getTask(taskName);
+    default DataNode<?> runTask(String taskName, Meta config, boolean overlay) {
+        Task<?> task = getTask(taskName);
         if (overlay && hasTarget(config.getName())) {
             config = new Laminate(config, getTarget(config.getName()));
         }
@@ -87,7 +86,7 @@ public interface Workspace extends Encapsulated {
         return runTask(model);
     }
 
-    default <T> DataNode<T> runTask(String taskName, Meta config) {
+    default DataNode<?> runTask(String taskName, Meta config) {
         return this.runTask(taskName, config, true);
     }
 
@@ -95,32 +94,30 @@ public interface Workspace extends Encapsulated {
      * Use config root node name as task name
      *
      * @param config
-     * @param <T>
      * @return
      */
-    default <T> DataNode<T> runTask(Meta config) {
+    default DataNode<?> runTask(Meta config) {
         return runTask(config.getName(), config);
     }
 
     /**
      * Run task using meta previously stored in workspace.
      *
-     * @param <T>
      * @param taskName
      * @param target
      * @return
      */
-    default <T> DataNode<T> runTask(String taskName, String target) {
+    default DataNode<?> runTask(String taskName, String target) {
         return runTask(taskName, getTarget(target));
     }
 
     /**
      * Run task for target with the same name as task name
+     *
      * @param taskName
-     * @param <T>
      * @return
      */
-    default <T> DataNode<T> runTask(String taskName) {
+    default DataNode<?> runTask(String taskName) {
         return runTask(taskName, taskName);
     }
 
@@ -128,11 +125,10 @@ public interface Workspace extends Encapsulated {
      * Run task with given model.
      *
      * @param model
-     * @param <T>
      * @return
      */
-    default <T> DataNode<T> runTask(TaskModel model) {
-        return this.<T>getTask(model.getName()).run(model);
+    default DataNode<?> runTask(TaskModel model) {
+        return this.getTask(model.getName()).run(model);
     }
 
     /**

@@ -5,7 +5,10 @@ import hep.dataforge.exceptions.TargetNotProvidedException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.Collection;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -52,18 +55,25 @@ public class Providers {
     }
 
     @SuppressWarnings("unchecked")
-    public static Collection<String> listContent(Object provider, String target) {
+    public static Stream<String> listContent(Object provider, String target) {
         return Stream.of(provider.getClass().getMethods())
                 .filter(method -> method.isAnnotationPresent(ProvidesNames.class))
                 .filter(method -> Objects.equals(method.getAnnotation(ProvidesNames.class).value(), target))
                 .findFirst()
                 .map(method -> {
                     try {
-                        return (Collection<String>) method.invoke(provider);
-                    } catch (IllegalAccessException | InvocationTargetException e) {
-                        throw new RuntimeException("Failed to provide names by reflections");
+                        Object list = method.invoke(provider);
+                        if (list instanceof Stream) {
+                            return (Stream<String>) list;
+                        } else if (list instanceof Collection) {
+                            return ((Collection<String>) list).stream();
+                        } else {
+                            throw new Error("Wrong method annotated with ProvidesNames");
+                        }
+                    } catch (Exception e) {
+                        throw new RuntimeException("Failed to provide names by reflections", e);
                     }
-                }).orElse(Collections.emptySet());
+                }).orElse(Stream.empty());
     }
 
     /**

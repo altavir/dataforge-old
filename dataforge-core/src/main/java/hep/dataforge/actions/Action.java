@@ -33,7 +33,7 @@ import hep.dataforge.names.Named;
  */
 public interface Action<T, R> extends Named, Described {
 
-    String ACTION_PROVIDER_KEY = "action";
+    String ACTION_TARGET = "action";
 
 //    default DataNode<R> run(DataNode<? extends T> data, Meta actionMeta){
 //        return run(Global.instance(),data,actionMeta);

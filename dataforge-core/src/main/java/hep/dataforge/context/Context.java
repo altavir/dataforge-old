@@ -181,17 +181,17 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
         return "plugin";
     }
 
-    @Provides("plugin")
+    @Provides(Plugin.PLUGIN_TARGET)
     public Optional<Plugin> optPlugin(String pluginName) {
         return pluginManager().opt(PluginTag.fromString(pluginName));
     }
 
-    @ProvidesNames("plugin")
+    @ProvidesNames(Plugin.PLUGIN_TARGET)
     public Collection<String> listPluigns() {
         return pluginManager().list().stream().map(Plugin::getName).collect(Collectors.toSet());
     }
 
-    @ProvidesNames("value")
+    @ProvidesNames(VALUE_TARGET)
     public Collection<String> listValues() {
         return properties.keySet();
     }

@@ -17,7 +17,7 @@
 package hep.dataforge.plots.fx;
 
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.fx.FXObjetct;
+import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import javafx.beans.Observable;
@@ -27,7 +27,7 @@ import java.io.OutputStream;
 /**
  * Created by darksnake on 04-Sep-16.
  */
-public interface FXPlotFrame extends PlotFrame, FXObjetct, Observable {
+public interface FXPlotFrame extends PlotFrame, FXObject, Observable {
     /**
      * Generate a snapshot
      *

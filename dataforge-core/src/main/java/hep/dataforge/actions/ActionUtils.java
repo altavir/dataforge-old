@@ -112,7 +112,7 @@ public class ActionUtils {
         if (SEQUENCE_ACTION_TYPE.equals(actionName)) {
             return new SequenceAction();
         } else {
-            Path path = Path.of(actionName, Action.ACTION_PROVIDER_KEY);
+            Path path = Path.of(actionName, Action.ACTION_TARGET);
             return context.pluginManager().stream(true)
                     .map(plugin -> plugin.provide(path))
                     .filter(opt -> opt.isPresent())

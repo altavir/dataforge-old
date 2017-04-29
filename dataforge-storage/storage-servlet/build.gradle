@@ -13,7 +13,4 @@ description = 'A servlet for remote view of repository'
 dependencies {
     compile project(':dataforge-storage')
     compile 'org.freemarker:freemarker:2.3.25-incubating'
-
-    //compile project(':dataforge-grind')
-    //compile 'com.google.visualization:visualization-datasource:1.1.1'
 }

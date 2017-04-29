@@ -37,6 +37,8 @@ import hep.dataforge.providers.Provider;
 @ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 public interface Plugin extends Configurable, Named, Encapsulated, Provider {
 
+    String PLUGIN_TARGET = "plugin";
+
     /**
      * Resolve plugin tag either from {@link PluginDef} annotation or Plugin instance.
      * @param type

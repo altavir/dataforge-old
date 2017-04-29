@@ -3,6 +3,7 @@ package hep.dataforge.providers;
 import java.lang.annotation.*;
 
 /**
+ * Annotates the method that returns either collection of String or stream of String
  * Created by darksnake on 26-Apr-17.
  */
 

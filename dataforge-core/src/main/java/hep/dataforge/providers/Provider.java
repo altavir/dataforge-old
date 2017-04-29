@@ -15,8 +15,8 @@
  */
 package hep.dataforge.providers;
 
-import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * A marker utility interface for providers.
@@ -36,7 +36,7 @@ public interface Provider {
      * @param target
      * @return
      */
-    default Collection<String> listContent(String target) {
+    default Stream<String> listContent(String target) {
         if (target.isEmpty()) {
             target = defaultTarget();
         }
