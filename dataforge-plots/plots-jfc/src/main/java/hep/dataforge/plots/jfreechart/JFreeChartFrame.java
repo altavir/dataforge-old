@@ -273,7 +273,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         opt.ifPresent(plottable -> {
             if (!index.containsKey(name)) {
                 JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
-                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(0) + 1);
+                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1)+1);
                 index.put(name, wrapper);
                 run(() -> {
                     plot.setDataset(wrapper.getIndex(), wrapper);
@@ -310,8 +310,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         run(() -> {
 
             XYLineAndShapeRenderer render;
-            boolean showLines = meta.getBoolean("showLine", false);
-            boolean showSymbols = meta.getBoolean("showSymbol", true);
             if (meta.getBoolean("showErrors", false)) {
                 render = new XYErrorRenderer();
             } else {
@@ -326,6 +324,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                         render = new XYLineAndShapeRenderer();
                 }
             }
+            boolean showLines = meta.getBoolean("showLine", false);
+            boolean showSymbols = meta.getBoolean("showSymbol", true);
             render.setDefaultShapesVisible(showSymbols);
             render.setDefaultLinesVisible(showLines);
 

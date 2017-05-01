@@ -55,26 +55,23 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     }
 
     private void setupListener() {
-        plottables.addListener(new MapChangeListener<String, Plottable>() {
-            @Override
-            public void onChanged(Change<? extends String, ? extends Plottable> change) {
-                Plottable removed = change.getValueRemoved();
-                Plottable added = change.getValueAdded();
+        plottables.addListener((MapChangeListener<String, Plottable>) change -> {
+            Plottable removed = change.getValueRemoved();
+            Plottable added = change.getValueAdded();
 
-                if (removed != null) {
-                    removed.removeListener(AbstractPlotFrame.this);
-                    if (removed != added) {
-                        updatePlotData(change.getKey());
-                    }
+            if (removed != null) {
+                removed.removeListener(AbstractPlotFrame.this);
+                if (removed != added) {
+                    updatePlotData(change.getKey());
                 }
-
-                if (added != null) {
-                    added.addListener(AbstractPlotFrame.this);
-                    updatePlotData(added.getName());
-                    updatePlotConfig(added.getName());
-                }
-
             }
+
+            if (added != null) {
+                added.addListener(AbstractPlotFrame.this);
+                updatePlotData(added.getName());
+                updatePlotConfig(added.getName());
+            }
+
         });
     }
 
