@@ -17,12 +17,12 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.XYAdapter;
 
 /**
  * Two-axis plot frame
+ *
  * @author Alexander Nozik
  */
 @NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
@@ -45,9 +45,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), getConfig());
+        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), meta());
 
-        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), getConfig());
+        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), meta());
 
         updateLegend(getLegendConfig());
 
@@ -55,16 +55,16 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
     protected abstract void updateFrame(Meta annotation);
 
-    public Configuration getXAxisConfig() {
-        return getConfig().requestNode("xAxis");
+    private Meta getXAxisConfig() {
+        return meta().getMetaOrEmpty("xAxis");
     }
 
-    public Configuration getYAxisConfig() {
-        return getConfig().requestNode("yAxis");
+    private Meta getYAxisConfig() {
+        return meta().getMetaOrEmpty("yAxis");
     }
 
-    public Configuration getLegendConfig() {
-        return getConfig().requestNode("legend");
+    private Meta getLegendConfig() {
+        return meta().getMetaOrEmpty("legend");
     }
 
     /**
@@ -77,9 +77,10 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
             info = "The type of axis. By default number axis is used")
     @ValueDef(name = "axisTitle", info = "The title of the axis.")
     @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
+    @NodeDef(name = "range", info = "The definition of range for given axis")
     @ValueDef(name = "range.from", type = "NUMBER", info = "Lower boundary for fixed range")
     @ValueDef(name = "range.to", type = "NUMBER", info = "Upper boundary for fixed range")
-    @ValueDef(name = "crosshair", def = "none",
+    @ValueDef(name = "crosshair", def = "free",
             allowed = "[none, free, data]",
             info = "Appearance and type of crosshair")
     protected abstract void updateAxis(String axisName, Meta axisMeta, Meta plotMeta);

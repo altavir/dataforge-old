@@ -38,7 +38,7 @@ public interface MetaProvider {
 //    }
 
     @Provides(META_TARGET)
-    Optional<Meta> optMeta(String path);
+    Optional<? extends Meta> optMeta(String path);
 
     default Meta getMeta(String path) {
         return optMeta(path).orElseThrow(() -> new NameNotFoundException(path));
@@ -52,10 +52,10 @@ public interface MetaProvider {
      * @return
      */
     default Meta getMeta(String path, Meta def) {
-        return optMeta(path).orElse(def);
+        return optMeta(path).<Meta>map(it -> it).orElse(def);
     }
 
-    default boolean hasMeta(String path){
+    default boolean hasMeta(String path) {
         return optMeta(path).isPresent();
     }
 

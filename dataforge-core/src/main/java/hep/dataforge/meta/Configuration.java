@@ -174,7 +174,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      * @return
      */
     public Configuration requestNode(String name) {
-        return optNode(name).orElseGet(() -> {
+        return optMeta(name).orElseGet(() -> {
             Configuration child = createChildNode(name);
             super.attachNode(child);
             return child;

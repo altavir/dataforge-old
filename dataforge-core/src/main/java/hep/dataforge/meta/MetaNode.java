@@ -18,6 +18,7 @@ package hep.dataforge.meta;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.names.Name;
+import hep.dataforge.providers.Provides;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
@@ -93,14 +94,10 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         }
     }
 
-    /**
-     * Type checked node
-     *
-     * @param path
-     * @return
-     */
-    protected Optional<T> optNode(String path) {
-        return getMetaList(path).stream().findFirst();
+    @Provides(META_TARGET)
+    @Override
+    public Optional<T> optMeta(String path) {
+        return getMetaList(path).stream().findFirst().map(it -> it);
     }
 
     /**
@@ -180,6 +177,11 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         } else {
             return item;
         }
+    }
+
+    @Override
+    public T getMeta(String path) {
+        return getMetaList(path).stream().findFirst().orElseThrow(() -> new NameNotFoundException(path));
     }
 
     @Override

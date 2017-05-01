@@ -19,10 +19,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
@@ -37,7 +34,7 @@ import java.util.stream.Collectors;
  */
 public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements GenericBuilder<Meta, MetaBuilder> {
 
-    public MetaBuilder(){
+    public MetaBuilder() {
         super();
     }
 
@@ -67,9 +64,6 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
         });
     }
 
-
-
-
     /**
      * return an immutable annotation base on this builder
      *
@@ -81,7 +75,11 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     }
 
     public MetaBuilder rename(String newName) {
-        return super.setName(newName);
+        if (Objects.equals(this.getName(), newName)) {
+            return this;
+        } else {
+            return super.setName(newName);
+        }
     }
 
     @Override

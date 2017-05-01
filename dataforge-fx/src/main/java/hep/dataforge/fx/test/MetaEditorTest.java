@@ -7,22 +7,22 @@ package hep.dataforge.fx.test;
 
 import hep.dataforge.description.DescriptorBuilder;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.fx.configuration.MetaEditor;
+import hep.dataforge.fx.configuration.ConfigEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
-import java.io.IOException;
-import java.util.List;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
+import java.util.List;
+
 /**
- *
  * @author Alexander Nozik
  */
 public class MetaEditorTest extends Application {
@@ -53,7 +53,8 @@ public class MetaEditorTest extends Application {
                         .setInfo("A child Node")
                         .addValue("childValue", "BOOLEAN", "A child boolean node"))
                 .addNode(new DescriptorBuilder("descriptedNode")
-                        .setInfo("A descripted node"))
+                        .setInfo("A descripted node")
+                        .addValue("descriptedValue", "BOOLEAN", "described value in described node"))
                 .build();
 
         config.addObserver(new ConfigChangeListener() {
@@ -68,7 +69,7 @@ public class MetaEditorTest extends Application {
             }
         });
 
-        Scene scene = new Scene(MetaEditor.build(config, descriptor), 400, 400);
+        Scene scene = new Scene(ConfigEditor.build(config, descriptor), 400, 400);
 
         primaryStage.setTitle("Meta editor test");
         primaryStage.setScene(scene);

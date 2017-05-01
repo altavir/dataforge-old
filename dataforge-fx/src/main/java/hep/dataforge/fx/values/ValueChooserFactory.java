@@ -6,14 +6,12 @@
 package hep.dataforge.fx.values;
 
 import hep.dataforge.description.ValueDescriptor;
-import hep.dataforge.meta.Configuration;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 
 import java.util.List;
 
 /**
- *
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class ValueChooserFactory {
@@ -44,27 +42,21 @@ public class ValueChooserFactory {
         return chooser;
     }
 
-    public ValueChooser build(ValueDescriptor descriptor, Configuration config, String path) {
+    public ValueChooser build(ValueDescriptor descriptor, Value initialValue, ValueCallback callback) {
         ValueChooser chooser = build(descriptor);
-        if (config.hasValue(path)) {
-            chooser.setValue(config.getValue(path));
+        if (initialValue != Value.NULL) {
+            chooser.setValue(initialValue);
         }
-        chooser.setValueCallback((Value value) -> {
-            config.setValue(path, value);
-            return new ValueCallbackResponse(true, value, "");
-        });
+        chooser.setValueCallback(callback);
         return chooser;
     }
-    
-    public ValueChooser build(Configuration config, String path) {
+
+    public ValueChooser build(Value initialValue, ValueCallback callback) {
         ValueChooser chooser = new TextValueChooser();
-        if (config.hasValue(path)) {
-            chooser.setValue(config.getValue(path));
+        if (initialValue != Value.NULL) {
+            chooser.setValue(initialValue);
         }
-        chooser.setValueCallback((Value value) -> {
-            config.setValue(path, value);
-            return new ValueCallbackResponse(true, value, "");
-        });
+        chooser.setValueCallback(callback);
         return chooser;
-    }    
+    }
 }

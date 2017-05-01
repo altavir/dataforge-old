@@ -15,6 +15,7 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.values.Value;
 
 import java.util.List;
@@ -56,13 +57,13 @@ public class SimpleConfigurable implements Configurable, Annotated {
     }
 
     /**
-     * Get configuration as an immutable annotation
+     * Get configuration as an immutable annotation underplayed by defaults from class description
      *
      * @return
      */
     @Override
     public Meta meta() {
-        return getConfig();
+        return new Laminate(getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }
 
     /**

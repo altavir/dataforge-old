@@ -80,7 +80,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
     public abstract List<? extends Meta> getMetaList(String path);
 
     @Provides(META_TARGET)
-    public Optional<Meta> optMeta(String path) {
+    public Optional<? extends Meta> optMeta(String path) {
         return getMetaList(path).stream().findFirst().map(it -> it);
     }
 

@@ -60,7 +60,7 @@ public class NameNotFoundException extends NamingException {
     }
 
     protected String buildMessage() {
-        return "The element with name \"" + getName() + "\" is not found.";
+        return " The element with name \"" + getName() + "\" is not found.";
     }
 
     /**

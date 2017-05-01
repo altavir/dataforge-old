@@ -104,6 +104,12 @@ class GrindTerminal extends SimpleConfigurable {
         if (terminal == null) {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
+
+            def console = System.console()
+            if (console) {
+                console.readLine('> Please enter your username: ')
+            }
+
         }
 
         this.terminal = terminal
@@ -113,7 +119,7 @@ class GrindTerminal extends SimpleConfigurable {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
             JFCFrameFactory.setDefault(context);
-            context.pluginManager().load(new BasicIOManager(terminal.input(),terminal.output()));
+            context.pluginManager().load(new BasicIOManager(terminal.input(), terminal.output()));
         }
 
         //create the shell
@@ -136,7 +142,7 @@ class GrindTerminal extends SimpleConfigurable {
             return null;
         }
 
-        shell.bind("describe"){it->
+        shell.bind("describe") { it ->
             if (it instanceof Described) {
                 renderer.render(MarkupUtils.markupDescriptor(it as Described))
                 renderer.ln()
@@ -244,8 +250,8 @@ class GrindTerminal extends SimpleConfigurable {
      * Start using provided closure as initializing script
      * @param closure
      */
-    def launch(Closure closure) {
-        this.with(closure)
+    def launch(@DelegatesTo(GrindShell) Closure closure) {
+        this.shell.with(closure)
         launch()
     }
 

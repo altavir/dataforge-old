@@ -8,7 +8,7 @@ package hep.dataforge.plots.fx;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.fx.FXUtils;
-import hep.dataforge.fx.configuration.MetaEditor;
+import hep.dataforge.fx.configuration.ConfigEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
@@ -245,7 +245,7 @@ public class PlotContainer implements Initializable {
             stage = configWindows.get(config);
         } else {
             stage = new Stage();
-            Scene scene = new Scene(MetaEditor.build(config, desc));
+            Scene scene = new Scene(ConfigEditor.build(config, desc));
             stage.setScene(scene);
             stage.setHeight(400);
             stage.setWidth(400);

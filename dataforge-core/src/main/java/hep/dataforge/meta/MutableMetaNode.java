@@ -31,17 +31,16 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-@SuppressWarnings("unchecked")
 public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNode<T>
         implements Serializable {
 
     protected T parent;
 
-    public MutableMetaNode(){
+    protected MutableMetaNode(){
         super();
     }
 
-    public MutableMetaNode(String name) {
+    protected MutableMetaNode(String name) {
         super(name);
         this.parent = null;
     }

@@ -88,6 +88,10 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     public Node getRoot() {
         mode = Mode.JAVAFX;
         ChartViewer viewer = new ChartViewer(getChart());
+//        viewer.setPrefSize(800,600);
+//        viewer.setCache(false);
+//        viewer.setCacheShape(false);
+//        viewer.getCanvas().setCache(false);
 
         FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
         return viewer;
@@ -175,7 +179,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             ValueAxis axis = getAxis(axisMeta);
 
             String crosshair = axisMeta.getString("crosshair",
-                    plotMeta.getString("crosshair", "none"));
+                    () -> plotMeta.getString("crosshair"));
 
 
             double from = axisMeta.getDouble("range.from", Double.NEGATIVE_INFINITY);
