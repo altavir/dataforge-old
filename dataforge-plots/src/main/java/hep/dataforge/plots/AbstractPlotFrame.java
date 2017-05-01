@@ -24,7 +24,6 @@ import hep.dataforge.meta.SimpleConfigurable;
 import javafx.beans.InvalidationListener;
 import javafx.beans.Observable;
 import javafx.collections.FXCollections;
-import javafx.collections.MapChangeListener;
 import javafx.collections.ObservableMap;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -47,32 +46,11 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
 
     public AbstractPlotFrame(Configuration configuration) {
         super(configuration);
-        setupListener();
+        //setupListener();
     }
 
     public AbstractPlotFrame() {
-        setupListener();
-    }
-
-    private void setupListener() {
-        plottables.addListener((MapChangeListener<String, Plottable>) change -> {
-            Plottable removed = change.getValueRemoved();
-            Plottable added = change.getValueAdded();
-
-            if (removed != null) {
-                removed.removeListener(AbstractPlotFrame.this);
-                if (removed != added) {
-                    updatePlotData(change.getKey());
-                }
-            }
-
-            if (added != null) {
-                added.addListener(AbstractPlotFrame.this);
-                updatePlotData(added.getName());
-                updatePlotConfig(added.getName());
-            }
-
-        });
+        //setupListener();
     }
 
     @NotNull
@@ -88,23 +66,30 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
 
     @Override
     public synchronized void remove(String plotName) {
-        plottables.remove(plotName);
+        Plottable removed = plottables.remove(plotName);
+        removed.removeListener(AbstractPlotFrame.this);
+        updatePlotData(plotName);
     }
 
     @Override
     public synchronized void clear() {
+        Collection<String> names = plottables.keySet();
         plottables.clear();
+        names.forEach(this::updatePlotData);
     }
 
     @Override
     public synchronized void add(Plottable plottable) {
         plottables.put(plottable.getName(), plottable);
+        plottable.addListener(AbstractPlotFrame.this);
+        updatePlotData(plottable.getName());
+        updatePlotConfig(plottable.getName());
     }
 
     @Override
-    public void setAll(Collection<? extends Plottable> collection) {
+    public synchronized void setAll(Collection<? extends Plottable> collection) {
         plottables.clear();
-        collection.forEach(pl -> add(pl));
+        collection.forEach(this::add);
     }
 
     /**

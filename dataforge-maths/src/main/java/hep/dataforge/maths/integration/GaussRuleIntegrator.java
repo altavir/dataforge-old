@@ -15,11 +15,12 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.integration.gauss.GaussIntegrator;
 import org.apache.commons.math3.analysis.integration.gauss.GaussIntegratorFactory;
 import org.apache.commons.math3.util.Pair;
+
+import java.util.function.Predicate;
 
 /**
  * <p>GaussRuleIntegrator class.</p>
@@ -56,7 +57,7 @@ public class GaussRuleIntegrator extends UnivariateIntegrator<CMIntegrand> {
     /** {@inheritDoc}
      * @return  */
     @Override
-    public Predicate<CMIntegrand> getDefaultStopingCondition() {
+    public Predicate<CMIntegrand> getDefaultStoppingCondition() {
         return (t) -> true;
     }
 

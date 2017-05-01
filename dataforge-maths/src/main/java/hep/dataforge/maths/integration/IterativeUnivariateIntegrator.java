@@ -15,8 +15,9 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
+import java.util.function.Predicate;
 
 /**
  * Iterative integrator based on any UnivariateIntegrator
@@ -41,8 +42,8 @@ public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extend
     /** {@inheritDoc}
      * @return  */
     @Override
-    public Predicate<T> getDefaultStopingCondition() {
-        return integrator.getDefaultStopingCondition();
+    public Predicate<T> getDefaultStoppingCondition() {
+        return integrator.getDefaultStoppingCondition();
     }
 
     /** {@inheritDoc}

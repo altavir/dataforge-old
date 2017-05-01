@@ -46,7 +46,7 @@ public class SplitUnivariateIntegrator extends UnivariateIntegrator<UnivariateIn
     }
 
     @Override
-    public Predicate<UnivariateIntegrand> getDefaultStopingCondition() {
+    public Predicate<UnivariateIntegrand> getDefaultStoppingCondition() {
         return (t) -> true;
     }
 
