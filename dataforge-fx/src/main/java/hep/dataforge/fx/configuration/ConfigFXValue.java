@@ -156,7 +156,9 @@ public class ConfigFXValue extends ConfigFX {
         } else {
             chooser = ValueChooserFactory.getInstance().build(getValue(), callback);
         }
+        chooser.setDisplayValue(getValue());
 //        chooser.setDisabled(!protectedProperty().get());
+
         return chooser;
     }
 

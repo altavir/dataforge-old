@@ -129,9 +129,7 @@ public class ConfigEditor extends BorderPane implements Initializable, Annotated
                 }
         );
 
-        valueColumn.setCellFactory((TreeTableColumn<ConfigFX, Value> column) -> {
-            return new ValueChooserCell();
-        });
+        valueColumn.setCellFactory((TreeTableColumn<ConfigFX, Value> column) -> new ValueChooserCell());
 
         descriptionColumn.setCellFactory((TreeTableColumn<ConfigFX, String> param) -> {
             TreeTableCell<ConfigFX, String> cell = new TreeTableCell<>();
@@ -228,6 +226,7 @@ public class ConfigEditor extends BorderPane implements Initializable, Annotated
                 if (row != null) {
                     if (row instanceof ConfigFXValue) {
                         setText(null);
+                        //TODO reuse value chooser
                         ValueChooser chooser = ((ConfigFXValue) row).valueChooser();
                         setGraphic(chooser.getNode());
                     } else {

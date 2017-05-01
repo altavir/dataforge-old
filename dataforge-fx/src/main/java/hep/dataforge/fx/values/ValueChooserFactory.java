@@ -35,6 +35,8 @@ public class ValueChooserFactory {
             chooser = new TextValueChooser();
         } else if (!descriptor.allowedValues().isEmpty()) {
             chooser = new ComboBoxValueChooser();
+        } else if (descriptor.tags().contains("color")) {
+            chooser = new ColorValueChooser();
         } else {
             chooser = new TextValueChooser();
         }
