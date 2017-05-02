@@ -119,7 +119,7 @@ public abstract class DataHandler implements Handler {
         return map;
     }
 
-    protected JsonObjectBuilder makeTable(TableFormat format, Iterable<DataPoint> data){
+    protected JsonObjectBuilder makeTable(TableFormat format, Iterable<DataPoint> data) {
         JsonObjectBuilder res = Json.createObjectBuilder();
 
         res.add("cols", makeCols(format));
@@ -127,8 +127,8 @@ public abstract class DataHandler implements Handler {
         return res;
     }
 
-    protected JsonObjectBuilder makeTable(Table source){
-        return makeTable(source.getFormat(),source);
+    protected JsonObjectBuilder makeTable(Table source) {
+        return makeTable(source.getFormat(), source);
     }
 
     protected abstract Table getData(Meta query);
@@ -148,24 +148,19 @@ public abstract class DataHandler implements Handler {
 
         ctx.getResponse().contentType("text/json");
 
+        Logger logger = LoggerFactory.getLogger("POINT_LOADER");
         Instant start = DateTimeUtils.now();
 
+        Table data = getData(buildQuery(tq, params));
+        logger.info("Table built in {}", Duration.between(start, DateTimeUtils.now()));
 
-
-        Logger logger = LoggerFactory.getLogger("POINT_LOADER");
-        Duration indexLoadTime = Duration.between(start, DateTimeUtils.now());
-        logger.info("Index file loaded in {}", indexLoadTime);
-
-
-        start = DateTimeUtils.now();
         JsonObject response = Json.createObjectBuilder()
                 .add("status", "ok")
                 .add("reqId", rqid)
-                .add("table", makeTable(getData(buildQuery(tq, params))))
+                .add("table", makeTable(data))
                 .build();
 
-        Duration tableBuildTime = Duration.between(start, DateTimeUtils.now());
-        logger.info("Table built in {}", tableBuildTime);
+        logger.info("Response built in {}", Duration.between(start, DateTimeUtils.now()));
 
         ctx.render(wrapResponse(response, responseHandler));
     }

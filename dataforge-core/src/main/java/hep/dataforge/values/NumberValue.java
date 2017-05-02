@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import hep.dataforge.exceptions.ValueConversionException;
+
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.time.Instant;
@@ -45,7 +47,11 @@ class NumberValue extends AbstractValue {
             return false;
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
-            return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
+            try {
+                return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
+            }catch (ValueConversionException ex){
+                return false;
+            }
         } else {
             return super.equals(obj);
         }

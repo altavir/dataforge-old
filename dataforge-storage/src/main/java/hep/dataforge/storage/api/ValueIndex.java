@@ -115,7 +115,6 @@ public interface ValueIndex<T> extends Index<T> {
         Value from = query.getValue(FROM_KEY, Value.NULL);
         Value to = query.getValue(TO_KEY, Value.NULL);
         if (query.hasValue(LIMIT_KEY)) {
-
             return pull(from, to, query.getInt(LIMIT_KEY));
         } else {
             return pull(from, to);

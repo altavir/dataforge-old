@@ -27,7 +27,7 @@ public class Providers {
     public static Optional<?> provide(Path path, Function<String, Optional<?>> resolver) {
         Optional<?> opt = resolver.apply(path.nameString());
         if (path.hasTail()) {
-            return opt.map(res -> {
+            return opt.flatMap(res -> {
                 if (res instanceof Provider) {
                     Provider p = Provider.class.cast(res);
                     //using default chain target if needed

@@ -2,6 +2,7 @@ package hep.dataforge.storage.servlet;
 
 import freemarker.template.Template;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.Name;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.JSONMetaWriter;
 import org.slf4j.LoggerFactory;
@@ -85,9 +86,10 @@ public class StorageRatpackHandler implements Handler {
             StringBuilder b = new StringBuilder();
             renderStorage(b, storage);
 
-            Map data = new HashMap(2);
+            Map<String,Object> data = buildBasicData(ctx);
             data.put("storageName", storage.getName());
             data.put("content", b.toString());
+            data.put("path", Name.of(storage.getFullPath()).asArray());
 
             StringWriter writer = new StringWriter();
             template.process(data, writer);
@@ -115,8 +117,7 @@ public class StorageRatpackHandler implements Handler {
                 stateMap.put(stateName, loader.getString(stateName));
             }
 
-            Map data = new HashMap(2);
-            data.put("loaderName", loader.getName());
+            Map<String, Object> data = buildLoaderData(ctx, loader);
             data.put("states", stateMap);
 
             StringWriter writer = new StringWriter();
@@ -153,25 +154,7 @@ public class StorageRatpackHandler implements Handler {
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
             Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
 
-            Map<String, Object> data = new HashMap(4);
-
-//            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
-//            String from = ctx.getRequest().getQueryParams().get("from");
-//            String to = ctx.getRequest().getQueryParams().get("to");
-//            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
-            String hostName;
-            if (ctx.getServerConfig().getAddress() != null) {
-                hostName = ctx.getServerConfig().getAddress().getHostAddress();
-            } else {
-                hostName = "localhost";
-            }
-            String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
-
-            String dataSourceStr = serverAddres + ctx.getRequest().getUri() + "&action=pull";
-
-            data.put("dataSource", dataSourceStr);
-            data.put("loaderName", loader.getName());
-            data.put("updateInterval", 30);
+            Map<String, Object> data = buildLoaderData(ctx, loader);
             String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
             if (plotParams != null) {
                 data.put("plotParams", plotParams);
@@ -187,4 +170,36 @@ public class StorageRatpackHandler implements Handler {
             ctx.render(ex.toString());
         }
     }
+
+    protected Map<String, Object> buildBasicData(Context ctx) {
+        Map<String, Object> data = new HashMap();
+
+//            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
+//            String from = ctx.getRequest().getQueryParams().get("from");
+//            String to = ctx.getRequest().getQueryParams().get("to");
+//            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
+        String hostName;
+        if (ctx.getServerConfig().getAddress() != null) {
+            hostName = ctx.getServerConfig().getAddress().getHostAddress();
+        } else {
+            hostName = "localhost";
+        }
+        String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
+
+        String dataSourceStr = serverAddres + ctx.getRequest().getUri() + "&action=pull";
+
+        data.put("dataSource", dataSourceStr);
+        data.put("homeURL", serverAddres + "/storage");
+
+        data.put("updateInterval", 30);
+        return data;
+    }
+
+    protected Map<String, Object> buildLoaderData(Context ctx, Loader loader) {
+        Map<String, Object> data = buildBasicData(ctx);
+        data.put("path", Name.of(loader.getStorage().getFullPath()).asArray());
+        data.put("loaderName", loader.getName());
+        return data;
+    }
+
 }
