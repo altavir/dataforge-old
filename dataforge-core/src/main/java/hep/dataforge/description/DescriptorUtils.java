@@ -273,10 +273,10 @@ public class DescriptorUtils {
                 Class sourceClass = (Class) source;
                 Class superClass = sourceClass.getSuperclass();
                 if (superClass != null) {
-                    res.addAll(listAnnotations(superClass, type, false));
+                    res.addAll(listAnnotations(superClass, type, true));
                 }
                 for (Class cl : sourceClass.getInterfaces()) {
-                    res.addAll(listAnnotations(cl, type, false));
+                    res.addAll(listAnnotations(cl, type, true));
                 }
             }
         } else {

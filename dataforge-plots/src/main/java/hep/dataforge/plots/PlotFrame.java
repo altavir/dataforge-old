@@ -18,6 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
+import javafx.collections.ObservableList;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -74,5 +75,11 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable, I
     default Plottable get(String name){
         return opt(name).get();
     }
+
+    /**
+     * Immutable observable list of plottables
+     * @return
+     */
+    ObservableList<Plottable> plottables();
 
 }

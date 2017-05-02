@@ -14,12 +14,10 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
-import javafx.beans.binding.ListBinding;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -36,8 +34,6 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 /**
  * FXML Controller class
@@ -202,19 +198,7 @@ public class PlotContainer implements Initializable {
             plotPane.getChildren().retainAll(optionsPannelButton);
             plotPane.setCenter(plot.getRoot());
 
-            ListBinding<Plottable> list = new ListBinding<Plottable>() {
-                {
-                    super.bind(plot);
-                }
-
-                @Override
-                protected ObservableList<Plottable> computeValue() {
-                    return FXCollections.observableList(StreamSupport.stream(plot.spliterator(), false).collect(Collectors.toList()));
-                }
-
-            };
-
-            plottableslList.setItems(list);
+            plottableslList.setItems(plot.plottables());
         });
     }
 
@@ -286,6 +270,7 @@ public class PlotContainer implements Initializable {
          * Configuration to which this cell is bound
          */
         private Configuration config;
+        private Plottable plottable;
 
         @Override
         protected synchronized void updateItem(Plottable item, boolean empty) {
@@ -308,9 +293,11 @@ public class PlotContainer implements Initializable {
         private void clearContent() {
             setText(null);
             setGraphic(null);
+            plottable = null;
         }
 
         private synchronized void setContent(Plottable item) {
+            this.plottable = item;
             setText(null);
 
             title = new CheckBox();
@@ -346,13 +333,25 @@ public class PlotContainer implements Initializable {
             FXUtils.runNow(() -> {
                 switch (name) {
                     case "title":
-                        title.setText(newItem.stringValue());
+                        if(newItem == null){
+                            title.setText(plottable.getName());
+                        } else {
+                            title.setText(newItem.stringValue());
+                        }
                         break;
                     case "color":
-                        title.setTextFill(Color.valueOf(newItem.stringValue()));
+                        if(newItem == null){
+                            title.setTextFill(Color.BLACK);
+                        } else {
+                            title.setTextFill(Color.valueOf(newItem.stringValue()));
+                        }
                         break;
                     case "visible":
-                        title.setSelected(newItem.booleanValue());
+                        if(newItem == null){
+                            title.setSelected(true);
+                        } else {
+                            title.setSelected(newItem.booleanValue());
+                        }
                         break;
                     default:
                         break;

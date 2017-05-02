@@ -15,9 +15,7 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
@@ -273,7 +271,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         opt.ifPresent(plottable -> {
             if (!index.containsKey(name)) {
                 JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
-                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1)+1);
+                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1) + 1);
                 index.put(name, wrapper);
                 run(() -> {
                     plot.setDataset(wrapper.getIndex(), wrapper);
@@ -300,14 +298,13 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 
     @Override
     protected synchronized void updatePlotConfig(String name) {
-        Plottable plottable = opt(name).orElseThrow(() -> new NameNotFoundException("Plot with given name not found", name));
+        opt(name).ifPresent(plottable -> {
 
-        if (!index.containsKey(name)) {
-            updatePlotData(name);
-        }
+            if (!index.containsKey(name)) {
+                updatePlotData(name);
+            }
 
-        Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
-        run(() -> {
+            Meta meta = plottable.meta();
 
             XYLineAndShapeRenderer render;
             if (meta.getBoolean("showErrors", false)) {
@@ -330,13 +327,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             render.setDefaultLinesVisible(showLines);
 
             //Build Legend map to avoid serialization issues
-//            Map<String, String> titleMap = new HashMap<>();
-//            getPlottables.entrySet().stream().forEach((entry) -> {
-//                titleMap.put(entry.getKey(), entry.getValue().getConfig().getString("title", entry.getKey()));
-//            });
-//
-//
-//            render.setLegendItemLabelGenerator(new LabelGenerator(titleMap));
             double thickness = PlotUtils.getThickness(meta);
             if (thickness > 0) {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
@@ -348,15 +338,18 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             }
 
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-            plot.setRenderer(index.get(name).getIndex(), render);
 
-            // update configuration to default colors
-            if (color == null) {
-                Paint paint = render.lookupSeriesPaint(0);
-                if (paint instanceof Color) {
-                    plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+            run(() -> {
+                plot.setRenderer(index.get(name).getIndex(), render);
+
+                // update configuration to default colors
+                if (color == null) {
+                    Paint paint = render.lookupSeriesPaint(0);
+                    if (paint instanceof Color) {
+                        plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+                    }
                 }
-            }
+            });
         });
     }
 

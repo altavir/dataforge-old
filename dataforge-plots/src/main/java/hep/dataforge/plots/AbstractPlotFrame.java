@@ -21,27 +21,31 @@ import hep.dataforge.io.envelopes.EnvelopeWriter;
 import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.SimpleConfigurable;
-import javafx.beans.InvalidationListener;
-import javafx.beans.Observable;
+import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableMap;
-import org.jetbrains.annotations.NotNull;
+import javafx.collections.ObservableList;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 
 /**
  * @author Alexander Nozik
  */
-public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame, Observable {
+public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
 
-    private final ObservableMap<String, Plottable> plottables = FXCollections.observableHashMap();
+    private final Map<String, Plottable> plottables = new ConcurrentHashMap<>();
+
+    private ListBinding<Plottable> list = new ListBinding<Plottable>() {
+        @Override
+        protected ObservableList<Plottable> computeValue() {
+            return FXCollections.observableArrayList(plottables.values());
+        }
+    };
 
 
     public AbstractPlotFrame(Configuration configuration) {
@@ -53,10 +57,14 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         //setupListener();
     }
 
-    @NotNull
     @Override
     public Iterator<Plottable> iterator() {
         return plottables.values().iterator();
+    }
+
+    @Override
+    public ObservableList<Plottable> plottables() {
+        return list;
     }
 
     @Override
@@ -67,8 +75,11 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     @Override
     public synchronized void remove(String plotName) {
         Plottable removed = plottables.remove(plotName);
-        removed.removeListener(AbstractPlotFrame.this);
-        updatePlotData(plotName);
+        if (removed != null) {
+            removed.removeListener(AbstractPlotFrame.this);
+            updatePlotData(plotName);
+            list.invalidate();
+        }
     }
 
     @Override
@@ -76,20 +87,38 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         Collection<String> names = plottables.keySet();
         plottables.clear();
         names.forEach(this::updatePlotData);
+        list.invalidate();
     }
 
     @Override
     public synchronized void add(Plottable plottable) {
-        plottables.put(plottable.getName(), plottable);
-        plottable.addListener(AbstractPlotFrame.this);
-        updatePlotData(plottable.getName());
-        updatePlotConfig(plottable.getName());
+        Plottable prev = plottables.put(plottable.getName(), plottable);
+        if (prev != plottable) {
+            plottable.addListener(AbstractPlotFrame.this);
+            updatePlotData(plottable.getName());
+            updatePlotConfig(plottable.getName());
+            list.invalidate();
+        }
     }
 
     @Override
     public synchronized void setAll(Collection<? extends Plottable> collection) {
+        Set<String> ivalidateNames = new HashSet<>();
+        plottables.values().forEach(plottable -> {
+            plottable.removeListener(AbstractPlotFrame.this);
+            ivalidateNames.add(plottable.getName());
+        });
         plottables.clear();
-        collection.forEach(this::add);
+        collection.forEach(plottable -> {
+            ivalidateNames.add(plottable.getName());
+            plottable.addListener(AbstractPlotFrame.this);
+            plottables.put(plottable.getName(), plottable);
+        });
+        ivalidateNames.forEach(name -> {
+            updatePlotData(name);
+            updatePlotConfig(name);
+        });
+        list.invalidate();
     }
 
     /**
@@ -114,16 +143,6 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     @Override
     public void notifyConfigurationChanged(String name) {
         updatePlotConfig(name);
-    }
-
-    @Override
-    public void addListener(InvalidationListener listener) {
-        plottables.addListener(listener);
-    }
-
-    @Override
-    public void removeListener(InvalidationListener listener) {
-        plottables.removeListener(listener);
     }
 
     @Override

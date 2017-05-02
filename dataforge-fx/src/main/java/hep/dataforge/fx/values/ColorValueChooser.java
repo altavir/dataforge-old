@@ -3,6 +3,7 @@ package hep.dataforge.fx.values;
 import hep.dataforge.values.Value;
 import javafx.scene.control.ColorPicker;
 import javafx.scene.paint.Color;
+import org.slf4j.LoggerFactory;
 
 /**
  * Created by darksnake on 01-May-17.
@@ -10,7 +11,13 @@ import javafx.scene.paint.Color;
 public class ColorValueChooser extends ValueChooserBase<ColorPicker> {
     @Override
     public void setDisplayValue(Value value) {
-        getNode().setValue(Color.valueOf(value.stringValue()));
+        if (!value.stringValue().isEmpty()) {
+            try {
+                getNode().setValue(Color.valueOf(value.stringValue()));
+            } catch (Exception ex) {
+                LoggerFactory.getLogger(getClass()).warn("Invalid color field value: " + value.stringValue());
+            }
+        }
     }
 
     @Override
