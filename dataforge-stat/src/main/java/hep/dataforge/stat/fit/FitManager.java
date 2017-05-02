@@ -18,21 +18,16 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.actions.Action;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Global;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.TargetNotProvidedException;
-import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
-import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.tables.Table;
 
-import java.io.PrintWriter;
 import java.util.HashMap;
 import java.util.Optional;
 
@@ -63,13 +58,13 @@ public class FitManager extends BasicPlugin implements Provider {
             case FIT_ENGINE_PROVIDER_KEY:
                 return Optional.ofNullable(engineList.get(path.nameString()));
             case Action.ACTION_TARGET:
-                if(path.nameString().equals(FitAction.FIT_ACTION_NAME)){
+                if (path.nameString().equals(FitAction.FIT_ACTION_NAME)) {
                     return Optional.of(new FitAction());
                 } else {
                     return Optional.empty();
                 }
             default:
-                throw new TargetNotProvidedException(path.target());
+                return Optional.empty();
         }
     }
 
@@ -93,6 +88,7 @@ public class FitManager extends BasicPlugin implements Provider {
 
     /**
      * Add new fit engine to manager
+     *
      * @param name
      * @param ef
      */
@@ -125,62 +121,28 @@ public class FitManager extends BasicPlugin implements Provider {
         return modelManager;
     }
 
-//    public FitResult runDefaultEngineTask(FitState state, String taskName, Loggable log, String... freePars) {
-//        FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, taskName, freePars);
-//        return runStage(state, task, log);
-//    }
+    public FitResult runDefaultStage(FitState state, String... freePars) {
+        return runDefaultStage(state, getContext(), freePars);
+    }
 
     public FitResult runDefaultStage(FitState state, Loggable log, String... freePars) {
         FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN, freePars);
         return runStage(state, task, log);
     }
 
-    public FitResult runDefaultStage(FitState state, String... freePars) {
-        return runDefaultStage(state, getContext(), freePars);
-    }
-
-    public FitResult runStage(FitState state, String engineName, String taskName, Loggable log, String... freePars) {
-        FitStage task = new FitStage(engineName, taskName, freePars);
-        return runStage(state, task, log);
-    }
-
     public FitResult runStage(FitState state, String engineName, String taskName, String... freePars) {
-        return runStage(state, engineName, taskName, getContext(), freePars);
+        FitStage task = new FitStage(engineName, taskName, freePars);
+        return runStage(state, task, getContext());
     }
 
     public FitResult runStage(FitState state, FitStage task, Loggable log) {
-        return runStage(state, task, Global.out(), log);
-    }
-
-    public FitResult runStage(FitState state, FitStage task, PrintWriter writer, Loggable log) {
-        if (log == null) {
-            log = getContext();
-        }
-
         FitEngine engine = buildEngine(task.getEngineName());
         if (state == null) {
             throw new IllegalArgumentException("The fit state is not defined");
         }
 
-        FitResult newState;
-
-        switch (task.getName()) {
-            //Тут идет обработка задач общих для всех движков
-            case "print":
-                state.printState(writer);
-                return new FitResult(state, FitResult.emptyTask("print"));
-            case "residuals":
-                writer.printf("%n***RESIDUALS***%n");
-                if (state.getModel() instanceof XYModel) {
-                    FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getDataSet(), state.getParameters());
-                } else {
-                    FittingIOUtils.printResiduals(writer, state);
-                }
-                return new FitResult(state, FitResult.emptyTask("residuals"));
-            default:
-                log.report("Starting task {}", task.toString());
-                newState = engine.run(state, task, log);
-        }
+        log.report("Starting fit task {}", task.toString());
+        FitResult newState = engine.run(state, task, log);
 
         if (!newState.isValid()) {
             log.reportError("The result of the task is not a valid state");

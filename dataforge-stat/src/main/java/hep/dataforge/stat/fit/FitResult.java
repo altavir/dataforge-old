@@ -31,6 +31,7 @@ public class FitResult extends FitState {
     private final FitStage lastTask;
     private boolean isValid = true;
 
+
     public FitResult(FitState state, FitStage lastTask) {
         super(state);
         this.lastTask = lastTask;

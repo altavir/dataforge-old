@@ -66,12 +66,12 @@ public class CMFitEngine implements FitEngine {
     @Override
     public FitResult run(FitState state, FitStage task, Loggable parentLog) {
         Log log = new Log("CM", parentLog);
-        switch (task.getName()) {
+        switch (task.getType()) {
             case TASK_SINGLE:
             case TASK_RUN:
                 return makeRun(state, task, log);
             default:
-                throw new IllegalArgumentException(String.format("Task '%s' is not supported by CMFitEngine", task.getName()));
+                throw new IllegalArgumentException(String.format("Task '%s' is not supported by CMFitEngine", task.getType()));
         }
     }
 

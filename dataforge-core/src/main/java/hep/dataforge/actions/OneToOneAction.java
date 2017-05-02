@@ -136,12 +136,12 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * (no lazy calculations). By default output meta is the same as input data
      * meta.
      *
-     * @param inputMeta
+     * @param actionMeta
      * @param data
      * @return
      */
-    protected Meta outputMeta(NamedData<? extends T> data, Meta inputMeta) {
-        return inputMeta;
+    protected Meta outputMeta(NamedData<? extends T> data, Meta actionMeta) {
+        return data.meta();
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {

@@ -46,9 +46,7 @@ public interface Path {
      * @return
      */
     static Path of(String target, String path) {
-        Path p = of(path);
-        p.setTarget(target);
-        return p;
+        return of(path).withTarget(target);
     }
 
     /**
@@ -88,6 +86,6 @@ public interface Path {
      *
      * @return
      */
-    Path setTarget(String target);
+    Path withTarget(String target);
 
 }

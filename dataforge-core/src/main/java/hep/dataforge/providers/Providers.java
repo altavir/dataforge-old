@@ -1,7 +1,6 @@
 package hep.dataforge.providers;
 
 import hep.dataforge.exceptions.ChainPathNotSupportedException;
-import hep.dataforge.exceptions.TargetNotProvidedException;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -33,7 +32,7 @@ public class Providers {
                     //using default chain target if needed
                     Path tail = path.tail();
                     if (tail.target().isEmpty()) {
-                        tail = tail.setTarget(p.defaultChainTarget());
+                        tail = tail.withTarget(p.defaultChainTarget());
                     }
                     return p.provide(tail);
                 } else {
@@ -93,7 +92,7 @@ public class Providers {
         }
 
         if (!providers.containsKey(target)) {
-            throw new TargetNotProvidedException(target);
+            return Optional.empty();
         } else {
             Method method = providers.get(target);
             try {

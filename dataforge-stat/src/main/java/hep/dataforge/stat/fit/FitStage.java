@@ -17,7 +17,6 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.Named;
 import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.Arrays;
@@ -27,7 +26,7 @@ import java.util.Arrays;
  * The description of fit stage to run
  * @author Alexander Nozik
  */
-public class FitStage extends SimpleMetaMorph implements Named {
+public class FitStage extends SimpleMetaMorph {
 
     public static final String STAGE_KEY = "stage";
 
@@ -35,7 +34,7 @@ public class FitStage extends SimpleMetaMorph implements Named {
     public static final String TASK_SINGLE = "single";
     public static final String TASK_COVARIANCE = "covariance";
 
-    private static final String NAME = "type";
+    private static final String FIT_STAGE_TYPE = "type";
     private static final String FREE_PARAMETERS = "freepars";
     private static final String ENGINE_NAME = "engine";
     private static final String METHOD_NAME = "method";
@@ -48,7 +47,7 @@ public class FitStage extends SimpleMetaMorph implements Named {
 
     public FitStage(String engineName, String taskName, String methodName, String[] freePars) {
         this(new MetaBuilder(STAGE_KEY)
-                .putValue(NAME, taskName)
+                .putValue(FIT_STAGE_TYPE, taskName)
                 .putValue(ENGINE_NAME, engineName)
                 .putValue(METHOD_NAME, methodName)
                 .putValues(FREE_PARAMETERS, freePars)
@@ -62,14 +61,14 @@ public class FitStage extends SimpleMetaMorph implements Named {
 
     public FitStage(String engineName, String taskName) {
         this(new MetaBuilder(STAGE_KEY)
-                .putValue(NAME, taskName)
+                .putValue(FIT_STAGE_TYPE, taskName)
                 .putValue(ENGINE_NAME, engineName)
                 .build()
         );
     }
 
     public FitStage(String taskName) {
-        this(new MetaBuilder(STAGE_KEY).putValue(NAME, taskName).build());
+        this(new MetaBuilder(STAGE_KEY).putValue(FIT_STAGE_TYPE, taskName).build());
     }
 
     public String getEngineName() {
@@ -95,15 +94,8 @@ public class FitStage extends SimpleMetaMorph implements Named {
         }
     }
 
-    /**
-     * Название задачи. Должно быть строго фиксированным, чтобы оно могло быть
-     * распознано программой
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    @Override
-    public String getName() {
-        return meta().getString(NAME, "fit");
+    public String getType() {
+        return meta().getString(FIT_STAGE_TYPE, "fit");
     }
 
     @Override
@@ -117,7 +109,7 @@ public class FitStage extends SimpleMetaMorph implements Named {
             parameters = Arrays.toString(freePars);
         }
             
-        return getName() + "(" + parameters + ")";
+        return getType() + "(" + parameters + ")";
     }
 
 }

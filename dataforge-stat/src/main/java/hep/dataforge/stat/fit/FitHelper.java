@@ -2,6 +2,7 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
+import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -79,12 +80,12 @@ public class FitHelper {
         public FitBuilder update(Meta meta) {
             if (meta.hasMeta(MODEL_KEY)) {
                 model(meta.getMeta(MODEL_KEY));
-            } else if(meta.hasValue(MODEL_KEY)) {
+            } else if (meta.hasValue(MODEL_KEY)) {
                 model(meta.getString(MODEL_KEY));
             }
             List<FitStage> stages = buildStageList(meta);
             if (!stages.isEmpty()) {
-                allStages(buildStageList(meta));
+                allStages(stages);
             }
             params(meta);
             return this;
@@ -151,12 +152,12 @@ public class FitHelper {
          * @return
          */
         public FitBuilder allStages(List<FitStage> stages) {
-            stages.clear();
+            this.stages.clear();
             this.stages.addAll(stages);
             return this;
         }
 
-        public FitBuilder showReult(){
+        public FitBuilder showReult() {
             return stage(new FitStage("print"))
                     .stage(new FitStage("residuals"));
         }
@@ -179,6 +180,8 @@ public class FitHelper {
                 throw new RuntimeException("Model not set");
             }
 
+            MarkupBuilder report = new MarkupBuilder();
+
             FitState state = new FitState(data, model, startPars);
             if (stages.isEmpty()) {
                 state = manager.runDefaultStage(state, log);
@@ -199,3 +202,17 @@ public class FitHelper {
         }
     }
 }
+
+/*
+            case "print":
+                state.printState(writer);
+                return new FitResult(state, FitResult.emptyTask("print"));
+            case "residuals":
+                writer.printf("%n***RESIDUALS***%n");
+                if (state.getModel() instanceof XYModel) {
+                    FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getDataSet(), state.getParameters());
+                } else {
+                    FittingIOUtils.printResiduals(writer, state);
+                }
+                return new FitResult(state, FitResult.emptyTask("residuals"));
+ */

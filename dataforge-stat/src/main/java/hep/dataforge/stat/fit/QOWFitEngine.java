@@ -138,8 +138,8 @@ public class QOWFitEngine implements FitEngine {
     @Override
     public FitResult run(FitState state, FitStage task, Loggable parentLog) {
         Log log = new Log("QOW", parentLog);
-        log.report("QOW fit engine started task '{}'", task.getName());
-        switch (task.getName()) {
+        log.report("QOW fit engine started task '{}'", task.getType());
+        switch (task.getType()) {
             case TASK_SINGLE:
                 return makeRun(state, task, log);
             case TASK_COVARIANCE:

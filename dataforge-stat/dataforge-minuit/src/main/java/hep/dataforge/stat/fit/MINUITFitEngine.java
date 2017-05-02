@@ -72,8 +72,8 @@ public class MINUITFitEngine implements FitEngine {
     public FitResult run(FitState state, FitStage task, Loggable parentLog) {
         Log log = new Log("MINUIT", parentLog);
 
-        log.report("MINUIT fit engine started task '{}'", task.getName());
-        switch (task.getName()) {
+        log.report("MINUIT fit engine started task '{}'", task.getType());
+        switch (task.getType()) {
             case TASK_COVARIANCE:
                 return runHesse(state, task, log);
             case TASK_SINGLE:
