@@ -12,6 +12,6 @@ try {
 } catch (Exception ex) {
     ex.printStackTrace();
 } finally {
-    Global.instance().close();
+    Global.terminate();
 }
 println "grind shell closed"

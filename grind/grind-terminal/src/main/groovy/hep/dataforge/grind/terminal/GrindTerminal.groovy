@@ -10,6 +10,7 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValuesDefs
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
+import hep.dataforge.grind.GrindWorkspaceBuilder
 import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
@@ -152,6 +153,18 @@ class GrindTerminal extends SimpleConfigurable {
 
         //binding.setProperty("man", help);
         shell.bind("help", this.&help);
+
+        //binding workspace build from default location
+        File wsFile = new File("workspace.groovy");
+        if (wsFile.exists()) {
+            try {
+                context.logger.info("Found 'workspace.groovy' in default location. Using it to build workspace.")
+                shell.bind("ws", new GrindWorkspaceBuilder(context).read(wsFile));
+                context.logger.info("Workspace builder bound to 'ws'")
+            } catch (Exception ex){
+                context.logger.error("Failed to build workspace from 'workspace.groovy'")
+            }
+        }
     }
 
     def help() {
