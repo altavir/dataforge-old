@@ -20,7 +20,7 @@ public interface MetaMorph extends Externalizable {
             res.fromMeta(meta);
             return res;
         } catch (Exception e) {
-            throw new Error("Failed to reconstruct metamorph from meta");
+            throw new RuntimeException("Failed to reconstruct metamorph from meta", e);
         }
     }
 

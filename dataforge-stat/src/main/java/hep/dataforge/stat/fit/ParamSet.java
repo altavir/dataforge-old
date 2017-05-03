@@ -101,9 +101,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
         }
 
         MetaUtils.nodeStream(params).forEach(entry -> {
-            if (entry.getKey() != "params") {
-                setPar(MetaMorph.morph(Param.class,entry.getValue()));
-            }
+            setPar(MetaMorph.morph(Param.class, entry.getValue()));
         });
     }
 

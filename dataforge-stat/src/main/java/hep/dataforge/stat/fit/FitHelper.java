@@ -90,6 +90,7 @@ public class FitHelper {
                         }
                     });
             }
+            writer.flush();
         };
     }
 
@@ -183,8 +184,10 @@ public class FitHelper {
             if (meta instanceof Laminate) {
                 ParamSet set = new ParamSet();
                 Laminate laminate = (Laminate) meta;
-                laminate.layersInverse().stream().forEach((layer) -> {
-                    set.updateFrom(MetaMorph.morph(ParamSet.class, layer));
+                laminate.layersInverse().stream().forEach(layer -> {
+                    layer.optMeta("params").ifPresent(params ->{
+                        set.updateFrom(MetaMorph.morph(ParamSet.class, layer.getMeta("params")));
+                    });
                 });
                 return params(set);
             } else {

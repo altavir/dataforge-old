@@ -14,6 +14,7 @@ public class SimpleMetaMorph extends BaseMetaHolder implements MetaMorph {
     }
 
     public SimpleMetaMorph() {
+        super();
     }
 
     @Override

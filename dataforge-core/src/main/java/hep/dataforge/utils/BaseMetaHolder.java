@@ -64,8 +64,8 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
      * @param meta
      */
     protected void setMeta(Meta meta) {
-        if (meta != null) {
-            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotanted object");
+        if (this.meta != null) {
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotated object");
         }
         this.meta = meta;
     }

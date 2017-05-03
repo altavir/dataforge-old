@@ -70,9 +70,9 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
         return res;
     }
 
-    @Override
-    protected void afterAction(Context context, String name, FitResult res, Laminate meta) {
-        super.afterAction(context, name, res, meta);
-        context.getLog(name).print(new PrintWriter(buildActionOutput(context, name)));
-    }
+//    @Override
+//    protected void afterAction(Context context, String name, FitResult res, Laminate meta) {
+//        super.afterAction(context, name, res, meta);
+////        context.getLog(name).print(new PrintWriter(buildActionOutput(context, name)));
+//    }
 }

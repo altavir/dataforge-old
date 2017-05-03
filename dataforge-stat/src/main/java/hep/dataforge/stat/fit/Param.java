@@ -52,7 +52,7 @@ public class Param implements MetaMorph, Named {
         this.value = value;
     }
 
-    private Param(){
+    public Param(){
 
     }
 
