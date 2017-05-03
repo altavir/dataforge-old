@@ -23,15 +23,13 @@ import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 
-import java.io.Serializable;
-
 /**
  * Square named matrix. Не обязательно симметричная, но обзательно квадратная.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedMatrix implements NameSetContainer, Serializable {
+public class NamedMatrix implements NameSetContainer {
 
     private final Names names;
     //TODO заменить на массив

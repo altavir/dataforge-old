@@ -132,7 +132,7 @@ public class MINUITFitEngine implements FitEngine {
 
         }
 
-        return new FitResult(newState.build(), task);
+        return FitResult.build(newState.build(), task.getFreePars());
     }
 
     /**
@@ -257,9 +257,7 @@ public class MINUITFitEngine implements FitEngine {
             newState.setInterval(minosErrors);
         }
 
-        FitResult result = new FitResult(newState.build(), task);
-        result.setValid(valid);
-        return result;
+        return FitResult.build(newState.build(),valid, task.getFreePars());
 
     }
 

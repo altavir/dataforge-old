@@ -47,7 +47,7 @@ public class QOWFitEngine implements FitEngine {
      */
     public static final String QOW_METHOD_FAST = "fast";
 
-//    /**
+    //    /**
 //     * <p>Constructor for QOWFitEngine.</p>
 //     *
 //     * @param report a {@link hep.dataforge.io.Loggable} object.
@@ -145,9 +145,9 @@ public class QOWFitEngine implements FitEngine {
             case TASK_COVARIANCE:
                 return generateErrors(state, task, log);
             case TASK_RUN:
-                FitState res = makeRun(state, task, log);
-                res = makeRun(res, task, log);
-                return generateErrors(res, task, log);
+                FitResult res = makeRun(state, task, log);
+                res = makeRun(res.getState().get(), task, log);
+                return generateErrors(res.getState().get(), task, log);
             default:
                 throw new IllegalArgumentException("Unknown task");
         }
@@ -170,7 +170,8 @@ public class QOWFitEngine implements FitEngine {
         ParamSet res = this.newtonianRun(state, task, curWeight, log);
 
         /*Генерация результата*/
-        FitResult result = FitResult.buildResult(state, task, res);
+
+        FitResult result = FitResult.build(state.edit().setPars(res).build(), task.getFreePars());
 
         return result;
     }
@@ -180,8 +181,8 @@ public class QOWFitEngine implements FitEngine {
      * generateErrors.</p>
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link Loggable} object.
+     * @param task  a {@link hep.dataforge.stat.fit.FitStage} object.
+     * @param log   a {@link Loggable} object.
      * @return a {@link FitResult} object.
      */
     public FitResult generateErrors(FitState state, FitStage task, Loggable log) {
@@ -199,14 +200,21 @@ public class QOWFitEngine implements FitEngine {
 //        ParamSet pars = state.getParameters().copy();
         NamedMatrix covar = getCovariance(state, curWeight);
 
-        FitResult result = FitResult.buildResult(state, task, covar);
         EigenDecomposition decomposition = new EigenDecomposition(covar.getMatrix());
+        boolean valid = true;
         for (double lambda : decomposition.getRealEigenvalues()) {
             if (lambda <= 0) {
                 log.report("The covariance matrix is not positive defined. Error estimation is not valid");
-                result.setValid(false);
+                valid = false;
             }
         }
+
+        FitResult result = FitResult.build(
+                state.edit().setCovariance(covar, true).build(),
+                valid,
+                task.getFreePars()
+        );
+
 
         return result;
 

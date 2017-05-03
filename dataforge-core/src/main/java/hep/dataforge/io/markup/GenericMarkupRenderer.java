@@ -11,6 +11,7 @@ import static hep.dataforge.io.markup.Markup.MARKUP_GROUP_TYPE;
  */
 public abstract class GenericMarkupRenderer implements MarkupRenderer {
     public static final String TEXT_TYPE = "text";
+    public static final String HEADER_TYPE = "head";
     public static final String LIST_TYPE = "list";
     public static final String TABLE_TYPE = "table";
 
@@ -140,4 +141,11 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
      */
     @ValueDef(name = "header", type = "BOOLEAN", info = "If true the row is considered to be a header")
     protected abstract void tableRow(Markup element);
+
+//    /**
+//     * Header
+//     * @param element
+//     */
+//    @ValueDef(name = "level", type = "NUMBER", info = "the level of header")
+//    protected abstract void header(Markup element);
 }

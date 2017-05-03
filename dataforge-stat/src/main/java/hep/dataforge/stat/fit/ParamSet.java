@@ -19,17 +19,19 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
-import java.io.Serializable;
 import java.util.*;
 import java.util.function.Consumer;
 
 /**
+ * FIXME fix documentation
  * Реализация набора параметров, которая будет потом использоваться в Result,
  * Fitter и Spectrum
  * <p>
@@ -39,7 +41,7 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ParamSet implements NamedValueSet, Serializable {
+public class ParamSet implements NamedValueSet, MetaMorph {
 
     private final HashMap<String, Param> params;
 
@@ -70,7 +72,7 @@ public class ParamSet implements NamedValueSet, Serializable {
     public ParamSet(ParamSet other) {
         this.params = new LinkedHashMap<>();
         for (Param par : other.getParams()) {
-            params.put(par.name(), par.copy());
+            params.put(par.getName(), par.copy());
         }
     }
 
@@ -87,7 +89,7 @@ public class ParamSet implements NamedValueSet, Serializable {
 
     //    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
     @NodeDef(name = "params", info = "Used as a wrapper for 'param' elements.")
-    public static ParamSet fromMeta(Meta cfg) {
+    public void fromMeta(Meta cfg) {
 
         Meta params;
         if (cfg.hasMeta("params")) {
@@ -95,18 +97,21 @@ public class ParamSet implements NamedValueSet, Serializable {
         } else if ("params".equals(cfg.getName())) {
             params = cfg;
         } else {
-            return new ParamSet();
+            return;
         }
 
-
-        ParamSet set = new ParamSet();
         MetaUtils.nodeStream(params).forEach(entry -> {
             if (entry.getKey() != "params") {
-                set.setPar(Param.fromMeta(entry.getValue()));
+                setPar(MetaMorph.morph(Param.class,entry.getValue()));
             }
         });
+    }
 
-        return set;
+    @Override
+    public Meta toMeta() {
+        MetaBuilder builder = new MetaBuilder("params");
+        params.values().forEach(param -> builder.putNode(param.toMeta()));
+        return builder.build();
     }
 
     /**
@@ -127,7 +132,7 @@ public class ParamSet implements NamedValueSet, Serializable {
 
     @Override
     public Optional<Value> optValue(String path) {
-        return optByName(path).map(par -> Value.of(par.value()));
+        return optByName(path).map(par -> Value.of(par.getValue()));
     }
 
 
@@ -268,7 +273,7 @@ public class ParamSet implements NamedValueSet, Serializable {
     public Double getDouble(String str) throws NameNotFoundException {
         Param p;
         p = this.getByName(str);
-        return p.value();
+        return p.getValue();
     }
 
     /**
@@ -288,12 +293,12 @@ public class ParamSet implements NamedValueSet, Serializable {
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      */
     public ParamSet setPar(Param input) {
-        this.params.put(input.name(), input);
+        this.params.put(input.getName(), input);
         return this;
     }
 
 
-    private ParamSet upadatePar(String name, Consumer<Param> consumer){
+    private ParamSet upadatePar(String name, Consumer<Param> consumer) {
         Param par;
         if (!params.containsKey(name)) {
             LoggerFactory.getLogger(getClass())
@@ -308,14 +313,14 @@ public class ParamSet implements NamedValueSet, Serializable {
     }
 
     public ParamSet setPar(String name, double value, double error) {
-        return upadatePar(name, (par)-> {
+        return upadatePar(name, (par) -> {
             par.setValue(value);
             par.setErr(error);
         });
     }
 
     public ParamSet setPar(String name, double value, double error, Double lower, Double upper) {
-        return upadatePar(name, (par)-> {
+        return upadatePar(name, (par) -> {
             par.setValue(value);
             par.setErr(error);
             par.setDomain(lower, upper);
@@ -323,7 +328,7 @@ public class ParamSet implements NamedValueSet, Serializable {
     }
 
     public ParamSet setParValue(String name, double value) {
-        return upadatePar(name, (par)-> {
+        return upadatePar(name, (par) -> {
             par.setValue(value);
         });
     }

@@ -216,8 +216,8 @@ public class FittingIOUtils {
         LogLikelihood like = res.getLogLike();
         Function func = FunctionUtils.getNamedProjection(like, name, res.getParameters());
         Param p = res.getParameters().getByName(name);
-        double a = max(p.value() - scale * p.getErr(), p.getLowerBound());
-        double b = min(p.value() + scale * p.getErr(), p.getUpperBound());
+        double a = max(p.getValue() - scale * p.getErr(), p.getLowerBound());
+        double b = min(p.getValue() + scale * p.getErr(), p.getUpperBound());
         printFunctionSimple(out, func, a, b, numpoints);
     }
 
@@ -279,7 +279,7 @@ public class FittingIOUtils {
     }
 
     public static void printResiduals(PrintWriter out, FitState state) {
-        printResiduals(out, state.getModel(), state.getDataSet(), state.getParameters());
+        printResiduals(out, state.getModel(), state.getPoints(), state.getParameters());
     }
 
     public static void printResiduals(PrintWriter out, Model model, Iterable<DataPoint> data, ParamSet pars) {

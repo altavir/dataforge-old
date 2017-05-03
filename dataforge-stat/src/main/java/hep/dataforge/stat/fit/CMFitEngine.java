@@ -139,7 +139,7 @@ public class CMFitEngine implements FitEngine {
         NamedVector respars = new NamedVector(fitPars, res.getPoint());
         ParamSet allpars = pars.copy();
         allpars.setParValues(respars);
-        FitResult outRes = FitResult.buildResult(state, task, allpars);
+        FitResult outRes = FitResult.build(state.edit().setPars(allpars).build(),task.getFreePars());
 
         return outRes;
 

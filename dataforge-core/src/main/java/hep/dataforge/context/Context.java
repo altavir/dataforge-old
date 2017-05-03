@@ -20,6 +20,7 @@ import hep.dataforge.io.IOManager;
 import hep.dataforge.io.reports.Log;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
@@ -279,14 +280,25 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
     }
 
     @Provides("log")
-    public Optional<Log> optLog(String logName){
+    public Optional<Log> optLog(String logName) {
         return Optional.ofNullable(reportCache.get(logName));
     }
 
+    /**
+     * get or build current log creating the whole log hierarchy
+     * @param reportName
+     * @return
+     */
     public Log getLog(String reportName) {
-        return reportCache.computeIfAbsent(reportName, (n) -> {
-            Log parent = new Log(n, this);
-            return new Log(getName(), parent);
+        return reportCache.computeIfAbsent(reportName, str -> {
+            Name name = Name.of(str);
+            Loggable parent;
+            if (name.length() > 1) {
+                parent = getLog(name.cutLast().toString());
+            } else {
+                parent = Context.this;
+            }
+            return new Log(name.getLast().toString(), parent);
         });
     }
 

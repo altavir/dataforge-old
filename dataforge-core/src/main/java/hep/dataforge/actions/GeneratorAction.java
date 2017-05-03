@@ -27,7 +27,7 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
     public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
-        Log log = new Log(getName(), context);
+        Log log = context.getLog(getName());
         Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
         //TODO add optional parallelization here
         nameStream().forEach(name -> {

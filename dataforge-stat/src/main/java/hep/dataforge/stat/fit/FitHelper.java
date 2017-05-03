@@ -2,7 +2,7 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
-import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -11,12 +11,16 @@ import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.utils.Misc;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.OutputStream;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import static hep.dataforge.stat.fit.FitStage.STAGE_KEY;
@@ -66,12 +70,36 @@ public class FitHelper {
         return new FitBuilder(data);
     }
 
+    @SuppressWarnings("deprecation")
+    private static BiConsumer<FitStage, FitResult> buildDefaultListener(OutputStream stream) {
+        return (stage, result) -> {
+            //TODO add stage additional meta evaluation
+            PrintWriter writer = new PrintWriter(stream);
+            switch (stage.getType()) {
+                case FitStage.TASK_COVARIANCE:
+                    writer.printf("%n***COVARIANCE***%n");
+                    result.printCovariance(writer);
+                default:
+                    result.printState(writer);
+                    result.getState().ifPresent(state -> {
+                        writer.printf("%n***RESIDUALS***%n");
+                        if (state.getModel() instanceof XYModel) {
+                            FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getPoints(), state.getParameters());
+                        } else {
+                            FittingIOUtils.printResiduals(writer, state);
+                        }
+                    });
+            }
+        };
+    }
+
     public class FitBuilder {
         NavigablePointSource data;
         Model model;
         ParamSet startPars = new ParamSet();
         Loggable log = null;
         List<FitStage> stages = new ArrayList<>();
+        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().io().out());
 
         public FitBuilder(@NotNull NavigablePointSource data) {
             this.data = data;
@@ -96,8 +124,43 @@ public class FitHelper {
             return this;
         }
 
+        /**
+         * use context log with given name for this helper
+         * @param reportName
+         * @return
+         */
         public FitBuilder report(String reportName) {
             this.log = getManager().getContext().getLog(reportName);
+            return this;
+        }
+
+        /**
+         * Set listener for fit stage result
+         * @param consumer
+         * @return
+         */
+        public FitBuilder setListener(@NotNull BiConsumer<FitStage, FitResult> consumer) {
+            this.listener = consumer;
+            return this;
+        }
+
+        /**
+         * Create default listener an redirect its output to given stream
+         * @param stream
+         * @return
+         */
+        public FitBuilder setListenerStream(OutputStream stream) {
+            this.listener = buildDefaultListener(stream);
+            return this;
+        }
+
+        /**
+         * Create default listener and redirect its output to Context output with default stage ang given name
+         * @param outputName
+         * @return
+         */
+        public FitBuilder setListenerStream(String outputName) {
+            this.listener = buildDefaultListener(getManager().getContext().io().out("", outputName));
             return this;
         }
 
@@ -121,11 +184,11 @@ public class FitHelper {
                 ParamSet set = new ParamSet();
                 Laminate laminate = (Laminate) meta;
                 laminate.layersInverse().stream().forEach((layer) -> {
-                    set.updateFrom(ParamSet.fromMeta(layer));
+                    set.updateFrom(MetaMorph.morph(ParamSet.class, layer));
                 });
                 return params(set);
             } else {
-                return params(ParamSet.fromMeta(meta));
+                return params(MetaMorph.morph(ParamSet.class, meta));
             }
         }
 
@@ -157,11 +220,6 @@ public class FitHelper {
             return this;
         }
 
-        public FitBuilder showReult() {
-            return stage(new FitStage("print"))
-                    .stage(new FitStage("residuals"));
-        }
-
         public FitBuilder stage(String engineName, String taskName, String... freeParameters) {
             if (freeParameters.length == 0) {
                 stages.add(new FitStage(engineName, taskName));
@@ -180,39 +238,25 @@ public class FitHelper {
                 throw new RuntimeException("Model not set");
             }
 
-            MarkupBuilder report = new MarkupBuilder();
-
             FitState state = new FitState(data, model, startPars);
+            FitResult result = FitResult.build(state);
             if (stages.isEmpty()) {
-                state = manager.runDefaultStage(state, log);
+                Misc.checkThread();
+                FitStage defaultStage = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN);
+                result = manager.runStage(state, defaultStage, log);
+                listener.accept(defaultStage, result);
             } else {
                 for (FitStage stage : stages) {
                     Misc.checkThread();
                     try {
-                        state = manager.runStage(state, stage, log);
+                        result = manager.runStage(state, stage, log);
                     } catch (Exception ex) {
-                        FitResult res = new FitResult(state, stage);
-                        res.setValid(false);
-                        state = res;
+                        result = FitResult.build(state, false, stage.getFreePars());
                     }
                 }
             }
 
-            return FitResult.class.cast(state);
+            return result;
         }
     }
 }
-
-/*
-            case "print":
-                state.printState(writer);
-                return new FitResult(state, FitResult.emptyTask("print"));
-            case "residuals":
-                writer.printf("%n***RESIDUALS***%n");
-                if (state.getModel() instanceof XYModel) {
-                    FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getDataSet(), state.getParameters());
-                } else {
-                    FittingIOUtils.printResiduals(writer, state);
-                }
-                return new FitResult(state, FitResult.emptyTask("residuals"));
- */

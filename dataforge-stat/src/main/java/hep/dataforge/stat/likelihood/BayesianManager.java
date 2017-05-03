@@ -91,8 +91,8 @@ public class BayesianManager{
         } else {
             UnivariateFunction function = this.calculateLikelihood(parname, state, freePars, numCalls);
             Param par = state.getParameters().getByName(parname);
-            Double a = max(par.value() - 4 * par.getErr(), par.getLowerBound());
-            Double b = min(par.value() + 4 * par.getErr(), par.getUpperBound());
+            Double a = max(par.getValue() - 4 * par.getErr(), par.getLowerBound());
+            Double b = min(par.getValue() + 4 * par.getErr(), par.getUpperBound());
             ConfidenceLimitCalculator calculator = new ConfidenceLimitCalculator(function, a, b);
             // На случай, если нам нужно сделать несколько действий и не пересчитывать все
             previousCalc = calculator;

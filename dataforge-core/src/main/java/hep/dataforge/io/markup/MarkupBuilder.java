@@ -91,6 +91,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Set the type of the element
+     *
      * @param type
      * @return
      */
@@ -101,6 +102,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Set the style of element
+     *
      * @param style
      * @return
      */
@@ -113,6 +115,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add content nodes to this markup
+     *
      * @param content
      * @return
      */
@@ -147,6 +150,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add text content
+     *
      * @param text
      * @return
      */
@@ -158,6 +162,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add clored text content
+     *
      * @param text
      * @param color
      * @return
@@ -171,6 +176,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add a new line or a paragraph break
+     *
      * @return
      */
     public MarkupBuilder ln() {
@@ -179,6 +185,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add a fixed width text
+     *
      * @param text
      * @param width
      * @return
@@ -192,6 +199,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
 
     /**
      * Add a list
+     *
      * @param items
      * @return
      */
@@ -203,11 +211,15 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Ann
     }
 
 
-    public MarkupBuilder addTable(MarkupBuilder... rows){
+    public MarkupBuilder addTable(MarkupBuilder... rows) {
         return addContent(new MarkupBuilder()
                 .setType(GenericMarkupRenderer.TABLE_TYPE)
                 .setContent(rows)
         );
+    }
+
+    public MarkupBuilder addHeader(String text, int level) {
+        return addContent(new MarkupBuilder().setType("header").setValue("level", level).setValue("text", text));
     }
 
 }

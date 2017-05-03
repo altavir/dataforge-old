@@ -20,9 +20,11 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.reports.Log;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.tables.Table;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
 
 /**
@@ -33,6 +35,7 @@ import java.io.PrintWriter;
  * @version $Id: $Id
  */
 @TypedActionDef(name = "fit", inputType = Table.class, outputType = FitResult.class, info = "Fit dataset with previously stored model.")
+@ValueDef(name = "printLog", type = "BOOLEAN", def = "true", info = "Append log to the fit report")
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
@@ -53,14 +56,23 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
      */
     @Override
     protected FitResult execute(Context context, String name, Table input, Laminate meta) {
-        return new FitHelper(context).fit(input,meta)
-                .report(name)
+        OutputStream output = buildActionOutput(context, name);
+        Log log = getLog(context, name);
+        FitResult res = new FitHelper(context).fit(input, meta)
+                .setListenerStream(output)
+                .report(log)
                 .run();
+
+        if (meta.getBoolean("printLog", true)) {
+            log.print(new PrintWriter(output));
+        }
+
+        return res;
     }
 
     @Override
     protected void afterAction(Context context, String name, FitResult res, Laminate meta) {
         super.afterAction(context, name, res, meta);
-        context.getLog(name).print(new PrintWriter(buildActionOutput(context,name)));
+        context.getLog(name).print(new PrintWriter(buildActionOutput(context, name)));
     }
 }

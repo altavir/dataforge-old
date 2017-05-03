@@ -17,12 +17,10 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Loggable;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -76,7 +74,6 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         }
         //FIXME add report manager instead of transmitting report
         String resultName = getResultName(data.getName(), actionMeta);
-        buildReport(context, resultName, data);
         Laminate meta = inputMeta(context, data.meta(), actionMeta);
         PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(context, meta),
                 input -> {
@@ -84,24 +81,25 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     return transform(context, resultName, input, meta);
                 }
         );
-//        //PENDING a bit ugly solution
-//        goal.onStart(() -> workListener(actionMeta).submit(resultName, goal.result()));
-
         return new ActionResult<>(context.getLog(resultName), goal, outputMeta(data, meta), getOutputType());
     }
 
-    protected void buildReport(Context context, String name, Data<? extends T> data) {
-        Loggable parent;
-        if (data != null && data instanceof ActionResult) {
-            Log actionLog = ((ActionResult) data).log();
-            if (actionLog.getParent() != null) {
-                //Getting parent from previous report
-                parent = actionLog.getParent();
-            } else {
-                parent = new Log(name, context);
-            }
-        }
+    protected Log getLog(Context context, String dataName) {
+        return context.getLog(Name.joinString(dataName, getName()));
     }
+
+//    protected void buildReport(Context context, String name, Data<? extends T> data) {
+//        Loggable parent;
+//        if (data != null && data instanceof ActionResult) {
+//            Log actionLog = ((ActionResult) data).log();
+//            if (actionLog.getParent() != null) {
+//                //Getting parent from previous report
+//                parent = actionLog.getParent();
+//            } else {
+//                parent = new Log(name, context);
+//            }
+//        }
+//    }
 
     /**
      * @param name      name of the input item

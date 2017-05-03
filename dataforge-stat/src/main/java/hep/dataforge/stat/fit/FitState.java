@@ -15,7 +15,6 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
@@ -27,10 +26,9 @@ import hep.dataforge.tables.Table;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import java.io.PrintWriter;
 import java.io.Serializable;
+import java.util.Optional;
 
-import static hep.dataforge.io.FittingIOUtils.printParamSet;
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
 
 /**
@@ -45,7 +43,7 @@ import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
 //TODO добавить параметры по-умолчанию в модель
 public class FitState implements Serializable {
 
-    private final NavigablePointSource dataSet;
+    private final NavigablePointSource points;
 
     private final Model model;
 
@@ -57,8 +55,8 @@ public class FitState implements Serializable {
 
     private final ParamSet pars;
 
-    public FitState(NavigablePointSource dataSet, Model model, ParamSet pars) {
-        this.dataSet = dataSet;
+    public FitState(NavigablePointSource points, Model model, ParamSet pars) {
+        this.points = points;
         this.model = model;
         this.prior = null;
         this.pars = pars;
@@ -66,9 +64,9 @@ public class FitState implements Serializable {
         this.interval = null;
     }
 
-    public FitState(NavigablePointSource dataSet, Model model, ParamSet pars,
+    public FitState(NavigablePointSource points, Model model, ParamSet pars,
                     NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
-        this.dataSet = dataSet;
+        this.points = points;
         this.model = model;
         this.prior = prior;
         this.covariance = covariance;
@@ -82,7 +80,7 @@ public class FitState implements Serializable {
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      */
     protected FitState(FitState state) {
-        this.dataSet = state.getDataSet();
+        this.points = state.getPoints();
         this.model = state.getModel();
         this.prior = state.getPrior();
         this.covariance = state.covariance;
@@ -150,8 +148,8 @@ public class FitState implements Serializable {
         return covariance != null;
     }
 
-    public IntervalEstimate getIntervalEstimate() {
-        return this.interval;
+    public Optional<IntervalEstimate> getIntervalEstimate() {
+        return Optional.ofNullable(this.interval);
     }
 
     public ParamSet getParameters() {
@@ -187,7 +185,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDis(int i, ParamSet pars) {
-        return model.distance(dataSet.getPoint(i), pars);
+        return model.distance(points.getPoint(i), pars);
     }
 
     /**
@@ -202,7 +200,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        DataPoint dp = dataSet.getPoint(i);
+        DataPoint dp = points.getPoint(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -220,7 +218,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDispersion(int i, ParamSet pars) {
-        double res = model.dispersion(dataSet.getPoint(i), pars);
+        double res = model.dispersion(points.getPoint(i), pars);
         if (res > 0) {
             return res;
         } else {
@@ -239,7 +237,7 @@ public class FitState implements Serializable {
         if (!model.providesProb()) {
             res = -getChi2(set) / 2;
         } else {
-            for (DataPoint dp : dataSet) {
+            for (DataPoint dp : points) {
                 res += model.getLogProb(dp, set);
             }
         }
@@ -270,7 +268,7 @@ public class FitState implements Serializable {
                 res -= d * deriv / s;
             }
         } else {
-            for (DataPoint dp : dataSet) {
+            for (DataPoint dp : points) {
                 res += model.getLogProbDeriv(parName, dp, set);
             }
         }
@@ -323,56 +321,15 @@ public class FitState implements Serializable {
         return model.size();
     }
 
-    public NavigablePointSource getDataSet() {
-        return dataSet;
+    public NavigablePointSource getPoints() {
+        return points;
     }
 
     public int getDataSize() {
-        return dataSet.size();
+        return points.size();
     }
 
-//    @Override
-//    public Markup markup(Meta configuration) {
-//        MarkupBuilder b = new MarkupBuilder()
-//                .addText("***FITTING RESULT***\n")//TODO replace by header
-//                .
-//
-//        return null;
-//    }
 
-    public void printState(PrintWriter out) {
-        out.println("***FITTING RESULT***");
-        this.printAllValues(out);
-        if (covariance != null) {
-            out.println();
-            out.println("Correlation marix:");
-            FittingIOUtils.printNamedMatrix(out, getCorrelationMatrix());
-        }
-        if (this.interval != null) {
-            this.interval.print(out);
-        }
-        out.println();
-        double chi2 = getChi2();
-        out.printf("Chi squared: %g%n", chi2);
-        out.println();
-        out.flush();
-    }
-
-    protected void printAllValues(PrintWriter out) {
-        out.println();
-        out.println("All function parameters are: ");
-        printParamSet(out, this.pars);
-    }
-
-    private void printCovariance(PrintWriter out) {
-        if (getCovariance() != null) {
-            out.println();
-            out.printf("%n***COVARIANCE***%n");
-
-            FittingIOUtils.printNamedMatrix(out, getCovariance());
-
-        }
-    }
 
     /**
      *
@@ -388,7 +345,7 @@ public class FitState implements Serializable {
 
         public Builder(FitState state) {
             this.covariance = state.covariance;
-            this.dataSet = state.dataSet;
+            this.dataSet = state.points;
             this.interval = state.interval;
             this.model = state.model;
             this.pars = state.pars;

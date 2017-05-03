@@ -15,14 +15,12 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.stat.fit.Param;
-import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.MINUIT.FunctionMinimum;
 import hep.dataforge.MINUIT.MnPrint;
 import hep.dataforge.MINUIT.MnUserParameters;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.stat.parametric.MultiFunction;
+
 import java.io.PrintWriter;
 
 class MINUITUtils {
@@ -38,7 +36,7 @@ class MINUITUtils {
 
         for (i = 0; i < fitPars.length; i++) {
             par = set.getByName(fitPars[i]);
-            pars.add(fitPars[i], par.value(), par.getErr());
+            pars.add(fitPars[i], par.getValue(), par.getErr());
 
             if ((par.getLowerBound() > Double.NEGATIVE_INFINITY) && (par.getUpperBound() < Double.POSITIVE_INFINITY)) {
                 pars.setLimits(i, par.getLowerBound(), par.getUpperBound());
