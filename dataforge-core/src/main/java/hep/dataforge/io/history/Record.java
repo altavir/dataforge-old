@@ -32,14 +32,14 @@ import static java.lang.String.format;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistoryEntry {
+public class Record {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final List<String> sourceTrace = new ArrayList<>();
     private final String message;
     private final Instant time;
 
-    public HistoryEntry(HistoryEntry entry, String traceAdd) {
+    public Record(Record entry, String traceAdd) {
         this.sourceTrace.addAll(entry.sourceTrace);
         if (traceAdd != null && !traceAdd.isEmpty()) {
             this.sourceTrace.add(0, traceAdd);
@@ -48,12 +48,12 @@ public class HistoryEntry {
         this.time = entry.time;
     }
 
-    public HistoryEntry(Instant time, String message) {
+    public Record(Instant time, String message) {
         this.time = time;
         this.message = message;
     }
 
-    public HistoryEntry(String message) {
+    public Record(String message) {
         this.time = DateTimeUtils.now();
         this.message = message;
     }

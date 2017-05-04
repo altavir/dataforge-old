@@ -37,8 +37,8 @@ public class Chronicle implements History, Named {
 
     private static int MAX_LOG_SIZE = 1000;
     private final String name;
-    private final ReferenceRegistry<Consumer<HistoryEntry>> listeners = new ReferenceRegistry<>();
-    protected ConcurrentLinkedQueue<HistoryEntry> entries = new ConcurrentLinkedQueue<>();
+    private final ReferenceRegistry<Consumer<Record>> listeners = new ReferenceRegistry<>();
+    protected ConcurrentLinkedQueue<Record> entries = new ConcurrentLinkedQueue<>();
     private History parent;
 
     public Chronicle(String name, History parent) {
@@ -62,18 +62,18 @@ public class Chronicle implements History, Named {
     }
 
     @Override
-    public void report(HistoryEntry entry) {
+    public void report(Record entry) {
         entries.add(entry);
         if (entries.size() >= getMaxLogSize()) {
             entries.poll();// Ограничение на размер лога
 //            getLogger().warn("Log at maximum capacity!");
         }
-        listeners.forEach((Consumer<HistoryEntry> listener) -> {
+        listeners.forEach((Consumer<Record> listener) -> {
             listener.accept(entry);
         });
 
         if (getParent() != null) {
-            HistoryEntry newEntry = pushTrace(entry, getName());
+            Record newEntry = pushTrace(entry, getName());
             getParent().report(newEntry);
         }
     }
@@ -83,12 +83,12 @@ public class Chronicle implements History, Named {
      *
      * @param logListener
      */
-    public void addListener(Consumer<HistoryEntry> logListener) {
+    public void addListener(Consumer<Record> logListener) {
         this.listeners.add(logListener, true);
     }
 
-    private HistoryEntry pushTrace(HistoryEntry entry, String toTrace) {
-        return new HistoryEntry(entry, toTrace);
+    private Record pushTrace(Record entry, String toTrace) {
+        return new Record(entry, toTrace);
     }
 
     public void clear() {
@@ -119,12 +119,12 @@ public class Chronicle implements History, Named {
 
     @Override
     public void report(String str, Object... parameters) {
-        HistoryEntry entry = new HistoryEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
+        Record entry = new Record(MessageFormatter.arrayFormat(str, parameters).getMessage());
         Chronicle.this.report(entry);
     }
 
     @Override
     public void reportError(String str, Object... parameters) {
-        Chronicle.this.report(new HistoryEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
+        Chronicle.this.report(new Record("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
     }
 }

@@ -32,7 +32,7 @@ public interface History {
         getLog().report(str, parameters);
     }
 
-    default void report(HistoryEntry entry){
+    default void report(Record entry){
         getLog().report(entry);
     }
     

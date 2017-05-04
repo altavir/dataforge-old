@@ -21,7 +21,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.context.Plugin;
-import hep.dataforge.io.history.HistoryEntry;
+import hep.dataforge.io.history.Record;
 import hep.dataforge.io.markup.MarkupRenderer;
 import hep.dataforge.io.markup.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
@@ -157,8 +157,8 @@ public interface IOManager extends Plugin {
         return tmp;
     }
 
-    default Consumer<HistoryEntry> getLogEntryHandler() {
-        return (HistoryEntry t) -> {
+    default Consumer<Record> getLogEntryHandler() {
+        return (Record t) -> {
             try {
                 out().write((t.toString() + "\n").getBytes());
                 out().flush();
