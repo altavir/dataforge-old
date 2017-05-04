@@ -9,9 +9,9 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
@@ -32,7 +32,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Annotated, ValueProvider {
+public class TaskModel implements Named, Metoid, ValueProvider {
 
     //TODO implement builder chain
     private final Workspace workspace;

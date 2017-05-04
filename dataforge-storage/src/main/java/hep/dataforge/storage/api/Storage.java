@@ -20,8 +20,8 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
@@ -40,7 +40,7 @@ import java.util.Optional;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
+public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
 
     public static final String LOADER_TARGET = "loader";
     public static final String STORAGE_TARGET = "storage";

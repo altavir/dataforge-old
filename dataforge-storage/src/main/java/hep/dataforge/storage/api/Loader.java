@@ -17,7 +17,7 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Path;
 
@@ -27,7 +27,7 @@ import hep.dataforge.providers.Path;
  *
  * @author Alexander Nozik
  */
-public interface Loader extends Annotated, AutoCloseable, Named, Responder {
+public interface Loader extends Metoid, AutoCloseable, Named, Responder {
 
     String LOADER_NAME_KEY = "name";
     String LOADER_TYPE_KEY = "type";

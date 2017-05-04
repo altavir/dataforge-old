@@ -17,8 +17,8 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.MINUIT.*;
 import hep.dataforge.context.Global;
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.MultiFunction;
 
@@ -69,8 +69,8 @@ public class MINUITFitEngine implements FitEngine {
      * @param parentLog
      */
     @Override
-    public FitResult run(FitState state, FitStage task, Loggable parentLog) {
-        Log log = new Log("MINUIT", parentLog);
+    public FitResult run(FitState state, FitStage task, History parentLog) {
+        Chronicle log = new Chronicle("MINUIT", parentLog);
 
         log.report("MINUIT fit engine started task '{}'", task.getType());
         switch (task.getType()) {
@@ -93,7 +93,7 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link FitResult} object.
      */
-    public FitResult runHesse(FitState state, FitStage task, Loggable log) {
+    public FitResult runHesse(FitState state, FitStage task, History log) {
         int strategy;
         strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
 
@@ -144,7 +144,7 @@ public class MINUITFitEngine implements FitEngine {
      * @param log
      * @return a {@link FitResult} object.
      */
-    public FitResult runFit(FitState state, FitStage task, Loggable log) {
+    public FitResult runFit(FitState state, FitStage task, History log) {
 
         MnApplication minuit;
         log.report("Starting fit using Minuit.");

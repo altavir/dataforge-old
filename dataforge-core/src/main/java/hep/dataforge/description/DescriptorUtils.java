@@ -6,10 +6,10 @@
 package hep.dataforge.description;
 
 import hep.dataforge.io.MetaFileReader;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Path;
 import hep.dataforge.utils.Misc;
@@ -218,7 +218,7 @@ public class DescriptorUtils {
      * @param obj
      * @return
      */
-    public static Value extractValue(String name, Annotated obj) {
+    public static Value extractValue(String name, Metoid obj) {
         return extractValue(name, obj.meta(), buildDescriptor(obj));
     }
 
@@ -252,7 +252,7 @@ public class DescriptorUtils {
                         return method;
                     }
                 }
-                LoggerFactory.getLogger(DescriptorUtils.class).error("Annotated method not found by given path: " + path);
+                LoggerFactory.getLogger(DescriptorUtils.class).error("Metoid method not found by given path: " + path);
                 return null;
             } catch (ClassNotFoundException ex) {
                 LoggerFactory.getLogger(DescriptorUtils.class).error("Class not found by given path: " + path, ex);

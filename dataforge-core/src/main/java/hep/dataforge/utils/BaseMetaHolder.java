@@ -7,8 +7,8 @@ package hep.dataforge.utils;
 
 import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
@@ -21,7 +21,7 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
-public class BaseMetaHolder implements Annotated, ValueProvider, Described {
+public class BaseMetaHolder implements Metoid, ValueProvider, Described {
 
     private Meta meta;
     private transient NodeDescriptor descriptor;
@@ -65,7 +65,7 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
      */
     protected void setMeta(Meta meta) {
         if (this.meta != null) {
-            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotated object");
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Metoid object");
         }
         this.meta = meta;
     }

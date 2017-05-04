@@ -15,7 +15,7 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 
 import java.util.List;
@@ -29,7 +29,7 @@ import java.util.stream.StreamSupport;
  * @version $Id: $Id
  */
 
-public interface Column extends Iterable<Value>, Annotated {
+public interface Column extends Iterable<Value>, Metoid {
 
     default ColumnFormat getFormat() {
         return new ColumnFormat(meta());

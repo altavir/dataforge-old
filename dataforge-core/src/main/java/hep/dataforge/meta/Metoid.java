@@ -20,7 +20,7 @@ package hep.dataforge.meta;
  *
  * @author Alexander Nozik
  */
-public interface Annotated {
+public interface Metoid {
 
     /**
      * Get the meta-data for this object. By convention null is not allowed. If

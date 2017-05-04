@@ -3,7 +3,7 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
-import hep.dataforge.io.reports.Loggable
+import hep.dataforge.io.history.History
 import hep.dataforge.meta.Laminate
 
 /**
@@ -46,7 +46,7 @@ class GrindOneToOneAction extends OneToOneAction {
     @Override
     protected Object execute(Context context, String name, Object input, Laminate meta) {
         if (action != null) {
-            return new OneToOneCallable(context.getLog(name), name, meta, input).execute(action);
+            return new OneToOneCallable(context.getChronicle(name), name, meta, input).execute(action);
         } else {
             return input;
         }
@@ -54,12 +54,12 @@ class GrindOneToOneAction extends OneToOneAction {
     }
 
     private static class OneToOneCallable {
-        Loggable log
+        History log
         String name
         Laminate meta
         Object input
 
-        OneToOneCallable(Loggable log, String name, Laminate meta, Object input) {
+        OneToOneCallable(History log, String name, Laminate meta, Object input) {
             this.log = log
             this.name = name
             this.meta = meta

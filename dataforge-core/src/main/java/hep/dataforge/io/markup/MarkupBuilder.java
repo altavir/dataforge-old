@@ -1,8 +1,8 @@
 package hep.dataforge.io.markup;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.GenericBuilder;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +15,7 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.LIST_TYPE;
 /**
  * Created by darksnake on 03-Jan-17.
  */
-public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Annotated {
+public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     public static MarkupBuilder text(String text) {
         return new MarkupBuilder().setValue("text", text);

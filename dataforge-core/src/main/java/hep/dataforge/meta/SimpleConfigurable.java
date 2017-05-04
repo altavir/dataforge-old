@@ -26,7 +26,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public class SimpleConfigurable implements Configurable, Annotated {
+public class SimpleConfigurable implements Configurable, Metoid {
 
     private Configuration configuration = null;
 

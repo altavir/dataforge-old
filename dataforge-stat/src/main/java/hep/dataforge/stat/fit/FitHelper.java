@@ -3,7 +3,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.io.FittingIOUtils;
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
@@ -100,7 +100,7 @@ public class FitHelper {
         NavigablePointSource data;
         Model model;
         ParamSet startPars = new ParamSet();
-        Loggable log = null;
+        History log = null;
         List<FitStage> stages = new ArrayList<>();
         BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().io().out());
 
@@ -122,7 +122,7 @@ public class FitHelper {
             return this;
         }
 
-        public FitBuilder report(Loggable report) {
+        public FitBuilder report(History report) {
             this.log = report;
             return this;
         }
@@ -134,7 +134,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder report(String reportName) {
-            this.log = getManager().getContext().getLog(reportName);
+            this.log = getManager().getContext().getChronicle(reportName);
             return this;
         }
 

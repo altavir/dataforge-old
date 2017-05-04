@@ -16,7 +16,7 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
@@ -29,7 +29,7 @@ import hep.dataforge.values.NamedValueSet;
  *
  * @author Alexander Nozik
  */
-public interface Model extends NameSetContainer, Annotated {
+public interface Model extends NameSetContainer, Metoid {
 
     /**
      * Fit function value minus data point value

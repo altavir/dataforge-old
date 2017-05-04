@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.reports;
+package hep.dataforge.io.history;
 
 import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
@@ -32,15 +32,16 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Log implements Loggable, Named {
+public class Chronicle implements History, Named {
+    public static final String CHRONICLE_PROVIDER_KEY = "chronicle";
 
     private static int MAX_LOG_SIZE = 1000;
     private final String name;
-    private final ReferenceRegistry<Consumer<LogEntry>> listeners = new ReferenceRegistry<>();
-    protected ConcurrentLinkedQueue<LogEntry> entries = new ConcurrentLinkedQueue<>();
-    private Loggable parent;
+    private final ReferenceRegistry<Consumer<HistoryEntry>> listeners = new ReferenceRegistry<>();
+    protected ConcurrentLinkedQueue<HistoryEntry> entries = new ConcurrentLinkedQueue<>();
+    private History parent;
 
-    public Log(String name, Loggable parent) {
+    public Chronicle(String name, History parent) {
         if (name == null || name.isEmpty()) {
             throw new AnonymousNotAlowedException();
         }
@@ -48,11 +49,11 @@ public class Log implements Loggable, Named {
         this.parent = parent;
     }
 
-    public Log(String name) {
+    public Chronicle(String name) {
         this(name, Global.instance());
     }
 
-    public void setParent(Loggable parent) {
+    public void setParent(History parent) {
         this.parent = parent;
     }
 
@@ -61,18 +62,18 @@ public class Log implements Loggable, Named {
     }
 
     @Override
-    public void report(LogEntry entry) {
+    public void report(HistoryEntry entry) {
         entries.add(entry);
         if (entries.size() >= getMaxLogSize()) {
             entries.poll();// Ограничение на размер лога
 //            getLogger().warn("Log at maximum capacity!");
         }
-        listeners.forEach((Consumer<LogEntry> listener) -> {
+        listeners.forEach((Consumer<HistoryEntry> listener) -> {
             listener.accept(entry);
         });
 
         if (getParent() != null) {
-            LogEntry newEntry = pushTrace(entry, getName());
+            HistoryEntry newEntry = pushTrace(entry, getName());
             getParent().report(newEntry);
         }
     }
@@ -82,19 +83,19 @@ public class Log implements Loggable, Named {
      *
      * @param logListener
      */
-    public void addListener(Consumer<LogEntry> logListener) {
+    public void addListener(Consumer<HistoryEntry> logListener) {
         this.listeners.add(logListener, true);
     }
 
-    private LogEntry pushTrace(LogEntry entry, String toTrace) {
-        return new LogEntry(entry, toTrace);
+    private HistoryEntry pushTrace(HistoryEntry entry, String toTrace) {
+        return new HistoryEntry(entry, toTrace);
     }
 
     public void clear() {
         entries.clear();
     }
 
-    public Loggable getParent() {
+    public History getParent() {
         return parent;
     }
 
@@ -107,7 +108,7 @@ public class Log implements Loggable, Named {
         out.flush();
     }
 
-    public Log getLog() {
+    public Chronicle getLog() {
         return this;
     }
 
@@ -118,12 +119,12 @@ public class Log implements Loggable, Named {
 
     @Override
     public void report(String str, Object... parameters) {
-        LogEntry entry = new LogEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
-        Log.this.report(entry);
+        HistoryEntry entry = new HistoryEntry(MessageFormatter.arrayFormat(str, parameters).getMessage());
+        Chronicle.this.report(entry);
     }
 
     @Override
     public void reportError(String str, Object... parameters) {
-        Log.this.report(new LogEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
+        Chronicle.this.report(new HistoryEntry("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
     }
 }

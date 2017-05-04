@@ -15,8 +15,8 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
@@ -24,7 +24,7 @@ import hep.dataforge.values.Value;
  * An adapter to interpret datapoint
  * @author Alexander Nozik
  */
-public interface PointAdapter extends Annotated, MetaMorph {
+public interface PointAdapter extends Metoid, MetaMorph {
     
     String DATA_ADAPTER_KEY = "adapter";
 

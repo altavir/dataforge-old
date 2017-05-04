@@ -15,8 +15,8 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.MultiFunction;
@@ -64,8 +64,8 @@ public class CMFitEngine implements FitEngine {
 
     /** {@inheritDoc} */
     @Override
-    public FitResult run(FitState state, FitStage task, Loggable parentLog) {
-        Log log = new Log("CM", parentLog);
+    public FitResult run(FitState state, FitStage task, History parentLog) {
+        Chronicle log = new Chronicle("CM", parentLog);
         switch (task.getType()) {
             case TASK_SINGLE:
             case TASK_RUN:
@@ -81,10 +81,10 @@ public class CMFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link Loggable} object.
+     * @param log a {@link History} object.
      * @return a {@link FitResult} object.
      */
-    public FitResult makeRun(FitState state, FitStage task, Loggable log) {
+    public FitResult makeRun(FitState state, FitStage task, History log) {
 
         log.report("Starting fit using provided Commons Math algorithms.");
         int maxSteps = task.meta().getInt("iterations", DEFAULT_MAXITER);

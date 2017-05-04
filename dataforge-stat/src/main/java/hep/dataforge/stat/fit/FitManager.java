@@ -20,7 +20,7 @@ import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
@@ -125,7 +125,7 @@ public class FitManager extends BasicPlugin implements Provider {
         return runDefaultStage(state, getContext(), freePars);
     }
 
-    public FitResult runDefaultStage(FitState state, Loggable log, String... freePars) {
+    public FitResult runDefaultStage(FitState state, History log, String... freePars) {
         FitStage task = new FitStage(QOWFitEngine.QOW_ENGINE_NAME, FitStage.TASK_RUN, freePars);
         return runStage(state, task, log);
     }
@@ -135,7 +135,7 @@ public class FitManager extends BasicPlugin implements Provider {
         return runStage(state, task, getContext());
     }
 
-    public FitResult runStage(FitState state, FitStage task, Loggable log) {
+    public FitResult runStage(FitState state, FitStage task, History log) {
         FitEngine engine = buildEngine(task.getEngineName());
         if (state == null) {
             throw new IllegalArgumentException("The fit state is not defined");

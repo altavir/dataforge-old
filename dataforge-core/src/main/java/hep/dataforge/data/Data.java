@@ -18,8 +18,8 @@ package hep.dataforge.data;
 import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.StaticGoal;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -32,7 +32,7 @@ import java.util.function.Supplier;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Data<T> implements Annotated {
+public class Data<T> implements Metoid {
 
     private final Goal<T> goal;
     private final Meta meta;

@@ -20,7 +20,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.tables.Table;
 
@@ -62,7 +62,7 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
         writer.println(meta.toString());
         writer.flush();
 
-        Log log = getLog(context, name);
+        Chronicle log = getLog(context, name);
         FitResult res = new FitHelper(context).fit(input, meta)
                 .setListenerStream(output)
                 .report(log)

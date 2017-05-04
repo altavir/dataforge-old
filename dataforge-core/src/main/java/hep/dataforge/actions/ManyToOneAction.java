@@ -68,7 +68,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             reportName = getName();
         }
 
-        return new ActionResult<>(context.getLog(reportName), goal, outputMeta, getOutputType());
+        return new ActionResult<>(context.getChronicle(reportName), goal, outputMeta, getOutputType());
     }
 
     protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {

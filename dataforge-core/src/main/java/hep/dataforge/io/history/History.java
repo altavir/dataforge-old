@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.reports;
+package hep.dataforge.io.history;
 
 
 /**
@@ -24,15 +24,15 @@ package hep.dataforge.io.reports;
  *
  * @author Alexander Nozik
  */
-public interface Loggable {
+public interface History {
 
-    Log getLog();
+    Chronicle getLog();
 
     default void report(String str, Object... parameters){
         getLog().report(str, parameters);
     }
 
-    default void report(LogEntry entry){
+    default void report(HistoryEntry entry){
         getLog().report(entry);
     }
     

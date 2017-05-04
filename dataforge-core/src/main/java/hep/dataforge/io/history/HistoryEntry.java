@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.io.reports;
+package hep.dataforge.io.history;
 
 import hep.dataforge.utils.DateTimeUtils;
 
@@ -32,14 +32,14 @@ import static java.lang.String.format;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class LogEntry {
+public class HistoryEntry {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final List<String> sourceTrace = new ArrayList<>();
     private final String message;
     private final Instant time;
 
-    public LogEntry(LogEntry entry, String traceAdd) {
+    public HistoryEntry(HistoryEntry entry, String traceAdd) {
         this.sourceTrace.addAll(entry.sourceTrace);
         if (traceAdd != null && !traceAdd.isEmpty()) {
             this.sourceTrace.add(0, traceAdd);
@@ -48,12 +48,12 @@ public class LogEntry {
         this.time = entry.time;
     }
 
-    public LogEntry(Instant time, String message) {
+    public HistoryEntry(Instant time, String message) {
         this.time = time;
         this.message = message;
     }
 
-    public LogEntry(String message) {
+    public HistoryEntry(String message) {
         this.time = DateTimeUtils.now();
         this.message = message;
     }

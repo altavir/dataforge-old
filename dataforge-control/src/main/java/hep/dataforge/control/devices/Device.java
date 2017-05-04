@@ -23,9 +23,9 @@ import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 
@@ -59,7 +59,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public interface Device extends Configurable, Annotated, Encapsulated, Named, Responder {
+public interface Device extends Configurable, Metoid, Encapsulated, Named, Responder {
 
     /**
      * Device type

@@ -7,8 +7,8 @@ package hep.dataforge.fx.configuration;
 
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.fx.values.ValueChooser;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Configuration;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 import javafx.beans.Observable;
 import javafx.event.ActionEvent;
@@ -31,7 +31,7 @@ import java.util.ResourceBundle;
  *
  * @author Alexander Nozik
  */
-public class ConfigEditor extends BorderPane implements Initializable, Annotated {
+public class ConfigEditor extends BorderPane implements Initializable, Metoid {
 
     public static ConfigEditor build(Configuration configuration, NodeDescriptor descriptor) {
         ConfigEditor component = new ConfigEditor();

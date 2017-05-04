@@ -17,8 +17,8 @@ package hep.dataforge.context;
 
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
@@ -42,6 +42,8 @@ import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.io.history.Chronicle.CHRONICLE_PROVIDER_KEY;
+
 /**
  * <p>
  * The local environment for anything being done in DataForge framework. Contexts are organized into tree structure with {@link Global} at the top.
@@ -58,7 +60,7 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-public class Context implements Provider, ValueProvider, Loggable, Named, AutoCloseable {
+public class Context implements Provider, ValueProvider, History, Named, AutoCloseable {
 
     public static Builder builder(String name) {
         return new Builder(name);
@@ -68,10 +70,10 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
     private final String name;
     private final PluginManager pm;
     protected Logger logger;
-    protected Log rootLog;
+    protected Chronicle rootLog;
 
     //TODO move to separate manager
-    private transient Map<String, Log> reportCache = new ConcurrentHashMap<>();
+    private transient Map<String, Chronicle> historyCache = new ConcurrentHashMap<>();
 
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;
@@ -85,7 +87,7 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
      */
     protected Context(String name) {
         this.pm = new PluginManager(this);
-        this.rootLog = new Log(name);
+        this.rootLog = new Chronicle(name);
         this.name = name;
     }
 
@@ -196,78 +198,6 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
     public Collection<String> listValues() {
         return properties.keySet();
     }
-//    @Override
-//    public Collection<String> listContent(String target) {
-//        if ("value".equals(target)) {
-//            return properties.keySet();
-//        } else if (target.isEmpty() || "plugin".equals(target)) {
-//            return pluginManager().list().stream().map(plugin -> plugin.getName()).collect(Collectors.toSet());
-//        } else {
-//            return Collections.emptySet();
-//        }
-//    }
-
-
-    //    /**
-//     * Check if object is provided in this namespace as is
-//     *
-//     * @param target a {@link java.lang.String} object.
-//     * @param name   a {@link hep.dataforge.names.Name} object.
-//     * @return a boolean.
-//     */
-//    public Object provideInNameSpace(String target, Name name) {
-//        if ("value".equals(target)) {
-//            return getValue(name.toString());
-//        } else if (target.isEmpty() || "plugin".equals(target)) {
-//            return pluginManager().getOrLoad(name.toString());
-//        } else {
-//            throw new TargetNotProvidedException(target);
-//        }
-//    }
-//
-//    @Override
-//    public Collection<String> listContent(String target) {
-//        if ("value".equals(target)) {
-//            return properties.keySet();
-//        } else if (target.isEmpty() || "plugin".equals(target)) {
-//            return pluginManager().list().stream().map(plugin -> plugin.getName()).collect(Collectors.toSet());
-//        } else {
-//            return Collections.emptySet();
-//        }
-//    }
-//    /**
-//     * Provide an object from namespace as is (without namespace substitution)
-//     *
-//     * @param target
-//     * @param name
-//     * @return
-//     */
-//    public boolean providesInNameSpace(String target, Name name) {
-//        if ("value".equals(target)) {
-//            return hasValue(name.toString());
-//        } else if (target.isEmpty() || "plugin".equals(target)) {
-//            return pluginManager().has(name.toString());
-//        } else {
-//            return false;
-//        }
-//    }
-//
-//    @Override
-//    public boolean provides(String target, Name name) {
-//        return providesInNameSpace(target, name)
-//                || (name.nameSpace().equals(getName()) && providesInNameSpace(target, name.toNameSpace("")));
-//    }
-//
-//    @Override
-//    public Object provide(String target, Name name) {
-//        if (providesInNameSpace(target, name)) {
-//            return provideInNameSpace(target, name);
-//        } else if (name.nameSpace().equals(getName())) {
-//            return provideInNameSpace(target, name.toNameSpace(""));
-//        } else {
-//            throw new NameNotFoundException(name.toString());
-//        }
-//    }
 
     /**
      * {@inheritDoc}
@@ -275,13 +205,13 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
      * @return
      */
     @Override
-    public Log getLog() {
+    public Chronicle getLog() {
         return this.rootLog;
     }
 
-    @Provides("log")
-    public Optional<Log> optLog(String logName) {
-        return Optional.ofNullable(reportCache.get(logName));
+    @Provides(CHRONICLE_PROVIDER_KEY)
+    public Optional<Chronicle> optChronicle(String logName) {
+        return Optional.ofNullable(historyCache.get(logName));
     }
 
     /**
@@ -289,16 +219,16 @@ public class Context implements Provider, ValueProvider, Loggable, Named, AutoCl
      * @param reportName
      * @return
      */
-    public Log getLog(String reportName) {
-        return reportCache.computeIfAbsent(reportName, str -> {
+    public Chronicle getChronicle(String reportName) {
+        return historyCache.computeIfAbsent(reportName, str -> {
             Name name = Name.of(str);
-            Loggable parent;
+            History parent;
             if (name.length() > 1) {
-                parent = getLog(name.cutLast().toString());
+                parent = getChronicle(name.cutLast().toString());
             } else {
                 parent = Context.this;
             }
-            return new Log(name.getLast().toString(), parent);
+            return new Chronicle(name.getLast().toString(), parent);
         });
     }
 

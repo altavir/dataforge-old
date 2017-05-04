@@ -20,7 +20,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.goals.PipeGoal;
-import hep.dataforge.io.reports.Log;
+import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -81,11 +81,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     return transform(context, resultName, input, meta);
                 }
         );
-        return new ActionResult<>(context.getLog(resultName), goal, outputMeta(data, meta), getOutputType());
+        return new ActionResult<>(context.getChronicle(resultName), goal, outputMeta(data, meta), getOutputType());
     }
 
-    protected Log getLog(Context context, String dataName) {
-        return context.getLog(Name.joinString(dataName, getName()));
+    protected Chronicle getLog(Context context, String dataName) {
+        return context.getChronicle(Name.joinString(dataName, getName()));
     }
 
 //    protected void buildReport(Context context, String name, Data<? extends T> data) {

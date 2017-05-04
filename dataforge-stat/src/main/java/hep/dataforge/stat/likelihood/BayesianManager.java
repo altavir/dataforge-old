@@ -15,7 +15,7 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.io.reports.Loggable;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.IntervalEstimate;
@@ -43,7 +43,7 @@ public class BayesianManager{
      * Constant <code>DEFAULT_MAX_CALLS=10000</code>
      */
     public static final int DEFAULT_MAX_CALLS = 10000;
-    private final Loggable log;
+    private final History log;
     private ConfidenceLimitCalculator previousCalc;
     private String previousPar;
     private FitState previousResult;
@@ -53,7 +53,7 @@ public class BayesianManager{
      * Constructor for BayesianManager.</p>
      * @param log
      */
-    public BayesianManager(Loggable log) {
+    public BayesianManager(History log) {
         this.log = log;
     }
 

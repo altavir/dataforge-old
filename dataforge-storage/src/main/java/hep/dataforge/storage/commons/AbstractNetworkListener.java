@@ -19,8 +19,8 @@ import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +38,7 @@ import static hep.dataforge.storage.commons.MessageFactory.terminator;
  *
  * @author Darksnake
  */
-public abstract class AbstractNetworkListener implements Annotated, AutoCloseable, Responder {
+public abstract class AbstractNetworkListener implements Metoid, AutoCloseable, Responder {
 
     private static final Logger logger = LoggerFactory.getLogger("LISTENER");
 

@@ -7,8 +7,8 @@ package hep.dataforge.data;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.goals.GoalGroup;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Annotated, Provider {
+public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Metoid, Provider {
 
     String DATA_TARGET = "data";
     String NODE_TARGET = "node";
@@ -278,7 +278,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         return dataStream().iterator();
     }
 
-    interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Annotated {
+    interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Metoid {
 
         Class<T> type();
 
