@@ -3,7 +3,7 @@ package hep.dataforge.plots.jzy3d;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.fx.FXPlotFrame;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
 
 import java.io.OutputStream;
 
@@ -13,10 +13,6 @@ import java.io.OutputStream;
 public class JZY3DFrame extends XYPlotFrame implements FXPlotFrame {
 
 
-    @Override
-    public void display(AnchorPane container) {
-
-    }
 
     @Override
     protected void updatePlotData(String name) {
@@ -46,5 +42,10 @@ public class JZY3DFrame extends XYPlotFrame implements FXPlotFrame {
     @Override
     public void snapshot(OutputStream stream, Meta config) {
 
+    }
+
+    @Override
+    public Node getRoot() {
+        return null;
     }
 }

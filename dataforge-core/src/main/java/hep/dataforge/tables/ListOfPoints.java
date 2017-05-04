@@ -89,15 +89,13 @@ public class ListOfPoints implements MetaMorph, NavigablePointSource {
 
     @Override
     public Meta toMeta() {
-        MetaBuilder res = new MetaBuilder("list");
         MetaBuilder dataNode = new MetaBuilder("data");
         forEach(dp -> dataNode.putNode("point", dp.toMeta()));
-        res.putNode(dataNode);
-        return res;
+        return dataNode;
     }
 
     @Override
     public void fromMeta(Meta meta) {
-        data.addAll(DataPoint.buildFromMeta(meta.getMeta("data")));
+        data.addAll(DataPoint.buildFromMeta(meta));
     }
 }

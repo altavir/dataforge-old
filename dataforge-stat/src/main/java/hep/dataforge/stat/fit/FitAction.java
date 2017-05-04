@@ -57,6 +57,11 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
     @Override
     protected FitResult execute(Context context, String name, Table input, Laminate meta) {
         OutputStream output = buildActionOutput(context, name);
+        PrintWriter writer = new PrintWriter(output);
+        writer.printf("%n*** META ***%n");
+        writer.println(meta.toString());
+        writer.flush();
+
         Log log = getLog(context, name);
         FitResult res = new FitHelper(context).fit(input, meta)
                 .setListenerStream(output)
@@ -64,7 +69,7 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
                 .run();
 
         if (meta.getBoolean("printLog", true)) {
-            log.print(new PrintWriter(output));
+            log.print(writer);
         }
 
         return res;

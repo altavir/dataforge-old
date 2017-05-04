@@ -70,7 +70,7 @@ public class FileStateLoaderTest {
         loader.close();
         System.out.println("passed!");
         System.out.println("***starting read test***");
-        loader = (StateLoader) storage.getLoader("test_states");
+        loader = (StateLoader) storage.optLoader("test_states").get();
         System.out.println(loader.getValue("giberish"));
         assertEquals(Math.PI, loader.getValue("pi").doubleValue(),0.01);
 

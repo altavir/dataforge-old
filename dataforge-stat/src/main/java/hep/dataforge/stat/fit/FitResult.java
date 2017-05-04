@@ -48,9 +48,9 @@ public class FitResult extends SimpleMetaMorph {
 
         //TODO add residuals to data
         if (freeParameters.length == 0) {
-            builder.setValue("freePars", freeParameters);
-        } else {
             builder.setValue("freePars", state.getParameters().namesAsArray());
+        } else {
+            builder.setValue("freePars", freeParameters);
         }
 
         //FIXME add covariance
@@ -118,7 +118,7 @@ public class FitResult extends SimpleMetaMorph {
      */
     @Deprecated
     public void printState(PrintWriter out) {
-        out.println("***FITTING RESULT***");
+        //out.println("***FITTING RESULT***");
         this.printAllValues(out);
         this.printFitParsValues(out);
 

@@ -22,10 +22,7 @@ import hep.dataforge.maths.MatrixOperations;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.stat.fit.FitManager;
-import hep.dataforge.stat.fit.FitState;
-import hep.dataforge.stat.fit.Hessian;
-import hep.dataforge.stat.fit.ParamSet;
+import hep.dataforge.stat.fit.*;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.DataPoint;
@@ -53,7 +50,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         rnd = new JDKRandomGenerator();
     }
 
-    public static FitState fit(Table data, ParamSet pars, String engine) {
+    public static FitResult fit(Table data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
         XYModel model = new XYModel( new GaussianSpectrum());
         FitState state = new FitState(data, model, pars);

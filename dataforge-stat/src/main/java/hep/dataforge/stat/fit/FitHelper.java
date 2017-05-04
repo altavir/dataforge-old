@@ -75,14 +75,16 @@ public class FitHelper {
         return (stage, result) -> {
             //TODO add stage additional meta evaluation
             PrintWriter writer = new PrintWriter(stream);
+            writer.printf("%n*** Result of fit stage" + stage.getType() + " ***%n");
+
             switch (stage.getType()) {
                 case FitStage.TASK_COVARIANCE:
-                    writer.printf("%n***COVARIANCE***%n");
+                    writer.printf("%n**COVARIANCE**%n");
                     result.printCovariance(writer);
                 default:
                     result.printState(writer);
                     result.getState().ifPresent(state -> {
-                        writer.printf("%n***RESIDUALS***%n");
+                        writer.printf("%n**RESIDUALS**%n");
                         if (state.getModel() instanceof XYModel) {
                             FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getPoints(), state.getParameters());
                         } else {
@@ -127,6 +129,7 @@ public class FitHelper {
 
         /**
          * use context log with given name for this helper
+         *
          * @param reportName
          * @return
          */
@@ -137,6 +140,7 @@ public class FitHelper {
 
         /**
          * Set listener for fit stage result
+         *
          * @param consumer
          * @return
          */
@@ -147,6 +151,7 @@ public class FitHelper {
 
         /**
          * Create default listener an redirect its output to given stream
+         *
          * @param stream
          * @return
          */
@@ -157,6 +162,7 @@ public class FitHelper {
 
         /**
          * Create default listener and redirect its output to Context output with default stage ang given name
+         *
          * @param outputName
          * @return
          */
@@ -185,7 +191,7 @@ public class FitHelper {
                 ParamSet set = new ParamSet();
                 Laminate laminate = (Laminate) meta;
                 laminate.layersInverse().stream().forEach(layer -> {
-                    layer.optMeta("params").ifPresent(params ->{
+                    layer.optMeta("params").ifPresent(params -> {
                         set.updateFrom(MetaMorph.morph(ParamSet.class, layer.getMeta("params")));
                     });
                 });
@@ -256,6 +262,7 @@ public class FitHelper {
                     } catch (Exception ex) {
                         result = FitResult.build(state, false, stage.getFreePars());
                     }
+                    listener.accept(stage, result);
                 }
             }
 
