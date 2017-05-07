@@ -32,7 +32,7 @@ public abstract class BaseConfigurable extends SimpleConfigurable {
      * Set unconformable meta layers below configuration layer
      * @param metaBase
      */
-    public final void setMetaBase(Meta... metaBase) {
+    protected final void setMetaBase(Meta... metaBase) {
         this.laminate.setLayers(metaBase);
         this.laminate.addFirstLayer(getConfig());        
     }

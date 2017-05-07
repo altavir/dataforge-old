@@ -17,19 +17,22 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.control.ControlUtils;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Configurable;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.Future;
 
 /**
  * The Device is general abstract representation of any physical or virtual
@@ -59,7 +62,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public interface Device extends Configurable, Metoid, Encapsulated, Named, Responder {
+public interface Device extends Metoid, Configurable, Encapsulated, Named, Responder {
 
     /**
      * Device type
@@ -70,6 +73,7 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
 
     /**
      * Set context for this device
+     *
      * @param context
      */
     void setContext(Context context);
@@ -85,7 +89,14 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
      */
     Value getState(String name);
 
-//    void setState(String stateName, Object stateValue);
+    /**
+     * Request state change for state with given name
+     * @param name
+     * @param value
+     * @return
+     */
+    Future<Value> setState(String name, Object value);
+
     /**
      * Initialize device and check if it is working but do not start any
      * measurements or issue commands. Init method could be called only once per
@@ -131,25 +142,9 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
      * Register connection for this device
      *
      * @param connection
-     * @param roles a set of roles for this connection
+     * @param roles      a set of roles for this connection
      */
     void connect(Connection<Device> connection, String... roles);
-
-    /**
-     * Invoke a simple command (set state) for this device
-     *
-     * @param commandName
-     * @param argument
-     */
-    void command(String commandName, Value argument) throws ControlException;
-
-    /**
-     * A command with complex configuration
-     *
-     * @param commandName
-     * @param commandConfiguration
-     */
-    void command(String commandName, Meta commandConfiguration) throws ControlException;
 
     /**
      * A list of all available states
@@ -175,8 +170,8 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
      * @param name
      * @return
      */
-    default StateDef getStateDef(String name) {
-        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst().orElse(null);
+    default Optional<StateDef> getStateDef(String name) {
+        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst();
     }
 
     /**
@@ -186,7 +181,7 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
      * @return
      */
     default boolean acceptsRole(String name) {
-        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findAny().isPresent();
+        return roleDefs().stream().anyMatch((roleDef) -> roleDef.name().equals(name));
     }
 
     /**
@@ -195,8 +190,12 @@ public interface Device extends Configurable, Metoid, Encapsulated, Named, Respo
      * @param name
      * @return
      */
-    default RoleDef getRoleDef(String name) {
-        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findFirst().orElse(null);
+    default Optional<RoleDef> getRoleDef(String name) {
+        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findFirst();
     }
 
+    @Override
+    default Envelope respond(Envelope message) {
+        return ControlUtils.getDefaultDeviceResponse(this, message);
+    }
 }

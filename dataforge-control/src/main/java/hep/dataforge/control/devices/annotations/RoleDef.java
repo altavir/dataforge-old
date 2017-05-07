@@ -5,13 +5,7 @@
  */
 package hep.dataforge.control.devices.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * The role of connection served by this device
@@ -36,7 +30,7 @@ public @interface RoleDef {
     String info() default "";
     
     /**
-     * The type of the object that could play the role
+     * The type of the object that could play this role
      * @return 
      */
     Class objectType() default Object.class;

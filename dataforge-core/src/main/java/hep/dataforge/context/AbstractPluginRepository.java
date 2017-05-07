@@ -1,7 +1,5 @@
 package hep.dataforge.context;
 
-import hep.dataforge.names.AlphanumComparator;
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -18,13 +16,13 @@ public abstract class AbstractPluginRepository implements PluginRepository {
                 .findFirst();
     }
 
-    protected int compare (Plugin p1, Plugin p2){
-        return - AlphanumComparator.INSTANCE.compare(p1.getTag().getVersion(), p2.getTag().getVersion());
+    protected int compare(Plugin p1, Plugin p2) {
+        return Integer.compare(p1.getTag().getInt("priority", 0), p2.getTag().getInt("priority", 0));
     }
 
     @Override
     public List<PluginTag> listTags() {
-        return stream().map(it -> it.getTag()).collect(Collectors.toList());
+        return stream().map(Plugin::getTag).collect(Collectors.toList());
     }
 
     protected abstract Stream<Plugin> stream();

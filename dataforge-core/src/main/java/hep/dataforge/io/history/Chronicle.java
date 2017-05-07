@@ -33,7 +33,7 @@ import java.util.function.Consumer;
  * @version $Id: $Id
  */
 public class Chronicle implements History, Named {
-    public static final String CHRONICLE_PROVIDER_KEY = "chronicle";
+    public static final String CHRONICLE_TARGET = "log";
 
     private static int MAX_LOG_SIZE = 1000;
     private final String name;

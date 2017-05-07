@@ -18,10 +18,8 @@ package hep.dataforge.context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.names.Name;
 import hep.dataforge.utils.SimpleMetaMorph;
-
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * The tag which contains information about name, group and version of some
@@ -29,10 +27,12 @@ import java.util.regex.Pattern;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "name")
-@ValueDef(name = "group")
-@ValueDef(name = "version")
-public class PluginTag extends SimpleMetaMorph{
+@ValueDef(name = "name", info = "The name of plugin")
+@ValueDef(name = "group", info = "The namespace of plugin")
+@ValueDef(name = "dependsOn", info = "The list of plugins tha given plugin requires to run")
+//@ValueDef(name = "role", multiple = true,info = "The list of roles this plugin implements")
+//@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
+public class PluginTag extends SimpleMetaMorph {
 
     /**
      * Build new PluginTag from standard string representation
@@ -41,15 +41,8 @@ public class PluginTag extends SimpleMetaMorph{
      * @return
      */
     public static PluginTag fromString(String tag) {
-        Pattern pattern = Pattern.compile("(?:(?<group>.*):)?(?<name>[^\\[\\]]*)(?:\\[(?<version>.*)\\])?");
-        Matcher matcher = pattern.matcher(tag);
-        if (!matcher.matches()) {
-            throw new RuntimeException("Can't parse tag from string. Wrong sytax.");
-        }
-        String group = matcher.group("group");
-        String name = matcher.group("name");
-        String version = matcher.group("version");
-        return new PluginTag(group, name, version);
+        Name name = Name.of(tag);
+        return new PluginTag(name.nameSpace(), name.nameString());
 
     }
 
@@ -60,11 +53,10 @@ public class PluginTag extends SimpleMetaMorph{
     public PluginTag() {
     }
 
-    public PluginTag(String group, String name, String version) {
+    public PluginTag(String group, String name) {
         super(new MetaBuilder("plugin")
                 .setValue("group", group)
                 .setValue("name", name)
-                .setValue("version", version)
         );
     }
 
@@ -77,11 +69,6 @@ public class PluginTag extends SimpleMetaMorph{
     }
 
 
-    public String getVersion() {
-        return getString("version", "");
-    }
-
-
     /**
      * Check if given tag is compatible (in range) of this tag
      *
@@ -89,7 +76,7 @@ public class PluginTag extends SimpleMetaMorph{
      * @return
      */
     public boolean matches(PluginTag otherTag) {
-        return matchesName(otherTag) && matchesGroup(otherTag) && matchesVersion(otherTag);
+        return matchesName(otherTag) && matchesGroup(otherTag);
     }
 
     private boolean matchesGroup(PluginTag otherTag) {
@@ -100,10 +87,6 @@ public class PluginTag extends SimpleMetaMorph{
         return this.getName().equals(otherTag.getName());
     }
 
-    private boolean matchesVersion(PluginTag otherTag) {
-        //TODO add version diapasons
-        return this.getVersion().isEmpty() || this.getVersion().equals(otherTag.getVersion());
-    }
 
     /**
      * Build standard string representation of plugin tag
@@ -117,12 +100,6 @@ public class PluginTag extends SimpleMetaMorph{
             theGroup = theGroup + ":";
         }
 
-        String theVersion = getVersion();
-
-        if (!theVersion.isEmpty()) {
-            theVersion = "[" + theVersion + "]";
-        }
-
-        return theGroup + getName() + theVersion;
+        return theGroup + getName();
     }
 }

@@ -5,13 +5,14 @@
  */
 package hep.dataforge.control.devices;
 
-import static hep.dataforge.control.devices.SingleMeasurementDevice.MEASURING_STATE;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
+import static hep.dataforge.control.devices.SingleMeasurementDevice.MEASURING_STATE;
 
 /**
  * A device that allows different types of measurements, but only one active at
@@ -40,6 +41,11 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
         } else {
             return super.getState(stateName);
         }
+    }
+
+    @Override
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
+        throw new ControlException("State not defined");
     }
 
     public T startMeasurement(String type) throws ControlException {

@@ -32,17 +32,19 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
-import java.util.Optional;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
-import static hep.dataforge.io.history.Chronicle.CHRONICLE_PROVIDER_KEY;
+import static hep.dataforge.io.history.Chronicle.CHRONICLE_TARGET;
 
 /**
  * <p>
@@ -66,11 +68,16 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return new Builder(name);
     }
 
+    public static Builder builder(String name, Context parent) {
+        return new Builder(name, parent);
+    }
+
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
     private final String name;
     private final PluginManager pm;
     protected Logger logger;
     protected Chronicle rootLog;
+    private ClassLoader classLoader = null;
 
     //TODO move to separate manager
     private transient Map<String, Chronicle> historyCache = new ConcurrentHashMap<>();
@@ -89,6 +96,19 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         this.pm = new PluginManager(this);
         this.rootLog = new Chronicle(name);
         this.name = name;
+    }
+
+    /**
+     * Get the class loader for this context
+     *
+     * @return
+     */
+    public ClassLoader getClassLoader() {
+        if (this.classLoader != null) {
+            return this.classLoader;
+        } else {
+            return getParent().getClassLoader();
+        }
     }
 
     public Logger getLogger() {
@@ -209,13 +229,14 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return this.rootLog;
     }
 
-    @Provides(CHRONICLE_PROVIDER_KEY)
+    @Provides(CHRONICLE_TARGET)
     public Optional<Chronicle> optChronicle(String logName) {
         return Optional.ofNullable(historyCache.get(logName));
     }
 
     /**
      * get or build current log creating the whole log hierarchy
+     *
      * @param reportName
      * @return
      */
@@ -319,6 +340,28 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
                 .map(it -> type.cast(it));
     }
 
+    /**
+     * Get stream of services of given class provided by Java SPI or any other service loading API.
+     *
+     * @param serviceClass
+     * @param <T>
+     * @return
+     */
+    public synchronized <T> Stream<T> serviceStream(Class<T> serviceClass) {
+        return StreamSupport.stream(ServiceLoader.load(serviceClass, getClassLoader()).spliterator(), false);
+    }
+
+    /**
+     *
+     * @param serviceClass
+     * @param predicate
+     * @param <T>
+     * @return
+     */
+    public <T> Optional<T> findService(Class<T> serviceClass, Predicate<T> predicate) {
+        return serviceStream(serviceClass).filter(predicate).findFirst();
+    }
+
     public static class Builder {
         Context ctx;
 
@@ -326,9 +369,9 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             this.ctx = Global.getContext(name);
         }
 
-        public Builder parent(Context parent) {
-            ctx.parent = parent;
-            return this;
+        public Builder(String name, Context parent) {
+            this.ctx = Global.getContext(Name.joinString(parent.getName(), name));
+            this.ctx.parent = parent;
         }
 
         public Builder properties(Meta config) {
@@ -361,6 +404,11 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
         public Builder plugin(Class<? extends Plugin> type) {
             ctx.pluginManager().load(type);
+            return this;
+        }
+
+        public Builder classPath(URL... path) {
+            ctx.classLoader = new URLClassLoader(path, ctx.getParent().getClassLoader());
             return this;
         }
 

@@ -14,15 +14,11 @@ import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.values.Value;
 
 import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.function.BiConsumer;
 import java.util.function.Function;
 
 /**
@@ -39,7 +35,6 @@ public class VirtualSensorFactory<T> {
     private Meta meta = Meta.buildEmpty("device");
     private List<StateDef> states = new ArrayList<>();
     private List<RoleDef> roles = new ArrayList<>();
-    private final Map<String, BiConsumer<Sensor<T>, Value>> commands = new HashMap<>();
 
     public VirtualSensorFactory<T> setValueFactory(Function<Sensor<T>, T> valueFactory) {
         this.valueFactory = valueFactory;
@@ -76,31 +71,31 @@ public class VirtualSensorFactory<T> {
         return this;
     }
 
-    public VirtualSensorFactory<T> addCommand(String commandName, BiConsumer<Sensor<T>, Value> consumer) {
-        commands.put(commandName, consumer);
-        return this;
-    }
+//    public VirtualSensorFactory<T> addCommand(String commandName, BiConsumer<Sensor<T>, Value> consumer) {
+//        commands.put(commandName, consumer);
+//        return this;
+//    }
 
-    //TODO add methods for custom states
-    public VirtualSensorFactory<T> addState(String name) {
-        states.add(new StateDef() {
-            @Override
-            public String name() {
-                return name;
-            }
-
-            @Override
-            public String info() {
-                return "";
-            }
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return StateDef.class;
-            }
-        });
-        return this;
-    }
+//    //TODO add methods for custom states
+//    public VirtualSensorFactory<T> addState(String name) {
+//        states.add(new StateDef() {
+//            @Override
+//            public String name() {
+//                return name;
+//            }
+//
+//            @Override
+//            public String info() {
+//                return "";
+//            }
+//
+//            @Override
+//            public Class<? extends Annotation> annotationType() {
+//                return StateDef.class;
+//            }
+//        });
+//        return this;
+//    }
 
     public VirtualSensorFactory<T> addRole(String name) {
         roles.add(new RoleDef() {
@@ -129,6 +124,9 @@ public class VirtualSensorFactory<T> {
 
     public Sensor<T> build() {
         Sensor<T> sensor = new Sensor<T>() {
+            {
+                setMetaBase(meta);
+            }
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {
                 return new VirtualMeasurement<>(delayFactory.apply(this), () -> valueFactory.apply(this));
@@ -144,19 +142,9 @@ public class VirtualSensorFactory<T> {
                 return states;
             }
 
-            @Override
-            public void command(String commandName, Value argument) throws ControlException {
-                if (commands.containsKey(commandName)) {
-                    commands.get(commandName).accept(this, argument);
-                } else {
-                    super.command(commandName, argument);
-                }
-            }
-
         };
 
         sensor.setName(name);
-        sensor.setMeta(meta);
         sensor.setContext(context);
         try {
             sensor.init();

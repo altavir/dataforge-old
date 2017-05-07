@@ -86,4 +86,9 @@ class EmptyName implements Name {
     public String toString() {
         return "";
     }
+
+    @Override
+    public String nameString() {
+        return "";
+    }
 }

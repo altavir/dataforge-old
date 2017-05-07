@@ -155,13 +155,13 @@ public interface Name {
         }
     }
 
+
     /**
      * The name as a String including query but ignoring namespace
      *
      * @return
      */
-    @Override
-    String toString();
+    String nameString();
 
     /**
      * if has query for the last element

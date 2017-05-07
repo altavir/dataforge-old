@@ -118,6 +118,11 @@ public class Global extends Context {
     }
 
     @Override
+    public ClassLoader getClassLoader() {
+        return ClassLoader.getSystemClassLoader();
+    }
+
+    @Override
     public IOManager io() {
         return pluginManager().opt(IOManager.class).orElseGet(() -> {
             getLogger().debug("No IO plugin found. Using default IO.");

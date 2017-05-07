@@ -45,7 +45,7 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(context, input.meta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = Context.builder(contextName).parent(context).build();
+        Context ac = Context.builder(contextName,context).build();
         if (meta.hasValue("configFile")) {
             File cfgFile = context.io().getFile(meta.getString("configFile"));
             try {

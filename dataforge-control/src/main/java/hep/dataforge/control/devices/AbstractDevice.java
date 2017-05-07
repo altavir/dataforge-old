@@ -20,7 +20,6 @@ import hep.dataforge.context.Global;
 import hep.dataforge.control.connections.Connection;
 import hep.dataforge.control.devices.annotations.RoleDef;
 import hep.dataforge.exceptions.ControlException;
-import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
@@ -33,7 +32,9 @@ import org.slf4j.LoggerFactory;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -55,16 +56,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     private Context context;
     private Logger logger;
 
-    /**
-     * Set fallback meta default for this device
-     *
-     * @param meta
-     */
-    public void setMeta(Meta meta) {
-        setMetaBase(meta);
-    }
-
-    protected Logger setupLogger() {
+    private Logger setupLogger() {
         String loggerName = meta().getString("logger", () -> "device::" + getName());
 
         //TODO move logger construction to context IoManager
@@ -112,17 +104,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         listeners.remove(listener);
     }
 
-    /**
-     * Check if command could be evaluated by this device
-     *
-     * @param command
-     * @param commandMeta
-     * @return
-     */
-    protected boolean checkCommand(String command, Meta commandMeta) {
-        return true;
-    }
-
     @Override
     public Context getContext() {
         if (context == null) {
@@ -144,11 +125,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     public void setName(String name) {
         this.getConfig().setValue("name", name);
-    }
-
-    @Override
-    public Envelope respond(Envelope message) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     /**
@@ -173,7 +149,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     protected void updateState(String stateName, Object stateValue) {
         Value oldState = this.states.get(stateName);
         Value newState = Value.of(stateValue);
-        //Notify only if state realy changed
+        //Notify only if state really changed
         if (!newState.equals(oldState)) {
             notifyStateChanged(stateName, newState);
         }
@@ -206,17 +182,20 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
     }
 
-    @Override
-    public void command(String commandName, Value argument) throws ControlException {
-        throw new ControlException("Command with name " + commandName + " not defined");
-    }
-
-    @Override
-    public void command(String commandName, Meta commandConfiguration) throws ControlException {
-        throw new ControlException("Command with name " + commandName + " not defined");
-    }
-
     protected abstract Object computeState(String stateName) throws ControlException;
+
+    protected abstract void requestStateChange(String stateName, Value value) throws ControlException;
+
+    @Override
+    public Future<Value> setState(String stateName, Object value) {
+        try {
+            requestStateChange(stateName, Value.of(value));
+        } catch (ControlException e) {
+            getLogger().error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString());
+            return CompletableFuture.completedFuture(Value.NULL);
+        }
+        return CompletableFuture.supplyAsync(() -> getState(stateName));
+    }
 
     @Override
     public Value getState(String stateName) {
@@ -275,38 +254,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             this.connections.remove(connection);
         }
     }
-
-//    /**
-//     * Perform some action for each connection with given role and/or connection
-//     * predicate. Both role and predicate could be empty
-//     *
-//     * @param role
-//     * @param predicate
-//     * @param action
-//     */
-//    public void forEachConnection(String role, Predicate<Connection> predicate, Consumer<Connection> action) {
-//        Stream<Map.Entry<Connection, List<String>>> stream = connections.entrySet().stream();
-//
-//        if (role != null && !role.isEmpty()) {
-//            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
-//        }
-//
-//        if (predicate != null) {
-//            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> predicate.test(entry.getKey()));
-//        }
-//
-//        stream.forEach((Map.Entry<Connection, List<String>> entry) -> action.accept(entry.getKey()));
-//    }
-//
-//    /**
-//     * For each connection with given role
-//     *
-//     * @param role
-//     * @param action
-//     */
-//    public void forEachConnection(String role, Consumer<Connection> action) {
-//        AbstractDevice.this.forEachConnection(role, null, action);
-//    }
 
     /**
      * For each connection of given class and role. Role may be empty, but type

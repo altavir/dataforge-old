@@ -3,15 +3,14 @@ package hep.dataforge.control;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.control.devices.Device;
+import hep.dataforge.control.devices.DeviceFactory;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaFactory;
 import hep.dataforge.utils.ReferenceRegistry;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -22,31 +21,17 @@ import java.util.Optional;
 public class ControlPlugin extends BasicPlugin implements Dispatcher {
 
     /**
-     * registered device factories
-     */
-    private Map<String, MetaFactory<Device>> deviceFactoryMap = new HashMap<>();
-
-    /**
      * Registered devices
      */
-    ReferenceRegistry<Device> devices;
+    ReferenceRegistry<Device> devices = new ReferenceRegistry<>();
 
-    public Device buildDevice(Meta deviceMeta) {
-        MetaFactory<Device> factory = getDeviceFactory(deviceMeta);
-        if (factory != null) {
-            Device device = factory.build(meta());
-//            String deviceName = ControlUtils.getDeviceName(deviceMeta);
-            device.setContext(getContext());
-            devices.add(device);
-            return device;
-        } else {
-            throw new RuntimeException("Can't find factory for given device type");
-        }
-    }
-
-    private MetaFactory<Device> getDeviceFactory(Meta deviceMeta) {
-        String deviceType = ControlUtils.getDeviceType(deviceMeta);
-        return deviceFactoryMap.get(deviceType);
+    private Device buildDevice(Meta deviceMeta) {
+        Device device = getContext()
+                .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
+                .map(factory -> factory.build(getContext(), meta()))
+                .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
+        devices.add(device);
+        return device;
     }
 
     @Override

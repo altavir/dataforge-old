@@ -15,7 +15,6 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
@@ -34,7 +33,6 @@ import hep.dataforge.providers.Provider;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 public interface Plugin extends Configurable, Named, Encapsulated, Provider {
 
     String PLUGIN_TARGET = "plugin";

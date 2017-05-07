@@ -102,6 +102,11 @@ class NameToken implements Name {
     }
 
     @Override
+    public String nameString() {
+        return token();
+    }
+
+    @Override
     public String entry() {
         return theName;
     }

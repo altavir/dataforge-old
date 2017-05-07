@@ -37,7 +37,7 @@ import java.util.Optional;
 @PluginDef(group = "hep.dataforge", name = "fitting", description = "Basic dataforge fitting plugin")
 public class FitManager extends BasicPlugin implements Provider {
 
-    public static final String FIT_ENGINE_PROVIDER_KEY = "engine";
+    public static final String FIT_ENGINE_TARGET = "fitEngine";
     private ModelManager modelManager;
     private HashMap<String, FitEngine> engineList = new HashMap<>();
 
@@ -55,7 +55,7 @@ public class FitManager extends BasicPlugin implements Provider {
     @Override
     public Optional<?> provide(Path path) {
         switch (path.target()) {
-            case FIT_ENGINE_PROVIDER_KEY:
+            case FIT_ENGINE_TARGET:
                 return Optional.ofNullable(engineList.get(path.nameString()));
             case Action.ACTION_TARGET:
                 if (path.nameString().equals(FitAction.FIT_ACTION_NAME)) {
