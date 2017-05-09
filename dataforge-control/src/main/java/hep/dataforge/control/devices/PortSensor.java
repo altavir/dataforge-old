@@ -5,8 +5,6 @@
  */
 package hep.dataforge.control.devices;
 
-import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
-import static hep.dataforge.control.devices.PortSensor.PORT_NAME_STATE;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.control.ports.PortFactory;
@@ -14,26 +12,29 @@ import hep.dataforge.control.ports.PortHandler;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
 
+import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
+
 /**
  * A Sensor that uses a PortHandler to obtain data
  *
  * @author darksnake
  * @param <T>
  */
-@ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 @StateDef(name = CONNECTION_STATE, info = "The connection state for this device")
-@StateDef(name = PORT_NAME_STATE, info = "The name of the port this device connected to")
+//@StateDef(name = PORT_NAME_STATE, info = "The name of the port this device connected to")
+@ValueDef(name = "port",info = "The name of the port for this sensor")
+@ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
 
     public static final String CONNECTION_STATE = "connect";
-    public static final String PORT_NAME_STATE = "portName";
+    public static final String PORT_NAME_KEY = "port";
 
     private PortHandler handler;
-    private final String portName;
+//    private final String portName;
 
-    public PortSensor(String portName) {
-        this.portName = portName;
-    }
+//    public PortSensor(String portName) {
+//        this.portName = portName;
+//    }
 
 //    public PortSensor(PortHandler handler) {
 //        this.handler = handler;
@@ -76,9 +77,9 @@ public abstract class PortSensor<T> extends Sensor<T> {
      */
     protected PortHandler getHandler() throws ControlException {
         if (handler == null) {
-            String port = portName;
+            String port = meta().getString(PORT_NAME_KEY);
             this.handler = buildHandler(port);
-            updateState(PORT_NAME_STATE, port);
+            updateState(PORT_NAME_KEY, port);
         }
 
         if (!handler.isOpen()) {

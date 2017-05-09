@@ -117,34 +117,12 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
     void shutdown() throws ControlException;
 
     /**
-     * Set device state listener for this device. Setting null removes current
-     * device state listener.
-     *
-     * @param listener
-     */
-    void addDeviceListener(DeviceListener listener);
-
-    /**
-     * Add a device listener with strong reference
-     *
-     * @param listener
-     */
-    void addStrongDeviceListener(DeviceListener listener);
-
-    /**
-     * remove a listener
-     *
-     * @param listener
-     */
-    void removeDeviceListener(DeviceListener listener);
-
-    /**
      * Register connection for this device
      *
      * @param connection
      * @param roles      a set of roles for this connection
      */
-    void connect(Connection<Device> connection, String... roles);
+    void connect(Connection connection, String... roles);
 
     /**
      * A list of all available states

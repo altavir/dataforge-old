@@ -9,6 +9,7 @@ import java.lang.annotation.*;
 
 /**
  * The role of connection served by this device
+ *
  * @author Alexander Nozik
  */
 @Target(ElementType.TYPE)
@@ -19,19 +20,28 @@ import java.lang.annotation.*;
 public @interface RoleDef {
     /**
      * Role name
-     * @return 
+     *
+     * @return
      */
     String name();
-    
-    /**
-     * Role description
-     * @return 
-     */
-    String info() default "";
-    
+
     /**
      * The type of the object that could play this role
-     * @return 
+     *
+     * @return
      */
     Class objectType() default Object.class;
+
+    /**
+     * If true then only one connection of this role is allowed per object
+     * @return
+     */
+    boolean unique() default false;
+
+    /**
+     * Role description
+     *
+     * @return
+     */
+    String info() default "";
 }

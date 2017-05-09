@@ -11,6 +11,7 @@ import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
  * @author Alexander Nozik
@@ -53,6 +54,10 @@ public interface MetaProvider {
      */
     default Meta getMeta(String path, Meta def) {
         return optMeta(path).<Meta>map(it -> it).orElse(def);
+    }
+
+    default Meta getMeta(String path, Supplier<Meta> def) {
+        return optMeta(path).<Meta>map(it -> it).orElseGet(def);
     }
 
     default boolean hasMeta(String path) {

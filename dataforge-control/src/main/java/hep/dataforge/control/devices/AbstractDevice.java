@@ -24,7 +24,6 @@ import hep.dataforge.meta.BaseConfigurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +37,8 @@ import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
+
 /**
  * <p>
  * State have two components: physical and logical. If logical state does not
@@ -48,10 +49,13 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
+@RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
 
-    private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    private final Map<Connection, List<String>> connections = new ConcurrentHashMap<>();
+    //TODO set up logger as connection
+
+    //private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
+    private final Map<Connection<? extends Device>, List<String>> connections = new ConcurrentHashMap<>();
     private final Map<String, Value> states = new ConcurrentHashMap<>();
     private Context context;
     private Logger logger;
@@ -73,7 +77,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     @Override
     public void init() throws ControlException {
         getLogger().info("Initializing device '{}'...", getName());
-        listeners.forEach(it -> it.notifyDeviceInitialized(this));
+
+        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceInitialized(this));
     }
 
     @Override
@@ -86,27 +91,14 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
                 getLogger().error("Failed to close connection {} with roles", it.getKey(), it.getValue());
             }
         });
-        listeners.forEach(it -> it.notifyDeviceShutdown(this));
+        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceShutdown(this));
     }
 
-    @Override
-    public void addDeviceListener(DeviceListener listener) {
-        listeners.add(listener);
-    }
-
-    @Override
-    public void addStrongDeviceListener(DeviceListener listener) {
-        listeners.add(listener, true);
-    }
-
-    @Override
-    public void removeDeviceListener(DeviceListener listener) {
-        listeners.remove(listener);
-    }
 
     @Override
     public Context getContext() {
         if (context == null) {
+            getLogger().warn("Context for device not defined. Using GLOBAL context.");
             return Global.instance();
         } else {
             return this.context;
@@ -136,7 +128,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     protected final void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(stateName, stateValue);
         getLogger().info("State {} changed to {}", stateName, stateValue);
-        listeners.forEach((DeviceListener it) -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
+        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
     }
 
     /**
@@ -157,7 +150,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     protected final void notifyError(String message, Throwable error) {
         getLogger().error(message, error);
-        listeners.forEach((DeviceListener it) -> it.evaluateDeviceException(AbstractDevice.this, message, error));
+        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                it -> it.evaluateDeviceException(AbstractDevice.this, message, error));
     }
 
     /**
@@ -218,18 +212,20 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param roles
      */
     @Override
-    public synchronized void connect(Connection<Device> connection, String... roles) {
+    @SuppressWarnings("unchecked")
+    public synchronized void connect(Connection connection, String... roles) {
         getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
         //Checking if connection could serve given roles
         for (String role : roles) {
             if (!acceptsRole(role)) {
                 getLogger().warn("The device {} does not support role {}", getName(), role);
             } else {
-                RoleDef rd = roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).findAny().get();
-                if (!rd.objectType().isInstance(connection)) {
-                    getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
-                            role, rd.objectType().getName());
-                }
+                roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).forEach(rd -> {
+                    if (!rd.objectType().isInstance(connection)) {
+                        getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
+                                role, rd.objectType().getName());
+                    }
+                });
             }
         }
         this.connections.put(connection, Arrays.asList(roles));
@@ -264,18 +260,23 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param type
      * @param action
      */
-    public <T> void forEachTypedConnection(String role, Class<T> type, Consumer<T> action) {
-        Stream<Map.Entry<Connection, List<String>>> stream = connections();
+    @SuppressWarnings("unchecked")
+    public <T> void forEachConnection(String role, Class<T> type, Consumer<T> action) {
+        Stream<Map.Entry<Connection<? extends Device>, List<String>>> stream = connections();
 
         if (role != null && !role.isEmpty()) {
-            stream = stream.filter((Map.Entry<Connection, List<String>> entry) -> entry.getValue().contains(role));
+            stream = stream.filter((Map.Entry<Connection<? extends Device>, List<String>> entry) -> entry.getValue().contains(role));
         }
 
         stream.filter((entry) -> type.isInstance(entry.getKey())).map((entry) -> (T) entry.getKey())
-                .forEach(action::accept);
+                .forEach(action);
     }
 
-    public Stream<Map.Entry<Connection, List<String>>> connections() {
+    public <T> void forEachConnection(Class<T> type, Consumer<T> action) {
+        forEachConnection(null, type, action);
+    }
+
+    public Stream<Map.Entry<Connection<? extends Device>, List<String>>> connections() {
         return connections.entrySet().stream();
     }
 
@@ -285,7 +286,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
             setupLogger();
         }
         getLogger().debug("Applying configuration change");
-        listeners.forEach((DeviceListener it) -> it.notifyDeviceConfigChanged(AbstractDevice.this));
+        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceConfigChanged(AbstractDevice.this));
     }
 
     @Override

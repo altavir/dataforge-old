@@ -7,11 +7,11 @@ package hep.dataforge.control.connections;
 
 import hep.dataforge.control.devices.Device;
 
-public abstract class DeviceConnection implements Connection<Device> {
+public abstract class DeviceConnection<D extends Device> implements Connection<D> {
 
-    private Device device;
+    private D device;
 
-    public Device getDevice() {
+    public D getDevice() {
         if (device != null) {
             return device;
         } else {
@@ -25,7 +25,7 @@ public abstract class DeviceConnection implements Connection<Device> {
     }
 
     @Override
-    public void open(Device device) throws Exception {
+    public void open(D device) throws Exception {
         this.device = device;
     }
 

@@ -274,7 +274,7 @@ public abstract class AbstractStorage implements Storage {
         String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET);
         String targetName = targetInfo.getString(TARGET_NAME_KEY, "");
         boolean allowCreate = targetInfo.getBoolean("allowCreate", true);
-        Meta addMeta = targetInfo.getMeta("meta", null);
+        Meta addMeta = targetInfo.getMeta("meta", Meta.empty());
         try {
             switch (targetType) {
                 case STORAGE_TARGET:

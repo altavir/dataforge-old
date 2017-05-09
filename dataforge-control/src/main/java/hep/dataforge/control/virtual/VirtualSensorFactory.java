@@ -15,7 +15,6 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 
-import java.lang.annotation.Annotation;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -97,30 +96,30 @@ public class VirtualSensorFactory<T> {
 //        return this;
 //    }
 
-    public VirtualSensorFactory<T> addRole(String name) {
-        roles.add(new RoleDef() {
-            @Override
-            public String name() {
-                return name;
-            }
-
-            @Override
-            public String info() {
-                return "";
-            }
-
-            @Override
-            public Class objectType() {
-                return Object.class;
-            }
-
-            @Override
-            public Class<? extends Annotation> annotationType() {
-                return RoleDef.class;
-            }
-        });
-        return this;
-    }
+//    public VirtualSensorFactory<T> addRole(String name) {
+//        roles.add(new RoleDef() {
+//            @Override
+//            public String name() {
+//                return name;
+//            }
+//
+//            @Override
+//            public String info() {
+//                return "";
+//            }
+//
+//            @Override
+//            public Class objectType() {
+//                return Object.class;
+//            }
+//
+//            @Override
+//            public Class<? extends Annotation> annotationType() {
+//                return RoleDef.class;
+//            }
+//        });
+//        return this;
+//    }
 
     public Sensor<T> build() {
         Sensor<T> sensor = new Sensor<T>() {

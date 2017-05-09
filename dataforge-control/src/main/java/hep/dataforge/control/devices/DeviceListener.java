@@ -23,7 +23,7 @@ import hep.dataforge.values.Value;
  *
  * @author Alexander Nozik
  */
-public interface DeviceListener {
+public interface DeviceListener<D extends Device> {
 
     /**
      * The device is initialized. No measurement or control procedure performed
@@ -31,7 +31,7 @@ public interface DeviceListener {
      *
      * @param device
      */
-    default void notifyDeviceInitialized(Device device){
+    default void notifyDeviceInitialized(D device){
         
     }
 
@@ -41,7 +41,7 @@ public interface DeviceListener {
      *
      * @param device
      */
-    default void notifyDeviceShutdown(Device device){
+    default void notifyDeviceShutdown(D device){
         
     }
 
@@ -53,26 +53,26 @@ public interface DeviceListener {
      * @param name the name of the state
      * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value state);
+    void notifyDeviceStateChanged(D device, String name, Value state);
 
     /**
      * Notify that device configuration has changed. By default is ignored.
      *
      * @param device
      */
-    default void notifyDeviceConfigChanged(Device device) {
+    default void notifyDeviceConfigChanged(D device) {
 
     }
 
-    /**
-     * Notify that command is accepted. By default is ignored.
-     *
-     * @param device
-     * @param command
-     */
-    default void notifyDeviceCommandAccepted(Device device, String command) {
-
-    }
+//    /**
+//     * Notify that command is accepted. By default is ignored.
+//     *
+//     * @param device
+//     * @param command
+//     */
+//    default void notifyDeviceCommandAccepted(Device device, String command) {
+//
+//    }
 
     /**
      * Evaluate device event
@@ -82,5 +82,5 @@ public interface DeviceListener {
         
     }
 
-    void evaluateDeviceException(Device device, String message, Throwable exception);
+    void evaluateDeviceException(D device, String message, Throwable exception);
 }

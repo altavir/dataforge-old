@@ -45,8 +45,8 @@ public abstract class DataFactory<T> implements DataLoader<T> {
     }
 
     @Override
-    public DataNode<T> build(Context context, Meta dataConfig) {
-        return builder(context, dataConfig).build();
+    public DataNode<T> build(Context context, Meta meta) {
+        return builder(context, meta).build();
     }
 
     protected DataTree.Builder<T> builder(Context context, Meta dataConfig) {

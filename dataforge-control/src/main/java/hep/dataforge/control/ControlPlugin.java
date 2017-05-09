@@ -25,9 +25,11 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
      */
     ReferenceRegistry<Device> devices = new ReferenceRegistry<>();
 
-    private Device buildDevice(Meta deviceMeta) {
-        Device device = getContext()
+    @SuppressWarnings("unchecked")
+    private <D extends Device> D buildDevice(Meta deviceMeta) {
+        D device = getContext()
                 .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
+                .map(it -> (DeviceFactory<D>) it)
                 .map(factory -> factory.build(getContext(), meta()))
                 .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
         devices.add(device);
@@ -36,7 +38,7 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
 
     @Override
     public Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     public Optional<Device> getDeviceByName(String name) {
