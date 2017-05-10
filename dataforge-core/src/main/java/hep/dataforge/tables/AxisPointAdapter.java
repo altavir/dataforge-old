@@ -52,7 +52,7 @@ public class AxisPointAdapter implements PointAdapter {
     }
 
     @Override
-    public Value getFrom(DataPoint point, String component) {
+    public Value getComponent(DataPoint point, String component) {
         return point.getValue(nameFor(component));
     }
 

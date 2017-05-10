@@ -27,11 +27,15 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
 
     @SuppressWarnings("unchecked")
     private <D extends Device> D buildDevice(Meta deviceMeta) {
-        D device = getContext()
+        DeviceFactory<D> factory = getContext()
                 .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
-                .map(it -> (DeviceFactory<D>) it)
-                .map(factory -> factory.build(getContext(), meta()))
-                .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
+                .orElseThrow(()->new RuntimeException("Can't find factory for given device type"));
+        D device = factory.build(getContext(),deviceMeta);
+
+        deviceMeta.getMetaList("connect").forEach(connectionMeta ->{
+
+        });
+
         devices.add(device);
         return device;
     }

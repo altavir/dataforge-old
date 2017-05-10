@@ -26,6 +26,7 @@ import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.values.Value;
 
 import java.util.List;
 
@@ -43,6 +44,7 @@ public interface Plottable extends Named, Metoid, Configurable, Wrappable, Descr
 
     /**
      * Get immutable list of data data according to query
+     *
      * @param query
      * @return
      */
@@ -52,7 +54,7 @@ public interface Plottable extends Named, Metoid, Configurable, Wrappable, Descr
     @ValueDef(name = "numPoints", type = "NUMBER", info = "A required number of visible points. The real number could differ from requested one.")
     List<DataPoint> getData(Meta query);
 
-    default List<DataPoint> getData(){
+    default List<DataPoint> getData() {
         return getData(Meta.empty());
     }
 
@@ -76,5 +78,9 @@ public interface Plottable extends Named, Metoid, Configurable, Wrappable, Descr
      * @return
      */
     PointAdapter getAdapter();
+
+    default Value getComponent(int index, String component) {
+        return getAdapter().getComponent(getData().get(index), component);
+    }
 
 }

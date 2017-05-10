@@ -41,5 +41,5 @@ public interface PointAdapter extends Metoid, MetaMorph {
      * @param component
      * @return 
      */
-    Value getFrom(DataPoint point, String component);
+    Value getComponent(DataPoint point, String component);
 }

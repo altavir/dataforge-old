@@ -119,7 +119,7 @@ public class Global extends Context {
 
     @Override
     public ClassLoader getClassLoader() {
-        return ClassLoader.getSystemClassLoader();
+        return Thread.currentThread().getContextClassLoader();
     }
 
     @Override

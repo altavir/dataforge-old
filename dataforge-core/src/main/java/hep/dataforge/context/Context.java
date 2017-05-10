@@ -80,7 +80,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     private ClassLoader classLoader = null;
 
     //TODO move to separate manager
-    private transient Map<String, Chronicle> historyCache = new ConcurrentHashMap<>();
+    private transient Map<String, Chronicle> historyCache = new HashMap<>();
 
     protected ExecutorService parallelExecutor;
     protected ExecutorService singleThreadExecutor;

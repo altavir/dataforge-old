@@ -46,15 +46,15 @@ public class HistogramAdapter extends AxisPointAdapter {
 
 
     public double getBinBegin(DataPoint point) {
-        return this.getFrom(point, BIN_BEGIN_NAME).doubleValue();
+        return this.getComponent(point, BIN_BEGIN_NAME).doubleValue();
     }
 
     public double getBinEnd(DataPoint point) {
-        return this.getFrom(point, BIN_END_NAME).doubleValue();
+        return this.getComponent(point, BIN_END_NAME).doubleValue();
     }
 
     public long getCount(DataPoint point) {
-        return this.getFrom(point, COUNT_NAME).longValue();
+        return this.getComponent(point, COUNT_NAME).longValue();
     }
 
     public double getBinSize(DataPoint point) {
