@@ -38,7 +38,7 @@ public interface ValueProvider {
         if (provider instanceof ValueProvider) {
             return (ValueProvider) provider;
         }
-        return path -> provider.provide(Path.of(path, VALUE_TARGET)).map(it -> Value.class.cast(it));
+        return path -> provider.provide(Path.of(path, VALUE_TARGET)).map(Value.class::cast);
     }
 
     default boolean hasValue(String path) {
@@ -53,11 +53,11 @@ public interface ValueProvider {
     }
 
     default Boolean getBoolean(String name, boolean def) {
-        return optValue(name).map(value -> value.booleanValue()).orElse(def);
+        return optValue(name).map(Value::booleanValue).orElse(def);
     }
 
     default Boolean getBoolean(String name, Supplier<Boolean> def) {
-        return optValue(name).map(value -> value.booleanValue()).orElseGet(def);
+        return optValue(name).map(Value::booleanValue).orElseGet(def);
     }
 
     default Boolean getBoolean(String name) {
@@ -65,11 +65,11 @@ public interface ValueProvider {
     }
 
     default Double getDouble(String name, double def) {
-        return optValue(name).map(value -> value.doubleValue()).orElse(def);
+        return optValue(name).map(Value::doubleValue).orElse(def);
     }
 
     default Double getDouble(String name, Supplier<Double> def) {
-        return optValue(name).map(value -> value.doubleValue()).orElseGet(def);
+        return optValue(name).map(Value::doubleValue).orElseGet(def);
     }
 
     default Double getDouble(String name) {
@@ -77,11 +77,11 @@ public interface ValueProvider {
     }
 
     default Integer getInt(String name, int def) {
-        return optValue(name).map(value -> value.intValue()).orElse(def);
+        return optValue(name).map(Value::intValue).orElse(def);
     }
 
     default Integer getInt(String name, Supplier<Integer> def) {
-        return optValue(name).map(value -> value.intValue()).orElseGet(def);
+        return optValue(name).map(Value::intValue).orElseGet(def);
 
     }
 
@@ -90,11 +90,11 @@ public interface ValueProvider {
     }
 
     default String getString(String name, String def) {
-        return optValue(name).map(value -> value.stringValue()).orElse(def);
+        return optValue(name).map(Value::stringValue).orElse(def);
     }
 
     default String getString(String name, Supplier<String> def) {
-        return optValue(name).map(value -> value.stringValue()).orElseGet(def);
+        return optValue(name).map(Value::stringValue).orElseGet(def);
     }
 
     default String getString(String name) {

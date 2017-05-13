@@ -51,7 +51,6 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 @AnonimousNotAlowed
 @RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
 public abstract class AbstractDevice extends BaseConfigurable implements Device {
-
     //TODO set up logger as connection
 
     //private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
@@ -77,8 +76,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     @Override
     public void init() throws ControlException {
         getLogger().info("Initializing device '{}'...", getName());
-
-        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceInitialized(this));
+        updateState(INITIALIZED_STATE, true);
+//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceInitialized(this));
     }
 
     @Override
@@ -91,7 +90,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
                 getLogger().error("Failed to close connection {} with roles", it.getKey(), it.getValue());
             }
         });
-        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceShutdown(this));
+        updateState(INITIALIZED_STATE, false);
+//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceShutdown(this));
     }
 
 
@@ -105,19 +105,19 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         }
     }
 
-    public void setContext(Context context) {
+    protected void setContext(Context context) {
         this.context = context;
         setValueContext(context);
     }
 
     @Override
     public String getName() {
-        return meta().getString("name", getClass().getSimpleName());
+        return meta().getString("name", type());
     }
 
-    public void setName(String name) {
-        this.getConfig().setValue("name", name);
-    }
+//    public void setName(String name) {
+//        this.getConfig().setValue("name", name);
+//    }
 
     /**
      * Update logical state and notify listeners.

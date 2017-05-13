@@ -29,7 +29,7 @@ import java.io.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@PluginDef(name = "io", group = "hep.dataforge", description = "Basic input and output plugin")
+@PluginDef(name = "io", group = "hep.dataforge", info = "Basic input and output plugin")
 public class BasicIOManager extends BasicPlugin implements IOManager {
 
     private OutputStream out;

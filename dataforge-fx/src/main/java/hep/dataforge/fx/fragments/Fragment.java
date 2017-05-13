@@ -1,19 +1,50 @@
 package hep.dataforge.fx.fragments;
 
+import hep.dataforge.fx.FXObject;
 import javafx.beans.binding.ObjectBinding;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableObjectValue;
+import javafx.scene.Node;
 import javafx.scene.Parent;
+import javafx.scene.layout.BorderPane;
+
+import java.util.function.Supplier;
 
 /**
  * A general GUI fragment
  * Created by darksnake on 09-Oct-16.
  */
-public abstract class Fragment{
+public abstract class Fragment implements FXObject {
+
+    /**
+     * Build fragment from scene Node
+     * @param title
+     * @param sup
+     * @return
+     */
+    public static Fragment buildFromNode(String title, Supplier<Node> sup) {
+        return new Fragment() {
+            @Override
+            protected Parent buildRoot() {
+                if (title != null) {
+                    setTitle(title);
+                }
+                Node node = sup.get();
+                if (node instanceof Parent) {
+                    return (Parent) node;
+                } else {
+                    BorderPane pane = new BorderPane();
+                    pane.setCenter(node);
+                    return pane;
+                }
+            }
+        };
+    }
+
     private BooleanProperty showing = new SimpleBooleanProperty(false);
     private StringProperty title = new SimpleStringProperty("");
-    private DoubleProperty preferedWidth = new SimpleDoubleProperty(400);
-    private DoubleProperty preferedHeight = new SimpleDoubleProperty(400);
+    private DoubleProperty preferredWidth = new SimpleDoubleProperty();
+    private DoubleProperty preferredHeight = new SimpleDoubleProperty();
     private Parent root;
 
     public Fragment() {
@@ -21,15 +52,22 @@ public abstract class Fragment{
 
     protected Fragment(String title, double width, double height) {
         setTitle(title);
-        setPreferedWidth(width);
-        setPreferedHeight(height);
+        setPreferredWidth(width);
+        setPreferredHeight(height);
     }
 
     protected abstract Parent buildRoot();
 
-    public Parent getRoot() {
-        if(root == null){
+    @Override
+    public Parent getFXNode() {
+        if (root == null) {
             root = buildRoot();
+            if (preferredWidth.getValue() == null) {
+                setPreferredWidth(root.prefWidth(-1));
+            }
+            if (preferredHeight.getValue() == null) {
+                setPreferredHeight(root.prefHeight(-1));
+            }
         }
         return root;
     }
@@ -37,20 +75,20 @@ public abstract class Fragment{
     /**
      * Invalidate and force to rebuild root node
      */
-    public void invalidate(){
+    public void invalidate() {
         this.root = null;
     }
 
-    public ObservableObjectValue<Parent> rootProperty(){
+    public ObservableObjectValue<Parent> rootProperty() {
         return new ObjectBinding<Parent>() {
             @Override
             protected Parent computeValue() {
-                return getRoot();
+                return getFXNode();
             }
         };
     }
 
-     public boolean isShowing() {
+    public boolean isShowing() {
         return showing.get();
     }
 
@@ -70,35 +108,35 @@ public abstract class Fragment{
         this.title.set(title);
     }
 
-    public double getPreferedWidth() {
-        return preferedWidth.get();
+    public double getPreferredWidth() {
+        return preferredWidth.get();
     }
 
-    public DoubleProperty preferedWidthProperty() {
-        return preferedWidth;
+    public DoubleProperty preferredWidthProperty() {
+        return preferredWidth;
     }
 
-    public void setPreferedWidth(double preferedWidth) {
-        this.preferedWidth.set(preferedWidth);
+    public void setPreferredWidth(double preferredWidth) {
+        this.preferredWidth.set(preferredWidth);
     }
 
-    public double getPreferedHeight() {
-        return preferedHeight.get();
+    public double getPreferredHeight() {
+        return preferredHeight.get();
     }
 
-    public DoubleProperty preferedHeightProperty() {
-        return preferedHeight;
+    public DoubleProperty preferredHeightProperty() {
+        return preferredHeight;
     }
 
-    public void setPreferedHeight(double preferedHeight) {
-        this.preferedHeight.set(preferedHeight);
+    public void setPreferredHeight(double preferredHeight) {
+        this.preferredHeight.set(preferredHeight);
     }
 
-    public void show(){
+    public void show() {
         this.showing.set(true);
     }
 
-    public void hide(){
+    public void hide() {
         this.showing.set(false);
     }
 }

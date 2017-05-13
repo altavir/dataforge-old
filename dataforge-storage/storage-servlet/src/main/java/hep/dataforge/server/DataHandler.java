@@ -1,4 +1,4 @@
-package hep.dataforge.storage.servlet;
+package hep.dataforge.server;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;

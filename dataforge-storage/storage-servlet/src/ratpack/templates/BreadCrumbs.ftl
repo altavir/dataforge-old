@@ -1,6 +1,6 @@
 <div class="container">
     <ol class="breadcrumb">
-        <li><a href="${homeURL}">Root</a></li>
+        <li><a href="${rootURL}">Root</a></li>
         <#list path as item>
             <li>${item}</li>
         </#list>

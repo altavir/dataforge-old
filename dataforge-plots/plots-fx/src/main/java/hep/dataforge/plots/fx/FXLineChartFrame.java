@@ -113,7 +113,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
     }
 
     @Override
-    public Node getRoot() {
+    public Node getFXNode() {
         return chart;
     }
 

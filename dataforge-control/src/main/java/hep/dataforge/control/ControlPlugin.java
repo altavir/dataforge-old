@@ -17,7 +17,7 @@ import java.util.Optional;
  * A plugin for creating and using different devices
  * Created by darksnake on 11-Oct-16.
  */
-@PluginDef(name = "control", description = "Management plugin for devices an their interaction")
+@PluginDef(name = "control", info = "Management plugin for devices an their interaction")
 public class ControlPlugin extends BasicPlugin implements Dispatcher {
 
     /**

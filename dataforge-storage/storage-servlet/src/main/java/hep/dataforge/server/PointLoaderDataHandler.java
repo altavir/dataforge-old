@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.storage.servlet;
+package hep.dataforge.server;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.PointLoader;

@@ -1,4 +1,4 @@
-description = 'GnuPlot backend'
+description = 'GnuPlot backendfor plots'
 
 dependencies {
     // https://mvnrepository.com/artifact/com.panayotis.javaplot/javaplot

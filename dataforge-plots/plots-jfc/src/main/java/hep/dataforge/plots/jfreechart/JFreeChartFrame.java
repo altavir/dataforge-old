@@ -83,7 +83,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     }
 
     @Override
-    public Node getRoot() {
+    public Node getFXNode() {
         mode = Mode.JAVAFX;
         ChartViewer viewer = new ChartViewer(getChart());
 //        viewer.setPrefSize(800,600);

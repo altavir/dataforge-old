@@ -10,5 +10,5 @@ public interface FXObject {
      * Get the root node of this object
      * @return
      */
-    Node getRoot();
+    Node getFXNode();
 }

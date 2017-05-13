@@ -56,7 +56,7 @@ public class FragmentWindow implements AutoCloseable {
      */
     public void bindTo(ObservableBooleanValue boolVal) {
         boolVal.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (newValue && newValue != getStage().isShowing()) {
+            if (newValue != getStage().isShowing()) {
                 show();
             } else {
                 hide();
@@ -107,7 +107,7 @@ public class FragmentWindow implements AutoCloseable {
 
     public Stage getStage() {
         if (stage == null) {
-            stage = buildStage(fragment.getRoot(), fragment.getTitle(), fragment.getPreferedWidth(), fragment.getPreferedHeight());
+            stage = buildStage(fragment.getFXNode(), fragment.getTitle(), fragment.getPreferredWidth(), fragment.getPreferredHeight());
             stage.setOnShown((WindowEvent event) -> {
                 onShow();
             });

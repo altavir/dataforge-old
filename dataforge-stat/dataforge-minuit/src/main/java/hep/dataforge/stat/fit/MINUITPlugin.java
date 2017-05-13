@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 @PluginDef(group = "hep.dataforge", name = "MINUIT",
         dependsOn = {"hep.dataforge:fitting"},
-        description = "The MINUIT fitter engine for DataForge fitting")
+        info = "The MINUIT fitter engine for DataForge fitting")
 public class MINUITPlugin extends BasicPlugin {
 
     /**

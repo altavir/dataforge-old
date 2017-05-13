@@ -19,7 +19,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  *
  * @author Alexander Nozik
  */
-@PluginDef(name = "math", group = "hep.dataforge", description = "General mathematics plugin contining function factories")
+@PluginDef(name = "math", group = "hep.dataforge", info = "General mathematics plugin contining function factories")
 public class MathPlugin extends BasicPlugin {
 
     private final FunctionDispatcher<UnivariateFunction> univariateFactory = new FunctionDispatcher<>();

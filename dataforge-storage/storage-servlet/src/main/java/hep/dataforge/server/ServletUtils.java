@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.storage.servlet;
+package hep.dataforge.server;
 
 import freemarker.template.Configuration;
 import freemarker.template.TemplateExceptionHandler;
+import ratpack.handling.Context;
 
 /**
  *
@@ -25,7 +26,17 @@ public class ServletUtils {
         }
         return freemarkerConfig;
     }
-    
+
+    public static String getServerURL(Context ctx){
+        String hostName;
+        if (ctx.getServerConfig().getAddress() != null) {
+            hostName = ctx.getServerConfig().getAddress().getHostAddress();
+        } else {
+            hostName = "localhost";
+        }
+        return "http://" + hostName + ":" + ctx.getServerConfig().getPort();
+    }
+
 //    public static DataTable generateDataTable(PointSource source) {
 //        DataTable table = new DataTable();
 //        TableFormat format = source.getFormat();

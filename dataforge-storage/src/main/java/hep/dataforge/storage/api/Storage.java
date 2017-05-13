@@ -42,8 +42,8 @@ import java.util.Optional;
 @AnonimousNotAlowed
 public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
 
-    public static final String LOADER_TARGET = "loader";
-    public static final String STORAGE_TARGET = "storage";
+    String LOADER_TARGET = "loader";
+    String STORAGE_TARGET = "storage";
 
     /**
      * Initialize this storage.

@@ -2,11 +2,12 @@ package hep.dataforge.plots.gnuplot;
 
 import com.panayotis.gnuplot.JavaPlot;
 import com.panayotis.gnuplot.plot.DataSetPlot;
-import com.panayotis.gnuplot.plot.Plot;
 import com.panayotis.gnuplot.terminal.GNUPlotTerminal;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.XYPlotFrame;
+import hep.dataforge.values.Value;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,13 +17,20 @@ import java.util.Map;
 public class GnuPlotFrame extends XYPlotFrame {
 
     private JavaPlot javaPlot = new JavaPlot();
-    private Map<String, Plot> plots = new HashMap<>();
+    private Map<String, DataSetPlot> plots = new HashMap<>();
     private GNUPlotTerminal terminal;
 
     @Override
     protected void updatePlotData(String name) {
         opt(name).ifPresent(plottable -> {
-            plots.computeIfAbsent(name, str -> new DataSetPlot(new PlottableDataSet(plottable)));
+            plots.computeIfAbsent(name, str -> {
+                DataSetPlot dpl = new DataSetPlot(new PlottableDataSet(plottable));
+                javaPlot.addPlot(dpl);
+                dpl.setTitle(plottable.meta().getString("title",plottable.getName()));
+                return dpl;
+            });
+
+            refresh();
         });
 
     }
@@ -33,8 +41,14 @@ public class GnuPlotFrame extends XYPlotFrame {
     }
 
     @Override
-    protected void updateFrame(Meta annotation) {
-
+    protected void updateFrame(Meta meta) {
+        meta.optValue("gnuplot.path").map(Value::stringValue).ifPresent(path -> {
+            try {
+                javaPlot.setGNUPlotPath(path);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     @Override
@@ -52,6 +66,13 @@ public class GnuPlotFrame extends XYPlotFrame {
      */
     public void refresh() {
 
+    }
+
+    /**
+     * Push the plot to the output
+     */
+    public void plot(){
+        javaPlot.plot();
     }
 
     public String getCommands() {

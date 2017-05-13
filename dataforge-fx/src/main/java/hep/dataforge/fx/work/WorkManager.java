@@ -15,7 +15,7 @@ import java.util.function.Consumer;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(name = "work", group = "hep.dataforge", description = "Visual process manager")
+@PluginDef(name = "work", group = "hep.dataforge", info = "Visual process manager")
 public class WorkManager extends BasicPlugin {
 
     /**

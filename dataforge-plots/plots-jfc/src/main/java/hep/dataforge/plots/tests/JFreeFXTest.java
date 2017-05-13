@@ -46,7 +46,7 @@ public class JFreeFXTest extends Application {
         BorderPane root = new BorderPane();
 
         JFreeChartFrame frame = new JFreeChartFrame();
-        root.setCenter(frame.getRoot());
+        root.setCenter(frame.getFXNode());
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 

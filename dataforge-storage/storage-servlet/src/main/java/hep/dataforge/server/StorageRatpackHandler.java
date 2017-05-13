@@ -1,4 +1,4 @@
-package hep.dataforge.storage.servlet;
+package hep.dataforge.server;
 
 import freemarker.template.Template;
 import hep.dataforge.meta.MetaBuilder;
@@ -15,27 +15,30 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static hep.dataforge.storage.servlet.StorageRenderer.renderStorage;
+import static hep.dataforge.server.StorageRenderer.renderStorage;
 
 /**
  * Created by darksnake on 13-Dec-15.
  */
 public class StorageRatpackHandler implements Handler {
 
+    private final ServerManager manager;
     private final Storage root;
-    private final Map<String, SoftReference<Loader>> cache;
+    private Map<String, SoftReference<Loader>> cache= new ConcurrentHashMap<>();
 
-    public StorageRatpackHandler(Storage root, Map<String, SoftReference<Loader>> cache) {
+//    public StorageRatpackHandler(Storage root, Map<String, SoftReference<Loader>> cache) {
+//        this.root = root;
+//        if (cache == null) {
+//            this.cache = new ConcurrentHashMap<>();
+//        } else {
+//            this.cache = cache;
+//        }
+//    }
+
+
+    public StorageRatpackHandler(ServerManager manager, Storage root) {
+        this.manager = manager;
         this.root = root;
-        if (cache == null) {
-            this.cache = new ConcurrentHashMap<>();
-        } else {
-            this.cache = cache;
-        }
-    }
-
-    public StorageRatpackHandler(Storage root) {
-        this(root, null);
     }
 
     @Override
@@ -81,7 +84,7 @@ public class StorageRatpackHandler implements Handler {
         try {
             storage.refresh();
             ctx.getResponse().contentType("text/html");
-            Template template = ServletUtils.freemarkerConfig().getTemplate("StorageTemplate.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("Storage.ftl");
 
             StringBuilder b = new StringBuilder();
             renderStorage(b, storage);
@@ -110,7 +113,7 @@ public class StorageRatpackHandler implements Handler {
     protected void renderStates(Context ctx, StateLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
-            Template template = ServletUtils.freemarkerConfig().getTemplate("StateLoaderTemplate.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("StateLoader.ftl");
 
             Map<String, String> stateMap = new HashMap<>();
             for (String stateName : loader.getStateNames()) {
@@ -152,7 +155,7 @@ public class StorageRatpackHandler implements Handler {
         try {
             ctx.getResponse().contentType("text/html");
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");
-            Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoaderView.ftl");
+            Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoader.ftl");
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
             String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
@@ -172,27 +175,26 @@ public class StorageRatpackHandler implements Handler {
     }
 
     protected Map<String, Object> buildBasicData(Context ctx) {
-        Map<String, Object> data = new HashMap();
+        Map<String, Object> binding = new HashMap<>();
+
 
 //            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
 //            String from = ctx.getRequest().getQueryParams().get("from");
 //            String to = ctx.getRequest().getQueryParams().get("to");
 //            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
-        String hostName;
-        if (ctx.getServerConfig().getAddress() != null) {
-            hostName = ctx.getServerConfig().getAddress().getHostAddress();
-        } else {
-            hostName = "localhost";
-        }
-        String serverAddres = "http://" + hostName + ":" + ctx.getServerConfig().getPort();
 
-        String dataSourceStr = serverAddres + ctx.getRequest().getUri() + "&action=pull";
+        String serverAddress = ServletUtils.getServerURL(ctx);
 
-        data.put("dataSource", dataSourceStr);
-        data.put("homeURL", serverAddres + "/storage");
+        String dataSourceStr = serverAddress + ctx.getRequest().getUri() + "&action=pull";
 
-        data.put("updateInterval", 30);
-        return data;
+        binding.put("homeURL",serverAddress);
+        binding.put("navigation",manager.listHandlers());
+
+        binding.put("dataSource", dataSourceStr);
+        binding.put("rootURL", serverAddress + "/storage");
+
+        binding.put("updateInterval", 30);
+        return binding;
     }
 
     protected Map<String, Object> buildLoaderData(Context ctx, Loader loader) {

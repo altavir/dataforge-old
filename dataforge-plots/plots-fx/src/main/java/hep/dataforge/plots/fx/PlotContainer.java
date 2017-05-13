@@ -196,7 +196,7 @@ public class PlotContainer implements Initializable {
         this.plot = plot;
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
-            plotPane.setCenter(plot.getRoot());
+            plotPane.setCenter(plot.getFXNode());
 
             plottableslList.setItems(plot.plottables());
         });

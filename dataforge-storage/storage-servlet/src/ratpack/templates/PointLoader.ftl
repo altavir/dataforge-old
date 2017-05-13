@@ -50,6 +50,10 @@
 </head>
 <body>
 
+<#if navigation??>
+    <#include "Navigation.ftl">
+</#if>
+
 <#include "BreadCrumbs.ftl">
 
 

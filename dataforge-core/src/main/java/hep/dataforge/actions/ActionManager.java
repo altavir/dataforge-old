@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-@PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions and task for given context")
+@PluginDef(name = "actions", group = "hep.dataforge", info = "A list of available actions and task for given context")
 public class ActionManager extends BasicPlugin {
 
 

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>${storageName}</title>
+    <title>DataForge storage::${storageName}</title>
     <meta charset="UTF-8">
     <meta http-equiv="refresh" content="30">
 
@@ -10,12 +10,17 @@
 </head>
 <body>
 
+<#if navigation??>
+    <#include "Navigation.ftl">
+</#if>
+
 <#include "BreadCrumbs.ftl">
 
-
 <div class="container">
-    <h1>Storage: ${storageName}</h1>
-${content}
+    <div class="page-header">
+        <h1>Storage: ${storageName}</h1>
+    </div>
+    ${content}
 </div>
 
 <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->

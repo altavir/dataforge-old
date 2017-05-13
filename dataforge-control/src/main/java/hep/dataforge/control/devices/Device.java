@@ -15,7 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.control.ControlUtils;
 import hep.dataforge.control.connections.Connection;
@@ -33,6 +32,7 @@ import hep.dataforge.values.Value;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
+
 
 /**
  * The Device is general abstract representation of any physical or virtual
@@ -62,7 +62,10 @@ import java.util.concurrent.Future;
  *
  * @author Alexander Nozik
  */
+@StateDef(name = Device.INITIALIZED_STATE,info = "State showing if device is initialized")
 public interface Device extends Metoid, Configurable, Encapsulated, Named, Responder {
+
+    String INITIALIZED_STATE = "init";
 
     /**
      * Device type
@@ -71,12 +74,12 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      */
     String type();
 
-    /**
-     * Set context for this device
-     *
-     * @param context
-     */
-    void setContext(Context context);
+//    /**
+//     * Set context for this device
+//     *
+//     * @param context
+//     */
+//    void setContext(Context context);
 
     /**
      * Get the device state with given name. Null if such state not found or
@@ -93,7 +96,7 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      * Request state change for state with given name
      * @param name
      * @param value
-     * @return
+     * @return the actual state after set
      */
     Future<Value> setState(String name, Object value);
 

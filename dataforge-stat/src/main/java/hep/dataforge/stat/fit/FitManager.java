@@ -34,7 +34,7 @@ import java.util.Optional;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(group = "hep.dataforge", name = "fitting", description = "Basic dataforge fitting plugin")
+@PluginDef(group = "hep.dataforge", name = "fitting", info = "Basic dataforge fitting plugin")
 public class FitManager extends BasicPlugin implements Provider {
 
     public static final String FIT_ENGINE_TARGET = "fitEngine";

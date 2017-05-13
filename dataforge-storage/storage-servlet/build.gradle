@@ -3,7 +3,7 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'io.ratpack:ratpack-gradle:1.4.5'
+        classpath 'io.ratpack:ratpack-gradle:1.4.6'
     }
 }
 
@@ -12,5 +12,16 @@ description = 'A servlet for remote view of repository'
 
 dependencies {
     compile project(':dataforge-storage')
-    compile 'org.freemarker:freemarker:2.3.25-incubating'
+    compile 'org.freemarker:freemarker:2.3.26-incubating'
+}
+
+//ratpack.baseDir = file('src/ratpack')
+
+task testServer(type: JavaExec){
+    group "df"
+    description "Run test server"
+    main 'hep.dataforge.server.TestServer'
+    classpath = sourceSets.main.runtimeClasspath
+    standardInput = System.in
+    standardOutput = System.out
 }

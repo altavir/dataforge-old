@@ -49,7 +49,7 @@ public interface Plugin extends Configurable, Named, Encapsulated, Provider {
             PluginDef def = type.getAnnotation(PluginDef.class);
             builder.putValue("group", def.group());
             builder.putValue("name", def.name());
-            builder.putValue("description", def.description());
+            builder.putValue("description", def.info());
             builder.putValue("version", def.version());
             for (String dep : def.dependsOn()) {
                 builder.putValue("dependsOn", dep);

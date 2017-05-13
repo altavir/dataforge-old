@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * Plugin holding JavaFX application instance and its root stage
  * Created by darksnake on 28-Oct-16.
  */
-@PluginDef(name = "fx", group = "hep.dataforge", description = "JavaFX window manager")
+@PluginDef(name = "fx", group = "hep.dataforge", info = "JavaFX window manager")
 @ValueDef(name = "implicitExit", type = "BOOLEAN", def = "false", info = "A Platfor implicitExit parameter")
 public class FXPlugin extends BasicPlugin {
 

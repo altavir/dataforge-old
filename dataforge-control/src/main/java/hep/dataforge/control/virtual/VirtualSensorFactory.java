@@ -29,7 +29,7 @@ public class VirtualSensorFactory<T> {
 
     private Function<Sensor<T>, T> valueFactory = (Sensor<T> sensor) -> null;
     private Function<Sensor<T>, Duration> delayFactory = (sensor) -> Duration.ZERO;
-    private String name = "device";
+//    private String name = "device";
     private Context context = Global.instance();
     private Meta meta = Meta.buildEmpty("device");
     private List<StateDef> states = new ArrayList<>();
@@ -46,7 +46,7 @@ public class VirtualSensorFactory<T> {
     }
 
     public VirtualSensorFactory<T> setName(String name) {
-        this.name = name;
+        this.meta = meta.getBuilder().setValue("name",name).build();
         return this;
     }
 
@@ -124,6 +124,7 @@ public class VirtualSensorFactory<T> {
     public Sensor<T> build() {
         Sensor<T> sensor = new Sensor<T>() {
             {
+                setContext(context);
                 setMetaBase(meta);
             }
             @Override
@@ -143,8 +144,6 @@ public class VirtualSensorFactory<T> {
 
         };
 
-        sensor.setName(name);
-        sensor.setContext(context);
         try {
             sensor.init();
         } catch (ControlException ex) {
