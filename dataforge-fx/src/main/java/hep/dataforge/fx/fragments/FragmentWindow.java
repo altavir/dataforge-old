@@ -24,18 +24,20 @@ import java.util.function.Supplier;
  */
 public class FragmentWindow implements AutoCloseable {
 
-    private final Fragment fragment;
+    //TODO allow node and node property instead of fragment
+
+    private final FXFragment fragment;
     private Stage stage;
     private Supplier<Window> owner;
     private Runnable onShow;
     private Runnable onHide;
 
-    public FragmentWindow(Fragment fragment) {
+    public FragmentWindow(FXFragment fragment) {
         this.fragment = fragment;
         owner = null;
     }
 
-    public FragmentWindow(Fragment fragment, Window owner) {
+    public FragmentWindow(FXFragment fragment, Window owner) {
         this.fragment = fragment;
         this.owner = () -> owner;
     }

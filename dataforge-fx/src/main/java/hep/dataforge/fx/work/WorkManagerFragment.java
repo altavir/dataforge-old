@@ -5,7 +5,7 @@
  */
 package hep.dataforge.fx.work;
 
-import hep.dataforge.fx.fragments.Fragment;
+import hep.dataforge.fx.fragments.FXFragment;
 import javafx.scene.layout.AnchorPane;
 import javafx.scene.layout.BorderPane;
 import org.jetbrains.annotations.NotNull;
@@ -13,7 +13,7 @@ import org.jetbrains.annotations.NotNull;
 /**
  * @author Alexander Nozik
  */
-public class WorkManagerFragment extends Fragment {
+public class WorkManagerFragment extends FXFragment {
 
     private WorkManager manager;
 

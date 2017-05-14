@@ -47,6 +47,9 @@ public class StorageRatpackHandler implements Handler {
             renderStorageTree(ctx, root);
         } else {
             String path = ctx.getRequest().getQueryParams().get("path");
+            if(path.startsWith("/")){
+                path = path.replace("/","loader::");
+            }
 
             Loader loader = null;
             if (cache.containsKey(path)) {

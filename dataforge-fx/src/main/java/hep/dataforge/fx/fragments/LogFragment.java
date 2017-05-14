@@ -24,7 +24,7 @@ import java.util.function.BiConsumer;
 /**
  * @author Alexander Nozik
  */
-public class LogFragment extends Fragment implements AutoCloseable {
+public class LogFragment extends FXFragment implements AutoCloseable {
 
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME;
 

@@ -14,7 +14,7 @@ import java.util.function.Supplier;
  * A general GUI fragment
  * Created by darksnake on 09-Oct-16.
  */
-public abstract class Fragment implements FXObject {
+public abstract class FXFragment implements FXObject {
 
     /**
      * Build fragment from scene Node
@@ -22,8 +22,8 @@ public abstract class Fragment implements FXObject {
      * @param sup
      * @return
      */
-    public static Fragment buildFromNode(String title, Supplier<Node> sup) {
-        return new Fragment() {
+    public static FXFragment buildFromNode(String title, Supplier<Node> sup) {
+        return new FXFragment() {
             @Override
             protected Parent buildRoot() {
                 if (title != null) {
@@ -47,10 +47,10 @@ public abstract class Fragment implements FXObject {
     private DoubleProperty preferredHeight = new SimpleDoubleProperty();
     private Parent root;
 
-    public Fragment() {
+    public FXFragment() {
     }
 
-    protected Fragment(String title, double width, double height) {
+    protected FXFragment(String title, double width, double height) {
         setTitle(title);
         setPreferredWidth(width);
         setPreferredHeight(height);
