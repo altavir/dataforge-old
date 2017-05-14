@@ -29,10 +29,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -54,8 +54,8 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
     //TODO set up logger as connection
 
     //private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    private final Map<Connection<? extends Device>, List<String>> connections = new ConcurrentHashMap<>();
-    private final Map<String, Value> states = new ConcurrentHashMap<>();
+    private final Map<Connection<? extends Device>, List<String>> connections = new HashMap<>();
+    private final Map<String, Value> states = new HashMap<>();
     private Context context;
     private Logger logger;
 
@@ -125,7 +125,7 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
      * @param stateName
      * @param stateValue
      */
-    protected final void notifyStateChanged(String stateName, Value stateValue) {
+    private final void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(stateName, stateValue);
         getLogger().info("State {} changed to {}", stateName, stateValue);
         forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,

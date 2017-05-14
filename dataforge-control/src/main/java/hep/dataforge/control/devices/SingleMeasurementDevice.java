@@ -27,7 +27,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
 
     private T measurement;
 
-//    public SingleMeasurementDevice(String name, Context context, Meta meta) {
+    //    public SingleMeasurementDevice(String name, Context context, Meta meta) {
 //        super(name, context, meta);
 //    }
     public T getMeasurement() {
@@ -45,7 +45,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
 
     @Override
     protected void requestStateChange(String stateName, Value value) throws ControlException {
-        throw new ControlException("State not defined");
+        updateState(stateName, value);
     }
 
     public T startMeasurement(String type) throws ControlException {
@@ -65,7 +65,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
      * Stop current measurement
      *
      * @param force if true than current measurement will be interrupted even if
-     * running
+     *              running
      */
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
@@ -78,7 +78,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
         this.measurement = null;
         recalculateState(MEASURING_STATE);
     }
-    
+
 
     protected abstract T createMeasurement(Meta meta) throws ControlException;
 
