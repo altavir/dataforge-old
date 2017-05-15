@@ -178,7 +178,9 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     protected abstract Object computeState(String stateName) throws ControlException;
 
-    protected abstract void requestStateChange(String stateName, Value value) throws ControlException;
+    protected void requestStateChange(String stateName, Value value) throws ControlException{
+        updateState(stateName, value);
+    }
 
     @Override
     public Future<Value> setState(String stateName, Object value) {

@@ -43,11 +43,6 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
         }
     }
 
-    @Override
-    protected void requestStateChange(String stateName, Value value) throws ControlException {
-        updateState(stateName, value);
-    }
-
     public T startMeasurement(String type) throws ControlException {
         return startMeasurement(getMetaForMeasurement(type));
     }

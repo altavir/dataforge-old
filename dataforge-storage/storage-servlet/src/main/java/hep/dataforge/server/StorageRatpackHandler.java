@@ -27,16 +27,6 @@ public class StorageRatpackHandler implements Handler {
     private final Storage root;
     private Map<String, SoftReference<Loader>> cache= new ConcurrentHashMap<>();
 
-//    public StorageRatpackHandler(Storage root, Map<String, SoftReference<Loader>> cache) {
-//        this.root = root;
-//        if (cache == null) {
-//            this.cache = new ConcurrentHashMap<>();
-//        } else {
-//            this.cache = cache;
-//        }
-//    }
-
-
     public StorageRatpackHandler(ServerManager manager, Storage root) {
         this.manager = manager;
         this.root = root;
@@ -166,10 +156,8 @@ public class StorageRatpackHandler implements Handler {
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
             String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
-            if (plotParams != null) {
-                data.put("plotParams", plotParams);
-            }
-//            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
+            data.put("plotParams", plotParams);
+            //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 
             StringWriter writer = new StringWriter();
             template.process(data, writer);

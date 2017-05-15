@@ -26,7 +26,7 @@ import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
 @ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
 
-    public static final String CONNECTION_STATE = "connect";
+    public static final String CONNECTION_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
 
     private PortHandler handler;
