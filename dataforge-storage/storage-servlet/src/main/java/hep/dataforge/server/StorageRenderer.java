@@ -12,14 +12,14 @@ import java.util.Comparator;
  */
 public class StorageRenderer {
 
-    public static void renderStorage(StringBuilder b, Storage storage) throws StorageException {
+    public static void renderStorage(StringBuilder b, String basePath, Storage storage) throws StorageException {
         b.append("<div class=\"node\">\n");
         if (!storage.loaders().isEmpty()) {
             b.append("<div class=\"leaf\">\n"
                     + "<ul>");
             storage.loaders().stream()
                     .sorted(Comparator.comparing(Named::getName))
-                    .forEach(loader -> renderLoaderEntry(b, loader));
+                    .forEach(loader -> renderLoaderEntry(b, basePath, loader));
 
             b.append("</ul>"
                     + "</div>\n");
@@ -31,7 +31,7 @@ public class StorageRenderer {
                     .forEach(shelf -> {
                         b.append(String.format("<li><strong>+ %s</strong></li>%n", shelf.getName()));
                         try {
-                            renderStorage(b, shelf);
+                            renderStorage(b, basePath, shelf);
                         } catch (StorageException e) {
                             b.append("Error loading storage: " + e.getMessage());
                         }
@@ -41,8 +41,8 @@ public class StorageRenderer {
         b.append("</div>\n");
     }
 
-    public static void renderLoaderEntry(StringBuilder b, Loader loader) {
-        String href = "/storage?path=" + loader.getPath();
+    public static void renderLoaderEntry(StringBuilder b, String basePath, Loader loader) {
+        String href = basePath + "?path=" + loader.getPath();
         b.append(String.format("<li><a href=\"%s\">%s</a> (%s)</li>", href, loader.getName(), loader.getType()));
     }
 }

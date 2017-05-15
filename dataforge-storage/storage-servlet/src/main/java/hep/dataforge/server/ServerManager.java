@@ -17,6 +17,7 @@ import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 /**
  * A web server manager. Only one servlet is allowed per context
@@ -35,6 +36,10 @@ public class ServerManager extends BasicPlugin {
      * Customizable handlers
      */
     private Handler rootHandler;
+
+    /**
+     * A mapping path -> handler
+     */
     private Map<String, Handler> handlers = new HashMap<>();
 
     /**
@@ -98,13 +103,29 @@ public class ServerManager extends BasicPlugin {
         this.rootHandler = rootHandler;
     }
 
+    /**
+     * Add custom handler without adding object to registry
+     * @param path
+     * @param handler
+     */
     public void addHandler(String path, Handler handler) {
         this.handlers.put(path, handler);
     }
 
+    /**
+     * Add object with a handler factory for this object
+     * @param path
+     * @param object
+     * @param handlerFactory
+     * @param <T>
+     */
+    public <T> void addObject(String path, T object, Function<T, Handler> handlerFactory) {
+        this.handlers.put(path, handlerFactory.apply(object));
+        paths.put(object, path);
+    }
+
     public void addStorageHandler(String path, Storage storage) {
-        addHandler(path, new StorageRatpackHandler(this, storage));
-        paths.put(storage, path);
+        addObject(path,storage,st -> new StorageRatpackHandler(this,st));
     }
 
     public void addStorageHandler(String path, File file) {
