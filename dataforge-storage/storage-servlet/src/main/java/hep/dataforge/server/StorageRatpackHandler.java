@@ -198,7 +198,7 @@ public class StorageRatpackHandler implements Handler {
         binding.put("navigation",manager.listHandlers());
 
         binding.put("dataSource", dataSourceStr);
-        binding.put("rootURL", serverAddress + "/storage");
+        binding.put("rootURL", manager.resolveObject(root));
 
         binding.put("updateInterval", 30);
         return binding;
