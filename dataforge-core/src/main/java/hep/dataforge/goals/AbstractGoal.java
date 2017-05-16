@@ -61,7 +61,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                         try {
                             thread = Thread.currentThread();
                             //trigger start hooks
-                            listeners.forEach(listener -> listener.onGoalStart());
+                            listeners.forEach(GoalListener::onGoalStart);
                             T r = compute();
                             //triggering result hooks
                             listeners.forEach(listener -> listener.onGoalComplete(getExecutor(), r));
@@ -130,7 +130,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
 
     @Override
     public void registerListener(GoalListener<T> listener) {
-        listeners.add(listener);
+        listeners.add(listener,true);
     }
 
     protected class GoalResult extends CompletableFuture<T> {

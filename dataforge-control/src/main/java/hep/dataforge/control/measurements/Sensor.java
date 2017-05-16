@@ -122,11 +122,6 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         return Value.NULL;
     }
 
-    @Override
-    protected void requestStateChange(String stateName, Value value) throws ControlException {
-        throw new ControlException("State not defined");
-    }
-
     protected abstract Measurement<T> createMeasurement() throws MeasurementException;
 
 }

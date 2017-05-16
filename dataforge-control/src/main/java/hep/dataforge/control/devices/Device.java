@@ -62,7 +62,7 @@ import java.util.concurrent.Future;
  *
  * @author Alexander Nozik
  */
-@StateDef(name = Device.INITIALIZED_STATE,info = "State showing if device is initialized")
+@StateDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized")
 public interface Device extends Metoid, Configurable, Encapsulated, Named, Responder {
 
     String INITIALIZED_STATE = "init";
@@ -73,13 +73,6 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      * @return
      */
     String type();
-
-//    /**
-//     * Set context for this device
-//     *
-//     * @param context
-//     */
-//    void setContext(Context context);
 
     /**
      * Get the device state with given name. Null if such state not found or
@@ -92,8 +85,26 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      */
     Value getState(String name);
 
+    default Optional<Value> optState(String stateName){
+        if(!hasState(stateName)){
+            return Optional.empty();
+        } else {
+            Value state = getState(stateName);
+            if(state.isNull()){
+                return Optional.empty();
+            } else {
+                return Optional.of(state);
+            }
+        }
+    }
+
+    default Optional<Boolean> optBooleanState(String name){
+        return optState(name).map(Value::booleanValue);
+    }
+
     /**
      * Request state change for state with given name
+     *
      * @param name
      * @param value
      * @return the actual state after set
@@ -134,6 +145,16 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      */
     default List<StateDef> stateDefs() {
         return DescriptorUtils.listAnnotations(this.getClass(), StateDef.class, true);
+    }
+
+    /**
+     * Find if current device has defined state with given name
+     *
+     * @param stateName
+     * @return
+     */
+    default boolean hasState(String stateName) {
+        return stateDefs().stream().anyMatch(stateDef -> stateDef.name().equals(stateName));
     }
 
     /**
