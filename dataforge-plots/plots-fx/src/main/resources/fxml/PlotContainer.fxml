@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+<?import java.net.URL?>
+<fx:root id="AnchorPane" styleClass="mainFxmlClass" type="AnchorPane" xmlns="http://javafx.com/javafx/8.0.111" xmlns:fx="http://javafx.com/fxml/1">
+    <stylesheets>
+        <URL value="@styles/plotcontainer.css" />
+    </stylesheets>
+   <children>
+      <SplitPane fx:id="split" dividerPositions="0.8" layoutX="200.0" layoutY="113.0" prefHeight="160.0" prefWidth="200.0" AnchorPane.bottomAnchor="0.0" AnchorPane.leftAnchor="0.0" AnchorPane.rightAnchor="0.0" AnchorPane.topAnchor="0.0">
+        <items>
+            <StackPane>
+               <children>
+                <BorderPane fx:id="plotPane" minHeight="300.0" minWidth="300.0" />
+                  <Button fx:id="optionsPannelButton" graphicTextGap="0.0" mnemonicParsing="false" opacity="0.4" text="&gt;&gt;" textAlignment="JUSTIFY" StackPane.alignment="TOP_RIGHT">
+                     <font>
+                        <Font name="System Bold" size="12.0" />
+                     </font>
+                  </Button>
+               </children>
+            </StackPane>
+            <VBox fx:id="sideBar" minWidth="0.0" prefHeight="200.0" prefWidth="100.0" SplitPane.resizableWithParent="false">
+               <children>
+                  <Button fx:id="frameOptionsButton" maxWidth="1.7976931348623157E308" minWidth="0.0" mnemonicParsing="false" onAction="#onFrameOptionsClick" text="Frame options" />
+                  <ListView fx:id="plottableslList" minWidth="0.0" VBox.vgrow="ALWAYS">
+                     <contextMenu>
+                        <ContextMenu>
+                          <items>
+                            <MenuItem mnemonicParsing="false" onAction="#onShowAll" text="Show all" />
+                              <MenuItem mnemonicParsing="false" onAction="#onHideAll" text="Hide all" />
+                          </items>
+                        </ContextMenu>
+                     </contextMenu></ListView>
+               </children>
+            </VBox>
+        </items>
+      </SplitPane>
+   </children>
+</fx:root>

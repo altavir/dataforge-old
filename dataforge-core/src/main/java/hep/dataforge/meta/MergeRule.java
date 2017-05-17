@@ -101,16 +101,16 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
      * @param builder
      * @return
      */
-    public MetaBuilder mergeInPlace(Meta main, MetaBuilder builder) {
+    public MetaBuilder mergeInPlace(Meta main, final MetaBuilder builder) {
         //MetaBuilder builder = new MetaBuilder(mergeName(main.getName(), second.getName()));
         builder.rename(mergeName(main.getName(), builder.getName()));
 
         // Overriding values
         for (String valueName : main.getValueNames()) {
             if (!builder.hasValue(valueName)) {
-                builder = writeValue(builder, valueName, main.getValue(valueName));
+                writeValue(builder, valueName, main.getValue(valueName));
             } else {
-                builder = writeValue(builder, valueName, mergeValues(Name.join(builder.getFullName(), Name.of(valueName)),
+                writeValue(builder, valueName, mergeValues(Name.join(builder.getFullName(), Name.of(valueName)),
                         main.getValue(valueName), builder.getValue(valueName)));
             }
         }
@@ -118,7 +118,7 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
         // Overriding nodes
         for (String nodeName : main.getNodeNames()) {
             if (!builder.hasMeta(nodeName)) {
-                builder = writeElement(builder, nodeName, main.getMetaList(nodeName));
+                writeElement(builder, nodeName, main.getMetaList(nodeName));
             } else {
                 List<? extends Meta> mainNodes = main.getMetaList(nodeName);
                 List<? extends Meta> secondNodes = builder.getMetaList(nodeName);
@@ -128,7 +128,7 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
                     //TODO apply smart merging rule for lists?
                     List<? extends Meta> item = mergeNodes(Name.join(builder.getFullName(),
                             Name.of(nodeName)), mainNodes, secondNodes);
-                    builder = writeElement(builder, nodeName, item);
+                    writeElement(builder, nodeName, item);
                 }
             }
         }

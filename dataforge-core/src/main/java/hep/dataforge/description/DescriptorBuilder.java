@@ -5,9 +5,9 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 
 import java.lang.reflect.AnnotatedElement;
@@ -17,7 +17,7 @@ import java.util.List;
  * Helper class to build descriptors
  * @author Alexander Nozik
  */
-public class DescriptorBuilder implements Annotated {
+public class DescriptorBuilder implements Metoid {
 
     private final MetaBuilder builder = new MetaBuilder("node");
 

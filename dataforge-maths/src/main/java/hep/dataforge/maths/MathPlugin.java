@@ -19,16 +19,16 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  *
  * @author Alexander Nozik
  */
-@PluginDef(name = "math", group = "hep.dataforge", description = "General mathematics plugin contining function factories")
+@PluginDef(name = "math", group = "hep.dataforge", info = "General mathematics plugin contining function factories")
 public class MathPlugin extends BasicPlugin {
-
-    public static MathPlugin buildFrom(Context context) {
-        MathPlugin plugin = context.provide("math", MathPlugin.class);
-        return plugin;
-    }
 
     private final FunctionDispatcher<UnivariateFunction> univariateFactory = new FunctionDispatcher<>();
     private final FunctionDispatcher<BivariateFunction> bivariateFactory = new FunctionDispatcher<>();
+
+    public static MathPlugin buildFrom(Context context) {
+        MathPlugin plugin = context.pluginManager().getOrLoad(MathPlugin.class);
+        return plugin;
+    }
 
     public UnivariateFunction buildUnivariateFunction(Meta meta) {
         return univariateFactory.build(meta);

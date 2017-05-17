@@ -62,11 +62,13 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <K, V> Cache<K, V> getCache(String cacheName, Class<K> keyType, Class<V> valueType) {
         return getMap().computeIfAbsent(cacheName, name -> new DefaultCache(name, this, valueType));
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <K, V> Cache<K, V> getCache(String cacheName) {
         return getMap().computeIfAbsent(cacheName, name -> new DefaultCache(name, this, Object.class));
     }
@@ -98,7 +100,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public void close() {
-        getMap().values().forEach(it -> it.close());
+        getMap().values().forEach(DefaultCache::close);
         map = null;
     }
 
@@ -108,6 +110,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> clazz) {
         if (clazz == DefaultCacheManager.class) {
             return (T) new DefaultCacheManager();

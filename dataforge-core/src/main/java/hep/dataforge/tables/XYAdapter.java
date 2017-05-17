@@ -22,7 +22,8 @@ import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 
 /**
- * An adapter to correctly interpret DataPoint into X-Y plot or model. Could have multiple Y-s
+ * An adapter to correctly interpret DataPoint into X-Y plot or model. Could have multiple Y-s.
+ * By default point keys are constructed as {@code <axis name>.<field key>}
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -83,8 +84,8 @@ public class XYAdapter extends AxisPointAdapter {
         xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
         xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
         if (meta().hasMeta(Y_AXIS)) {
-            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(i -> new String[i]);
-            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(i -> new String[i]);
+            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(String[]::new);
+            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(String[]::new);
         } else {
             yValues = new String[]{Y_VALUE_KEY};
             yErrors = new String[]{Y_ERROR_KEY};

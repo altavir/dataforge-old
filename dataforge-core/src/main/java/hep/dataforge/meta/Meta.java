@@ -15,11 +15,11 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.XMLMetaWriter;
-import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import hep.dataforge.providers.AbstractProvider;
+import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -27,6 +27,7 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * The main building block of the DataForge.
@@ -37,7 +38,7 @@ import java.util.Objects;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public abstract class Meta extends AbstractProvider implements Named, ValueProvider, Serializable, MetaProvider {
+public abstract class Meta implements Provider, Named, ValueProvider, Serializable, MetaProvider {
 
     private static final Meta EMPTY = new MetaBuilder("").build();
 
@@ -62,7 +63,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     }
 
     /**
-     * Возвращает билдер, который работает с копией этой аннотации
+     * Return modifiable {@link MetaBuilder} witch copies data from this meta. Initial meta not changed.
      *
      * @return a {@link hep.dataforge.meta.MetaBuilder} object.
      */
@@ -71,147 +72,72 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
     }
 
     /**
-     * Get meta node with given name
+     * Return the meta node with given name
+     *
      * @param path
      * @return
      */
-    @Override
-    public abstract Meta getMeta(String path);
+    public abstract List<? extends Meta> getMetaList(String path);
 
-    /**
-     * Alias for {@code getMeta()}
-     * @param path
-     * @return
-     */
-    public final Meta getNode(String path){
-        return getMeta(path);
+    @Provides(META_TARGET)
+    public Optional<? extends Meta> optMeta(String path) {
+        return getMetaList(path).stream().findFirst().map(it -> it);
     }
 
-    /**
-     * В случае передачи {@code "$all"} или {@code null} в качестве аргумента
-     * возвращает всех прямых наследников
-     *
-     * @param name
-     * @return
-     */
-    public abstract List<? extends Meta> getMetaList(String name);
-
 //    /**
-//     * Alias for {@code getMetaList}
+//     * Check if this meta has a node with given name
 //     * @param name
 //     * @return
 //     */
-//    public final List<? extends Meta> getNodes(String name){
-//        return getMetaList(name);
+//    public boolean hasMeta(String name) {
+//        Collection<String> names = getNodeNames();
+//        if (names.contains(name)) {
+//            return true;
+//        } else {
+//            Name path = Name.of(name);
+//            if (path.length() > 1) {
+//                String head = path.getFirst().entry();
+//                String tail = path.cutFirst().toString();
+//                if (names.contains(head)) {
+//                    return getMeta(head).hasMeta(tail);
+//                } else {
+//                    return false;
+//                }
+//            } else {
+//                return false;
+//            }
+//        }
 //    }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @param path
-     * @return
-     */
-    @Override
-    public abstract Value getValue(String path);
-
-    public boolean hasChildren() {
-        return !getNodeNames().isEmpty();
-    }
-
-    /**
-     * Check if this meta has a node with given name
-     * @param name
-     * @return
-     */
-    public boolean hasMeta(String name) {
-        Collection<String> names = getNodeNames();
-        if (names.contains(name)) {
-            return true;
-        } else {
-            Name path = Name.of(name);
-            if (path.length() > 1) {
-                String head = path.getFirst().entry();
-                String tail = path.cutFirst().toString();
-                if (names.contains(head)) {
-                    return getMeta(head).hasMeta(tail);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-    }
-
-    /**
-     * Alias for {@code hasMeta}
-     * @param name
-     * @return
-     */
-    public final boolean hasNode(String name) {
-        return hasMeta(name);
-    }
-
-    /**
-     * {@inheritDoc}
-     *
-     * @param name
-     * @return
-     */
-    @Override
-    public boolean hasValue(String name) {
-        if (getValueNames().contains(name)) {
-            return true;
-        } else {
-            Collection<String> names = getNodeNames();
-            Name path = Name.of(name);
-            if (path.length() > 1) {
-                String head = path.getFirst().entry();
-                String tail = path.cutFirst().toString();
-                if (names.contains(head)) {
-                    return getMeta(head).hasValue(tail);
-                } else {
-                    return false;
-                }
-            } else {
-                return false;
-            }
-        }
-    }
+//    /**
+//     * {@inheritDoc}
+//     *
+//     * @param name
+//     * @return
+//     */
+//    @Override
+//    public boolean hasValue(String name) {
+//        if (getValueNames().contains(name)) {
+//            return true;
+//        } else {
+//            Collection<String> names = getNodeNames();
+//            Name path = Name.of(name);
+//            if (path.length() > 1) {
+//                String head = path.getFirst().entry();
+//                String tail = path.cutFirst().toString();
+//                if (names.contains(head)) {
+//                    return getMeta(head).hasValue(tail);
+//                } else {
+//                    return false;
+//                }
+//            } else {
+//                return false;
+//            }
+//        }
+//    }
 
     public boolean isEmpty() {
         return this.getNodeNames().isEmpty() && this.getValueNames().isEmpty();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Object provide(String target, Name name) {
-        switch (target) {
-            case VALUE_TARGET:
-                return getValue(name.toString());
-            case META_TARGET:
-                return getMeta(name.toString());
-            default:
-                throw new TargetNotProvidedException();
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public boolean provides(String target, Name name) {
-        switch (target) {
-            case VALUE_TARGET:
-                return hasValue(name.toString());
-            case META_TARGET:
-                return hasMeta(name.toString());
-            default:
-                return false;
-        }
-
     }
 
     /**
@@ -219,6 +145,7 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      *
      * @return a {@link java.util.Collection} object.
      */
+    @ProvidesNames(VALUE_TARGET)
     public abstract Collection<String> getValueNames();
 
     /**
@@ -226,28 +153,18 @@ public abstract class Meta extends AbstractProvider implements Named, ValueProvi
      *
      * @return a {@link java.util.Collection} object.
      */
+    @ProvidesNames(META_TARGET)
     public abstract Collection<String> getNodeNames();
 
-    /**
-     * Return a child node with given name or default if child node not found
-     * @param path
-     * @param def
-     * @return 
-     */
-    public Meta getMeta(String path, Meta def) {
-        if (this.hasMeta(path)) {
-            return getMeta(path);
-        } else {
-            return def;
-        }
-    }
-    
+
+
     /**
      * Return a child node with given name or empty node if child node not found
+     *
      * @param path
-     * @return 
+     * @return
      */
-    public Meta getNodeOrEmpty(String path) {
+    public final Meta getMetaOrEmpty(String path) {
         return getMeta(path, Meta.empty());
     }
 

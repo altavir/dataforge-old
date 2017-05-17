@@ -16,8 +16,9 @@
 package hep.dataforge.maths.integration;
 
 import hep.dataforge.maths.GridCalculator;
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
+import java.util.function.Predicate;
 
 /**
  * <p>
@@ -49,7 +50,7 @@ public class RiemanIntegrator extends UnivariateIntegrator<UnivariateIntegrand> 
      * @return
      */
     @Override
-    public Predicate<UnivariateIntegrand> getDefaultStopingCondition() {
+    public Predicate<UnivariateIntegrand> getDefaultStoppingCondition() {
         return (t) -> true;
     }
 

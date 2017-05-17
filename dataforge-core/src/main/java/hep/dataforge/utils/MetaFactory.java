@@ -11,7 +11,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
+@FunctionalInterface
 public interface MetaFactory<T> {
-
     T build(Meta meta);
 }

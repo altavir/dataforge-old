@@ -15,8 +15,8 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
@@ -47,15 +47,15 @@ public class QOWFitEngine implements FitEngine {
      */
     public static final String QOW_METHOD_FAST = "fast";
 
-//    /**
+    //    /**
 //     * <p>Constructor for QOWFitEngine.</p>
 //     *
-//     * @param report a {@link hep.dataforge.io.Logable} object.
+//     * @param report a {@link hep.dataforge.io.Loggable} object.
 //     */
-//    public QOWFitEngine(Logable report) {
+//    public QOWFitEngine(Loggable report) {
 //        super(report);
 //    }
-    private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, Logable log) {
+    private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, History log) {
         int maxSteps = task.meta().getInt("iterations", 100);
         double tolerance = task.meta().getDouble("tolerance", 0);
 
@@ -136,24 +136,24 @@ public class QOWFitEngine implements FitEngine {
      * {@inheritDoc}
      */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
-        Log log = new Log("QOW", parentLog);
-        log.report("QOW fit engine started task '{}'", task.getName());
-        switch (task.getName()) {
+    public FitResult run(FitState state, FitStage task, History parentLog) {
+        Chronicle log = new Chronicle("QOW", parentLog);
+        log.report("QOW fit engine started task '{}'", task.getType());
+        switch (task.getType()) {
             case TASK_SINGLE:
                 return makeRun(state, task, log);
             case TASK_COVARIANCE:
                 return generateErrors(state, task, log);
             case TASK_RUN:
-                FitState res = makeRun(state, task, log);
-                res = makeRun(res, task, log);
-                return generateErrors(res, task, log);
+                FitResult res = makeRun(state, task, log);
+                res = makeRun(res.getState().get(), task, log);
+                return generateErrors(res.getState().get(), task, log);
             default:
                 throw new IllegalArgumentException("Unknown task");
         }
     }
 
-    private FitTaskResult makeRun(FitState state, FitStage task, Logable log) {
+    private FitResult makeRun(FitState state, FitStage task, History log) {
         /*Инициализация объектов, задание исходных значений*/
         log.report("Starting fit using quasioptimal weights method.");
 
@@ -170,7 +170,8 @@ public class QOWFitEngine implements FitEngine {
         ParamSet res = this.newtonianRun(state, task, curWeight, log);
 
         /*Генерация результата*/
-        FitTaskResult result = FitTaskResult.buildResult(state, task, res);
+
+        FitResult result = FitResult.build(state.edit().setPars(res).build(), task.getFreePars());
 
         return result;
     }
@@ -180,11 +181,11 @@ public class QOWFitEngine implements FitEngine {
      * generateErrors.</p>
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link Logable} object.
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
+     * @param task  a {@link hep.dataforge.stat.fit.FitStage} object.
+     * @param log   a {@link History} object.
+     * @return a {@link FitResult} object.
      */
-    public FitTaskResult generateErrors(FitState state, FitStage task, Logable log) {
+    public FitResult generateErrors(FitState state, FitStage task, History log) {
 
         log.report("Starting errors estimation using quasioptimal weights method.");
 
@@ -199,14 +200,21 @@ public class QOWFitEngine implements FitEngine {
 //        ParamSet pars = state.getParameters().copy();
         NamedMatrix covar = getCovariance(state, curWeight);
 
-        FitTaskResult result = FitTaskResult.buildResult(state, task, covar);
         EigenDecomposition decomposition = new EigenDecomposition(covar.getMatrix());
+        boolean valid = true;
         for (double lambda : decomposition.getRealEigenvalues()) {
             if (lambda <= 0) {
                 log.report("The covariance matrix is not positive defined. Error estimation is not valid");
-                result.setValid(false);
+                valid = false;
             }
         }
+
+        FitResult result = FitResult.build(
+                state.edit().setCovariance(covar, true).build(),
+                valid,
+                task.getFreePars()
+        );
+
 
         return result;
 

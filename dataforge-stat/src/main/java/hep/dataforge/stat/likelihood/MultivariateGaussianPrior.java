@@ -75,9 +75,9 @@ public class MultivariateGaussianPrior implements ParametricValue {
         double res = 1;
         for (Param par : set.getParams()) {
             
-            double mean = par.value();
+            double mean = par.getValue();
             double sigma = par.getErr();
-            double value = pars.getDouble(par.name());
+            double value = pars.getDouble(par.getName());
             double dif = value - mean;
             
             res *= 1 / Math.sqrt(2 * Math.PI) / sigma * Math.exp(-dif * dif / 2 / sigma / sigma);

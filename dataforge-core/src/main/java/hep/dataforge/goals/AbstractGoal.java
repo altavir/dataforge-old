@@ -52,13 +52,16 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             .toArray(num -> new CompletableFuture[num]))
                     .whenCompleteAsync((res, err) -> {
                         if (err != null) {
-                            this.result.completeExceptionally(err);
+                            getLogger().error("One of goal dependencies failed with exception", err);
+                            if (failOnError()) {
+                                this.result.completeExceptionally(err);
+                            }
                         }
 
                         try {
                             thread = Thread.currentThread();
                             //trigger start hooks
-                            listeners.forEach(listener -> listener.onGoalStart());
+                            listeners.forEach(GoalListener::onGoalStart);
                             T r = compute();
                             //triggering result hooks
                             listeners.forEach(listener -> listener.onGoalComplete(getExecutor(), r));
@@ -79,6 +82,16 @@ public abstract class AbstractGoal<T> implements Goal<T> {
     }
 
     protected abstract T compute() throws Exception;
+
+    /**
+     * If true the goal will result in error if any of dependencies throws exception.
+     * Otherwise it will be calculated event if some of dependencies are failed.
+     *
+     * @return
+     */
+    protected boolean failOnError() {
+        return true;
+    }
 
     /**
      * Abort internal goals process without canceling result. Use with
@@ -117,7 +130,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
 
     @Override
     public void registerListener(GoalListener<T> listener) {
-        listeners.add(listener);
+        listeners.add(listener,true);
     }
 
     protected class GoalResult extends CompletableFuture<T> {

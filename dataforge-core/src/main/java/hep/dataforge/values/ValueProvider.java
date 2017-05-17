@@ -18,8 +18,10 @@ package hep.dataforge.values;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
 public interface ValueProvider {
@@ -36,44 +38,26 @@ public interface ValueProvider {
         if (provider instanceof ValueProvider) {
             return (ValueProvider) provider;
         }
-        return new ValueProvider() {
-            @Override
-            public Value getValue(String path) {
-                return provider.provide(Path.of(path, VALUE_TARGET), Value.class);
-            }
-
-            @Override
-            public boolean hasValue(String path) {
-                return provider.provides(Path.of(path, VALUE_TARGET));
-            }
-
-        };
+        return path -> provider.provide(Path.of(path, VALUE_TARGET)).map(Value.class::cast);
     }
 
     default boolean hasValue(String path) {
-        try {
-            return getValue(path) != null;
-        } catch (NameNotFoundException ex) {
-            return false;
-        }
+        return optValue(path).isPresent();
     }
 
-    Value getValue(String path);
+    @Provides(VALUE_TARGET)
+    Optional<Value> optValue(String path);
+
+    default Value getValue(String path) {
+        return optValue(path).orElseThrow(() -> new NameNotFoundException(path));
+    }
 
     default Boolean getBoolean(String name, boolean def) {
-        if (this.hasValue(name)) {
-            return getValue(name).booleanValue();
-        } else {
-            return def;
-        }
+        return optValue(name).map(Value::booleanValue).orElse(def);
     }
 
     default Boolean getBoolean(String name, Supplier<Boolean> def) {
-        if (this.hasValue(name)) {
-            return getValue(name).booleanValue();
-        } else {
-            return def.get();
-        }
+        return optValue(name).map(Value::booleanValue).orElseGet(def);
     }
 
     default Boolean getBoolean(String name) {
@@ -81,19 +65,11 @@ public interface ValueProvider {
     }
 
     default Double getDouble(String name, double def) {
-        if (this.hasValue(name)) {
-            return getValue(name).doubleValue();
-        } else {
-            return def;
-        }
+        return optValue(name).map(Value::doubleValue).orElse(def);
     }
 
     default Double getDouble(String name, Supplier<Double> def) {
-        if (this.hasValue(name)) {
-            return getValue(name).doubleValue();
-        } else {
-            return def.get();
-        }
+        return optValue(name).map(Value::doubleValue).orElseGet(def);
     }
 
     default Double getDouble(String name) {
@@ -101,19 +77,12 @@ public interface ValueProvider {
     }
 
     default Integer getInt(String name, int def) {
-        if (this.hasValue(name)) {
-            return getValue(name).intValue();
-        } else {
-            return def;
-        }
+        return optValue(name).map(Value::intValue).orElse(def);
     }
 
     default Integer getInt(String name, Supplier<Integer> def) {
-        if (this.hasValue(name)) {
-            return getValue(name).intValue();
-        } else {
-            return def.get();
-        }
+        return optValue(name).map(Value::intValue).orElseGet(def);
+
     }
 
     default Integer getInt(String name) {
@@ -121,19 +90,11 @@ public interface ValueProvider {
     }
 
     default String getString(String name, String def) {
-        if (this.hasValue(name)) {
-            return getValue(name).stringValue();
-        } else {
-            return def;
-        }
+        return optValue(name).map(Value::stringValue).orElse(def);
     }
 
     default String getString(String name, Supplier<String> def) {
-        if (this.hasValue(name)) {
-            return getValue(name).stringValue();
-        } else {
-            return def.get();
-        }
+        return optValue(name).map(Value::stringValue).orElseGet(def);
     }
 
     default String getString(String name) {
@@ -141,19 +102,11 @@ public interface ValueProvider {
     }
 
     default Value getValue(String name, Value def) {
-        if (this.hasValue(name)) {
-            return getValue(name);
-        } else {
-            return def;
-        }
+        return optValue(name).orElse(def);
     }
 
     default Value getValue(String name, Supplier<Value> def) {
-        if (this.hasValue(name)) {
-            return getValue(name);
-        } else {
-            return def.get();
-        }
+        return optValue(name).orElseGet(def);
     }
 
     default String[] getStringArray(String name) {
@@ -165,7 +118,7 @@ public interface ValueProvider {
         return res;
     }
 
-    default  String[] getStringArray(String name, Supplier<String[]> def) {
+    default String[] getStringArray(String name, Supplier<String[]> def) {
         if (this.hasValue(name)) {
             return getStringArray(name);
         } else {

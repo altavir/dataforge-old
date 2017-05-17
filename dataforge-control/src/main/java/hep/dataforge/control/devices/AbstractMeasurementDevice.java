@@ -11,6 +11,7 @@ import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.MeasurementListener;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
+
 import java.time.Instant;
 
 public abstract class AbstractMeasurementDevice extends AbstractDevice implements MeasurementListener {
@@ -22,12 +23,12 @@ public abstract class AbstractMeasurementDevice extends AbstractDevice implement
      * @param measurement
      */
     protected <T> void onCreateMeasurement(Measurement<T> measurement) {
-        forEachTypedConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
+        forEachConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
                 (MeasurementConsumer t) -> t.accept(AbstractMeasurementDevice.this, measurement));
     }
 
     protected <T> void onCreateMeasurement(String measurementName, Measurement<T> measurement) {
-        forEachTypedConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
+        forEachConnection(Roles.MEASUREMENT_CONSUMER_ROLE, MeasurementConsumer.class,
                 (MeasurementConsumer t) -> t.accept(AbstractMeasurementDevice.this, measurementName, measurement));
     }
     

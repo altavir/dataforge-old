@@ -18,6 +18,7 @@ package hep.dataforge.values;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 /**
  * Simple valuew provider based on map
@@ -37,7 +38,7 @@ public class MapValueProvider implements ValueProvider {
     }
 
     @Override
-    public Value getValue(String path) {
-        return map.get(path);
+    public Optional<Value> optValue(String path) {
+        return Optional.ofNullable(map.get(path));
     }
 }

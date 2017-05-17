@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(name = "cache", group = "hep.dataforge", description = "Data caching plugin")
+@PluginDef(name = "cache", group = "hep.dataforge", info = "Data caching plugin")
 @ValueDef(name = "cacheManager", info = "The fully qualified name of cache manager class")
 public class CachePlugin extends BasicPlugin {
 

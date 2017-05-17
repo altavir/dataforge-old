@@ -34,7 +34,7 @@ public interface Integrator<T extends Integrand> {
      * @return a T object.
      */
     default T evaluate(T integrand) {
-        return Integrator.this.evaluate(integrand, getDefaultStopingCondition());
+        return Integrator.this.evaluate(integrand, getDefaultStoppingCondition());
     }
 
     /**
@@ -61,7 +61,7 @@ public interface Integrator<T extends Integrand> {
      *
      * @return a {@link java.util.function.Predicate} object.
      */
-    default Predicate<T> getDefaultStopingCondition() {
+    default Predicate<T> getDefaultStoppingCondition() {
         return t -> true;
     }
 }

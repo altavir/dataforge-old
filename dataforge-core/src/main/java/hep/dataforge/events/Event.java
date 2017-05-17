@@ -16,7 +16,7 @@
 package hep.dataforge.events;
 
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Annotated;
+import hep.dataforge.meta.Metoid;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -32,7 +32,7 @@ import static hep.dataforge.events.Event.*;
 @ValueDef(name = EVENT_PRIORITY_KEY, type = "NUMBER", def = "0", info = "Priority of the event. 0 is default priority")
 @ValueDef(name = EVENT_SOURCE_KEY, def = "", info = "The source or the tag of the event. By default is empty")
 @ValueDef(name = EVENT_TIME_KEY, required = true, info = "Time of the event")
-public interface Event extends Annotated {
+public interface Event extends Metoid {
 
     String EVENT_PRIORITY_KEY = "priority";
     String EVENT_TYPE_KEY = "type";

@@ -1,5 +1,7 @@
 package hep.dataforge.control;
 
+import hep.dataforge.control.devices.Device;
+import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -11,7 +13,10 @@ public class ControlUtils {
     }
 
     public static String getDeviceName(Meta meta){
-        //TODO add default
-        return meta.getString("name");
+        return meta.getString("name","");
+    }
+
+    public static Envelope getDefaultDeviceResponse(Device device, Envelope request){
+        throw new UnsupportedOperationException("Not implemented");
     }
 }

@@ -14,10 +14,9 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 
 /**
- *
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
-public class PlottableGroup<T extends Plottable> implements  Iterable<T> {
+public class PlottableGroup<T extends Plottable> implements Iterable<T> {
 
     //TODO replace by obsevable collection
     protected final Map<String, T> map = new LinkedHashMap<>();
@@ -37,19 +36,19 @@ public class PlottableGroup<T extends Plottable> implements  Iterable<T> {
         }
     }
 
-    public void addPlottable(T pl) {
+    public void add(T pl) {
         map.put(pl.getName(), pl);
     }
 
-    public void removePlottable(TimePlottable pl) {
-        map.remove(pl.getName());
+    public void remove(String name) {
+        map.remove(name);
     }
 
-    public T getPlottable(String name) {
+    public T get(String name) {
         return map.get(name);
     }
 
-    public boolean hasPlottable(String name) {
+    public boolean has(String name) {
         return map.containsKey(name);
     }
 
@@ -58,37 +57,37 @@ public class PlottableGroup<T extends Plottable> implements  Iterable<T> {
      *
      * @param config
      */
-    public void applyEachConfig(Meta config) {
+    public void apply(Meta config) {
         map.values().stream().forEach((pl) -> {
             pl.configure(config);
         });
     }
-   
+
     /**
      * Set configuration value for each plottable
      *
      * @param name
      * @param value
      */
-    public void setEachConfigValue(String name, Object value) {
+    public void setValue(String name, Object value) {
         map.values().stream().forEach((pl) -> {
             pl.getConfig().setValue(name, value);
         });
     }
 
     /**
-     * Apply configuration to plottables considering each plottable described
+     * Apply configuration to getPlottables considering each plottable described
      * with appropriate {@code plot} node.
-     * 
      * <p>
-     *  A node marked {@code eachPlot} is applied to each plottable previously to individual configurations.
+     * <p>
+     * A node marked {@code eachPlot} is applied to each plottable previously to individual configurations.
      * </p>
      *
      * @param config
      */
     public void applyConfig(Meta config) {
-        if(config.hasMeta("eachPlot")){
-            applyEachConfig(config.getMeta("eachPlot"));
+        if (config.hasMeta("eachPlot")) {
+            apply(config.getMeta("eachPlot"));
         }
         map.values().stream().forEach((pl) -> {
             Meta m = MetaUtils.findNodeByValue(config, "plot", "name", pl.getName());

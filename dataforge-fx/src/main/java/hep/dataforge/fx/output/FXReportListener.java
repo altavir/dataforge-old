@@ -6,7 +6,7 @@
 package hep.dataforge.fx.output;
 
 import hep.dataforge.fx.FXUtils;
-import hep.dataforge.io.reports.LogEntry;
+import hep.dataforge.io.history.Record;
 
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
@@ -16,7 +16,7 @@ import java.util.function.Consumer;
  *
  * @author Alexander Nozik
  */
-public class FXReportListener implements Consumer<LogEntry> {
+public class FXReportListener implements Consumer<Record> {
 
     private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final FXOutputPane pane;
@@ -26,7 +26,7 @@ public class FXReportListener implements Consumer<LogEntry> {
     }
 
     @Override
-    public synchronized void accept(LogEntry t) {
+    public synchronized void accept(Record t) {
         FXUtils.runNow(() -> {
             pane.appendColored(FORMATTER.format(t.getTime()) + " ", "grey");
             pane.appendColored(t.getTraceString() + ": ", "blue");

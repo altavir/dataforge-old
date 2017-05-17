@@ -15,10 +15,8 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
-import hep.dataforge.io.reports.LogEntry;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
@@ -26,6 +24,7 @@ import org.slf4j.Logger;
 import java.io.File;
 import java.io.PrintWriter;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -39,12 +38,28 @@ public class Global extends Context {
     private static final ReferenceRegistry<Context> contextRegistry = new ReferenceRegistry();
     private static final ExecutorService dispatchThreadExecutor = Executors.newSingleThreadExecutor(r -> {
         Thread res = new Thread(r, "DF_DISPATCH");
-//        res.setDaemon(false);
         res.setPriority(Thread.MAX_PRIORITY);
         return res;
     });
-    private static Global instance = new Global();
 
+    private static Global instance = new Global();
+    private static Context defaultContext;
+
+    /**
+     * Use that context when the context for some reason is not provided. By default throws a runtime exception.
+     *
+     * @return
+     */
+    public static Context getDefaultContext() {
+        if (defaultContext == null) {
+            throw new RuntimeException("Context not specified");
+        }
+        return defaultContext;
+    }
+
+    public static void setDefaultContext(Context defaultContext) {
+        Global.defaultContext = defaultContext;
+    }
 
     private Global() {
         super("GLOBAL");
@@ -103,14 +118,16 @@ public class Global extends Context {
     }
 
     @Override
+    public ClassLoader getClassLoader() {
+        return Thread.currentThread().getContextClassLoader();
+    }
+
+    @Override
     public IOManager io() {
-        if (this.io == null) {
-            setIO(new BasicIOManager());
-            getLog().addListener((LogEntry t) -> {
-                System.out.println(t.toString());
-            });
-        }
-        return io;
+        return pluginManager().opt(IOManager.class).orElseGet(() -> {
+            getLogger().debug("No IO plugin found. Using default IO.");
+            return pluginManager().load(new BasicIOManager());
+        });
     }
 
     /**
@@ -130,12 +147,8 @@ public class Global extends Context {
      * @return
      */
     @Override
-    public Value getValue(String path) {
-        if (properties.containsKey(path)) {
-            return properties.get(path);
-        } else {
-            throw new NameNotFoundException(path);
-        }
+    public Optional<Value> optValue(String path) {
+        return Optional.ofNullable(properties.get(path));
     }
 
     /**

@@ -17,8 +17,8 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.MINUIT.*;
 import hep.dataforge.context.Global;
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.MultiFunction;
 
@@ -69,11 +69,11 @@ public class MINUITFitEngine implements FitEngine {
      * @param parentLog
      */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
-        Log log = new Log("MINUIT", parentLog);
+    public FitResult run(FitState state, FitStage task, History parentLog) {
+        Chronicle log = new Chronicle("MINUIT", parentLog);
 
-        log.report("MINUIT fit engine started task '{}'", task.getName());
-        switch (task.getName()) {
+        log.report("MINUIT fit engine started task '{}'", task.getType());
+        switch (task.getType()) {
             case TASK_COVARIANCE:
                 return runHesse(state, task, log);
             case TASK_SINGLE:
@@ -91,9 +91,9 @@ public class MINUITFitEngine implements FitEngine {
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
      * @param log
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
+     * @return a {@link FitResult} object.
      */
-    public FitTaskResult runHesse(FitState state, FitStage task, Logable log) {
+    public FitResult runHesse(FitState state, FitStage task, History log) {
         int strategy;
         strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
 
@@ -132,7 +132,7 @@ public class MINUITFitEngine implements FitEngine {
 
         }
 
-        return new FitTaskResult(newState.build(), task);
+        return FitResult.build(newState.build(), task.getFreePars());
     }
 
     /**
@@ -142,9 +142,9 @@ public class MINUITFitEngine implements FitEngine {
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
      * @param log
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
+     * @return a {@link FitResult} object.
      */
-    public FitTaskResult runFit(FitState state, FitStage task, Logable log) {
+    public FitResult runFit(FitState state, FitStage task, History log) {
 
         MnApplication minuit;
         log.report("Starting fit using Minuit.");
@@ -257,9 +257,7 @@ public class MINUITFitEngine implements FitEngine {
             newState.setInterval(minosErrors);
         }
 
-        FitTaskResult result = new FitTaskResult(newState.build(), task);
-        result.setValid(valid);
-        return result;
+        return FitResult.build(newState.build(),valid, task.getFreePars());
 
     }
 

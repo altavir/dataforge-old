@@ -34,10 +34,16 @@ import java.util.Map;
  */
 public abstract class MultiStageTask<R> extends AbstractTask<R> {
 
+    protected final Class<R> type;
+
+    public MultiStageTask(Class<R> type) {
+        this.type = type;
+    }
+
     @Override
     protected DataNode<R> run(TaskModel model, DataNode<?> data) {
         MultiStageTaskState state = new MultiStageTaskState(data);
-        Logger logger = getLogger(model);
+        Logger logger = model.getContext().getLogger();
 //        Work work = getWork(model, data.getName());
 
         logger.debug("Starting transformation phase");
@@ -61,7 +67,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      * @param model
      * @param state
      */
-    protected abstract void transform(TaskModel model, MultiStageTaskState state);
+    protected abstract MultiStageTaskState transform(TaskModel model, MultiStageTaskState state);
 
     /**
      * Generating finish and storing it in workspace.
@@ -70,8 +76,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      * @return
      */
     protected DataNode<R> result(TaskModel model, MultiStageTaskState state) {
-        //FIXME check for type cast
-        return (DataNode<R>) state.getResult();
+        return state.getResult().checked(type);
     }
 
     /**

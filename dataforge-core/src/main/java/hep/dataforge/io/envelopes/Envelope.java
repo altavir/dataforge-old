@@ -18,8 +18,8 @@ package hep.dataforge.io.envelopes;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 
 /**
  * The message is a pack that can include three principal parts:
@@ -33,7 +33,7 @@ import hep.dataforge.meta.Meta;
 @NodeDef(name = "@envelope", info = "An optional envelope service info node")
 @ValueDef(name = "@envelope.type", info = "Type of the envelope content")
 @ValueDef(name = "@envelope.description", info = "Description of the envelope content")
-public interface Envelope extends Annotated {
+public interface Envelope extends Metoid {
     //Constants
     /**
      * Properties keys

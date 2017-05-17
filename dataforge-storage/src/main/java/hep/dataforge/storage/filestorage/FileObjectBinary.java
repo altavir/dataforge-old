@@ -14,7 +14,6 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 /**
- *
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
 public class FileObjectBinary implements Binary {

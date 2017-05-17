@@ -15,15 +15,15 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
-import hep.dataforge.goals.PipeGoal;
 import hep.dataforge.goals.StaticGoal;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * A piece of data which is basically calculated asynchronously
@@ -32,7 +32,7 @@ import java.util.function.Function;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Data<T> implements Annotated {
+public class Data<T> implements Metoid {
 
     private final Goal<T> goal;
     private final Meta meta;
@@ -50,12 +50,21 @@ public class Data<T> implements Annotated {
         this.type = type;
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> Data<T> buildStatic(T content, Meta meta) {
-        return new Data(new StaticGoal(content), content.getClass(), meta);
+        return new Data<T>(new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
     }
 
     public static <T> Data<T> buildStatic(T content) {
         return buildStatic(content, Meta.empty());
+    }
+
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(executor, sup), type, meta);
+    }
+
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(sup), type, meta);
     }
 
     public Goal<T> getGoal() {
@@ -91,7 +100,6 @@ public class Data<T> implements Annotated {
     }
 
     /**
-     *
      * @return false if goal is canceled or completed exceptionally
      */
     public boolean isValid() {
@@ -103,22 +111,5 @@ public class Data<T> implements Annotated {
         return meta;
     }
 
-    /**
-     * Apply lazy transformation of the data using default executor. The meta of the result is the same as meta of input
-     *
-     * @param target
-     * @param transformation
-     * @param <R>
-     * @return
-     */
-    public <R> Data<R> andThen(Class<R> target, Function<T, R> transformation) {
-        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), transformation);
-        return new Data<R>(goal, target, this.meta());
-    }
-
-    public <R> Data<R> andThen(Class<R> target, Executor executor, Function<T, R> transformation) {
-        Goal<R> goal = new PipeGoal<T, R>(this.getGoal(), executor, transformation);
-        return new Data<R>(goal, target, this.meta());
-    }
 
 }

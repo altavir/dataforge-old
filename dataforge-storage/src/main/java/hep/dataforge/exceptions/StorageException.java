@@ -19,7 +19,7 @@ package hep.dataforge.exceptions;
  * Общий класс для ошибок загрузки и выгрузки
  * @author Darksnake
  */
-public class StorageException extends Exception {
+public class StorageException extends RuntimeException {
 
     /**
      * Creates a new instance of <code>StorageException</code> without detail

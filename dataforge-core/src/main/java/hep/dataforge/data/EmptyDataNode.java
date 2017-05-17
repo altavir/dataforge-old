@@ -6,7 +6,6 @@
 package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.providers.Path;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -23,7 +22,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String name) {
+    public Optional<Data<? extends T>> optData(String name) {
         return Optional.empty();
     }
 
@@ -49,7 +48,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
         return Optional.empty();
     }
 
@@ -63,13 +62,4 @@ public class EmptyDataNode<T> implements DataNode<T> {
         return Meta.empty();
     }
 
-    @Override
-    public Object provide(Path path) {
-        return null;
-    }
-
-    @Override
-    public boolean provides(Path path) {
-        return false;
-    }
 }

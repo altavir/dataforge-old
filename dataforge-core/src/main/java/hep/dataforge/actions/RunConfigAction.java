@@ -16,7 +16,6 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
@@ -46,7 +45,7 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(context, input.meta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = Global.getContext(contextName).withParent(context);
+        Context ac = Context.builder(contextName,context).build();
         if (meta.hasValue("configFile")) {
             File cfgFile = context.io().getFile(meta.getString("configFile"));
             try {

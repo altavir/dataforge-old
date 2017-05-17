@@ -15,9 +15,7 @@
  */
 package hep.dataforge.plots.jfreechart;
 
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.Plottable;
@@ -26,7 +24,8 @@ import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
-import javafx.scene.layout.AnchorPane;
+import javafx.scene.Node;
+import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
@@ -44,7 +43,6 @@ import org.jfree.chart.renderer.xy.XYStepRenderer;
 import org.jfree.chart.title.LegendTitle;
 import org.jfree.data.Range;
 import org.jfree.data.general.DatasetChangeEvent;
-import org.jfree.data.xy.IntervalXYDataset;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
@@ -53,9 +51,9 @@ import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -69,35 +67,32 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     /**
      * Index mapping names to datasets
      */
-    List<String> index = new ArrayList<>();
+    private final Map<String, JFCDataWrapper> index = new HashMap<>();
+//    private final Map<String, Integer> index = new HashMap<>();
 
     private Mode mode = Mode.NONE;
 
     public JFreeChartFrame() {
-        plot = new XYPlot();
-        chart = new JFreeChart(plot);
+        this(Meta.empty());
     }
 
     public JFreeChartFrame(Meta frameMeta) {
-        this();
-        super.configure(frameMeta);
+        plot = new XYPlot();
+        chart = new JFreeChart(plot);
+        configure(frameMeta);
     }
 
     @Override
-    public void display(AnchorPane container) {
+    public Node getFXNode() {
         mode = Mode.JAVAFX;
-        Platform.runLater(() -> {
-            ChartViewer viewer = new ChartViewer(getChart());
+        ChartViewer viewer = new ChartViewer(getChart());
+//        viewer.setPrefSize(800,600);
+//        viewer.setCache(false);
+//        viewer.setCacheShape(false);
+//        viewer.getCanvas().setCache(false);
 
-            FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
-
-            container.getChildren().add(viewer);
-            AnchorPane.setBottomAnchor(viewer, 0d);
-            AnchorPane.setTopAnchor(viewer, 0d);
-            AnchorPane.setLeftAnchor(viewer, 0d);
-            AnchorPane.setRightAnchor(viewer, 0d);
-        });
-
+        FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
+        return viewer;
     }
 
     public JFreeChartFrame display(Container panel) {
@@ -160,6 +155,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         return logAxis;
     }
 
+    @NotNull
     private Range getRange(Meta meta) {
         return new Range(meta.getDouble("lower", Double.NEGATIVE_INFINITY), meta.getDouble("upper", Double.POSITIVE_INFINITY));
     }
@@ -181,7 +177,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             ValueAxis axis = getAxis(axisMeta);
 
             String crosshair = axisMeta.getString("crosshair",
-                    plotMeta.getString("crosshair", "none"));
+                    () -> plotMeta.getString("crosshair"));
 
 
             double from = axisMeta.getDouble("range.from", Double.NEGATIVE_INFINITY);
@@ -267,62 +263,50 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        });
     }
 
-//    protected double convertValue(Value v) {
-//        try {
-//            switch (v.valueType()) {
-//                case NULL:
-//                    return Double.NaN;
-////                case TIME:
-////                    return v.timeValue().toEpochMilli();
-//                default:
-//                    return v.doubleValue();
-//            }
-//        } catch (ValueConversionException ex) {
-//            return Double.NaN;
-//        }
-//    }
 
     @Override
     protected synchronized void updatePlotData(String name) {
+        Optional<Plottable> opt = opt(name);
+
+        opt.ifPresent(plottable -> {
+            if (!index.containsKey(name)) {
+                JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
+                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1) + 1);
+                index.put(name, wrapper);
+                run(() -> {
+                    plot.setDataset(wrapper.getIndex(), wrapper);
+                });
+            } else {
+                JFCDataWrapper wrapper = index.get(name);
+                wrapper.setPlottable(plottable);
+                wrapper.invalidateData();
+                run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
+            }
+        });
+
+
         //removing data set if necessary
-        Plottable plottable = get(name);
-        if (plottable == null) {
-            index.remove(name);
-            run(() -> {
-                plot.setDataset(index.indexOf(name), null);
-            });
-            return;
-        }
-
-        if (!index.contains(name)) {
-            IntervalXYDataset data = new JFCDataWrapper(plottable);
-            index.add(plottable.getName());
-
-            run(() -> {
-                plot.setDataset(index.indexOf(name), data);
-            });
-        } else {
-            JFCDataWrapper wrapper = (JFCDataWrapper) plot.getDataset(index.indexOf(name));
-            //TODO add support for ObservableLists and dynamic data sets
-            wrapper.invalidateData();
-            run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
+        if (!opt.isPresent()) {
+            if (index.containsKey(name)) {
+                run(() -> {
+                    plot.setDataset(index.get(name).getIndex(), null);
+                });
+                index.remove(name);
+            }
         }
     }
 
     @Override
     protected synchronized void updatePlotConfig(String name) {
-        final Plottable plottable = get(name);
-        if (!index.contains(plottable.getName())) {
-            index.add(plottable.getName());
-        }
-        int num = index.indexOf(name);
+        opt(name).ifPresent(plottable -> {
 
-        Meta meta = new Laminate(plottable.meta()).setDescriptor(DescriptorUtils.buildDescriptor(plottable));
-        run(() -> {
+            if (!index.containsKey(name)) {
+                updatePlotData(name);
+            }
+
+            Meta meta = plottable.meta();
 
             XYLineAndShapeRenderer render;
-            boolean showLines = meta.getBoolean("showLine", false);
-            boolean showSymbols = meta.getBoolean("showSymbol", true);
             if (meta.getBoolean("showErrors", false)) {
                 render = new XYErrorRenderer();
             } else {
@@ -337,17 +321,12 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                         render = new XYLineAndShapeRenderer();
                 }
             }
-            render.setBaseShapesVisible(showSymbols);
-            render.setBaseLinesVisible(showLines);
+            boolean showLines = meta.getBoolean("showLine", false);
+            boolean showSymbols = meta.getBoolean("showSymbol", true);
+            render.setDefaultShapesVisible(showSymbols);
+            render.setDefaultLinesVisible(showLines);
 
             //Build Legend map to avoid serialization issues
-//            Map<String, String> titleMap = new HashMap<>();
-//            plottables.entrySet().stream().forEach((entry) -> {
-//                titleMap.put(entry.getKey(), entry.getValue().getConfig().getString("title", entry.getKey()));
-//            });
-//
-//
-//            render.setLegendItemLabelGenerator(new LabelGenerator(titleMap));
             double thickness = PlotUtils.getThickness(meta);
             if (thickness > 0) {
                 render.setSeriesStroke(0, new BasicStroke((float) thickness));
@@ -359,15 +338,18 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             }
 
             render.setSeriesVisible(0, meta.getBoolean("visible", true));
-            plot.setRenderer(num, render);
 
-            // update configuration to default colors
-            if (color == null) {
-                Paint paint = render.lookupSeriesPaint(0);
-                if (paint instanceof Color) {
-                    plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+            run(() -> {
+                plot.setRenderer(index.get(name).getIndex(), render);
+
+                // update configuration to default colors
+                if (color == null) {
+                    Paint paint = render.lookupSeriesPaint(0);
+                    if (paint instanceof Color) {
+                        plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
+                    }
                 }
-            }
+            });
         });
     }
 

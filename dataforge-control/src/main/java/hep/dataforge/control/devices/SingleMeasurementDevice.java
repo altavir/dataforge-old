@@ -5,13 +5,14 @@
  */
 package hep.dataforge.control.devices;
 
-import static hep.dataforge.control.devices.SingleMeasurementDevice.MEASURING_STATE;
 import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+
+import static hep.dataforge.control.devices.SingleMeasurementDevice.MEASURING_STATE;
 
 /**
  * A device that allows different types of measurements, but only one active at
@@ -26,7 +27,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
 
     private T measurement;
 
-//    public SingleMeasurementDevice(String name, Context context, Meta meta) {
+    //    public SingleMeasurementDevice(String name, Context context, Meta meta) {
 //        super(name, context, meta);
 //    }
     public T getMeasurement() {
@@ -59,7 +60,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
      * Stop current measurement
      *
      * @param force if true than current measurement will be interrupted even if
-     * running
+     *              running
      */
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
@@ -72,7 +73,7 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
         this.measurement = null;
         recalculateState(MEASURING_STATE);
     }
-    
+
 
     protected abstract T createMeasurement(Meta meta) throws ControlException;
 

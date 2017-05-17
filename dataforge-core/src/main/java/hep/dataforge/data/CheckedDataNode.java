@@ -1,7 +1,6 @@
 package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.providers.Path;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -30,8 +29,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String name) {
-        return node.getData(name).flatMap(d -> {
+    public Optional<Data<? extends T>> optData(String name) {
+        return node.optData(name).flatMap(d -> {
             if (type.isAssignableFrom(d.type())) {
                 return Optional.of((Data<? extends T>) d);
             } else {
@@ -41,8 +40,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
-        return node.getNode(nodeName).flatMap(n -> {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+        return node.optNode(nodeName).flatMap(n -> {
             if (type.isAssignableFrom(n.type())) {
                 return Optional.of((DataNode<? extends T>) n);
             } else {
@@ -69,15 +68,5 @@ public class CheckedDataNode<T> implements DataNode<T> {
     @Override
     public boolean isEmpty() {
         return false;
-    }
-
-    @Override
-    public Object provide(Path path) {
-        return node.provide(path);
-    }
-
-    @Override
-    public boolean provides(Path path) {
-        return node.provides(path);
     }
 }

@@ -21,13 +21,14 @@ package hep.dataforge.exceptions;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class TargetNotProvidedException extends RuntimeException {
+public class TargetNotProvidedException extends NameNotFoundException {
 
     /**
      * Creates a new instance of <code>TargetNotProvided</code> without detail
      * message.
      */
-    public TargetNotProvidedException() {
+    public TargetNotProvidedException(String target) {
+        super(target);
     }
 
     /**
@@ -36,7 +37,12 @@ public class TargetNotProvidedException extends RuntimeException {
      *
      * @param msg the detail message.
      */
-    public TargetNotProvidedException(String msg) {
-        super(msg);
+    public TargetNotProvidedException(String msg, String target) {
+        super(msg, target);
+    }
+
+    @Override
+    protected String buildMessage() {
+        return "The target \"" + getName() + "\" is not provided.";
     }
 }

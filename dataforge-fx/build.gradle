@@ -1,6 +1,5 @@
 dependencies {
     compile project(':dataforge-core')
-    compile 'org.controlsfx:controlsfx:8.40.12'
     compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.6.10'
 }
 

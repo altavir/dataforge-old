@@ -7,12 +7,12 @@ package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
 import org.slf4j.LoggerFactory;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -21,7 +21,7 @@ import java.util.stream.Stream;
  * @param <T>
  * @author Alexander Nozik
  */
-public class DataSet<T> extends AbstractProvider implements DataNode<T> {
+public class DataSet<T> implements DataNode<T> {
 
     private final String name;
     private final Meta meta;
@@ -73,23 +73,25 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
      */
     @Override
     public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+        if (recursive) {
+            throw new Error("Not implemented");
+        }
         return dataStream()
-                .map(data -> {
-                    Name dataName = Name.of(data.getName());
-                    if (dataName.length() > 1) {
-                        return dataName.cutLast();
-                    } else {
-                        return Name.EMPTY;
-                    }
-                })
-                .filter(it -> it != Name.EMPTY)
-                .filter(it -> recursive || it.length() == 1)
-                .map(it -> it.toString())
-                .map((String str) -> new NodeWrapper<>(getNode(str).get(), str, meta()));
+                .map(data -> Name.of(data.getName())) // converting strings to Names
+                .filter(name -> name.length() > 1) //selecting only composite names
+                .map(name -> name.getFirst().toString())
+                .distinct()
+                .map(str -> new DataSet<>(str, meta, type, subMap(str + ".")));
+    }
+
+    private Map<String, Data<? extends T>> subMap(String prefix) {
+        return dataMap.entrySet().stream()
+                .filter(entry -> entry.getKey().startsWith(prefix))
+                .collect(Collectors.toMap(entry -> entry.getKey().substring(prefix.length()), entry -> entry.getValue()));
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String name) {
+    public Optional<Data<? extends T>> optData(String name) {
         return Optional.ofNullable(dataMap.get(name));
     }
 
@@ -118,21 +120,7 @@ public class DataSet<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    protected boolean provides(String target, Name name) {
-        return DATA_TARGET.equals(target) && dataMap.containsKey(name.toString());
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        if (DATA_TARGET.equals(target)) {
-            return dataMap.get(name.toString());
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
         Builder<T> builder = new Builder<>(type)
                 .setName(nodeName)
                 .setMeta(meta());

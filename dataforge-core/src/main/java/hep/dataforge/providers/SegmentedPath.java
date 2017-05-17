@@ -173,7 +173,7 @@ class SegmentedPath implements Path {
     }
 
     @Override
-    public Path setTarget(String target) {
+    public Path withTarget(String target) {
         return new SegmentedPath(segments, target);
     }
 

@@ -16,6 +16,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeTag;
@@ -27,10 +28,7 @@ import org.apache.commons.vfs2.VFS;
 import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
@@ -82,8 +80,13 @@ public class FileEnvelope implements Envelope, AutoCloseable {
             if (dataSize == INFINITE_DATA_SIZE) {
                 dataSize = getRandomAccess().length() - getDataOffset();
             }
-            getRandomAccess().seek(getDataOffset());
-            return new FileObjectBinary(file, (int) getDataOffset(), (int) dataSize);
+            //getRandomAccess().seek(getDataOffset());
+            if (file.isFile()) {
+                File f = new File(file.getURL().getFile());
+                return new FileBinary(f, (int) getDataOffset(), (int) dataSize);
+            } else {
+                return new FileObjectBinary(file, (int) getDataOffset(), (int) dataSize);
+            }
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -91,12 +94,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @Override
     public synchronized Meta meta() {
-        if(meta == null){
+        if (meta == null) {
             ensureOpen();
-            try (InputStream stream =  getFile().getContent().getInputStream()){
+            try (InputStream stream = getFile().getContent().getInputStream()) {
                 meta = type.getReader().read(stream).meta();
-            } catch (IOException e) {
-                throw new RuntimeException("Can't read meta from file Envelope");
+            } catch (Exception e) {
+                throw new RuntimeException("Can't read meta from file Envelope", e);
             }
         }
         return meta;
@@ -307,13 +310,13 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     /**
      * ensure envelope is initialized
      */
-    private synchronized void ensureOpen(){
-        if(!isOpen()){
+    private synchronized void ensureOpen() {
+        if (!isOpen()) {
             open();
         }
     }
 
-    public boolean isOpen(){
-        return tag!=null;
+    public boolean isOpen() {
+        return tag != null;
     }
 }

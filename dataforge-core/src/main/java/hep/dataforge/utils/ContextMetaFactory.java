@@ -28,7 +28,7 @@ import hep.dataforge.meta.MetaBuilder;
  */
 @FunctionalInterface
 public interface ContextMetaFactory<T> {
-    T build(Context context, Meta annotation);
+    T build(Context context, Meta meta);
 
     default T build(){
         return build(Global.instance(), MetaBuilder.buildEmpty(null));

@@ -5,14 +5,18 @@
  */
 package hep.dataforge.workspace;
 
-import hep.dataforge.cache.CachePlugin;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.providers.Path;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -23,12 +27,26 @@ public abstract class AbstractWorkspace implements Workspace {
     protected final Map<String, Task> tasks = new HashMap<>();
     protected final Map<String, Meta> targets = new HashMap<>();
     private Context context;
-    private transient CachePlugin cache;
 
     @Override
-    public <T> Task<T> getTask(String taskName) {
+    public Task<?> getTask(String taskName) {
         if (!tasks.containsKey(taskName)) {
-            throw new NameNotFoundException(taskName);
+            getContext().getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
+            List<Task> taskList = getContext().pluginManager().stream(true)
+                    .map(plugin -> plugin.provide(Path.of(Task.TASK_TARGET, taskName), Task.class))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toList());
+            if (taskList.isEmpty()) {
+                throw new NameNotFoundException(taskName);
+            } else {
+                if (taskList.size() > 1) {
+                    getContext().getLogger().warn("A name conflict during task resolution. " +
+                            "Task with name '{}' is present in multiple plugins. " +
+                            "Consider loading task explicitly.", taskName);
+                }
+                return taskList.get(0);
+            }
         }
         return tasks.get(taskName);
     }
@@ -58,6 +76,9 @@ public abstract class AbstractWorkspace implements Workspace {
 
     @Override
     public Context getContext() {
+        if (context == null) {
+            return Global.getDefaultContext();
+        }
         return context;
     }
 
@@ -65,41 +86,10 @@ public abstract class AbstractWorkspace implements Workspace {
         this.context = context;
     }
 
-    protected synchronized CachePlugin getCache() {
-        if (cache == null || cache.getContext() != this.getContext()) {
-            cache = context.optFeature(CachePlugin.class).orElseGet(() -> {
-                CachePlugin pl = new CachePlugin();
-                context.pluginManager().load(pl);
-                return pl;
-            });
-        }
-        return cache;
-    }
 
     @Override
-    public <T> DataNode<T> runTask(TaskModel model) {
-        Task<T> task = getTask(model.getName());
-        //Cache result if cache is available and caching is not blocked
-        if (cacheEnabled() && model.meta().getBoolean("cache.enabled", true)) {
-            return getCache().cacheNode(model.getName(), model.getIdentity(), task.run(model));
-        } else {
-            return task.run(model);
-        }
+    public DataNode<?> runTask(TaskModel model) {
+        return getTask(model.getName()).run(model);
     }
 
-    protected boolean cacheEnabled() {
-        return true;
-    }
-
-    @Override
-    public void clean() {
-        getContext().getLogger().info("Cleaning up cache...");
-        invalidateCache();
-    }
-
-    public void invalidateCache() {
-        if (cacheEnabled()) {
-            getCache().invalidate();
-        }
-    }
 }

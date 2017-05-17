@@ -34,7 +34,7 @@ public abstract class ValueChooserBase<T extends Node> implements ValueChooser {
         this.callback = callback;
         valueProperty.addListener((ObservableValue<? extends Value> observable, Value oldValue, Value newValue) -> {
             if (callback != null) {
-                ValueCallbackResponse response = ValueChooserBase.this.callback.update(newValue);
+                ValueCallbackResponse response = callback.update(newValue);
                 if (response.value != null && !response.value.equals(valueProperty.get())) {
                     setDisplayValue(response.value);
                 }

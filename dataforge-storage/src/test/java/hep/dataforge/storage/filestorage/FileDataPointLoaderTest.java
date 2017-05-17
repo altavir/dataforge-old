@@ -99,7 +99,7 @@ public class FileDataPointLoaderTest {
 //        }).flatMap(it -> it.stream()).map(it -> it.get()).count();
 
         for (int i = 0; i < 100; i++) {
-            index.pull(i * 10).stream().map(it -> it.get()).collect(Collectors.toList());
+            index.pull(i * 10).collect(Collectors.toList());
         }
         System.out.printf("Selective pull operation on 100 element completed in %s%n", Duration.between(start, DateTimeUtils.now()));
 
@@ -107,14 +107,13 @@ public class FileDataPointLoaderTest {
         System.out.println("smart pull");
 
         start = DateTimeUtils.now();
-        int smartPullSize = index.pull(Value.NULL, Value.NULL, 100)
-                .stream().map(it -> it.get()).collect(Collectors.toList()).size();
+        int smartPullSize = index.pull(Value.NULL, Value.NULL, 100).collect(Collectors.toList()).size();
         assertTrue(smartPullSize <= 100);
 
         System.out.printf("Smart pull operation on %d element completed in %s%n", smartPullSize, Duration.between(start, DateTimeUtils.now()));
 
         System.out.println("pull consistency check");
-        DataPoint dp = index.pull(24, 26).get(0).get();
+        DataPoint dp = index.pull(24, 26).findFirst().get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
     }
 

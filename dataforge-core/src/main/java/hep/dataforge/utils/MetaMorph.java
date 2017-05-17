@@ -14,6 +14,16 @@ import java.io.ObjectOutput;
  */
 public interface MetaMorph extends Externalizable {
 
+    static <T extends MetaMorph> T morph(Class<T> type, Meta meta) {
+        try {
+            T res = type.newInstance();
+            res.fromMeta(meta);
+            return res;
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to reconstruct metamorph from meta", e);
+        }
+    }
+
     /**
      * Convert this object to Meta
      *

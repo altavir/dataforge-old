@@ -20,13 +20,14 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 
-import java.util.Map;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -39,7 +40,10 @@ import java.util.Map;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Annotated, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
+public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
+
+    String LOADER_TARGET = "loader";
+    String STORAGE_TARGET = "storage";
 
     /**
      * Initialize this storage.
@@ -95,7 +99,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Map<String, Loader> loaders() throws StorageException;
+    Collection<Loader> loaders() throws StorageException;
 
     /**
      * A map of all shelfs in this storage and their annotations
@@ -103,35 +107,26 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Map<String, Storage> shelves() throws StorageException;
+    Collection<Storage> shelves() throws StorageException;
 
-    /**
-     * Check if the loader with given name is registered. Chain path not
-     * allowed.
-     *
-     * @param name
-     * @return
-     */
-    boolean hasLoader(String name);
+    @Override
+    default String defaultTarget() {
+        return STORAGE_TARGET;
+    }
+
+    @Override
+    default String defaultChainTarget() {
+        return LOADER_TARGET;
+    }
 
     /**
      * Get the loader with given name if it is registered in this storage. Chain
      * path not allowed.
      *
-     * @param name name of the loader or data set. In general is the name of
-     *             hierarchical root element for all data points
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    Loader getLoader(String name) throws StorageException;
-
-    /**
-     * Check if this storage has shelf with given name. Chain path not allowed.
-     *
      * @param name
      * @return
      */
-    boolean hasShelf(String name);
+    Optional<Loader> optLoader(String name);
 
     /**
      * Returns th shelf with given name. Chain path not allowed. Throws
@@ -141,7 +136,7 @@ public interface Storage extends Annotated, Named, Provider, AutoCloseable, Resp
      * @return
      * @throws StorageException
      */
-    Storage getShelf(String name) throws StorageException;
+    Optional<Storage> optShelf(String name);
 
     /**
      * Get superStorage of this storage. If null, than this storage is root

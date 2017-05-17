@@ -26,9 +26,9 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.commons.StorageUtils;
 import hep.dataforge.values.Value;
 
-import java.util.List;
 import java.util.NavigableSet;
-import java.util.function.Supplier;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * An index that uses a Value corresponding to each indexed element
@@ -49,9 +49,9 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    List<Supplier<T>> pull(Value value) throws StorageException;
+    Stream<T> pull(Value value) throws StorageException;
 
-    default List<Supplier<T>> pull(Object value) throws StorageException {
+    default Stream<T> pull(Object value) throws StorageException {
         return pull(Value.of(value));
     }
 
@@ -62,16 +62,11 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws StorageException
      */
-    default Supplier<T> pullOne(Value value) throws StorageException {
-        List<Supplier<T>> res = pull(value);
-        if (!res.isEmpty()) {
-            return res.get(0);
-        } else {
-            return null;
-        }
+    default Optional<T> pullOne(Value value) throws StorageException {
+        return pull(value).findFirst();
     }
 
-    default Supplier<T> pullOne(Object value) throws StorageException {
+    default Optional<T> pullOne(Object value) throws StorageException {
         return pullOne(Value.of(value));
     }
 
@@ -85,9 +80,9 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    List<Supplier<T>> pull(Value from, Value to) throws StorageException;
+    Stream<T> pull(Value from, Value to) throws StorageException;
 
-    default List<Supplier<T>> pull(Object from, Object to) throws StorageException {
+    default Stream<T> pull(Object from, Object to) throws StorageException {
         return pull(Value.of(from), Value.of(to));
     }
 
@@ -102,7 +97,7 @@ public interface ValueIndex<T> extends Index<T> {
      * @return
      * @throws StorageException
      */
-    default List<Supplier<T>> pull(Value from, Value to, int limit) throws StorageException {
+    default Stream<T> pull(Value from, Value to, int limit) throws StorageException {
         return StorageUtils.sparsePull(this, from, to, limit);
     }
 
@@ -114,13 +109,12 @@ public interface ValueIndex<T> extends Index<T> {
      * @throws StorageException
      */
     @Override
-    default List<Supplier<T>> query(Meta query) throws StorageException {
+    default Stream<T> query(Meta query) throws StorageException {
         //TODO add support for query engines
         //null values correspond to
         Value from = query.getValue(FROM_KEY, Value.NULL);
         Value to = query.getValue(TO_KEY, Value.NULL);
         if (query.hasValue(LIMIT_KEY)) {
-
             return pull(from, to, query.getInt(LIMIT_KEY));
         } else {
             return pull(from, to);

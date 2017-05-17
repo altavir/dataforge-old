@@ -5,9 +5,10 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+
+import java.util.Optional;
 import java.util.function.BiFunction;
 
 /**
@@ -29,11 +30,11 @@ public class VirtualDataPoint<S> implements DataPoint {
     }
 
     @Override
-    public Value getValue(String name) throws NameNotFoundException {
+    public Optional<Value> optValue(String name) {
         if (hasValue(name)) {
-            return transformation.apply(name, source);
+            return Optional.ofNullable(transformation.apply(name, source));
         } else {
-            throw new NameNotFoundException(name);
+            return Optional.empty();
         }
     }
 
@@ -42,9 +43,5 @@ public class VirtualDataPoint<S> implements DataPoint {
         return names;
     }
 
-    @Override
-    public boolean hasValue(String path) {
-        return names.contains(path);
-    }
 
 }

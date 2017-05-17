@@ -7,12 +7,13 @@ package hep.dataforge.utils;
 
 import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
+
+import java.util.Optional;
 
 /**
  * The base class for {@code Meta} objects with immutable meta which also
@@ -20,7 +21,7 @@ import org.slf4j.LoggerFactory;
  *
  * @author Alexander Nozik
  */
-public class BaseMetaHolder implements Annotated, ValueProvider, Described {
+public class BaseMetaHolder implements Metoid, ValueProvider, Described {
 
     private Meta meta;
     private transient NodeDescriptor descriptor;
@@ -31,8 +32,7 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
 
     public BaseMetaHolder() {
     }
-    
-    
+
 
     /**
      * Return meta of this object. If it is null, than return default meta from
@@ -64,8 +64,8 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
      * @param meta
      */
     protected void setMeta(Meta meta) {
-        if(meta != null){
-            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Annotanted object");
+        if (this.meta != null) {
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Metoid object");
         }
         this.meta = meta;
     }
@@ -100,14 +100,14 @@ public class BaseMetaHolder implements Annotated, ValueProvider, Described {
      * @return
      */
     @Override
-    public Value getValue(String name) {
-        if (meta().hasValue(name)) {
-            return meta().getValue(name);
-        } else if (getDescriptor().hasDefaultForValue(name)) {
-            return getDescriptor().valueDescriptor(name).defaultValue();
-        } else {
-            throw new NameNotFoundException(name);
-        }
+    public Optional<Value> optValue(String name) {
+        return Optionals.either(meta.optValue(name)).or(() -> {
+            if (getDescriptor().hasDefaultForValue(name)) {
+                return Optional.of(getDescriptor().valueDescriptor(name).defaultValue());
+            } else {
+                return Optional.empty();
+            }
+        }).opt();
     }
 
     /**

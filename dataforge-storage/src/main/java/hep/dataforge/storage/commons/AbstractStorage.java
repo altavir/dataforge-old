@@ -21,22 +21,18 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.exceptions.TargetNotProvidedException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
-import hep.dataforge.providers.Path;
+import hep.dataforge.providers.Provides;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
-import org.slf4j.LoggerFactory;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Конфигурации загрузчиков хранятся в оперативной памяти. Те, что поставляются
@@ -46,10 +42,7 @@ import java.util.Map;
  *
  * @author Darksnake
  */
-public abstract class AbstractStorage extends AbstractProvider implements Storage {
-
-    public static final String LOADER_TARGET_TYPE = "loader";
-    public static final String STORAGE_TARGET_TYPE = "storage";
+public abstract class AbstractStorage implements Storage {
 
     public static final String DEFAULT_EVENT_LOADER_NAME = "@log";
     protected final Map<String, Loader> loaders = new HashMap<>();
@@ -69,7 +62,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     public AbstractStorage(String name) {
-        this(null, name,Meta.buildEmpty("storage") );
+        this(null, name, Meta.buildEmpty("storage"));
     }
 
     /**
@@ -136,75 +129,6 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     @Override
-    public boolean provides(Path path) {
-        if (path.hasTail()) {
-            return super.provides(path);
-        } else {
-            return provides("loader", path.name());
-        }
-    }
-
-    /**
-     * If chainpath is presented than default target is "storage". For single
-     * path the default target is "loader"
-     *
-     * @param path
-     * @return
-     */
-    @Override
-    public Object provide(Path path) {
-        if (path.hasTail()) {
-            return super.provide(path);
-        } else {
-            return provide("loader", path.name());
-        }
-    }
-
-    /**
-     * If chainpath is presented than default target is "storage". For single
-     * path the default target is "loader"
-     *
-     * @param target
-     * @param name
-     * @return
-     */
-    @Override
-    protected boolean provides(String target, Name name) {
-        if (target.isEmpty() || "storage".equals(target)) {
-            return hasShelf(name.toString());
-        } else if ("loader".equals(target)) {
-            return hasLoader(name.toString());
-        } else {
-            throw new TargetNotProvidedException();
-        }
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        try {
-            if (target.isEmpty() || "storage".equals(target)) {
-                return getShelf(name.toString());
-            } else if ("loader".equals(target)) {
-                return getLoader(name.toString());
-            } else {
-                throw new TargetNotProvidedException();
-            }
-        } catch (StorageException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
-    @Override
-    protected String defaultTagrget() {
-        return "storage";
-    }
-
-    @Override
-    protected String defaultChainTarget() {
-        return "loader";
-    }
-
-    @Override
     public Meta meta() {
         if (storageConfig == null) {
             return Meta.buildEmpty("storage");
@@ -219,97 +143,20 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     @Override
-    public boolean hasLoader(String name) {
-        return loaders.containsKey(name);
-//        if (loaders.containsKey(name)) {
-//            return true;
-//        } else {
-//            Name loaderName = Name.of(name);
-//            if (loaderName.length() == 1) {
-//                return false;
-//            }
-//            try {
-//                Name shelfName = loaderName.cutLast();
-//                Storage childShelf = getShelf(shelfName.toString());
-//                if (childShelf == null) {
-//                    return false;
-//                } else {
-//                    return childShelf.hasLoader(shelfName.getLast().toString());
-//                }
-//            } catch (StorageException ex) {
-//                LoggerFactory.getLogger(getClass()).error("Error while triyngto find shelf", ex);
-//                return false;
-//            }
-//        }
+    @Provides(LOADER_TARGET)
+    public Optional<Loader> optLoader(String name) {
+        return Optional.ofNullable(loaders.get(name));
     }
 
-    @Override
-    public Loader getLoader(String name) throws StorageException {
-//        refresh();
-        if (loaders.containsKey(name)) {
-            return loaders.get(name);
-        } else {
-            return null;
-        }
-//            Name loaderName = Name.of(name);
-//            if (loaderName.length() == 1) {
-//                return null;
-//            }
-//            try {
-//                Name shelfName = loaderName.cutLast();
-//                Storage childShelf = getShelf(shelfName.toString());
-//                if (childShelf == null) {
-//                    return null;
-//                } else {
-//                    return childShelf.getLoader(shelfName.getLast().toString());
-//                }
-//            } catch (StorageException ex) {
-//                LoggerFactory.getLogger(getClass()).error("Error while triyngto find shelf", ex);
-//                return null;
-//            }
-//        }
-    }
 
     @Override
-    public boolean hasShelf(String name) {
+    @Provides(STORAGE_TARGET)
+    public Optional<Storage> optShelf(String name) {
         Name shelfName = Name.of(name);
         if (shelfName.length() == 1) {
-            return shelves.containsKey(name);
+            return Optional.ofNullable(shelves.get(name));
         } else {
-            Storage child;
-            try {
-                child = getShelf(shelfName.getFirst().toString());
-            } catch (StorageException ex) {
-                LoggerFactory.getLogger(getClass()).error("Error while triyngto find shelf", ex);
-                return false;
-            }
-            if (child == null) {
-                return false;
-            } else {
-                return child.hasShelf(shelfName.cutFirst().toString());
-            }
-        }
-    }
-
-    /**
-     * Get child shelf using recursive calling. Returns null if shelf not found
-     *
-     * @param name
-     * @return
-     * @throws StorageException
-     */
-    @Override
-    public Storage getShelf(String name) throws StorageException {
-        Name shelfName = Name.of(name);
-        if (shelfName.length() == 1) {
-            return shelves.get(name);
-        } else {
-            Storage child = getShelf(shelfName.getFirst().toString());
-            if (child == null) {
-                return null;
-            } else {
-                return child.getShelf(shelfName.cutFirst().toString());
-            }
+            return optShelf(shelfName.getFirst().toString()).flatMap(child -> child.optShelf(shelfName.cutFirst().toString()));
         }
     }
 
@@ -320,15 +167,13 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
      * @throws StorageException
      */
     @Override
-    public Map<String, Loader> loaders() throws StorageException {
-        return new HashMap<>(loaders);
-        //return Collections.unmodifiableMap(loaders);
+    public Collection<Loader> loaders() throws StorageException {
+        return Collections.unmodifiableCollection(loaders.values());
     }
 
     @Override
-    public Map<String, Storage> shelves() throws StorageException {
-        return new HashMap<>(shelves);
-//        return Collections.unmodifiableMap(shelves);
+    public Collection<Storage> shelves() throws StorageException {
+        return Collections.unmodifiableCollection(shelves.values());
     }
 
     /**
@@ -348,12 +193,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
      * @throws StorageException
      */
     public Loader buildLoader(String shelf, Meta loaderConfig) throws StorageException {
-        if (this.hasShelf(shelf)) {
-            return this.getShelf(shelf).buildLoader(loaderConfig);
-        } else {
-            Storage shelfStorage = buildShelf(shelf);
-            return shelfStorage.buildLoader(loaderConfig);
-        }
+        return optShelf(shelf).orElseGet(() -> buildShelf(shelf)).buildLoader(loaderConfig);
     }
 
     public boolean isRoot() {
@@ -396,7 +236,7 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
     }
 
     public MessageValidator getValidator() {
-        return StorageUtils.defaultMessageValidator(STORAGE_TARGET_TYPE, getName());
+        return StorageUtils.defaultMessageValidator(STORAGE_TARGET, getName());
     }
 
 //    @Override
@@ -431,29 +271,35 @@ public abstract class AbstractStorage extends AbstractProvider implements Storag
             info = "Allow to create new loader or storage if it is not found.")
     @NodeDef(name = "meta", info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     public Responder getResponder(Meta targetInfo) {
-        String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET_TYPE);
-        String targetName = targetInfo.getString(TARGET_NAME_KEY);
+        String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET);
+        String targetName = targetInfo.getString(TARGET_NAME_KEY, "");
         boolean allowCreate = targetInfo.getBoolean("allowCreate", true);
-        Meta addMeta = targetInfo.getMeta("meta", null);
+        Meta addMeta = targetInfo.getMeta("meta", Meta.empty());
         try {
-            if (targetType.equals(STORAGE_TARGET_TYPE)) {
-                if (targetName.equals(getName())) {
-                    return this;
-                } else if (hasShelf(targetName)) {
-                    return getShelf(targetName);
-                } else if (allowCreate) {
-                    //TODO add some path parsing cutting first segment if it is the same as this storage name
-                    return buildShelf(targetName, addMeta);
-                } else {
+            switch (targetType) {
+                case STORAGE_TARGET:
+                    if (targetName.isEmpty()) {
+                        return this;
+                    } else {
+                        return optShelf(targetName).orElseGet(() -> {
+                            if (allowCreate) {
+                                //TODO add some path parsing cutting first segment if it is the same as this storage name
+                                return buildShelf(targetName, addMeta);
+                            } else {
+                                throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
+                            }
+                        });
+                    }
+                case LOADER_TARGET:
+                    return optLoader(targetName).orElseGet(() -> {
+                        if (allowCreate) {
+                            return buildLoader(addMeta);
+                        } else {
+                            throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
+                        }
+                    });
+                default:
                     throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
-                }
-            } else if (hasLoader(targetName)) {
-                //TODO check for meta equality
-                return getLoader(targetName);
-            } else if (allowCreate) {
-                return buildLoader(addMeta);
-            } else {
-                throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
             }
         } catch (StorageException ex) {
             throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);

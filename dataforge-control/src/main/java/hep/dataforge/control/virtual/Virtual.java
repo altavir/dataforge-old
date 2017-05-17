@@ -10,6 +10,8 @@ import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+
 import java.time.Duration;
 import java.util.Arrays;
 import java.util.List;
@@ -85,6 +87,10 @@ public class Virtual {
 
     public static Sensor<Double> randomDoubleSensor(String name, Duration delay, double mean, double sigma) {
         Sensor<Double> sensor = new Sensor<Double>() {
+            {
+                setMetaBase(new MetaBuilder("device").setValue("name", name).build());
+            }
+
             @Override
             protected Measurement<Double> createMeasurement() {
                 return randomDoubleMeasurement(delay, mean, sigma);
@@ -95,12 +101,12 @@ public class Virtual {
                 return "Virtual sensor";
             }
         };
+
         try {
             sensor.init();
         } catch (ControlException ex) {
             throw new Error(ex);
         }
-        sensor.setName(name);
         return sensor;
     }
 

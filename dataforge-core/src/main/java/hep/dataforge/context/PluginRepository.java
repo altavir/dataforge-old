@@ -6,6 +6,7 @@
 package hep.dataforge.context;
 
 import java.util.List;
+import java.util.Optional;
 
 /**
  * A resolution strategy for plugins
@@ -20,10 +21,15 @@ public interface PluginRepository {
      * @param tag
      * @return
      */
-    Plugin get(PluginTag tag);
+    Optional<Plugin> opt(PluginTag tag);
+
+    default Plugin get(PluginTag tag) {
+        return opt(tag).orElseThrow(() -> new RuntimeException("No plugin matching " + tag.toString()));
+    }
 
     /**
      * List tags provided by this repository
+     *
      * @return
      */
     List<PluginTag> listTags();

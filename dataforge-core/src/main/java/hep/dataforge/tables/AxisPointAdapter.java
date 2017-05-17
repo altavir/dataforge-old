@@ -15,6 +15,7 @@ import hep.dataforge.values.Value;
 import java.util.HashMap;
 import java.util.Map;
 
+@ValueDef(name = "label", def = "label", info = "Point label key")
 public class AxisPointAdapter implements PointAdapter {
 
     public static final String VALUE_KEY = "value";
@@ -51,7 +52,7 @@ public class AxisPointAdapter implements PointAdapter {
     }
 
     @Override
-    public Value getFrom(DataPoint point, String component) {
+    public Value getComponent(DataPoint point, String component) {
         return point.getValue(nameFor(component));
     }
 
@@ -65,11 +66,10 @@ public class AxisPointAdapter implements PointAdapter {
      * @param axis
      * @return
      */
-    @ValueDef(name = "value", def = "value", required = true, info = "value key")
-    @ValueDef(name = "err", def = "err", info = "error key")
-    @ValueDef(name = "up", def = "up", info = "upper boundary key")
-    @ValueDef(name = "lo", def = "lo", info = "lower boundary key")
-    @ValueDef(name = "label", def = "label", info = "point label key")
+    @ValueDef(name = "value", required = true, info = "Axis value key")
+    @ValueDef(name = "err", info = "Axis error key")
+    @ValueDef(name = "up", info = "Axis upper boundary key")
+    @ValueDef(name = "lo", info = "Axis lower boundary key")
     @ValueDef(name = "axisTitle", info = "The title of this axis. By default axis name is used.")
     public Meta getAxisMeta(String axis) {
         return this.meta().getMeta(axis, Meta.empty());

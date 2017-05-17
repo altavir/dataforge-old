@@ -25,35 +25,37 @@ import hep.dataforge.values.Value;
  */
 public interface DeviceListener {
 
-    /**
-     * The device is initialized. No measurement or control procedure performed
-     * here
-     *
-     * @param device
-     */
-    default void notifyDeviceInitialized(Device device){
-        
-    }
-
-    /**
-     * The device is shut down. No measurement or control procedure performed
-     * here
-     *
-     * @param device
-     */
-    default void notifyDeviceShutdown(Device device){
-        
-    }
+//    /**
+//     * The device is initialized. No measurement or control procedure performed
+//     * here
+//     *
+//     * @param device
+//     */
+//    default void notifyDeviceInitialized(Device device) {
+//
+//    }
+//
+//    /**
+//     * The device is shut down. No measurement or control procedure performed
+//     * here
+//     *
+//     * @param device
+//     */
+//    default void notifyDeviceShutdown(Device device) {
+//
+//    }
 
     /**
      * Notify that state of device is changed. either oldState or newState could
      * be empty.
      *
      * @param device
-     * @param name the name of the state
+     * @param name   the name of the state
      * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value state);
+    default void notifyDeviceStateChanged(Device device, String name, Value state){
+        
+    }
 
     /**
      * Notify that device configuration has changed. By default is ignored.
@@ -64,23 +66,24 @@ public interface DeviceListener {
 
     }
 
-    /**
-     * Notify that command is accepted. By default is ignored.
-     *
-     * @param device
-     * @param command
-     */
-    default void notifyDeviceCommandAccepted(Device device, String command) {
-
-    }
+//    /**
+//     * Notify that command is accepted. By default is ignored.
+//     *
+//     * @param device
+//     * @param command
+//     */
+//    default void notifyDeviceCommandAccepted(Device device, String command) {
+//
+//    }
 
     /**
      * Evaluate device event
-     *
      */
-    default void evaluateDeviceEvent(Event event){
-        
+    default void evaluateDeviceEvent(Device device, Event event) {
+
     }
 
-    void evaluateDeviceException(Device device, String message, Throwable exception);
+    default void evaluateDeviceException(Device device, String message, Throwable exception) {
+
+    }
 }

@@ -5,19 +5,14 @@
  */
 package hep.dataforge.control.devices.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * The definition of state for device.
  * <p>
- *  Consider extending it to any state holder
+ * Consider extending it to any state holder
  * </p>
+ *
  * @author Alexander Nozik
  */
 @Target(ElementType.TYPE)
@@ -28,14 +23,30 @@ import java.lang.annotation.Target;
 public @interface StateDef {
     /**
      * State name
-     * @return 
+     *
+     * @return
      */
     String name();
-    
+
     /**
      * State description
-     * @return 
+     *
+     * @return
      */
     String info() default "";
+
+    /**
+     * This state could be read
+     *
+     * @return
+     */
+    boolean readable() default true;
+
+    /**
+     * This state could be written
+     *
+     * @return
+     */
+    boolean writable() default false;
 
 }

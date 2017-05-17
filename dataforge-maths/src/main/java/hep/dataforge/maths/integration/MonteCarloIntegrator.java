@@ -15,8 +15,9 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+
+import java.util.function.Predicate;
 
 /**
  * <p>
@@ -45,7 +46,7 @@ public class MonteCarloIntegrator implements Integrator<MonteCarloIntegrand> {
      * @return
      */
     @Override
-    public Predicate<MonteCarloIntegrand> getDefaultStopingCondition() {
+    public Predicate<MonteCarloIntegrand> getDefaultStoppingCondition() {
         return (t) -> t.getNumCalls() > DEFAULT_MAX_CALLS || t.getRelativeAccuracy() < DEFAULT_MIN_RELATIVE_ACCURACY;
     }
 

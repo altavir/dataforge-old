@@ -19,6 +19,7 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -49,7 +50,7 @@ public class Laminate extends Meta implements Described {
 
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
-        this.layers = new ArrayList(layers);
+        this.layers = new ArrayList<>(layers);
         this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
     }
 
@@ -156,7 +157,7 @@ public class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Meta getMeta(String path) {
+    public Optional<? extends Meta> optMeta(String path) {
         List<Meta> childLayers = new ArrayList<>();
         layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
             //FIXME child elements are not chained!
@@ -169,14 +170,15 @@ public class Laminate extends Meta implements Described {
                 laminate.setDescriptor(descriptor.childDescriptor(path));
             }
             laminate.setValueContext(valueContext());
-            return laminate;
+            return Optional.of(laminate);
         } else //if node not found, using descriptor layer if it is defined
             if (descriptorLayer != null) {
-                return descriptorLayer.getMeta(path);
+                return descriptorLayer.optMeta(path);
             } else {
-                throw new NameNotFoundException(path);
+                return Optional.empty();
             }
     }
+
 
     /**
      * Get the first occurrence of meta node with the given name without merging. If not found, uses description.
@@ -247,20 +249,20 @@ public class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Value getValue(String path) {
+    public Optional<Value> optValue(String path) {
+        Optionals<Value> opts = Optionals.either();
+
         //searching layers for value
         for (Meta m : layers) {
-            if (m.hasValue(path)) {
-                return MetaUtils.transformValue(m.getValue(path), valueContext());
-            }
+            opts = opts.or(() -> m.optValue(path));
         }
 
         // if descriptor layer is definded, searching it for value
-        if (descriptorLayer != null && descriptorLayer.hasValue(path)) {
-            return MetaUtils.transformValue(descriptorLayer.getValue(path), valueContext());
+        if (descriptorLayer != null) {
+            opts = opts.or(() -> descriptorLayer.optValue(path));
         }
 
-        throw new NameNotFoundException(path);
+        return opts.opt().map(it -> MetaUtils.transformValue(it, valueContext()));
     }
 
     @Override
@@ -303,7 +305,7 @@ public class Laminate extends Meta implements Described {
     public <A> Meta collectNode(String nodeName, Collector<Meta, A, Meta> collector) {
         return layers.stream()
                 .filter(layer -> layer.hasMeta(nodeName))
-                .map(layer -> layer.getNode(nodeName))
+                .map(layer -> layer.getMeta(nodeName))
                 .collect(collector);
     }
 
@@ -339,6 +341,7 @@ public class Laminate extends Meta implements Described {
 
     /**
      * Same as above but uses fixed meta value with given key as identity
+     *
      * @param nodeName
      * @param key
      * @return

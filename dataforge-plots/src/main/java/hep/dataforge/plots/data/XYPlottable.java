@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static hep.dataforge.fx.configuration.MetaTreeItem.NO_CONFIGURATOR_TAG;
+import static hep.dataforge.fx.configuration.ConfigFXTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
 
 /**
@@ -36,7 +36,7 @@ import static hep.dataforge.meta.Configuration.FINAL_TAG;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "color", info = "The color of line or symbol.")
+@ValueDef(name = "color", info = "The color of line or symbol.", tags = {"color"})
 @ValueDef(name = "showLine", type = "BOOLEAN", def = "true", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = "BOOLEAN", def = "false", info = "Show symbols for data point.")
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
@@ -62,6 +62,7 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
 
     /**
      * Apply range filters to data
+     *
      * @param query
      * @return
      */

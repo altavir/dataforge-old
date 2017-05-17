@@ -7,84 +7,58 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.description.ActionDescriptor;
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.names.Name;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
+import hep.dataforge.utils.Optionals;
+import hep.dataforge.workspace.Task;
 import org.slf4j.LoggerFactory;
 
-import java.lang.reflect.Constructor;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
+ * A support manager to dynamically load actions and tasks into the context
+ *
  * @author Alexander Nozik
  */
-@PluginDef(name = "actions", group = "hep.dataforge", description = "A list of available actions for given context")
+@PluginDef(name = "actions", group = "hep.dataforge", info = "A list of available actions and task for given context")
 public class ActionManager extends BasicPlugin {
 
+
     private final Map<String, Action> actionMap = new HashMap<>();
+    private final Map<String, Task> taskMap = new HashMap<>();
 
     public ActionManager() {
-        register(TransformTableAction.class);
-        register(ReadPointSetAction.class);
-        register(RunConfigAction.class);
+        //TODO move somewhere else
+        putAction(TransformTableAction.class);
+        putAction(ReadPointSetAction.class);
+        putAction(RunConfigAction.class);
     }
 
-    protected ActionManager getParent() {
-        if (getContext() == null || getContext().getParent() == null || !getContext().getParent().provides("actions")) {
-            return null;
+    protected Optional<ActionManager> getParent() {
+        if (getContext() == null || getContext().getParent() == null) {
+            return Optional.empty();
         } else {
             return getContext().getParent().provide("actions", ActionManager.class);
         }
     }
 
-
-    /**
-     * Build action using its type and default empty constructor
-     *
-     * @param type
-     * @return
-     */
-    public Action build(Class<Action> type) {
-        try {
-            Constructor<Action> constructor = type.getConstructor();
-            return constructor.newInstance();
-            //TODO add logger factory and parent process
-        } catch (NoSuchMethodException e) {
-            throw new IllegalArgumentException("This action type does not have parameterless constructor");
-        } catch (Exception e) {
-            throw new RuntimeException("Error while creating an instance of action");
-        }
+    @Provides(Action.ACTION_TARGET)
+    public Optional<Action> optAction(String name) {
+        return Optionals.either(actionMap.get(name))
+                .or(getParent().flatMap(parent -> parent.optAction(name)))
+                .opt();
     }
 
-    /**
-     * Build action using class name
-     *
-     * @param type
-     * @return
-     * @throws ClassNotFoundException
-     */
-    public Action buildByType(String type) throws ClassNotFoundException {
-        return build((Class<Action>) Class.forName(type));
-    }
-
-    /**
-     * @param name
-     * @return
-     */
-    public Action build(String name) {
-        if (actionMap.containsKey(name)) {
-            return actionMap.get(name);
-        } else {
-            ActionManager parent = getParent();
-            if (parent == null) {
-                //TODO сделать ActionNotFoundException
-                throw new NameNotFoundException(name);
-            } else {
-                return parent.build(name);
-            }
-        }
+    @Provides(Task.TASK_TARGET)
+    public Optional<Task> optTask(String name) {
+        return Optionals.either(taskMap.get(name))
+                .or(getParent().flatMap(parent -> parent.optTask(name)))
+                .opt();
     }
 
     private void put(Action action) {
@@ -95,13 +69,20 @@ public class ActionManager extends BasicPlugin {
         }
     }
 
+    private void put(Task task) {
+        if (taskMap.containsKey(task.getName())) {
+            LoggerFactory.getLogger(getClass()).warn("Duplicate task names in ActionManager.");
+        } else {
+            taskMap.put(task.getName(), task);
+        }
+    }
+
     /**
-     * Регестрирует действие, используя только его класс. Для этого обязательно
-     * должна присутствовать аннотация ActionDescription
+     * Put a task into the manager using action construction by reflections. Action must have empty constructor
      *
      * @param actionClass a {@link java.lang.Class} object.
      */
-    public final void register(Class<? extends Action> actionClass) {
+    public final void putAction(Class<? extends Action> actionClass) {
         try {
             put(actionClass.newInstance());
         } catch (IllegalAccessException ex) {
@@ -111,48 +92,42 @@ public class ActionManager extends BasicPlugin {
         }
     }
 
-    /**
-     * <p>
-     * unRegister.</p>
-     *
-     * @param actionType a {@link java.lang.String} object.
-     */
-    public void unRegister(String actionType) {
-        actionMap.remove(actionType);
+    public final void putTask(Class<? extends Task> taskClass) {
+        try {
+            put(taskClass.newInstance());
+        } catch (IllegalAccessException ex) {
+            throw new RuntimeException("Task must have default empty constructor to be registered.");
+        } catch (InstantiationException ex) {
+            throw new RuntimeException("Error while constructing Task", ex);
+        }
     }
 
     /**
-     * List all available actions in this context
+     * Stream of all available actions
      *
      * @return
      */
-    public List<ActionDescriptor> list() {
-        List<ActionDescriptor> list;
-        if (getParent() != null) {
-            list = getParent().list();
-        } else {
-            list = new ArrayList<>();
-        }
-        this.actionMap.values().stream().forEach((action) -> {
-            list.add(ActionDescriptor.build(action));
-        });
-
-        Collections.sort(list, (ActionDescriptor o1, ActionDescriptor o2) -> o1.getName().compareTo(o2.getName()));
-        return list;
+    @ProvidesNames(Action.ACTION_TARGET)
+    public Stream<String> getAllActions() {
+        return Stream.concat(
+                this.actionMap.keySet().stream(),
+                getContext().pluginManager().stream(true)
+                        .flatMap(plugin -> plugin.listContent(Action.ACTION_TARGET))
+        ).distinct();
     }
 
-    @Override
-    protected boolean provides(String target, Name name) {
-        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.containsKey(name.toString());
-        } else return false;
-    }
-
-    @Override
-    protected Object provide(String target, Name name) {
-        if (target.equals(Action.ACTION_PROVIDER_KEY)) {
-            return actionMap.get(name.toString());
-        } else return null;
+    /**
+     * Stream of all available tasks
+     *
+     * @return
+     */
+    @ProvidesNames(Task.TASK_TARGET)
+    public Stream<String> getAllTasks() {
+        return Stream.concat(
+                this.taskMap.keySet().stream(),
+                getContext().pluginManager().stream(true)
+                        .flatMap(plugin -> plugin.listContent(Task.TASK_TARGET))
+        ).distinct();
     }
 
 }

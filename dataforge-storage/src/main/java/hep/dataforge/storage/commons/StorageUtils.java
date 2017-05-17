@@ -30,9 +30,8 @@ import hep.dataforge.values.ValueType;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Supplier;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static hep.dataforge.io.messages.Dispatcher.*;
@@ -63,13 +62,7 @@ public class StorageUtils {
         if (loaderConfig.hasMeta("shelf")) {
             for (Meta an : loaderConfig.getMetaList("shelf")) {
                 String shelfName = shelfName(an);
-                Storage shelf;
-
-                if (storage.hasShelf(shelfName)) {
-                    shelf = storage.getShelf(shelfName);
-                } else {
-                    shelf = storage.buildShelf(shelfName(an), an);
-                }
+                Storage shelf = storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName(an), an));
                 setupLoaders(shelf, an);
             }
         }
@@ -78,14 +71,10 @@ public class StorageUtils {
             List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
             for (Meta la : loaderAns) {
                 String loaderName = loaderName(la);
-                if (!storage.hasLoader(loaderName)) {
-                    storage.buildLoader(la);
-                } else {
-                    Loader currentLoader = storage.getLoader(loaderName);
-                    //If the same annotation is used - do nothing
-                    if (!currentLoader.meta().equals(la)) {
-                        storage.buildLoader(loaderConfig);
-                    }
+                Loader current = storage.optLoader(loaderName).orElseGet(()->storage.buildLoader(la));
+                //If the same annotation is used - do nothing
+                if (!current.meta().equals(la)) {
+                    storage.buildLoader(loaderConfig);
                 }
             }
         }
@@ -107,9 +96,11 @@ public class StorageUtils {
     public static Stream<Pair<String, Loader>> loaderStream(Storage storage) {
         try {
             return Stream.concat(
-                    storage.shelves().entrySet().stream().flatMap(entry -> loaderStream(entry.getValue())
-                            .map(pair -> new Pair<>(Name.joinString(entry.getKey(), pair.getKey()), pair.getValue()))),
-                    storage.loaders().entrySet().stream().map(entry -> new Pair<>(entry.getKey(), entry.getValue()))
+                    storage.shelves().stream().flatMap(entry ->
+                            loaderStream(entry)
+                                    .map(pair -> new Pair<>(Name.joinString(entry.getName(), pair.getKey()), pair.getValue()))
+                    ),
+                    storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry))
             );
         } catch (StorageException ex) {
             throw new RuntimeException(ex);
@@ -127,19 +118,14 @@ public class StorageUtils {
      * @return
      * @throws StorageException
      */
-    public static <T> List<Supplier<T>> sparsePull(ValueIndex<T> index, Value from, Value to, int limit) throws StorageException {
+    public static <T> Stream<T> sparsePull(ValueIndex<T> index, Value from, Value to, int limit) throws StorageException {
         if (limit > 0) {
             if (isNumeric(from) && isNumeric(to)) {
                 double a = from.doubleValue();
                 double b = to.doubleValue();
                 return sparsePull(index, a, b, limit);
             } else {
-                List<Supplier<T>> res = index.pull(from, to);
-                if (res.size() <= limit) {
-                    return res;
-                } else {
-                    return res.subList(0, limit);
-                }
+                return index.pull(from, to).limit(limit);
             }
         } else {
             return index.pull(from, to);
@@ -158,7 +144,7 @@ public class StorageUtils {
      * @return
      * @throws StorageException
      */
-    public static <T> List<Supplier<T>> sparsePull(ValueIndex<T> index, double from, double to, int limit) throws StorageException {
+    public static <T> Stream<T> sparsePull(ValueIndex<T> index, double from, double to, int limit) throws StorageException {
         if (!Double.isFinite(from)) {
             from = index.getFirstKey().doubleValue();
         }
@@ -166,15 +152,18 @@ public class StorageUtils {
             to = index.getLastKey().doubleValue();
         }
 
-        List<Supplier<T>> res = new ArrayList<>();
+        double start = from;
         double step = (to - from) / limit;
-        for (double x = from; x < to; x += step) {
-            Supplier<T> sup = index.pullOne(x + step / 2);
-            if (sup != null) {
-                res.add(sup);
+
+        return IntStream.range(0, limit).mapToObj(i -> {
+            double x = start + step * i;
+            try {
+                return index.pullOne(x + step / 2).get();
+            } catch (StorageException e) {
+                throw new RuntimeException(e);
             }
-        }
-        return res;
+        }).filter(it -> it != null).distinct();
+
     }
 
 
@@ -184,6 +173,7 @@ public class StorageUtils {
 
     /**
      * A simple validator that checks only name and type if present
+     *
      * @param type
      * @param name
      * @return

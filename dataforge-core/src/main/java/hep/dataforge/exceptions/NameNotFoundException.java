@@ -21,7 +21,7 @@ package hep.dataforge.exceptions;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NameNotFoundException extends NamingException{
+public class NameNotFoundException extends NamingException {
 
     private String name;
 
@@ -40,20 +40,28 @@ public class NameNotFoundException extends NamingException{
      * @param name a {@link java.lang.String} object.
      */
     public NameNotFoundException(String name) {
-        super("The element with name \""+name+"\" is not found.");
         this.name = name;
     }
-    
+
     /**
      * <p>Constructor for NameNotFoundException.</p>
      *
      * @param name a {@link java.lang.String} object.
-     * @param msg a {@link java.lang.String} object.
+     * @param msg  a {@link java.lang.String} object.
      */
     public NameNotFoundException(String name, String msg) {
-        super("The element with name \""+name+"\" is not found. " + msg);
+        super(msg);
         this.name = name;
-    }    
+    }
+
+    @Override
+    public String getMessage() {
+        return super.getMessage() + buildMessage();
+    }
+
+    protected String buildMessage() {
+        return " The element with name \"" + getName() + "\" is not found.";
+    }
 
     /**
      * <p>Getter for the field <code>name</code>.</p>

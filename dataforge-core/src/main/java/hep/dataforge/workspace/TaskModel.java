@@ -6,13 +6,12 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
@@ -21,10 +20,9 @@ import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.LinkedHashSet;
+import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.Executor;
 import java.util.function.BiConsumer;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -34,21 +32,21 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Annotated, ValueProvider {
+public class TaskModel implements Named, Metoid, ValueProvider {
 
     //TODO implement builder chain
     private final Workspace workspace;
     private final String taskName;
     private final Meta taskMeta;
     private final Set<Dependency> deps;
-    private final Set<OutputHook> outs;
+//    private final Set<OutputHook> outs;
 
-    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps, Set<OutputHook> outs) {
+    protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps) {
         this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         this.deps = deps;
-        this.outs = outs;
+//        this.outs = outs;
     }
 
     public TaskModel(Workspace workspace, String taskName, Meta taskMeta) {
@@ -56,7 +54,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         deps = new LinkedHashSet<>();
-        outs = new LinkedHashSet<>();
+//        outs = new LinkedHashSet<>();
     }
 
     public Workspace getWorkspace() {
@@ -73,7 +71,7 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @return
      */
     public TaskModel copy() {
-        return new TaskModel(workspace, taskName, taskMeta, deps, outs);
+        return new TaskModel(workspace, taskName, taskMeta, deps);
     }
 
     /**
@@ -84,24 +82,25 @@ public class TaskModel implements Named, Annotated, ValueProvider {
     public Collection<Dependency> dependencies() {
         return deps;
     }
+//
+//    /**
+//     * An ordered collection of task outputs
+//     *
+//     * @return
+//     */
+//    public Collection<OutputHook> outs() {
+//        return outs;
+//    }
 
-    /**
-     * An ordered collection of task outputs
-     *
-     * @return
-     */
-    public Collection<OutputHook> outs() {
-        return outs;
-    }
-
-    /**
-     * handle result using
-     *
-     * @param hook
-     */
-    public void handle(OutputHook hook) {
-        this.outs.add(hook);
-    }
+//    /**
+//     * handle result using
+//     *
+//     * @param hook
+//     */
+//    public TaskModel handle(OutputHook hook) {
+//        this.outs.add(hook);
+//        return this;
+//    }
 
     @Override
     public String getName() {
@@ -119,8 +118,9 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param model
      * @param as
      */
-    public void dependsOn(TaskModel model, String as) {
+    public TaskModel dependsOn(TaskModel model, String as) {
         this.deps.add(new TaskDependency(model, as));
+        return this;
     }
 
     /**
@@ -128,8 +128,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      *
      * @param model
      */
-    public void dependsOn(TaskModel model) {
-        dependsOn(model, model.getName());
+    public TaskModel dependsOn(TaskModel model) {
+        return dependsOn(model, model.getName());
     }
 
     /**
@@ -138,8 +138,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param taskName
      * @param taskMeta
      */
-    public void dependsOn(String taskName, Meta taskMeta) {
-        dependsOn(taskName, taskMeta, "");
+    public TaskModel dependsOn(String taskName, Meta taskMeta) {
+        return dependsOn(taskName, taskMeta, "");
     }
 
     /**
@@ -149,20 +149,35 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param taskMeta
      * @param as
      */
-    public void dependsOn(String taskName, Meta taskMeta, String as) {
-        dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
+    public TaskModel dependsOn(String taskName, Meta taskMeta, String as) {
+        return dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
     }
 
     /**
      * Add data dependency rule using data path mask and name transformation
      * rule.
+     * <p>
+     * Name change rule should be "pure" to avoid runtime model changes
      *
      * @param mask
      * @param rule
      */
-    //FIXME Name change rule should be "pure" to avoid runtime model changes
-    public void data(String mask, UnaryOperator<String> rule) {
+    public TaskModel data(String mask, UnaryOperator<String> rule) {
         this.deps.add(new DataDependency(mask, rule));
+        return this;
+    }
+
+    /**
+     * Type checked data dependency
+     *
+     * @param type
+     * @param mask
+     * @param rule
+     * @return
+     */
+    public TaskModel data(Class<?> type, String mask, UnaryOperator<String> rule) {
+        this.deps.add(new DataDependency(type, mask, rule));
+        return this;
     }
 
     /**
@@ -170,8 +185,8 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      *
      * @param mask
      */
-    public void data(String mask) {
-        data(mask, UnaryOperator.identity());
+    public TaskModel data(String mask) {
+        return data(mask, UnaryOperator.identity());
     }
 
     /**
@@ -180,29 +195,56 @@ public class TaskModel implements Named, Annotated, ValueProvider {
      * @param mask
      * @param as
      */
-    public void data(String mask, String as) {
+    public TaskModel data(String mask, String as) {
         //FIXME make smart name transformation here
-        data(mask, str -> as);
+        return data(mask, str -> as);
+    }
+
+    /**
+     * Add a dependency on a type checked node
+     *
+     * @param type
+     * @param sourceNodeName
+     * @param targetNodeName
+     * @return
+     */
+    public TaskModel dataNode(Class<?> type, String sourceNodeName, String targetNodeName) {
+        this.deps.add(new DataNodeDependency(type, sourceNodeName, targetNodeName));
+        return this;
+    }
+
+    /**
+     * Source and target node have the same name
+     *
+     * @param type
+     * @param nodeName
+     * @return
+     */
+    public TaskModel dataNode(Class<?> type, String nodeName) {
+        this.deps.add(new DataNodeDependency(type, nodeName, nodeName));
+        return this;
     }
 
     public Meta getIdentity() {
         return new MetaBuilder("task")
-                .setValue("name",getName())
-                .setNode("meta",meta());
+                .setValue("name", getName())
+                .setNode("meta", meta());
     }
 
     /**
      * Convenience method. Equals {@code meta().getValue(path)}
+     *
      * @param path
      * @return
      */
     @Override
-    public Value getValue(String path) {
-        return meta().getValue(path);
+    public Optional<Value> optValue(String path) {
+        return meta().optValue(path);
     }
 
     /**
      * Convenience method. Equals {@code meta().hasValue(path)}
+     *
      * @param path
      * @return
      */
@@ -226,14 +268,18 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         void apply(DataTree.Builder tree, Workspace workspace);
     }
 
-    /**
-     * Task output handler
-     */
-    public interface OutputHook<T> extends Consumer<DataNode<T>>, Encapsulated {
-        default Executor getExecutor() {
-            return getContext().singleThreadExecutor();
-        }
-    }
+//    /**
+//     * Task output handler
+//     */
+//    public interface OutputHook<T> extends BiConsumer<TaskModel, DataNode<T>>, Encapsulated {
+//        default Executor getExecutor() {
+//            return getContext().singleThreadExecutor();
+//        }
+//
+//        default Consumer<DataNode<T>> handler(TaskModel model) {
+//            return node -> this.accept(model, node);
+//        }
+//    }
 
     /**
      * Data dependency
@@ -261,6 +307,19 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         }
 
         /**
+         * Data dependency w
+         *
+         * @param type
+         * @param mask
+         * @param rule
+         */
+        public DataDependency(Class<?> type, String mask, UnaryOperator<String> rule) {
+            this.gatherer = (w) -> w.getData().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName())
+                    && type.isAssignableFrom(data.type()));
+            this.pathTransformationRule = rule;
+        }
+
+        /**
          * Place data
          *
          * @param tree
@@ -270,6 +329,23 @@ public class TaskModel implements Named, Annotated, ValueProvider {
         public void apply(DataTree.Builder tree, Workspace workspace) {
             gatherer.apply(workspace)
                     .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
+        }
+    }
+
+    static class DataNodeDependency implements Dependency {
+        private final String sourceNodeName;
+        private final String targetNodeName;
+        private final Class<?> type;
+
+        public DataNodeDependency(Class<?> type, String sourceNodeName, String targetNodeName) {
+            this.sourceNodeName = sourceNodeName;
+            this.targetNodeName = targetNodeName;
+            this.type = type;
+        }
+
+        @Override
+        public void apply(DataTree.Builder tree, Workspace workspace) {
+            tree.putNode(targetNodeName, workspace.getData().getCheckedNode(sourceNodeName, type));
         }
     }
 

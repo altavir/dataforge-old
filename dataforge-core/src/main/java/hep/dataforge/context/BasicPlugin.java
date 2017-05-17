@@ -15,11 +15,7 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleConfigurable;
-import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
-import hep.dataforge.providers.Path;
 
 /**
  * A base for plugin implementation
@@ -29,23 +25,6 @@ import hep.dataforge.providers.Path;
 public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     private Context context;
-
-    private final ProviderDelegate providerDelegate = new ProviderDelegate();
-
-    protected MetaBuilder getDefinition() {
-        MetaBuilder builder = new MetaBuilder("plugin");
-        if (getClass().isAnnotationPresent(PluginDef.class)) {
-            PluginDef def = getClass().getAnnotation(PluginDef.class);
-            builder.putValue("group", def.group());
-            builder.putValue("name", def.name());
-            builder.putValue("description", def.description());
-            builder.putValue("version", def.version());
-            for (String dep : def.dependsOn()) {
-                builder.putValue("dependsOn", dep);
-            }
-        }
-        return builder;
-    }
 
     @Override
     public PluginTag[] dependsOn() {
@@ -69,7 +48,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
      */
     @Override
     public PluginTag getTag() {
-        return new PluginTag(getDefinition().build());
+        return Plugin.resolveTag(getClass());
     }
 
     public String getDescription() {
@@ -80,7 +59,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
      * Load this plugin to the Global without annotation
      */
     public void startGlobal() {
-        if (getContext() != null && !Global.instance().equals(getContext())) {
+        if (context != null && !Global.instance().equals(getContext())) {
             Global.instance().getLogger().warn("Loading plugin as global from non-global context");
         }
         Global.instance().pluginManager().load(this);
@@ -98,39 +77,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
 
     @Override
     public final Context getContext() {
+        if (context == null) {
+            throw new RuntimeException("Plugin not attached");
+        }
         return context;
     }
-
-    @Override
-    public final Object provide(Path path) {
-        return providerDelegate.provide(path);
-    }
-
-    @Override
-    public final boolean provides(Path path) {
-        return providerDelegate.provides(path);
-    }
-
-    protected boolean provides(String target, Name name) {
-        return false;
-    }
-
-    protected Object provide(String target, Name name) {
-        return null;
-    }
-
-    private class ProviderDelegate extends AbstractProvider{
-
-        @Override
-        protected boolean provides(String target, Name name) {
-            return BasicPlugin.this.provides(target,name);
-        }
-
-        @Override
-        protected Object provide(String target, Name name) {
-            return BasicPlugin.this.provide(target,name);
-        }
-    }
-
-
 }

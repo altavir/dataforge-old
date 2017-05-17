@@ -8,7 +8,6 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.AbstractProvider;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -21,7 +20,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class DataTree<T> extends AbstractProvider implements DataNode<T> {
+public class DataTree<T> implements DataNode<T> {
 
     private final Class<T> type;
     private final Map<String, DataTree<? extends T>> nodes = new HashMap<>();
@@ -41,7 +40,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      */
     private DataTree(DataTree<T> tree, String as) {
         this.type = tree.type;
-//        this.parent = tree.parent;
         this.meta = tree.meta;
         this.name = as;
         tree.nodes.forEach((String key, DataTree<? extends T> tree1) -> {
@@ -125,7 +123,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String dataName) {
+    public Optional<Data<? extends T>> optData(String dataName) {
         return Optional.ofNullable(getData(Name.of(dataName)));
     }
 
@@ -135,7 +133,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
         } else {
             DataNode<? extends T> node = getNode(dataName.cutLast());
             if (node != null) {
-                return node.getData(dataName.getLast().toString()).get();
+                return node.optData(dataName.getLast().toString()).get();
             } else {
                 return null;
             }
@@ -149,6 +147,10 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
      * @param data
      */
     protected void putData(Name name, Data<? extends T> data, boolean replace) {
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("Name must not be empty");
+        }
+
         if (name.length() == 1) {
             String key = name.toString();
             checkedPutData(key, data, replace);
@@ -166,7 +168,9 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     protected void putNode(Name name, DataNode<? extends T> node) {
-        if (name.length() == 1) {
+        if (name.length() == 0) {
+            throw new IllegalArgumentException("Can't put node with empty name");
+        } else if (name.length() == 1) {
             String key = name.toString();
             checkedPutNode(key, node);
         } else {
@@ -278,7 +282,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
         return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 
@@ -304,31 +308,6 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
             return meta;
         } else {
             return new Laminate(meta, parent().meta());
-        }
-    }
-
-    @Override
-    public boolean provides(String target, Name name) {
-        switch (target) {
-            case NODE_TARGET:
-                return getNode(name) != null;
-            case DATA_TARGET:
-                return getData(name) != null;
-            default:
-                return false;
-        }
-    }
-
-    @Override
-    public Object provide(String target, Name name) {
-        //FIXME replace nulls by unchecked exceptions
-        switch (target) {
-            case NODE_TARGET:
-                return getNode(name);
-            case DATA_TARGET:
-                return getData(name);
-            default:
-                return null;
         }
     }
 
@@ -427,7 +406,7 @@ public class DataTree<T> extends AbstractProvider implements DataNode<T> {
             return this.tree.meta();
         }
 
-        public boolean isEmpty(){
+        public boolean isEmpty() {
             return this.tree.isEmpty();
         }
     }

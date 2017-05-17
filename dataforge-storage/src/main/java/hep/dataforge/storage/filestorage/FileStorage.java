@@ -184,7 +184,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     private static boolean checkIfEnvelope(FileObject file) {
         try {
-            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readChar() == '#';
+            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readByte() == '#';
         } catch (IOException e) {
             return false;
         }
@@ -312,8 +312,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
     public Loader buildLoader(Meta loaderConfiguration) throws StorageException {
         String type = StorageUtils.loaderType(loaderConfiguration);
         String name = StorageUtils.loaderName(loaderConfiguration);
-        if (hasLoader(name)) {
-            return overrideLoader(getLoader(name), loaderConfiguration);
+
+        if (optLoader(name).isPresent()) {
+            return overrideLoader(optLoader(name).get(), loaderConfiguration);
         } else {
             return buildLoaderByType(loaderConfiguration, type);
         }
@@ -355,11 +356,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
                 }
             }
             refresh();
-            Loader loader = getLoader(name);
-            if (loader == null) {
-                throw new StorageException("Loader could not be initialized from existing file");
-            }
-            return loader;
+
+            return optLoader(name).orElseThrow(() -> new StorageException("Loader could not be initialized from existing file"));
         } catch (IOException ex) {
             throw new StorageException(ex);
         }

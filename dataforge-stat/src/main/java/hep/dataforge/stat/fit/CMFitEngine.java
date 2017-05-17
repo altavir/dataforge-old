@@ -15,8 +15,8 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.io.reports.Log;
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.MultiFunction;
@@ -64,14 +64,14 @@ public class CMFitEngine implements FitEngine {
 
     /** {@inheritDoc} */
     @Override
-    public FitTaskResult run(FitState state, FitStage task, Logable parentLog) {
-        Log log = new Log("CM", parentLog);
-        switch (task.getName()) {
+    public FitResult run(FitState state, FitStage task, History parentLog) {
+        Chronicle log = new Chronicle("CM", parentLog);
+        switch (task.getType()) {
             case TASK_SINGLE:
             case TASK_RUN:
                 return makeRun(state, task, log);
             default:
-                throw new IllegalArgumentException(String.format("Task '%s' is not supported by CMFitEngine", task.getName()));
+                throw new IllegalArgumentException(String.format("Task '%s' is not supported by CMFitEngine", task.getType()));
         }
     }
 
@@ -81,10 +81,10 @@ public class CMFitEngine implements FitEngine {
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link Logable} object.
-     * @return a {@link hep.dataforge.stat.fit.FitTaskResult} object.
+     * @param log a {@link History} object.
+     * @return a {@link FitResult} object.
      */
-    public FitTaskResult makeRun(FitState state, FitStage task, Logable log) {
+    public FitResult makeRun(FitState state, FitStage task, History log) {
 
         log.report("Starting fit using provided Commons Math algorithms.");
         int maxSteps = task.meta().getInt("iterations", DEFAULT_MAXITER);
@@ -139,7 +139,7 @@ public class CMFitEngine implements FitEngine {
         NamedVector respars = new NamedVector(fitPars, res.getPoint());
         ParamSet allpars = pars.copy();
         allpars.setParValues(respars);
-        FitTaskResult outRes = FitTaskResult.buildResult(state, task, allpars);
+        FitResult outRes = FitResult.build(state.edit().setPars(allpars).build(),task.getFreePars());
 
         return outRes;
 

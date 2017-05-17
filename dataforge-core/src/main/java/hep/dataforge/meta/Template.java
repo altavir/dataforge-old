@@ -20,7 +20,7 @@ import static hep.dataforge.meta.MetaUtils.transformValue;
 /**
  * @author Alexander Nozik
  */
-public class Template implements Annotated, UnaryOperator<Meta> {
+public class Template implements Metoid, UnaryOperator<Meta> {
 
     /**
      * Template itself

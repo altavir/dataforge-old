@@ -1,8 +1,0 @@
-apply plugin: 'groovy'
-
-description = 'The grind plugin for dataforge framework'
-
-dependencies {
-    compile project(':dataforge-plots')
-    compile project(':dataforge-maths:groovymath')
-}

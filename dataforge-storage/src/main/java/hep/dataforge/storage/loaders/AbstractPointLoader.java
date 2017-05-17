@@ -31,7 +31,7 @@ import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
 
 import java.util.*;
-import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import static hep.dataforge.storage.commons.StorageMessageUtils.*;
 import static hep.dataforge.tables.DataPoint.buildFromMeta;
@@ -112,27 +112,29 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     return confirmationResponse(message);
 
                 case PULL_OPERATION:
-                    List<Supplier<DataPoint>> points = new ArrayList<>();
+                    List<DataPoint> points = new ArrayList<>();
                     if (messageMeta.hasMeta(QUERY_ELEMENT)) {
-                        points = getIndex().query(messageMeta.getMeta(QUERY_ELEMENT));
+                        points = getIndex().query(messageMeta.getMeta(QUERY_ELEMENT)).collect(Collectors.toList());
                     } else if (messageMeta.hasValue("value")) {
                         String valueName = messageMeta.getString("valueName", "");
-                        for (Value value : messageMeta.getValue("value").listValue()) {
-                            points.add(this.getIndex(valueName).pullOne(value));
-                        }
+                        points = messageMeta.getValue("value").listValue().stream()
+                                .map(val -> getIndex(valueName).pullOne(val))
+                                .filter(it -> it.isPresent()).map(it -> it.get())
+                                .collect(Collectors.toList());
                     } else if (messageMeta.hasMeta("range")) {
                         String valueName = messageMeta.getString("valueName", "");
                         for (Meta rangeAn : messageMeta.getMetaList("range")) {
                             Value from = rangeAn.getValue("from", Value.getNull());
                             Value to = rangeAn.getValue("to", Value.getNull());
 //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
-                            points.addAll(this.getIndex(valueName).pull(from, to));
+                            points = this.getIndex(valueName).pull(from, to)
+                                    .collect(Collectors.toList());
                         }
                     }
 
                     MetaBuilder dataAn = new MetaBuilder("data");
-                    for (Supplier<DataPoint> dp : points) {
-                        dataAn.putNode(dp.get().toMeta());
+                    for (DataPoint dp : points) {
+                        dataAn.putNode(dp.toMeta());
                     }
                     return new MessageFactory().okResponseBase(message, true, false)
                             .putMetaNode(dataAn)

@@ -5,15 +5,16 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
+
 import java.io.Serializable;
 
 /**
  * The base class for descriptors
  * @author Alexander Nozik
  */
-public class DescriptorBase implements Annotated, Serializable{
+public class DescriptorBase implements Metoid, Serializable{
 
     private final Meta meta;
 

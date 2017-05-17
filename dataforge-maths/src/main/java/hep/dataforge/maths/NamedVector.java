@@ -24,6 +24,8 @@ import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
+import java.util.Optional;
+
 /**
  * Именованый вектор. Данные хранятся в виде массива. Скорость доступа поностью
  * зависит от скорости NameList.
@@ -66,9 +68,14 @@ public class NamedVector implements NamedValueSet {
     }
 
     @Override
-    public Value getValue(String path) {
-        return Value.of(getDouble(path));
-    }    
+    public Optional<Value> optValue(String path) {
+        int n = this.getNumberByName(path);
+        if (n < 0) {
+            return Optional.empty();
+        } else {
+            return Optional.of(Value.of(vector.getEntry(n)));
+        }
+    }
     
     public NamedVector copy() {
         return new NamedVector(this.namesAsArray(), vector);

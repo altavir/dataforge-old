@@ -5,16 +5,11 @@
  */
 package hep.dataforge.control.devices.annotations;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * The role of connection served by this device
+ *
  * @author Alexander Nozik
  */
 @Target(ElementType.TYPE)
@@ -25,19 +20,28 @@ import java.lang.annotation.Target;
 public @interface RoleDef {
     /**
      * Role name
-     * @return 
+     *
+     * @return
      */
     String name();
-    
+
     /**
-     * Role description
-     * @return 
-     */
-    String info() default "";
-    
-    /**
-     * The type of the object that could play the role
-     * @return 
+     * The type of the object that could play this role
+     *
+     * @return
      */
     Class objectType() default Object.class;
+
+    /**
+     * If true then only one connection of this role is allowed per object
+     * @return
+     */
+    boolean unique() default false;
+
+    /**
+     * Role description
+     *
+     * @return
+     */
+    String info() default "";
 }

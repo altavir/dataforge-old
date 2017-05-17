@@ -15,20 +15,21 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.fx.FXUtils;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.EnvelopeWriter;
 import hep.dataforge.io.envelopes.WrapperEnvelopeType;
+import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.SimpleConfigurable;
-import hep.dataforge.names.Named;
+import javafx.beans.binding.ListBinding;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 
@@ -37,44 +38,87 @@ import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
  */
 public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
 
-    protected ObservableList<Plottable> plottables = FXCollections.observableArrayList();
+    private final Map<String, Plottable> plottables = new ConcurrentHashMap<>();
 
-    //    private String name;
+    private ListBinding<Plottable> list = new ListBinding<Plottable>() {
+        @Override
+        protected ObservableList<Plottable> computeValue() {
+            return FXCollections.observableArrayList(plottables.values());
+        }
+    };
+
+
+    public AbstractPlotFrame(Configuration configuration) {
+        super(configuration);
+        //setupListener();
+    }
+
+    public AbstractPlotFrame() {
+        //setupListener();
+    }
+
     @Override
-    public Plottable get(String name) {
-        return plottables.stream().filter(pl -> name.equals(pl.getName())).findFirst().orElse(null);
+    public Iterator<Plottable> iterator() {
+        return plottables.values().iterator();
     }
 
     @Override
     public ObservableList<Plottable> plottables() {
-        return FXCollections.unmodifiableObservableList(plottables);
+        return list;
+    }
+
+    @Override
+    public Optional<Plottable> opt(String name) {
+        return Optional.ofNullable(plottables.get(name));
     }
 
     @Override
     public synchronized void remove(String plotName) {
-        get(plotName).removeListener(this);
-        FXUtils.runNow(() -> {
-            Plottable pl = get(plotName);
-            if (pl != null) {
-                pl.removeListener(this);
-            }
-            plottables.remove(pl);
+        Plottable removed = plottables.remove(plotName);
+        if (removed != null) {
+            removed.removeListener(AbstractPlotFrame.this);
             updatePlotData(plotName);
-        });
+            list.invalidate();
+        }
     }
 
     @Override
     public synchronized void clear() {
-        plottables.stream().map(Named::getName).collect(Collectors.toList()).stream().forEach(plName -> remove(plName));
+        Collection<String> names = plottables.keySet();
+        plottables.clear();
+        names.forEach(this::updatePlotData);
+        list.invalidate();
     }
 
     @Override
     public synchronized void add(Plottable plottable) {
-        String pName = plottable.getName();
-        plottables.add(plottable);
-        plottable.addListener(this);
-        updatePlotData(pName);
-        updatePlotConfig(pName);
+        Plottable prev = plottables.put(plottable.getName(), plottable);
+        if (prev != plottable) {
+            plottable.addListener(AbstractPlotFrame.this);
+            updatePlotData(plottable.getName());
+            updatePlotConfig(plottable.getName());
+            list.invalidate();
+        }
+    }
+
+    @Override
+    public synchronized void setAll(Collection<? extends Plottable> collection) {
+        Set<String> ivalidateNames = new HashSet<>();
+        plottables.values().forEach(plottable -> {
+            plottable.removeListener(AbstractPlotFrame.this);
+            ivalidateNames.add(plottable.getName());
+        });
+        plottables.clear();
+        collection.forEach(plottable -> {
+            ivalidateNames.add(plottable.getName());
+            plottable.addListener(AbstractPlotFrame.this);
+            plottables.put(plottable.getName(), plottable);
+        });
+        ivalidateNames.forEach(name -> {
+            updatePlotData(name);
+            updatePlotConfig(name);
+        });
+        list.invalidate();
     }
 
     /**
@@ -105,7 +149,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     public Envelope wrap() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         EnvelopeWriter writer = new WrapperEnvelopeType().getWriter();
-        for (Plottable pl : plottables()) {
+        for (Plottable pl : this) {
             try {
                 writer.write(baos, pl.wrap());
             } catch (IOException ex) {

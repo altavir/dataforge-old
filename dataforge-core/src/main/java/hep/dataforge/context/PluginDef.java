@@ -30,7 +30,7 @@ public @interface PluginDef {
     String name();
 
     String version() default "";
-    String description();
+    String info();
     String[] dependsOn() default {};
 
 }

@@ -15,48 +15,44 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.Named;
+import hep.dataforge.utils.SimpleMetaMorph;
 
-import java.io.Serializable;
 import java.util.Arrays;
 
-import static hep.dataforge.stat.fit.FitAction.STAGE_KEY;
 
 /**
- * <p>
- FitStage class.</p>
- *
+ * The description of fit stage to run
  * @author Alexander Nozik
- * @version $Id: $Id
  */
-public class FitStage implements Annotated, Named, Serializable {
+public class FitStage extends SimpleMetaMorph {
+
+    public static final String STAGE_KEY = "stage";
 
     public static final String TASK_RUN = "fit";
     public static final String TASK_SINGLE = "single";
     public static final String TASK_COVARIANCE = "covariance";
 
-    private static final String NAME = "type";
+    private static final String FIT_STAGE_TYPE = "type";
     private static final String FREE_PARAMETERS = "freepars";
     private static final String ENGINE_NAME = "engine";
     private static final String METHOD_NAME = "method";
     private static final String DEFAULT_METHOD_NAME = "default";
 
-    private final Meta taskDescription;
 
     public FitStage(Meta taskAnnotation) {
-        this.taskDescription = taskAnnotation;
+        super(taskAnnotation);
     }
 
     public FitStage(String engineName, String taskName, String methodName, String[] freePars) {
-        taskDescription = new MetaBuilder(STAGE_KEY)
-                .putValue(NAME, taskName)
+        this(new MetaBuilder(STAGE_KEY)
+                .putValue(FIT_STAGE_TYPE, taskName)
                 .putValue(ENGINE_NAME, engineName)
                 .putValue(METHOD_NAME, methodName)
                 .putValues(FREE_PARAMETERS, freePars)
-                .build();
+                .build()
+        );
     }
 
     public FitStage(String engineName, String taskName, String[] freePars) {
@@ -64,22 +60,23 @@ public class FitStage implements Annotated, Named, Serializable {
     }
 
     public FitStage(String engineName, String taskName) {
-        taskDescription = new MetaBuilder(STAGE_KEY)
-                .putValue(NAME, taskName)
+        this(new MetaBuilder(STAGE_KEY)
+                .putValue(FIT_STAGE_TYPE, taskName)
                 .putValue(ENGINE_NAME, engineName)
-                .build();
+                .build()
+        );
     }
 
     public FitStage(String taskName) {
-        taskDescription = new MetaBuilder(STAGE_KEY).putValue(NAME, taskName).build();
+        this(new MetaBuilder(STAGE_KEY).putValue(FIT_STAGE_TYPE, taskName).build());
     }
 
     public String getEngineName() {
-        return taskDescription.getString(ENGINE_NAME, QOWFitEngine.QOW_ENGINE_NAME);
+        return meta().getString(ENGINE_NAME, QOWFitEngine.QOW_ENGINE_NAME);
     }
 
     public String getMethodName() {
-        return taskDescription.getString(METHOD_NAME, DEFAULT_METHOD_NAME);
+        return meta().getString(METHOD_NAME, DEFAULT_METHOD_NAME);
     }
 
     /**
@@ -97,20 +94,8 @@ public class FitStage implements Annotated, Named, Serializable {
         }
     }
 
-    /**
-     * Название задачи. Должно быть строго фиксированным, чтобы оно могло быть
-     * распознано программой
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    @Override
-    public String getName() {
-        return meta().getString(NAME, "fit");
-    }
-
-    @Override
-    public Meta meta() {
-        return taskDescription;
+    public String getType() {
+        return meta().getString(FIT_STAGE_TYPE, "fit");
     }
 
     @Override
@@ -124,7 +109,7 @@ public class FitStage implements Annotated, Named, Serializable {
             parameters = Arrays.toString(freePars);
         }
             
-        return getName() + "(" + parameters + ")";
+        return getType() + "(" + parameters + ")";
     }
 
 }

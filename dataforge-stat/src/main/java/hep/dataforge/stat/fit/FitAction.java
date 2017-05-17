@@ -20,17 +20,12 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.ContentException;
+import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Laminate;
-import hep.dataforge.meta.Meta;
-import hep.dataforge.stat.models.Model;
-import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.Table;
-import hep.dataforge.utils.Misc;
 
+import java.io.OutputStream;
 import java.io.PrintWriter;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * <p>
@@ -39,7 +34,8 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@TypedActionDef(name = "fit", inputType = Table.class, outputType = FitState.class, info = "Fit dataset with previously stored model.")
+@TypedActionDef(name = "fit", inputType = Table.class, outputType = FitResult.class, info = "Fit dataset with previously stored model.")
+@ValueDef(name = "printLog", type = "BOOLEAN", def = "true", info = "Append log to the fit report")
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
@@ -49,13 +45,9 @@ import java.util.List;
                 + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
         target = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
 @NodeDef(name = "stage", multiple = true, info = "Fit stages")
-public class FitAction extends OneToOneAction<Table, FitState> {
+public class FitAction extends OneToOneAction<Table, FitResult> {
 
     public static final String FIT_ACTION_NAME = "fit";
-
-    public static final String STAGE_KEY = "stage";
-
-    public static final String MODEL_KEY = "model";
 
     /**
      * {@inheritDoc}
@@ -63,70 +55,29 @@ public class FitAction extends OneToOneAction<Table, FitState> {
      * @return
      */
     @Override
-    protected FitState execute(Context context, String name, Table input, Laminate meta) {
-        FitManager fm;
-        if (context.provides("fitting")) {
-            fm = context.provide("fitting", FitManager.class);
-        } else {
-            fm = new FitManager(context);
+    protected FitResult execute(Context context, String name, Table input, Laminate meta) {
+        OutputStream output = buildActionOutput(context, name);
+        PrintWriter writer = new PrintWriter(output);
+        writer.printf("%n*** META ***%n");
+        writer.println(meta.toString());
+        writer.flush();
+
+        Chronicle log = getLog(context, name);
+        FitResult res = new FitHelper(context).fit(input, meta)
+                .setListenerStream(output)
+                .report(log)
+                .run();
+
+        if (meta.getBoolean("printLog", true)) {
+            log.print(writer);
         }
 
-        List<FitStage> stages = buildStageList(meta);
-
-//        boolean printresult = meta().getBoolean("printresult", true);
-        if (stages.isEmpty()) {
-            throw new ContentException("No fit tasks defined");
-        }
-
-        FitState res = buildInitialState(context, meta, input, fm);
-        PrintWriter writer = new PrintWriter(buildActionOutput(context, name));
-
-        for (FitStage task : stages) {
-            Misc.checkThread();// check if action is cacneled
-            res = fm.runStage(res, task, writer, getReport(context, name));
-        }
-        getReport(context, name).print(writer);
         return res;
     }
 
-    private FitState buildInitialState(Context context, Laminate meta, Table input, FitManager fm) {
-        Model model;
-
-        ModelManager mm = fm.getModelManager();
-
-        if (meta.hasMeta(MODEL_KEY)) {
-            model = mm.buildModel(meta.getMeta(MODEL_KEY));
-        } else {
-            model = mm.buildModel(meta.getString(MODEL_KEY));
-        }
-
-        ParamSet params;
-
-        //updating parameters for each laminate 
-        params = new ParamSet();
-        meta.layersInverse().stream().forEach((layer) -> {
-            params.updateFrom(ParamSet.fromMeta(layer));
-        });
-
-        return new FitState(input, model, params);
-
-    }
-
-    private List<FitStage> buildStageList(Meta meta) {
-        List<FitStage> list = new ArrayList<>();
-        if (meta.hasMeta(STAGE_KEY)) { // Пробуем взять набор задач из аннотации данных или аннотации действия
-            meta.getMetaList(STAGE_KEY).stream().forEach((an) -> {
-                list.add(new FitStage(an));
-            });
-        } else { // если и там нет, то считаем что имеется всего одна задача и она зашифрована в а аннотациях
-            list.add(new FitStage(meta));
-
-        }
-
-        list.add(new FitStage("print"));
-        list.add(new FitStage("residuals"));
-
-        return list;
-    }
-
+//    @Override
+//    protected void afterAction(Context context, String name, FitResult res, Laminate meta) {
+//        super.afterAction(context, name, res, meta);
+////        context.getLog(name).print(new PrintWriter(buildActionOutput(context, name)));
+//    }
 }

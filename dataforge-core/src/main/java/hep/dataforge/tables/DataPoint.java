@@ -15,7 +15,6 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.NamedValueSet;
@@ -43,12 +42,6 @@ public interface DataPoint extends NamedValueSet, Serializable {
         }
         return res;
     }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    Value getValue(String name) throws NameNotFoundException;
 
     @Override
     default boolean hasValue(String path) {

@@ -17,7 +17,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.Table;
+import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
@@ -109,15 +109,15 @@ public class IOUtils {
 
     }
 
-    public static Table readColumnedData(String fileName, String... names) throws FileNotFoundException {
+    public static NavigablePointSource readColumnedData(String fileName, String... names) throws FileNotFoundException {
         return readColumnedData(new File(fileName), names);
     }
 
-    public static Table readColumnedData(File file, String... names) throws FileNotFoundException {
+    public static NavigablePointSource readColumnedData(File file, String... names) throws FileNotFoundException {
         return readColumnedData(new FileInputStream(file));
     }
 
-    public static Table readColumnedData(InputStream stream, String... names) {
+    public static NavigablePointSource readColumnedData(InputStream stream, String... names) {
         ColumnedDataReader reader;
         if (names.length == 0) {
             reader = new ColumnedDataReader(stream);

@@ -16,19 +16,42 @@ import org.jfree.data.xy.AbstractIntervalXYDataset;
 import java.util.List;
 
 /**
+ * Wrapper for plottable. Multiple xs are not allowed
+ *
  * @author Alexander Nozik
  */
 final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
-    private final Plottable plottable;
+    private Plottable plottable;
 
     private XYAdapter adapter;
     private List<DataPoint> data;
     private Meta query = Meta.empty();
+    private Integer index = 0;
+
 
     public JFCDataWrapper(Plottable plottable) {
         this.plottable = plottable;
         adapter = XYAdapter.from(plottable.getAdapter());
+    }
+
+    public Integer getIndex() {
+        return index;
+    }
+
+    public void setIndex(Integer index) {
+        this.index = index;
+    }
+
+    public Plottable getPlottable() {
+        return plottable;
+    }
+
+    public void setPlottable(Plottable plottable) {
+        if (this.plottable != plottable) {
+            this.plottable = plottable;
+            invalidateData();
+        }
     }
 
     private synchronized List<DataPoint> getData() {
@@ -102,107 +125,4 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     public void invalidateData() {
         this.data = null;
     }
-
-    //    private final Map<Integer, Number> xCache = new ConcurrentHashMap<>();
-//    private final Map<Integer, Number> yCache = new ConcurrentHashMap<>();
-//    private int cacheSize = -1;
-//    private boolean cacheXY;
-
-//    public JFCDataWrapper(XYPlottable plottable) {
-//        this.plottable = plottable;
-//        adapter = plottable.getAdapter();
-//        this.cacheXY = plottable.meta().getBoolean("JFreeChart.cache", false);
-//
-//        plottable.getConfig().addObserver((String name, Value oldItem, Value newItem) -> {
-//            switch (name) {
-//                case "JFreeChart.cache":
-//                    cacheXY = newItem.booleanValue();
-//                    clearCache();
-//                    break;
-//            }
-//        }, false);
-//    }
-//
-//    @Override
-//    public int getSeriesCount() {
-//        return adapter.getYCount();
-//    }
-//
-//    @Override
-//    public Comparable getSeriesKey(int i) {
-////        if (getSeriesCount() == 1) {
-////            return plottable.getName();
-////        } else {
-////            return Name.joinString(plottable.getName(), adapter.getY())
-////        }
-//        return plottable.getName();
-//    }
-//
-//    @Override
-//    public int getItemCount(int i) {
-//        if (cacheXY) {
-//            if (cacheSize < 0) {
-//                cacheSize = (int) plottable.dataStream().count();
-//            }
-//            return cacheSize;
-//        } else {
-//            return (int) plottable.dataStream().count();
-//        }
-//    }
-//
-//    @Override
-//    public synchronized Number getX(int i, int i1) {
-//        if (cacheXY) {
-//            if (xCache.containsKey(i1)) {
-//                return xCache.get(i1);
-//            } else {
-//                Number x = adapter.getX(plottable.getPoint(i1)).numberValue();
-//                xCache.put(i1, x);
-//                return x;
-//            }
-//        } else {
-//            return adapter.getX(plottable.getPoint(i1)).numberValue();
-//        }
-//    }
-//
-//    @Override
-//    public synchronized Number getY(int i, int i1) {
-//        if (cacheXY) {
-//            if (yCache.containsKey(i1)) {
-//                return yCache.get(i1);
-//            } else {
-//                Number y = adapter.getY(plottable.getPoint(i1)).numberValue();
-//                yCache.put(i1, y);
-//                return y;
-//            }
-//        } else {
-//            return adapter.getY(plottable.getPoint(i1)).numberValue();
-//        }
-//    }
-//
-//    @Override
-//    public Number getStartX(int i, int i1) {
-//        return adapter.getXLower(plottable.getPoint(i1));
-//    }
-//
-//    @Override
-//    public Number getEndX(int i, int i1) {
-//        return adapter.getXUpper(plottable.getPoint(i1));
-//    }
-//
-//    @Override
-//    public Number getStartY(int i, int i1) {
-//        return adapter.getYLower(plottable.getPoint(i1));
-//    }
-//
-//    @Override
-//    public Number getEndY(int i, int i1) {
-//        return adapter.getYUpper(plottable.getPoint(i1));
-//    }
-//
-//    public synchronized void clearCache() {
-//        this.xCache.clear();
-//        this.yCache.clear();
-//    }
-
 }

@@ -3,7 +3,6 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.Path;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -28,13 +27,13 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> getData(String name) {
-        return node.getData(name);
+    public Optional<Data<? extends T>> optData(String name) {
+        return node.optData(name);
     }
 
     @Override
-    public Optional<DataNode<? extends T>> getNode(String nodeName) {
-        return node.getNode(nodeName);
+    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+        return node.optNode(nodeName);
     }
 
     @Override
@@ -65,15 +64,5 @@ public class NodeWrapper<T> implements DataNode<T> {
     @Override
     public String getName() {
         return overrideName;
-    }
-
-    @Override
-    public Object provide(Path path) {
-        return node.provide(path);
-    }
-
-    @Override
-    public boolean provides(Path path) {
-        return node.provides(path);
     }
 }

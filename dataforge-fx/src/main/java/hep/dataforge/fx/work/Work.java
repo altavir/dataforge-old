@@ -130,7 +130,8 @@ public class Work implements Named {
 
     protected void setFuture(CompletableFuture<?> task) {
         if (this.futureProperty.get() != null && !getFuture().isDone()) {
-            throw new RuntimeException("The task for this process already set");
+            getManager().getContext().getLogger().error("The task for work {} already set",getName());
+            return;
         }
         getManager().onStarted(getName());
 
@@ -263,7 +264,7 @@ public class Work implements Named {
     }
 
     public double getProgress() {
-        return curProgress.get() + children.values().stream().mapToDouble(it -> it.getProgress()).sum();
+        return curProgress.get() + children.values().stream().mapToDouble(Work::getProgress).sum();
     }
 
     /**
@@ -276,7 +277,7 @@ public class Work implements Named {
     }
 
     public double getMaxProgress() {
-        return curMaxProgress.get() + children.values().stream().mapToDouble(it -> it.getMaxProgress()).sum();
+        return curMaxProgress.get() + children.values().stream().mapToDouble(Work::getMaxProgress).sum();
     }
 
     public void setMaxProgress(double maxProgress) {

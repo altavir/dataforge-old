@@ -28,6 +28,8 @@ import hep.dataforge.names.Named;
  * @author Alexander Nozik
  */
 public interface Task<R> extends Named, Described {
+    String TASK_TARGET = "task";
+
     /**
      * Build a model for this task
      *

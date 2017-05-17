@@ -5,7 +5,6 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.tables.*;
 import hep.dataforge.values.Value;
@@ -13,6 +12,7 @@ import hep.dataforge.values.Value;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * @author Alexander Nozik
@@ -20,34 +20,32 @@ import java.util.stream.Stream;
 public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
-        List<Plottable> plottables = new ArrayList<>(frame.plottables());
 
-        if (visibleOnly) {
-            plottables = plottables.stream().filter((p) -> p.meta().getBoolean("visible", true)).collect(Collectors.toList());
-        }
 
         Map<Value, MapPoint.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
 
-        for (Plottable pl : plottables) {
-            XYAdapter adapter = XYAdapter.from(pl.getAdapter());
+        StreamSupport.stream(frame.spliterator(),false)
+                .filter(pl-> !visibleOnly || pl.meta().getBoolean("visible", true) )
+                .forEach(pl->{
+                    XYAdapter adapter = XYAdapter.from(pl.getAdapter());
 
-            names.add(pl.getName());
-            pl.getData().stream().forEach(point -> {
-                Value x = adapter.getX(point);
-                MapPoint.Builder mdp;
-                if (points.containsKey(x)) {
-                    mdp = points.get(x);
-                } else {
-                    mdp = new MapPoint.Builder();
-                    mdp.putValue("x", x);
-                    points.put(x, mdp);
-                }
-                mdp.putValue(pl.getName(), adapter.getY(point));
-            });
+                    names.add(pl.getName());
+                    pl.getData().stream().forEach(point -> {
+                        Value x = adapter.getX(point);
+                        MapPoint.Builder mdp;
+                        if (points.containsKey(x)) {
+                            mdp = points.get(x);
+                        } else {
+                            mdp = new MapPoint.Builder();
+                            mdp.putValue("x", x);
+                            points.put(x, mdp);
+                        }
+                        mdp.putValue(pl.getName(), adapter.getY(point));
+                    });
+                });
 
-        }
         ListTable.Builder res = new ListTable.Builder(TableFormat.forNames(names));
         res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
@@ -70,7 +68,7 @@ public class PlotDataUtils {
         }).collect(Collectors.toList());
         plottables.forEach(pl-> pl.setData(points));
 
-        return new PlottableGroup<>(plottables);
+        return new PlottableGroup<PlottableData>(plottables);
     }
 
 }

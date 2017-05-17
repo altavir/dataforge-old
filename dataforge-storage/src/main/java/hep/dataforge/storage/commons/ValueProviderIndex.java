@@ -11,11 +11,9 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueUtils;
 
-import java.util.List;
 import java.util.NavigableSet;
 import java.util.TreeSet;
-import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -49,19 +47,15 @@ public class ValueProviderIndex<T extends ValueProvider> implements ValueIndex<T
     }
 
     @Override
-    public List<Supplier<T>> pull(Value value) throws StorageException {
+    public Stream<T> pull(Value value) throws StorageException {
         return StreamSupport.stream(iterable.spliterator(), true)
-                .filter(it -> it.getValue(valueName, defaultValue).equals(value))
-                .<Supplier<T>>map(it -> () -> it)
-                .collect(Collectors.toList());
+                .filter(it -> it.getValue(valueName, defaultValue).equals(value));
     }
 
     @Override
-    public List<Supplier<T>> pull(Value from, Value to) throws StorageException {
+    public Stream<T> pull(Value from, Value to) throws StorageException {
         return StreamSupport.stream(iterable.spliterator(), true)
-                .filter(it -> ValueUtils.isBetween(it.getValue(valueName, defaultValue), from, to))
-                .<Supplier<T>>map(it -> () -> it)
-                .collect(Collectors.toList());
+                .filter(it -> ValueUtils.isBetween(it.getValue(valueName, defaultValue), from, to));
     }
 
     @Override

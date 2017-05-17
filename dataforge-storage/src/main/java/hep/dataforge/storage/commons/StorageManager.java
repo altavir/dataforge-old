@@ -20,14 +20,24 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.filestorage.FileStorage;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
+import static hep.dataforge.storage.api.Storage.STORAGE_TARGET;
+
 /**
- *
  * @author darksnake
  */
-@PluginDef(name = "storage", group = "hep.dataforge", description = "Basic DataForge storage plugin")
+@PluginDef(name = "storage", group = "hep.dataforge", info = "Basic DataForge storage plugin")
 public class StorageManager extends BasicPlugin {
 
     /**
@@ -40,6 +50,8 @@ public class StorageManager extends BasicPlugin {
     public static StorageManager buildFrom(Context context) {
         return context.getFeature(StorageManager.class);
     }
+
+    private Map<Meta, Storage> storageCache = new HashMap<>();
 
     /**
      * Return blank file storage in current working directory
@@ -54,10 +66,19 @@ public class StorageManager extends BasicPlugin {
         }
     }
 
+    @Provides(STORAGE_TARGET)
+    public Optional<Storage> optStorage(String name) {
+        return storageCache.values().stream().filter(it -> Objects.equals(it.getName(), name)).findAny();
+    }
+
+    @ProvidesNames(STORAGE_TARGET)
+    public Stream<String> storageNames() {
+        return storageCache.values().stream().map(Named::getName).distinct();
+    }
+
     public Storage buildStorage(Meta config) {
-        Storage res = StorageFactory.buildStorage(getContext(), config);
-//        storageCache.add(res);
-        return res;
+        //FIXME fix duplicate names
+        return storageCache.computeIfAbsent(config, cfg -> StorageFactory.buildStorage(getContext(), cfg));
     }
 
 }

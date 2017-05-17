@@ -15,7 +15,6 @@
  */
 package hep.dataforge.storage.loaders;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.WrongTargetException;
@@ -29,18 +28,19 @@ import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static hep.dataforge.storage.commons.StorageMessageUtils.*;
 
 /**
- *
  * @author darksnake
  */
 public abstract class AbstractStateLoader extends AbstractLoader implements StateLoader {
@@ -69,16 +69,11 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
     }
 
     @Override
-    public Value getValue(String name) {
+    public Optional<Value> optValue(String name) {
         check();
-        if (states.containsKey(name)) {
-            return states.get(name);
-        }
-        if (defaults.containsKey(name)) {
-            return defaults.get(name);
-        } else {
-            throw new NameNotFoundException(name);
-        }
+        return Optionals.either(Optional.ofNullable(states.get(name)))
+                .or(() -> Optional.ofNullable(defaults.get(name)))
+                .opt();
     }
 
     protected final boolean isUpToDate() {
@@ -93,7 +88,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
 
     @Override
     public boolean isEmpty() {
-        check();        
+        check();
         return states.isEmpty();
     }
 
@@ -159,7 +154,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
 
     @Override
     public void setValue(String name, Value value) throws StorageException {
-        check();        
+        check();
         Value oldValue = states.get(name);
         if (oldValue == null) {
             oldValue = Value.getNull();

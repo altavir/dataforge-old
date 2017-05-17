@@ -15,7 +15,7 @@
  */
 package hep.dataforge.stat.likelihood;
 
-import hep.dataforge.io.reports.Logable;
+import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.IntervalEstimate;
@@ -43,7 +43,7 @@ public class BayesianManager{
      * Constant <code>DEFAULT_MAX_CALLS=10000</code>
      */
     public static final int DEFAULT_MAX_CALLS = 10000;
-    private final Logable log;
+    private final History log;
     private ConfidenceLimitCalculator previousCalc;
     private String previousPar;
     private FitState previousResult;
@@ -53,7 +53,7 @@ public class BayesianManager{
      * Constructor for BayesianManager.</p>
      * @param log
      */
-    public BayesianManager(Logable log) {
+    public BayesianManager(History log) {
         this.log = log;
     }
 
@@ -91,8 +91,8 @@ public class BayesianManager{
         } else {
             UnivariateFunction function = this.calculateLikelihood(parname, state, freePars, numCalls);
             Param par = state.getParameters().getByName(parname);
-            Double a = max(par.value() - 4 * par.getErr(), par.getLowerBound());
-            Double b = min(par.value() + 4 * par.getErr(), par.getUpperBound());
+            Double a = max(par.getValue() - 4 * par.getErr(), par.getLowerBound());
+            Double b = min(par.getValue() + 4 * par.getErr(), par.getUpperBound());
             ConfidenceLimitCalculator calculator = new ConfidenceLimitCalculator(function, a, b);
             // На случай, если нам нужно сделать несколько действий и не пересчитывать все
             previousCalc = calculator;

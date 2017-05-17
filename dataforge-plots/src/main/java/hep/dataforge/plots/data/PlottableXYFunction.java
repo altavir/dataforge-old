@@ -46,7 +46,7 @@ public class PlottableXYFunction extends XYPlottable {
     }
 
     private final NavigableMap<Double, Double> cache = new TreeMap<>();
-    private final ObjectProperty<Function<Double, Double>> function = new SimpleObjectProperty();
+    private final ObjectProperty<Function<Double, Double>> function = new SimpleObjectProperty<>();
     private final DoubleProperty lo = new SimpleDoubleProperty();
     private final DoubleProperty hi = new SimpleDoubleProperty();
     /**

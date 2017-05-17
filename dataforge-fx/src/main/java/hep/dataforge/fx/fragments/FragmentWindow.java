@@ -24,18 +24,20 @@ import java.util.function.Supplier;
  */
 public class FragmentWindow implements AutoCloseable {
 
-    private final Fragment fragment;
+    //TODO allow node and node property instead of fragment
+
+    private final FXFragment fragment;
     private Stage stage;
     private Supplier<Window> owner;
     private Runnable onShow;
     private Runnable onHide;
 
-    public FragmentWindow(Fragment fragment) {
+    public FragmentWindow(FXFragment fragment) {
         this.fragment = fragment;
         owner = null;
     }
 
-    public FragmentWindow(Fragment fragment, Window owner) {
+    public FragmentWindow(FXFragment fragment, Window owner) {
         this.fragment = fragment;
         this.owner = () -> owner;
     }
@@ -56,7 +58,7 @@ public class FragmentWindow implements AutoCloseable {
      */
     public void bindTo(ObservableBooleanValue boolVal) {
         boolVal.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (newValue && newValue != getStage().isShowing()) {
+            if (newValue != getStage().isShowing()) {
                 show();
             } else {
                 hide();
@@ -107,7 +109,7 @@ public class FragmentWindow implements AutoCloseable {
 
     public Stage getStage() {
         if (stage == null) {
-            stage = buildStage(fragment.getRoot(), fragment.getTitle(), fragment.getPreferedWidth(), fragment.getPreferedHeight());
+            stage = buildStage(fragment.getFXNode(), fragment.getTitle(), fragment.getPreferredWidth(), fragment.getPreferredHeight());
             stage.setOnShown((WindowEvent event) -> {
                 onShow();
             });

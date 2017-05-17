@@ -49,7 +49,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
         super(name);
     }
 
-    public Configuration(){
+    public Configuration() {
         super();
     }
 
@@ -106,7 +106,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      *
      * @param observer
      * @param strongReference if true, then configuration prevents observer from
-     * being recycled by GC
+     *                        being recycled by GC
      */
     public void addObserver(ConfigChangeListener observer, boolean strongReference) {
         this.observers.add(observer, strongReference);
@@ -122,6 +122,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
     }
 
     //PENDING add value observers inheriting value class by wrapper
+
     /**
      * Remove an observer from this configuration
      *
@@ -145,10 +146,10 @@ public class Configuration extends MutableMetaNode<Configuration> {
             annotation.getNodeNames().stream().forEach((elementName) -> {
                 setNode(elementName,
                         annotation
-                        .getMetaList(elementName)
-                        .stream()
-                        .map((el) -> new Configuration(el))
-                        .collect(Collectors.toList())
+                                .getMetaList(elementName)
+                                .stream()
+                                .map((el) -> new Configuration(el))
+                                .collect(Collectors.toList())
                 );
             });
         }
@@ -173,13 +174,11 @@ public class Configuration extends MutableMetaNode<Configuration> {
      * @return
      */
     public Configuration requestNode(String name) {
-        if (hasMeta(name)) {
-            return getMeta(name);
-        } else {
+        return optMeta(name).orElseGet(() -> {
             Configuration child = createChildNode(name);
             super.attachNode(child);
             return child;
-        }
+        });
     }
 
     @Override

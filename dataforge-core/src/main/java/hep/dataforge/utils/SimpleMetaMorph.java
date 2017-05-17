@@ -1,7 +1,7 @@
 package hep.dataforge.utils;
 
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 
 /**
  * A simple metamorph implementation based on {@link BaseMetaHolder}.
@@ -14,6 +14,7 @@ public class SimpleMetaMorph extends BaseMetaHolder implements MetaMorph {
     }
 
     public SimpleMetaMorph() {
+        super();
     }
 
     @Override
@@ -33,6 +34,6 @@ public class SimpleMetaMorph extends BaseMetaHolder implements MetaMorph {
 
     @Override
     public boolean equals(Object obj) {
-        return getClass().equals(obj.getClass()) && ((Annotated) obj).meta().equals(meta());
+        return getClass().equals(obj.getClass()) && ((Metoid) obj).meta().equals(meta());
     }
 }

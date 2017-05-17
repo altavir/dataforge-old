@@ -5,21 +5,25 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.cache.CachePlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 /**
- * A basic non-caching workspace
+ * A basic data caching workspace
  *
  * @author Alexander Nozik
  */
 public class BasicWorkspace extends AbstractWorkspace {
 
-    DataTree.Builder data = DataTree.builder();
+    private DataTree.Builder data = DataTree.builder();
+    private transient CachePlugin cache;
 
+    @NotNull
     public static Builder builder() {
         return new Builder();
     }
@@ -29,15 +33,43 @@ public class BasicWorkspace extends AbstractWorkspace {
         return data.build();
     }
 
-    //    @Override
-//    public <T> DataNode<T> updateStage(String stage, DataNode<T> data) {
-//        if (!this.stages.containsKey(stage)) {
-//            this.stages.put(stage, DataTree.builder().setName(stage));
-//        }
-//        DataTree.Builder stageBuilder = this.stages.get(stage);
-//        stageBuilder.putNode(data);
-//        return stageBuilder.build();
-//    }
+    protected boolean cacheEnabled() {
+        return true;
+    }
+
+    public DataNode<?> runTask(TaskModel model) {
+        //Cache result if cache is available and caching is not blocked
+        if (cacheEnabled() && model.meta().getBoolean("cache.enabled", true)) {
+            Task<?> task = getTask(model.getName());
+            return getCache().cacheNode(model.getName(), model.getIdentity(), task.run(model));
+        } else {
+            return super.runTask(model);
+        }
+    }
+
+    protected synchronized CachePlugin getCache() {
+        if (cache == null || cache.getContext() != this.getContext()) {
+            cache = getContext().optFeature(CachePlugin.class).orElseGet(() -> {
+                CachePlugin pl = new CachePlugin();
+                getContext().pluginManager().load(pl);
+                return pl;
+            });
+        }
+        return cache;
+    }
+
+    @Override
+    public void clean() {
+        getContext().getLogger().info("Cleaning up cache...");
+        invalidateCache();
+    }
+
+    public void invalidateCache() {
+        if (cacheEnabled()) {
+            getCache().invalidate();
+        }
+    }
+
 
     public static class Builder implements Workspace.Builder<Builder> {
 
@@ -65,7 +97,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
         @Override
         public Builder loadData(String as, Data data) {
-            if (w.getData().provides(as)) {
+            if (w.getData().optNode(as).isPresent()) {
                 getContext().getLogger().warn("Overriding non-empty data during workspace data fill");
             }
             getData().putData(as, data);
@@ -92,7 +124,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadMeta(String name, Meta meta) {
+        public Builder target(String name, Meta meta) {
             w.targets.put(name, meta);
             return self();
         }

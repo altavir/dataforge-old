@@ -7,10 +7,11 @@ package hep.dataforge.data;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.goals.GoalGroup;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
 import hep.dataforge.utils.GenericBuilder;
 
 import java.util.Collection;
@@ -28,7 +29,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Annotated, Provider {
+public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Metoid, Provider {
 
     String DATA_TARGET = "data";
     String NODE_TARGET = "node";
@@ -65,10 +66,12 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param name
      * @return
      */
-    Optional<Data<? extends T>> getData(String name);
+    @Provides(DATA_TARGET)
+    Optional<Data<? extends T>> optData(String name);
 
+    @SuppressWarnings("unchecked")
     default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
-        Data<? extends T> data = getData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
+        Data<? extends T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
         if (type.isAssignableFrom(data.type())) {
             return (Data<R>) data;
         } else {
@@ -83,7 +86,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default T compute(String name) {
-        return getData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
+        return optData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
     }
 
     /**
@@ -93,7 +96,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @return
      */
     default Data<? extends T> getData() {
-        return getData(DEFAULT_DATA_FRAGMENT_NAME)
+        return optData(DEFAULT_DATA_FRAGMENT_NAME)
                 .orElse(dataStream(true).findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
     }
 
@@ -106,7 +109,12 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param nodeName
      * @return
      */
-    Optional<DataNode<? extends T>> getNode(String nodeName);
+    @Provides(NODE_TARGET)
+    Optional<DataNode<? extends T>> optNode(String nodeName);
+
+    default DataNode<? extends T> getNode(String nodeName) {
+        return optNode(nodeName).get();
+    }
 
     /**
      * Get the node assuming it have specific type with type check
@@ -121,7 +129,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         if (nodeName.isEmpty()) {
             node = this;
         } else {
-            node = getNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
+            node = optNode(nodeName).orElseThrow(() -> new NameNotFoundException(nodeName));
         }
 
         return node.checked(type);
@@ -154,6 +162,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param type
      * @param consumer
      */
+    @SuppressWarnings("unchecked")
     default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
         dataStream().filter(d -> type.isAssignableFrom(d.type()))
                 .forEach(d -> consumer.accept((NamedData<R>) d));
@@ -255,6 +264,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
      * @param <R>
      * @return
      */
+    @SuppressWarnings("unchecked")
     default <R> DataNode<R> checked(Class<R> checkType) {
         if (this.type().equals(checkType)) {
             return (DataNode<R>) this;
@@ -268,7 +278,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
         return dataStream().iterator();
     }
 
-    interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Annotated {
+    interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Metoid {
 
         Class<T> type();
 
@@ -280,6 +290,10 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, An
 
         default B putData(String key, Data<? extends T> data) {
             return putData(key, data, false);
+        }
+
+        default B putData(String key, T data, Meta meta) {
+            return putData(key, Data.buildStatic(data, meta));
         }
 
         B putNode(String as, DataNode<? extends T> node);

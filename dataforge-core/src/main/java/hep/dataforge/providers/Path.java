@@ -38,14 +38,15 @@ public interface Path {
             return p.head();
         }
     }
-    
-    static Path of(String path, String target){
-                SegmentedPath p = new SegmentedPath(path);
-        if (p.hasTail()) {
-            return p;
-        } else {
-            return p.head();
-        }
+
+    /**
+     * Create a path with given target override (even if it is provided by the path itself)
+     * @param target
+     * @param path
+     * @return
+     */
+    static Path of(String target, String path) {
+        return of(path).withTarget(target);
     }
 
     /**
@@ -79,11 +80,12 @@ public interface Path {
      * @return a {@link java.lang.String} object.
      */
     String target();
-    
+
     /**
      * Return new path with different target
-     * @return 
+     *
+     * @return
      */
-    Path setTarget(String target);
+    Path withTarget(String target);
 
 }

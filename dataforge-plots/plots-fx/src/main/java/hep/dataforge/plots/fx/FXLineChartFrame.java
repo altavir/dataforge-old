@@ -22,11 +22,11 @@ import hep.dataforge.plots.data.XYPlottable;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import javafx.embed.swing.SwingFXUtils;
+import javafx.scene.Node;
 import javafx.scene.SnapshotResult;
 import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
-import javafx.scene.layout.AnchorPane;
 import javafx.util.Callback;
 import org.slf4j.LoggerFactory;
 
@@ -113,12 +113,8 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
     }
 
     @Override
-    public void display(AnchorPane container) {
-        AnchorPane.setTopAnchor(chart, 0d);
-        AnchorPane.setBottomAnchor(chart, 0d);
-        AnchorPane.setRightAnchor(chart, 0d);
-        AnchorPane.setLeftAnchor(chart, 0d);
-        container.getChildren().add(chart);
+    public Node getFXNode() {
+        return chart;
     }
 
     @Override

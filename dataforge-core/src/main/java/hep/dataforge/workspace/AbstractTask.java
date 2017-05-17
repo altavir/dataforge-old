@@ -18,8 +18,6 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 
 /**
@@ -32,28 +30,23 @@ public abstract class AbstractTask<R> implements Task {
         //validate model
         validate(model);
 
-//        Work work = getWork(model, "");
-//
-//        work.setTitle(getName());
-//        work.setStatus("Gathering...");
-
+        // gather data
         DataNode input = TaskUtils.gather(model).build();
-//        work.setStatus("Evaluating...");
 
+        //execute
         DataNode<R> output = run(model, input);
 
-        model.outs().forEach(reporter -> output.handle(reporter.getExecutor(), reporter));
-
-//        work.setStatus("Complete");
+        //handle result
+        output.handle(model.getContext().singleThreadExecutor(), this::handle);
 
         return output;
     }
 
-    protected abstract DataNode<R> run(TaskModel model, DataNode<?> data);
+    protected void handle(DataNode<R> output) {
+        //do nothing
+    }
 
-//    protected Work getWork(TaskModel model, String name) {
-//        return model.getContext().getWorkManager().getWork(Name.joinString(getName(), Integer.toUnsignedString(model.hashCode()), name));
-//    }
+    protected abstract DataNode<R> run(TaskModel model, DataNode<?> data);
 
 
     @Override
@@ -81,17 +74,5 @@ public abstract class AbstractTask<R> implements Task {
     @Override
     public TaskModel build(Workspace workspace, Meta taskConfig) {
         return transformModel(TaskUtils.createDefaultModel(workspace, getName(), taskConfig));
-    }
-
-    public Logger getLogger(TaskModel model) {
-        return model.getContext().getLogger();
-    }
-
-    /**
-     * Get default logger for this task
-     * @return
-     */
-    public Logger getLogger(){
-        return LoggerFactory.getLogger(getName());
     }
 }

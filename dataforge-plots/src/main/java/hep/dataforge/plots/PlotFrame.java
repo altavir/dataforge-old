@@ -18,10 +18,10 @@ package hep.dataforge.plots;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
-import hep.dataforge.meta.Meta;
 import javafx.collections.ObservableList;
 
-import java.io.OutputStream;
+import java.util.Collection;
+import java.util.Optional;
 
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
@@ -29,18 +29,16 @@ import java.io.OutputStream;
  * @author Alexander Nozik
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
+public interface PlotFrame extends PlotStateListener, Configurable, Wrappable, Iterable<Plottable> {
 
     /**
-     * Заменить серию с данным именем и перерисовать соответствующий график или
-     * добавить новую серию.
-     *
+     * Add or replace registered plottable
      * @param plotable
      */
     void add(Plottable plotable);
     
     /**
-     * Add all plottables to the frame
+     * Add (replace) all plottables to the frame
      * @param plottables 
      */
     default void addAll(Iterable<? extends Plottable> plottables){
@@ -48,6 +46,12 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
             add(pl);
         }
     }
+
+    /**
+     * Update all plottables. Remove the ones not present in a new set
+     * @param plottables
+     */
+    void setAll(Collection<? extends Plottable> plottables);
 
     /**
      * Remove plottable with given name
@@ -62,28 +66,20 @@ public interface PlotFrame extends PlotStateListener, Configurable, Wrappable {
     void clear();
 
     /**
-     * Возвращает загруженную серию, если она есть. Иначе возвращает null
-     *
+     * Opt the plottable with the given name
      * @param name
      * @return
      */
-    Plottable get(String name);
+    Optional<Plottable> opt(String name);
+
+    default Plottable get(String name){
+        return opt(name).get();
+    }
 
     /**
-     * List of all plottables
-     *
+     * Immutable observable list of plottables
      * @return
      */
     ObservableList<Plottable> plottables();
 
-    
-    /**
-     * Generate a snapshot
-     * PENDING move to FX?
-     * @param config
-     */
-    @ValueDef(name = "width", type = "NUMBER", def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", type = "NUMBER", def = "600", info = "The height of the snapshot in pixels")
-    void snapshot(OutputStream stream, Meta config);
-    
 }

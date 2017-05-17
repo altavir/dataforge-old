@@ -6,10 +6,11 @@
 package hep.dataforge.description;
 
 import hep.dataforge.io.MetaFileReader;
-import hep.dataforge.meta.Annotated;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
+import hep.dataforge.names.Name;
 import hep.dataforge.providers.Path;
 import hep.dataforge.utils.Misc;
 import hep.dataforge.values.Value;
@@ -21,10 +22,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Tools to work with descriptors
@@ -122,8 +120,11 @@ public class DescriptorUtils {
             //TODO replace by map to avoid multiple node parsing
             boolean exists = res.hasMeta("node") && res.getMetaList("node").stream()
                     .anyMatch(mb -> mb.getString("name").equals(nodeDef.name()));
-            //avoiding dublicate nodes
-            if (!exists) {
+            //warning on duplicate nodes
+            if (exists) {
+                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.name());
+            }else {
+
                 MetaBuilder nodeMeta = new MetaBuilder("node")
                         .putValue("name", nodeDef.name())
                         .putValue("info", nodeDef.info())
@@ -141,21 +142,59 @@ public class DescriptorUtils {
                     nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
                 }
 
-                res.putNode(nodeMeta);
+                putDescription(res, nodeMeta);
             }
+
         }
 
-        //FIXME forbid non-unique values and Nodes
         for (ValueDef valueDef : listAnnotations(element, ValueDef.class, true)) {
             boolean exists = res.hasMeta("value") && res.getMetaList("value").stream()
                     .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
-            if (!exists) {
-                res.putNode(ValueDescriptor.build(valueDef).meta());
+            if (exists) {
+                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate value with name {} in descriptor", valueDef.name());
+            } else {
+                putDescription(res, ValueDescriptor.build(valueDef).meta());
             }
         }
 
         return res;
     }
+
+    /**
+     * Put a node or value description inside existing meta builder creating intermediate nodes
+     *
+     * @param builder
+     * @param meta
+     */
+    private static void putDescription(MetaBuilder builder, Meta meta) {
+        Name nodeName = Name.of(meta.getString("name"));
+        MetaBuilder currentNode = builder;
+        while (nodeName.length() > 1) {
+            String childName = nodeName.getFirst().toString();
+            MetaBuilder finalCurrentNode = currentNode;
+            currentNode = finalCurrentNode.getMetaList("node").stream()
+                    .filter(node -> Objects.equals(node.getString("name"), childName))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        MetaBuilder newChild = new MetaBuilder("node").setValue("name", childName);
+                        finalCurrentNode.attachNode(newChild);
+                        return newChild;
+                    });
+            nodeName = nodeName.cutFirst();
+        }
+
+        String childName = nodeName.toString();
+        MetaBuilder finalCurrentNode = currentNode;
+        currentNode.getMetaList(meta.getName()).stream()
+                .filter(node -> Objects.equals(node.getString("name"), childName))
+                .findFirst()
+                .orElseGet(() -> {
+                    MetaBuilder newChild = new MetaBuilder(meta.getName()).setValue("name", childName);
+                    finalCurrentNode.attachNode(newChild);
+                    return newChild;
+                }).update(meta).setValue("name", childName);
+    }
+
 
     /**
      * Get the value using descriptor as a default
@@ -179,7 +218,7 @@ public class DescriptorUtils {
      * @param obj
      * @return
      */
-    public static Value extractValue(String name, Annotated obj) {
+    public static Value extractValue(String name, Metoid obj) {
         return extractValue(name, obj.meta(), buildDescriptor(obj));
     }
 
@@ -213,7 +252,7 @@ public class DescriptorUtils {
                         return method;
                     }
                 }
-                LoggerFactory.getLogger(DescriptorUtils.class).error("Annotated method not found by given path: " + path);
+                LoggerFactory.getLogger(DescriptorUtils.class).error("Metoid method not found by given path: " + path);
                 return null;
             } catch (ClassNotFoundException ex) {
                 LoggerFactory.getLogger(DescriptorUtils.class).error("Class not found by given path: " + path, ex);
@@ -234,10 +273,10 @@ public class DescriptorUtils {
                 Class sourceClass = (Class) source;
                 Class superClass = sourceClass.getSuperclass();
                 if (superClass != null) {
-                    res.addAll(listAnnotations(superClass, type, false));
+                    res.addAll(listAnnotations(superClass, type, true));
                 }
                 for (Class cl : sourceClass.getInterfaces()) {
-                    res.addAll(listAnnotations(cl, type, false));
+                    res.addAll(listAnnotations(cl, type, true));
                 }
             }
         } else {

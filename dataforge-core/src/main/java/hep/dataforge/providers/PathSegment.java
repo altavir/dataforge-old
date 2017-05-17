@@ -106,7 +106,7 @@ class PathSegment implements Path {
     }
 
     @Override
-    public Path setTarget(String target) {
+    public Path withTarget(String target) {
         return new PathSegment(name, target);
     }
     

@@ -1,0 +1,8 @@
+apply plugin: 'groovy'
+
+description = 'The GRIND (GRoovy INteractive Dataforge) environment'
+
+dependencies {
+    compile project(':dataforge-plots')
+    compile 'org.codehaus.groovy:groovy-all:2.4.+'
+}

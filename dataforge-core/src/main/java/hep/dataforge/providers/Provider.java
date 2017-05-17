@@ -15,73 +15,99 @@
  */
 package hep.dataforge.providers;
 
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
+ * A marker utility interface for providers.
  *
  * @author Alexander Nozik
  */
 public interface Provider {
 
-    /**
-     * Provides by path generated from string
-     *
-     * @param path
-     * @return
-     */
-    default Object provide(String path) {
-        return this.provide(Path.of(path));
+
+    default Optional<?> provide(Path path) {
+        return Providers.provide(this, path);
     }
 
     /**
-     * Type checked provide
+     * Stream of available names with given target. Only top level names are listed, no chain path.
      *
-     * @param path
-     * @param type
-     * @param <T>
+     * @param target
      * @return
      */
-    default <T> T provide(String path, Class<T> type) {
-        return provide(Path.of(path), type);
-    }
-
-    /**
-     * Type checked provide
-     *
-     * @param <T>
-     * @param path
-     * @param type
-     * @return
-     */
-    default <T> T provide(Path path, Class<T> type) {
-        Object obj = provide(path);
-        if (type.isInstance(obj)) {
-            return (T) obj;
-        } else {
-            throw new IllegalStateException(
-                    String.format("Error in type checked provide method. %s object expected, but %s provided", 
-                            type.getName(), obj.getClass().getName())
-            );
+    default Stream<String> listContent(String target) {
+        if (target.isEmpty()) {
+            target = defaultTarget();
         }
-    }
-
-    default boolean provides(String path) {
-        return this.provides(Path.of(path));
+        return Providers.listContent(this, target);
     }
 
     /**
-     * Return an object with given path (recurrent chain paths included)
+     * Default target for this provider
      *
-     * @param path a {@link java.lang.String} object in the format of Path
-     * @return a T object.
+     * @return
      */
-    Object provide(Path path);
+    default String defaultTarget() {
+        return "";
+    }
 
     /**
-     * <p>
-     * provides.</p>
+     * Default target for next chain segment
+     *
+     * @return
+     */
+    default String defaultChainTarget() {
+        return "";
+    }
+
+
+    //utils
+
+
+    /**
+     * Type checked provide
      *
      * @param path
-     * @return a boolean.
+     * @param type
+     * @param <T>
+     * @return
      */
-    boolean provides(Path path);
+    default <T> Optional<T> provide(String path, Class<T> type) {
+        return provide(Path.of(path)).map(it -> type.cast(it));
+    }
+
+    default <T> Optional<T> provide(Path path, Class<T> type) {
+        return provide(path).map(it -> type.cast(it));
+    }
+//
+//    /**
+//     * Type checked provide
+//     *
+//     * @param <T>
+//     * @param path
+//     * @param type
+//     * @return
+//     */
+//    default <T> T provide(Path path, Class<T> type) {
+//        return type.cast(provide(path));
+//    }
+//
+//    default boolean provides(String path) {
+//        return this.provides(Path.of(path));
+//    }
+//
+//
+//    /**
+//     * Provides by path generated from string
+//     *
+//     * @param path
+//     * @return
+//     */
+//    default Object provide(String path) {
+//        return this.provide(Path.of(path));
+//    }
+//
+
 
 }

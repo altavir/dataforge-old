@@ -1,7 +1,0 @@
-description "osgi framework for easy plugin delivery"
-
-dependencies{
-    // https://mvnrepository.com/artifact/org.apache.felix/org.apache.felix.framework
-    compile group: 'org.apache.felix', name: 'org.apache.felix.framework', version: '5.6.1'
-    compile project(':dataforge-core')
-}

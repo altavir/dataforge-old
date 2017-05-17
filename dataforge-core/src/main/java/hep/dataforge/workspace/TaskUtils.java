@@ -11,6 +11,7 @@ import org.jetbrains.annotations.NotNull;
 
 /**
  * Some utility methods to work with tasks
+ *
  * @author Alexander Nozik
  */
 public class TaskUtils {
@@ -66,6 +67,24 @@ public class TaskUtils {
         });
         return builder;
     }
+
+//    /**
+//     * Search for a Task in context plugins and up the parent plugin. Throw an exception if action not found.
+//     *
+//     * @param context
+//     * @return
+//     */
+//    public static Task<?> buildTask(Context context, String taskName) {
+//        Path path = Path.of(taskName, Task.TASK_TARGET);
+//        return context.pluginManager().stream(true)
+//                .map(plugin -> plugin.provide(path, Task.class))
+//                .filter(Optional::isPresent)
+//                .map(Optional::get)
+//                .findFirst()
+//                .orElseThrow(() -> new NameNotFoundException(taskName));
+//
+//    }
+
 
 //    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
 //        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");

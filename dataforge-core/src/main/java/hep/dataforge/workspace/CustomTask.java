@@ -87,7 +87,7 @@ public class CustomTask extends AbstractTask<Object> {
     }
 
     public CustomTask dependsOn(String taskName) {
-        return transformModel(model -> model.dependsOn(taskName, model.meta().getNodeOrEmpty(taskName)));
+        return transformModel(model -> model.dependsOn(taskName, model.meta().getMetaOrEmpty(taskName)));
     }
 
     public CustomTask dependsOnData(String dataMask, String as) {
@@ -140,7 +140,7 @@ public class CustomTask extends AbstractTask<Object> {
      * @return
      */
     public CustomTask then(Action action) {
-        return then(action, model -> model.meta().getNodeOrEmpty(action.getName()));
+        return then(action, model -> model.meta().getMetaOrEmpty(action.getName()));
     }
 
 //    public CustomTask then(Class<Action> actionType, Function<TaskModel, Meta> actionMetaGenerator) {
