@@ -25,7 +25,7 @@ public class PortFactory {
      * @return
      * @throws ControlException 
      */
-    public static PortHandler getdPort(String portName) throws ControlException {
+    public synchronized static PortHandler getPort(String portName) throws ControlException {
         String protocol;
         String addres;
         int port;

@@ -44,12 +44,6 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * The default end phrase condition
      */
     private Predicate<String> phraseCondition = defaultPhraseCondition();
-//    private final String portName;
-
-//    public PortHandler(String portName) {
-//        this.portName = portName;
-//    }
-
 
     public PortHandler(Meta meta) {
         super(meta);
@@ -154,12 +148,12 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * ignores holder lock.
      *
      * @param message
-     * @param responseCondition
      * @param timeout
+     * @param responseCondition
      * @return
      * @throws hep.dataforge.exceptions.PortException
      */
-    public final synchronized String sendAndWait(String message, Predicate<String> responseCondition, int timeout)
+    public final synchronized String sendAndWait(String message, int timeout, Predicate<String> responseCondition)
             throws PortException {
         if (!isOpen()) {
             open();
@@ -180,7 +174,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * @throws PortException
      */
     public final synchronized String sendAndWait(String message, int timeout) throws PortException {
-        return sendAndWait(message, null, timeout);
+        return sendAndWait(message, timeout, null);
     }
 
     /**

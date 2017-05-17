@@ -30,16 +30,6 @@ public abstract class PortSensor<T> extends Sensor<T> {
     public static final String PORT_NAME_KEY = "port";
 
     private PortHandler handler;
-//    private final String portName;
-
-//    public PortSensor(String portName) {
-//        this.portName = portName;
-//    }
-
-//    public PortSensor(PortHandler handler) {
-//        this.handler = handler;
-//        portName = handler.getPortId();
-//    }
 
     protected final void setHandler(PortHandler handler) {
         this.handler = handler;
@@ -55,7 +45,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
 
     protected PortHandler buildHandler(String portName) throws ControlException {
         getLogger().info("Connecting to port {}", portName);
-        return PortFactory.getdPort(portName);
+        return PortFactory.getPort(portName);
     }
 
     @Override
