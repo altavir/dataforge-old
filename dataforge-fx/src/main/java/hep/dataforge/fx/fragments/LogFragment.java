@@ -125,6 +125,7 @@ public class LogFragment extends FXFragment implements AutoCloseable {
     /**
      * Redirect copy of std streams to this console window
      */
+    @Deprecated
     public void hookStd() {
         if (!stdHooked) {
 //            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_OUT)));
@@ -138,6 +139,7 @@ public class LogFragment extends FXFragment implements AutoCloseable {
     /**
      * Restore default std streams
      */
+    @Deprecated
     public void restoreStd() {
         if (stdHooked) {
             System.setOut(STD_OUT);
@@ -148,7 +150,6 @@ public class LogFragment extends FXFragment implements AutoCloseable {
 
     @Override
     public void close() {
-        restoreStd();
         logAppender.stop();
     }
 
