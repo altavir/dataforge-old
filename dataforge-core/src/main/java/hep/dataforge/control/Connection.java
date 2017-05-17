@@ -3,10 +3,11 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.control.connections;
+package hep.dataforge.control;
 
 /**
- * The connection between devices or other control objects
+ * A connection which could be applied to object that could receive connection.
+ * Usually connection does not invoke {@code open} method itself, but delegates it to {@code Connectable}
  *
  * @author Alexander Nozik
  */

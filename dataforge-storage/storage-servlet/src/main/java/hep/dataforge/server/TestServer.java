@@ -10,7 +10,6 @@ import hep.dataforge.context.Global;
 import hep.dataforge.storage.commons.StorageManager;
 
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 
 /**
@@ -31,7 +30,7 @@ public class TestServer {
 
         String path = "D:/temp/test";
         System.out.println("Starting test numass storage servlet in " + path);
-        serverManager.addStorageHandler("storage", new File(path));
+        serverManager.addFileStorage("storage", path);
 
         serverManager.startSetver();
 

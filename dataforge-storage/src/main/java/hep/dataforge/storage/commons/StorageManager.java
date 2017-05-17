@@ -60,7 +60,7 @@ public class StorageManager extends BasicPlugin {
      */
     public Storage getDefaultStorage() {
         try {
-            return FileStorage.in(getContext().io().getRootDirectory(), null);
+            return new FileStorage(getContext(), Meta.empty());
         } catch (StorageException ex) {
             throw new RuntimeException("Can't initialize default storage", ex);
         }

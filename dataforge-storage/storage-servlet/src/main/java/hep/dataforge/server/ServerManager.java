@@ -6,14 +6,13 @@ import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.filestorage.FileStorage;
-import org.apache.commons.vfs2.FileObject;
+import hep.dataforge.storage.filestorage.FileStorageFactory;
 import ratpack.handling.Chain;
 import ratpack.handling.Handler;
 import ratpack.server.RatpackServer;
 import ratpack.server.RatpackServerSpec;
 import ratpack.server.ServerConfigBuilder;
 
-import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
@@ -126,16 +125,14 @@ public class ServerManager extends BasicPlugin {
         paths.put(object, path);
     }
 
-    public void addStorageHandler(String path, Storage storage) {
+    public void addStorage(String path, Storage storage) {
         addObject(path, storage, StorageRatpackHandler::new);
     }
 
-    public void addStorageHandler(String path, File file) {
-        addStorageHandler(path, FileStorage.connect(file, true, true));
-    }
-
-    public void addStorageHandler(String path, FileObject file) {
-        addStorageHandler(path, FileStorage.connect(file, true, true));
+    public void addFileStorage(String path, String uri) {
+        addStorage(path, new FileStorage(getContext(),
+                FileStorageFactory.buildStorageMeta(uri, true, true))
+        );
     }
 
     public void stopServer() {

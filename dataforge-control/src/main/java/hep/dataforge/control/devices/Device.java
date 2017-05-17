@@ -16,15 +16,12 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.control.Connectable;
 import hep.dataforge.control.ControlUtils;
-import hep.dataforge.control.connections.Connection;
-import hep.dataforge.control.devices.annotations.RoleDef;
-import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
@@ -63,7 +60,7 @@ import java.util.concurrent.Future;
  * @author Alexander Nozik
  */
 @StateDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized")
-public interface Device extends Metoid, Configurable, Encapsulated, Named, Responder {
+public interface Device extends Connectable, Metoid, Encapsulated, Named, Responder {
 
     String INITIALIZED_STATE = "init";
 
@@ -131,14 +128,6 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
     void shutdown() throws ControlException;
 
     /**
-     * Register connection for this device
-     *
-     * @param connection
-     * @param roles      a set of roles for this connection
-     */
-    void connect(Connection connection, String... roles);
-
-    /**
      * A list of all available states
      *
      * @return
@@ -157,14 +146,7 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
         return stateDefs().stream().anyMatch(stateDef -> stateDef.name().equals(stateName));
     }
 
-    /**
-     * A list of all available roles
-     *
-     * @return
-     */
-    default List<RoleDef> roleDefs() {
-        return DescriptorUtils.listAnnotations(this.getClass(), RoleDef.class, true);
-    }
+
 
     /**
      * Find a state definition for given name. Null if not found.
@@ -174,26 +156,6 @@ public interface Device extends Metoid, Configurable, Encapsulated, Named, Respo
      */
     default Optional<StateDef> getStateDef(String name) {
         return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst();
-    }
-
-    /**
-     * A quick way to find if device accepts connection with given role
-     *
-     * @param name
-     * @return
-     */
-    default boolean acceptsRole(String name) {
-        return roleDefs().stream().anyMatch((roleDef) -> roleDef.name().equals(name));
-    }
-
-    /**
-     * Find a role definition for given name. Null if not found.
-     *
-     * @param name
-     * @return
-     */
-    default Optional<RoleDef> getRoleDef(String name) {
-        return roleDefs().stream().filter((roleDef) -> roleDef.name().equals(name)).findFirst();
     }
 
     @Override

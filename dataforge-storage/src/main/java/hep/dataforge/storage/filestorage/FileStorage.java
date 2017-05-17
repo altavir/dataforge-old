@@ -50,11 +50,12 @@ import static org.apache.commons.vfs2.FileType.FOLDER;
  */
 @ValueDef(name = "path", info = "Path to storage root")
 @ValueDef(name = "monitor", type = "BOOLEAN", def = "false",
-        info = "Enable file sistem monitoring for synchronous acess to single storage from different instances")
+        info = "Enable file system monitoring for synchronous acess to single storage from different instances")
+@ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage implements FileListener {
 
-    public static final String LOADER_PATH_KEY = "path";
-    public static final String STORAGE_CONFIGURATION_FILE = "storage.xml";
+//    public static final String LOADER_PATH_KEY = "path";
+//    public static final String STORAGE_CONFIGURATION_FILE = "storage.xml";
 
     static {
         //set up slf4j bridge and logging level
@@ -70,14 +71,13 @@ public class FileStorage extends AbstractStorage implements FileListener {
     /**
      * Create a root storage in directory
      *
-     * @param dir
      * @param config
      * @throws StorageException
      */
-    protected FileStorage(FileObject dir, Meta config) throws StorageException {
-        super("root", config);
-        this.dataDir = dir;
+    public FileStorage(Context context, Meta config) throws StorageException {
+        super(context, config);
         try {
+            this.dataDir = VFSUtils.getFile(config.getString("path", "."));
             startup();
         } catch (FileSystemException ex) {
             throw new StorageException(ex);
@@ -103,86 +103,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    /**
-     * Create root File storage from annotation
-     *
-     * @param context
-     * @param annotation
-     * @return
-     */
-    public static FileStorage from(Context context, Meta annotation) {
-        String repo = annotation.getString("path");
-        try {
-            return in(new File(repo), annotation);
-        } catch (StorageException ex) {
-            throw new RuntimeException("Can't create a storage from given configuration", ex);
-        }
-    }
-
-    /**
-     * Create root file storage in the given local directory. Annotation is
-     * optional.
-     *
-     * @param directory
-     * @param def
-     * @return
-     * @throws StorageException
-     */
-    public static FileStorage in(File directory, Meta def) throws StorageException {
-        try {
-            FileObject localRoot = VFSUtils.getLocalFile(directory);
-            return in(localRoot, def);
-
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
-        }
-    }
-
-    public static FileStorage in(FileObject remoteDir, Meta def) throws StorageException {
-        FileStorage res = new FileStorage(remoteDir, def);
-//        res.loadConfig(def);
-        res.updateDirectoryLoaders();
-        return res;
-    }
-
-    /**
-     * Open existing storage in read only or read/write mode.
-     *
-     * @param remoteDir
-     * @param readOnly
-     * @return
-     * @throws StorageException
-     */
-    public static FileStorage connect(FileObject remoteDir, boolean readOnly, boolean monitor) throws StorageException {
-        try {
-            if (!remoteDir.exists() || !remoteDir.getType().equals(FOLDER)) {
-                throw new StorageException("Can't open storage. Target should be existing directory.");
-            }
-        } catch (FileSystemException ex) {
-            throw new StorageException("Can't open storage.");
-        }
-
-        Meta meta = new MetaBuilder("storage")
-                .setValue("type", "file")
-                .setValue("readOnly", readOnly)
-                .setValue("monitor", monitor);
-
-        FileStorage res = new FileStorage(remoteDir, meta);
-        res.refresh();
-        return res;
-    }
-
-    public static FileStorage connect(File directory, boolean readOnly, boolean monitor) throws StorageException {
-        try {
-            FileObject localRoot = VFSUtils.getLocalFile(directory);
-            return FileStorage.connect(localRoot, readOnly, monitor);
-
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
-        }
-    }
-
-    private static boolean checkIfEnvelope(FileObject file) {
+    private boolean checkIfEnvelope(FileObject file) {
         try {
             return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readByte() == '#';
         } catch (IOException e) {

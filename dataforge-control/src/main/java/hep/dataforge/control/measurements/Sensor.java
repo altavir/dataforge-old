@@ -6,7 +6,7 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.control.devices.AbstractMeasurementDevice;
-import hep.dataforge.control.devices.annotations.StateDef;
+import hep.dataforge.control.devices.StateDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.values.Value;

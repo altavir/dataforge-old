@@ -45,4 +45,5 @@ public interface StorageType {
      * @return 
      */
     Storage build(Context context, Meta meta);
+    //TODO add StorageManager registration
 }

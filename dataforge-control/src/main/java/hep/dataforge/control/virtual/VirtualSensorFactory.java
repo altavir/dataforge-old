@@ -7,8 +7,8 @@ package hep.dataforge.control.virtual;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
-import hep.dataforge.control.devices.annotations.RoleDef;
-import hep.dataforge.control.devices.annotations.StateDef;
+import hep.dataforge.control.RoleDef;
+import hep.dataforge.control.devices.StateDef;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.exceptions.ControlException;
@@ -125,7 +125,7 @@ public class VirtualSensorFactory<T> {
         Sensor<T> sensor = new Sensor<T>() {
             {
                 setContext(context);
-                setMetaBase(meta);
+                setMeta(meta);
             }
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {

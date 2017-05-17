@@ -1,5 +1,6 @@
 package hep.dataforge.control.connections;
 
+import hep.dataforge.control.Connection;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.tables.PointListener;
 

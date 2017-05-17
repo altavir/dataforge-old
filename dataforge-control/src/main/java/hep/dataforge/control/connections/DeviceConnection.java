@@ -5,6 +5,7 @@
  */
 package hep.dataforge.control.connections;
 
+import hep.dataforge.control.Connection;
 import hep.dataforge.control.devices.Device;
 
 public abstract class DeviceConnection<D extends Device> implements Connection<D> {

@@ -3,15 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.control.devices.annotations;
+package hep.dataforge.control;
 
 import java.lang.annotation.*;
 
 /**
- * The definition of state for device.
- * <p>
- * Consider extending it to any state holder
- * </p>
+ * The role of connection served by this device
  *
  * @author Alexander Nozik
  */
@@ -19,34 +16,32 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Repeatable(StateDefs.class)
-public @interface StateDef {
+@Repeatable(RoleDefs.class)
+public @interface RoleDef {
     /**
-     * State name
+     * Role name
      *
      * @return
      */
     String name();
 
     /**
-     * State description
+     * The type of the object that could play this role
+     *
+     * @return
+     */
+    Class objectType() default Object.class;
+
+    /**
+     * If true then only one connection of this role is allowed per object
+     * @return
+     */
+    boolean unique() default false;
+
+    /**
+     * Role description
      *
      * @return
      */
     String info() default "";
-
-    /**
-     * This state could be read
-     *
-     * @return
-     */
-    boolean readable() default true;
-
-    /**
-     * This state could be written
-     *
-     * @return
-     */
-    boolean writable() default false;
-
 }

@@ -3,12 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.control.connections;
+package hep.dataforge.control;
+
+import java.lang.annotation.*;
 
 /**
  *
  * @author Alexander Nozik
  */
-public interface Connectable<C extends Connection<T>,T> {
-    C connectTo(T target);
+@Target(ElementType.TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Documented
+@Inherited
+public @interface RoleDefs {
+    RoleDef[] value();
 }

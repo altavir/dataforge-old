@@ -24,6 +24,7 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
@@ -31,6 +32,8 @@ import hep.dataforge.providers.Provides;
 import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.utils.BaseMetaHolder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -42,27 +45,31 @@ import java.util.*;
  *
  * @author Darksnake
  */
-public abstract class AbstractStorage implements Storage {
+public abstract class AbstractStorage extends BaseMetaHolder implements Storage {
 
     public static final String DEFAULT_EVENT_LOADER_NAME = "@log";
     protected final Map<String, Loader> loaders = new HashMap<>();
     protected final Map<String, Storage> shelves = new HashMap<>();
     private final String name;
-    protected Storage parent;
-    protected Meta storageConfig;
+    private final Context context;
+    private final Storage parent;
 
-    protected AbstractStorage(Storage parent, String name, Meta annotation) {
+    protected AbstractStorage(@NotNull Storage parent, String name, Meta meta) {
+        super(new Laminate(meta, parent.getMeta()));
         this.name = name;
-        this.storageConfig = annotation;
         this.parent = parent;
+        if (parent == null) {
+            context = Global.getDefaultContext();
+        } else {
+            context = parent.getContext();
+        }
     }
 
-    public AbstractStorage(String name, Meta annotation) {
-        this(null, name, annotation);
-    }
-
-    public AbstractStorage(String name) {
-        this(null, name, Meta.buildEmpty("storage"));
+    protected AbstractStorage(Context context, Meta meta) {
+        super(meta);
+        this.name = meta.getString("name", "root");
+        this.context = context;
+        this.parent = null;
     }
 
     /**
@@ -125,15 +132,6 @@ public abstract class AbstractStorage implements Storage {
             return currentLoader;
         } else {
             throw new StorageException("Can't update loader with new annotation");
-        }
-    }
-
-    @Override
-    public Meta meta() {
-        if (storageConfig == null) {
-            return Meta.buildEmpty("storage");
-        } else {
-            return storageConfig;
         }
     }
 
@@ -211,7 +209,7 @@ public abstract class AbstractStorage implements Storage {
 
     @Override
     public Context getContext() {
-        return Global.instance();
+        return context;
     }
 
     @Override

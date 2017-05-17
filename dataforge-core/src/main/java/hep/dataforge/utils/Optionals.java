@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * Fork for optionals
+ * Temporary Either implementation. Waiting for Java 9 to replace
  * Created by darksnake on 19-Apr-17.
  */
 public class Optionals<V> {

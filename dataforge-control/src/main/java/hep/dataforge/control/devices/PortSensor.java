@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.control.devices.annotations.StateDef;
 import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.control.ports.PortHandler;

@@ -65,7 +65,7 @@ public class BaseMetaHolder implements Metoid, ValueProvider, Described {
      */
     protected void setMeta(Meta meta) {
         if (this.meta != null) {
-            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the Metoid object");
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the BaseMetaHolder");
         }
         this.meta = meta;
     }

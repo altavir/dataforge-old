@@ -17,13 +17,12 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
-import hep.dataforge.control.connections.Connection;
-import hep.dataforge.control.devices.annotations.RoleDef;
+import hep.dataforge.control.Connection;
+import hep.dataforge.control.RoleDef;
 import hep.dataforge.exceptions.ControlException;
-import hep.dataforge.meta.BaseConfigurable;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
+import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +46,7 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
  */
 @AnonimousNotAlowed
 @RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
-public abstract class AbstractDevice extends BaseConfigurable implements Device {
+public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     //TODO set up logger as connection
 
     //private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
@@ -104,7 +103,6 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
 
     protected void setContext(Context context) {
         this.context = context;
-        setValueContext(context);
     }
 
     @Override
@@ -288,14 +286,14 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
         return connections.entrySet().stream();
     }
 
-    @Override
-    protected void applyConfig(Meta config) {
-        if (meta().hasValue("logger")) {
-            setupLogger();
-        }
-        getLogger().debug("Applying configuration change");
-        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceConfigChanged(AbstractDevice.this));
-    }
+//    @Override
+//    protected void applyConfig(Meta config) {
+//        if (meta().hasValue("logger")) {
+//            setupLogger();
+//        }
+//        getLogger().debug("Applying configuration change");
+//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceConfigChanged(AbstractDevice.this));
+//    }
 
     @Override
     public String type() {
