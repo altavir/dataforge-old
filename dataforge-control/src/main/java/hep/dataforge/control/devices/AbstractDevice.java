@@ -28,10 +28,7 @@ import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 import java.util.function.Consumer;
@@ -205,6 +202,15 @@ public abstract class AbstractDevice extends BaseConfigurable implements Device 
                 return Value.NULL;
             }
         });
+    }
+
+    @Override
+    public Optional<Value> optState(String stateName) {
+        if(states.containsKey(stateName)){
+            return Optional.of(states.get(stateName));
+        } else {
+            return Device.super.optState(stateName);
+        }
     }
 
     /**

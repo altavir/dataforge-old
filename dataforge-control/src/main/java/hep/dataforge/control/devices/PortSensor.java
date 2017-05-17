@@ -21,7 +21,6 @@ import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
  * @param <T>
  */
 @StateDef(name = CONNECTION_STATE, info = "The connection state for this device")
-//@StateDef(name = PORT_NAME_STATE, info = "The name of the port this device connected to")
 @ValueDef(name = "port",info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
