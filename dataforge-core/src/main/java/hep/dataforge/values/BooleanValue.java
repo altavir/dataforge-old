@@ -113,9 +113,4 @@ class BooleanValue extends AbstractValue {
     public ValueType valueType() {
         return ValueType.BOOLEAN;
     }
-
-    @Override
-    public String toString() {
-        return stringValue();
-    }
 }

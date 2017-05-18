@@ -20,7 +20,7 @@ import java.util.concurrent.Callable;
  * @author Alexander Nozik
  */
 @StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
-public abstract class Sensor<T> extends AbstractMeasurementDevice {
+public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
 
     private Measurement<T> measurement;
 
@@ -58,6 +58,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
     public Measurement<T> startMeasurement() throws MeasurementException {
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
+            measurement.addListener(this);
             onCreateMeasurement(measurement);
         } else if (measurement.isStarted()) {
             getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
@@ -115,11 +116,6 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice {
         } else {
             return super.getState(stateName);
         }
-    }
-
-    @Override
-    protected Object computeState(String stateName) throws ControlException {
-        return Value.NULL;
     }
 
     protected abstract Measurement<T> createMeasurement() throws MeasurementException;

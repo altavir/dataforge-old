@@ -117,11 +117,4 @@ class NumberValue extends AbstractValue {
         return ValueType.NUMBER;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return stringValue();
-    }
 }

@@ -83,6 +83,6 @@ public abstract class AbstractValue implements Value {
 
     @Override
     public String toString() {
-        return super.toString();
+        return stringValue();
     }
 }

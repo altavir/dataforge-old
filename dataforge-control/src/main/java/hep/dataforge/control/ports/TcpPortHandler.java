@@ -16,7 +16,6 @@
 package hep.dataforge.control.ports;
 
 import hep.dataforge.exceptions.PortException;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +36,6 @@ public class TcpPortHandler extends PortHandler {
 
     private volatile boolean stopFlag = false;
 
-    //TODO сделать аннотацию и конструктор по аннотации
     public TcpPortHandler(String ip, int port) throws PortException {
         super(new MetaBuilder("handler")
                 .setValue("type", "tcp")
@@ -75,7 +73,9 @@ public class TcpPortHandler extends PortHandler {
         if (socket != null) {
             try {
                 stopFlag = true;
-                listenerThread.join(1500);
+                if (listenerThread != null) {
+                    listenerThread.join(1500);
+                }
             } catch (InterruptedException ex) {
                 throw new PortException(ex);
             } finally {
@@ -84,7 +84,7 @@ public class TcpPortHandler extends PortHandler {
                     getSocket().close();
                     socket = null;
                 } catch (IOException e) {
-                    throw new PortException(e);
+                    LoggerFactory.getLogger(getClass()).error("Failed to close socket", e);
                 }
             }
         }
@@ -106,15 +106,17 @@ public class TcpPortHandler extends PortHandler {
                         buffer.reset();
                     }
                 } catch (IOException ex) {
-                    LoggerFactory.getLogger(getClass()).error("TCP connection broken on {}. Reconnecting.", getPortId());
-                    try {
-                        if (socket != null) {
-                            socket.close();
-                            socket = null;
+                    if (!stopFlag) {
+                        LoggerFactory.getLogger(getClass()).error("TCP connection broken on {}. Reconnecting.", getPortId());
+                        try {
+                            if (socket != null) {
+                                socket.close();
+                                socket = null;
+                            }
+                            reader = new BufferedInputStream(getSocket().getInputStream());
+                        } catch (Exception ex1) {
+                            throw new RuntimeException("Failed to reconnect tcp port");
                         }
-                        reader = new BufferedInputStream(getSocket().getInputStream());
-                    }catch (Exception ex1){
-                        throw new RuntimeException("Failed to reconnect tcp port");
                     }
                 }
             }
@@ -142,11 +144,6 @@ public class TcpPortHandler extends PortHandler {
     @Override
     public boolean isOpen() {
         return listenerThread != null;
-    }
-
-    @Override
-    public Meta meta() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 
     public synchronized Socket getSocket() throws IOException {

@@ -111,11 +111,4 @@ class TimeValue extends AbstractValue {
         return ValueType.TIME;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public String toString() {
-        return value.toString();
-    }
 }

@@ -5,6 +5,7 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.control.RoleDef;
 import hep.dataforge.control.connections.MeasurementConsumer;
 import hep.dataforge.control.connections.Roles;
 import hep.dataforge.control.measurements.Measurement;
@@ -14,7 +15,8 @@ import hep.dataforge.meta.MetaUtils;
 
 import java.time.Instant;
 
-public abstract class AbstractMeasurementDevice extends AbstractDevice implements MeasurementListener {
+@RoleDef(name = Roles.MEASUREMENT_CONSUMER_ROLE,objectType = MeasurementConsumer.class, info = "Listen to measurement start events")
+public abstract class AbstractMeasurementDevice<T> extends AbstractDevice implements MeasurementListener<T> {
 
     /**
      * The method that must be called after measurement is started
@@ -34,12 +36,12 @@ public abstract class AbstractMeasurementDevice extends AbstractDevice implement
     
 
     @Override
-    public void onMeasurementResult(Measurement measurement, Object result, Instant time) {
+    public void onMeasurementResult(Measurement<T> measurement, T result, Instant time) {
         
     }
 
     @Override
-    public void onMeasurementFailed(Measurement measurement, Throwable exception) {
+    public void onMeasurementFailed(Measurement<T> measurement, Throwable exception) {
         notifyError("Measurement failed", exception);
     }
 

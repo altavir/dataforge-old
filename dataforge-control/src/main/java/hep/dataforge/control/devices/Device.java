@@ -154,7 +154,7 @@ public interface Device extends Connectable, Metoid, Encapsulated, Named, Respon
      * @param name
      * @return
      */
-    default Optional<StateDef> getStateDef(String name) {
+    default Optional<StateDef> optStateDef(String name) {
         return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst();
     }
 

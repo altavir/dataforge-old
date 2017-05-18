@@ -10,21 +10,24 @@ import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.control.ports.PortHandler;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.values.Value;
 
-import static hep.dataforge.control.devices.PortSensor.CONNECTION_STATE;
+import java.util.Objects;
+
+import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
 
 /**
  * A Sensor that uses a PortHandler to obtain data
  *
- * @author darksnake
  * @param <T>
+ * @author darksnake
  */
-@StateDef(name = CONNECTION_STATE, info = "The connection state for this device")
-@ValueDef(name = "port",info = "The name of the port for this sensor")
+@StateDef(name = CONNECTED_STATE, def = "false", info = "The connection state for this device")
+@ValueDef(name = "port", info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
 
-    public static final String CONNECTION_STATE = "connected";
+    public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
 
     private PortHandler handler;
@@ -34,7 +37,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
     }
 
     public boolean isConnected() {
-        return getState(CONNECTION_STATE).booleanValue();
+        return getState(CONNECTED_STATE).booleanValue();
     }
 
     protected int timeout() {
@@ -53,10 +56,28 @@ public abstract class PortSensor<T> extends Sensor<T> {
             if (handler != null) {
                 handler.close();
             }
-            updateState(CONNECTION_STATE, false);
+            updateState(CONNECTED_STATE, false);
         } catch (Exception ex) {
             throw new ControlException(ex);
         }
+    }
+
+    @Override
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
+        if (Objects.equals(stateName, CONNECTED_STATE)) {
+            if (value.booleanValue()) {
+                if (!getHandler().isOpen()) {
+                    getHandler().open();
+                }
+            } else {
+                try {
+                    getHandler().close();
+                } catch (Exception e) {
+                    throw new ControlException(e);
+                }
+            }
+        }
+        super.requestStateChange(stateName, value);
     }
 
     /**
@@ -67,15 +88,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
         if (handler == null) {
             String port = meta().getString(PORT_NAME_KEY);
             this.handler = buildHandler(port);
-            updateState(PORT_NAME_KEY, port);
         }
-
-        if (!handler.isOpen()) {
-            updateState(CONNECTION_STATE, false);
-            handler.open();
-            updateState(CONNECTION_STATE, true);
-        }
-
         return handler;
     }
 

@@ -19,6 +19,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.control.Connection;
 import hep.dataforge.control.RoleDef;
+import hep.dataforge.control.connections.Roles;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
@@ -46,6 +47,7 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
  */
 @AnonimousNotAlowed
 @RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
+@RoleDef(name = Roles.VIEW_ROLE)
 public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     //TODO set up logger as connection
 
@@ -110,17 +112,13 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         return meta().getString("name", type());
     }
 
-//    public void setName(String name) {
-//        this.getConfig().setValue("name", name);
-//    }
-
     /**
      * Update logical state and notify listeners.
      *
      * @param stateName
      * @param stateValue
      */
-    private final void notifyStateChanged(String stateName, Value stateValue) {
+    private void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(stateName, stateValue);
         getLogger().info("State {} changed to {}", stateName, stateValue);
         forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
@@ -171,7 +169,10 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         }
     }
 
-    protected abstract Object computeState(String stateName) throws ControlException;
+    protected Object computeState(String stateName) throws ControlException{
+        return optStateDef(stateName).map(StateDef::def)
+                .orElseThrow(()->new ControlException("Can't calculate state " + stateName));
+    }
 
     protected void requestStateChange(String stateName, Value value) throws ControlException{
         updateState(stateName, value);

@@ -49,4 +49,10 @@ public @interface StateDef {
      */
     boolean writable() default false;
 
+    /**
+     * The default value for this state
+     * @return
+     */
+    String def() default "";
+
 }

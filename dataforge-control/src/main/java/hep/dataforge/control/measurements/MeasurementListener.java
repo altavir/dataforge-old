@@ -16,6 +16,7 @@
 package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
+
 import java.time.Instant;
 
 /**
@@ -29,7 +30,7 @@ public interface MeasurementListener<T> {
      * Measurement started. Ignored by default
      * @param measurement 
      */
-    default void onMeasurementStarted(Measurement measurement){
+    default void onMeasurementStarted(Measurement<T> measurement){
         
     }
 
@@ -37,7 +38,7 @@ public interface MeasurementListener<T> {
      * Measurement stopped. Ignored by default
      * @param measurement 
      */
-    default void onMeasurementFinished(Measurement measurement){
+    default void onMeasurementFinished(Measurement<T> measurement){
         
     }
 
@@ -53,14 +54,14 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param exception 
      */
-    void onMeasurementFailed(Measurement measurement, Throwable exception);
+    void onMeasurementFailed(Measurement<T> measurement, Throwable exception);
     
     /**
      * Measurement failed with message
      * @param measurement
      * @param message 
      */
-    default void onMeasurementFailed(Measurement measurement, String message){
+    default void onMeasurementFailed(Measurement<T> measurement, String message){
         onMeasurementFailed(measurement, new MeasurementException(message));
     }
 
@@ -69,7 +70,7 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param progress 
      */
-    default void onMeasurementProgress(Measurement measurement, double progress) {
+    default void onMeasurementProgress(Measurement<T> measurement, double progress) {
 
     }
 
@@ -78,7 +79,7 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param message 
      */
-    default void onMeasurementProgress(Measurement measurement, String message) {
+    default void onMeasurementProgress(Measurement<T> measurement, String message) {
 
     }
 
