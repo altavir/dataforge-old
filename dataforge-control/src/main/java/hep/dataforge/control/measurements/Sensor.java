@@ -82,6 +82,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
+            measurement.removeListener(this);
         } else {
             getLogger().warn("No active measurement to stop. Ignoring.");
         }
@@ -94,9 +95,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
 
     @Override
     public void shutdown() throws ControlException {
-        if (measurement != null) {
-            measurement.stop(true);
-        }
+        stopMeasurement(true);
         super.shutdown();
     }
 

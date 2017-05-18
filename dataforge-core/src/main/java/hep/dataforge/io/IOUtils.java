@@ -215,7 +215,7 @@ public class IOUtils {
     }
 
     private static DecimalFormat getExpFormat(int width) {
-        return new DecimalFormat(String.format("0.%sE0#;(-0.%sE0#)", grids(width - 6), grids(width - 7)));
+        return new DecimalFormat(String.format("0.%sE0#;-0.%sE0#", grids(width - 6), grids(width - 7)));
     }
 
     private static String grids(int num) {
