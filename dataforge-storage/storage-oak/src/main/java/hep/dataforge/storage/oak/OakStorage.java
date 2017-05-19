@@ -21,16 +21,6 @@ public class OakStorage extends AbstractStorage {
         super(parent, name, annotation);
     }
 
-    public OakStorage(String name, Meta annotation) {
-        super(name, annotation);
-    }
-
-    public OakStorage(String name) {
-        super(name);
-    }
-    
-    
-
     @Override
     public Loader buildLoader(Meta loaderConfiguration) throws StorageException {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

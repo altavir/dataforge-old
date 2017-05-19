@@ -7,6 +7,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.filestorage.FileStorage;
 import hep.dataforge.storage.filestorage.FileStorageFactory;
+import javafx.beans.binding.BooleanBinding;
 import ratpack.handling.Chain;
 import ratpack.handling.Handler;
 import ratpack.server.RatpackServer;
@@ -46,6 +47,13 @@ public class ServerManager extends BasicPlugin {
      */
     private Map<Object, String> paths = new HashMap<>();
 
+    public BooleanBinding isStarted = new BooleanBinding() {
+        @Override
+        protected boolean computeValue() {
+            return ratpack != null;
+        }
+    };
+
     /**
      * Resolve the absolute path for a given object. Return '#' if object is not registered
      *
@@ -74,7 +82,7 @@ public class ServerManager extends BasicPlugin {
         }
     }
 
-    public void startSetver() throws Exception {
+    public void startServer() throws Exception {
         if (ratpack != null) {
             throw new RuntimeException("Server already running");
         }
@@ -96,6 +104,7 @@ public class ServerManager extends BasicPlugin {
                         }
                 )
         );
+        isStarted.invalidate();
     }
 
     public void setRootHandler(Handler rootHandler) {
@@ -144,10 +153,21 @@ public class ServerManager extends BasicPlugin {
                 getContext().getLogger().error("Failed to stop ratpack servlet", ex);
             }
         }
+        isStarted.invalidate();
     }
 
     public Collection<String> listHandlers() {
         return handlers.keySet();
+    }
+
+    public String getLink() {
+        if (isStarted.get()) {
+            return ratpack.getScheme() + "://"
+                    + ratpack.getBindHost() + ":"
+                    + ratpack.getBindPort();
+        } else {
+            return "";
+        }
     }
 
 

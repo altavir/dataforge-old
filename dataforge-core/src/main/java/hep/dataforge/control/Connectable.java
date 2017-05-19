@@ -9,6 +9,8 @@ import hep.dataforge.description.DescriptorUtils;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * Something that could be connected
@@ -24,6 +26,35 @@ public interface Connectable {
      * @param roles
      */
     void connect(Connection connection, String... roles);
+
+    /**
+     * Get a stream of all connections with given role and type. Role could be regexp
+     *
+     * @param role
+     * @param type
+     * @param <T>
+     * @return
+     */
+    <T> Stream<T> connections(String role, Class<T> type);
+
+
+    /**
+     * For each connection of given class and role. Role may be empty, but type
+     * is mandatory
+     *
+     * @param <T>
+     * @param role
+     * @param type
+     * @param action
+     */
+    default <T> void forEachConnection(String role, Class<T> type, Consumer<T> action) {
+        connections(role,type).forEach(action);
+    }
+
+    default <T> void forEachConnection(Class<T> type, Consumer<T> action) {
+        forEachConnection(".*", type, action);
+    }
+
 
     /**
      * A list of all available roles

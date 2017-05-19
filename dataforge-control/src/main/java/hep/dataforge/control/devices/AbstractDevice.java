@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
@@ -81,11 +80,11 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     @Override
     public void shutdown() throws ControlException {
         getLogger().info("Shutting down device '{}'...", getName());
-        connections().forEach(it -> {
+        forEachConnection(Connection.class, c -> {
             try {
-                it.getKey().close();
+                c.close();
             } catch (Exception e) {
-                getLogger().error("Failed to close connection {} with roles", it.getKey(), it.getValue());
+                getLogger().error("Failed to close connection", e);
             }
         });
         updateState(INITIALIZED_STATE, false);
@@ -169,12 +168,12 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         }
     }
 
-    protected Object computeState(String stateName) throws ControlException{
+    protected Object computeState(String stateName) throws ControlException {
         return optStateDef(stateName).map(StateDef::def)
-                .orElseThrow(()->new ControlException("Can't calculate state " + stateName));
+                .orElseThrow(() -> new ControlException("Can't calculate state " + stateName));
     }
 
-    protected void requestStateChange(String stateName, Value value) throws ControlException{
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
         updateState(stateName, value);
     }
 
@@ -205,7 +204,7 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
 
     @Override
     public Optional<Value> optState(String stateName) {
-        if(states.containsKey(stateName)){
+        if (states.containsKey(stateName)) {
             return Optional.of(states.get(stateName));
         } else {
             return Device.super.optState(stateName);
@@ -258,33 +257,13 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         }
     }
 
-    /**
-     * For each connection of given class and role. Role may be empty, but type
-     * is mandatory
-     *
-     * @param <T>
-     * @param role
-     * @param type
-     * @param action
-     */
-    @SuppressWarnings("unchecked")
-    public <T> void forEachConnection(String role, Class<T> type, Consumer<T> action) {
-        Stream<Map.Entry<Connection<? extends Device>, List<String>>> stream = connections();
 
-        if (role != null && !role.isEmpty()) {
-            stream = stream.filter((Map.Entry<Connection<? extends Device>, List<String>> entry) -> entry.getValue().contains(role));
-        }
-
-        stream.filter((entry) -> type.isInstance(entry.getKey())).map((entry) -> (T) entry.getKey())
-                .forEach(action);
-    }
-
-    public <T> void forEachConnection(Class<T> type, Consumer<T> action) {
-        forEachConnection(null, type, action);
-    }
-
-    public Stream<Map.Entry<Connection<? extends Device>, List<String>>> connections() {
-        return connections.entrySet().stream();
+    @Override
+    public <T> Stream<T> connections(String role, Class<T> type) {
+        return connections.entrySet().stream()
+                .filter(entry -> type.isInstance(entry.getKey()))
+                .filter(entry -> entry.getValue().stream().anyMatch(r -> r.matches(role)))
+                .map(entry -> type.cast(entry.getKey()));
     }
 
 //    @Override

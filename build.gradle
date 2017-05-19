@@ -6,7 +6,7 @@ subprojects{
     apply plugin: 'maven-publish'
 
     group = 'hep.dataforge'
-    version = '0.4.0 - SNAPSHOT'
+    version = '0.4.0'
 
 
     [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
@@ -42,5 +42,5 @@ subprojects{
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.4.1'
+    gradleVersion = '3.5'
 }

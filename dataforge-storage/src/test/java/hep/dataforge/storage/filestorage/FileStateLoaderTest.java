@@ -60,7 +60,7 @@ public class FileStateLoaderTest {
 
     @Test
     public void testIO() throws Exception {
-        FileStorage storage = FileStorage.in(dir, null);
+        FileStorage storage = FileStorageFactory.buildLocal(dir);
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
 
         System.out.println("***starting write test***");

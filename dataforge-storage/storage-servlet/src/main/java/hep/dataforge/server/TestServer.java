@@ -32,7 +32,7 @@ public class TestServer {
         System.out.println("Starting test numass storage servlet in " + path);
         serverManager.addFileStorage("storage", path);
 
-        serverManager.startSetver();
+        serverManager.startServer();
 
         String stopLine = "";
 

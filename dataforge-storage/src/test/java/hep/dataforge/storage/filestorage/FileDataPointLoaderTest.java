@@ -72,7 +72,7 @@ public class FileDataPointLoaderTest {
     public void testReadWrite() throws FileNotFoundException, StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
-        FileStorage storage = FileStorage.in(dir, null);
+        FileStorage storage = FileStorageFactory.buildLocal(dir);
 
         PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", TableFormat.forNames(names));
 

@@ -83,8 +83,6 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
             measurement.removeListener(this);
-        } else {
-            getLogger().warn("No active measurement to stop. Ignoring.");
         }
     }
 
