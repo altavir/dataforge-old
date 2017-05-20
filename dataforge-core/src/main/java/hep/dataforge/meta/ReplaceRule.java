@@ -39,11 +39,15 @@ class ReplaceRule extends MergeRule {
 
     @Override
     protected Value mergeValues(Name valueName, Value first, Value second) {
-        return first;
+        if (first.isNull()) {
+            return second;
+        } else return first;
     }
 
     @Override
     protected List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes) {
-        return mainNodes;
+        if (mainNodes.isEmpty()) {
+            return secondaryNodes;
+        } else return mainNodes;
     }
 }

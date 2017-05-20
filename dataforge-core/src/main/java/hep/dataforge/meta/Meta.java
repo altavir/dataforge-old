@@ -83,7 +83,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
 
     @Provides(META_TARGET)
     public Optional<? extends Meta> optMeta(String path) {
-        return getMetaList(path).stream().findFirst().map(it -> it);
+        return getMetaList(path).stream().findFirst();
     }
 
     public boolean isEmpty() {

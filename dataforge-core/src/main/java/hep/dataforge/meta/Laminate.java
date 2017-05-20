@@ -21,7 +21,6 @@ import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
 
 import java.util.*;
 import java.util.function.Function;
@@ -35,13 +34,12 @@ import java.util.stream.Stream;
  *
  * @author darksnake
  */
-public class Laminate extends Meta implements Described {
+public final class Laminate extends Meta implements Described {
 
     private String name;
     private List<Meta> layers;
     private NodeDescriptor descriptor;
     private Meta descriptorLayer;
-    private ValueProvider valueContext;
 
     public Laminate(String name) {
         this.name = name;
@@ -51,7 +49,7 @@ public class Laminate extends Meta implements Described {
     public Laminate(String name, List<Meta> layers) {
         this.name = name;
         this.layers = new ArrayList<>(layers);
-        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
+        cleanUpLayers();
     }
 
     public Laminate(List<Meta> layers) {
@@ -69,10 +67,6 @@ public class Laminate extends Meta implements Described {
 
     public Laminate(String name, Meta... layers) {
         this(name, Arrays.asList(layers));
-    }
-
-    public ValueProvider valueContext() {
-        return valueContext;
     }
 
     /**
@@ -96,11 +90,6 @@ public class Laminate extends Meta implements Described {
         }
     }
 
-    public Laminate setValueContext(ValueProvider valueContext) {
-        this.valueContext = valueContext;
-        return this;
-    }
-
     /**
      * Add primary (first layer)
      *
@@ -111,6 +100,7 @@ public class Laminate extends Meta implements Described {
         if (!layer.isEmpty()) {
             this.layers.add(0, layer);
         }
+        cleanUpLayers();
         return this;
     }
 
@@ -124,20 +114,18 @@ public class Laminate extends Meta implements Described {
         if (!layer.isEmpty()) {
             this.layers.add(layer);
         }
+        cleanUpLayers();
         return this;
     }
 
     public Laminate setLayers(Meta... layers) {
-        this.layers.clear();
-        this.layers.addAll(Arrays.asList(layers));
-        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
-        return this;
+        return setLayers(Arrays.asList(layers));
     }
 
     public Laminate setLayers(Collection<Meta> layers) {
         this.layers.clear();
         this.layers.addAll(layers);
-        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
+        cleanUpLayers();
         return this;
     }
 
@@ -156,10 +144,14 @@ public class Laminate extends Meta implements Described {
         return layersInverse;
     }
 
+    private void cleanUpLayers() {
+        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
+    }
+
     @Override
     public Optional<? extends Meta> optMeta(String path) {
         List<Meta> childLayers = new ArrayList<>();
-        layers.stream().filter((m) -> (m.hasMeta(path))).forEach((m) -> {
+        layers.stream().filter(layer -> layer.hasMeta(path)).forEach((m) -> {
             //FIXME child elements are not chained!
             childLayers.add(m.getMeta(path));
         });
@@ -169,7 +161,6 @@ public class Laminate extends Meta implements Described {
             if (descriptor != null && descriptor.childrenDescriptors().containsKey(path)) {
                 laminate.setDescriptor(descriptor.childDescriptor(path));
             }
-            laminate.setValueContext(valueContext());
             return Optional.of(laminate);
         } else //if node not found, using descriptor layer if it is defined
             if (descriptorLayer != null) {
@@ -212,7 +203,7 @@ public class Laminate extends Meta implements Described {
 
     public Stream<String> getNodeNames(boolean includeHidden, boolean includeDefaults) {
         Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden));
-        if(includeDefaults && descriptorLayer != null){
+        if (includeDefaults && descriptorLayer != null) {
             return Stream.concat(names, descriptorLayer.getNodeNames(includeHidden));
         } else {
             return names;
@@ -231,7 +222,7 @@ public class Laminate extends Meta implements Described {
 
     public Stream<String> getValueNames(boolean includeHidden, boolean includeDefaults) {
         Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden));
-        if(includeDefaults && descriptorLayer != null){
+        if (includeDefaults && descriptorLayer != null) {
             return Stream.concat(names, descriptorLayer.getValueNames(includeHidden));
         } else {
             return names;
@@ -252,7 +243,7 @@ public class Laminate extends Meta implements Described {
             opts = opts.or(() -> descriptorLayer.optValue(path));
         }
 
-        return opts.opt().map(it -> MetaUtils.transformValue(it, valueContext()));
+        return opts.opt().map(it -> MetaUtils.transformValue(it));
     }
 
     @Override
@@ -348,5 +339,14 @@ public class Laminate extends Meta implements Described {
      */
     public double sumValue(String valueName) {
         return layers.stream().mapToDouble(layer -> layer.getDouble(valueName, 0)).sum();
+    }
+
+    /**
+     * Press all of the Laminate layers together creating single immutable meta
+     *
+     * @return
+     */
+    public Meta collapse() {
+        return new SealedNode(this);
     }
 }

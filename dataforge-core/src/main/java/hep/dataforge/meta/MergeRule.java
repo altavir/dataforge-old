@@ -26,6 +26,8 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * Правило объединения двух аннотаций
@@ -106,32 +108,32 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
         builder.rename(mergeName(main.getName(), builder.getName()));
 
         // Overriding values
-        main.getValueNames().forEach(valueName -> {
-            if (!builder.hasValue(valueName)) {
-                writeValue(builder, valueName, main.getValue(valueName));
-            } else {
-                writeValue(builder, valueName, mergeValues(Name.join(builder.getFullName(), Name.of(valueName)),
-                        main.getValue(valueName), builder.getValue(valueName)));
-            }
-        });
+        Stream.concat(main.getValueNames(), builder.getValueNames()).collect(Collectors.toSet())
+                .forEach(valueName -> {
+                    writeValue(
+                            builder,
+                            valueName,
+                            mergeValues(
+                                    Name.join(builder.getFullName(), Name.of(valueName)),
+                                    main.optValue(valueName).orElse(Value.NULL),
+                                    builder.optValue(valueName).orElse(Value.NULL)
+                            )
+                    );
+                });
 
         // Overriding nodes
-        main.getNodeNames().forEach(nodeName->{
-            if (!builder.hasMeta(nodeName)) {
-                writeElement(builder, nodeName, main.getMetaList(nodeName));
-            } else {
-                List<? extends Meta> mainNodes = main.getMetaList(nodeName);
-                List<? extends Meta> secondNodes = builder.getMetaList(nodeName);
-                if (mainNodes.size() == 1 && secondNodes.size() == 1) {
-                    writeElement(builder, nodeName, Collections.singletonList(merge(mainNodes.get(0), secondNodes.get(0))));
-                } else {
-                    //TODO apply smart merging rule for lists?
-                    List<? extends Meta> item = mergeNodes(Name.join(builder.getFullName(),
-                            Name.of(nodeName)), mainNodes, secondNodes);
-                    writeElement(builder, nodeName, item);
-                }
-            }
-        });
+        Stream.concat(main.getNodeNames(), builder.getNodeNames()).collect(Collectors.toSet())
+                .forEach(nodeName -> {
+                    List<? extends Meta> mainNodes = main.getMetaList(nodeName);
+                    List<? extends Meta> secondNodes = builder.getMetaList(nodeName);
+                    if (mainNodes.size() == 1 && secondNodes.size() == 1) {
+                        writeNode(builder, nodeName, Collections.singletonList(merge(mainNodes.get(0), secondNodes.get(0))));
+                    } else {
+                        List<? extends Meta> item = mergeNodes(Name.join(builder.getFullName(),
+                                Name.of(nodeName)), mainNodes, secondNodes);
+                        writeNode(builder, nodeName, item);
+                    }
+                });
 
         return builder;
     }
@@ -154,12 +156,12 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
      */
     protected abstract List<? extends Meta> mergeNodes(Name nodeName, List<? extends Meta> mainNodes, List<? extends Meta> secondaryNodes);
 
-    protected MetaBuilder writeValue(MetaBuilder builder, String name, Value item) {
-        return builder.setValue(name, item);
+    protected void writeValue(MetaBuilder builder, String name, Value item) {
+        builder.setValue(name, item);
     }
 
-    protected MetaBuilder writeElement(MetaBuilder builder, String name, List<? extends Meta> item) {
-        return builder.setNode(name, item);
+    protected void writeNode(MetaBuilder builder, String name, List<? extends Meta> item) {
+        builder.setNode(name, item);
     }
 
     @Override
@@ -175,12 +177,12 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
 
     @Override
     public BinaryOperator<MetaBuilder> combiner() {
-        return (builder1, builder2) -> merge(builder1, builder2);
+        return this::merge;
     }
 
     @Override
     public Function<MetaBuilder, Meta> finisher() {
-        return (builder) -> builder.build();
+        return MetaBuilder::build;
     }
 
     @Override

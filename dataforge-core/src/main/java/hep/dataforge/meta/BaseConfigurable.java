@@ -7,7 +7,6 @@ package hep.dataforge.meta;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.values.ValueProvider;
 
 /**
  * An object with partially changeable meta. Inner layer of meta is not
@@ -35,10 +34,6 @@ public abstract class BaseConfigurable extends SimpleConfigurable {
     protected final void setMetaBase(Meta... metaBase) {
         this.laminate.setLayers(metaBase);
         this.laminate.addFirstLayer(getConfig());        
-    }
-
-    protected final void setValueContext(ValueProvider context) {
-        this.laminate.setValueContext(context);
     }
 
     protected final void setDescriptor(NodeDescriptor descriptor) {
