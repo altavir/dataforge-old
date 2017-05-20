@@ -24,10 +24,12 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
 import java.io.Serializable;
-import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * The main building block of the DataForge.
@@ -40,7 +42,7 @@ import java.util.Optional;
  */
 public abstract class Meta implements Provider, Named, ValueProvider, Serializable, MetaProvider {
 
-    private static final Meta EMPTY = new MetaBuilder("").build();
+    private static final Meta EMPTY = new EmptyMeta();
 
     /**
      * Build an empty annotation with given name FIXME make a separate simple
@@ -84,78 +86,33 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         return getMetaList(path).stream().findFirst().map(it -> it);
     }
 
-//    /**
-//     * Check if this meta has a node with given name
-//     * @param name
-//     * @return
-//     */
-//    public boolean hasMeta(String name) {
-//        Collection<String> names = getNodeNames();
-//        if (names.contains(name)) {
-//            return true;
-//        } else {
-//            Name path = Name.of(name);
-//            if (path.length() > 1) {
-//                String head = path.getFirst().entry();
-//                String tail = path.cutFirst().toString();
-//                if (names.contains(head)) {
-//                    return getMeta(head).hasMeta(tail);
-//                } else {
-//                    return false;
-//                }
-//            } else {
-//                return false;
-//            }
-//        }
-//    }
-
-//    /**
-//     * {@inheritDoc}
-//     *
-//     * @param name
-//     * @return
-//     */
-//    @Override
-//    public boolean hasValue(String name) {
-//        if (getValueNames().contains(name)) {
-//            return true;
-//        } else {
-//            Collection<String> names = getNodeNames();
-//            Name path = Name.of(name);
-//            if (path.length() > 1) {
-//                String head = path.getFirst().entry();
-//                String tail = path.cutFirst().toString();
-//                if (names.contains(head)) {
-//                    return getMeta(head).hasValue(tail);
-//                } else {
-//                    return false;
-//                }
-//            } else {
-//                return false;
-//            }
-//        }
-//    }
-
     public boolean isEmpty() {
-        return this.getNodeNames().isEmpty() && this.getValueNames().isEmpty();
+        return this.getNodeNames().count() == 0 && this.getValueNames().count() == 0;
     }
 
     /**
-     * List value names of direct descendants
+     * List value names of direct descendants. Excludes hidden values
      *
      * @return a {@link java.util.Collection} object.
      */
     @ProvidesNames(VALUE_TARGET)
-    public abstract Collection<String> getValueNames();
+    public final Stream<String> getValueNames() {
+        return getValueNames(false);
+    }
+
+    public abstract Stream<String> getValueNames(boolean includeHidden);
 
     /**
-     * List node names of direct descendants
+     * List node names of direct descendants. Excludes hidden nodes
      *
      * @return a {@link java.util.Collection} object.
      */
     @ProvidesNames(META_TARGET)
-    public abstract Collection<String> getNodeNames();
+    public final Stream<String> getNodeNames() {
+        return getNodeNames(false);
+    }
 
+    public abstract Stream<String> getNodeNames(boolean includeHidden);
 
 
     /**
@@ -191,29 +148,23 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
      * @return
      */
     public boolean equalsIgnoreName(Meta other) {
-        for (String valueName : getValueNames()) {
-            Value value = getValue(valueName);
-            if (!other.hasValue(valueName) || !value.equals(other.getValue(valueName))) {
-                return false;
-            }
-        }
-        for (String elementName : getNodeNames()) {
-            List<? extends Meta> elementItem = getMetaList(elementName);
-            if (!other.hasMeta(elementName) || !elementItem.equals(other.getMetaList(elementName))) {
-                return false;
-            }
-        }
-        return true;
+        boolean valuesEqual = getValueNames(true)
+                .allMatch(valueName -> other.hasValue(valueName) && getValue(valueName).equals(other.getValue(valueName)));
+
+        boolean nodesEqual = getNodeNames(true)
+                .allMatch(nodeName -> other.hasMeta(nodeName) && getMetaList(nodeName).equals(other.getMetaList(nodeName)));
+
+        return valuesEqual && nodesEqual;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
         hash = 59 * hash + Objects.hashCode(getName());
-        for (String valueName : getValueNames()) {
+        for (String valueName : getValueNames(true).collect(Collectors.toList())) {
             hash = 59 * hash + Objects.hashCode(getValue(valueName));
         }
-        for (String elementName : getNodeNames()) {
+        for (String elementName : getNodeNames(true).collect(Collectors.toList())) {
             hash = 59 * hash + Objects.hashCode(getMetaList(elementName));
         }
         return hash;
@@ -222,6 +173,34 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
     @Override
     public String toString() {
         return new XMLMetaWriter().writeString(this);
+    }
+
+    private static class EmptyMeta extends Meta{
+
+        @Override
+        public List<? extends Meta> getMetaList(String path) {
+            return Collections.emptyList();
+        }
+
+        @Override
+        public Stream<String> getValueNames(boolean includeHidden) {
+            return Stream.empty();
+        }
+
+        @Override
+        public Stream<String> getNodeNames(boolean includeHidden) {
+            return Stream.empty();
+        }
+
+        @Override
+        public String getName() {
+            return "";
+        }
+
+        @Override
+        public Optional<Value> optValue(String path) {
+            return Optional.empty();
+        }
     }
 
 }

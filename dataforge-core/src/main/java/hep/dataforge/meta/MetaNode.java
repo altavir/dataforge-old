@@ -24,6 +24,7 @@ import hep.dataforge.values.Value;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An immutable representation of annotation node. Descendants could be mutable
@@ -33,42 +34,19 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
+public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
     private static final long serialVersionUID = 1L;
 
-    protected final Map<String, List<T>> nodes;
     protected String name;
+    protected final Map<String, List<T>> nodes;
     protected final Map<String, Value> values;
 
-    /**
-     * A static deep copy constructor for immutable annotations
-     *
-     * @param meta
-     * @return
-     */
-    public static MetaNode<MetaNode> from(Meta meta) {
-        MetaNode<MetaNode> res = new MetaNode<>(meta.getName());
 
-        Collection<String> valueNames = meta.getValueNames();
-        valueNames.stream().forEach((valueName) -> {
-            res.values.put(valueName, meta.getValue(valueName));
-        });
-
-        Collection<String> nodeNames = meta.getNodeNames();
-        nodeNames.stream().forEach((elementName) -> {
-            List<MetaNode> item = meta.getMetaList(elementName).stream()
-                    .<MetaNode>map((an) -> from(an))
-                    .collect(Collectors.toList());
-            res.nodes.put(elementName, new ArrayList<>(item));
-        });
-        return res;
-    }
-
-    public MetaNode() {
+    protected MetaNode() {
         this("");
     }
 
-    public MetaNode(String name) {
+    protected MetaNode(String name) {
         this.name = name;
         values = new LinkedHashMap<>();
         nodes = new LinkedHashMap<>();
@@ -81,23 +59,20 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @return
      */
     protected T getHead(Name path) {
-        Collection<String> names = getNodeNames();
+        return optHead(path)
+                .orElseThrow(() -> new NameNotFoundException(path.toString()));
+    }
+
+    protected Optional<T> optHead(Name path) {
         Name head = path.getFirst();
-        if (names.contains(head.entry())) {
-            List<T> child = getChildNodeItem(head.entry());
-            if (head.hasQuery()) {
-                child = MetaUtils.applyQuery(child, head.getQuery());
-            }
-            return child.get(0);
-        } else {
-            throw new NameNotFoundException(path.toString());
-        }
+        return optChildNodeItem(head.entry())
+                .map(child -> MetaUtils.applyQuery(child, head.getQuery()).get(0));
     }
 
     @Provides(META_TARGET)
     @Override
     public Optional<T> optMeta(String path) {
-        return getMetaList(path).stream().findFirst().map(it -> it);
+        return getMetaList(path).stream().findFirst();
     }
 
     /**
@@ -106,34 +81,23 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @param path
      * @return
      */
-    protected List<T> getNodeItem(Name path) {
+    protected List<T> getMetaList(Name path) {
+        if (path.length() == 0) {
+            throw new RuntimeException("Empty path not allowed");
+        }
         List<T> res;
         if (path.length() == 1) {
-            String pathStr = path.ignoreQuery().toString();
-            if (getNodeNames().contains(pathStr)) {
-                res = getChildNodeItem(pathStr);
-            } else {
-                res = null;
-            }
-        } else if (path.length() > 1 && nodes.containsKey(path.getFirst().entry())) {
-            res = getHead(path).getNodeItem(path.cutFirst());
+            res = optChildNodeItem(path.ignoreQuery().toString()).orElse(Collections.emptyList());
         } else {
-            res = null;
+            res = optHead(path).map(it -> it.getMetaList(path.cutFirst())).orElse(Collections.emptyList());
         }
 
-        /**
-         * Filtering nodes using query
-         */
-        if (res != null) {
-            if (path.hasQuery()) {
-                res = MetaUtils.applyQuery(res, path.getQuery());
-            }
-            if (res.isEmpty()) {
-                res = null;
-            }
+        if (!res.isEmpty() && path.hasQuery()) {
+            //Filtering nodes using query
+            return MetaUtils.applyQuery(res, path.getQuery());
+        } else {
+            return res;
         }
-
-        return res;
     }
 
     /**
@@ -142,22 +106,15 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @param path
      * @return
      */
-    protected Value getValueItem(Name path) {
-        Value res;
-        if (path.length() == 1) {
-            String pathStr = path.toString();
-            if (getValueNames().contains(pathStr)) {
-                res = getChildValue(pathStr);
-            } else {
-                return null;
-            }
-        } else if (path.length() > 1 && nodes.containsKey(path.getFirst().entry())) {
-            res = getHead(path).getValueItem(path.cutFirst());
-        } else {
-            return null;
+    public Optional<Value> optValue(Name path) {
+        if (path.length() == 0) {
+            throw new RuntimeException("Empty path not allowed");
         }
-        return res;
-
+        if (path.length() == 1) {
+            return Optional.ofNullable(values.get(path.toString()));
+        } else {
+            return optHead(path).flatMap(it -> it.optValue(path.cutFirst()));
+        }
     }
 
     /**
@@ -170,13 +127,7 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      */
     @Override
     public List<T> getMetaList(String name) {
-        Name n = Name.of(name);
-        List<T> item = getNodeItem(n);
-        if (item == null) {
-            return Collections.emptyList();
-        } else {
-            return item;
-        }
+        return getMetaList(Name.of(name));
     }
 
     @Override
@@ -186,7 +137,7 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
 
     @Override
     public Optional<Value> optValue(String name) {
-        return Optional.ofNullable(getValueItem(Name.of(name)));
+        return optValue(Name.of(name));
     }
 
     /**
@@ -195,8 +146,13 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @return
      */
     @Override
-    public Collection<String> getNodeNames() {
-        return this.nodes.keySet();
+    public Stream<String> getNodeNames(boolean includeHidden) {
+        Stream<String> res = this.nodes.keySet().stream();
+        if (includeHidden) {
+            return res;
+        } else {
+            return res.filter(it -> !it.startsWith("@"));
+        }
     }
 
     /**
@@ -215,8 +171,13 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @return
      */
     @Override
-    public Collection<String> getValueNames() {
-        return this.values.keySet();
+    public Stream<String> getValueNames(boolean includeHidden) {
+        Stream<String> res = this.values.keySet().stream();
+        if (includeHidden) {
+            return res;
+        } else {
+            return res.filter(it -> !it.startsWith("@"));
+        }
     }
 
     /**
@@ -225,8 +186,8 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
      * @param name
      * @return
      */
-    protected List<T> getChildNodeItem(String name) {
-        return nodes.get(name);
+    protected Optional<List<T>> optChildNodeItem(String name) {
+        return Optional.ofNullable(nodes.get(name));
     }
 
     /**
@@ -243,6 +204,16 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         return !(name.contains("[") || name.contains("]") || name.contains("$"));
     }
 
+
+    /**
+     * Create a deep copy of the node but do not set parent or name. Deep copy
+     * does not clone listeners
+     *
+     * @param node
+     * @return
+     */
+    protected abstract T cloneNode(Meta node);
+
     @Override
     public Meta toMeta() {
         return this;
@@ -255,49 +226,12 @@ public class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
         }
         this.name = meta.getName();
 
-        MetaNode node = (meta instanceof MetaNode) ? (MetaNode) meta : from(meta);
+        meta.getValueNames(true).forEach(valueName -> {
+            this.values.put(valueName, meta.getValue(valueName));
+        });
 
-        this.values.putAll(node.values);
-        this.nodes.putAll(node.nodes);
+        meta.getNodeNames(true).forEach(nodeName -> {
+            this.nodes.put(nodeName, meta.getMetaList(nodeName).stream().map(this::cloneNode).collect(Collectors.toList()));
+        });
     }
-
-//    /**
-//     * A stream containing pairs
-//     *
-//     * @param prefix
-//     * @return
-//     */
-//    private Stream<Pair<String, T>> nodeStream(String prefix) {
-//        return Stream.concat(Stream.of(new Pair<>(prefix, this)),
-//                this.getNodeNames().stream().flatMap(nodeName -> {
-//                    List<? extends T> metaList = this.getMetaList(nodeName);
-//                    String nodePrefix;
-//                    if (prefix == null || prefix.isEmpty()) {
-//                        nodePrefix = nodeName;
-//                    } else {
-//                        nodePrefix = prefix + "." + nodeName;
-//                    }
-//                    return IntStream.range(0, metaList.size()).boxed()
-//                            .flatMap(i -> {
-//                                String subPrefix = String.format("%s[%d]", nodePrefix, i);
-//                                T subNode = metaList.get(i);
-//                                return nodeStream(subPrefix, subNode);
-//                            });
-//                })
-//        );
-//    }
-//
-//    public Stream<Pair<String, T>> nodeStream() {
-//        return nodeStream("");
-//    }
-//
-//    public Stream<Pair<String, Value>> valueStream() {
-//        return nodeStream().flatMap((Pair<String, T> entry) -> {
-//            String key = entry.getKey();
-//            Meta childMeta = entry.getValue();
-//            return childMeta.getValueNames().stream()
-//                    .map((String valueName) -> new Pair<>(key + "." + valueName, childMeta.getValue(valueName)));
-//        });
-//    }
-
 }

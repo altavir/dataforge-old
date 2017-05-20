@@ -79,33 +79,33 @@ public class XMLMetaWriter implements MetaStreamWriter {
         return str.replace("@", "_at_");
     }
 
-    private Element getXMLElement(Meta an, Document doc) {
+    private Element getXMLElement(Meta meta, Document doc) {
         String elementName;
-        if (an.isAnonimous()) {
+        if (meta.isAnonimous()) {
             elementName = "meta";
         } else {
-            elementName = an.getName();
+            elementName = meta.getName();
         }
         Element res = doc.createElement(normalizeName(elementName));
 //        MetaBuilder builder = an.getBuilder();
 //        Map<String, Item<Annotation>> elements = builder.getElementMap();
 //        Map<String, Item<Value>> values = builder.getValueMap();
 
-        for (String name : an.getValueNames()) {
-            List<Value> valueList = an.getValue(name).listValue();
+        meta.getValueNames().forEach(valueName -> {
+            List<Value> valueList = meta.getValue(valueName).listValue();
             if (valueList.size() == 1) {
-                res.setAttribute(normalizeName(name), valueList.get(0).stringValue());
+                res.setAttribute(normalizeName(valueName), valueList.get(0).stringValue());
             } else {
                 String val = valueList
                         .stream()
                         .map((v) -> v.stringValue())
                         .collect(Collectors.joining(", ", "[", "]"));
-                res.setAttribute(normalizeName(name), val);
+                res.setAttribute(normalizeName(valueName), val);
             }
-        }
+        });
 
-        for (String name : an.getNodeNames()) {
-            List<? extends Meta> elementList = an.getMetaList(name);
+        meta.getNodeNames().forEach(nodeName -> {
+            List<? extends Meta> elementList = meta.getMetaList(nodeName);
             if (elementList.size() == 1) {
                 Element el = getXMLElement(elementList.get(0), doc);
                 res.appendChild(el);
@@ -116,7 +116,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
                 }
             }
 
-        }
+        });
         return res;
     }
 }

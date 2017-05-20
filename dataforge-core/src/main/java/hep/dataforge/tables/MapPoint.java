@@ -141,9 +141,9 @@ public class MapPoint implements DataPoint, MetaMorph {
         if (!this.valueMap.isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
-        for (String valName : meta.getValueNames()) {
+        meta.getValueNames().forEach(valName -> {
             valueMap.put(valName, meta.getValue(valName));
-        }
+        });
     }
 
     @Override

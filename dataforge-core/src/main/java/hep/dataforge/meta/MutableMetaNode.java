@@ -36,7 +36,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
     protected T parent;
 
-    protected MutableMetaNode(){
+    protected MutableMetaNode() {
         super();
     }
 
@@ -95,27 +95,28 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * Add a copy of given meta to the node list with given name. Create a new
      * one if it does not exist
      *
-     * @param element
-     * @param notify  notify listeners
+     * @param node
+     * @param notify notify listeners
      */
-    public T putNode(String name, Meta element, boolean notify) {
+    public T putNode(String name, Meta node, boolean notify) {
         if (!isValidElementName(name)) {
             throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", name));
         }
 
-        T newNode = transformNode(name, element);
-        List<T> list = this.getChildNodeItem(name);
+        T newNode = transformNode(name, node);
+        List<T> list = super.nodes.get(name);
         List<T> oldList = list != null ? new ArrayList<>(list) : null;
         if (list == null) {
-            List<Meta> newList = new ArrayList<>();
+            List<T> newList = new ArrayList<>();
             newList.add(newNode);
             this.setNodeItem(name, newList);
-            list = this.getChildNodeItem(name);
+            list = newList;
         } else {
+            //Adding items to existing list. No need to update parents and listeners
             list.add(newNode);
         }
         if (notify) {
-            notifyNodeChanged(element.getName(), oldList, list);
+            notifyNodeChanged(node.getName(), oldList, new ArrayList<>(list));
         }
         return self();
     }
@@ -162,7 +163,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             if (hasValue(name)) {
                 Value oldValue = getValue(name);
 
-                List<Value> list = new ArrayList(oldValue.listValue());
+                List<Value> list = new ArrayList<>(oldValue.listValue());
                 list.add(value);
 
                 Value newValue = Value.of(list);
@@ -255,7 +256,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     public T setNode(String name, Meta... elements) {
         List<Meta> res = new ArrayList<>();
         res.addAll(Arrays.asList(elements));
-        return setNode(name, res);
+        return setNode(name, Arrays.asList(elements));
     }
 
     /**
@@ -468,12 +469,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     private List<T> transformNodeItem(String name, List<? extends Meta> item) {
         List<T> res = new ArrayList<>();
-        item.stream().map((an) -> transformNode(name, an)).map((el) -> {
-            el.parent = this;
-            return el;
-        }).forEach((el) -> {
-            res.add(el);
-        });
+        item.stream().map((an) -> transformNode(name, an)).peek((el) -> el.parent = this).forEach(res::add);
         return res;
     }
 
@@ -492,14 +488,14 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     protected abstract T createChildNode(String name);
 
-    /**
-     * Create a deep copy of the node but do not set parent or name. Deep copy
-     * does not clone listeners
-     *
-     * @param node
-     * @return
-     */
-    protected abstract T cloneNode(Meta node);
+//    /**
+//     * Create a deep copy of the node but do not set parent or name. Deep copy
+//     * does not clone listeners
+//     *
+//     * @param node
+//     * @return
+//     */
+//    protected abstract T cloneNode(Meta node);
 
     /**
      * Attach node item without transformation. Each node's parent is changed to

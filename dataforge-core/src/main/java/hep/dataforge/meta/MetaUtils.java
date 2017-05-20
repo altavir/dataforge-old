@@ -135,6 +135,11 @@ public class MetaUtils {
      * @return
      */
     public static <T extends MetaNode> List<T> applyQuery(List<T> nodeList, String query) {
+        if (query.isEmpty()) {
+            return nodeList;
+        }
+
+
         //TODO make queries more complicated
         int num;
         try {
@@ -155,7 +160,7 @@ public class MetaUtils {
      * @return
      */
     private static Stream<Pair<String, Meta>> nodeStream(String prefix, Meta node, boolean includeRoot) {
-        Stream<Pair<String, Meta>> subNodeStream = node.getNodeNames().stream().flatMap(nodeName -> {
+        Stream<Pair<String, Meta>> subNodeStream = node.getNodeNames().flatMap(nodeName -> {
             List<? extends Meta> metaList = node.getMetaList(nodeName);
             String nodePrefix;
             if (prefix == null || prefix.isEmpty()) {
@@ -189,7 +194,7 @@ public class MetaUtils {
         return nodeStream("", node, true).flatMap((Pair<String, Meta> entry) -> {
             String key = entry.getKey();
             Meta childMeta = entry.getValue();
-            return childMeta.getValueNames().stream()
+            return childMeta.getValueNames()
                     .map((String valueName) -> {
                         String prefix;
                         if (key.isEmpty()) {
@@ -210,31 +215,44 @@ public class MetaUtils {
      * @param includeName include node name in serialization
      * @throws IOException
      */
-    public static void writeMeta(ObjectOutput out, Meta meta, boolean includeName) throws IOException {
-        // write name if it is required
-        if (includeName) {
-            out.writeUTF(meta.getName());
-        }
-        out.writeShort(meta.getValueNames().size());
-        //writing values in format [name length, name, value]
-        for (String valName : meta.getValueNames()) {
-            out.writeUTF(valName);
-            ValueUtils.writeValue(out, meta.getValue(valName));
-        }
-        out.writeShort(meta.getNodeNames().size());
-        for (String nodeName : meta.getNodeNames()) {
-            out.writeUTF(nodeName);
-            List<? extends Meta> metas = meta.getMetaList(nodeName);
-            out.writeShort(metas.size());
-            for (Meta m : metas) {
-                //ignoring names for children
-                writeMeta(out, m, false);
+    public static void writeMeta(ObjectOutput out, Meta meta, boolean includeName) {
+        try {
+            // write name if it is required
+            if (includeName) {
+                out.writeUTF(meta.getName());
             }
+            out.writeShort((int) meta.getValueNames(true).count());
+            //writing values in format [name length, name, value]
+            meta.getValueNames(true).forEach(valName -> {
+                try {
+                    out.writeUTF(valName);
+                    ValueUtils.writeValue(out, meta.getValue(valName));
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+
+            out.writeShort((int) meta.getNodeNames(true).count());
+            meta.getNodeNames(true).forEach(nodeName -> {
+                try {
+                    out.writeUTF(nodeName);
+                    List<? extends Meta> metas = meta.getMetaList(nodeName);
+                    out.writeShort(metas.size());
+                    for (Meta m : metas) {
+                        //ignoring names for children
+                        writeMeta(out, m, false);
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            });
+            out.flush();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
-        out.flush();
     }
 
-    public static void writeMeta(ObjectOutput out, Meta meta) throws IOException {
+    public static void writeMeta(ObjectOutput out, Meta meta) {
         writeMeta(out, meta, true);
     }
 

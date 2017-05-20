@@ -15,6 +15,7 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
@@ -46,32 +47,30 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     /**
      * A deep copy constructor
      *
-     * @param annotation
+     * @param meta
      */
-    public MetaBuilder(Meta annotation) {
-        super(annotation.getName());
-        Collection<String> valueNames = annotation.getValueNames();
-        valueNames.stream().forEach((valueName) -> {
-            setValueItem(valueName, annotation.getValue(valueName));
+    public MetaBuilder(Meta meta) {
+        super(meta.getName());
+        meta.getValueNames(true).forEach((valueName) -> {
+            setValueItem(valueName, meta.getValue(valueName));
         });
 
-        Collection<String> elementNames = annotation.getNodeNames();
-        elementNames.stream().forEach((elementName) -> {
-            List<MetaBuilder> item = annotation.getMetaList(elementName).stream()
-                    .map((an) -> new MetaBuilder(an))
+        meta.getNodeNames(true).forEach((elementName) -> {
+            List<MetaBuilder> item = meta.getMetaList(elementName).stream()
+                    .map(MetaBuilder::new)
                     .collect(Collectors.toList());
             setNodeItem(elementName, new ArrayList<>(item));
         });
     }
 
     /**
-     * return an immutable annotation base on this builder
+     * return an immutable meta based on this builder
      *
      * @return a {@link hep.dataforge.meta.Meta} object.
      */
     @Override
     public Meta build() {
-        return MetaNode.from(this);
+        return new SealedNode(this);
     }
 
     public MetaBuilder rename(String newName) {
@@ -118,17 +117,26 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     public MetaBuilder updateNode(String name, MergeRule rule, Meta... elements) {
         if (!hasMeta(name)) {
             MetaBuilder.this.setNode(name, elements);
-        }
-        List<MetaBuilder> list = super.getChildNodeItem(name);
-        if (list.size() != elements.length) {
-            throw new RuntimeException("Can't update element item with an item of different size");
         } else {
-            MetaBuilder[] newList = new MetaBuilder[list.size()];
-            for (int i = 0; i < list.size(); i++) {
-                newList[i] = rule.merge(elements[i], list.get(i)).rename(name);
+            Name n = Name.of(name);
+            if (n.length() == 1) {
+                optChildNodeItem(name).ifPresent(list -> {
+                    if (list.size() != elements.length) {
+                        throw new RuntimeException("Can't update element item with an item of different size");
+                    } else {
+                        MetaBuilder[] newList = new MetaBuilder[list.size()];
+                        for (int i = 0; i < list.size(); i++) {
+                            newList[i] = rule.merge(elements[i], list.get(i)).rename(name);
+                        }
+                        super.setNode(name, newList);
+                    }
+                });
+            } else {
+                getMeta(n.cutLast().toString()).updateNode(n.getLast().toString(), rule, elements);
             }
-            super.setNode(name, newList);
         }
+
+
         return this;
     }
 
@@ -156,8 +164,8 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
      * @param values
      * @return
      */
-    public MetaBuilder update(Map<String, ? extends Object> values) {
-        values.forEach((key, value) -> setValue(key, value));
+    public MetaBuilder update(Map<String, ?> values) {
+        values.forEach(this::setValue);
         return self();
     }
 
@@ -221,7 +229,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     public MetaBuilder transform(final UnaryOperator<MetaBuilder> nodeTransform, final BiFunction<String, Value, Value> valueTransform) {
         MetaBuilder res = nodeTransform.apply(this);
         res.values.replaceAll(valueTransform);
-        res.nodes.values().stream().forEach((item) -> {
+        res.nodes.values().forEach((item) -> {
             item.replaceAll((MetaBuilder t) -> t.transform(nodeTransform, valueTransform));
         });
         return res;

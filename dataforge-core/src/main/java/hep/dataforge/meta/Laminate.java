@@ -205,24 +205,18 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     @Override
-    public Collection<String> getNodeNames() {
-        return getNodeNames(true);
+    public Stream<String> getNodeNames(boolean includeHidden) {
+        return getNodeNames(includeHidden, true);
     }
 
 
-    public Collection<String> getNodeNames(boolean includeDefaults) {
-        Set<String> names = new HashSet<>();
-        if (layers != null) {
-            layers.stream().forEach((m) -> {
-                names.addAll(m.getNodeNames());
-            });
+    public Stream<String> getNodeNames(boolean includeHidden, boolean includeDefaults) {
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden));
+        if(includeDefaults && descriptorLayer != null){
+            return Stream.concat(names, descriptorLayer.getNodeNames(includeHidden));
+        } else {
+            return names;
         }
-
-        if (includeDefaults && descriptorLayer != null) {
-            names.addAll(descriptorLayer.getNodeNames());
-        }
-
-        return names;
     }
 
     /**
@@ -231,21 +225,17 @@ public class Laminate extends Meta implements Described {
      * @return
      */
     @Override
-    public Collection<String> getValueNames() {
-        return getValueNames(true);
+    public Stream<String> getValueNames(boolean includeHidden) {
+        return getValueNames(includeHidden, true);
     }
 
-    public Collection<String> getValueNames(boolean includeDefaults) {
-        Set<String> names = new HashSet<>();
-        layers.stream().forEach((m) -> {
-            names.addAll(m.getValueNames());
-        });
-
-        if (includeDefaults && descriptorLayer != null) {
-            names.addAll(descriptorLayer.getValueNames());
+    public Stream<String> getValueNames(boolean includeHidden, boolean includeDefaults) {
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden));
+        if(includeDefaults && descriptorLayer != null){
+            return Stream.concat(names, descriptorLayer.getValueNames(includeHidden));
+        } else {
+            return names;
         }
-
-        return names;
     }
 
     @Override
@@ -323,7 +313,7 @@ public class Laminate extends Meta implements Described {
         return layers().stream()
                 .filter(layer -> layer.hasMeta(nodeName))
                 .flatMap(layer -> layer.getMetaList(nodeName).stream())
-                .collect(Collectors.groupingBy(classifier, () -> new LinkedHashMap<>(), collector)).values();
+                .collect(Collectors.groupingBy(classifier, LinkedHashMap::new, collector)).values();
         //linkedhashmap ensures ordering
     }
 

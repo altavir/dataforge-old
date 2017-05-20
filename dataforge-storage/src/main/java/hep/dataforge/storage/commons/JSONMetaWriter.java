@@ -54,11 +54,11 @@ public class JSONMetaWriter implements MetaStreamWriter {
                 .write(fromMeta(meta));
     }
 
-    public JsonObject fromMeta(Meta an) {
+    public JsonObject fromMeta(Meta meta) {
         JsonObjectBuilder res = Json.createObjectBuilder();
         // записываем все значения
-        for (String key : an.getValueNames()) {
-            List<Value> item = an.getValue(key).listValue();
+        meta.getValueNames().forEach(key ->{
+            List<Value> item = meta.getValue(key).listValue();
             if (item.size() == 1) {
                 res.add(key, item.get(0).stringValue());
             } else {
@@ -68,10 +68,10 @@ public class JSONMetaWriter implements MetaStreamWriter {
                 }
                 res.add(key, array);
             }
-        }
-        // рекурсивно записываем все аннотации
-        for (String key : an.getNodeNames()) {
-            List<? extends Meta> item = an.getMetaList(key);
+        });
+        // write all meta nodes recursively
+        meta.getNodeNames().forEach(key ->{
+            List<? extends Meta> item = meta.getMetaList(key);
             if (item.size() == 1) {
                 res.add(key, fromMeta(item.get(0)));
             } else {
@@ -81,7 +81,7 @@ public class JSONMetaWriter implements MetaStreamWriter {
                 }
                 res.add(key, array);
             }
-        }
+        });
         return res.build();
     }
 }

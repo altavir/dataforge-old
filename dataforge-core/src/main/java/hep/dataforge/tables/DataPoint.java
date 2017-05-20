@@ -33,11 +33,11 @@ public interface DataPoint extends NamedValueSet, Serializable {
 
     static List<DataPoint> buildFromMeta(Meta annotation) {
         List<DataPoint> res = new ArrayList<>();
-        for (Meta pointAn : annotation.getMetaList("point")) {
+        for (Meta pointMeta : annotation.getMetaList("point")) {
             Map<String, Value> map = new HashMap<>();
-            for (String key : pointAn.getValueNames()) {
-                map.put(key, pointAn.getValue(key));
-            }
+            pointMeta.getValueNames().forEach(key->{
+                map.put(key, pointMeta.getValue(key));
+            });
             res.add(new MapPoint(map));
         }
         return res;

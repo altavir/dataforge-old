@@ -45,7 +45,7 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
         return new ReplaceRule();
     }
 
-    public static MergeRule join(){
+    public static MergeRule join() {
         return new JoinRule();
     }
 
@@ -106,17 +106,17 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
         builder.rename(mergeName(main.getName(), builder.getName()));
 
         // Overriding values
-        for (String valueName : main.getValueNames()) {
+        main.getValueNames().forEach(valueName -> {
             if (!builder.hasValue(valueName)) {
                 writeValue(builder, valueName, main.getValue(valueName));
             } else {
                 writeValue(builder, valueName, mergeValues(Name.join(builder.getFullName(), Name.of(valueName)),
                         main.getValue(valueName), builder.getValue(valueName)));
             }
-        }
+        });
 
         // Overriding nodes
-        for (String nodeName : main.getNodeNames()) {
+        main.getNodeNames().forEach(nodeName->{
             if (!builder.hasMeta(nodeName)) {
                 writeElement(builder, nodeName, main.getMetaList(nodeName));
             } else {
@@ -131,7 +131,7 @@ public abstract class MergeRule implements Collector<Meta, MetaBuilder, Meta> {
                     writeElement(builder, nodeName, item);
                 }
             }
-        }
+        });
 
         return builder;
     }

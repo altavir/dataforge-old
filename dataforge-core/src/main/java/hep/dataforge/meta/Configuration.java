@@ -20,7 +20,6 @@ import hep.dataforge.values.Value;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,18 +59,17 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     public Configuration(Meta meta) {
         super(meta.getName());
-        Collection<String> valueNames = meta.getValueNames();
-        for (String valueName : valueNames) {
+        meta.getValueNames(true).forEach(valueName -> {
             setValueItem(valueName, meta.getValue(valueName));
-        }
+        });
 
-        Collection<String> elementNames = meta.getNodeNames();
-        for (String elementName : elementNames) {
-            List<Configuration> item = meta.getMetaList(elementName).stream()
-                    .map((an) -> new Configuration(an))
+        meta.getNodeNames(true).forEach(nodeName -> {
+            List<Configuration> item = meta.getMetaList(nodeName).stream()
+                    .map(Configuration::new)
                     .collect(Collectors.toList());
-            setNodeItem(elementName, new ArrayList<>(item));
-        }
+            setNodeItem(nodeName, new ArrayList<>(item));
+
+        });
     }
 
     /**
@@ -83,7 +81,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     @Override
     protected void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-        observers.stream().forEach((ConfigChangeListener obs) -> obs.notifyElementChanged(name, oldItem, newItem));
+        observers.forEach((ConfigChangeListener obs) -> obs.notifyElementChanged(name, oldItem, newItem));
         super.notifyNodeChanged(name, oldItem, newItem);
     }
 
@@ -96,7 +94,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     @Override
     protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
-        observers.stream().forEach((ConfigChangeListener obs)
+        observers.forEach((ConfigChangeListener obs)
                 -> obs.notifyValueChanged(name, oldItem, newItem));
         super.notifyValueChanged(name, oldItem, newItem);
     }
@@ -139,11 +137,11 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     public void update(Meta annotation) {
         if (annotation != null) {
-            annotation.getValueNames().stream().forEach((valueName) -> {
+            annotation.getValueNames().forEach((valueName) -> {
                 setValue(valueName, annotation.getValue(valueName));
             });
 
-            annotation.getNodeNames().stream().forEach((elementName) -> {
+            annotation.getNodeNames().forEach((elementName) -> {
                 setNode(elementName,
                         annotation
                                 .getMetaList(elementName)
