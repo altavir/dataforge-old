@@ -7,18 +7,16 @@ import hep.dataforge.description.ValueDef;
 import javafx.beans.binding.BooleanBinding;
 import javafx.util.Pair;
 import org.jetbrains.annotations.Nullable;
+import ratpack.func.Action;
 import ratpack.handling.Chain;
-import ratpack.handling.Handler;
 import ratpack.server.RatpackServer;
 import ratpack.server.RatpackServerSpec;
 import ratpack.server.ServerConfigBuilder;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A web server manager. Only one servlet is allowed per context
@@ -37,7 +35,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
     /**
      * Customizable handlers
      */
-    private Handler rootHandler; //TODO replace by full chaing configuration
+    private Action<Chain> rootHandler; //TODO replace by full chaing configuration
 
     private List<ServerObject> bindings = new ArrayList<>();
 
@@ -53,7 +51,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
     public void attach(Context context) {
         super.attach(context);
         if (rootHandler == null) {
-            rootHandler = new ContextRatpackHandler(this, context);
+            rootHandler = chain -> chain.get(new ContextRatpackHandler(this, context));
         }
     }
 
@@ -96,10 +94,10 @@ public class ServerManager extends BasicPlugin implements ServerObject {
     /**
      * Set the handler for the index page
      *
-     * @param rootHandler
+     * @param action
      */
-    public void setRootHandler(Handler rootHandler) {
-        this.rootHandler = rootHandler;
+    public void setIndexPage(Action<Chain> action) {
+        this.rootHandler = action;
         reload();
     }
 
@@ -149,6 +147,23 @@ public class ServerManager extends BasicPlugin implements ServerObject {
         }
     }
 
+    /**
+     * Wrap a given object into a server object
+     *
+     * @param parent
+     * @param object
+     * @param path
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static ServerObject wrap(ServerObject parent, Object object, String path) {
+        ServiceLoader<ServerWrapper> loader = ServiceLoader.load(ServerWrapper.class);
+        ServerWrapper wrapper = StreamSupport.stream(loader.spliterator(), false)
+                .filter(it -> it.getType().isInstance(object)).findFirst()
+                .orElseGet(DefaultServerWrapper::new);
+        return wrapper.wrap(parent, object, path);
+    }
+
     public Map<String, Object> buildBasicData(ratpack.handling.Context ctx) {
         Map<String, Object> binding = new HashMap<>();
 
@@ -184,8 +199,10 @@ public class ServerManager extends BasicPlugin implements ServerObject {
 
     @Override
     public void updateChain(Chain chain) {
-        if (rootHandler != null) {
-            chain.get(rootHandler);
+        try {
+            rootHandler.execute(chain);
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to apply root chain", e);
         }
         ServerObject.super.updateChain(chain);
     }
