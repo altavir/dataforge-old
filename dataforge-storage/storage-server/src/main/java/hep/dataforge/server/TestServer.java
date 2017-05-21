@@ -7,13 +7,13 @@ package hep.dataforge.server;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
+import hep.dataforge.server.storage.StorageServeUtils;
 import hep.dataforge.storage.commons.StorageManager;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class TestServer {
@@ -23,14 +23,14 @@ public class TestServer {
      * @throws hep.dataforge.exceptions.StorageException
      */
     public static void main(String[] args) throws Exception {
-        Context context = Global.getContext("SERVLET");
+        Context context = Global.getContext("SERVER-TEST");
         StorageManager storageManager = context.pluginManager().load(StorageManager.class);
 
         ServerManager serverManager = context.pluginManager().load(ServerManager.class);
 
         String path = "D:/temp/test";
         System.out.println("Starting test numass storage servlet in " + path);
-        serverManager.addFileStorage("storage", path);
+        StorageServeUtils.addFileStorage(serverManager, path, "test");
 
         serverManager.startServer();
 
@@ -44,6 +44,7 @@ public class TestServer {
 
         System.out.println("Stopping ratpack");
         serverManager.stopServer();
+        Global.terminate();
     }
 
 }

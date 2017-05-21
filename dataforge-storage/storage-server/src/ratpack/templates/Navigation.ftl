@@ -16,8 +16,8 @@
         </div>
         <div id="navbar" class="navbar-collapse collapse">
             <ul class="nav navbar-nav">
-            <#list navigation?sort as nav>
-                <li><a href="${homeURL}/${nav}">${nav}</a></li>
+            <#list navigation as nav>
+                <li><a href="${homeURL}/${nav.getKey()}">${nav.getValue()}</a></li>
             </#list>
             </ul>
         </div>

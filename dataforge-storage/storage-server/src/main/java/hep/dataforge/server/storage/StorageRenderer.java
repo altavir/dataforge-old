@@ -1,4 +1,4 @@
-package hep.dataforge.server;
+package hep.dataforge.server.storage;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.names.Named;

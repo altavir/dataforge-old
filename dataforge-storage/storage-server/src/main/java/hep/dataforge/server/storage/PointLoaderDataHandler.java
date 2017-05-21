@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.server;
+package hep.dataforge.server.storage;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.PointLoader;
@@ -19,7 +19,7 @@ import hep.dataforge.tables.Table;
  *
  * @author Alexander Nozik
  */
-public class PointLoaderDataHandler extends DataHandler {
+public class PointLoaderDataHandler extends GoogleDataHandler {
 
 //    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
 

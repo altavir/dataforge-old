@@ -1,4 +1,4 @@
-package hep.dataforge.server;
+package hep.dataforge.server.storage;
 
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;

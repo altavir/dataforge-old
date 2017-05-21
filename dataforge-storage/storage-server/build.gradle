@@ -17,8 +17,9 @@ dependencies {
 
 //ratpack.baseDir = file('src/ratpack')
 
-task testServer(type: JavaExec){
+task testServer(type: JavaExec) {
     group "df"
+    systemProperties << ["ratpack.development": true]
     description "Run test server"
     main 'hep.dataforge.server.TestServer'
     classpath = sourceSets.main.runtimeClasspath

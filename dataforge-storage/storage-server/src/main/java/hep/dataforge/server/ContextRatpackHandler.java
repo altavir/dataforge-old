@@ -1,15 +1,13 @@
 package hep.dataforge.server;
 
 import freemarker.template.Template;
+import hep.dataforge.context.Plugin;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
 import java.io.StringWriter;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
-
-import static hep.dataforge.server.ServletUtils.getServerURL;
 
 /**
  * Created by darksnake on 13-May-17.
@@ -29,9 +27,8 @@ public class ContextRatpackHandler implements Handler {
         Template template = ServletUtils.freemarkerConfig().getTemplate("Context.ftl");
 
 
-        Map<String, Object> binding = new HashMap<>();
-        binding.put("homeURL",getServerURL(ctx));
-        binding.put("navigation",manager.listHandlers());
+        Map<String, Object> binding = manager.buildBasicData(ctx);
+
         binding.put("contextName", context.getName());
         binding.put("properties", context.getProperties().entrySet());
 
@@ -43,7 +40,7 @@ public class ContextRatpackHandler implements Handler {
                     } else {
                         return String.format("(%s) %s", plugin.getContext().getName(), plugin.getName());
                     }
-                }, manager::resolveObject));
+                }, Plugin::getName));
 
         binding.put("plugins", plugins.entrySet());
 

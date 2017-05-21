@@ -1,4 +1,4 @@
-package hep.dataforge.server;
+package hep.dataforge.server.storage;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -28,9 +28,10 @@ import java.util.Map;
 import static hep.dataforge.storage.api.ValueIndex.LIMIT_KEY;
 
 /**
+ * The handler that returns data in Google Visualisation table format
  * Created by darksnake on 04-Apr-17.
  */
-public abstract class DataHandler implements Handler {
+public abstract class GoogleDataHandler implements Handler {
 
 
     private JsonArrayBuilder makeCols(TableFormat format) {

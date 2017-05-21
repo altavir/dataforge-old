@@ -61,7 +61,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
 
     @Override
     public synchronized ValueIndex<DataPoint> getIndex(String name) {
-        return indexMap.computeIfAbsent(name, str -> buildIndex(str));
+        return indexMap.computeIfAbsent(name, this::buildIndex);
     }
 
     protected abstract ValueIndex<DataPoint> buildIndex(String name);
@@ -75,7 +75,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
     @Override
     public void push(DataPoint dp) throws StorageException {
         //Notifying the listener
-        listeners.stream().forEach((l) -> {
+        listeners.forEach((l) -> {
             l.accept(dp);
         });
         pushPoint(dp);
@@ -119,7 +119,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                         String valueName = messageMeta.getString("valueName", "");
                         points = messageMeta.getValue("value").listValue().stream()
                                 .map(val -> getIndex(valueName).pullOne(val))
-                                .filter(it -> it.isPresent()).map(it -> it.get())
+                                .filter(Optional::isPresent).map(Optional::get)
                                 .collect(Collectors.toList());
                     } else if (messageMeta.hasMeta("range")) {
                         String valueName = messageMeta.getString("valueName", "");

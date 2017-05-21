@@ -11,11 +11,11 @@ public final class SealedNode extends MetaNode<SealedNode> {
 
     public SealedNode(Meta meta) {
         super(meta.getName());
-        getValueNames(true).forEach((valueName) -> {
+        meta.getValueNames(true).forEach((valueName) -> {
             super.values.put(valueName,meta.getValue(valueName));
         });
 
-        getNodeNames(true).forEach((nodeName) -> {
+        meta.getNodeNames(true).forEach((nodeName) -> {
             List<SealedNode> item = meta.getMetaList(nodeName).stream()
                     .map(SealedNode::new)
                     .collect(Collectors.toList());

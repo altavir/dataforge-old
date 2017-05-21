@@ -24,11 +24,11 @@ import static org.junit.Assert.assertEquals;
  *
  * @author darksnake
  */
-public class AnnotationTest {
+public class MetaTest {
 
     static Meta testAnnotation;
 
-    public AnnotationTest() {
+    public MetaTest() {
     }
 
     @BeforeClass

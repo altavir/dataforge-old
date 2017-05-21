@@ -102,7 +102,7 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
     Collection<Loader> loaders() throws StorageException;
 
     /**
-     * A map of all shelfs in this storage and their annotations
+     * A list of all shelves in this storage
      *
      * @return
      * @throws StorageException

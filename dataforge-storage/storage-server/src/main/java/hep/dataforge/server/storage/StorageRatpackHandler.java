@@ -1,9 +1,11 @@
-package hep.dataforge.server;
+package hep.dataforge.server.storage;
 
 import freemarker.template.Template;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
+import hep.dataforge.server.ServerManager;
+import hep.dataforge.server.ServletUtils;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.JSONMetaWriter;
 import org.slf4j.LoggerFactory;
@@ -16,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import static hep.dataforge.server.StorageRenderer.renderStorage;
+import static hep.dataforge.server.storage.StorageRenderer.renderStorage;
 
 /**
  * Created by darksnake on 13-Dec-15.
@@ -25,7 +27,7 @@ public class StorageRatpackHandler implements Handler {
 
     private final ServerManager manager;
     private final Storage root;
-    private Map<String, SoftReference<Loader>> cache= new ConcurrentHashMap<>();
+    private Map<String, SoftReference<Loader>> cache = new ConcurrentHashMap<>();
 
     public StorageRatpackHandler(ServerManager manager, Storage root) {
         this.manager = manager;
@@ -40,8 +42,8 @@ public class StorageRatpackHandler implements Handler {
             String path = ctx.getRequest().getQueryParams().get("path");
             //quick-fix to work with root loaders
             //TODO do better inside provider
-            if(path.startsWith("/")){
-                path = path.replace("/","loader::");
+            if (path.startsWith("/")) {
+                path = path.replace("/", "loader::");
             }
 
             Loader loader = null;
@@ -83,10 +85,10 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("Storage.ftl");
 
             StringBuilder b = new StringBuilder();
-            String basePath = manager.resolveObject(storage);
-            renderStorage(b,basePath, storage);
+            String basePath = ctx.getRequest().getPath();
+            renderStorage(b, basePath, storage);
 
-            Map<String,Object> data = buildBasicData(ctx);
+            Map<String, Object> data = buildStorageData(ctx);
             data.put("storageName", storage.getName());
             data.put("content", b.toString());
             data.put("path", Name.of(storage.getFullPath()).asArray());
@@ -169,8 +171,8 @@ public class StorageRatpackHandler implements Handler {
         }
     }
 
-    protected Map<String, Object> buildBasicData(Context ctx) {
-        Map<String, Object> binding = new HashMap<>();
+    private Map<String, Object> buildStorageData(Context ctx) {
+        Map<String, Object> binding = manager.buildBasicData(ctx);
 
 
 //            String valueName = ctx.getRequest().getQueryParams().getOrDefault("valueName", "timestamp");
@@ -178,22 +180,17 @@ public class StorageRatpackHandler implements Handler {
 //            String to = ctx.getRequest().getQueryParams().get("to");
 //            String maxItems = ctx.getRequest().getQueryParams().getOrDefault("items", "250");
 
-        String serverAddress = ServletUtils.getServerURL(ctx);
-
-        String dataSourceStr = serverAddress + ctx.getRequest().getUri() + "&action=pull";
-
-        binding.put("homeURL",serverAddress);
-        binding.put("navigation",manager.listHandlers());
+        String dataSourceStr = ctx.getRequest().getUri() + "&action=pull";
 
         binding.put("dataSource", dataSourceStr);
-        binding.put("rootURL", manager.resolveObject(root));
+        binding.put("rootURL", ctx.getRequest().getPath());
 
         binding.put("updateInterval", 30);
         return binding;
     }
 
-    protected Map<String, Object> buildLoaderData(Context ctx, Loader loader) {
-        Map<String, Object> data = buildBasicData(ctx);
+    private Map<String, Object> buildLoaderData(Context ctx, Loader loader) {
+        Map<String, Object> data = buildStorageData(ctx);
         data.put("path", Name.of(loader.getStorage().getFullPath()).asArray());
         data.put("loaderName", loader.getName());
         return data;

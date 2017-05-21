@@ -85,7 +85,7 @@ public class XMLMetaReader implements MetaStreamReader {
             //Оставляем только те элементы, в которых есть что-то кроме текста.
             //Те, в которых только текст уже посчитаны как значения
             if (e.hasAttributes() || e.getElementsByTagName("*").getLength() > 0) {
-                res.putNode(buildNode(e).build());
+                res.putNode(buildNode(e));
             }
         }
 

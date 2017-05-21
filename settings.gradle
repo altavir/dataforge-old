@@ -25,7 +25,8 @@ include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting
 
 include ':dataforge-control' // tools for measurement and control applications
 include ':dataforge-storage' // storage module
-include ':dataforge-storage:storage-servlet' // Storage web servlet
+include ':dataforge-storage:storage-server' // Storage web servlet
 include ':dataforge-storage:storage-oak'
 
+//include ':dataforge-server'
 include ':site'//the site
