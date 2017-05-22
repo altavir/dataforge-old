@@ -99,6 +99,8 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                 } else {
                     res = task.get(getMeasurementTimeout().toMillis(), TimeUnit.MILLISECONDS);
                 }
+
+
                 if (res != null) {
                     result(res.getKey(), res.getValue());
                 } else {
