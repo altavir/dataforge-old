@@ -3,10 +3,9 @@ package hep.dataforge.server.storage;
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.server.ServerObject;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.filestorage.FileStorage;
-import org.apache.commons.vfs2.FileObject;
 import org.jetbrains.annotations.Nullable;
 import ratpack.handling.Chain;
+import ratpack.handling.Handler;
 
 import java.util.stream.Stream;
 
@@ -51,16 +50,7 @@ public class StorageServerObject implements ServerObject {
         try {
             parentChain.prefix(getPath(), chain -> {
                 //adding storage handler
-                chain.get(new StorageRatpackHandler(manager, storage));
-                //adding files (permissions?) if FileStorage
-                if (storage instanceof FileStorage) {
-                    FileObject dir = ((FileStorage) storage).getDataDir();
-                    try {
-                        chain.files(it -> it.dir(dir.getURL().getPath()));
-                    } catch (Exception ex) {
-                        getContext().getLogger().error("Failed to load storage chain", ex);
-                    }
-                }
+                chain.get(buildHandler(storage));
                 //Adding children chains
                 ServerObject.super.updateChain(chain);
             });
@@ -69,8 +59,16 @@ public class StorageServerObject implements ServerObject {
         }
     }
 
+    protected Handler buildHandler(Storage storage){
+        return new StorageRatpackHandler(getManager(),storage);
+    }
+
+    protected StorageServerObject buildChildStorageObject(Storage shelf){
+        return new StorageServerObject(this, shelf);
+    }
+
     @Override
     public Stream<ServerObject> getChildren() {
-        return storage.shelves().stream().map(shelf -> new StorageServerObject(this, shelf));
+        return storage.shelves().stream().map(this::buildChildStorageObject);
     }
 }

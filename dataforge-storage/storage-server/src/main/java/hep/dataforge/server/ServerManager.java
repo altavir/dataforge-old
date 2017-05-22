@@ -104,9 +104,8 @@ public class ServerManager extends BasicPlugin implements ServerObject {
     /**
      * Add new ServerObject root and add it to main menu
      *
-     * @param <T>
      */
-    public <T> void bind(ServerObject sobj) {
+    public void bind(ServerObject sobj) {
         bindings.add(sobj);
         reload();
     }

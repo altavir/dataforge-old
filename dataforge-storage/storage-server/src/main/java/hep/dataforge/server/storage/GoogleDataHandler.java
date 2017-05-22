@@ -140,7 +140,7 @@ public abstract class GoogleDataHandler implements Handler {
         String tqx = ctx.getRequest().getQueryParams().get("tqx");
         Map<String, String> params = getRequestParams(tqx);
 
-        String rqid = params.get("reqId");
+        String reqId = params.get("reqId");
         String out = params.getOrDefault("onComplete", "json");
         String responseHandler = params.getOrDefault("responseHandler", "google.visualization.Query.setResponse");
         if (!out.equals("json")) {
@@ -157,7 +157,7 @@ public abstract class GoogleDataHandler implements Handler {
 
         JsonObject response = Json.createObjectBuilder()
                 .add("status", "ok")
-                .add("reqId", rqid)
+                .add("reqId", reqId)
                 .add("table", makeTable(data))
                 .build();
 
