@@ -31,7 +31,7 @@ public class StorageRenderer {
                     .forEach(shelf -> {
                         b.append(String.format("<li><strong>+ %s</strong></li>%n", shelf.getName()));
                         try {
-                            renderStorage(b, basePath, shelf);
+                            renderStorage(b, basePath + shelf.getName() + "/", shelf);
                         } catch (StorageException e) {
                             b.append("Error loading storage: " + e.getMessage());
                         }
@@ -42,7 +42,7 @@ public class StorageRenderer {
     }
 
     public static void renderLoaderEntry(StringBuilder b, String basePath, Loader loader) {
-        String href = basePath + "?path=" + loader.getPath();
+        String href = basePath + "loader::" + loader.getName();
         b.append(String.format("<li><a href=\"%s\">%s</a> (%s)</li>", href, loader.getName(), loader.getType()));
     }
 }

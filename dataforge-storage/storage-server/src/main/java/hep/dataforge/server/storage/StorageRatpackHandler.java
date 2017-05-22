@@ -41,17 +41,13 @@ public class StorageRatpackHandler implements Handler {
         } else {
             String path = ctx.getRequest().getQueryParams().get("path");
             //quick-fix to work with root loaders
-            //TODO do better inside provider
-            if (path.startsWith("/")) {
-                path = path.replace("/", "loader::");
-            }
 
             Loader loader = null;
             if (cache.containsKey(path)) {
                 loader = cache.get(path).get();
             }
             if (loader == null) {
-                loader = root.provide(path, Loader.class).orElseThrow(NameNotFoundException::new);
+                loader = root.provide(path, Loader.class).orElseThrow(() -> new NameNotFoundException(path));
                 cache.put(path, new SoftReference<>(loader));
             }
 
@@ -85,7 +81,7 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("Storage.ftl");
 
             StringBuilder b = new StringBuilder();
-            String basePath = ctx.getRequest().getPath();
+            String basePath = ctx.getRequest().getPath() + "?path=";
             renderStorage(b, basePath, storage);
 
             Map<String, Object> data = buildStorageData(ctx);
