@@ -17,42 +17,30 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
-import hep.dataforge.exceptions.StorageException;
-
-import java.util.function.Predicate;
+import hep.dataforge.io.envelopes.Envelope;
 
 /**
  * The loader for events. By default it does not provide any pull operations and
  * could ignore events partially or store only limited number of entries
  *
  * @author darksnake
- * @param <T>
  */
-public interface EventLoader<T extends Event> extends Loader, Iterable<T> {
-    //TODO remove generics
+
+public interface EventLoader extends Loader, Iterable<Event>, EventHandler {
 
     String EVENT_LOADER_TYPE = "event";
 
-    /**
-     * Put an event to Loader
-     * @param event
-     * @throws StorageException 
-     */
-    void push(T event) throws StorageException;
+    @Override
+    boolean pushEvent(Event event);
 
-    /**
-     * Add named listener for specific events
-     *
-     * @param name
-     * @param condition
-     * @param handler
-     */
-    void addEventListener(String name, Predicate<T> condition, EventHandler<T> handler);
+    @Override
+    default String getType() {
+        return EVENT_LOADER_TYPE;
+    }
 
-    /**
-     * Remove specific eventListener
-     *
-     * @param name
-     */
-    void removeEventListener(String name);
+
+    @Override
+    default Envelope respond(Envelope message) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
 }

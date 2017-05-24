@@ -15,11 +15,12 @@
  */
 package hep.dataforge.storage.loaders;
 
+import hep.dataforge.control.ConnectionHelper;
+import hep.dataforge.events.Event;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.PushFailedException;
-import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
@@ -36,16 +37,18 @@ public abstract class AbstractLoader implements Loader {
     protected Meta meta;
     protected boolean readOnly = false;
     private final Storage storage;
+    private final ConnectionHelper connectionHelper;
 
-    public AbstractLoader(Storage storage, String name, Meta annotation) {
+    public AbstractLoader(Storage storage, String name, Meta meta) {
         this.name = name;
-        this.meta = annotation;
+        this.meta = meta;
         this.storage = storage;
+        connectionHelper = new ConnectionHelper(storage.getContext().getLogger());
     }
 
-    public AbstractLoader(Storage storage, String name) {
-        this.name = name;
-        this.storage = storage;
+    @Override
+    public ConnectionHelper getConnectionHelper() {
+        return connectionHelper;
     }
 
     @Override
@@ -106,22 +109,16 @@ public abstract class AbstractLoader implements Loader {
         }
     }
 
-    /**
-     * An event loader associated with this loader.
-     *
-     * @return
-     * @throws hep.dataforge.exceptions.StorageException
-     */
-    protected EventLoader<?> getEventLoader() throws StorageException {
-        if (getStorage() != null) {
-            return getStorage().getDefaultEventLoader();
-        } else {
-            return null;
-        }
-    }
-
     public MessageValidator getValidator() {
         return StorageUtils.defaultMessageValidator(LOADER_TARGET, getName());
+    }
+
+    /**
+     * Notify all connections which can handle events
+     * @param event
+     */
+    protected void dispatchEvent(Event event){
+        forEachConnection(EventHandler.class,eventHandler -> eventHandler.pushEvent(event));
     }
 
     protected void checkOpen() {

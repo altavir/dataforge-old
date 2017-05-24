@@ -20,9 +20,9 @@ package hep.dataforge.values;
  * @author Alexander Nozik
  */
 public interface ValueListener {
-    void acquire(Value value);
+    void pushValue(Value value);
     
-    default void acquire(Object obj){
-        acquire(Value.of(obj));
+    default void pushValue(Object obj){
+        pushValue(Value.of(obj));
     }
 }

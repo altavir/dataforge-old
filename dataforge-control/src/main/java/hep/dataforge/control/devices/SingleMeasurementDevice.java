@@ -20,15 +20,12 @@ import static hep.dataforge.control.devices.SingleMeasurementDevice.MEASURING_ST
  * @author Alexander Nozik
  */
 @StateDef(name = MEASURING_STATE, info = "True if measurement is currently in progress")
-public abstract class SingleMeasurementDevice<T extends Measurement> extends AbstractMeasurementDevice {
+public abstract class SingleMeasurementDevice<T extends Measurement> extends AbstractDevice {
 
     public static final String MEASURING_STATE = "measuring";
 
     private T measurement;
 
-    //    public SingleMeasurementDevice(String name, Context context, Meta meta) {
-//        super(name, context, meta);
-//    }
     public T getMeasurement() {
         return measurement;
     }
@@ -36,20 +33,18 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
     @Override
     public Value getState(String stateName) {
         if (MEASURING_STATE.equals(stateName)) {
-            return Value.of(this.measurement != null);
+            return Value.of(this.measurement != null && ! this.measurement.isFinished());
         } else {
             return super.getState(stateName);
         }
     }
 
-    public T startMeasurement(String type) throws ControlException {
-        return startMeasurement(getMetaForMeasurement(type));
+    public T startMeasurement() throws ControlException {
+        return startMeasurement(getMeasurementMeta());
     }
 
     public T startMeasurement(Meta meta) throws ControlException {
         this.measurement = createMeasurement(meta);
-        onCreateMeasurement(measurement);
-        measurement.addListener(this);
         recalculateState(MEASURING_STATE);
         this.measurement.start();
         return this.measurement;
@@ -67,13 +62,15 @@ public abstract class SingleMeasurementDevice<T extends Measurement> extends Abs
         }
     }
 
-    @Override
-    public void onMeasurementFinished(Measurement measurement) {
-        this.measurement = null;
-        recalculateState(MEASURING_STATE);
-    }
-
-
     protected abstract T createMeasurement(Meta meta) throws ControlException;
+
+    /**
+     * Compute default meta for measurement
+     *
+     * @return
+     */
+    protected Meta getMeasurementMeta() {
+        return meta().getMetaOrEmpty("measurement");
+    }
 
 }

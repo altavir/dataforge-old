@@ -15,6 +15,9 @@
  */
 package hep.dataforge.storage.api;
 
+import hep.dataforge.control.AutoConnectible;
+import hep.dataforge.control.RoleDef;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
@@ -27,7 +30,8 @@ import hep.dataforge.providers.Path;
  *
  * @author Alexander Nozik
  */
-public interface Loader extends Metoid, AutoCloseable, Named, Responder {
+@RoleDef(name = "eventListener", objectType = EventHandler.class, info = "Handle events produced by this loader")
+public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoConnectible {
 
     String LOADER_NAME_KEY = "name";
     String LOADER_TYPE_KEY = "type";

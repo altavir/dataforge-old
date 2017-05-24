@@ -16,15 +16,10 @@
 package hep.dataforge.events;
 
 /**
- * Общий предок для всех классов, которые способны обрабатывать события
+ * A handler for events
  * @author Alexander Nozik
- * @param <T>
  */
-public interface EventHandler<T extends Event> {
-    /**
-     * Обработать событие (поставить в очередь, обработать немедленно и т.д.)
-     * @param event
-     * @return true  если событие успешно обработано
-     */
-    boolean handle(T event);
+@FunctionalInterface
+public interface EventHandler{
+    boolean pushEvent(Event event);
 }

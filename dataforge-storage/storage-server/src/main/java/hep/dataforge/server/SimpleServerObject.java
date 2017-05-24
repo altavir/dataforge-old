@@ -35,4 +35,9 @@ public class SimpleServerObject implements ServerObject {
     public void updateChain(Chain chain) {
         chainUpdater.accept(chain);
     }
+
+    @Override
+    public void close() throws Exception {
+        // do nothing
+    }
 }

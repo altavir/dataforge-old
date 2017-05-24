@@ -5,8 +5,8 @@
  */
 package hep.dataforge.control.collectors;
 
+import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
-import hep.dataforge.tables.PointListener;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 
@@ -14,6 +14,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Consumer;
 
 /**
  * An averaging DataPoint collector that starts timer on first put operation and
@@ -25,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class RegularPointCollector implements ValueCollector {
 
     private final Map<String, List<Value>> values = new ConcurrentHashMap<>();
-    private final PointListener consumer;
+    private final Consumer<DataPoint> consumer;
     private final Duration duration;
     private Instant startTime;
     /**
@@ -34,20 +35,14 @@ public class RegularPointCollector implements ValueCollector {
     private List<String> names = new ArrayList<>();
     private Timer timer;
 
-    public RegularPointCollector(PointListener consumer, Duration duration) {
+    public RegularPointCollector(Duration duration, Consumer<DataPoint> consumer) {
         this.consumer = consumer;
         this.duration = duration;
     }
 
-    public RegularPointCollector(PointListener consumer, Duration duration, Collection<String> names) {
-        this(consumer, duration);
+    public RegularPointCollector(Duration duration, Collection<String> names, Consumer<DataPoint> consumer) {
+        this(duration, consumer);
         this.names = new ArrayList<>(names);
-    }
-
-    public RegularPointCollector(PointListener consumer, Duration duration, String... names) {
-        this(consumer, duration);
-        this.names = Arrays.asList(names);
-        //TODO add wait for all names option
     }
 
     @Override
@@ -63,7 +58,7 @@ public class RegularPointCollector implements ValueCollector {
         point.putValue("timestamp", average);
 
         for (Map.Entry<String, List<Value>> entry : values.entrySet()) {
-            point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble((v) -> v.doubleValue()).sum() / entry.getValue().size());
+            point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble(Value::doubleValue).sum() / entry.getValue().size());
         }
 
         // filling all missing values with nulls

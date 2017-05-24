@@ -16,6 +16,7 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.exceptions.StorageException;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -37,10 +38,10 @@ public interface StateLoader extends Loader, ValueProvider {
      * @param value
      * @throws hep.dataforge.exceptions.StorageException
      */
-    void setValue(String path, Value value) throws StorageException;
+    void pushState(String path, Value value) throws StorageException;
 
-    default void setValue(String path, Object value) throws StorageException {
-        setValue(path, Value.of(value));
+    default void pushState(String path, Object value) throws StorageException {
+        pushState(path, Value.of(value));
     }
 
     /**
@@ -49,6 +50,7 @@ public interface StateLoader extends Loader, ValueProvider {
      *
      * @return
      */
+    @ProvidesNames(VALUE_TARGET)
     Set<String> getStateNames();
     
 }

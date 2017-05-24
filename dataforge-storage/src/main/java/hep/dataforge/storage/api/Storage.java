@@ -16,6 +16,7 @@
 package hep.dataforge.storage.api;
 
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.MessageValidator;
@@ -25,6 +26,8 @@ import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
+import hep.dataforge.values.Value;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
 import java.util.Optional;
@@ -40,7 +43,8 @@ import java.util.Optional;
  * @author Darksnake
  */
 @AnonimousNotAlowed
-public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated {
+public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, AutoConnectible {
+    //TODO consider removing dispatcher to helper classes
 
     String LOADER_TARGET = "loader";
     String STORAGE_TARGET = "storage";
@@ -70,17 +74,15 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
     void close() throws Exception;
 
     /**
-     * If the loader with given annotation is registered, than it is returned.
-     * If not, it is registered and then returned. If given annotation is
-     * different from the one that is stored for loader with its name than
-     * loader configuration is changed if it is possible. Otherwise exception is
-     * thrown.
+     * Creates a new loader with given configuration. Throws an exception if loader already exists.
+     * The returned loader is not necessary a direct child of this storage
      *
+     * @param loaderName
      * @param loaderConfiguration
      * @return
      * @throws hep.dataforge.exceptions.StorageException
      */
-    Loader buildLoader(Meta loaderConfiguration) throws StorageException;
+    Loader buildLoader(String loaderName, Meta loaderConfiguration) throws StorageException;
 
     /**
      * Create new substorage (shelf) in this storage. The shelf name could be
@@ -143,15 +145,16 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
      *
      * @return
      */
+    @Nullable
     Storage getParent();
 
-    /**
-     * Get the default event loader for this storage
-     *
-     * @return
-     * @throws StorageException
-     */
-    EventLoader getDefaultEventLoader() throws StorageException;
+//    /**
+//     * Get the default event loader for this storage
+//     *
+//     * @return
+//     * @throws StorageException
+//     */
+//    EventLoader getDefaultEventLoader() throws StorageException;
 
     /**
      * Get validator for
@@ -159,6 +162,18 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
      * @return
      */
     MessageValidator getValidator();
+
+
+    /**
+     * Read only storage produces only read only loaders
+     *
+     * @return
+     */
+    default boolean isReadOnly() {
+        return meta().optValue("readOnly")
+                .map(Value::booleanValue)
+                .orElseGet(() -> getParent() != null && getParent().isReadOnly());
+    }
 
     /**
      * Get the full path of this storage relative to root using '.' as a

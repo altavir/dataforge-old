@@ -54,9 +54,6 @@ import static org.apache.commons.vfs2.FileType.FOLDER;
 @ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage implements FileListener {
 
-//    public static final String LOADER_PATH_KEY = "path";
-//    public static final String STORAGE_CONFIGURATION_FILE = "storage.xml";
-
     static {
         //set up slf4j bridge and logging level
         Logger logger = LoggerFactory.getLogger("org.apache.commons.vfs2");
@@ -112,16 +109,19 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private void startup() throws FileSystemException, StorageException {
-        if (!isReadOnly()) {
-            if (!dataDir.exists()) {
+        if (!dataDir.exists()) {
+            if (isReadOnly()) {
+                throw new StorageException("The directory for read only file storage does not exist");
+            } else {
                 dataDir.createFolder();
             }
         }
+
         if (!dataDir.exists() || dataDir.getType() != FOLDER) {
             throw new StorageException("File Storage should be based on directory.");
         }
 
-        //starting direcotry monitoring
+        //starting directory monitoring
         if (meta().getBoolean("monitor", false)) {
             startMonitor();
         }
@@ -137,17 +137,10 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private void stopMonitor() {
+        getContext().getLogger().debug("Stopping monitor in storage {}", getFullPath());
         if (monitor != null) {
             monitor.stop();
             monitor = null;
-        }
-    }
-
-    public void toggleMonitor(boolean monitorActive) {
-        if (monitorActive) {
-            startMonitor();
-        } else {
-            stopMonitor();
         }
     }
 
@@ -180,10 +173,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
         if (file.getType() == FOLDER) {
             try {
                 String dirName = file.getName().getBaseName();
-                FileStorage shelf = new FileStorage(this, dirName, buildDirectoryMeta(file));
-//                shelf.setReadOnly(isReadOnly());
-                shelf.refresh();
+                FileStorage shelf = createShelf(dirName, buildDirectoryMeta(file));
                 shelves.putIfAbsent(dirName, shelf);
+                shelf.refresh();
             } catch (StorageException ex) {
                 LoggerFactory.getLogger(getClass())
                         .error("Can't create a File storage from subdirectory {} at {}",
@@ -225,12 +217,13 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     @Override
     public void close() throws Exception {
+        super.close();
         stopMonitor();
         dataDir.close();
     }
 
     @Override
-    public Loader buildLoader(Meta loaderConfiguration) throws StorageException {
+    protected Loader createLoader(String loaderName, Meta loaderConfiguration) throws StorageException {
         String type = StorageUtils.loaderType(loaderConfiguration);
         String name = StorageUtils.loaderName(loaderConfiguration);
 
@@ -285,11 +278,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     @Override
-    public FileStorage buildShelf(String path, Meta an) throws StorageException {
-
-        //TODO add recusive shelves builders for composite paths
-        //converting dataforge paths to file paths
-        path = path.replace('.', File.separatorChar);
+    public FileStorage createShelf(String path, Meta an) throws StorageException {
         return new FileStorage(this, path, an);
     }
 

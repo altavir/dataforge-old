@@ -15,6 +15,8 @@
  */
 package hep.dataforge.storage.loaders;
 
+import hep.dataforge.events.Event;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.exceptions.WrongTargetException;
@@ -22,7 +24,6 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.StateChangedEvent;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.api.Storage;
@@ -109,7 +110,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
                         for (Meta state : envelopeMeta.getMetaList("state")) {
                             String stateName = state.getString("name");
                             String stateValue = state.getString("value");
-                            setValue(stateName, stateValue);
+                            pushState(stateName, stateValue);
                             res.putMetaNode(new MetaBuilder("state")
                                     .putValue("name", stateName)
                                     .putValue("value", stateValue));
@@ -117,7 +118,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
                     } else if (envelopeMeta.hasValue("state")) {
                         String stateName = envelopeMeta.getString("name");
                         String stateValue = envelopeMeta.getString("value");
-                        setValue(stateName, stateValue);
+                        pushState(stateName, stateValue);
                         res.putMetaNode(new MetaBuilder("state")
                                 .putValue("name", stateName)
                                 .putValue("value", stateValue));
@@ -153,18 +154,18 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
     }
 
     @Override
-    public void setValue(String name, Value value) throws StorageException {
+    public void pushState(String name, Value value) throws StorageException {
         check();
         Value oldValue = states.get(name);
         if (oldValue == null) {
             oldValue = Value.getNull();
         }
         states.put(name, value);
-        EventLoader el = getEventLoader();
-        if (el != null) {
-            el.push(StateChangedEvent.build(name, oldValue, value));
-        }
         commit();
+        Event event = StateChangedEvent.build(name, oldValue, value);
+        forEachConnection("eventListener",EventHandler.class, handler -> {
+            handler.pushEvent(event);
+        });
     }
 
     @Override

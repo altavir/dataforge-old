@@ -71,4 +71,9 @@ public class StorageServerObject implements ServerObject {
     public Stream<ServerObject> getChildren() {
         return storage.shelves().stream().map(this::buildChildStorageObject);
     }
+
+    @Override
+    public void close() throws Exception {
+        storage.close();
+    }
 }

@@ -5,13 +5,11 @@
  */
 package hep.dataforge.control.measurements;
 
-import hep.dataforge.control.devices.AbstractMeasurementDevice;
+import hep.dataforge.control.devices.AbstractDevice;
 import hep.dataforge.control.devices.StateDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.values.Value;
-
-import java.util.concurrent.Callable;
 
 /**
  * A device with single one-time or periodic measurement
@@ -20,30 +18,9 @@ import java.util.concurrent.Callable;
  * @author Alexander Nozik
  */
 @StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
-public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
+public abstract class Sensor<T> extends AbstractDevice {
 
     private Measurement<T> measurement;
-
-    /**
-     * Create simple sensor with simple one-time measurement
-     *
-     * @param <T>
-     * @param proc
-     * @return
-     */
-    public static <T> Sensor<T> simpleSensor(Callable<T> proc) {
-        return new Sensor<T>() {
-            @Override
-            protected Measurement<T> createMeasurement() throws MeasurementException {
-                return new SimpleMeasurement<T>() {
-                    @Override
-                    protected T doMeasure() throws Exception {
-                        return proc.call();
-                    }
-                };
-            }
-        };
-    }
 
     /**
      * Read sensor data synchronously
@@ -58,8 +35,8 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
     public Measurement<T> startMeasurement() throws MeasurementException {
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
-            measurement.addListener(this);
-            onCreateMeasurement(measurement);
+//            measurement.addListener(this);
+//            onCreateMeasurement(measurement);
         } else if (measurement.isStarted()) {
             getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
         }
@@ -82,7 +59,7 @@ public abstract class Sensor<T> extends AbstractMeasurementDevice<T> {
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
-            measurement.removeListener(this);
+//            measurement.removeListener(this);
         }
     }
 

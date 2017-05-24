@@ -25,7 +25,7 @@ public abstract class EventBuilder<E extends EventBuilder> implements GenericBui
 
     protected final MetaBuilder builder = new MetaBuilder("event");
     private final Map<String, Object> objectMap = new HashMap<>();
-    
+
     protected EventBuilder(String type) {
         this.builder.setValue(Event.EVENT_TYPE_KEY, type);
     }
@@ -69,28 +69,19 @@ public abstract class EventBuilder<E extends EventBuilder> implements GenericBui
         return this;
     }
 
-    public EventBuilder addReference(String tag, Object object) {
-        this.objectMap.put(tag, object);
-        return this;
-    }
-
     public Meta buildEventMeta() {
         if (!builder.hasValue(EVENT_TIME_KEY)) {
             setTime();
         }
         return builder.build();
     }
-    
-    public Map<String, Object> getReferenceMap(){
-        return this.objectMap;
-    }
 
     @Override
     public Event build() {
-        return new BasicEvent(buildEventMeta(), objectMap);
+        return new Event(buildEventMeta());
     }
 
-    private static class ConcreteEventBuilder extends EventBuilder<EventBuilder>{
+    private static class ConcreteEventBuilder extends EventBuilder<EventBuilder> {
 
         public ConcreteEventBuilder(String type) {
             super(type);
@@ -100,7 +91,7 @@ public abstract class EventBuilder<E extends EventBuilder> implements GenericBui
         public EventBuilder self() {
             return this;
         }
-        
+
     }
 
 }

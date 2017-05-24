@@ -7,11 +7,11 @@ package hep.dataforge.control.measurements;
 
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.utils.DateTimeUtils;
-import hep.dataforge.utils.ReferenceRegistry;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
 import java.time.Instant;
+import java.util.function.Consumer;
 
 /**
  * A boilerplate code for measurements
@@ -20,7 +20,7 @@ import java.time.Instant;
  */
 public abstract class AbstractMeasurement<T> implements Measurement<T> {
 
-    protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
+    //    protected final ReferenceRegistry<MeasurementListener<T>> listeners = new ReferenceRegistry<>();
     protected Pair<T, Instant> lastResult;
     protected Throwable exception;
     private MeasurementState state;
@@ -38,7 +38,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      */
     protected void afterStart() {
         setMeasurementState(MeasurementState.PENDING);
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementStarted(this));
+        notifyListeners(it -> it.onMeasurementStarted(this));
     }
 
     /**
@@ -46,7 +46,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      */
     protected void afterStop() {
         setMeasurementState(MeasurementState.FINISHED);
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
+        notifyListeners(it -> it.onMeasurementFinished(this));
     }
 
     /**
@@ -54,7 +54,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
      */
     protected void afterPause() {
         setMeasurementState(MeasurementState.OK);
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFinished(this));
+        notifyListeners(it -> it.onMeasurementFinished(this));
     }
 
     protected synchronized void error(Throwable error) {
@@ -62,7 +62,7 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         setMeasurementState(MeasurementState.FAILED);
         this.exception = error;
         notify();
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementFailed(this, error));
+        notifyListeners(it -> it.onMeasurementFailed(this, error));
     }
 
     /**
@@ -83,25 +83,19 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         this.lastResult = new Pair<>(result, time);
         setMeasurementState(MeasurementState.OK);
         notify();
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementResult(this, result, time));
+        notifyListeners(it -> it.onMeasurementResult(this, result, time));
     }
 
     protected void progressUpdate(double progress) {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, progress));
+        notifyListeners(it -> it.onMeasurementProgress(this, progress));
     }
 
     protected void progressUpdate(String message) {
-        listeners.forEach((MeasurementListener<T> t) -> t.onMeasurementProgress(this, message));
+        notifyListeners(it -> it.onMeasurementProgress(this, message));
     }
 
-    @Override
-    public void addListener(MeasurementListener<T> listener) {
-        this.listeners.add(listener);
-    }
-
-    @Override
-    public void removeListener(MeasurementListener<T> listener) {
-        this.listeners.remove(listener);
+    protected final void notifyListeners(Consumer<MeasurementListener> consumer) {
+        getDevice().forEachConnection(MeasurementListener.class, consumer);
     }
 
     @Override

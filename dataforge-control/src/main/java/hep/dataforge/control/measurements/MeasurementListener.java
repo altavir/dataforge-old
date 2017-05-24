@@ -24,13 +24,13 @@ import java.time.Instant;
  *
  * @author Alexander Nozik
  */
-public interface MeasurementListener<T> {
+public interface MeasurementListener {
 
     /**
      * Measurement started. Ignored by default
      * @param measurement 
      */
-    default void onMeasurementStarted(Measurement<T> measurement){
+    default void onMeasurementStarted(Measurement<?> measurement){
         
     }
 
@@ -38,7 +38,7 @@ public interface MeasurementListener<T> {
      * Measurement stopped. Ignored by default
      * @param measurement 
      */
-    default void onMeasurementFinished(Measurement<T> measurement){
+    default void onMeasurementFinished(Measurement<?> measurement){
         
     }
 
@@ -47,21 +47,21 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param result 
      */
-    void onMeasurementResult(Measurement<T> measurement, T result, Instant time);
+    void onMeasurementResult(Measurement<?> measurement, Object result, Instant time);
 
     /**
      * Measurement failed with exception
      * @param measurement
      * @param exception 
      */
-    void onMeasurementFailed(Measurement<T> measurement, Throwable exception);
+    void onMeasurementFailed(Measurement<?> measurement, Throwable exception);
     
     /**
      * Measurement failed with message
      * @param measurement
      * @param message 
      */
-    default void onMeasurementFailed(Measurement<T> measurement, String message){
+    default void onMeasurementFailed(Measurement<?> measurement, String message){
         onMeasurementFailed(measurement, new MeasurementException(message));
     }
 
@@ -70,7 +70,7 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param progress 
      */
-    default void onMeasurementProgress(Measurement<T> measurement, double progress) {
+    default void onMeasurementProgress(Measurement<?> measurement, double progress) {
 
     }
 
@@ -79,7 +79,7 @@ public interface MeasurementListener<T> {
      * @param measurement
      * @param message 
      */
-    default void onMeasurementProgress(Measurement<T> measurement, String message) {
+    default void onMeasurementProgress(Measurement<?> measurement, String message) {
 
     }
 

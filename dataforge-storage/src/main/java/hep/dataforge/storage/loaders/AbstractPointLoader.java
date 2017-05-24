@@ -44,12 +44,8 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
     protected final Set<PointListener> listeners = new HashSet<>();
     private HashMap<String, ValueIndex<DataPoint>> indexMap = new HashMap<>();
 
-    public AbstractPointLoader(Storage storage, String name, Meta annotation) {
-        super(storage, name, annotation);
-    }
-
-    public AbstractPointLoader(Storage storage, String name) {
-        super(storage, name);
+    public AbstractPointLoader(Storage storage, String name, Meta meta) {
+        super(storage, name, meta);
     }
 
     @Override

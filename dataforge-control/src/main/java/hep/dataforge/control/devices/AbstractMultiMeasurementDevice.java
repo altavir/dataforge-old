@@ -18,7 +18,9 @@ package hep.dataforge.control.devices;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.AnonimousNotAlowed;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,21 +30,16 @@ import java.util.Map;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public abstract class AbstractMultiMeasurementDevice extends AbstractMeasurementDevice implements MultiMeasurementDevice {
+public abstract class AbstractMultiMeasurementDevice extends AbstractDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();
-
-//    public AbstractMultiMeasurementDevice(String name, Context context, Meta meta) {
-//        super(name, context, meta);
-//    }
 
     @Override
     public Measurement createMeasurement(String name, Meta meta) throws ControlException {
         if (meta == null) {
-            meta = getMetaForMeasurement(name);
+            meta = getMetaMeasurement(name);
         }
         Measurement m = doCreateMeasurement(name, meta);
-        onCreateMeasurement(m);
         measurements.put(name, m);
         return m;
     }
@@ -50,12 +47,16 @@ public abstract class AbstractMultiMeasurementDevice extends AbstractMeasurement
     protected abstract Measurement doCreateMeasurement(String name, Meta meta);
 
     public Measurement createMeasurement(String name) throws ControlException {
-        return createMeasurement(name, getMetaForMeasurement(name));
+        return createMeasurement(name, getMetaMeasurement(name));
     }
 
     @Override
     public Measurement getMeasurement(String name) {
         return this.measurements.get(name);
+    }
+
+    protected Meta getMetaMeasurement(String name) {
+        return MetaUtils.findNodeByValue(meta(), "measurement", "name", name);
     }
 
     /**

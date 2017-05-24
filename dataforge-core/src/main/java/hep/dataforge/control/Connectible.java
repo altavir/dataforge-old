@@ -17,7 +17,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface Connectable {
+public interface Connectible {
 
     /**
      * Register a new connection with given roles
@@ -36,6 +36,12 @@ public interface Connectable {
      * @return
      */
     <T> Stream<T> connections(String role, Class<T> type);
+
+    /**
+     * Disconnect given connection
+     * @param connection
+     */
+    void disconnect(Connection connection);
 
 
     /**

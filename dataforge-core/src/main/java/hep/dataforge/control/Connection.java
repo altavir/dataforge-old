@@ -7,7 +7,7 @@ package hep.dataforge.control;
 
 /**
  * A connection which could be applied to object that could receive connection.
- * Usually connection does not invoke {@code open} method itself, but delegates it to {@code Connectable}
+ * Usually connection does not invoke {@code open} method itself, but delegates it to {@code Connectible}
  *
  * @author Alexander Nozik
  */

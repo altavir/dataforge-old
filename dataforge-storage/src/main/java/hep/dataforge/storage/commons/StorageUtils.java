@@ -71,10 +71,10 @@ public class StorageUtils {
             List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
             for (Meta la : loaderAns) {
                 String loaderName = loaderName(la);
-                Loader current = storage.optLoader(loaderName).orElseGet(()->storage.buildLoader(la));
+                Loader current = storage.optLoader(loaderName).orElseGet(() -> storage.buildLoader(loaderName, la));
                 //If the same annotation is used - do nothing
                 if (!current.meta().equals(la)) {
-                    storage.buildLoader(loaderConfig);
+                    storage.buildLoader(loaderName, loaderConfig);
                 }
             }
         }
@@ -202,6 +202,32 @@ public class StorageUtils {
             }
         };
 
+    }
+
+
+    /**
+     * Return shelf with given name if it does exist, otherwise build shelf with given meta
+     *
+     * @param shelfName
+     * @param shelfConfiguration
+     * @return
+     */
+    public static Storage getOrBuildShelf(Storage storage, String shelfName, Meta shelfConfiguration) {
+        return storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName, shelfConfiguration));
+    }
+
+    /**
+     * Create intermediate path for building loaders and shelves
+     *
+     * @param path
+     * @return
+     */
+    public static Storage buildPath(Storage storage, Name path) {
+        if (path.length() == 0) {
+            return storage;
+        } else {
+            return buildPath(getOrBuildShelf(storage, path.getFirst().toString(), Meta.empty()), path.cutFirst());
+        }
     }
 
 

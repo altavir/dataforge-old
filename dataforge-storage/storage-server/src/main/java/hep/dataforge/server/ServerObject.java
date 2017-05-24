@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 /**
  *
  */
-public interface ServerObject extends Encapsulated {
+public interface ServerObject extends Encapsulated, AutoCloseable {
 
     /**
      * Get server manager for this object

@@ -16,9 +16,11 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Global;
+import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.events.Event;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
@@ -26,16 +28,16 @@ import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provides;
-import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.utils.BaseMetaHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+
+import static hep.dataforge.storage.commons.StorageUtils.buildPath;
 
 /**
  * Конфигурации загрузчиков хранятся в оперативной памяти. Те, что поставляются
@@ -45,24 +47,22 @@ import java.util.*;
  *
  * @author Darksnake
  */
+@ValueDef(name = "readOnly", type = "BOOLEAN", info = "Define if push operations are allowed in this storage")
 public abstract class AbstractStorage extends BaseMetaHolder implements Storage {
 
-    public static final String DEFAULT_EVENT_LOADER_NAME = "@log";
     protected final Map<String, Loader> loaders = new HashMap<>();
     protected final Map<String, Storage> shelves = new HashMap<>();
     private final String name;
     private final Context context;
     private final Storage parent;
+    private final ConnectionHelper connectionHelper;
 
     protected AbstractStorage(@NotNull Storage parent, String name, Meta meta) {
         super(new Laminate(meta, parent.getMeta()));
         this.name = name;
         this.parent = parent;
-        if (parent == null) {
-            context = Global.getDefaultContext();
-        } else {
-            context = parent.getContext();
-        }
+        context = parent.getContext();
+        connectionHelper = new ConnectionHelper(context.getLogger());
     }
 
     protected AbstractStorage(Context context, Meta meta) {
@@ -70,6 +70,12 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         this.name = meta.getString("name", "root");
         this.context = context;
         this.parent = null;
+        connectionHelper = new ConnectionHelper(context.getLogger());
+    }
+
+    @Override
+    public ConnectionHelper getConnectionHelper() {
+        return connectionHelper;
     }
 
     /**
@@ -104,7 +110,13 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
      */
     @Override
     public void close() throws Exception {
-
+        getContext().getLogger().debug("Closing storage {}", getFullPath());
+        for (Storage shelf : shelves()) {
+            shelf.close();
+        }
+        for (Loader loader : loaders()) {
+            loader.close();
+        }
     }
 
     /**
@@ -115,9 +127,56 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
      * @return
      * @throws StorageException
      */
-    public Storage buildShelf(String shelfName) throws StorageException {
-        return buildShelf(shelfName, null);
+    public final Storage buildShelf(String shelfName) throws StorageException {
+        return buildShelf(shelfName, Meta.empty());
     }
+
+    @Override
+    public final Loader buildLoader(String loaderName, Meta loaderConfiguration) throws StorageException {
+        Name name = Name.of(loaderName);
+        if (name.length() == 1) {
+            Loader loader = createLoader(loaderName, loaderConfiguration);
+            this.loaders.put(loaderName, loader);
+            return loader;
+        } else {
+            //delegate building to child storage
+            return buildPath(this, name.cutLast()).buildLoader(name.getLast().toString(), loaderConfiguration);
+        }
+    }
+
+    /**
+     * Create a child loader but do not add it to loader list
+     *
+     * @param name
+     * @param loaderConfiguration
+     * @return
+     * @throws StorageException
+     */
+    protected abstract Loader createLoader(String name, Meta loaderConfiguration) throws StorageException;
+
+
+    @Override
+    public final Storage buildShelf(String shelfName, Meta shelfConfiguration) throws StorageException {
+        Name name = Name.of(shelfName);
+        if (name.length() == 1) {
+            Storage shelf = createShelf(shelfName, shelfConfiguration);
+            this.shelves.put(shelfName, shelf);
+            return shelf;
+        } else {
+            //delegate building to child storage
+            return buildPath(this, name.cutLast()).buildShelf(name.getLast().toString(), shelfConfiguration);
+        }
+    }
+
+    /**
+     * Create a direct child shelf but do not add it to shelf list
+     *
+     * @param name
+     * @param shelfConfiguration
+     * @return
+     * @throws StorageException
+     */
+    protected abstract Storage createShelf(String name, Meta shelfConfiguration) throws StorageException;
 
     /**
      * update an annotation of loader using overriding annotation
@@ -182,29 +241,8 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         return parent;
     }
 
-    /**
-     * Build a loader on a specific shelf
-     *
-     * @param shelf
-     * @param loaderConfig
-     * @return
-     * @throws StorageException
-     */
-    public Loader buildLoader(String shelf, Meta loaderConfig) throws StorageException {
-        return optShelf(shelf).orElseGet(() -> buildShelf(shelf)).buildLoader(loaderConfig);
-    }
-
     public boolean isRoot() {
         return getParent() == null;
-    }
-
-    /**
-     * Read only storage produces only read only loaders
-     *
-     * @return
-     */
-    public boolean isReadOnly() {
-        return meta().getBoolean("readOnly", false);
     }
 
     @Override
@@ -212,13 +250,13 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         return context;
     }
 
-    @Override
-    public EventLoader getDefaultEventLoader() throws StorageException {
-        return (EventLoader) buildLoader(new MetaBuilder("loader")
-                .putValue(Loader.LOADER_NAME_KEY, DEFAULT_EVENT_LOADER_NAME)
-                .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)
-                .build());
-    }
+//    @Override
+//    public EventLoader getDefaultEventLoader() throws StorageException {
+//        return (EventLoader) buildLoader(new MetaBuilder("loader")
+//                .putValue(Loader.LOADER_NAME_KEY, DEFAULT_EVENT_LOADER_NAME)
+//                .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)
+//                .build());
+//    }
 
     @Override
     @NodeDef(name = "security", info = "Some information for  security manager")
@@ -291,7 +329,7 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
                 case LOADER_TARGET:
                     return optLoader(targetName).orElseGet(() -> {
                         if (allowCreate) {
-                            return buildLoader(addMeta);
+                            return buildLoader(targetName, addMeta);
                         } else {
                             throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
                         }
@@ -302,6 +340,14 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         } catch (StorageException ex) {
             throw new EnvelopeTargetNotFoundException(targetType, targetName, targetInfo);
         }
+    }
+
+    /**
+     * Notify all connections which can handle events
+     * @param event
+     */
+    protected void dispatchEvent(Event event){
+        forEachConnection(EventHandler.class, eventHandler -> eventHandler.pushEvent(event));
     }
 
 }

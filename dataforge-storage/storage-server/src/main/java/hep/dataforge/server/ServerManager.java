@@ -55,6 +55,16 @@ public class ServerManager extends BasicPlugin implements ServerObject {
         }
     }
 
+    @Override
+    public void detach() {
+        try {
+            close();
+        } catch (Exception e) {
+            getContext().getLogger().error("Can't close server manager", e);
+        }
+        super.detach();
+    }
+
     public void startServer() throws Exception {
         if (ratpack != null) {
             throw new RuntimeException("Server already running");
@@ -103,7 +113,6 @@ public class ServerManager extends BasicPlugin implements ServerObject {
 
     /**
      * Add new ServerObject root and add it to main menu
-     *
      */
     public void bind(ServerObject sobj) {
         bindings.add(sobj);
@@ -209,5 +218,13 @@ public class ServerManager extends BasicPlugin implements ServerObject {
     @Override
     public Stream<ServerObject> getChildren() {
         return bindings.stream();
+    }
+
+    @Override
+    public void close() throws Exception {
+        stopServer();
+        for (ServerObject o : bindings) {
+            o.close();
+        }
     }
 }

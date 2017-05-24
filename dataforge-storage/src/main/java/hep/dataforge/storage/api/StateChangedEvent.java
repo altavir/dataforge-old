@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.events.BasicEvent;
+import hep.dataforge.events.Event;
 import hep.dataforge.events.EventBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
@@ -25,7 +25,7 @@ import hep.dataforge.values.Value;
  *
  * @author Alexander Nozik
  */
-public class StateChangedEvent extends BasicEvent {
+public class StateChangedEvent extends Event {
 
     public static final String STATE_NAME_KEY = "stateName";
     public static final String OLD_STATE_KEY = "oldState";

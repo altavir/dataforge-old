@@ -17,14 +17,10 @@ import hep.dataforge.storage.loaders.AbstractLoader;
  */
 public abstract class AbstractEnvelopeLoader extends AbstractLoader implements EnvelopeLoader {
 
-    public AbstractEnvelopeLoader(Storage storage, String name, Meta annotation) {
-        super(storage, name, annotation);
+    public AbstractEnvelopeLoader(Storage storage, String name, Meta meta) {
+        super(storage, name, meta);
     }
 
-    public AbstractEnvelopeLoader(Storage storage, String name) {
-        super(storage, name);
-    }
-    
     @Override
     public Envelope respond(Envelope message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

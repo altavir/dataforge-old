@@ -12,8 +12,10 @@ import hep.dataforge.storage.loaders.AbstractBinaryLoader;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
-import java.io.*;
-import java.text.ParseException;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -54,13 +56,8 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
      */
     private FileEnvelope file;
 
-    public FileObjectLoader(Storage storage, String name, Meta annotation, String uri) {
-        super(storage, name, annotation);
-        this.filePath = uri;
-    }
-
-    public FileObjectLoader(Storage storage, String name, String uri) {
-        super(storage, name);
+    public FileObjectLoader(Storage storage, String name, Meta meta, String uri) {
+        super(storage, name, meta);
         this.filePath = uri;
     }
 
@@ -136,12 +133,8 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
         return this.file;
     }
 
-    private FileEnvelope buildEnvelope(boolean readOnly) throws StorageException {
-        try {
-            return new FileEnvelope(filePath, readOnly);
-        } catch (IOException | ParseException ex) {
-            throw new StorageException(ex);
-        }
+    private FileEnvelope buildEnvelope(boolean readOnly)  {
+        return new FileEnvelope(filePath, readOnly);
     }
 
     @Override

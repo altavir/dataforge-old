@@ -16,7 +16,6 @@ import org.apache.commons.vfs2.VFS;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Iterator;
 import java.util.function.Function;
 
@@ -66,7 +65,7 @@ public class FileIndexFactory implements Encapsulated {
     public <T extends ValueProvider> ValueProviderIndex<T> buildProviderStreamIndex(String valueName, Function<String, T> transformation) {
         return new ValueProviderIndex<>(iterable(transformation), valueName);
     }
-    
+
     protected <T> Iterable<T> iterable(Function<String, T> transformation) {
         return () -> buildIterator(transformation);
     }
@@ -113,12 +112,7 @@ public class FileIndexFactory implements Encapsulated {
         if (envelope == null) {
             FileObject file = VFS.getManager().resolveFile(uri);
             if (file.exists() && file.isReadable()) {
-                try {
-                    envelope = new FileEnvelope(uri, true);
-                } catch (ParseException ex) {
-                    invalidate();
-                    throw new RuntimeException("Can't parse file envelope meta", ex);
-                }
+                envelope = new FileEnvelope(uri, true);
             } else {
                 invalidate();
                 throw new RuntimeException("Can't read file " + uri);

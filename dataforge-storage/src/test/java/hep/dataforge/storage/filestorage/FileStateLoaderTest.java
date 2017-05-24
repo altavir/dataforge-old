@@ -64,9 +64,9 @@ public class FileStateLoaderTest {
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
 
         System.out.println("***starting write test***");
-        loader.setValue("my.favorite.key", Value.of("my.favorite.value"));
-        loader.setValue("pi", Value.of(Math.PI));
-        loader.setValue("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
+        loader.pushState("my.favorite.key", Value.of("my.favorite.value"));
+        loader.pushState("pi", Value.of(Math.PI));
+        loader.pushState("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
         loader.close();
         System.out.println("passed!");
         System.out.println("***starting read test***");

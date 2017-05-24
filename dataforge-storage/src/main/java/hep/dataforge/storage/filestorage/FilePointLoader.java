@@ -24,7 +24,6 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
 import java.io.IOException;
-import java.text.ParseException;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -35,7 +34,7 @@ public class FilePointLoader extends AbstractPointLoader {
 
     public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
         try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            return fromEnvelope(storage,envelope);
+            return fromEnvelope(storage, envelope);
         }
     }
 
@@ -62,13 +61,8 @@ public class FilePointLoader extends AbstractPointLoader {
      */
     private FileEnvelope envelope;
 
-    public FilePointLoader(Storage storage, String name, Meta annotation, String uri) {
-        super(storage, name, annotation);
-        this.uri = uri;
-    }
-
-    public FilePointLoader(Storage storage, String name, String uri) {
-        super(storage, name);
+    public FilePointLoader(Storage storage, String name, Meta meta, String uri) {
+        super(storage, name, meta);
         this.uri = uri;
     }
 
@@ -100,21 +94,16 @@ public class FilePointLoader extends AbstractPointLoader {
         super.close();
     }
 
-    private FileEnvelope buildEnvelope(boolean readOnly) throws StorageException {
-        try {
-            return new FileEnvelope(uri, readOnly);
-        } catch (IOException | ParseException ex) {
-            throw new StorageException(ex);
-        }
+    private FileEnvelope buildEnvelope(boolean readOnly) {
+        return new FileEnvelope(uri, readOnly);
     }
 
     /**
      * Get writeable reusable single access envelope for this loader
      *
      * @return
-     * @throws StorageException
      */
-    private FileEnvelope getEnvelope() throws StorageException {
+    private FileEnvelope getEnvelope() {
         if (this.envelope == null) {
             this.envelope = buildEnvelope(false);
         }
@@ -196,13 +185,7 @@ public class FilePointLoader extends AbstractPointLoader {
             //use point number index
             return new DefaultIndex<>(this);
         } else {
-            return new FilePointIndex(name, getStorage().getContext(), () -> {
-                try {
-                    return getEnvelope();
-                } catch (StorageException ex) {
-                    throw new RuntimeException(ex);
-                }
-            });
+            return new FilePointIndex(name, getStorage().getContext(), this::getEnvelope);
         }
     }
 

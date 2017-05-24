@@ -25,26 +25,6 @@ import hep.dataforge.values.Value;
  */
 public interface DeviceListener {
 
-//    /**
-//     * The device is initialized. No measurement or control procedure performed
-//     * here
-//     *
-//     * @param device
-//     */
-//    default void notifyDeviceInitialized(Device device) {
-//
-//    }
-//
-//    /**
-//     * The device is shut down. No measurement or control procedure performed
-//     * here
-//     *
-//     * @param device
-//     */
-//    default void notifyDeviceShutdown(Device device) {
-//
-//    }
-
     /**
      * Notify that state of device is changed. either oldState or newState could
      * be empty.
@@ -65,16 +45,6 @@ public interface DeviceListener {
     default void notifyDeviceConfigChanged(Device device) {
 
     }
-
-//    /**
-//     * Notify that command is accepted. By default is ignored.
-//     *
-//     * @param device
-//     * @param command
-//     */
-//    default void notifyDeviceCommandAccepted(Device device, String command) {
-//
-//    }
 
     /**
      * Evaluate device event

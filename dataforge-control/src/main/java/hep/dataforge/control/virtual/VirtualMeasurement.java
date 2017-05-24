@@ -5,7 +5,9 @@
  */
 package hep.dataforge.control.virtual;
 
+import hep.dataforge.control.devices.Device;
 import hep.dataforge.control.measurements.SimpleMeasurement;
+
 import java.time.Duration;
 import java.util.concurrent.Callable;
 
@@ -28,6 +30,9 @@ public class VirtualMeasurement<T> extends SimpleMeasurement<T> {
         Thread.sleep(delay.toMillis());
         return result.call();
     }
-    
-    
+
+    @Override
+    public Device getDevice() {
+        return new DummyDevice();
+    }
 }

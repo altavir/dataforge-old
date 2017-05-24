@@ -44,13 +44,8 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
     private final String filePath;
     private FileEnvelope file;
 
-    public FileEnvelopeLoader(Storage storage, String name, Meta annotation, String uri) {
-        super(storage, name, annotation);
-        this.filePath = uri;
-    }
-
-    public FileEnvelopeLoader(Storage storage, String name, String uri) {
-        super(storage, name);
+    public FileEnvelopeLoader(Storage storage, String name, Meta meta, String uri) {
+        super(storage, name, meta);
         this.filePath = uri;
     }
 

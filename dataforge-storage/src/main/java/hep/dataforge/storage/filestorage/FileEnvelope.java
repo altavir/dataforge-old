@@ -31,7 +31,6 @@ import org.slf4j.LoggerFactory;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.text.ParseException;
 
 /**
  * A specific envelope to handle file storage format.
@@ -51,7 +50,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private EnvelopeTag tag;
     private EnvelopeType type = DefaultEnvelopeType.instance;
 
-    public FileEnvelope(String uri, boolean readOnly) throws IOException, ParseException {
+    public FileEnvelope(String uri, boolean readOnly){
         this.uri = uri;
         this.readOnly = readOnly;
     }

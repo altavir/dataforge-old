@@ -18,20 +18,21 @@ package hep.dataforge.control.devices;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.control.Connection;
+import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.control.connections.Roles;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.names.AnonimousNotAlowed;
-import hep.dataforge.names.Named;
 import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
-import java.util.stream.Stream;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 
@@ -50,11 +51,10 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     //TODO set up logger as connection
 
-    //private final ReferenceRegistry<DeviceListener> listeners = new ReferenceRegistry<>();
-    private final Map<Connection<? extends Device>, List<String>> connections = new HashMap<>();
     private final Map<String, Value> states = new HashMap<>();
     private Context context;
     private Logger logger;
+    private ConnectionHelper connectionHelper;
 
     private Logger setupLogger() {
         String loggerName = meta().getString("logger", () -> "device::" + getName());
@@ -69,6 +69,15 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         }
         return logger;
     }
+
+     public ConnectionHelper getConnectionHelper() {
+        if(connectionHelper == null){
+            connectionHelper = new ConnectionHelper(this.getLogger());
+        }
+        return connectionHelper;
+    }
+
+
 
     @Override
     public void init() throws ControlException {
@@ -210,70 +219,6 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
             return Device.super.optState(stateName);
         }
     }
-
-    /**
-     * Attach connection
-     *
-     * @param connection
-     * @param roles
-     */
-    @Override
-    @SuppressWarnings("unchecked")
-    public synchronized void connect(Connection connection, String... roles) {
-        getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
-        //Checking if connection could serve given roles
-        for (String role : roles) {
-            if (!acceptsRole(role)) {
-                getLogger().warn("The device {} does not support role {}", getName(), role);
-            } else {
-                roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).forEach(rd -> {
-                    if (!rd.objectType().isInstance(connection)) {
-                        getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
-                                role, rd.objectType().getName());
-                    }
-                });
-            }
-        }
-        this.connections.put(connection, Arrays.asList(roles));
-        try {
-            getLogger().debug("Opening connection {}", connection.toString());
-            connection.open(this);
-        } catch (Exception ex) {
-            this.notifyError("Can not open connection", ex);
-        }
-    }
-
-    public synchronized void disconnect(Connection<Device> connection) {
-        if (connections.containsKey(connection)) {
-            String conName = Named.nameOf(connection);
-            try {
-                getLogger().debug("Closing connection {}", conName);
-                connection.close();
-            } catch (Exception ex) {
-                this.notifyError("Can not close connection", ex);
-            }
-            getLogger().info("Detaching connection {}", conName);
-            this.connections.remove(connection);
-        }
-    }
-
-
-    @Override
-    public <T> Stream<T> connections(String role, Class<T> type) {
-        return connections.entrySet().stream()
-                .filter(entry -> type.isInstance(entry.getKey()))
-                .filter(entry -> entry.getValue().stream().anyMatch(r -> r.matches(role)))
-                .map(entry -> type.cast(entry.getKey()));
-    }
-
-//    @Override
-//    protected void applyConfig(Meta config) {
-//        if (meta().hasValue("logger")) {
-//            setupLogger();
-//        }
-//        getLogger().debug("Applying configuration change");
-//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceConfigChanged(AbstractDevice.this));
-//    }
 
     @Override
     public String type() {

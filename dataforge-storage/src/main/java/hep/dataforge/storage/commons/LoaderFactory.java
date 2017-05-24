@@ -24,19 +24,18 @@ import hep.dataforge.tables.TableFormat;
 import java.util.Arrays;
 
 /**
- *
  * @author darksnake
  */
 public class LoaderFactory {
 
-    public static MetaBuilder buildDataPointLoaderMeta(String name, String indexField, TableFormat format) {
+    public static MetaBuilder buildDataPointLoaderMeta(String indexField, TableFormat format) {
         MetaBuilder builder = new MetaBuilder("loader");
 
-        if (name == null || name.isEmpty()) {
-            throw new RuntimeException("The name can not be empty");
-        } else {
-            builder.putValue(Loader.LOADER_NAME_KEY, name);
-        }
+//        if (name == null || name.isEmpty()) {
+//            throw new RuntimeException("The name can not be empty");
+//        } else {
+//            builder.putValue(Loader.LOADER_NAME_KEY, name);
+//        }
 
         if (indexField != null) {
             builder.putValue("index", indexField);
@@ -54,10 +53,10 @@ public class LoaderFactory {
         return builder;
     }
 
-    private static Storage findShelf(Storage storage, String shelfName){
+    private static Storage findShelf(Storage storage, String shelfName) {
         if (shelfName != null && !shelfName.isEmpty()) {
-            return storage.optShelf(shelfName).orElseGet(()-> storage.buildShelf(shelfName, null));
-        } else{
+            return storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName, null));
+        } else {
             return storage;
         }
     }
@@ -75,7 +74,7 @@ public class LoaderFactory {
      */
     public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, TableFormat format)
             throws StorageException {
-        return (PointLoader) findShelf(storage,shelfName).buildLoader(buildDataPointLoaderMeta(loaderName, indexField, format));
+        return (PointLoader) findShelf(storage, shelfName).buildLoader(loaderName, buildDataPointLoaderMeta(indexField, format));
     }
 
     /**
@@ -87,16 +86,15 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static <T> ObjectLoader<T> buildObjectLoder(Storage storage, String loaderName, String shelfName)
+    public static ObjectLoader buildObjectLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         Meta loaderAn = new MetaBuilder("loader")
-                .putValue(Loader.LOADER_NAME_KEY, loaderName)
                 .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
                 .build();
 
-        return (ObjectLoader<T>) findShelf(storage,shelfName).buildLoader(loaderAn);
-    }    
-    
+        return ObjectLoader.class.cast(findShelf(storage, shelfName).buildLoader(loaderName, loaderAn));
+    }
+
     /**
      * A helper to create specific loader in the storage
      *
@@ -109,11 +107,10 @@ public class LoaderFactory {
     public static StateLoader buildStateLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         Meta loaderAn = new MetaBuilder("loader")
-                .putValue(Loader.LOADER_NAME_KEY, loaderName)
                 .putValue(Loader.LOADER_TYPE_KEY, StateLoader.STATE_LOADER_TYPE)
                 .build();
 
-        return (StateLoader) findShelf(storage,shelfName).buildLoader(loaderAn);
+        return (StateLoader) findShelf(storage, shelfName).buildLoader(loaderName, loaderAn);
     }
 
     /**
@@ -128,11 +125,10 @@ public class LoaderFactory {
     public static EventLoader buildEventLoder(Storage storage, String loaderName, String shelfName)
             throws StorageException {
         Meta loaderAn = new MetaBuilder("loader")
-                .putValue(Loader.LOADER_NAME_KEY, loaderName)
                 .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)
                 .build();
 
-        return (EventLoader) findShelf(storage,shelfName).buildLoader(loaderAn);
+        return (EventLoader) findShelf(storage, shelfName).buildLoader(loaderName, loaderAn);
     }
 
 //    public static PointLoader getPointLoader(Storage storage, String name) throws StorageException {

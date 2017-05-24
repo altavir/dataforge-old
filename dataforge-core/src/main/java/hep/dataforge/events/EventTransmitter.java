@@ -21,7 +21,7 @@ package hep.dataforge.events;
  *
  * @author Alexander Nozik
  */
-public interface EventTransmitter<T extends Event> {
+public interface EventTransmitter {
 
     /**
      * Send message and return true if message is successfully sent
@@ -29,5 +29,5 @@ public interface EventTransmitter<T extends Event> {
      * @param event
      * @return 
      */
-    boolean send(String address, T event);
+    boolean send(String address, Event event);
 }

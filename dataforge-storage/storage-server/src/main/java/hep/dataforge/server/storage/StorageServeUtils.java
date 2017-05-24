@@ -8,6 +8,7 @@ import hep.dataforge.storage.filestorage.FileStorageFactory;
 public class StorageServeUtils {
 
     public static void addStorage(ServerManager manager, Storage storage, String path) {
+        storage.open();
         manager.bind(new StorageServerObject(manager, storage, path));
     }
 

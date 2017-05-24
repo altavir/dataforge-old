@@ -5,6 +5,7 @@
  */
 package hep.dataforge.control.measurements;
 
+import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.MeasurementException;
 
 import java.time.Instant;
@@ -16,6 +17,8 @@ import java.time.Instant;
  * @author Alexander Nozik
  */
 public interface Measurement<T> {
+
+    Device getDevice();
 
     /**
      * Begin the measurement
@@ -67,8 +70,4 @@ public interface Measurement<T> {
      * @return
      */
     Throwable getError();
-
-    void addListener(MeasurementListener<T> listener);
-
-    void removeListener(MeasurementListener<T> listener);
 }

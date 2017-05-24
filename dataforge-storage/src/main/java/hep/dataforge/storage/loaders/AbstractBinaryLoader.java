@@ -26,14 +26,11 @@ import hep.dataforge.storage.api.Storage;
  */
 public abstract class AbstractBinaryLoader<T> extends AbstractLoader implements ObjectLoader<T> {
 
-    public AbstractBinaryLoader(Storage storage, String name, Meta annotation) {
-        super(storage, name, annotation);
+    public AbstractBinaryLoader(Storage storage, String name, Meta meta) {
+        super(storage, name, meta);
     }
 
-    public AbstractBinaryLoader(Storage storage, String name) {
-        super(storage, name);
-    }
-    
+
     @Override
     public Envelope respond(Envelope message) {
         throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.

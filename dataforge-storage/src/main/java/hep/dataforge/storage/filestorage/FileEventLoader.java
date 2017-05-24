@@ -19,9 +19,10 @@ import hep.dataforge.events.Event;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.IOUtils;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.storage.api.EventLoader;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.JSONMetaWriter;
-import hep.dataforge.storage.loaders.AbstractEventLoader;
+import hep.dataforge.storage.loaders.AbstractLoader;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.vfs2.FileObject;
 
@@ -31,7 +32,7 @@ import java.util.function.Predicate;
 /**
  * @author darksnake
  */
-public class FileEventLoader extends AbstractEventLoader {
+public class FileEventLoader extends AbstractLoader implements EventLoader {
 
     private static final byte[] NEWLINE = {'\r', '\n'};
 
@@ -101,15 +102,18 @@ public class FileEventLoader extends AbstractEventLoader {
     }
 
     @Override
-    protected void pushDirect(Event event) throws StorageException {
+    public boolean pushEvent(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
                 String eventString = new JSONMetaWriter(false).writeString(event.meta());
                 getFile().append(eventString.getBytes(IOUtils.UTF8_CHARSET));
                 getFile().append(NEWLINE);
+                return true;
             } catch (Exception ex) {
                 throw new StorageException(ex);
             }
+        }else {
+            return false;
         }
     }
 
@@ -136,5 +140,4 @@ public class FileEventLoader extends AbstractEventLoader {
         }
         return file;
     }
-
 }
