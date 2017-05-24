@@ -225,16 +225,15 @@ public class FileStorage extends AbstractStorage implements FileListener {
     @Override
     protected Loader createLoader(String loaderName, Meta loaderConfiguration) throws StorageException {
         String type = StorageUtils.loaderType(loaderConfiguration);
-        String name = StorageUtils.loaderName(loaderConfiguration);
 
-        if (optLoader(name).isPresent()) {
-            return overrideLoader(optLoader(name).get(), loaderConfiguration);
+        if (optLoader(loaderName).isPresent()) {
+            return overrideLoader(optLoader(loaderName).get(), loaderConfiguration);
         } else {
-            return buildLoaderByType(loaderConfiguration, type);
+            return buildLoaderByType(loaderName, loaderConfiguration, type);
         }
     }
 
-    protected Loader buildLoaderByType(Meta loaderConfiguration, String type) throws StorageException {
+    protected Loader buildLoaderByType(String loaderName, Meta loaderConfiguration, String type) throws StorageException {
         switch (type) {
             case PointLoader.POINT_LOADER_TYPE:
                 return createNewFileLoader(loaderConfiguration, ".points");

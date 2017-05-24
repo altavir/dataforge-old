@@ -46,9 +46,9 @@ public class StorageUtils {
 
     public static final String SHELF_PATH_KEY = "path";
 
-    public static String loaderName(Meta loaderAnnotation) {
-        return loaderAnnotation.getString(Loader.LOADER_NAME_KEY);
-    }
+//    public static String loaderName(Meta loaderAnnotation) {
+//        return loaderAnnotation.getString(Loader.LOADER_NAME_KEY);
+//    }
 
     public static String loaderType(Meta loaderAnnotation) {
         return loaderAnnotation.getString(LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);

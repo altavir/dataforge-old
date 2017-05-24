@@ -8,12 +8,12 @@ public interface AutoConnectible extends Connectible {
 
     @Override
     default void connect(Connection connection, String... roles) {
-        getConnectionHelper().connect(connection,roles);
+        getConnectionHelper().connect(connection, roles);
     }
 
     @Override
-    default  <T> Stream<T> connections(String role, Class<T> type) {
-        return getConnectionHelper().connections(role,type);
+    default <T> Stream<T> connections(String role, Class<T> type) {
+        return getConnectionHelper().connections(role, type);
     }
 
     @Override

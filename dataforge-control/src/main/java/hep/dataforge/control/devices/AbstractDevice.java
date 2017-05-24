@@ -72,7 +72,7 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
 
      public ConnectionHelper getConnectionHelper() {
         if(connectionHelper == null){
-            connectionHelper = new ConnectionHelper(this.getLogger());
+            connectionHelper = new ConnectionHelper(this, this.getLogger());
         }
         return connectionHelper;
     }

@@ -11,10 +11,12 @@ import java.util.stream.Stream;
  */
 public class ConnectionHelper implements Connectible {
     //TODO isolate errors inside connections
-    private final Map<Connection, Set<String>> connections = new HashMap<>();
+    private final Map<Connection<?>, Set<String>> connections = new HashMap<>();
+    private final Connectible caller;
     private final Logger logger;
 
-    public ConnectionHelper(Logger logger) {
+    public ConnectionHelper(Connectible caller, Logger logger) {
+        this.caller = caller;
         this.logger = logger;
     }
 
@@ -55,7 +57,7 @@ public class ConnectionHelper implements Connectible {
         }
         try {
             getLogger().debug("Opening connection {}", connection.toString());
-            connection.open(this);
+            connection.open(caller);
         } catch (Exception ex) {
             getLogger().error("Can not open connection", ex);
         }

@@ -43,7 +43,7 @@ public abstract class AbstractLoader implements Loader {
         this.name = name;
         this.meta = meta;
         this.storage = storage;
-        connectionHelper = new ConnectionHelper(storage.getContext().getLogger());
+        connectionHelper = new ConnectionHelper(this, storage.getContext().getLogger());
     }
 
     @Override

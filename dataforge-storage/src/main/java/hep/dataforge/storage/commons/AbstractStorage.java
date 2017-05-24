@@ -62,7 +62,7 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         this.name = name;
         this.parent = parent;
         context = parent.getContext();
-        connectionHelper = new ConnectionHelper(context.getLogger());
+        connectionHelper = new ConnectionHelper(this, context.getLogger());
     }
 
     protected AbstractStorage(Context context, Meta meta) {
@@ -70,7 +70,7 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
         this.name = meta.getString("name", "root");
         this.context = context;
         this.parent = null;
-        connectionHelper = new ConnectionHelper(context.getLogger());
+        connectionHelper = new ConnectionHelper(this, context.getLogger());
     }
 
     @Override
