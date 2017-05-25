@@ -15,7 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.events.Event;
 import hep.dataforge.values.Value;
 
 /**
@@ -43,13 +42,6 @@ public interface DeviceListener {
      * @param device
      */
     default void notifyDeviceConfigChanged(Device device) {
-
-    }
-
-    /**
-     * Evaluate device event
-     */
-    default void evaluateDeviceEvent(Device device, Event event) {
 
     }
 

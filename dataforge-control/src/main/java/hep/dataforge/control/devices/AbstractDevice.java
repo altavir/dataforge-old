@@ -21,6 +21,8 @@ import hep.dataforge.control.Connection;
 import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.control.connections.Roles;
+import hep.dataforge.events.Event;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.utils.BaseMetaHolder;
@@ -156,6 +158,10 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         getLogger().error(message, error);
         forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
                 it -> it.evaluateDeviceException(AbstractDevice.this, message, error));
+    }
+
+    protected final void dispatchEvent(Event event) {
+        forEachConnection(EventHandler.class, it -> it.pushEvent(event));
     }
 
     /**
