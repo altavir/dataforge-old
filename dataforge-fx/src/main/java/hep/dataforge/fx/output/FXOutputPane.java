@@ -5,11 +5,13 @@
  */
 package hep.dataforge.fx.output;
 
+import hep.dataforge.fx.FXObject;
 import hep.dataforge.fx.FXUtils;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.IntegerProperty;
 import javafx.beans.property.SimpleIntegerProperty;
 import javafx.collections.ObservableList;
+import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import org.fxmisc.richtext.InlineCssTextArea;
 import org.fxmisc.richtext.ReadOnlyStyledDocument;
@@ -23,11 +25,11 @@ import java.io.OutputStream;
  *
  * @author Alexander Nozik
  */
-public class FXOutputPane {
+public class FXOutputPane implements FXObject {
 
     private static final int DEFAULT_TAB_STOP_SIZE = 15;
 
-    private final AnchorPane holder;
+    private final AnchorPane root;
     private final InlineCssTextArea textArea = new InlineCssTextArea();
 
     private final IntegerProperty maxLinesProperty = new SimpleIntegerProperty(-1);
@@ -46,7 +48,7 @@ public class FXOutputPane {
 //        textArea = new InlineCssTextArea();
         textArea.setEditable(false);
 //        textArea.setWrapText(true);
-        holder = new AnchorPane(textArea);
+        root = new AnchorPane(textArea);
         AnchorPane.setBottomAnchor(textArea, 5d);
         AnchorPane.setTopAnchor(textArea, 5d);
         AnchorPane.setLeftAnchor(textArea, 5d);
@@ -62,12 +64,12 @@ public class FXOutputPane {
     }
 
     /**
-     * The holder Anchor pane
+     * The root Anchor pane
      *
      * @return
      */
     public AnchorPane getRoot() {
-        return holder;
+        return root;
     }
 
     public IntegerProperty maxLinesProperty() {
@@ -181,7 +183,7 @@ public class FXOutputPane {
     }
 
     public void clear() {
-        FXUtils.runNow(() -> textArea.clear());
+        FXUtils.runNow(textArea::clear);
     }
 
     public OutputStream getStream() {
@@ -198,4 +200,8 @@ public class FXOutputPane {
         };
     }
 
+    @Override
+    public Node getFXNode() {
+        return root;
+    }
 }

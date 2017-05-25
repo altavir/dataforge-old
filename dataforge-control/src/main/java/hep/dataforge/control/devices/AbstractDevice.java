@@ -70,13 +70,12 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
         return logger;
     }
 
-     public ConnectionHelper getConnectionHelper() {
-        if(connectionHelper == null){
+    public ConnectionHelper getConnectionHelper() {
+        if (connectionHelper == null) {
             connectionHelper = new ConnectionHelper(this, this.getLogger());
         }
         return connectionHelper;
     }
-
 
 
     @Override
@@ -128,7 +127,11 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
      */
     private void notifyStateChanged(String stateName, Value stateValue) {
         this.states.put(stateName, stateValue);
-        getLogger().info("State {} changed to {}", stateName, stateValue);
+        if (stateValue.isNull()) {
+            getLogger().info("State {} is reset", stateName);
+        } else {
+            getLogger().info("State {} changed to {}", stateName, stateValue);
+        }
         forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
                 it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue));
     }

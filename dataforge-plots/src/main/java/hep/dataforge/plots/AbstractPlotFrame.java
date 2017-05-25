@@ -29,7 +29,6 @@ import org.slf4j.LoggerFactory;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
 
@@ -38,7 +37,7 @@ import static hep.dataforge.plots.wrapper.PlotUnWrapper.PLOT_WRAPPER_TYPE;
  */
 public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
 
-    private final Map<String, Plottable> plottables = new ConcurrentHashMap<>();
+    private final Map<String, Plottable> plottables = new LinkedHashMap<>();
 
     private ListBinding<Plottable> list = new ListBinding<Plottable>() {
         @Override

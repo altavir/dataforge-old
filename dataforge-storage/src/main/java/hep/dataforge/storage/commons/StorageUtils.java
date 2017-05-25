@@ -30,7 +30,6 @@ import hep.dataforge.values.ValueType;
 import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
-import java.util.List;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -58,27 +57,27 @@ public class StorageUtils {
         return shelfAnnotation.getString(SHELF_PATH_KEY);
     }
 
-    public static void setupLoaders(Storage storage, Meta loaderConfig) throws StorageException {
-        if (loaderConfig.hasMeta("shelf")) {
-            for (Meta an : loaderConfig.getMetaList("shelf")) {
-                String shelfName = shelfName(an);
-                Storage shelf = storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName(an), an));
-                setupLoaders(shelf, an);
-            }
-        }
-
-        if (loaderConfig.hasMeta("loader")) {
-            List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
-            for (Meta la : loaderAns) {
-                String loaderName = loaderName(la);
-                Loader current = storage.optLoader(loaderName).orElseGet(() -> storage.buildLoader(loaderName, la));
-                //If the same annotation is used - do nothing
-                if (!current.meta().equals(la)) {
-                    storage.buildLoader(loaderName, loaderConfig);
-                }
-            }
-        }
-    }
+//    public static void setupLoaders(Storage storage, Meta loaderConfig) throws StorageException {
+//        if (loaderConfig.hasMeta("shelf")) {
+//            for (Meta an : loaderConfig.getMetaList("shelf")) {
+//                String shelfName = shelfName(an);
+//                Storage shelf = storage.optShelf(shelfName).orElseGet(() -> storage.buildShelf(shelfName(an), an));
+//                setupLoaders(shelf, an);
+//            }
+//        }
+//
+//        if (loaderConfig.hasMeta("loader")) {
+//            List<? extends Meta> loaderAns = loaderConfig.getMetaList("loader");
+//            for (Meta la : loaderAns) {
+//                String loaderName = loaderName(la);
+//                Loader current = storage.optLoader(loaderName).orElseGet(() -> storage.buildLoader(loaderName, la));
+//                //If the same annotation is used - do nothing
+//                if (!current.meta().equals(la)) {
+//                    storage.buildLoader(loaderName, loaderConfig);
+//                }
+//            }
+//        }
+//    }
 
     public static Meta getErrorMeta(Throwable err) {
         return new MetaBuilder("error")

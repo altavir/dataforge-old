@@ -236,41 +236,41 @@ public class FileStorage extends AbstractStorage implements FileListener {
     protected Loader buildLoaderByType(String loaderName, Meta loaderConfiguration, String type) throws StorageException {
         switch (type) {
             case PointLoader.POINT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".points");
+                return createNewFileLoader(loaderName, loaderConfiguration, ".points");
             case StateLoader.STATE_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".state");
+                return createNewFileLoader(loaderName, loaderConfiguration, ".state");
             case ObjectLoader.OBJECT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".binary");
+                return createNewFileLoader(loaderName, loaderConfiguration, ".binary");
             case EventLoader.EVENT_LOADER_TYPE:
-                return createNewFileLoader(loaderConfiguration, ".event");
+                return createNewFileLoader(loaderName, loaderConfiguration, ".event");
             default:
                 throw new StorageException("Loader type not supported");
         }
     }
 
-    protected Loader createNewFileLoader(Meta an, String extension) throws StorageException {
+    protected Loader createNewFileLoader(String loaderName, Meta meta, String extension) throws StorageException {
         try {
-            String name = StorageUtils.loaderName(an);
+//            String name = StorageUtils.loaderName(meta);
             FileObject dir = getDataDir();
             //Создаем путь к файлу, если его не существует
             if (!dir.exists()) {
                 dir.createFolder();
             }
 
-            FileObject dataFile = dir.resolveFile(name + extension);
+            FileObject dataFile = dir.resolveFile(loaderName + extension);
             if (!dataFile.exists()) {
                 dataFile.createFile();
                 try (OutputStream stream = dataFile.getContent().getOutputStream()) {
                     Envelope emptyEnvelope = new EnvelopeBuilder()
                             .setContentType(FILE_STORAGE_ENVELOPE_TYPE)
-                            .setMeta(an)
+                            .setMeta(meta)
                             .build();
                     new FileStorageEnvelopeType().getWriter().write(stream, emptyEnvelope);
                 }
             }
             refresh();
 
-            return optLoader(name).orElseThrow(() -> new StorageException("Loader could not be initialized from existing file"));
+            return optLoader(loaderName).orElseThrow(() -> new StorageException("Loader could not be initialized from existing file"));
         } catch (IOException ex) {
             throw new StorageException(ex);
         }

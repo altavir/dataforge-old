@@ -46,7 +46,7 @@ public interface Value extends Serializable {
      */
     static Value of(String str) {
         //Trying to get integer
-        if (str == null) {
+        if (str == null || str.isEmpty()) {
             return Value.getNull();
         }
 
@@ -133,10 +133,10 @@ public interface Value extends Serializable {
         return new TimeValue(t);
     }
 
-    static Value of(Object... list){
+    static Value of(Object... list) {
         return of(Arrays.asList(list));
     }
-    
+
     static Value of(Collection<Object> list) {
         List<Object> l = new ArrayList<>();
         l.addAll(list);

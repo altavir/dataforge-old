@@ -37,7 +37,7 @@ public class ConnectionHelper implements Connectible {
         //Checking if connection could serve given roles
         for (String role : roles) {
             if (!acceptsRole(role)) {
-                getLogger().warn("The connectable does not support role {}", role);
+                getLogger().warn("The connectible does not support role {}", role);
             } else {
                 roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).forEach(rd -> {
                     if (!rd.objectType().isInstance(connection)) {
@@ -85,5 +85,20 @@ public class ConnectionHelper implements Connectible {
                 .filter(entry -> type.isInstance(entry.getKey()))
                 .filter(entry -> entry.getValue().stream().anyMatch(r -> r.matches(role)))
                 .map(entry -> type.cast(entry.getKey()));
+    }
+
+    @Override
+    public boolean acceptsRole(String name) {
+        return caller.acceptsRole(name);
+    }
+
+    @Override
+    public List<RoleDef> roleDefs() {
+        return caller.roleDefs();
+    }
+
+    @Override
+    public Optional<RoleDef> optRoleDef(String name) {
+        return caller.optRoleDef(name);
     }
 }
