@@ -106,7 +106,9 @@ public class FXOutputPane implements FXObject {
                     append(tabs[i], style);
                     tab();
                 }
-                append(tabs[tabs.length - 1], style);
+                if(tabs.length>0) {
+                    append(tabs[tabs.length - 1], style);
+                }
             } else if (style.isEmpty()) {
                 textArea.appendText(t);
             } else {

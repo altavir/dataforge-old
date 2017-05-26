@@ -128,7 +128,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
     protected synchronized void recievePhrase(String phrase) {
         lastResponse = phrase;
         notify();
-        LoggerFactory.getLogger(getClass()).debug("RECIEVE: " + phrase);
+        LoggerFactory.getLogger(getClass()).trace("RECIEVE: " + phrase);
         if (controller != null) {
             controller.accept(phrase);
         }

@@ -20,17 +20,13 @@ allprojects{
             javaParameters = true
         }
     }
-
-    dependencies {
-        compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:$kotlin_version"
-    }
-
 }
 
 
 description = "KOtlin Dataforge EXtension"
 
 dependencies{
+    compile "org.jetbrains.kotlin:kotlin-stdlib-jre8"
     compile project(':dataforge-core')
 }
 

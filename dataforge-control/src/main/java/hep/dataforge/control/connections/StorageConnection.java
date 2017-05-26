@@ -45,7 +45,7 @@ public class StorageConnection extends DeviceConnection implements Responder {
 
     @Override
     public void open(Device device) throws Exception {
-        StorageManager storageManager = device.getContext().getFeature(StorageManager.class);
+        StorageManager storageManager = device.getContext().pluginManager().getOrLoad(StorageManager.class);
         if (storage == null) {
             if (device.meta().hasMeta("storage")) {
                 storage = storageManager.buildStorage(device.meta().getMeta("storage"));

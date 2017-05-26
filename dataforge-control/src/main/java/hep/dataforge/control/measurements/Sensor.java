@@ -33,6 +33,9 @@ public abstract class Sensor<T> extends AbstractDevice {
     }
 
     public Measurement<T> startMeasurement() throws MeasurementException {
+        if(!getState(INITIALIZED_STATE).booleanValue()){
+            throw new RuntimeException("Device not initialized");
+        }
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
 //            measurement.addListener(this);

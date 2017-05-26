@@ -84,7 +84,6 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     public void init() throws ControlException {
         getLogger().info("Initializing device '{}'...", getName());
         updateState(INITIALIZED_STATE, true);
-//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceInitialized(this));
     }
 
     @Override

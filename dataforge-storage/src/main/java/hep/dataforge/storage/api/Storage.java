@@ -183,7 +183,7 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
      */
     default String getFullPath() {
         if (getParent() == null) {
-            return "";
+            return getName();
         } else {
             String parentPath = getParent().getFullPath();
             if (parentPath.isEmpty()) {

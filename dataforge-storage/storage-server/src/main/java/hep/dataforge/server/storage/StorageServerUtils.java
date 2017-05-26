@@ -5,7 +5,7 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.filestorage.FileStorage;
 import hep.dataforge.storage.filestorage.FileStorageFactory;
 
-public class StorageServeUtils {
+public class StorageServerUtils {
 
     public static void addStorage(ServerManager manager, Storage storage, String path) {
         storage.open();

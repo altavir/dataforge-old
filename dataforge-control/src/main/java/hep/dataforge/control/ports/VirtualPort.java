@@ -88,7 +88,7 @@ public abstract class VirtualPort extends PortHandler implements Configurable {
     }
 
     protected synchronized void cancelByTag(String tag) {
-        futures.stream().filter((future) -> future.hasTag(tag)).forEach((future) -> future.cancel());
+        futures.stream().filter((future) -> future.hasTag(tag)).forEach(TaggedFuture::cancel);
     }
 
     /**
