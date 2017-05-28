@@ -30,7 +30,7 @@ class GrindShell implements Encapsulated {
         //define important properties
         binding.setProperty("context", context)
         binding.setProperty("plots", new PlotHelper(context))
-        shell = new GroovyShell(getClass().classLoader, binding, configuration);
+        shell = new GroovyShell(context.classLoader, binding, configuration);
     }
 
     def bind(String key, Object value) {
