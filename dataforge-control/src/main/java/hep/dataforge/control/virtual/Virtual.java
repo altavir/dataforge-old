@@ -5,9 +5,9 @@
  */
 package hep.dataforge.control.virtual;
 
+import hep.dataforge.control.devices.Sensor;
 import hep.dataforge.control.devices.StateDef;
 import hep.dataforge.control.measurements.Measurement;
-import hep.dataforge.control.measurements.Sensor;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;

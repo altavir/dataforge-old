@@ -129,11 +129,11 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     public <T extends Plugin> Optional<T> opt(PluginTag tag, Class<T> type) {
-        return opt(tag).map(it -> type.cast(it));
+        return opt(tag).map(type::cast);
     }
 
     public <T extends Plugin> Optional<T> opt(Class<T> type) {
-        return stream(true).filter(it -> type.isInstance(it)).findFirst().map(it -> type.cast(it));
+        return stream(true).filter(type::isInstance).findFirst().map(type::cast);
     }
 
     /**

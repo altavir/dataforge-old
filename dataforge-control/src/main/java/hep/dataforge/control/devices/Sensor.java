@@ -3,17 +3,16 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.control.measurements;
+package hep.dataforge.control.devices;
 
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.control.connections.Roles;
-import hep.dataforge.control.devices.AbstractDevice;
-import hep.dataforge.control.devices.StateDef;
+import hep.dataforge.control.measurements.Measurement;
+import hep.dataforge.control.measurements.MeasurementListener;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
-import hep.dataforge.values.Value;
 
-import static hep.dataforge.control.measurements.Sensor.MEASURING_STATE;
+import static hep.dataforge.control.devices.Sensor.MEASURING_STATE;
 
 /**
  * A device with single one-time or periodic measurement
@@ -89,7 +88,7 @@ public abstract class Sensor<T> extends AbstractDevice {
     @Override
     protected Object computeState(String stateName) throws ControlException {
         if (MEASURING_STATE.equals(stateName)) {
-            return Value.of(isMeasuring());
+            return isMeasuring();
         } else {
             return super.computeState(stateName);
         }

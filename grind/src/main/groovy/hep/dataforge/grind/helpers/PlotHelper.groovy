@@ -17,6 +17,7 @@
 package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.Global
 import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.data.PlottableData
 import hep.dataforge.plots.data.PlottableXYFunction
@@ -33,11 +34,9 @@ class PlotHelper {
     static final String DEFAULT_FRAME = "default";
     PlotManager manager;
 
-    PlotHelper(Context context) {
-//        Global.instance().pluginManager().load("plots-jfc");
+    PlotHelper(Context context = Global.instance()) {
         this.manager = context.getFeature(PlotManager)
     }
-
 
     def configure(String frame, Closure config) {
         manager.getPlotFrame(frame).configure(config);
