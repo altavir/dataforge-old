@@ -22,7 +22,7 @@ import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
  * @param <T>
  * @author darksnake
  */
-@StateDef(name = CONNECTED_STATE, def = "false", info = "The connection state for this device")
+@StateDef(name = CONNECTED_STATE, writable = true, def = "false", info = "The connection state for this device")
 @ValueDef(name = "port", info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
@@ -47,6 +47,15 @@ public abstract class PortSensor<T> extends Sensor<T> {
     protected PortHandler buildHandler(String portName) throws ControlException {
         getLogger().info("Connecting to port {}", portName);
         return PortFactory.getPort(portName);
+    }
+
+    @Override
+    protected Object computeState(String stateName) throws ControlException {
+        if (CONNECTED_STATE.equals(stateName)) {
+            return handler != null && handler.isOpen();
+        } else {
+            return super.computeState(stateName);
+        }
     }
 
     @Override
@@ -88,6 +97,8 @@ public abstract class PortSensor<T> extends Sensor<T> {
         if (handler == null) {
             String port = meta().getString(PORT_NAME_KEY);
             this.handler = buildHandler(port);
+            handler.open();
+            updateState(CONNECTED_STATE,true);
         }
         return handler;
     }

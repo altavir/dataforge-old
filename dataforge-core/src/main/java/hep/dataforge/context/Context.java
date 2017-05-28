@@ -352,7 +352,6 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     /**
-     *
      * @param serviceClass
      * @param predicate
      * @param <T>
@@ -409,6 +408,11 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
         public Builder classPath(URL... path) {
             ctx.classLoader = new URLClassLoader(path, ctx.getParent().getClassLoader());
+            return this;
+        }
+
+        public Builder classPath(Collection<URL> paths) {
+            ctx.classLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]), ctx.getParent().getClassLoader());
             return this;
         }
 

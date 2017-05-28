@@ -169,7 +169,7 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
      * @param stateName
      */
     protected final void invalidateState(String stateName) {
-        this.states.put(stateName, Value.NULL);
+        this.states.remove(stateName);
     }
 
     /**

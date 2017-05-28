@@ -5,11 +5,15 @@
  */
 package hep.dataforge.control.measurements;
 
+import hep.dataforge.control.RoleDef;
+import hep.dataforge.control.connections.Roles;
 import hep.dataforge.control.devices.AbstractDevice;
 import hep.dataforge.control.devices.StateDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.values.Value;
+
+import static hep.dataforge.control.measurements.Sensor.MEASURING_STATE;
 
 /**
  * A device with single one-time or periodic measurement
@@ -17,8 +21,10 @@ import hep.dataforge.values.Value;
  * @param <T>
  * @author Alexander Nozik
  */
-@StateDef(name = "inProgress", info = "Shows if this sensor is actively measuring")
+@StateDef(name = MEASURING_STATE, info = "Shows if this sensor is actively measuring")
+@RoleDef(name = Roles.MEASUREMENT_LISTENER_ROLE, objectType = MeasurementListener.class)
 public abstract class Sensor<T> extends AbstractDevice {
+    public static final String MEASURING_STATE = "measuring";
 
     private Measurement<T> measurement;
 
@@ -33,18 +39,17 @@ public abstract class Sensor<T> extends AbstractDevice {
     }
 
     public Measurement<T> startMeasurement() throws MeasurementException {
-        if(!getState(INITIALIZED_STATE).booleanValue()){
+        if (!getState(INITIALIZED_STATE).booleanValue()) {
             throw new RuntimeException("Device not initialized");
         }
         if (this.measurement == null || this.measurement.isFinished()) {
             this.measurement = createMeasurement();
-//            measurement.addListener(this);
-//            onCreateMeasurement(measurement);
         } else if (measurement.isStarted()) {
             getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
         }
 
         this.measurement.start();
+        updateState(MEASURING_STATE, true);
         return this.measurement;
     }
 
@@ -62,14 +67,9 @@ public abstract class Sensor<T> extends AbstractDevice {
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
-//            measurement.removeListener(this);
+            updateState(MEASURING_STATE, false);
         }
     }
-
-//    @Override
-//    protected <T> void onFinishMeasurement(Measurement<T> measurement) {
-//        measurement = null;
-//    }
 
     @Override
     public void shutdown() throws ControlException {
@@ -87,11 +87,11 @@ public abstract class Sensor<T> extends AbstractDevice {
     }
 
     @Override
-    public Value getState(String stateName) {
-        if ("measuring".equals(stateName)) {
+    protected Object computeState(String stateName) throws ControlException {
+        if (MEASURING_STATE.equals(stateName)) {
             return Value.of(isMeasuring());
         } else {
-            return super.getState(stateName);
+            return super.computeState(stateName);
         }
     }
 

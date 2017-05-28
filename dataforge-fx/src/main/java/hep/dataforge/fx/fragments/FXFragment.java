@@ -2,7 +2,10 @@ package hep.dataforge.fx.fragments;
 
 import hep.dataforge.fx.FXObject;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.*;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -11,7 +14,7 @@ import javafx.scene.layout.BorderPane;
 import java.util.function.Supplier;
 
 /**
- * A general GUI fragment
+ * A container for
  * Created by darksnake on 09-Oct-16.
  */
 public abstract class FXFragment implements FXObject {
@@ -30,6 +33,8 @@ public abstract class FXFragment implements FXObject {
                     setTitle(title);
                 }
                 Node node = sup.get();
+                setWidth(node.prefWidth(-1));
+                setHeight(node.prefHeight(-1));
                 if (node instanceof Parent) {
                     return (Parent) node;
                 } else {
@@ -41,7 +46,6 @@ public abstract class FXFragment implements FXObject {
         };
     }
 
-    private BooleanProperty showing = new SimpleBooleanProperty(false);
     private StringProperty title = new SimpleStringProperty("");
     private DoubleProperty preferredWidth = new SimpleDoubleProperty();
     private DoubleProperty preferredHeight = new SimpleDoubleProperty();
@@ -52,8 +56,8 @@ public abstract class FXFragment implements FXObject {
 
     protected FXFragment(String title, double width, double height) {
         setTitle(title);
-        setPreferredWidth(width);
-        setPreferredHeight(height);
+        setWidth(width);
+        setHeight(height);
     }
 
     protected abstract Parent buildRoot();
@@ -63,10 +67,10 @@ public abstract class FXFragment implements FXObject {
         if (root == null) {
             root = buildRoot();
             if (preferredWidth.getValue() == null) {
-                setPreferredWidth(root.prefWidth(-1));
+                setWidth(root.prefWidth(-1));
             }
             if (preferredHeight.getValue() == null) {
-                setPreferredHeight(root.prefHeight(-1));
+                setHeight(root.prefHeight(-1));
             }
         }
         return root;
@@ -88,13 +92,6 @@ public abstract class FXFragment implements FXObject {
         };
     }
 
-    public boolean isShowing() {
-        return showing.get();
-    }
-
-    public BooleanProperty showingProperty() {
-        return showing;
-    }
 
     public String getTitle() {
         return title.get();
@@ -108,35 +105,28 @@ public abstract class FXFragment implements FXObject {
         this.title.set(title);
     }
 
-    public double getPreferredWidth() {
+    public double getWidth() {
         return preferredWidth.get();
     }
 
-    public DoubleProperty preferredWidthProperty() {
+    public DoubleProperty widthProperty() {
         return preferredWidth;
     }
 
-    public void setPreferredWidth(double preferredWidth) {
+    public void setWidth(double preferredWidth) {
         this.preferredWidth.set(preferredWidth);
     }
 
-    public double getPreferredHeight() {
+    public double getHeight() {
         return preferredHeight.get();
     }
 
-    public DoubleProperty preferredHeightProperty() {
+    public DoubleProperty heightProperty() {
         return preferredHeight;
     }
 
-    public void setPreferredHeight(double preferredHeight) {
+    public void setHeight(double preferredHeight) {
         this.preferredHeight.set(preferredHeight);
     }
 
-    public void show() {
-        this.showing.set(true);
-    }
-
-    public void hide() {
-        this.showing.set(false);
-    }
 }

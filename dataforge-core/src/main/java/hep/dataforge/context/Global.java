@@ -80,7 +80,7 @@ public class Global extends Context {
     }
 
     public static Logger logger() {
-        return instance.logger;
+        return instance.getLogger();
     }
 
     /**

@@ -5,7 +5,10 @@
  */
 package hep.dataforge.fx.fragments;
 
-import javafx.beans.value.ObservableBooleanValue;
+import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -29,8 +32,21 @@ public class FragmentWindow implements AutoCloseable {
     private final FXFragment fragment;
     private Stage stage;
     private Supplier<Window> owner;
-    private Runnable onShow;
-    private Runnable onHide;
+    private BooleanProperty isShowing = new SimpleBooleanProperty(false);
+    private DoubleProperty xPos = new SimpleDoubleProperty();
+    private DoubleProperty yPos = new SimpleDoubleProperty();
+
+    {
+        isShowing.addListener((observable, oldValue, newValue) -> {
+            if (newValue != getStage().isShowing()) {
+                if (newValue) {
+                    show();
+                } else {
+                    hide();
+                }
+            }
+        });
+    }
 
     public FragmentWindow(FXFragment fragment) {
         this.fragment = fragment;
@@ -39,15 +55,17 @@ public class FragmentWindow implements AutoCloseable {
 
     public FragmentWindow(FXFragment fragment, Window owner) {
         this.fragment = fragment;
-        this.owner = () -> owner;
+        setOwner(() -> owner);
     }
 
-    public void setOwner(Window owner) {
-        this.owner = () -> owner;
-        try {
-            stage.initOwner(owner);
-        } catch (Exception ex) {
-            LoggerFactory.getLogger(getClass()).error("Failed to set window owner", ex);
+    private final void setOwner(Supplier<Window> owner) {
+        this.owner = owner;
+        if (stage != null) {
+            try {
+                stage.initOwner(owner.get());
+            } catch (Exception ex) {
+                LoggerFactory.getLogger(getClass()).error("Failed to set window owner", ex);
+            }
         }
     }
 
@@ -56,14 +74,12 @@ public class FragmentWindow implements AutoCloseable {
      *
      * @param boolVal
      */
-    public void bindTo(ObservableBooleanValue boolVal) {
-        boolVal.addListener((ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) -> {
-            if (newValue != getStage().isShowing()) {
-                show();
-            } else {
-                hide();
-            }
-        });
+    public void bindTo(ObservableValue<Boolean> boolVal) {
+        isShowing.bind(boolVal);
+    }
+
+    public void bindTo(BooleanProperty property) {
+        isShowing.bindBidirectional(property);
     }
 
     /**
@@ -73,20 +89,8 @@ public class FragmentWindow implements AutoCloseable {
      */
     public void bindTo(ToggleButton button) {
         bindTo(button.selectedProperty());
-        owner = () -> button.getScene().getWindow();
-        onHide = () -> {
-            if (button.isSelected()) {
-                button.setSelected(false);
-            }
-        };
+        setOwner(() -> button.getScene().getWindow());
     }
-
-//    /**
-//     * Create a window for scene root and set its parameters.
-//     * @param root
-//     * @return
-//     */
-//    protected abstract Stage buildStage(Parent root);
 
 
     /**
@@ -103,16 +107,20 @@ public class FragmentWindow implements AutoCloseable {
         stage.setTitle(title);
         stage.setScene(new Scene(root, width, height));
         stage.sizeToScene();
-
         return stage;
     }
 
     public Stage getStage() {
         if (stage == null) {
-            stage = buildStage(fragment.getFXNode(), fragment.getTitle(), fragment.getPreferredWidth(), fragment.getPreferredHeight());
+            stage = buildStage(fragment.getFXNode(), fragment.getTitle(), fragment.getWidth(), fragment.getHeight());
             stage.setOnShown((WindowEvent event) -> {
                 onShow();
             });
+
+            fragment.heightProperty().bind(stage.heightProperty());
+            fragment.widthProperty().bind(stage.widthProperty());
+            xPos.bind(stage.xProperty());
+            yPos.bind(stage.yProperty());
 
             stage.setOnHidden((WindowEvent event) -> {
                 onHide();
@@ -141,25 +149,24 @@ public class FragmentWindow implements AutoCloseable {
     }
 
     public void hide() {
-        fragment.hide();
         getStage().hide();
     }
 
     public void show() {
-        fragment.show();
-        getStage().show();
+        Stage stage = getStage();
+        stage.show();
+        stage.setWidth(fragment.getWidth());
+        stage.setHeight(fragment.getHeight());
+        stage.setX(xPos.doubleValue());
+        stage.setY(yPos.doubleValue());
     }
 
     protected void onShow() {
-        if (onShow != null) {
-            onShow.run();
-        }
+        isShowing.set(true);
     }
 
     protected void onHide() {
-        if (onHide != null) {
-            onHide.run();
-        }
+        isShowing.set(false);
     }
 
 }
