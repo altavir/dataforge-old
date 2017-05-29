@@ -204,9 +204,11 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                         case "free":
                             plot.setDomainCrosshairVisible(true);
                             plot.setDomainCrosshairLockedOnData(false);
+                            break;
                         case "data":
                             plot.setDomainCrosshairVisible(true);
                             plot.setDomainCrosshairLockedOnData(true);
+                            break;
                         case "none":
                             plot.setDomainCrosshairVisible(false);
                     }
@@ -217,9 +219,11 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
                         case "free":
                             plot.setRangeCrosshairVisible(true);
                             plot.setRangeCrosshairLockedOnData(false);
+                            break;
                         case "data":
                             plot.setRangeCrosshairVisible(true);
                             plot.setRangeCrosshairLockedOnData(true);
+                            break;
                         case "none":
                             plot.setRangeCrosshairVisible(false);
                     }

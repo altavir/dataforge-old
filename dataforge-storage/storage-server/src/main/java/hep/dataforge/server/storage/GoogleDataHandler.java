@@ -114,13 +114,13 @@ public abstract class GoogleDataHandler implements Handler {
             if (keyValue.length == 2) {
                 map.put(keyValue[0], keyValue[1]);
             } else {
-                LoggerFactory.getLogger("PointLoaderVisualizationHandler").error("Can't parse request");
+                LoggerFactory.getLogger(getClass()).error("Can't parse request");
             }
         }
         return map;
     }
 
-    protected JsonObjectBuilder makeTable(TableFormat format, Iterable<DataPoint> data) {
+    private JsonObjectBuilder toJson(TableFormat format, Iterable<DataPoint> data) {
         JsonObjectBuilder res = Json.createObjectBuilder();
 
         res.add("cols", makeCols(format));
@@ -128,8 +128,8 @@ public abstract class GoogleDataHandler implements Handler {
         return res;
     }
 
-    protected JsonObjectBuilder makeTable(Table source) {
-        return makeTable(source.getFormat(), source);
+    private JsonObjectBuilder toJson(Table source) {
+        return toJson(source.getFormat(), source);
     }
 
     protected abstract Table getData(Meta query);
@@ -158,7 +158,7 @@ public abstract class GoogleDataHandler implements Handler {
         JsonObject response = Json.createObjectBuilder()
                 .add("status", "ok")
                 .add("reqId", reqId)
-                .add("table", makeTable(data))
+                .add("table", toJson(data))
                 .build();
 
         logger.info("Response built in {}", Duration.between(start, DateTimeUtils.now()));

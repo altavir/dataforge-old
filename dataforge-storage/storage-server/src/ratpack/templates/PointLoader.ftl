@@ -13,8 +13,7 @@
         google.charts.setOnLoadCallback(startUpdate);
 
         function startUpdate() {
-            var opts = {sendMethod: 'auto'};
-            var query = new google.visualization.Query("${dataSource}", opts);
+            var query = new google.visualization.Query("${dataSource}");
             query.setRefreshInterval(${updateInterval});
             query.send(handleQueryResponse);
         }
