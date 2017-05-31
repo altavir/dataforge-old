@@ -32,7 +32,7 @@ public class FragmentWindow implements AutoCloseable {
     private final FXFragment fragment;
     private Stage stage;
     private Supplier<Window> owner;
-    private BooleanProperty isShowing = new SimpleBooleanProperty(false);
+    private BooleanProperty isShowing = new SimpleBooleanProperty(this, "isShowing", false);
     private DoubleProperty xPos = new SimpleDoubleProperty();
     private DoubleProperty yPos = new SimpleDoubleProperty();
 
