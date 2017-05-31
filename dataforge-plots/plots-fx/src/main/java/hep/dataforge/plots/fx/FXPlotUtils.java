@@ -83,7 +83,7 @@ public class FXPlotUtils {
         return stage -> {
             stage.setWidth(width);
             stage.setHeight(height);
-            Scene scene = new Scene(container.getRoot(), width, height);
+            Scene scene = new Scene(container.getPane(), width, height);
             stage.setTitle(title);
             stage.setScene(scene);
         };

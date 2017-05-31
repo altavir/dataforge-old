@@ -83,6 +83,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
 
     /**
      * An unique ID for this port
+     *
      * @return
      */
     public abstract String getPortId();
@@ -125,7 +126,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      *
      * @param phrase
      */
-    protected synchronized void recievePhrase(String phrase) {
+    protected synchronized void receivePhrase(String phrase) {
         lastResponse = phrase;
         notify();
         LoggerFactory.getLogger(getClass()).trace("RECIEVE: " + phrase);
@@ -158,7 +159,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
         if (!isOpen()) {
             open();
         }
-        
+
         send(message);
         waitForPhrase(responseCondition, Duration.ofMillis(timeout));
         return lastResponse;
@@ -181,15 +182,14 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * Waits for phrase from port which satisfies specific condition
      *
      * @param responseCondition the condition to be specified. If null than next
-     * phrase is accepted
+     *                          phrase is accepted
      * @throws InterruptedException
      */
     private synchronized void waitForPhrase(Predicate<String> responseCondition, Duration timeout) throws PortException {
         lastResponse = null;
         Instant start = DateTimeUtils.now();
         try {
-            while (lastResponse == null
-                    || (responseCondition != null && !responseCondition.test(lastResponse))) {
+            while (lastResponse == null || (responseCondition != null && !responseCondition.test(lastResponse))) {
                 if (Duration.between(start, DateTimeUtils.now()).compareTo(timeout) > 0) {
                     throw new PortTimeoutException(timeout);
                 }
@@ -206,7 +206,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      *
      * @param controller
      * @throws PortLockException in case given holder is not the one that holds
-     * handler
+     *                           handler
      */
     public synchronized void unholdBy(PortController controller) throws PortLockException {
         if (isLocked()) {

@@ -79,7 +79,7 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
             return buildPlotFrame(stage, name, Meta.empty());
         } else {
             PlotContainer container = containers.get(name);
-            Window window = container.getRoot().getScene().getWindow();
+            Window window = container.getPane().getScene().getWindow();
             if (!window.isShowing()) {
                 if (window instanceof Stage) {
                     Platform.runLater(() -> ((Stage) window).show());

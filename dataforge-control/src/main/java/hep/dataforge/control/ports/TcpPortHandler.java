@@ -102,7 +102,7 @@ public class TcpPortHandler extends PortHandler {
                     buffer.write(reader.read());
                     String str = buffer.toString();
                     if (isPhrase(str)) {
-                        recievePhrase(str);
+                        receivePhrase(str);
                         buffer.reset();
                     }
                 } catch (IOException ex) {

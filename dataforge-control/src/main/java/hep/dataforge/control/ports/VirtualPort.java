@@ -82,9 +82,7 @@ public abstract class VirtualPort extends PortHandler implements Configurable {
     protected abstract void evaluateRequest(String request);
 
     protected synchronized void clearCompleted() {
-        futures.stream().filter((future) -> (future.future.isDone() || future.future.isCancelled())).forEach((future) -> {
-            futures.remove(future);
-        });
+        futures.stream().filter((future) -> (future.future.isDone() || future.future.isCancelled())).forEach(futures::remove);
     }
 
     protected synchronized void cancelByTag(String tag) {
@@ -100,14 +98,14 @@ public abstract class VirtualPort extends PortHandler implements Configurable {
      */
     protected synchronized void planResponse(String response, Duration delay, String... tags) {
         clearCompleted();
-        Runnable task = () -> recievePhrase(response);
+        Runnable task = () -> receivePhrase(response);
         ScheduledFuture future = scheduler.schedule(task, delay.toNanos(), TimeUnit.NANOSECONDS);
         this.futures.add(new TaggedFuture(future, tags));
     }
 
     protected synchronized void planRegularResponse(Supplier<String> responseBuilder, Duration delay, Duration period, String... tags) {
         clearCompleted();
-        Runnable task = () -> recievePhrase(responseBuilder.get());
+        Runnable task = () -> receivePhrase(responseBuilder.get());
         ScheduledFuture future = scheduler.scheduleAtFixedRate(task, delay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS);
         this.futures.add(new TaggedFuture(future, tags));
     }

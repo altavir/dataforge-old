@@ -35,7 +35,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
-import static hep.dataforge.control.connections.Roles.LOGGER_ROLE;
 
 /**
  * <p>
@@ -60,7 +59,8 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     }
 
     public Logger getLogger() {
-        return connections(LOGGER_ROLE, Logger.class).findFirst().orElseGet(this::getDefaultLogger);
+        return getDefaultLogger();
+        //return connections(LOGGER_ROLE, Logger.class).findFirst().orElseGet(this::getDefaultLogger);
     }
 
     public ConnectionHelper getConnectionHelper() {

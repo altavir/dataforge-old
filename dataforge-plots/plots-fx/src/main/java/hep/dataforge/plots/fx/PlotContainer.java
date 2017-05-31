@@ -7,6 +7,7 @@ package hep.dataforge.plots.fx;
 
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.fx.FXObject;
 import hep.dataforge.fx.FXUtils;
 import hep.dataforge.fx.configuration.ConfigEditor;
 import hep.dataforge.meta.ConfigChangeListener;
@@ -40,7 +41,7 @@ import java.util.*;
  *
  * @author Alexander Nozik
  */
-public class PlotContainer implements Initializable {
+public class PlotContainer implements Initializable, FXObject {
 
     private AnchorPane root;
     @FXML
@@ -78,17 +79,17 @@ public class PlotContainer implements Initializable {
 
     public static PlotContainer anchorTo(AnchorPane pane) {
         PlotContainer container = new PlotContainer();
-        pane.getChildren().add(container.getRoot());
-        AnchorPane.setBottomAnchor(container.getRoot(), 0d);
-        AnchorPane.setTopAnchor(container.getRoot(), 0d);
-        AnchorPane.setLeftAnchor(container.getRoot(), 0d);
-        AnchorPane.setRightAnchor(container.getRoot(), 0d);
+        pane.getChildren().add(container.getPane());
+        AnchorPane.setBottomAnchor(container.getPane(), 0d);
+        AnchorPane.setTopAnchor(container.getPane(), 0d);
+        AnchorPane.setLeftAnchor(container.getPane(), 0d);
+        AnchorPane.setRightAnchor(container.getPane(), 0d);
         return container;
     }
 
     public static PlotContainer centerIn(BorderPane pane) {
         PlotContainer container = new PlotContainer();
-        pane.setCenter(container.getRoot());
+        pane.setCenter(container.getPane());
         return container;
     }
 
@@ -97,8 +98,13 @@ public class PlotContainer implements Initializable {
      *
      * @return
      */
-    public Parent getRoot() {
+    public Parent getPane() {
         return root;
+    }
+
+    @Override
+    public Node getFXNode() {
+        return getPane();
     }
 
     /**

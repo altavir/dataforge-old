@@ -149,7 +149,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
 
             String str = new String(buffer.toByteArray());
             if (isPhrase(str)) {
-                recievePhrase(str);
+                receivePhrase(str);
                 buffer.reset();
             }
 
