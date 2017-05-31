@@ -42,7 +42,7 @@ public class JFreeFXTest extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
         BorderPane root = new BorderPane();
 
         JFreeChartFrame frame = new JFreeChartFrame();
@@ -70,9 +70,9 @@ public class JFreeFXTest extends Application {
 
         Scene scene = new Scene(root, 800, 600);
 
-        primaryStage.setTitle("my plot");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("my plot");
+        stage.setScene(scene);
+        stage.show();
     }
 
 }

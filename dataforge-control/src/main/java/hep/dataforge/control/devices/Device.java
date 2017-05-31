@@ -18,17 +18,22 @@ package hep.dataforge.control.devices;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.ControlUtils;
+import hep.dataforge.control.RoleDef;
 import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
+import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Future;
+
+import static hep.dataforge.control.connections.Roles.*;
 
 
 /**
@@ -59,6 +64,10 @@ import java.util.concurrent.Future;
  *
  * @author Alexander Nozik
  */
+@RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
+@RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this device")
+@RoleDef(name = VIEW_ROLE)
+@RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
 @StateDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized")
 public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Responder {
 

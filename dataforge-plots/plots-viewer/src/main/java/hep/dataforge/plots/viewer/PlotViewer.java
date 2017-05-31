@@ -5,13 +5,14 @@
  */
 package hep.dataforge.plots.viewer;
 
-import java.io.File;
-import java.io.IOException;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+
+import java.io.File;
+import java.io.IOException;
 
 /**
  *
@@ -20,16 +21,16 @@ import javafx.stage.Stage;
 public class PlotViewer extends Application {
     
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage stage) throws IOException {
         
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PlotViewer.fxml"));
         Parent root = loader.load();
         PlotViewerController controller = loader.getController();
         Scene scene = new Scene(root);
         
-        primaryStage.setTitle("DataForge plot viewer");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("DataForge plot viewer");
+        stage.setScene(scene);
+        stage.show();
 
         for(String fileName: this.getParameters().getUnnamed()){
             controller.loadPlot(new File(fileName));

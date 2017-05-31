@@ -30,7 +30,7 @@ public class MetaEditorTest extends Application {
     private Logger logger = LoggerFactory.getLogger("test");
 
     @Override
-    public void start(Stage primaryStage) throws IOException {
+    public void start(Stage stage) throws IOException {
 
         Configuration config = new Configuration("test")
                 .setValue("testValue", "[1,2,3]")
@@ -71,9 +71,9 @@ public class MetaEditorTest extends Application {
 
         Scene scene = new Scene(ConfigEditor.build(config, descriptor), 400, 400);
 
-        primaryStage.setTitle("Meta editor test");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("Meta editor test");
+        stage.setScene(scene);
+        stage.show();
     }
 
     /**

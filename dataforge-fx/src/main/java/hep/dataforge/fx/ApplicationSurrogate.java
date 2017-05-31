@@ -36,8 +36,8 @@ public class ApplicationSurrogate extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) throws Exception {
-        stageGenerator.complete(primaryStage);
+    public void start(Stage stage) throws Exception {
+        stageGenerator.complete(stage);
     }
 
     @Override

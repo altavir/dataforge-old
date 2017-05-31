@@ -80,9 +80,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
     @NodeDef(name = "range", info = "The definition of range for given axis")
     @ValueDef(name = "range.from", type = "NUMBER", info = "Lower boundary for fixed range")
     @ValueDef(name = "range.to", type = "NUMBER", info = "Upper boundary for fixed range")
-    @ValueDef(name = "crosshair", def = "free",
+    @ValueDef(name = "crosshair", def = "data",
             allowed = "[none, free, data]",
-            info = "Appearance and type of crosshair")
+            info = "Appearance and type of the crosshair")
     protected abstract void updateAxis(String axisName, Meta axisMeta, Meta plotMeta);
 
     @ValueDef(name = "show", type = "BOOLEAN", def = "true", info = "Display or hide the legend")

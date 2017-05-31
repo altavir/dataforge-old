@@ -15,4 +15,6 @@ public class Roles {
     public static final String STORAGE_ROLE = "storage";
     public static final String POINT_LISTENER_ROLE = "pointListener";
     public static final String VIEW_ROLE = "view";
+    public static final String LOGGER_ROLE = "log";
+    public static final String EVENT_HANDLER_ROLE = "eventHandler";
 }

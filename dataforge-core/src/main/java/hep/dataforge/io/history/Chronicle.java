@@ -108,7 +108,7 @@ public class Chronicle implements History, Named {
         out.flush();
     }
 
-    public Chronicle getLog() {
+    public Chronicle getChronicle() {
         return this;
     }
 

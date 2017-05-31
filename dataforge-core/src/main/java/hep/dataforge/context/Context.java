@@ -225,7 +225,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @return
      */
     @Override
-    public Chronicle getLog() {
+    public Chronicle getChronicle() {
         return this.rootLog;
     }
 

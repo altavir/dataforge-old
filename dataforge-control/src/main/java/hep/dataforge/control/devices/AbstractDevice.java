@@ -19,8 +19,6 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.control.Connection;
 import hep.dataforge.control.ConnectionHelper;
-import hep.dataforge.control.RoleDef;
-import hep.dataforge.control.connections.Roles;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
@@ -37,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
+import static hep.dataforge.control.connections.Roles.LOGGER_ROLE;
 
 /**
  * <p>
@@ -48,28 +47,20 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-@RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
-@RoleDef(name = Roles.VIEW_ROLE)
 public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     //TODO set up logger as connection
 
     private final Map<String, Value> states = new HashMap<>();
     private Context context;
-    private Logger logger;
     private ConnectionHelper connectionHelper;
 
-    private Logger setupLogger() {
+    private Logger getDefaultLogger() {
         String loggerName = meta().getString("logger", () -> "device::" + getName());
-
-        //TODO move logger construction to context IoManager
         return LoggerFactory.getLogger(loggerName);
     }
 
     public Logger getLogger() {
-        if (logger == null) {
-            logger = setupLogger();
-        }
-        return logger;
+        return connections(LOGGER_ROLE, Logger.class).findFirst().orElseGet(this::getDefaultLogger);
     }
 
     public ConnectionHelper getConnectionHelper() {

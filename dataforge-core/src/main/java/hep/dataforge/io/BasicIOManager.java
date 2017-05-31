@@ -50,7 +50,7 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        context.getLog().addListener(getLogEntryHandler());
+        context.getChronicle().addListener(getLogEntryHandler());
         if (context.getLogger() instanceof ch.qos.logback.classic.Logger) {
             addLoggerAppender((ch.qos.logback.classic.Logger) context.getLogger());
         }

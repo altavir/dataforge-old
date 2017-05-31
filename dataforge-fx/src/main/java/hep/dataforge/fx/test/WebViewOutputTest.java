@@ -6,7 +6,6 @@
 package hep.dataforge.fx.test;
 
 import javafx.application.Application;
-import static javafx.application.Application.launch;
 import javafx.scene.Scene;
 import javafx.scene.web.WebView;
 import javafx.stage.Stage;
@@ -18,7 +17,7 @@ import javafx.stage.Stage;
 public class WebViewOutputTest extends Application {
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
 
         WebView webView = new WebView();
 
@@ -27,9 +26,9 @@ public class WebViewOutputTest extends Application {
 
         Scene scene = new Scene(webView, 400, 400);
 
-        primaryStage.setTitle("WebViewOutputTest");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("WebViewOutputTest");
+        stage.setScene(scene);
+        stage.show();
     }
 
     /**

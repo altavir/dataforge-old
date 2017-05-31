@@ -26,18 +26,18 @@ package hep.dataforge.io.history;
  */
 public interface History {
 
-    Chronicle getLog();
+    Chronicle getChronicle();
 
     default void report(String str, Object... parameters){
-        getLog().report(str, parameters);
+        getChronicle().report(str, parameters);
     }
 
     default void report(Record entry){
-        getLog().report(entry);
+        getChronicle().report(entry);
     }
     
     default void reportError(String str, Object... parameters){
-        getLog().reportError(str, parameters);
+        getChronicle().reportError(str, parameters);
     }
     
 }

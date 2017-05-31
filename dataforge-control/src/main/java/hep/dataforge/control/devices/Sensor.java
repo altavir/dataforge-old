@@ -11,6 +11,9 @@ import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.MeasurementListener;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
+import hep.dataforge.values.Value;
+
+import java.util.Objects;
 
 import static hep.dataforge.control.devices.Sensor.MEASURING_STATE;
 
@@ -20,7 +23,7 @@ import static hep.dataforge.control.devices.Sensor.MEASURING_STATE;
  * @param <T>
  * @author Alexander Nozik
  */
-@StateDef(name = MEASURING_STATE, info = "Shows if this sensor is actively measuring")
+@StateDef(name = MEASURING_STATE, writable = true, info = "Shows if this sensor is actively measuring")
 @RoleDef(name = Roles.MEASUREMENT_LISTENER_ROLE, objectType = MeasurementListener.class)
 public abstract class Sensor<T> extends AbstractDevice {
     public static final String MEASURING_STATE = "measuring";
@@ -50,6 +53,18 @@ public abstract class Sensor<T> extends AbstractDevice {
         this.measurement.start();
         updateState(MEASURING_STATE, true);
         return this.measurement;
+    }
+
+    @Override
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
+        if(Objects.equals(stateName, MEASURING_STATE)){
+            if(value.booleanValue()){
+                startMeasurement();
+            } else {
+                stopMeasurement(false);
+            }
+        }
+        super.requestStateChange(stateName, value);
     }
 
     public Measurement<T> getMeasurement() {

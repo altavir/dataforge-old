@@ -78,6 +78,6 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
 //    @Override
 //    protected void afterAction(Context context, String name, FitResult res, Laminate meta) {
 //        super.afterAction(context, name, res, meta);
-////        context.getLog(name).print(new PrintWriter(buildActionOutput(context, name)));
+////        context.getChronicle(name).print(new PrintWriter(buildActionOutput(context, name)));
 //    }
 }

@@ -19,15 +19,15 @@ public class JFreeChartTest extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
         BorderPane root = new BorderPane();
         XYPlot plot = new XYPlot(null,new NumberAxis(),new NumberAxis(),new XYLineAndShapeRenderer());
         JFreeChart chart = new JFreeChart(plot);
         ChartViewer viewer = new ChartViewer(chart);
         root.setCenter(viewer);
         Scene scene = new Scene(root, 800, 600);
-        primaryStage.setTitle("JFC test");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("JFC test");
+        stage.setScene(scene);
+        stage.show();
     }
 }

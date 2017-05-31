@@ -48,8 +48,8 @@ public class TestFXAxis extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
-        primaryStage.setTitle("FX axis test");
+    public void start(Stage stage) {
+        stage.setTitle("FX axis test");
         //defining the axes
         final FXTimeAxis xAxis = new FXTimeAxis();
         final NumberAxis yAxis = new NumberAxis();
@@ -72,8 +72,8 @@ public class TestFXAxis extends Application {
         Scene scene = new Scene(box, 800, 600);
         lineChart.getData().add(series);
 
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setScene(scene);
+        stage.show();
     }
 
     @Override

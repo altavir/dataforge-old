@@ -24,7 +24,7 @@ public class FXOutputPaneTest extends Application {
     }
 
     @Override
-    public void start(Stage primaryStage) {
+    public void start(Stage stage) {
 
         FXOutputPane out = new FXOutputPane();
         out.setMaxLines(5);
@@ -38,9 +38,9 @@ public class FXOutputPaneTest extends Application {
 
         Scene scene = new Scene(out.getRoot(), 400, 400);
 
-        primaryStage.setTitle("FXOutputPaneTest");
-        primaryStage.setScene(scene);
-        primaryStage.show();
+        stage.setTitle("FXOutputPaneTest");
+        stage.setScene(scene);
+        stage.show();
     }
     
 }

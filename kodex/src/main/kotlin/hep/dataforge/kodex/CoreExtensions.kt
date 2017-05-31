@@ -12,7 +12,7 @@ import java.time.Instant
  */
 
 operator fun Value.plus(other: Value): Value {
-    return when (this.valueType()) {
+    return when (this.valueType()!!) {
         ValueType.NUMBER -> Value.of(this.numberValue() + other.numberValue());
         ValueType.STRING -> Value.of(this.stringValue() + other.stringValue());
         ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() + other.timeValue().toEpochMilli()))
@@ -22,18 +22,18 @@ operator fun Value.plus(other: Value): Value {
 }
 
 
-inline operator fun Value.plus(other: Any): Value {
+operator fun Value.plus(other: Any): Value {
     return this + Value.of(other);
 }
 
-inline operator fun Meta.get(path: String): Value {
+operator fun Meta.get(path: String): Value {
     return this.getValue(path);
 }
 
-inline operator fun MutableMetaNode<*>.set(path: String, value: Value):MutableMetaNode<*> {
+operator fun MutableMetaNode<*>.set(path: String, value: Value):MutableMetaNode<*> {
     return this.setValue(path, value);
 }
 
-inline operator fun MutableMetaNode<*>.plus(meta: Meta): MutableMetaNode<*>{
+operator fun MutableMetaNode<*>.plus(meta: Meta): MutableMetaNode<*>{
     return this.putNode(meta);
 }

@@ -122,7 +122,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
 //     *
 //     * @return
 //     */
-//    public String getLog() {
+//    public String getChronicle() {
 //        return new String(getFile().getData().array(), CHARSET);
 //    }
 
