@@ -25,6 +25,8 @@ import hep.dataforge.values.ValueUtils;
 import java.util.List;
 import java.util.function.Predicate;
 
+import static hep.dataforge.values.ValueType.NUMBER;
+
 /**
  * <p>
  * Filtering class.</p>
@@ -137,8 +139,8 @@ public class Filtering {
     @ValueDef(name = "tag", info = "The DataPoint tag to filter")
     @ValueDef(name = "value", info = "The value name to filter")
     @ValueDef(name = "equals", info = "The equality condition value")
-    @ValueDef(name = "from", type = "NUMBER", info = "The lower bound for value. The 'value' parameter should be present")
-    @ValueDef(name = "to", type = "NUMBER", info = "The upper bound for value. The 'value' parameter should be present")
+    @ValueDef(name = "from", type = {NUMBER}, info = "The lower bound for value. The 'value' parameter should be present")
+    @ValueDef(name = "to", type = {NUMBER}, info = "The upper bound for value. The 'value' parameter should be present")
     public static Predicate<DataPoint> buildCondition(Meta an) {
         Predicate<DataPoint> res = null;
         if (an.hasValue("tag")) {

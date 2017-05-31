@@ -30,6 +30,9 @@ import hep.dataforge.values.Value;
 
 import java.util.List;
 
+import static hep.dataforge.values.ValueType.BOOLEAN;
+import static hep.dataforge.values.ValueType.NUMBER;
+
 /**
  * Единичный набор данных для отрисовки
  *
@@ -38,7 +41,7 @@ import java.util.List;
 @ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name.")
 //@ValueDef(name = "preferedPlotter", def = "jFreeChart",
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
-@ValueDef(name = "visible", def = "true", type = "BOOLEAN", info = "The current visibility of this plottable")
+@ValueDef(name = "visible", def = "true", type = {BOOLEAN}, info = "The current visibility of this plottable")
 @AnonimousNotAlowed
 public interface Plottable extends Named, Metoid, Configurable, Wrappable, Described {
 
@@ -49,9 +52,9 @@ public interface Plottable extends Named, Metoid, Configurable, Wrappable, Descr
      * @return
      */
     @NodeDef(name = "xRange", info = "X filter")
-    @ValueDef(name = "xRange.from", type = "NUMBER", info = "X range from")
-    @ValueDef(name = "xRange.to", type = "NUMBER", info = "X range to")
-    @ValueDef(name = "numPoints", type = "NUMBER", info = "A required number of visible points. The real number could differ from requested one.")
+    @ValueDef(name = "xRange.from", type = {NUMBER}, info = "X range from")
+    @ValueDef(name = "xRange.to", type = {NUMBER}, info = "X range to")
+    @ValueDef(name = "numPoints", type = {NUMBER}, info = "A required number of visible points. The real number could differ from requested one.")
     List<DataPoint> getData(Meta query);
 
     default List<DataPoint> getData() {

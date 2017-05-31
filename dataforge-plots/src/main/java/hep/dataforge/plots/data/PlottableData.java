@@ -26,12 +26,14 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import static hep.dataforge.values.ValueType.BOOLEAN;
+
 /**
  * @author Alexander Nozik
  */
-@ValueDef(name = "showLine", type = "BOOLEAN", def = "false", info = "Show the connecting line.")
-@ValueDef(name = "showSymbol", type = "BOOLEAN", def = "true", info = "Show symbols for data point.")
-@ValueDef(name = "showErrors", type = "BOOLEAN", def = "true", info = "Show errors for points.")
+@ValueDef(name = "showLine", type = {BOOLEAN}, def = "false", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "true", info = "Show symbols for data point.")
+@ValueDef(name = "showErrors", type = {BOOLEAN}, def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
 
     //TODO replace by ObservableList and allow external modification

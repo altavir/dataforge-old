@@ -20,6 +20,7 @@ import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.ControlUtils;
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
@@ -68,7 +69,7 @@ import static hep.dataforge.control.connections.Roles.*;
 @RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this device")
 @RoleDef(name = VIEW_ROLE)
 @RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
-@StateDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized")
+@StateDef(@ValueDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized"))
 public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Responder {
 
     String INITIALIZED_STATE = "init";
@@ -91,12 +92,12 @@ public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Re
      */
     Value getState(String name);
 
-    default Optional<Value> optState(String stateName){
-        if(!hasState(stateName)){
+    default Optional<Value> optState(String stateName) {
+        if (!hasState(stateName)) {
             return Optional.empty();
         } else {
             Value state = getState(stateName);
-            if(state.isNull()){
+            if (state.isNull()) {
                 return Optional.empty();
             } else {
                 return Optional.of(state);
@@ -104,7 +105,7 @@ public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Re
         }
     }
 
-    default Optional<Boolean> optBooleanState(String name){
+    default Optional<Boolean> optBooleanState(String name) {
         return optState(name).map(Value::booleanValue);
     }
 
@@ -152,9 +153,8 @@ public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Re
      * @return
      */
     default boolean hasState(String stateName) {
-        return stateDefs().stream().anyMatch(stateDef -> stateDef.name().equals(stateName));
+        return stateDefs().stream().anyMatch(stateDef -> stateDef.value().name().equals(stateName));
     }
-
 
 
     /**
@@ -164,7 +164,7 @@ public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Re
      * @return
      */
     default Optional<StateDef> optStateDef(String name) {
-        return stateDefs().stream().filter((stateDef) -> stateDef.name().equals(name)).findFirst();
+        return stateDefs().stream().filter((stateDef) -> stateDef.value().name().equals(name)).findFirst();
     }
 
     @Override

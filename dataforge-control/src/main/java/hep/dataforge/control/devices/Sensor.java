@@ -9,6 +9,7 @@ import hep.dataforge.control.RoleDef;
 import hep.dataforge.control.connections.Roles;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.control.measurements.MeasurementListener;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.MeasurementException;
 import hep.dataforge.values.Value;
@@ -23,7 +24,10 @@ import static hep.dataforge.control.devices.Sensor.MEASURING_STATE;
  * @param <T>
  * @author Alexander Nozik
  */
-@StateDef(name = MEASURING_STATE, writable = true, info = "Shows if this sensor is actively measuring")
+@StateDef(
+        value = @ValueDef( name = MEASURING_STATE, info = "Shows if this sensor is actively measuring"),
+        writable = true
+)
 @RoleDef(name = Roles.MEASUREMENT_LISTENER_ROLE, objectType = MeasurementListener.class)
 public abstract class Sensor<T> extends AbstractDevice {
     public static final String MEASURING_STATE = "measuring";

@@ -41,6 +41,7 @@ import java.io.OutputStream;
 import java.time.Instant;
 
 import static hep.dataforge.storage.filestorage.FileStorageEnvelopeType.FILE_STORAGE_ENVELOPE_TYPE;
+import static hep.dataforge.values.ValueType.BOOLEAN;
 import static org.apache.commons.vfs2.FileType.FOLDER;
 
 /**
@@ -49,7 +50,7 @@ import static org.apache.commons.vfs2.FileType.FOLDER;
  * @author Darksnake
  */
 @ValueDef(name = "path", info = "Path to storage root")
-@ValueDef(name = "monitor", type = "BOOLEAN", def = "false",
+@ValueDef(name = "monitor", type = {BOOLEAN}, def = "false",
         info = "Enable file system monitoring for synchronous acess to single storage from different instances")
 @ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage implements FileListener {

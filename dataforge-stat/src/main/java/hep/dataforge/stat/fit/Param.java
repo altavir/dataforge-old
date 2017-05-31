@@ -24,6 +24,8 @@ import hep.dataforge.utils.MetaMorph;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import static hep.dataforge.values.ValueType.NUMBER;
+
 /**
  * The main parameter implementation
  *
@@ -59,10 +61,10 @@ public class Param implements MetaMorph, Named {
 
 
     @ValueDef(name = "name", info = "Parameter name. If not defined, then node name is used.")
-    @ValueDef(name = "value", type = "NUMBER", required = true, info = "Parameter value.")
-    @ValueDef(name = "err", type = "NUMBER", info = "Parameter error or in general case inversed square root of the weight.")
-    @ValueDef(name = "lower", type = "NUMBER", info = "Parameter lower boundary.")
-    @ValueDef(name = "upper", type = "NUMBER", info = "Parameter upper boundary.")
+    @ValueDef(name = "value", type = {NUMBER}, required = true, info = "Parameter value.")
+    @ValueDef(name = "err", type = {NUMBER}, info = "Parameter error or in general case inversed square root of the weight.")
+    @ValueDef(name = "lower", type = {NUMBER}, info = "Parameter lower boundary.")
+    @ValueDef(name = "upper", type = {NUMBER}, info = "Parameter upper boundary.")
     public void fromMeta(Meta cfg) {
         name = cfg.getString("name", cfg.getName());
         setErr(cfg.getDouble("err", Double.NaN));

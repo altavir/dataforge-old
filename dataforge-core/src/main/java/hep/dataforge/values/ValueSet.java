@@ -32,7 +32,7 @@ public class ValueSet implements Value {
 
     public ValueSet(Collection<Object> values) {
         this.values = new ArrayList<>();
-        values.stream().forEach((o) -> {
+        values.forEach((o) -> {
             this.values.add(Value.of(o));
         });
     }
@@ -52,11 +52,7 @@ public class ValueSet implements Value {
 
     @Override
     public boolean booleanValue() {
-        if (values.size() > 0) {
-            return values.get(0).booleanValue();
-        } else {
-            return false;
-        }
+        return values.size() > 0 && values.get(0).booleanValue();
     }
 
     @Override
@@ -75,7 +71,7 @@ public class ValueSet implements Value {
         } else if (values.size() == 1) {
             return values.get(0).stringValue();
         } else {
-            return values.stream().map(v -> v.stringValue()).collect(Collectors.joining(", ", "[", "]"));
+            return values.stream().map(Value::stringValue).collect(Collectors.joining(", ", "[", "]"));
         }
     }
 

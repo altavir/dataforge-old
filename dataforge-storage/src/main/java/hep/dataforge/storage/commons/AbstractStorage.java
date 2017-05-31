@@ -38,6 +38,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.*;
 
 import static hep.dataforge.storage.commons.StorageUtils.buildPath;
+import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
  * Конфигурации загрузчиков хранятся в оперативной памяти. Те, что поставляются
@@ -47,7 +48,7 @@ import static hep.dataforge.storage.commons.StorageUtils.buildPath;
  *
  * @author Darksnake
  */
-@ValueDef(name = "readOnly", type = "BOOLEAN", info = "Define if push operations are allowed in this storage")
+@ValueDef(name = "readOnly", type = {BOOLEAN}, info = "Define if push operations are allowed in this storage")
 public abstract class AbstractStorage extends BaseMetaHolder implements Storage {
 
     protected final Map<String, Loader> loaders = new HashMap<>();
@@ -303,7 +304,7 @@ public abstract class AbstractStorage extends BaseMetaHolder implements Storage 
     @Override
     @ValueDef(name = "name", info = "The name of storage or loader.")
     @ValueDef(name = "type", allowed = "[loader,storage]", def = "loader", info = "The type of target.")
-    @ValueDef(name = "allowCreate", type = "BOOLEAN", def = "true",
+    @ValueDef(name = "allowCreate", type = {BOOLEAN}, def = "true",
             info = "Allow to create new loader or storage if it is not found.")
     @NodeDef(name = "meta", info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     public Responder getResponder(Meta targetInfo) {

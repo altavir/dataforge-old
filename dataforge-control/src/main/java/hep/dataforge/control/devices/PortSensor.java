@@ -14,6 +14,7 @@ import hep.dataforge.values.Value;
 import java.util.Objects;
 
 import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
+import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * A Sensor that uses a PortHandler to obtain data
@@ -21,9 +22,12 @@ import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
  * @param <T>
  * @author darksnake
  */
-@StateDef(name = CONNECTED_STATE, writable = true, def = "false", info = "The connection state for this device")
+@StateDef(
+        value = @ValueDef(name = CONNECTED_STATE, def = "false", info = "The connection state for this device"),
+        writable = true
+)
 @ValueDef(name = "port", info = "The name of the port for this sensor")
-@ValueDef(name = "timeout", type = "NUMBER", def = "400", info = "A timeout for port response")
+@ValueDef(name = "timeout", type = {NUMBER}, def = "400", info = "A timeout for port response")
 public abstract class PortSensor<T> extends Sensor<T> {
 
     public static final String CONNECTED_STATE = "connected";
@@ -97,7 +101,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
             String port = meta().getString(PORT_NAME_KEY);
             this.handler = buildHandler(port);
             handler.open();
-            updateState(CONNECTED_STATE,true);
+            updateState(CONNECTED_STATE, true);
         }
         return handler;
     }

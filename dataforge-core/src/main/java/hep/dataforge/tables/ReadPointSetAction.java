@@ -27,10 +27,12 @@ import hep.dataforge.meta.Laminate;
 import java.io.IOException;
 import java.io.InputStream;
 
+import static hep.dataforge.values.ValueType.NUMBER;
+
 @TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, info = "Read DataSet from text file")
 @ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
 @ValueDef(name = "encoding", def = "UTF8", info = "file encoding")
-@ValueDef(name = "headerLength", type = "NUMBER", info = "The number of header lines to be ignored")
+@ValueDef(name = "headerLength", type = {NUMBER}, info = "The number of header lines to be ignored")
 @ValueDef(name = "dataSetName", info = "The name of resulting DataSet. By default the input content name is taken.")
 public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
 

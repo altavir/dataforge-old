@@ -30,6 +30,8 @@ import java.util.stream.Stream;
 
 import static hep.dataforge.fx.configuration.ConfigFXTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
+import static hep.dataforge.values.ValueType.BOOLEAN;
+import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * Plottable with x and y axis. It is possible to have multiple y axis
@@ -37,13 +39,13 @@ import static hep.dataforge.meta.Configuration.FINAL_TAG;
  * @author Alexander Nozik
  */
 @ValueDef(name = "color", info = "The color of line or symbol.", tags = {"color"})
-@ValueDef(name = "showLine", type = "BOOLEAN", def = "true", info = "Show the connecting line.")
-@ValueDef(name = "showSymbol", type = "BOOLEAN", def = "false", info = "Show symbols for data point.")
+@ValueDef(name = "showLine", type = {BOOLEAN}, def = "true", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "false", info = "Show symbols for data point.")
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", def = "default", info = "The type of conncetion between points.")
-@ValueDef(name = "thickness", type = "NUMBER", info = "The type of the line.")
+@ValueDef(name = "thickness", type = {NUMBER}, info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset",
         target = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
 public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {

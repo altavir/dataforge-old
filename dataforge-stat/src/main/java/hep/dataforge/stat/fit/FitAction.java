@@ -27,6 +27,8 @@ import hep.dataforge.tables.Table;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 
+import static hep.dataforge.values.ValueType.BOOLEAN;
+
 /**
  * <p>
  * FitAction class.</p>
@@ -35,7 +37,7 @@ import java.io.PrintWriter;
  * @version $Id: $Id
  */
 @TypedActionDef(name = "fit", inputType = Table.class, outputType = FitResult.class, info = "Fit dataset with previously stored model.")
-@ValueDef(name = "printLog", type = "BOOLEAN", def = "true", info = "Append log to the fit report")
+@ValueDef(name = "printLog", type = {BOOLEAN}, def = "true", info = "Append log to the fit report")
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",

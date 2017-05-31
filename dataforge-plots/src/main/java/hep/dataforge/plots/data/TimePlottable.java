@@ -29,6 +29,7 @@ import java.time.Instant;
 import java.util.*;
 
 import static hep.dataforge.plots.data.TimePlottable.*;
+import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * A plottable to display dynamic series with limited number of elements (x axis is always considered to be time). Both
@@ -36,9 +37,9 @@ import static hep.dataforge.plots.data.TimePlottable.*;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = MAX_AGE_KEY, type = "NUMBER", def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
-@ValueDef(name = MAX_ITEMS_KEY, type = "NUMBER", def = "-1", info = "The maximum number of items. Negative means no limit")
-@ValueDef(name = PREF_ITEMS_KEY, type = "NUMBER", def = "400", info = "The preferred number of items to leave after cleanup.")
+@ValueDef(name = MAX_AGE_KEY, type = {NUMBER}, def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
+@ValueDef(name = MAX_ITEMS_KEY, type = {NUMBER}, def = "-1", info = "The maximum number of items. Negative means no limit")
+@ValueDef(name = PREF_ITEMS_KEY, type = {NUMBER}, def = "400", info = "The preferred number of items to leave after cleanup.")
 public class TimePlottable extends XYPlottable {
 
     public static final String MAX_AGE_KEY = "maxAge";
@@ -130,7 +131,7 @@ public class TimePlottable extends XYPlottable {
 
         if (size() > 2) {
             int maxItems = meta().getInt(MAX_ITEMS_KEY, -1);
-            int prefItems = meta().getInt(PREF_ITEMS_KEY, Math.min(400,maxItems));
+            int prefItems = meta().getInt(PREF_ITEMS_KEY, Math.min(400, maxItems));
             int maxAge = meta().getInt(MAX_AGE_KEY, -1);
             cleanup(maxAge, maxItems, prefItems);
         }
@@ -163,13 +164,13 @@ public class TimePlottable extends XYPlottable {
         return map.size();
     }
 
-    public void clear(){
+    public void clear() {
         this.map.clear();
         notifyDataChanged();
     }
 
 
-    synchronized void cleanup(int maxAge, int maxItems, int prefItems) {
+    private synchronized void cleanup(int maxAge, int maxItems, int prefItems) {
         Instant first = map.firstKey();
         Instant last = map.lastKey();
 

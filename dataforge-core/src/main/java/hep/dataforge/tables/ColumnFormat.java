@@ -10,13 +10,15 @@ import hep.dataforge.values.ValueType;
 
 import java.util.Arrays;
 
+import static hep.dataforge.values.ValueType.NUMBER;
+
 /**
  * Created by darksnake on 29-Dec-16.
  */
 @ValueDef(name = "name", required = true, info = "The name of the column.")
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
-@ValueDef(name = "precision", type = "NUMBER", info = "Expected precision for number values or length for string values")
+@ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
 public class ColumnFormat extends BaseMetaHolder implements MetaMorph, Named {
 
     public ColumnFormat() {
@@ -68,6 +70,6 @@ public class ColumnFormat extends BaseMetaHolder implements MetaMorph, Named {
      * @return
      */
     public String getTitle() {
-        return getString("title", () -> getName());
+        return getString("title", this::getName);
     }
 }

@@ -20,6 +20,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
 import hep.dataforge.plots.jfreechart.JFCFrameFactory
+import hep.dataforge.values.ValueType
 import org.jline.reader.EndOfFileException
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
@@ -39,9 +40,9 @@ import java.util.stream.Stream
  */
 @CompileStatic
 @ValuesDefs([
-        @ValueDef(name = "evalClosures", type = "BOOLEAN", def = "true", info = "Automatically replace closures by their results"),
-        @ValueDef(name = "evalData", type = "BOOLEAN", def = "false", info = "Automatically replace data by its value"),
-        @ValueDef(name = "unwrap", type = "BOOLEAN", def = "false", info = "Apply result hooks for each element of collection or stream")
+        @ValueDef(name = "evalClosures", type = ValueType.BOOLEAN, def = "true", info = "Automatically replace closures by their results"),
+        @ValueDef(name = "evalData", type = ValueType.BOOLEAN, def = "false", info = "Automatically replace data by its value"),
+        @ValueDef(name = "unwrap", type = ValueType.BOOLEAN, def = "false", info = "Apply result hooks for each element of collection or stream")
 ])
 class GrindTerminal extends SimpleConfigurable {
     private static final AttributedStyle RES = AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);

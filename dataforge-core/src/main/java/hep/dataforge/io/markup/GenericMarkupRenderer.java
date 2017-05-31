@@ -4,6 +4,7 @@ import hep.dataforge.description.ValueDef;
 import org.slf4j.LoggerFactory;
 
 import static hep.dataforge.io.markup.Markup.MARKUP_GROUP_TYPE;
+import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
  * A basic renderer framework allowing to render basic markup elements: text, list and table
@@ -31,7 +32,7 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
     protected void doRender(Markup element) {
         switch (element.getType(this::inferType)) {
             case MARKUP_GROUP_TYPE: //render container
-                element.getContent().forEach(it -> doRender(it));
+                element.getContent().forEach(this::doRender);
                 break;
             case TEXT_TYPE:
                 text(element);
@@ -131,7 +132,7 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
 
     protected void table(Markup element) {
         //TODO add header here
-        element.getContent().forEach(row -> tableRow(row));
+        element.getContent().forEach(this::tableRow);
     }
 
     /**
@@ -139,7 +140,7 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
      *
      * @param element
      */
-    @ValueDef(name = "header", type = "BOOLEAN", info = "If true the row is considered to be a header")
+    @ValueDef(name = "header", type = {BOOLEAN}, info = "If true the row is considered to be a header")
     protected abstract void tableRow(Markup element);
 
 //    /**

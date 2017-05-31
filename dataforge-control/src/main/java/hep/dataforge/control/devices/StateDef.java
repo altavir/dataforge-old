@@ -5,6 +5,8 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.description.ValueDef;
+
 import java.lang.annotation.*;
 
 /**
@@ -21,19 +23,12 @@ import java.lang.annotation.*;
 @Inherited
 @Repeatable(StateDefs.class)
 public @interface StateDef {
-    /**
-     * State name
-     *
-     * @return
-     */
-    String name();
 
     /**
-     * State description
-     *
+     * The definition for state value
      * @return
      */
-    String info() default "";
+    ValueDef value();
 
     /**
      * This state could be read
@@ -48,11 +43,4 @@ public @interface StateDef {
      * @return
      */
     boolean writable() default false;
-
-    /**
-     * The default value for this state
-     * @return
-     */
-    String def() default "";
-
 }

@@ -15,12 +15,14 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
+import static hep.dataforge.values.ValueType.BOOLEAN;
+
 /**
  * Plugin holding JavaFX application instance and its root stage
  * Created by darksnake on 28-Oct-16.
  */
 @PluginDef(name = "fx", group = "hep.dataforge", info = "JavaFX window manager")
-@ValueDef(name = "implicitExit", type = "BOOLEAN", def = "false", info = "A Platfor implicitExit parameter")
+@ValueDef(name = "implicitExit", type = {BOOLEAN}, def = "false", info = "A Platform implicitExit parameter")
 public class FXPlugin extends BasicPlugin {
 
     private Stage stage;
@@ -49,7 +51,7 @@ public class FXPlugin extends BasicPlugin {
 
         //close all windows
         Platform.runLater(() -> {
-            windows.forEach(window -> window.close());
+            windows.forEach(Stage::close);
         });
 
 
