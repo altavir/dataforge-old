@@ -22,7 +22,6 @@ import java.time.Duration;
 import java.util.Iterator;
 
 /**
- *
  * @author darksnake
  */
 public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
@@ -68,15 +67,15 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
      * @param age
      */
     public void setMaxAge(Duration age) {
-        this.forEach(it-> it.setMaxAge(age));
+        this.forEach(it -> it.setMaxAge(age));
     }
 
     public void setMaxItems(int maxItems) {
-        this.forEach(it->it.setMaxItems(maxItems));
+        this.forEach(it -> it.setMaxItems(maxItems));
     }
 
     public void setPrefItems(int prefItems) {
-        this.forEach(it->it.setPrefItems(prefItems));
+        this.forEach(it -> it.setPrefItems(prefItems));
     }
 
     @Override

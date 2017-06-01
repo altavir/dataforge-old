@@ -8,6 +8,7 @@ import javafx.scene.layout.BorderPane;
  * Created by darksnake on 17-Apr-17.
  */
 public interface FXObject {
+    //TODO replace by tornadofx UIComponent?
     /**
      * Get the root node of this object
      * @return

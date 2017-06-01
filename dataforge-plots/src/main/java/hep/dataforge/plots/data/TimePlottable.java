@@ -38,7 +38,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
  * @author Alexander Nozik
  */
 @ValueDef(name = MAX_AGE_KEY, type = {NUMBER}, def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
-@ValueDef(name = MAX_ITEMS_KEY, type = {NUMBER}, def = "-1", info = "The maximum number of items. Negative means no limit")
+@ValueDef(name = MAX_ITEMS_KEY, type = {NUMBER}, def = "1000", info = "The maximum number of items. Negative means no limit")
 @ValueDef(name = PREF_ITEMS_KEY, type = {NUMBER}, def = "400", info = "The preferred number of items to leave after cleanup.")
 public class TimePlottable extends XYPlottable {
 
