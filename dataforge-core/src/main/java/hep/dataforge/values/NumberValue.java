@@ -34,6 +34,7 @@ class NumberValue extends AbstractValue {
     @Override
     public int hashCode() {
         int hash = 7;
+        //TODO evaluate infinities
         hash = 59 * hash + Objects.hashCode(new BigDecimal(this.value.doubleValue(), MathContext.DECIMAL32));
         return hash;
     }
