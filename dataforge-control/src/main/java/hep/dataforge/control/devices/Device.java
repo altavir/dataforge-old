@@ -32,7 +32,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Future;
+import java.util.concurrent.CompletableFuture;
 
 import static hep.dataforge.control.connections.Roles.*;
 
@@ -110,13 +110,13 @@ public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Re
     }
 
     /**
-     * Request state change for state with given name
+     * Request asynchronous state change for state with given name and return the state value after change
      *
      * @param name
      * @param value
      * @return the actual state after set
      */
-    Future<Value> setState(String name, Object value);
+    CompletableFuture<Value> setState(String name, Object value);
 
     /**
      * Initialize device and check if it is working but do not start any

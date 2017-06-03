@@ -7,11 +7,14 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.control.ports.PortHandler;
+import hep.dataforge.control.ports.SyncPortController;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.values.Value;
 
+import java.time.Duration;
 import java.util.Objects;
+import java.util.function.Predicate;
 
 import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
 import static hep.dataforge.values.ValueType.NUMBER;
@@ -28,12 +31,13 @@ import static hep.dataforge.values.ValueType.NUMBER;
 )
 @ValueDef(name = "port", info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = {NUMBER}, def = "400", info = "A timeout for port response")
-public abstract class PortSensor<T> extends Sensor<T> {
+public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.PortController {
 
     public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
 
     private PortHandler handler;
+    private SyncPortController controller = new SyncPortController(this);
 
     protected final void setHandler(PortHandler handler) {
         this.handler = handler;
@@ -43,8 +47,8 @@ public abstract class PortSensor<T> extends Sensor<T> {
         return getState(CONNECTED_STATE).booleanValue();
     }
 
-    protected int timeout() {
-        return meta().getInt("timeout", 400);
+    protected Duration timeout() {
+        return Duration.ofMillis(meta().getInt("timeout", 400));
     }
 
     protected PortHandler buildHandler(String portName) throws ControlException {
@@ -73,6 +77,50 @@ public abstract class PortSensor<T> extends Sensor<T> {
             throw new ControlException(ex);
         }
     }
+
+    @Override
+    public void acceptPortPhrase(String message) {
+        //do nothing
+    }
+
+    protected final String sendAndWait(String request, Duration timeout) throws ControlException {
+        getHandler().holdBy(controller);
+        try {
+            getHandler().send(controller, request);
+            return controller.waitFor(timeout);
+        } finally {
+            getHandler().unholdBy(controller);
+        }
+    }
+
+    protected final String sendAndWait(String request, Duration timeout, Predicate<String> predicate) throws ControlException {
+        getHandler().holdBy(controller);
+        try {
+            getHandler().send(controller, request);
+            return controller.waitFor(timeout, predicate);
+        } finally {
+            getHandler().unholdBy(controller);
+        }
+    }
+
+    protected final void send(String message) throws ControlException {
+        getHandler().holdBy(controller);
+        try {
+            getHandler().send(controller,message);
+        } finally {
+            getHandler().unholdBy(controller);
+        }
+    }
+
+    protected final String receive(Duration timeout) throws ControlException {
+        getHandler().holdBy(controller);
+        try {
+            return controller.waitFor(timeout);
+        } finally {
+            getHandler().unholdBy(controller);
+        }
+    }
+
 
     @Override
     protected void requestStateChange(String stateName, Value value) throws ControlException {

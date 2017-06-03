@@ -32,7 +32,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 
@@ -186,14 +185,16 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     }
 
     @Override
-    public Future<Value> setState(String stateName, Object value) {
-        try {
-            requestStateChange(stateName, Value.of(value));
-        } catch (ControlException e) {
-            getLogger().error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString());
-            return CompletableFuture.completedFuture(Value.NULL);
-        }
-        return CompletableFuture.supplyAsync(() -> getState(stateName));
+    public CompletableFuture<Value> setState(String stateName, Object value) {
+        return CompletableFuture.supplyAsync(() -> {
+            try {
+                requestStateChange(stateName, Value.of(value));
+            } catch (ControlException e) {
+                getLogger().error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString());
+                return Value.NULL;
+            }
+            return getState(stateName);
+        });
     }
 
     @Override

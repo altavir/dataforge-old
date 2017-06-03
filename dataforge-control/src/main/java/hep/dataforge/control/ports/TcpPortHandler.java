@@ -117,6 +117,8 @@ public class TcpPortHandler extends PortHandler {
                         } catch (Exception ex1) {
                             throw new RuntimeException("Failed to reconnect tcp port");
                         }
+                    } else {
+                        LoggerFactory.getLogger(getClass()).info("Port listener stopped");
                     }
                 }
             }

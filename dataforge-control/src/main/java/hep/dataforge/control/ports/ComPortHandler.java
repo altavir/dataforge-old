@@ -139,7 +139,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
             try {
                 bytes = port.readBytes(chars);
             } catch (SerialPortException ex) {
-                controller.error("Internal JSSC error", ex);
+                controller.portError("Internal JSSC error", ex);
             }
             try {
                 buffer.write(bytes);

@@ -20,16 +20,15 @@ import hep.dataforge.exceptions.PortLockException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.BaseMetaHolder;
-import hep.dataforge.utils.DateTimeUtils;
+import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
 /**
- * The handler
+ * The universal asynchronous port handler
  *
  * @author Alexander Nozik
  */
@@ -37,9 +36,6 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
 
     private final ReentrantLock portLock = new ReentrantLock(true);
     protected PortController controller;
-
-    //PENDING add additional port listeners?
-    private volatile String lastResponse = null;
     /**
      * The default end phrase condition
      */
@@ -50,6 +46,10 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
     }
 
     public PortHandler() {
+    }
+
+    Logger getLogger() {
+        return LoggerFactory.getLogger(meta().getString("logger", getClass().getName()));
     }
 
     /**
@@ -65,8 +65,8 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
         this.phraseCondition = condition;
     }
 
-    public void setDelimeter(String delimeter) {
-        phraseCondition = (String str) -> str.endsWith(delimeter);
+    public void setDelimiter(String delimiter) {
+        phraseCondition = (String str) -> str.endsWith(delimiter);
     }
 
     public abstract void open() throws PortException;
@@ -104,10 +104,10 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
         try {
             portLock.lockInterruptibly();
         } catch (InterruptedException ex) {
-            LoggerFactory.getLogger(getClass()).error("Lock on port {} is broken", getPortId());
+            getLogger().error("Lock on port {} is broken", getPortId());
             throw new PortException(ex);
         }
-        LoggerFactory.getLogger(getClass()).debug("Locked by {}", controller);
+        getLogger().debug("Locked by {}", controller);
         this.controller = controller;
     }
 
@@ -117,7 +117,7 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * @param str
      * @return
      */
-    public boolean isPhrase(String str) {
+    protected boolean isPhrase(String str) {
         return phraseCondition.test(str);
     }
 
@@ -127,11 +127,11 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * @param phrase
      */
     protected synchronized void receivePhrase(String phrase) {
-        lastResponse = phrase;
+//        lastResponse.lazySet(phrase);
         notify();
-        LoggerFactory.getLogger(getClass()).trace("RECIEVE: " + phrase);
+        getLogger().trace("RECEIVE: " + phrase);
         if (controller != null) {
-            controller.accept(phrase);
+            controller.acceptPortPhrase(phrase);
         }
     }
 
@@ -141,64 +141,20 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      * @param message
      * @throws hep.dataforge.exceptions.PortException
      */
-    public abstract void send(String message) throws PortException;
+    protected abstract void send(String message) throws PortException;
 
     /**
-     * Send the string and wait for a specific answer. All other answers are
-     * passed to the controller but only this one is returned. This method
-     * ignores holder lock.
-     *
+     * Send the message if the controller is correct
+     * @param controller
      * @param message
-     * @param timeout
-     * @param responseCondition
-     * @return
-     * @throws hep.dataforge.exceptions.PortException
-     */
-    public final synchronized String sendAndWait(String message, int timeout, Predicate<String> responseCondition)
-            throws PortException {
-        if (!isOpen()) {
-            open();
-        }
-
-        send(message);
-        waitForPhrase(responseCondition, Duration.ofMillis(timeout));
-        return lastResponse;
-    }
-
-    /**
-     * Send message and wait for the fist reply. This method ignores holder
-     * lock.
-     *
-     * @param message
-     * @param timeout
-     * @return
      * @throws PortException
      */
-    public final synchronized String sendAndWait(String message, int timeout) throws PortException {
-        return sendAndWait(message, timeout, null);
-    }
-
-    /**
-     * Waits for phrase from port which satisfies specific condition
-     *
-     * @param responseCondition the condition to be specified. If null than next
-     *                          phrase is accepted
-     * @throws InterruptedException
-     */
-    private synchronized void waitForPhrase(Predicate<String> responseCondition, Duration timeout) throws PortException {
-        lastResponse = null;
-        Instant start = DateTimeUtils.now();
-        try {
-            while (lastResponse == null || (responseCondition != null && !responseCondition.test(lastResponse))) {
-                if (Duration.between(start, DateTimeUtils.now()).compareTo(timeout) > 0) {
-                    throw new PortTimeoutException(timeout);
-                }
-                wait(timeout.toMillis());
-            }
-        } catch (InterruptedException ex) {
-            throw new PortException(ex);
+    public final void send(@Nullable PortController controller, String message) throws PortException{
+        if(this.controller == null || controller == this.controller){
+            send(message);
+        } else {
+            throw new PortException("Port locked by another controller");
         }
-
     }
 
     /**
@@ -214,12 +170,12 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
             if (controller.equals(this.controller)) {
                 this.controller = null;
                 portLock.unlock();
-                LoggerFactory.getLogger(getClass()).debug("Unlocked by {}", controller);
+                getLogger().debug("Unlocked by {}", controller);
             } else {
                 throw new PortLockException("Can't unlock hold with wrong holder");
             }
         } else {
-            LoggerFactory.getLogger(getClass()).warn("Attempting to unhold unlocked port");
+            getLogger().warn("Attempting to unhold unlocked port");
         }
     }
 
@@ -234,8 +190,10 @@ public abstract class PortHandler extends BaseMetaHolder implements AutoCloseabl
      */
     public interface PortController {
 
-        void accept(String message);
+        void acceptPortPhrase(String message);
 
-        void error(String errorMessage, Throwable error);
+        default void portError(String errorMessage, Throwable error){
+            //do nothing
+        }
     }
 }
