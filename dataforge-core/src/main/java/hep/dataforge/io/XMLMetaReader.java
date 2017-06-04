@@ -78,7 +78,7 @@ public class XMLMetaReader implements MetaStreamReader {
         List<Element> elements = getElements(element);
 
         for (NamedValue value : values) {
-            res.putValue(normalizeName(value.getName()), value.getSourceValue());
+            res.putValue(normalizeName(value.getName()), value.getAnonymousValue());
         }
 
         for (Element e : elements) {

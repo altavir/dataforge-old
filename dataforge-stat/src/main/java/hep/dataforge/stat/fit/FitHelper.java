@@ -3,6 +3,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.io.FittingIOUtils;
+import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -100,7 +101,7 @@ public class FitHelper {
         NavigablePointSource data;
         Model model;
         ParamSet startPars = new ParamSet();
-        History log = null;
+        History log = new Chronicle("fit", null);
         List<FitStage> stages = new ArrayList<>();
         BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().io().out());
 
@@ -190,7 +191,7 @@ public class FitHelper {
             if (meta instanceof Laminate) {
                 ParamSet set = new ParamSet();
                 Laminate laminate = (Laminate) meta;
-                laminate.layersInverse().stream().forEach(layer -> {
+                laminate.layersInverse().forEach(layer -> {
                     layer.optMeta("params").ifPresent(params -> {
                         set.updateFrom(MetaMorph.morph(ParamSet.class, layer.getMeta("params")));
                     });
@@ -257,11 +258,11 @@ public class FitHelper {
             } else {
                 for (FitStage stage : stages) {
                     Misc.checkThread();
-                    try {
-                        result = manager.runStage(state, stage, log);
-                    } catch (Exception ex) {
-                        result = FitResult.build(state, false, stage.getFreePars());
-                    }
+//                    try {
+                    result = manager.runStage(state, stage, log);
+//                    } catch (Exception ex) {
+//                        result = FitResult.build(state, false, stage.getFreePars());
+//                    }
                     listener.accept(stage, result);
                 }
             }

@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.utils.NamingUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -238,6 +239,7 @@ public interface Value extends Serializable {
      */
     String stringValue();
 
+    @NotNull
     ValueType valueType();
 
     /**

@@ -44,7 +44,11 @@ public class NamedValue implements Named, Value {
         return name;
     }
 
-    public Value getSourceValue() {
+    /**
+     * Return underlying value without a name
+     * @return
+     */
+    public Value getAnonymousValue() {
         return value;
     }
 
@@ -91,11 +95,4 @@ public class NamedValue implements Named, Value {
     public ValueType valueType() {
         return value.valueType();
     }
-
-//    /** {@inheritDoc}
-//     * @return  */
-//    @Override
-//    public Content referenceValue() {
-//        return this;
-//    }
 }

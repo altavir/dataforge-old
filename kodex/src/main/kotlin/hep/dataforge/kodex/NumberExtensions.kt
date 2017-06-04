@@ -12,8 +12,8 @@ import java.math.BigDecimal
 /**
  * Convert a number to BigDecimal
  */
-fun Number.toBigDecimal():BigDecimal{
-    if(this is BigDecimal){
+fun Number.toBigDecimal(): BigDecimal {
+    if (this is BigDecimal) {
         return this
     } else {
         return BigDecimal(this.toDouble())
@@ -34,4 +34,8 @@ operator fun Number.div(other: Number): Number {
 
 operator fun Number.times(other: Number): Number {
     return this.toBigDecimal().multiply(other.toBigDecimal());
+}
+
+operator fun Number.compareTo(other: Number): Int {
+    return this.toBigDecimal().compareTo(other.toBigDecimal());
 }

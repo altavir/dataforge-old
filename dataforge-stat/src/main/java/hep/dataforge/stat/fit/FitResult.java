@@ -99,7 +99,7 @@ public class FitResult extends SimpleMetaMorph {
         return getChi2() / ndf();
     }
 
-    private double getChi2() {
+    public double getChi2() {
         return meta().getDouble("chi2");
     }
 

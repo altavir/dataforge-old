@@ -19,6 +19,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
+import org.jetbrains.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 
 import java.io.PrintWriter;
@@ -35,13 +36,12 @@ import java.util.function.Consumer;
 public class Chronicle implements History, Named {
     public static final String CHRONICLE_TARGET = "log";
 
-    private static int MAX_LOG_SIZE = 1000;
     private final String name;
     private final ReferenceRegistry<Consumer<Record>> listeners = new ReferenceRegistry<>();
-    protected ConcurrentLinkedQueue<Record> entries = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<Record> entries = new ConcurrentLinkedQueue<>();
     private History parent;
 
-    public Chronicle(String name, History parent) {
+    public Chronicle(String name, @Nullable History parent) {
         if (name == null || name.isEmpty()) {
             throw new AnonymousNotAlowedException();
         }
@@ -58,7 +58,7 @@ public class Chronicle implements History, Named {
     }
 
     protected int getMaxLogSize() {
-        return MAX_LOG_SIZE;
+        return 1000;
     }
 
     @Override
@@ -101,7 +101,7 @@ public class Chronicle implements History, Named {
 
     public void print(PrintWriter out) {
         out.println();
-        entries.stream().forEach((entry) -> {
+        entries.forEach((entry) -> {
             out.println(entry.toString());
         });
         out.println();
