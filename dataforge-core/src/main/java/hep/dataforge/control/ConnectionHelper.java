@@ -49,7 +49,7 @@ public class ConnectionHelper implements Connectible {
         }
 
         Set<String> roleSet = new HashSet<>(Arrays.asList(roles));
-        if(this.connections.containsKey(connection)){
+        if (this.connections.containsKey(connection)) {
             //updating roles of existing connection
             connections.get(connection).addAll(roleSet);
         } else {
@@ -59,7 +59,7 @@ public class ConnectionHelper implements Connectible {
             getLogger().debug("Opening connection {}", connection.toString());
             connection.open(caller);
         } catch (Exception ex) {
-            getLogger().error("Can not open connection", ex);
+            throw new RuntimeException("Can not open connection", ex);
         }
     }
 
