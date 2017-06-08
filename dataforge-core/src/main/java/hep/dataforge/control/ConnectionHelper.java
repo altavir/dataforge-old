@@ -11,7 +11,7 @@ import java.util.stream.Stream;
  */
 public class ConnectionHelper implements Connectible {
     //TODO isolate errors inside connections
-    private final Map<Connection<?>, Set<String>> connections = new HashMap<>();
+    private final Map<Connection, Set<String>> connections = new HashMap<>();
     private final Connectible caller;
     private final Logger logger;
 
@@ -31,7 +31,6 @@ public class ConnectionHelper implements Connectible {
      * @param roles
      */
     @Override
-    @SuppressWarnings("unchecked")
     public synchronized void connect(Connection connection, String... roles) {
         getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
         //Checking if connection could serve given roles
@@ -55,6 +54,7 @@ public class ConnectionHelper implements Connectible {
         } else {
             this.connections.put(connection, roleSet);
         }
+
         try {
             getLogger().debug("Opening connection {}", connection.toString());
             connection.open(caller);

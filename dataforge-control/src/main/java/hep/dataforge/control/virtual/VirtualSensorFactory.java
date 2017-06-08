@@ -129,7 +129,7 @@ public class VirtualSensorFactory<T> {
             }
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {
-                return new VirtualMeasurement<>(delayFactory.apply(this), () -> valueFactory.apply(this));
+                return new VirtualMeasurement<>(this, delayFactory.apply(this), () -> valueFactory.apply(this));
             }
 
             @Override

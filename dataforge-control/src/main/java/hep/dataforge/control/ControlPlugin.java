@@ -26,14 +26,14 @@ public class ControlPlugin extends BasicPlugin implements Dispatcher {
     private ReferenceRegistry<Device> devices = new ReferenceRegistry<>();
 
     private Device buildDevice(Meta deviceMeta) {
-        DeviceFactory factory = getContext()
+        DeviceFactory<?> factory = getContext()
                 .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
                 .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
         Device device = factory.build(getContext(), deviceMeta);
 
-        deviceMeta.getMetaList("connect").forEach(connectionMeta -> {
-
-        });
+//        deviceMeta.getMetaList("connect").forEach(connectionMeta -> {
+//
+//        });
 
         devices.add(device);
         return device;

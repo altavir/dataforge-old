@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.tables.DataPoint;
@@ -38,7 +37,7 @@ public class LoaderConnection implements PointListenerConnection {
     }
 
     @Override
-    public void open(Device object) throws Exception {
+    public void open(Object object) throws Exception {
         loader.open();
     }
 

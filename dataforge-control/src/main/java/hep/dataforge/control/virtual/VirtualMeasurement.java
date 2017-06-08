@@ -16,11 +16,13 @@ import java.util.concurrent.Callable;
  * @author Alexander Nozik
  */
 public class VirtualMeasurement<T> extends SimpleMeasurement<T> {
-    
-    Duration delay;
-    Callable<T> result;
 
-    public VirtualMeasurement(Duration delay, Callable<T> result) {
+    private final Device device;
+    private final Duration delay;
+    private final Callable<T> result;
+
+    public VirtualMeasurement(Device device, Duration delay, Callable<T> result) {
+        this.device = device;
         this.delay = delay;
         this.result = result;
     }
@@ -33,6 +35,6 @@ public class VirtualMeasurement<T> extends SimpleMeasurement<T> {
 
     @Override
     public Device getDevice() {
-        return new DummyDevice();
+        return device;
     }
 }

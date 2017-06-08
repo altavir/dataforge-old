@@ -11,8 +11,17 @@ package hep.dataforge.control;
  *
  * @author Alexander Nozik
  */
-public interface Connection<T> extends AutoCloseable {
-    boolean isOpen();
+public interface Connection extends AutoCloseable {
+    default boolean isOpen(){
+        return true;
+    }
 
-    void open(T object) throws Exception;
+    default void open(Object object) throws Exception{
+        //do nothing
+    }
+
+    @Override
+    default void close() throws Exception {
+        //do nothing
+    }
 }

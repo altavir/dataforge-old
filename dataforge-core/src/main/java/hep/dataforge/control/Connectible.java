@@ -25,7 +25,7 @@ public interface Connectible {
      * @param connection
      * @param roles
      */
-    void connect(Connection connection, String... roles);
+     void connect(Connection connection, String... roles);
 
     /**
      * Get a stream of all connections with given role and type. Role could be regexp
@@ -39,6 +39,7 @@ public interface Connectible {
 
     /**
      * Disconnect given connection
+     *
      * @param connection
      */
     void disconnect(Connection connection);
@@ -54,7 +55,7 @@ public interface Connectible {
      * @param action
      */
     default <T> void forEachConnection(String role, Class<T> type, Consumer<T> action) {
-        connections(role,type).forEach(action);
+        connections(role, type).forEach(action);
     }
 
     default <T> void forEachConnection(Class<T> type, Consumer<T> action) {

@@ -5,7 +5,6 @@
  */
 package hep.dataforge.control.connections;
 
-import hep.dataforge.control.devices.Device;
 import hep.dataforge.exceptions.NotConnectedException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
@@ -44,11 +43,12 @@ public class StorageConnection extends DeviceConnection implements Responder {
     }
 
     @Override
-    public void open(Device device) throws Exception {
-        StorageManager storageManager = device.getContext().pluginManager().getOrLoad(StorageManager.class);
+    public void open(Object obj) throws Exception {
+        super.open(obj);
+        StorageManager storageManager = getDevice().getContext().pluginManager().getOrLoad(StorageManager.class);
         if (storage == null) {
-            if (device.meta().hasMeta("storage")) {
-                storage = storageManager.buildStorage(device.meta().getMeta("storage"));
+            if (getDevice().meta().hasMeta("storage")) {
+                storage = storageManager.buildStorage(getDevice().meta().getMeta("storage"));
             } else {
                 storage = storageManager.getDefaultStorage();
             }
@@ -70,6 +70,7 @@ public class StorageConnection extends DeviceConnection implements Responder {
         if (isOpen()) {
             storage.close();
         }
+        super.close();
     }
 
     public Storage getStorage() {

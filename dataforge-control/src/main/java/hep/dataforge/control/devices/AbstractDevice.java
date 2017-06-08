@@ -176,7 +176,7 @@ public abstract class AbstractDevice extends BaseMetaHolder implements Device {
     }
 
     protected Object computeState(String stateName) throws ControlException {
-        return optStateDef(stateName).map(StateDef::value)
+        return optStateDef(stateName).map(def -> def.value().def())
                 .orElseThrow(() -> new ControlException("Can't calculate state " + stateName));
     }
 
