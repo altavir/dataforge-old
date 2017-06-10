@@ -42,14 +42,37 @@ class GrindShell implements Encapsulated {
         return context;
     }
 
-    synchronized Object eval(String expression) {
-        Object res = shell.evaluate(expression);
-        //remembering last answer
+    /**
+     * remembering last answer
+     * @param res
+     * @return
+     */
+    private def rememberResult(Object res) {
         if (res != null) {
             bind("res", res)
         };
         //TODO remember n last answers
         return res;
+    }
+
+    /**
+     * Evaluate string expression
+     * @param expression
+     * @return
+     */
+    synchronized def eval(String expression) {
+        return rememberResult(shell.evaluate(expression))
+    }
+
+    /**
+     * Evaluate a closure using shell bindings
+     * @param cl
+     * @return
+     */
+    synchronized def eval(Closure cl) {
+        Closure script = cl.rehydrate(binding, null, null);
+        script.resolveStrategy = Closure.DELEGATE_ONLY;
+        return rememberResult(script.call())
     }
 }
 
