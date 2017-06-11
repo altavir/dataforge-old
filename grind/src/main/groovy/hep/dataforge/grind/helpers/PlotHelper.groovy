@@ -18,10 +18,14 @@ package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.grind.Grind
+import hep.dataforge.grind.GrindMetaBuilder
+import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.data.PlottableData
 import hep.dataforge.plots.data.PlottableXYFunction
 import hep.dataforge.plots.data.XYPlottable
+import hep.dataforge.tables.PointAdapter
 import hep.dataforge.tables.PointSource
 import hep.dataforge.tables.XYAdapter
 
@@ -97,11 +101,27 @@ class PlotHelper {
         return plot(x, y, name, frame);
     }
 
-    XYPlottable plot(PointSource source, XYAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "", String frame = DEFAULT_FRAME) {
-        def res = PlottableData.plot(name, adapter, source);
+    XYPlottable plot(PointSource source, PointAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
+        def res = PlottableData.plot(name, XYAdapter.from(adapter), source);
         manager.getPlotFrame(frame).add(res)
         return res;
     }
 
+    /**
+     * Build data plot using any point source and closure to configure adapter
+     * @param source
+     * @param parameters
+     * @param cl
+     * @return
+     */
+    XYPlottable plot(PointSource source, Map parameters = Collections.emptyMap(),
+                     @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        Meta configuration = Grind.buildMeta(parameters, cl);
+        String name = configuration.getString("name", "data_${source.hashCode()}")
+        String frameName = configuration.getString("frame", DEFAULT_FRAME)
+        def res = PlottableData.plot(name, new XYAdapter(configuration), source);
+        manager.getPlotFrame(frameName).add(res)
+        return res;
+    }
 
 }

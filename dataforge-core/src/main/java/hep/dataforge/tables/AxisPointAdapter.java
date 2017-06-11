@@ -40,7 +40,7 @@ public class AxisPointAdapter implements PointAdapter {
 
     public AxisPointAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
-        map.entrySet().stream().forEach((entry) -> {
+        map.entrySet().forEach((entry) -> {
             mb.setValue(entry.getKey(), entry.getValue());
         });
         this.meta = mb.build();

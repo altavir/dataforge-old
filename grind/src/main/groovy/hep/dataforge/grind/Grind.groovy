@@ -2,6 +2,7 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.utils.MetaMorph
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
 
@@ -132,5 +133,15 @@ class Grind {
 
     static Workspace buildWorkspace(String file) {
         return new GrindWorkspaceBuilder().read(file).build();
+    }
+
+    /**
+     * Build MetaMorph using convenient meta builder
+     * @param type
+     * @param args
+     * @return
+     */
+    static <T extends MetaMorph> T morph(Class<T> type, Object... args){
+        MetaMorph.morph(type,buildMeta(args))
     }
 }

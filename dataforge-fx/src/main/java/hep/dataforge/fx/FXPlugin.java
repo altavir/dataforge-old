@@ -78,6 +78,7 @@ public class FXPlugin extends BasicPlugin {
     }
 
     private synchronized void addStage(Stage stage) {
+        Platform.setImplicitExit(true);
         this.windows.add(stage);
     }
 

@@ -126,18 +126,26 @@ class MetaExtension {
 
     //TODO add tests
     static void setProperty(final MetaBuilder self, String name, Object value) {
-        self.setValue(name, value)
+        if (value instanceof Meta) {
+            self.setNode(name, (Meta) value)
+        } else if (value instanceof Collection) {
+            self.setNode(name, (Collection<? extends Meta>) value)
+        } else if (value.getClass().isArray()) {
+            self.setNode(name, (Meta[]) value)
+        } else {
+            throw new RuntimeException("Can't convert ${value.getClass()} to Meta")
+        }
     }
 
-    static Value getProperty(final Meta self, String name) {
-        return self.getValue(name)
+    static Meta getProperty(final Meta self, String name) {
+        return self.getMeta(name)
     }
 
-    static Value getAt(final Meta self, String name){
+    static Value getAt(final Meta self, String name) {
         return self.getValue(name);
     }
 
-    static void setAt(final MetaBuilder self, String name, Object value){
+    static void setAt(final MetaBuilder self, String name, Object value) {
         self.setValue(name, value)
     }
 
