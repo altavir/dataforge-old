@@ -27,16 +27,14 @@ import org.apache.commons.math3.linear.RealVector;
 import java.util.Optional;
 
 /**
- * Именованый вектор. Данные хранятся в виде массива. Скорость доступа поностью
- * зависит от скорости NameList.
+ * A {@link NamedValueSet} implementation wrapping Commons Math {@link RealVector}
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public class NamedVector implements NamedValueSet {
 
     Names nameList;
-    ArrayRealVector vector;
+    RealVector vector;
 
     public NamedVector(String[] names, RealVector v) {
         if (names.length != v.getDimension()) {
@@ -76,7 +74,7 @@ public class NamedVector implements NamedValueSet {
             return Optional.of(Value.of(vector.getEntry(n)));
         }
     }
-    
+
     public NamedVector copy() {
         return new NamedVector(this.namesAsArray(), vector);
     }
@@ -129,7 +127,7 @@ public class NamedVector implements NamedValueSet {
         }
     }
 
-    public ArrayRealVector getVector() {
+    public RealVector getVector() {
         return vector;
     }
 

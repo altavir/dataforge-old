@@ -15,63 +15,37 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.ArrayList;
-import java.util.List;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.SynchronizedRandomGenerator;
+
+import java.util.stream.Stream;
 
 /**
  * <p>Abstract Sampler class.</p>
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public abstract class Sampler {
 
     protected final RandomGenerator generator;
 
-    /**
-     * <p>Constructor for Sampler.</p>
-     *
-     * @param generator a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     */
+
     public Sampler(RandomGenerator generator) {
         this.generator = generator;
     }
 
-    /**
-     * <p>Constructor for Sampler.</p>
-     */
+
     public Sampler() {
         generator = new SynchronizedRandomGenerator(new JDKRandomGenerator());
     }
 
-    /**
-     * <p>nextSample.</p>
-     *
-     * @return a {@link hep.dataforge.maths.integration.Sample} object.
-     */
+
     public abstract Sample nextSample();
 
-    /**
-     * <p>nextNSamples.</p>
-     *
-     * @param n a int.
-     * @return a {@link java.util.List} object.
-     */
-    public List<Sample> nextNSamples(int n) {
-        List<Sample> res = new ArrayList<>();
-        for (int i = 0; i < n; i++) {
-            res.add(nextSample());
-        }
-        return res;
+    public Stream<Sample> stream() {
+        return Stream.generate(this::nextSample);
     }
-    
-    /**
-     * <p>getDimension.</p>
-     *
-     * @return a int.
-     */
+
     public abstract int getDimension();
 }

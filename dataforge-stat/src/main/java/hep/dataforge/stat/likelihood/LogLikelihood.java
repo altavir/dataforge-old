@@ -17,6 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
+import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
@@ -24,21 +25,19 @@ import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.util.FastMath;
 import org.slf4j.LoggerFactory;
 
 /**
- * <p>
- * LogLikelihood class.</p>
+ * Automatically calculated Likelihood based on fit state
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
-public class LogLikelihood extends ScaleableNamedFunction {
+public class LogLikelihood implements ParametricValue {
 
     private final FitState source;
 
     public LogLikelihood(FitState source) {
-        super(source.getModel());
         this.source = source;
         if (!source.getModel().providesProb()) {
             LoggerFactory.getLogger(getClass())
@@ -58,6 +57,11 @@ public class LogLikelihood extends ScaleableNamedFunction {
         return derivValue(derivParName, new ParamSet(pars));
     }
 
+    @Override
+    public Names names() {
+        return source.getModel().names();
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -67,16 +71,15 @@ public class LogLikelihood extends ScaleableNamedFunction {
     }
 
     /**
-     * <p>
-     * getLikelihood.</p>
+     * Get a likelihood function calculated as {@code value - offset} to avoid very large or very small values
      *
-     * @return a {@link hep.dataforge.stat.parametric.ParametricValue} object.
+     * @return
      */
-    public ParametricValue getLikelihood() {
+    public ParametricValue getLikelihood(double offset) {
         return new AbstractParametricValue(this) {
             @Override
             public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
-                return expDeriv(derivParName, pars);
+                return value(pars)*LogLikelihood.this.derivValue(derivParName, pars);
             }
 
             @Override
@@ -85,10 +88,27 @@ public class LogLikelihood extends ScaleableNamedFunction {
             }
 
             @Override
-            public double apply(NamedValueSet pars) throws NamingException {
-                return expValue(pars);
+            public double value(NamedValueSet pars) throws NamingException {
+                return FastMath.exp(LogLikelihood.this.value(pars) - offset);
             }
         };
+    }
+
+    /**
+     * The likelihood function without offset
+     * @return
+     */
+    public ParametricValue getLikelihood() {
+        return getLikelihood(0);
+    }
+
+    /**
+     * Get Likelihood function, rescaling it to be 1 in the given point
+     * @param offsetPoint
+     * @return
+     */
+    public ParametricValue getLikelihood(NamedValueSet offsetPoint) {
+        return getLikelihood(value(offsetPoint));
     }
 
     public UnivariateFunction getLogLikelihoodProjection(final String axisName, final NamedValueSet allPar) {
@@ -111,7 +131,7 @@ public class LogLikelihood extends ScaleableNamedFunction {
      * {@inheritDoc}
      */
     @Override
-    public double apply(NamedValueSet pars) throws NamingException {
+    public double value(NamedValueSet pars) throws NamingException {
         return value(new ParamSet(pars));
     }
 

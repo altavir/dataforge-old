@@ -172,7 +172,7 @@ class QOWUtils {
                         && source.getPrior().names().contains(fitPars[l])) {
                     ParametricValue prior = source.getPrior();
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
-                    double pi = prior.apply(set);
+                    double pi = prior.value(set);
                     double deriv1 = prior.derivValue(fitPars[k], set);
                     double deriv2 = prior.derivValue(fitPars[l], set);
                     //считаем априорную вероятность независимой для разных переменных
@@ -213,7 +213,7 @@ class QOWUtils {
                         && source.getPrior().names().contains(fitPars[l])) {
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                     ParametricValue prior = source.getPrior();
-                    double pi = prior.apply(weight.getTheta());
+                    double pi = prior.value(weight.getTheta());
                     double deriv1 = prior.derivValue(fitPars[k], weight.getTheta());
                     double deriv2 = prior.derivValue(fitPars[l], weight.getTheta());
                     //считаем априорную вероятность независимой для разный переменных
@@ -261,7 +261,7 @@ class QOWUtils {
             if ((source.getPrior() != null) && source.getPrior().names().contains(fitPars[k])) {
                 Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                 ParametricValue prior = source.getPrior();
-                res[k] -= prior.derivValue(fitPars[k], set) / prior.apply(set);
+                res[k] -= prior.derivValue(fitPars[k], set) / prior.value(set);
             }
         }
         return new NamedVector(fitPars, res);

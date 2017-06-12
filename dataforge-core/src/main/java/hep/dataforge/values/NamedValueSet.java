@@ -19,7 +19,6 @@ import hep.dataforge.names.NameSetContainer;
 
 /**
  * A value provider with declared ordered list of names
- *
  */
 public interface NamedValueSet extends NameSetContainer, ValueProvider {
 
@@ -34,7 +33,13 @@ public interface NamedValueSet extends NameSetContainer, ValueProvider {
         return this.names().contains(path);
     }
 
-    default Value getValue(int num) {
+    /**
+     * A convenient method to access value by its index. Has generally worse performance.
+     *
+     * @param num
+     * @return
+     */
+    default Value getAt(int num) {
         return getValue(this.names().getName(num));
     }
 }

@@ -98,7 +98,7 @@ public class OneSidedUniformPrior implements ParametricValue {
      * В данном случае априорная вероятность не нормирована
      */
     @Override
-    public double apply(NamedValueSet pars) {
+    public double value(NamedValueSet pars) {
         double parValue = pars.getDouble(parName);
         if (isLower) {
             if (parValue < border) {

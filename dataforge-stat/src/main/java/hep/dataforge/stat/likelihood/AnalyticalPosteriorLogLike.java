@@ -31,7 +31,7 @@ import static java.lang.Math.log;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
+public class AnalyticalPosteriorLogLike extends LogValue {
 
     NamedGaussianPDFLog like;
     ParametricValue priorProb = null;
@@ -71,7 +71,7 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     public double derivValue(String derivParName, NamedValueSet pars) {
         double res = this.like.derivValue(derivParName, pars);
         if (priorProb != null) {
-            res += priorProb.derivValue(derivParName, pars) / priorProb.apply(pars);
+            res += priorProb.derivValue(derivParName, pars) / priorProb.value(pars);
         }        
         return res;
     }
@@ -89,10 +89,10 @@ public class AnalyticalPosteriorLogLike extends ScaleableNamedFunction {
     
     /** {@inheritDoc} */
     @Override
-    public double apply(NamedValueSet pars) {
-        double res = this.like.apply(pars);
+    public double value(NamedValueSet pars) {
+        double res = this.like.value(pars);
         if (priorProb != null) {
-            res += log(priorProb.apply(pars));
+            res += log(priorProb.value(pars));
         }
         return res;
     }

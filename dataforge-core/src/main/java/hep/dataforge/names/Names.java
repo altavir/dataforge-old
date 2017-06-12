@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * A set of names
+ * A helper class to store an ordered set of names
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -107,4 +107,8 @@ public interface Names extends Iterable<String>, MetaMorph {
      * @return
      */
     int size();
+
+    default Names minus(String[] nuisancePars){
+        return Names.of(asList().stream().filter(it-> !Arrays.sea))
+    }
 }

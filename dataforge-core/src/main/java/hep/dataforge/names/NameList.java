@@ -19,11 +19,9 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * The fast random access implementation of Names based on ArrayList.
@@ -32,7 +30,7 @@ import java.util.List;
  */
 public class NameList implements Names {
 
-    protected ArrayList<String> nameList = new ArrayList<>();
+    private ArrayList<String> nameList = new ArrayList<>();
 
     /**
      * <p>
@@ -52,11 +50,11 @@ public class NameList implements Names {
      * <p>
      * Constructor for NameList.</p>
      *
-     * @param named a {@link hep.dataforge.names.Names} object.
+     * @param names a {@link hep.dataforge.names.Names} object.
      */
-    public NameList(Names named) {
+    public NameList(Names names) {
         try {
-            addNames(named);
+            addNames(names);
         } catch (NamingException ex) {
             throw new Error(ex);
         }
@@ -152,6 +150,7 @@ public class NameList implements Names {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public Iterator<String> iterator() {
         return this.nameList.iterator();
@@ -170,7 +169,7 @@ public class NameList implements Names {
      */
     @Override
     public List<String> asList() {
-        return (List<String>) nameList.clone();
+        return Collections.unmodifiableList(this.nameList);
     }
 
     @Override

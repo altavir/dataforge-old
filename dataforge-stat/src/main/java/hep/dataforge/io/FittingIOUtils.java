@@ -60,7 +60,7 @@ public class FittingIOUtils {
             for (int j = 0; j < func.size(); j++) {
                 values[j] = point.getVector().getEntry(j);
             }
-            values[values.length - 1] = func.apply(point);
+            values[values.length - 1] = func.value(point);
             DataPoint dp = new MapPoint(format, values);
             res.row(dp);
         }

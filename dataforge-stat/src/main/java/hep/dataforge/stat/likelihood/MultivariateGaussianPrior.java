@@ -51,7 +51,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
             double value = pars.getDouble(derivParName);
             double dif = value - mean;
 
-            return -this.apply(pars) * dif / sigma / sigma;
+            return -this.value(pars) * dif / sigma / sigma;
         } else {
             return 0;
         }
@@ -71,7 +71,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public double apply(NamedValueSet pars) throws NameNotFoundException {
+    public double value(NamedValueSet pars) throws NameNotFoundException {
         double res = 1;
         for (Param par : set.getParams()) {
             

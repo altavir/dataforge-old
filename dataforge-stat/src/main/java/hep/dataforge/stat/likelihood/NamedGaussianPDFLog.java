@@ -30,7 +30,7 @@ import static java.lang.Math.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedGaussianPDFLog extends ScaleableNamedFunction {
+public class NamedGaussianPDFLog extends LogValue {
 
     private final NamedMatrix infoMatrix;
     private final double norm;
@@ -113,7 +113,7 @@ public class NamedGaussianPDFLog extends ScaleableNamedFunction {
     }
 
     @Override
-    public double apply(NamedValueSet pars) {
+    public double value(NamedValueSet pars) {
         RealVector difVector = getVector(pars).subtract(values);
         return log(norm) - infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
     }

@@ -86,7 +86,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double apply(NamedValueSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return distance(point, pars);
             }
         };
@@ -113,7 +113,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double apply(NamedValueSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return getLogProb(point, pars);
             }
         };

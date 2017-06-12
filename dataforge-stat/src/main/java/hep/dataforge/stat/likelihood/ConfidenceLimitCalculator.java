@@ -78,7 +78,7 @@ public class ConfidenceLimitCalculator {
         this.setupfunctions(func, a, b, DEFAULT_CACHE_POINTS);
     }
 
-//    public ConfidenceLimitCalculator(NamedMatrix cov, ScaleableNamedFunction like, NamedVector point,
+//    public ConfidenceLimitCalculator(NamedMatrix cov, LogValue like, NamedVector point,
 //            String parName, double a, double b, String... freePars) {
 //        Marginalizer marginalizer = new Marginalizer(cov, like, point);
 //        UnivariateFunction marginalLike = marginalizer.getUnivariateMarginalFunction(parName, freePars);

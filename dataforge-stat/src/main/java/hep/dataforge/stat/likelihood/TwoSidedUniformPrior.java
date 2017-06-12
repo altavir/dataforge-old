@@ -30,9 +30,9 @@ public class TwoSidedUniformPrior implements ParametricValue {
 
     private final String parName;
     private final Names names;
-    double lowerBorder;
-    double norm;
-    double upperBorder;
+    private double lowerBorder;
+    private double norm;
+    private double upperBorder;
 
     /**
      * <p>Constructor for TwoSidedUniformPrior.</p>
@@ -101,7 +101,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
      * Нормированная априорная информация
      */
     @Override
-    public double apply(NamedValueSet pars) {
+    public double value(NamedValueSet pars) {
         double parValue = pars.getDouble(parName);
         if (parValue >= lowerBorder && parValue <= upperBorder) {
             return norm;

@@ -57,7 +57,7 @@ public class FunctionUtils {
             @Override
             public double value(double x) {
                 curPars.setValue(parName, x);
-                return nFunc.apply(curPars);
+                return nFunc.value(curPars);
             }
         };
     }
@@ -99,7 +99,7 @@ public class FunctionUtils {
             @Override
             public double value(double x) {
                 curPars.setValue(parName, x);
-                return nFunc.apply(curPars);
+                return nFunc.value(curPars);
             }
         };
     }
@@ -145,14 +145,14 @@ public class FunctionUtils {
             }
 
             @Override
-            public double apply(NamedValueSet pars) {
+            public double value(NamedValueSet pars) {
                 if (!pars.names().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
                 for (String name : this.names()) {
                     this.allPars.setValue(name, pars.getDouble(name));
                 }
-                return f.apply(allPars);
+                return f.value(allPars);
             }
         };
     }
@@ -201,7 +201,7 @@ public class FunctionUtils {
             }
 
             @Override
-            public double apply(NamedValueSet pars) throws NamingException {
+            public double value(NamedValueSet pars) throws NamingException {
                 return s.value(x, pars);
             }
         };

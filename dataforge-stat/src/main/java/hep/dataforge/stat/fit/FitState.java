@@ -243,7 +243,7 @@ public class FitState implements Serializable {
         }
         if (getPrior() != null) {
             //логарифм произведения равен сумме логарифмов
-            res += Math.log(getPrior().apply(set));
+            res += Math.log(getPrior().value(set));
         }
         return res;
     }
@@ -273,7 +273,7 @@ public class FitState implements Serializable {
             }
         }
         if ((getPrior() != null) && (getPrior().names().contains(parName))) {
-            return res += getPrior().derivValue(parName, set) / getPrior().apply(set);
+            return res += getPrior().derivValue(parName, set) / getPrior().value(set);
         }
         return res;
     }

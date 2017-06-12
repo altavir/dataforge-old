@@ -32,7 +32,7 @@ import static org.junit.Assert.assertEquals;
  *
  * @author Alexander Nozik
  */
-public class MarginalizerTest {
+public class MarginalFunctionBuilderTest {
 
     static final String[] nameList = {"par1", "par2", "par3"};
 
@@ -49,13 +49,13 @@ public class MarginalizerTest {
     @AfterClass
     public static void tearDownClass() {
     }
-    Marginalizer instance;
-    ScaleableNamedFunction testFunc;
+    MarginalFunctionBuilder instance;
+    LogValue testFunc;
 
     /**
      *
      */
-    public MarginalizerTest() {
+    public MarginalFunctionBuilderTest() {
     }
 
     /**
@@ -72,7 +72,7 @@ public class MarginalizerTest {
         NamedVector zero = new NamedVector(nameList, vector);
         RandomGenerator generator = new JDKRandomGenerator();
         generator.setSeed(54321);
-        instance = new Marginalizer(cov, testFunc, zero,generator);
+        instance = new MarginalFunctionBuilder(testFunc, zero, cov, generator);
     }
 
     /**

@@ -20,6 +20,10 @@ package hep.dataforge.names;
  * @author Alexander Nozik
  */
 public interface NameSetContainer {
+    /**
+     * Get the names helper
+     * @return
+     */
     Names names();
     
     default int size(){

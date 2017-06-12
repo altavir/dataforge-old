@@ -55,7 +55,7 @@ public class GaussianPrior implements ParametricValue{
         double value = pars.getDouble(parName);
         double dif = value-mean;
 
-        return -this.apply(pars) * dif / sigma / sigma;
+        return -this.value(pars) * dif / sigma / sigma;
 //        if(this.parName.equalsIgnoreCase(derivParName)){
 //            DerivativeStructure struct = new DerivativeStructure(1, 1, 1, pars.getDouble(parName));
 //            double val = gaussian.value(struct).getPartialDerivative(1);
@@ -86,7 +86,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public double apply(NamedValueSet pars) throws NameNotFoundException {
+    public double value(NamedValueSet pars) throws NameNotFoundException {
 //        return this.gaussian.value(pars.getDouble(parName));
         double value = pars.getDouble(parName);
         double dif = value-mean;

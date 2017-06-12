@@ -15,26 +15,41 @@
  */
 package hep.dataforge.stat.parametric;
 
+import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.values.NamedValueSet;
 
 /**
- * A value calculated from a set of parameters
+ * A function mapping parameter set to real value
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public interface ParametricValue extends NameSetContainer {
 
-    double apply(NamedValueSet pars);
-
-    double derivValue(String derivParName, NamedValueSet pars);
+    /**
+     * Value
+     * @param pars
+     * @return
+     */
+    double value(NamedValueSet pars);
 
     /**
-     * Возвращает true только если производная явно задана. Если имени нет в списке параметров, должно возврашать false
+     * Partial derivative value for given parameter
+     * @param derivParName
+     * @param pars
+     * @return
+     */
+    default double derivValue(String derivParName, NamedValueSet pars){
+        throw new NotDefinedException();
+    }
+
+    /**
+     * Returns true if this object provides explicit analytical value derivative for given parameter
      *
      * @param name a {@link java.lang.String} object.
      * @return a boolean.
      */
-    boolean providesDeriv(String name);
+    default boolean providesDeriv(String name){
+        return false;
+    }
 }

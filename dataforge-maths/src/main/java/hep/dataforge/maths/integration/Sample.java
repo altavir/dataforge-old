@@ -19,70 +19,38 @@ import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 /**
- * <p>Sample class.</p>
+ * A single multivariate sample with weight
  *
  * @author Alexander Nozik
- * @version $Id: $Id
+
  */
 public class Sample {
 
     private final double weight;
     private final RealVector sample;
 
-    /**
-     * <p>Constructor for Sample.</p>
-     *
-     * @param weight a double.
-     * @param sample a {@link org.apache.commons.math3.linear.RealVector} object.
-     */
     public Sample(double weight, RealVector sample) {
         this.weight = weight;
         this.sample = sample;
     }
 
-    /**
-     * <p>Constructor for Sample.</p>
-     *
-     * @param weight a double.
-     * @param sample an array of double.
-     */
     public Sample(double weight, double[] sample) {
         this.weight = weight;
         this.sample = new ArrayRealVector(sample);
     }
 
-    /**
-     * <p>getDimension.</p>
-     *
-     * @return a int.
-     */
     public int getDimension() {
         return sample.getDimension();
     }
 
-    /**
-     * <p>Getter for the field <code>weight</code>.</p>
-     *
-     * @return a double.
-     */
     public double getWeight() {
         return weight;
     }
 
-    /**
-     * <p>getVector.</p>
-     *
-     * @return a {@link org.apache.commons.math3.linear.RealVector} object.
-     */
     public RealVector getVector() {
         return sample;
     }
 
-    /**
-     * <p>getArray.</p>
-     *
-     * @return an array of double.
-     */
     public double[] getArray() {
         return sample.toArray();
     }

@@ -74,7 +74,7 @@ public class BayesianManager{
         String[] parNames = exclude(freePars, parname);
 
         NamedMatrix matrix = state.getCovariance();
-        Marginalizer marginal = new Marginalizer(matrix, loglike, state.getParameters());
+        MarginalFunctionBuilder marginal = new MarginalFunctionBuilder(loglike, state.getParameters(), matrix);
         return marginal.getUnivariateMarginalFunction(numCalls, parname, parNames);
     }
 

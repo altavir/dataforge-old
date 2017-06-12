@@ -80,7 +80,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
         /** {@inheritDoc} */
         /** {@inheritDoc} */
     @Override
-    public double apply(NamedValueSet pars) {
+    public double value(NamedValueSet pars) {
         NamedVector vector = new NamedVector(pars);
         if(dom.contains(vector.getVector())) {
             return 1/dom.volume();
