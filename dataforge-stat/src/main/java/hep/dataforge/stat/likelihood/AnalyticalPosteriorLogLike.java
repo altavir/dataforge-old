@@ -18,6 +18,7 @@ package hep.dataforge.stat.likelihood;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.NamedValueSet;
 
@@ -31,7 +32,7 @@ import static java.lang.Math.log;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class AnalyticalPosteriorLogLike extends LogValue {
+public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
 
     NamedGaussianPDFLog like;
     ParametricValue priorProb = null;

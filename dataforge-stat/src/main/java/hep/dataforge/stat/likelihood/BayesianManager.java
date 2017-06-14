@@ -22,6 +22,9 @@ import hep.dataforge.stat.fit.IntervalEstimate;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.parametric.UnivariateSplineWrapper;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.apache.commons.math3.random.JDKRandomGenerator;
+import org.apache.commons.math3.random.RandomGenerator;
+import org.apache.commons.math3.random.SynchronizedRandomGenerator;
 
 import java.io.PrintWriter;
 
@@ -37,7 +40,7 @@ import static java.lang.String.format;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class BayesianManager{
+public class BayesianManager {
 
     /**
      * Constant <code>DEFAULT_MAX_CALLS=10000</code>
@@ -51,11 +54,14 @@ public class BayesianManager{
     /**
      * <p>
      * Constructor for BayesianManager.</p>
+     *
      * @param log
      */
     public BayesianManager(History log) {
         this.log = log;
     }
+
+    private RandomGenerator generator = new SynchronizedRandomGenerator(new JDKRandomGenerator());
 
     /**
      * A marginalized likelihood function without caching. Recalculates on call.
@@ -74,8 +80,12 @@ public class BayesianManager{
         String[] parNames = exclude(freePars, parname);
 
         NamedMatrix matrix = state.getCovariance();
-        MarginalFunctionBuilder marginal = new MarginalFunctionBuilder(loglike, state.getParameters(), matrix);
-        return marginal.getUnivariateMarginalFunction(numCalls, parname, parNames);
+        MarginalFunctionBuilder marginal = new MarginalFunctionBuilder()
+                .setFunction(loglike)
+                .setParameters(state.getParameters(),freePars)
+                .setNormalSampler(generator, state.getParameters(), matrix);
+
+        throw new RuntimeException("not implemented");
     }
 
     private ConfidenceLimitCalculator getCalculator(String parname, FitState result, String[] freePars) {
@@ -107,8 +117,8 @@ public class BayesianManager{
      * <p>
      * getConfidenceInterval.</p>
      *
-     * @param parname a {@link java.lang.String} object.
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
+     * @param parname  a {@link java.lang.String} object.
+     * @param state    a {@link hep.dataforge.stat.fit.FitState} object.
      * @param freePars an array of {@link java.lang.String} objects.
      * @return a {@link hep.dataforge.stat.fit.FitState} object.
      */
@@ -128,8 +138,8 @@ public class BayesianManager{
      * <p>
      * getMarginalLikelihood.</p>
      *
-     * @param parname a {@link java.lang.String} object.
-     * @param state a {@link hep.dataforge.stat.fit.FitState} object.
+     * @param parname  a {@link java.lang.String} object.
+     * @param state    a {@link hep.dataforge.stat.fit.FitState} object.
      * @param freePars a {@link java.lang.String} object.
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction}
      * object.
@@ -148,9 +158,9 @@ public class BayesianManager{
      * Prints spline smoothed marginal likelihood for the parameter TODO нужно
      * сделать возможность контролировать количество точек кэширования
      *
-     * @param out a {@link java.io.PrintWriter} object.
-     * @param parname a {@link java.lang.String} object.
-     * @param result a {@link hep.dataforge.stat.fit.FitState} object.
+     * @param out      a {@link java.io.PrintWriter} object.
+     * @param parname  a {@link java.lang.String} object.
+     * @param result   a {@link hep.dataforge.stat.fit.FitState} object.
      * @param freePars an array of {@link java.lang.String} objects.
      * @param numCalls a int.
      */

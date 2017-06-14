@@ -62,7 +62,9 @@ public class CMFitEngine implements FitEngine {
     private final static int DEFAULT_MAXITER = 1000;
     private final static double DEFAULT_TOLERANCE = 1e-5;
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public FitResult run(FitState state, FitStage task, History parentLog) {
         Chronicle log = new Chronicle("CM", parentLog);
@@ -80,8 +82,8 @@ public class CMFitEngine implements FitEngine {
      * makeRun.</p>
      *
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param task a {@link hep.dataforge.stat.fit.FitStage} object.
-     * @param log a {@link History} object.
+     * @param task  a {@link hep.dataforge.stat.fit.FitStage} object.
+     * @param log   a {@link History} object.
      * @return a {@link FitResult} object.
      */
     public FitResult makeRun(FitState state, FitStage task, History log) {
@@ -139,9 +141,8 @@ public class CMFitEngine implements FitEngine {
         NamedVector respars = new NamedVector(fitPars, res.getPoint());
         ParamSet allpars = pars.copy();
         allpars.setParValues(respars);
-        FitResult outRes = FitResult.build(state.edit().setPars(allpars).build(),task.getFreePars());
 
-        return outRes;
+        return FitResult.build(state.edit().setPars(allpars).build(), task.getFreePars());
 
     }
 

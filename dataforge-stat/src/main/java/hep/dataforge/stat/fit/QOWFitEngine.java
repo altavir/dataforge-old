@@ -146,8 +146,8 @@ public class QOWFitEngine implements FitEngine {
                 return generateErrors(state, task, log);
             case TASK_RUN:
                 FitResult res = makeRun(state, task, log);
-                res = makeRun(res.getState().get(), task, log);
-                return generateErrors(res.getState().get(), task, log);
+                res = makeRun(res.optState().get(), task, log);
+                return generateErrors(res.optState().get(), task, log);
             default:
                 throw new IllegalArgumentException("Unknown task");
         }

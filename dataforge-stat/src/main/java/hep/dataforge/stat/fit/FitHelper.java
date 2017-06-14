@@ -49,7 +49,7 @@ public class FitHelper {
 
     private List<FitStage> buildStageList(Meta meta) {
         if (meta.hasMeta(STAGE_KEY)) {
-            return meta.getMetaList(STAGE_KEY).stream().map(m -> new FitStage(m)).collect(Collectors.toList());
+            return meta.getMetaList(STAGE_KEY).stream().map(FitStage::new).collect(Collectors.toList());
         } else {
             return Collections.emptyList();
         }
@@ -84,7 +84,7 @@ public class FitHelper {
                     result.printCovariance(writer);
                 default:
                     result.printState(writer);
-                    result.getState().ifPresent(state -> {
+                    result.optState().ifPresent(state -> {
                         writer.printf("%n**RESIDUALS**%n");
                         if (state.getModel() instanceof XYModel) {
                             FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getPoints(), state.getParameters());

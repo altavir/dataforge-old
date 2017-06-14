@@ -16,10 +16,12 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.io.FittingIOUtils;
+import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.io.PrintWriter;
@@ -32,6 +34,7 @@ import static hep.dataforge.io.FittingIOUtils.printParamSet;
  *
  * @author Alexander Nozik
  */
+
 public class FitResult extends SimpleMetaMorph {
 
     private transient FitState state = null;
@@ -53,10 +56,9 @@ public class FitResult extends SimpleMetaMorph {
             builder.setValue("freePars", freeParameters);
         }
 
-        //FIXME add covariance
-//        if (state.hasCovariance()) {
-//            builder.setNode("covariance", state.getCovariance().toMeta());
-//        }
+        if (state.hasCovariance()) {
+            builder.setNode("covariance", state.getCovariance().toMeta());
+        }
 
         //FIXME add interval estimate
 
@@ -75,8 +77,21 @@ public class FitResult extends SimpleMetaMorph {
     }
 
     public ParamSet getParameters() {
-        return MetaMorph.morph(ParamSet.class, meta().getMeta("params"));
+        return optState().map(FitState::getParameters)
+                .orElseGet(() -> MetaMorph.morph(ParamSet.class, meta().getMeta("params")));
     }
+
+    public Optional<NamedMatrix> optCovariance() {
+        return Optionals.either(optState().map(FitState::getCovariance))
+                .or(() -> {
+                    if (meta().hasMeta("covariance")) {
+                        return Optional.of(MetaMorph.morph(NamedMatrix.class, meta().getMeta("covariance")));
+                    } else {
+                        return Optional.empty();
+                    }
+                }).opt();
+    }
+
 
     public String[] getFreePars() {
         return meta().getStringArray("freePars");
@@ -103,12 +118,12 @@ public class FitResult extends SimpleMetaMorph {
         return meta().getDouble("chi2");
     }
 
-    public Optional<FitState> getState() {
+    public Optional<FitState> optState() {
         return Optional.ofNullable(state);
     }
 
-    public NavigablePointSource getData(){
-        return MetaMorph.morph(ListOfPoints.class,meta().getMeta("data"));
+    public NavigablePointSource getData() {
+        return MetaMorph.morph(ListOfPoints.class, meta().getMeta("data"));
     }
 
     /**
@@ -122,7 +137,7 @@ public class FitResult extends SimpleMetaMorph {
         this.printAllValues(out);
         this.printFitParsValues(out);
 
-        getState().ifPresent(state -> {
+        optState().ifPresent(state -> {
             if (state.hasCovariance()) {
                 out.println();
                 out.println("Correlation matrix:");
@@ -151,7 +166,7 @@ public class FitResult extends SimpleMetaMorph {
 
     @Deprecated
     public void printCovariance(PrintWriter out) {
-        getState().ifPresent(state -> {
+        optState().ifPresent(state -> {
             if (state.getCovariance() != null) {
                 out.println();
                 out.printf("%n***COVARIANCE***%n");

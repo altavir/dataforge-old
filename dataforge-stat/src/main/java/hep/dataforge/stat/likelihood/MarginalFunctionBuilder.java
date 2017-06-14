@@ -46,7 +46,10 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 
     private Integrator<MonteCarloIntegrand> integrator = new MonteCarloIntegrator();
     private Sampler sampler;
-    private NamedVector startingPoint;
+    private NamedValueSet startingPoint;
+    /**
+     * The set of parameters over which integration should be made
+     */
     private String[] nuisancePars;
     private ParametricValue function;
 
@@ -84,20 +87,25 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
         return self();
     }
 
-    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, NamedVector means, NamedMatrix covariance, String... parameters) {
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, NamedValueSet means, NamedMatrix covariance, String... parameters) {
         return setNormalSampler(
                 generator,
-                means.subVector(parameters).getVector(),
+                new NamedVector(means).subVector(parameters).getVector(),
                 covariance.subMatrix(parameters).getMatrix()
         );
     }
 
     public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, FitResult fitResult, String... parameters) {
-        return setNormalSampler(
-                generator,
-                fitResult.getParameters(),
-                fitResult.getCovariance()
-        );
+        if (fitResult.optCovariance().isPresent()) {
+            return setNormalSampler(
+                    generator,
+                    fitResult.getParameters(),
+                    fitResult.optCovariance().get(),
+                    parameters
+            );
+        } else {
+            throw new IllegalArgumentException("Need FitResult with valid covariance");
+        }
     }
 
     public ParametricValue getFunction() {
@@ -122,7 +130,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
      * @param nuisancePars
      * @return
      */
-    public MarginalFunctionBuilder setParameters(NamedVector startingPoint, String... nuisancePars) {
+    public MarginalFunctionBuilder setParameters(NamedValueSet startingPoint, String... nuisancePars) {
         this.startingPoint = startingPoint;
         this.nuisancePars = nuisancePars;
         return self();

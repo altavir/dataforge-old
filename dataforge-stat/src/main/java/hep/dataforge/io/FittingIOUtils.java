@@ -190,7 +190,6 @@ public class FittingIOUtils {
         double[] grid2 = GridCalculator.getUniformUnivariateGrid(val2 - scale * err2, val2 + scale * err2, num2);
 
         LogLikelihood like = res.getLogLike();
-        like.reScale(res.getParameters());
         ParametricValue func = FunctionUtils.getNamedSubFunction(like.getLikelihood(), res.getParameters(), par1, par2);
 
         double[] vector = new double[2];
