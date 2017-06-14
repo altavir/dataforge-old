@@ -19,8 +19,8 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.MultiFunction;
-import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.ParametricMultiFunctionWrapper;
+import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
 import org.apache.commons.math3.optim.*;
 import org.apache.commons.math3.optim.nonlinear.scalar.GoalType;
@@ -95,7 +95,7 @@ public class CMFitEngine implements FitEngine {
         ParamSet pars = state.getParameters().copy();
 
         NamedVector subSet = pars.getParValues(fitPars);
-        ParametricValue likeFunc = FunctionUtils.getNamedSubFunction(state.getLogLike(), pars, fitPars);
+        ParametricValue likeFunc = ParametricUtils.getNamedSubFunction(state.getLogLike(), pars, fitPars);
 
         MultiFunction func = new ParametricMultiFunctionWrapper(likeFunc);
         ObjectiveFunction oFunc;

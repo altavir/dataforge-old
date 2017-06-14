@@ -25,12 +25,12 @@ import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
- * <p>FunctionUtils class.</p>
+ * <p>ParametricUtils class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class FunctionUtils {
+public class ParametricUtils {
 
     /**
      * Создает одномерное сечение многомерной именованной функции

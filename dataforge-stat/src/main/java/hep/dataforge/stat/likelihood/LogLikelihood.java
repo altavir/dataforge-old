@@ -21,7 +21,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
-import hep.dataforge.stat.parametric.FunctionUtils;
+import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -112,7 +112,7 @@ public class LogLikelihood implements ParametricValue {
     }
 
     public UnivariateFunction getLogLikelihoodProjection(final String axisName, final NamedValueSet allPar) {
-        return FunctionUtils.getNamedProjection(this, axisName, allPar);
+        return ParametricUtils.getNamedProjection(this, axisName, allPar);
     }
 
     /**

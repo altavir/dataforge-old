@@ -24,8 +24,8 @@ import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
-import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.ParametricFunction;
+import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.*;
 import hep.dataforge.values.NamedValueSet;
@@ -189,7 +189,7 @@ public class FittingIOUtils {
         double[] grid2 = GridCalculator.getUniformUnivariateGrid(val2 - scale * err2, val2 + scale * err2, num2);
 
         LogLikelihood like = res.getLogLike();
-        ParametricValue func = FunctionUtils.getNamedSubFunction(like.getLikelihood(), res.getParameters(), par1, par2);
+        ParametricValue func = ParametricUtils.getNamedSubFunction(like.getLikelihood(), res.getParameters(), par1, par2);
 
         double[] vector = new double[2];
 
@@ -212,7 +212,7 @@ public class FittingIOUtils {
 
     public static void printLogProb1D(PrintWriter out, FitState res, int numpoints, double scale, String name) {
         LogLikelihood like = res.getLogLike();
-        UnivariateFunction func = FunctionUtils.getNamedProjection(like, name, res.getParameters());
+        UnivariateFunction func = ParametricUtils.getNamedProjection(like, name, res.getParameters());
         Param p = res.getParameters().getByName(name);
         double a = max(p.getValue() - scale * p.getErr(), p.getLowerBound());
         double b = min(p.getValue() + scale * p.getErr(), p.getUpperBound());
@@ -234,7 +234,7 @@ public class FittingIOUtils {
 
         assert names.length > 0;
         LogLikelihood like = res.getLogLike();
-        ParametricValue func = FunctionUtils.getNamedSubFunction(like, res.getParameters(), names);
+        ParametricValue func = ParametricUtils.getNamedSubFunction(like, res.getParameters(), names);
 
         double[] vals = res.getParameters().getParValues(names).getArray();
 
@@ -292,7 +292,7 @@ public class FittingIOUtils {
     }
 
     public static void printSpectrum(PrintWriter out, ParametricFunction sp, NamedValueSet pars, double a, double b, int numPoints) {
-        UnivariateFunction func = FunctionUtils.getSpectrumFunction(sp, pars);
+        UnivariateFunction func = ParametricUtils.getSpectrumFunction(sp, pars);
         printFunctionSimple(out, func, a, b, numPoints);
         out.flush();
     }

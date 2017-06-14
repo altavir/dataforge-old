@@ -18,7 +18,7 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
-import hep.dataforge.stat.parametric.FunctionUtils;
+import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
@@ -51,7 +51,7 @@ public class Hessian{
         
         for (int i = 0; i < dim; i++) {
             for (int j = i; j < dim; j++) {
-                UnivariateFunction func = FunctionUtils.getNamedProjectionDerivative(function, fitPars[i], fitPars[j], set);
+                UnivariateFunction func = ParametricUtils.getNamedProjectionDerivative(function, fitPars[i], fitPars[j], set);
                 double value = DerivativeCalculator.calculateDerivative(func, set.getDouble(fitPars[i]), set.getError(fitPars[j])/2);
                 res.setEntry(i, j, value);
                 res.setEntry(j, i, value);                

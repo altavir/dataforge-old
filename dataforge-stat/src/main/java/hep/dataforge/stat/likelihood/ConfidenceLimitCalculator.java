@@ -27,7 +27,7 @@ import org.apache.commons.math3.analysis.solvers.PegasusSolver;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.util.Pair;
 
-import static hep.dataforge.stat.parametric.FunctionCaching.cacheUnivariateFunction;
+import static hep.dataforge.maths.functions.FunctionCaching.cacheUnivariateFunction;
 
 /**
  * <p>ConfidenceLimitCalculator class.</p>

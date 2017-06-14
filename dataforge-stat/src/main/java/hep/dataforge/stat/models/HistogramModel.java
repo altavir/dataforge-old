@@ -16,14 +16,15 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.parametric.FunctionUtils;
-import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
+import hep.dataforge.stat.parametric.ParametricFunction;
+import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.NamedValueSet;
-import static java.lang.Math.log;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
+import static java.lang.Math.log;
 
 /**
  * Модель для гистограммы. В общем случае размещение и размер бинов может быть
@@ -98,7 +99,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     public double value(double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
-            UnivariateFunction spFunc = FunctionUtils.getSpectrumFunction(source, set);
+            UnivariateFunction spFunc = ParametricUtils.getSpectrumFunction(source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
         } else {
             return source.value((binBegin + binEnd) / 2, set) * (binEnd - binBegin);
@@ -108,7 +109,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     public double derivValue(String parName, double binBegin, double binEnd, NamedValueSet set) {
         if (isCalculateCountInBin()) {
-            UnivariateFunction spFunc = FunctionUtils.getSpectrumDerivativeFunction(parName, source, set);
+            UnivariateFunction spFunc = ParametricUtils.getSpectrumDerivativeFunction(parName, source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
         } else {
             double val = (binBegin + binEnd) / 2;

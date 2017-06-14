@@ -29,8 +29,8 @@ import hep.dataforge.values.NamedValueSet;
 /**
  * Basic implementation for model
  *
- * @author Alexander Nozik
  * @param <T>
+ * @author Alexander Nozik
  */
 public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHolder implements Model {
 //TODO add default parameters to model

@@ -13,12 +13,13 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.stat.parametric;
+package hep.dataforge.maths.functions;
 
-import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.analysis.interpolation.SplineInterpolator;
 import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
+
+import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 
 /**
  * <p>FunctionCaching class.</p>

@@ -72,7 +72,10 @@ public class XYModel extends AbstractModel<XYAdapter> {
 //        super(name, source, new XYAdapter(xName, yName));
 //        this.source = source;
 //    }
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
@@ -86,13 +89,15 @@ public class XYModel extends AbstractModel<XYAdapter> {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double dispersion(DataPoint point, NamedValueSet pars) {
         return 1d / getWeight(point);
     }
 
-    private double getWeight(DataPoint point){
+    private double getWeight(DataPoint point) {
         if (point.names().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
         } else {
@@ -101,7 +106,9 @@ public class XYModel extends AbstractModel<XYAdapter> {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double distance(DataPoint point, NamedValueSet pars) {
         double x = adapter.getX(point).doubleValue();
@@ -109,7 +116,9 @@ public class XYModel extends AbstractModel<XYAdapter> {
         return value(x, pars) - y;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getLogProb(DataPoint point, NamedValueSet pars) {
         double dist = this.distance(point, pars);
@@ -124,7 +133,9 @@ public class XYModel extends AbstractModel<XYAdapter> {
         return -dist * dist / 2d / disp + base;// Внимание! Тут не хи-квадрат, а логарифм правдоподобия
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) {
         return -this.distance(point, pars) * this.disDeriv(parName, point, pars) / this.dispersion(point, pars);
@@ -140,19 +151,25 @@ public class XYModel extends AbstractModel<XYAdapter> {
         return this.source;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesDeriv(String name) {
         return source.providesDeriv(name);
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesProb() {
         return true;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public boolean providesProbDeriv(String name) {
         return providesDeriv(name);
@@ -161,7 +178,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
     /**
      * {@inheritDoc}
      *
-     * @param x a double.
+     * @param x   a double.
      * @param set
      * @return a double.
      */
@@ -173,7 +190,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * <p>derivValue.</p>
      *
      * @param parName a {@link java.lang.String} object.
-     * @param x a double.
+     * @param x       a double.
      * @param set
      * @return a double.
      */
