@@ -15,7 +15,8 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.stat.parametric.MultiFunction;
+import hep.dataforge.maths.functions.MultiFunction;
+
 import java.util.ArrayList;
 import java.util.List;
 

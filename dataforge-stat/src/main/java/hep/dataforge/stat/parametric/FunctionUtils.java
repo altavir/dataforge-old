@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.maths.functions.UniFunction;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -37,10 +38,10 @@ public class FunctionUtils {
      * @param nFunc - исходная именованная функция
      * @param parName - имя параметра, по которому делается сечение
      * @param pars - Точка, вкоторой вычеслено сечение
-     * @return a {@link hep.dataforge.stat.parametric.Function} object.
+     * @return a {@link UniFunction} object.
      */
-    public static Function getNamedProjection(final ParametricValue nFunc, final String parName, final NamedValueSet pars) {
-        return new Function() {
+    public static UniFunction getNamedProjection(final ParametricValue nFunc, final String parName, final NamedValueSet pars) {
+        return new UniFunction() {
             NamedVector curPars = new NamedVector(pars);
 
             @Override
@@ -80,26 +81,6 @@ public class FunctionUtils {
             public double value(double x) {
                 curPars.setValue(parName, x);
                 return nFunc.derivValue(derivativeName, curPars);
-            }
-        };
-    }
-
-    /**
-     * <p>getNamedProjectionFunction.</p>
-     *
-     * @param nFunc a {@link hep.dataforge.stat.parametric.ParametricValue} object.
-     * @param parName a {@link java.lang.String} object.
-     * @param pars
-     * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     */
-    public static UnivariateFunction getNamedProjectionFunction(final ParametricValue nFunc, final String parName, final NamedValueSet pars) {
-        return new UnivariateFunction() {
-            NamedVector curPars = new NamedVector(pars);
-
-            @Override
-            public double value(double x) {
-                curPars.setValue(parName, x);
-                return nFunc.value(curPars);
             }
         };
     }
@@ -157,36 +138,14 @@ public class FunctionUtils {
         };
     }
 
-    /**
-     * <p>getSpectrumDerivativeFunction.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param s a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param pars
-     * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     */
     public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final NamedValueSet pars) {
         return (double x) -> s.derivValue(name, x, pars);
     }
 
-    /**
-     * <p>getSpectrumFunction.</p>
-     *
-     * @param s a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param pars
-     * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     */
     public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final NamedValueSet pars) {
         return (double x) -> s.value(x, pars);
     }
 
-    /**
-     * <p>getSpectrumPointFunction.</p>
-     *
-     * @param s a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param x a double.
-     * @return a {@link hep.dataforge.stat.parametric.ParametricValue} object.
-     */
     public static ParametricValue getSpectrumPointFunction(final ParametricFunction s, final double x) {
         return new AbstractParametricValue(s) {
 

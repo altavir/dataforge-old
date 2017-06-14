@@ -24,7 +24,6 @@ import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
-import hep.dataforge.stat.parametric.Function;
 import hep.dataforge.stat.parametric.FunctionUtils;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricValue;
@@ -213,7 +212,7 @@ public class FittingIOUtils {
 
     public static void printLogProb1D(PrintWriter out, FitState res, int numpoints, double scale, String name) {
         LogLikelihood like = res.getLogLike();
-        Function func = FunctionUtils.getNamedProjection(like, name, res.getParameters());
+        UnivariateFunction func = FunctionUtils.getNamedProjection(like, name, res.getParameters());
         Param p = res.getParameters().getByName(name);
         double a = max(p.getValue() - scale * p.getErr(), p.getLowerBound());
         double b = min(p.getValue() + scale * p.getErr(), p.getUpperBound());

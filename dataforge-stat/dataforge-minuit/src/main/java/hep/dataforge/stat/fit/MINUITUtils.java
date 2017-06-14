@@ -19,7 +19,7 @@ import hep.dataforge.MINUIT.FunctionMinimum;
 import hep.dataforge.MINUIT.MnPrint;
 import hep.dataforge.MINUIT.MnUserParameters;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.stat.parametric.MultiFunction;
+import hep.dataforge.maths.functions.MultiFunction;
 
 import java.io.PrintWriter;
 

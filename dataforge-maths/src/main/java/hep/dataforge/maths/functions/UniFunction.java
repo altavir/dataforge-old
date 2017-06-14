@@ -13,18 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.stat.parametric;
+package hep.dataforge.maths.functions;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
- * <p>Function interface.</p>
+ * A Univariate function that can provide first derivative
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Function extends UnivariateFunction {
+public interface UniFunction extends UnivariateFunction {
 
     double derivValue(double x) throws NotDefinedException;
 

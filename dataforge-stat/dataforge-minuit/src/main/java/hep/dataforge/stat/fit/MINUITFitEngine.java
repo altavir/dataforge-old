@@ -20,7 +20,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
-import hep.dataforge.stat.parametric.MultiFunction;
+import hep.dataforge.maths.functions.MultiFunction;
 
 import static hep.dataforge.stat.fit.FitStage.*;
 

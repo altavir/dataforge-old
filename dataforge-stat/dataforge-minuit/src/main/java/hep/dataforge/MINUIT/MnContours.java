@@ -15,8 +15,9 @@
  */
 package hep.dataforge.MINUIT;
 
+import hep.dataforge.maths.functions.MultiFunction;
 import hep.dataforge.stat.fit.MINUITPlugin;
-import hep.dataforge.stat.parametric.MultiFunction;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,7 +37,7 @@ public class MnContours {
     /**
      * construct from FCN + minimum
      *
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
      */
     public MnContours(MultiFunction fcn, FunctionMinimum min) {
@@ -48,7 +49,7 @@ public class MnContours {
      *
      * @param stra a int.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      */
     public MnContours(MultiFunction fcn, FunctionMinimum min, int stra) {
         this(fcn, min, new MnStrategy(stra));
@@ -59,7 +60,7 @@ public class MnContours {
      *
      * @param stra a {@link hep.dataforge.MINUIT.MnStrategy} object.
      * @param min a {@link hep.dataforge.MINUIT.FunctionMinimum} object.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      */
     public MnContours(MultiFunction fcn, FunctionMinimum min, MnStrategy stra) {
         theFCN = fcn;

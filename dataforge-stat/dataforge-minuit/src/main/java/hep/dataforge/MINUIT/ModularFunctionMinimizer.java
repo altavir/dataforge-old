@@ -15,7 +15,7 @@
  */
 package hep.dataforge.MINUIT;
 
-import hep.dataforge.stat.parametric.MultiFunction;
+import hep.dataforge.maths.functions.MultiFunction;
 
 /**
  *

@@ -17,7 +17,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.maths.Domain;
 import hep.dataforge.maths.UniformRandomVectorGenerator;
-import hep.dataforge.stat.parametric.MultiFunction;
+import hep.dataforge.maths.functions.MultiFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NullArgumentException;
@@ -96,7 +96,7 @@ public class PrintFunction {
      * Использует
      *
      * @param out a {@link java.io.PrintWriter} object.
-     * @param func a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param func a {@link MultiFunction} object.
      * @param dom a {@link hep.dataforge.maths.Domain} object.
      * @param numpoints - Количество вызовов функции
      */
@@ -124,7 +124,7 @@ public class PrintFunction {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param head a {@link java.lang.String} object.
-     * @param func a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param func a {@link MultiFunction} object.
      * @param points a {@link java.util.List} object.
      */
     public static void printMultiFunction(PrintWriter out, String head, MultiFunction func, List<double[]> points){

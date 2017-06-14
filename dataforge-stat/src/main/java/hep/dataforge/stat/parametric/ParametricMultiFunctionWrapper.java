@@ -18,6 +18,7 @@ package hep.dataforge.stat.parametric;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.maths.functions.MultiFunction;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.NamedValueSet;
 

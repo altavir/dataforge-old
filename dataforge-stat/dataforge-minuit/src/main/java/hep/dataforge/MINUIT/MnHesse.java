@@ -15,8 +15,8 @@
  */
 package hep.dataforge.MINUIT;
 
+import hep.dataforge.maths.functions.MultiFunction;
 import hep.dataforge.stat.fit.MINUITPlugin;
-import hep.dataforge.stat.parametric.MultiFunction;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.linear.SingularMatrixException;
@@ -66,7 +66,7 @@ public class MnHesse {
     /**
      * <p>calculate.</p>
      *
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par an array of double.
      * @param err an array of double.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -79,7 +79,7 @@ public class MnHesse {
      * FCN + parameters + errors
      *
      * @param maxcalls a int.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par an array of double.
      * @param err an array of double.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -91,7 +91,7 @@ public class MnHesse {
     /**
      * <p>calculate.</p>
      *
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par an array of double.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -104,7 +104,7 @@ public class MnHesse {
      * FCN + parameters + MnUserCovariance
      *
      * @param maxcalls a int.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par an array of double.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -119,7 +119,7 @@ public class MnHesse {
     /**
      * <p>calculate.</p>
      *
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
      */
@@ -131,7 +131,7 @@ public class MnHesse {
      * FCN + MnUserParameters
      *
      * @param maxcalls a int.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
      */
@@ -142,7 +142,7 @@ public class MnHesse {
     /**
      * <p>calculate.</p>
      *
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -155,7 +155,7 @@ public class MnHesse {
      * FCN + MnUserParameters + MnUserCovariance
      *
      * @param maxcalls a int.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param par a {@link hep.dataforge.MINUIT.MnUserParameters} object.
      * @param cov a {@link hep.dataforge.MINUIT.MnUserCovariance} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
@@ -168,7 +168,7 @@ public class MnHesse {
      * FCN + MnUserParameterState
      *
      * @param maxcalls a int.
-     * @param fcn a {@link hep.dataforge.stat.parametric.MultiFunction} object.
+     * @param fcn a {@link MultiFunction} object.
      * @param state a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
      * @return a {@link hep.dataforge.MINUIT.MnUserParameterState} object.
      */

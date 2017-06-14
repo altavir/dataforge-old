@@ -31,7 +31,7 @@ public class MonteCarloIntegrator implements Integrator<MonteCarloIntegrand> {
     private static final int DEFAULT_MAX_CALLS = 100000;
     private static final double DEFAULT_MIN_RELATIVE_ACCURACY = 1e-3;
 
-    int sampleSizeStep = 500;
+    private int sampleSizeStep = 500;
 
     public MonteCarloIntegrator() {
     }

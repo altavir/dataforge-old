@@ -17,6 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.maths.functions.UniFunction;
 import hep.dataforge.stat.fit.FitState;
 import hep.dataforge.stat.fit.IntervalEstimate;
 import hep.dataforge.stat.fit.Param;
@@ -30,6 +31,7 @@ import java.io.PrintWriter;
 
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
 import static hep.dataforge.names.NamedUtils.exclude;
+import static hep.dataforge.stat.parametric.FunctionUtils.getNamedProjection;
 import static java.lang.Math.max;
 import static java.lang.Math.min;
 import static java.lang.String.format;
@@ -40,7 +42,7 @@ import static java.lang.String.format;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class BayesianManager {
+public class BayesianConfidenceLimit {
 
     /**
      * Constant <code>DEFAULT_MAX_CALLS=10000</code>
@@ -53,11 +55,11 @@ public class BayesianManager {
 
     /**
      * <p>
-     * Constructor for BayesianManager.</p>
+     * Constructor for BayesianConfidenceLimit.</p>
      *
      * @param log
      */
-    public BayesianManager(History log) {
+    public BayesianConfidenceLimit(History log) {
         this.log = log;
     }
 
@@ -72,7 +74,7 @@ public class BayesianManager {
      * @param numCalls
      * @return
      */
-    private UnivariateFunction calculateLikelihood(String parname, FitState state, String[] freePars, int numCalls) {
+    private UniFunction calculateLikelihood(String parname, FitState state, String[] freePars, int numCalls) {
         if (state == null) {
             throw new IllegalStateException("Fit information is not propertly initialized.");
         }
@@ -82,10 +84,10 @@ public class BayesianManager {
         NamedMatrix matrix = state.getCovariance();
         MarginalFunctionBuilder marginal = new MarginalFunctionBuilder()
                 .setFunction(loglike)
-                .setParameters(state.getParameters(),freePars)
+                .setParameters(state.getParameters(), freePars)
                 .setNormalSampler(generator, state.getParameters(), matrix);
 
-        throw new RuntimeException("not implemented");
+        return getNamedProjection(marginal.build(), parname, state.getParameters());
     }
 
     private ConfidenceLimitCalculator getCalculator(String parname, FitState result, String[] freePars) {
@@ -113,15 +115,6 @@ public class BayesianManager {
         }
     }
 
-    /**
-     * <p>
-     * getConfidenceInterval.</p>
-     *
-     * @param parname  a {@link java.lang.String} object.
-     * @param state    a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param freePars an array of {@link java.lang.String} objects.
-     * @return a {@link hep.dataforge.stat.fit.FitState} object.
-     */
     public FitState getConfidenceInterval(String parname, FitState state, String[] freePars) {
         log.report(
                 format("Starting combined confidence limits calculation for parameter \'%s\'.", parname));
@@ -134,16 +127,6 @@ public class BayesianManager {
         return state.edit().setInterval(limit).build();
     }
 
-    /**
-     * <p>
-     * getMarginalLikelihood.</p>
-     *
-     * @param parname  a {@link java.lang.String} object.
-     * @param state    a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param freePars a {@link java.lang.String} object.
-     * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction}
-     * object.
-     */
     public UnivariateFunction getMarginalLikelihood(String parname, FitState state, String... freePars) {
         ConfidenceLimitCalculator calculator;
         if (freePars.length == 0) {

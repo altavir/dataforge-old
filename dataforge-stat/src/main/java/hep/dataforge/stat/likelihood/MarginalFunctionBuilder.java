@@ -17,7 +17,10 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
-import hep.dataforge.maths.integration.*;
+import hep.dataforge.maths.integration.DistributionSampler;
+import hep.dataforge.maths.integration.MonteCarloIntegrand;
+import hep.dataforge.maths.integration.MonteCarloIntegrator;
+import hep.dataforge.maths.integration.Sampler;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.FitResult;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
@@ -44,7 +47,7 @@ import java.util.Optional;
  */
 public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, MarginalFunctionBuilder> {
 
-    private Integrator<MonteCarloIntegrand> integrator = new MonteCarloIntegrator();
+    private MonteCarloIntegrator integrator = new MonteCarloIntegrator();
     private Sampler sampler;
     private NamedValueSet startingPoint;
     /**
@@ -60,6 +63,8 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
     private Sampler getSampler() {
         return sampler;
     }
+
+    private int numCalls = -1;
 
     /**
      * Set a specific sampler for this function
@@ -84,6 +89,11 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 
     public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, RealVector means, RealMatrix covariance) {
         this.sampler = new DistributionSampler(new MultivariateNormalDistribution(generator, means.toArray(), covariance.getData()));
+        return self();
+    }
+
+    public MarginalFunctionBuilder setNumCalls(int numCalls) {
+        this.numCalls = numCalls;
         return self();
     }
 
@@ -162,7 +172,11 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
             public double value(NamedValueSet pars) {
                 MultivariateFunction func = new ExpLikelihood(offset);
                 MonteCarloIntegrand integrand = new MonteCarloIntegrand(func, getSampler());
-                return integrator.integrate(integrand);
+                if (numCalls < 0) {
+                    return integrator.integrate(integrand);
+                } else {
+                    return integrator.evaluate(integrand, numCalls).getValue();
+                }
             }
         };
     }
