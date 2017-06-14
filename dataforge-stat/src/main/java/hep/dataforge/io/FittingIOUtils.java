@@ -241,7 +241,7 @@ public class FittingIOUtils {
         double[] vals = res.getParameters().getParValues(names).getArray();
 
         NamedMatrix fullCov = res.getCovariance();
-        RealMatrix reducedCov = fullCov.getNamedSubMatrix(names).getMatrix().scalarMultiply(scale);
+        RealMatrix reducedCov = fullCov.subMatrix(names).getMatrix().scalarMultiply(scale);
         MultivariateNormalDistribution distr
                 = new MultivariateNormalDistribution(vals, reducedCov.getData());
 

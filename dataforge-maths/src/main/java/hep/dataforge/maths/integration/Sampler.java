@@ -15,10 +15,11 @@
  */
 package hep.dataforge.maths.integration;
 
-import org.apache.commons.math3.random.JDKRandomGenerator;
+import hep.dataforge.maths.MultivariateUniformDistribution;
+import javafx.util.Pair;
 import org.apache.commons.math3.random.RandomGenerator;
-import org.apache.commons.math3.random.SynchronizedRandomGenerator;
 
+import java.util.List;
 import java.util.stream.Stream;
 
 /**
@@ -26,26 +27,18 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public abstract class Sampler {
+public interface Sampler {
 
-    protected final RandomGenerator generator;
-
-
-    public Sampler(RandomGenerator generator) {
-        this.generator = generator;
+    static Sampler uniform(RandomGenerator generator, List<Pair<Double, Double>> borders) {
+        return new DistributionSampler(MultivariateUniformDistribution.square(generator, borders));
     }
 
 
-    public Sampler() {
-        generator = new SynchronizedRandomGenerator(new JDKRandomGenerator());
-    }
+    Sample nextSample();
 
-
-    public abstract Sample nextSample();
-
-    public Stream<Sample> stream() {
+    default Stream<Sample> stream() {
         return Stream.generate(this::nextSample);
     }
 
-    public abstract int getDimension();
+    int getDimension();
 }

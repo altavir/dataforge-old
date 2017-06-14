@@ -228,7 +228,7 @@ public class QOWFitEngine implements FitEngine {
 //        res = invH.multiply(covarF).multiply(transinvH);
 
 //        return new NamedMatrix(res, weight.asArray());
-        return new NamedMatrix(invH, weight.namesAsArray());
+        return new NamedMatrix(weight.namesAsArray(), invH);
     }
 
 }

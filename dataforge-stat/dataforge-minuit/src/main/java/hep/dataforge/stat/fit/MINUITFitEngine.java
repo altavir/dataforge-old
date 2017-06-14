@@ -128,7 +128,7 @@ public class MINUITFitEngine implements FitEngine {
                     cov[i][j] = mnCov.get(i, j);
                 }
             }
-            newState.setCovariance(new NamedMatrix(cov, fitPars), true);
+            newState.setCovariance(new NamedMatrix(fitPars, cov), true);
 
         }
 
@@ -234,7 +234,7 @@ public class MINUITFitEngine implements FitEngine {
                     }
                 }
             }
-            newState.setCovariance(new NamedMatrix(cov, fitPars), true);
+            newState.setCovariance(new NamedMatrix(fitPars, cov), true);
 
         }
 

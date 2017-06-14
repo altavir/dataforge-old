@@ -114,7 +114,7 @@ public class FitState implements Serializable {
 
         for (String str1 : names) {
             for (String str2 : names) {
-                double value = res.getElement(str1, str2) / pars.getError(str1) / pars.getError(str2);
+                double value = res.get(str1, str2) / pars.getError(str1) / pars.getError(str2);
                 res.setElement(str1, str2, value);
             }
         }
@@ -132,7 +132,7 @@ public class FitState implements Serializable {
         double[] sigmas = this.pars.getParErrors().getArray();
         sigmas = ebeMultiply(sigmas, sigmas);
         RealMatrix baseMatrix = new DiagonalMatrix(sigmas);
-        NamedMatrix result = new NamedMatrix(baseMatrix, this.pars.namesAsArray());
+        NamedMatrix result = new NamedMatrix(this.pars.namesAsArray(), baseMatrix);
         if (hasCovariance()) {
             result.setValuesFrom(this.covariance);
         }
@@ -375,7 +375,7 @@ public class FitState implements Serializable {
             covariance = cov;
             if (updateErrors) {
                 for (String name : cov.names()) {
-                    double value = cov.getElement(name, name);
+                    double value = cov.get(name, name);
                     if (value > 0) {
                         pars.setParError(name, Math.sqrt(value));
                     } else {

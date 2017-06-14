@@ -17,6 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.stat.parametric.ParametricValue;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -29,7 +30,6 @@ import static java.lang.Math.sqrt;
 import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class MarginalFunctionBuilderTest {
@@ -49,8 +49,9 @@ public class MarginalFunctionBuilderTest {
     @AfterClass
     public static void tearDownClass() {
     }
+
     MarginalFunctionBuilder instance;
-    LogValue testFunc;
+    ParametricValue testFunc;
 
     /**
      *
@@ -66,13 +67,14 @@ public class MarginalFunctionBuilderTest {
         double[] d = {1d, 2d, 0.5d};
         RealMatrix mat = new DiagonalMatrix(d);
 
-        NamedMatrix cov = new NamedMatrix(mat, nameList);
+        NamedMatrix cov = new NamedMatrix(nameList, mat);
         testFunc = new NamedGaussianPDFLog(cov);
         ArrayRealVector vector = new ArrayRealVector(cov.size());
         NamedVector zero = new NamedVector(nameList, vector);
         RandomGenerator generator = new JDKRandomGenerator();
         generator.setSeed(54321);
-        instance = new MarginalFunctionBuilder(testFunc, zero, cov, generator);
+        instance = new MarginalFunctionBuilder()
+                .setFunction(testFunc). zero, cov, generator);
     }
 
     /**
@@ -89,7 +91,7 @@ public class MarginalFunctionBuilderTest {
     public void testGetMarginalValue() {
         System.out.println("getMarginalValue");
         int maxCalls = 1000;
-        double expResult = 1 / (2 * Math.PI)/sqrt(2d);
+        double expResult = 1 / (2 * Math.PI) / sqrt(2d);
         double result = instance.getMarginalValue(maxCalls, "par2");
         assertEquals(expResult, result, 0.01);
         System.out.printf("The expected value is %g, the test result is %g%n", expResult, result);

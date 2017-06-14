@@ -15,33 +15,36 @@
  */
 package hep.dataforge.maths;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import org.apache.commons.math3.linear.RealVector;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
- * Square named matrix. Не обязательно симметричная, но обзательно квадратная.
+ * Square named matrix.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedMatrix implements NameSetContainer {
+public class NamedMatrix implements NameSetContainer, MetaMorph {
 
-    private final Names names;
-    //TODO заменить на массив
-    private Array2DRowRealMatrix mat;
-    /**
-     * <p>
-     * Constructor for NamedMatrix.</p>
-     *
-     * @param mat a {@link org.apache.commons.math3.linear.RealMatrix} object.
-     * @param names an array of {@link java.lang.String} objects.
-     */
-    public NamedMatrix(RealMatrix mat, String[] names) {
+    private Names names;
+    private RealMatrix mat;
+
+    public NamedMatrix() {
+        names = Names.of();
+        mat = new Array2DRowRealMatrix();
+    }
+
+    public NamedMatrix(String[] names, RealMatrix mat) {
         this.names = Names.of(names);
         if (!mat.isSquare()) {
             throw new IllegalArgumentException("Only square matrices allowed.");
@@ -52,14 +55,7 @@ public class NamedMatrix implements NameSetContainer {
         this.mat = new Array2DRowRealMatrix(mat.getData(), true);
     }
 
-    /**
-     * <p>
-     * Constructor for NamedMatrix.</p>
-     *
-     * @param values an array of double.
-     * @param names an array of {@link java.lang.String} objects.
-     */
-    public NamedMatrix(double[][] values, String[] names) {
+    public NamedMatrix(String[] names, double[][] values) {
         this.names = Names.of(names);
         if (values.length != values[0].length) {
             throw new IllegalArgumentException("Only square matrices allowed.");
@@ -82,53 +78,36 @@ public class NamedMatrix implements NameSetContainer {
         for (int i = 0; i < vectorValues.length; i++) {
             values[i][i] = vectorValues[i];
         }
-        return new NamedMatrix(values, vector.namesAsArray());
+        return new NamedMatrix(vector.namesAsArray(), values);
     }
 
-    /**
-     * <p>
-     * copy.</p>
-     *
-     * @return a {@link hep.dataforge.maths.NamedMatrix} object.
-     */
     public NamedMatrix copy() {
-        return new NamedMatrix(getMatrix().copy(), this.namesAsArray());
+        return new NamedMatrix(this.namesAsArray(), getMatrix().copy());
     }
 
-    double getElement(int i, int j) {
+    public double get(int i, int j) {
         return mat.getEntry(i, j);
     }
 
-    /**
-     * <p>
-     * getElement.</p>
-     *
-     * @param name1 a {@link java.lang.String} object.
-     * @param name2 a {@link java.lang.String} object.
-     * @return a double.
-     */
-    public double getElement(String name1, String name2) {
+    public double get(String name1, String name2) {
         return mat.getEntry(this.names.getNumberByName(name1), this.names.getNumberByName(name2));
     }
 
-    /**
-     * <p>
-     * getMatrix.</p>
-     *
-     * @return a {@link org.apache.commons.math3.linear.RealMatrix} object.
-     */
     public RealMatrix getMatrix() {
         return this.mat;
     }
 
     /**
      * Return named submatrix with given names. The order of names in submatrix
-     * is the one provided by arguments.
+     * is the one provided by arguments. If name list is empty, return this.
      *
      * @param names a {@link java.lang.String} object.
      * @return a {@link hep.dataforge.maths.NamedMatrix} object.
      */
-    public NamedMatrix getNamedSubMatrix(String... names) {
+    public NamedMatrix subMatrix(String... names) {
+        if (names.length == 0) {
+            return this;
+        }
         if (!this.names().contains(names)) {
             throw new IllegalArgumentException();
         }
@@ -138,7 +117,7 @@ public class NamedMatrix implements NameSetContainer {
 
         }
         RealMatrix newMat = this.mat.getSubMatrix(numbers, numbers);
-        return new NamedMatrix(newMat, names);
+        return new NamedMatrix(names, newMat);
     }
 
     /**
@@ -151,14 +130,6 @@ public class NamedMatrix implements NameSetContainer {
         return names;
     }
 
-    /**
-     * <p>
-     * setElement.</p>
-     *
-     * @param name1 a {@link java.lang.String} object.
-     * @param name2 a {@link java.lang.String} object.
-     * @param value a double.
-     */
     public void setElement(String name1, String name2, double value) {
         mat.setEntry(this.names.getNumberByName(name1), this.names.getNumberByName(name2), value);
     }
@@ -172,35 +143,45 @@ public class NamedMatrix implements NameSetContainer {
     public void setValuesFrom(NamedMatrix matrix) {
         for (int i = 0; i < matrix.size(); i++) {
             for (int j = 0; j < matrix.size(); j++) {
-                String name1 = matrix.names.getName(i);
-                String name2 = matrix.names.getName(j);
+                String name1 = matrix.names.get(i);
+                String name2 = matrix.names.get(j);
                 if (names.contains(name1) && names.contains(name2)) {
-                    this.setElement(name1, name2, matrix.getElement(i, j));
+                    this.setElement(name1, name2, matrix.get(i, j));
                 }
             }
 
         }
     }
 
-    /**
-     * <p>
-     * getPoint.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link org.apache.commons.math3.linear.RealVector} object.
-     */
-    public RealVector getRow(String name) {
-        return getMatrix().getRowVector(names.getNumberByName(name));
+    public NamedVector getRow(String name) {
+        return new NamedVector(names, getMatrix().getRowVector(names.getNumberByName(name)));
     }
 
-    /**
-     * <p>
-     * getColumn.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link org.apache.commons.math3.linear.RealVector} object.
-     */
-    public RealVector getColumn(String name) {
-        return getMatrix().getColumnVector(names.getNumberByName(name));
+    public NamedVector getColumn(String name) {
+        return new NamedVector(names, getMatrix().getColumnVector(names.getNumberByName(name)));
+    }
+
+    @Override
+    public Meta toMeta() {
+        //Serialisator in fact works for non-square matrices
+        MetaBuilder res = new MetaBuilder("matrix");
+        for (int i = 0; i < mat.getRowDimension(); i++) {
+            String name = names.get(i);
+            res.putNode(name, getRow(name).toMeta());
+        }
+        return res;
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        Map<String, NamedVector> vectors = new HashMap<>();
+        meta.getNodeNames().forEach(name -> {
+            vectors.put(name, MetaMorph.morph(NamedVector.class, meta.getMeta(name)));
+        });
+        this.names = Names.of(vectors.keySet());
+        this.mat = new Array2DRowRealMatrix(names.size(), names.size());
+        for (int i = 0; i < names.size(); i++) {
+            mat.setRowVector(i, vectors.get(names.get(i)).getVector());
+        }
     }
 }

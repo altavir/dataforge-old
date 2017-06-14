@@ -16,96 +16,73 @@
 package hep.dataforge.maths;
 
 import hep.dataforge.exceptions.NotDefinedException;
+import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
 
 /**
- * Класс описывающий замкнутую поверхность в н-мерии
- * FIXME заменить на именованый аналог
+ * n-dimensional volume
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 public interface Domain {
 
-    /**
-     * <p>contains.</p>
-     *
-     * @param point a {@link org.apache.commons.math3.linear.RealVector} object.
-     * @return a boolean.
-     */
     boolean contains(RealVector point);
 
-    /**
-     * <p>contains.</p>
-     *
-     * @param point an array of double.
-     * @return a boolean.
-     */
-    boolean contains(double[] point);
+    default boolean contains(double[] point) {
+        return this.contains(new ArrayRealVector(point));
+    }
 
-    /**
-     * Заготовка на будущее для всяческих геометрических заморочек
-     *
-     * @param point a {@link org.apache.commons.math3.linear.RealVector} object.
-     * @return a {@link org.apache.commons.math3.linear.RealVector} object.
-     */
     RealVector nearestInDomain(RealVector point);
 
     /**
-     * <p>getLowerBound.</p>
-     *
-     * @param num a int.
-     * @param point a {@link org.apache.commons.math3.linear.RealVector} object.
-     * @return a {@link java.lang.Double} object.
+     * The lower edge for the domain going down from point
+     * @param num
+     * @param point
+     * @return
      */
     Double getLowerBound(int num, RealVector point);
 
     /**
-     * <p>getUpperBound.</p>
-     *
-     * @param num a int.
-     * @param point a {@link org.apache.commons.math3.linear.RealVector} object.
-     * @return a {@link java.lang.Double} object.
+     * The upper edge of the domain going up from point
+     * @param num
+     * @param point
+     * @return
      */
     Double getUpperBound(int num, RealVector point);
 
     /**
-     * Абсолютные максимумы и минимумы по координате для всей области.
-     *
-     * @param num a int.
-     * @return a {@link java.lang.Double} object.
-     * @throws hep.dataforge.exceptions.NotDefinedException if any.
+     * Global lower edge
+     * @param num
+     * @return
+     * @throws NotDefinedException
      */
     Double getLowerBound(int num) throws NotDefinedException;
 
     /**
-     * <p>getUpperBound.</p>
-     *
-     * @param num a int.
-     * @return a {@link java.lang.Double} object.
-     * @throws hep.dataforge.exceptions.NotDefinedException if any.
+     * Global upper edge
+     * @param num
+     * @return
+     * @throws NotDefinedException
      */
     Double getUpperBound(int num) throws NotDefinedException;
 
     /**
-     * <p>volume.</p>
-     *
-     * @return a {@link java.lang.Double} object.
+     * Hyper volume
+     * @return
      */
-    Double volume();
+    double volume();
 
     /**
-     * <p>getDimension.</p>
-     *
-     * @return a int.
+     * Number of Hyperspace dimensions
+     * @return
      */
     int getDimension();
 
-    /**
-     * <p>isFixed.</p>
-     *
-     * @param num a int.
-     * @return a boolean.
-     */
-    boolean isFixed(int num);
+//    /**
+//     * <p>isFixed.</p>
+//     *
+//     * @param num a int.
+//     * @return a boolean.
+//     */
+//    boolean isFixed(int num);
 }

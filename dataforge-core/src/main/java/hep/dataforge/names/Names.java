@@ -18,8 +18,7 @@ package hep.dataforge.names;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.utils.MetaMorph;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -68,7 +67,7 @@ public interface Names extends Iterable<String>, MetaMorph {
         return asList().toArray(new String[size()]);
     }
 
-    String getName(int k);
+    String get(int k);
 
     /**
      * Finds the number of the given name in list if numbering is supported
@@ -108,7 +107,25 @@ public interface Names extends Iterable<String>, MetaMorph {
      */
     int size();
 
-    default Names minus(String[] nuisancePars){
-        return Names.of(asList().stream().filter(it-> !Arrays.sea))
+    /**
+     * Create new Names containing all the names in this, but for the strings in argument. The order of names is preserved
+     * @param minusNames
+     * @return
+     */
+    default Names minus(String... minusNames){
+        List<String> newNames = new ArrayList<>(asList());
+        newNames.removeAll(Arrays.asList(minusNames));
+        return Names.of(newNames);
+    }
+
+    /**
+     * Create new Names with additional names preserving order.
+     * @param plusNames
+     * @return
+     */
+    default Names plus(String... plusNames){
+        Set<String> newNames = new LinkedHashSet<>(asList());
+        newNames.addAll(Arrays.asList(plusNames));
+        return Names.of(newNames);
     }
 }

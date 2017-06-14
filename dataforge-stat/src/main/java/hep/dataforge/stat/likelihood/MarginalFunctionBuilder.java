@@ -15,54 +15,194 @@
  */
 package hep.dataforge.stat.likelihood;
 
+import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
-import hep.dataforge.maths.integration.Integrator;
-import hep.dataforge.maths.integration.MonteCarloIntegrand;
-import hep.dataforge.maths.integration.MonteCarloIntegrator;
-import hep.dataforge.maths.integration.Sampler;
+import hep.dataforge.maths.integration.*;
 import hep.dataforge.names.Names;
+import hep.dataforge.stat.fit.FitResult;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
+import hep.dataforge.utils.ArgumentChecker;
+import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+import javafx.util.Pair;
 import org.apache.commons.math3.analysis.MultivariateFunction;
+import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
+import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.util.FastMath;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
- *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MarginalFunctionBuilder {
+public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, MarginalFunctionBuilder> {
 
     private Integrator<MonteCarloIntegrand> integrator = new MonteCarloIntegrator();
     private Sampler sampler;
     private NamedVector startingPoint;
-    private int numCalls = 10000;
     private String[] nuisancePars;
     private ParametricValue function;
 
-    private Names allNames(){
-
+    private Names allNames() {
+        return function.names();
     }
 
-    public ParametricValue build(){
+    private Sampler getSampler() {
+        return sampler;
+    }
+
+    /**
+     * Set a specific sampler for this function
+     *
+     * @param sampler
+     * @return
+     */
+    public MarginalFunctionBuilder setSampler(Sampler sampler) {
+        this.sampler = sampler;
+        return self();
+    }
+
+    public MarginalFunctionBuilder setUniformSampler(RandomGenerator generator, List<Pair<Double, Double>> borders) {
+        this.sampler = Sampler.uniform(generator, borders);
+        return self();
+    }
+
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, double[] means, double[][] covariance) {
+        this.sampler = new DistributionSampler(new MultivariateNormalDistribution(generator, means, covariance));
+        return self();
+    }
+
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, RealVector means, RealMatrix covariance) {
+        this.sampler = new DistributionSampler(new MultivariateNormalDistribution(generator, means.toArray(), covariance.getData()));
+        return self();
+    }
+
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, NamedVector means, NamedMatrix covariance, String... parameters) {
+        return setNormalSampler(
+                generator,
+                means.subVector(parameters).getVector(),
+                covariance.subMatrix(parameters).getMatrix()
+        );
+    }
+
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, FitResult fitResult, String... parameters) {
+        return setNormalSampler(
+                generator,
+                fitResult.getParameters(),
+                fitResult.getCovariance()
+        );
+    }
+
+    public ParametricValue getFunction() {
+        return function;
+    }
+
+    /**
+     * Set the function
+     *
+     * @param function
+     * @return
+     */
+    public MarginalFunctionBuilder setFunction(ParametricValue function) {
+        this.function = function;
+        return self();
+    }
+
+    /**
+     * Define a subset of parameters over which one needs to marginalize
+     *
+     * @param startingPoint
+     * @param nuisancePars
+     * @return
+     */
+    public MarginalFunctionBuilder setParameters(NamedVector startingPoint, String... nuisancePars) {
+        this.startingPoint = startingPoint;
+        this.nuisancePars = nuisancePars;
+        return self();
+    }
+
+    @Override
+    public MarginalFunctionBuilder self() {
+        return this;
+    }
+
+    /**
+     * Build a parametric marginalized function. If marginalization was performed over all parameters, than resulting
+     * function is a fixed value and does not require additional parameters
+     *
+     * @return
+     */
+    @Override
+    public ParametricValue build() {
+        ArgumentChecker.checkNotNull(sampler, function);
         Names remaining = allNames().minus(nuisancePars);
+        double offset;
+        if (startingPoint != null) {
+            offset = function.value(startingPoint);
+        } else {
+            offset = 0;
+        }
         return new AbstractParametricValue(remaining) {
             @Override
             public double value(NamedValueSet pars) {
-                MultivariateFunction func = new ExpLikelihood();
-                MonteCarloIntegrand integrand = new MonteCarloIntegrand(func,sampler);
+                MultivariateFunction func = new ExpLikelihood(offset);
+                MonteCarloIntegrand integrand = new MonteCarloIntegrand(func, getSampler());
                 return integrator.integrate(integrand);
             }
         };
     }
 
+    private class ExpLikelihood implements MultivariateFunction {
 
-//    private static int DEFAULT_MAXIMUM_CALLS = 10000;
+        double offset;
+
+        public ExpLikelihood(double offset) {
+            this.offset = offset;
+        }
+
+        public double getOffset() {
+            return offset;
+        }
+
+        @Override
+        public double value(double[] point) {
+            NamedValueSet actualVector;
+            if (nuisancePars == null || nuisancePars.length == 0) {
+                actualVector = new NamedVector(startingPoint.names(), point);
+            } else {
+                actualVector = new VectorWithDefault(point);
+            }
+            return FastMath.exp(getFunction().value(actualVector) - offset);
+        }
+
+        private class VectorWithDefault implements NamedValueSet {
+
+            NamedVector vector;
+
+            private VectorWithDefault(double[] point) {
+                this.vector = new NamedVector(nuisancePars, point);
+            }
+
+            @Override
+            public Names names() {
+                return startingPoint.names();
+            }
+
+            @Override
+            public Optional<Value> optValue(String path) {
+                return Optionals.either(vector.optValue(path)).or(startingPoint.optValue(path)).opt();
+            }
+        }
+    }
+
+    //    private static int DEFAULT_MAXIMUM_CALLS = 10000;
 //
 //    private ParametricValue like;
 ////    private NamedMatrix cov;
@@ -99,7 +239,7 @@ public class MarginalFunctionBuilder {
 //            throw new NameNotFoundException();
 //        }
 //        double[] vals = point.getArray(freePars);
-//        double[][] mat = cov.getNamedSubMatrix(freePars).getMatrix().getData();
+//        double[][] mat = cov.subMatrix(freePars).getMatrix().getData();
 //
 //        Sampler sampler = new DistributionSampler(generator, vals, mat);
 //        MonteCarloIntegrator integrator = new MonteCarloIntegrator();
@@ -147,43 +287,4 @@ public class MarginalFunctionBuilder {
 //        return this.getUnivariateMarginalFunction(DEFAULT_MAXIMUM_CALLS, parName, freePars);
 //    }
 //
-    private class ExpLikelihood implements MultivariateFunction {
-
-        double offset = function.value(startingPoint);
-
-
-        public double getOffset() {
-            return offset;
-        }
-
-        @Override
-        public double value(double[] point) {
-            NamedValueSet actualVector;
-            if (nuisancePars.length == 0) {
-                actualVector = new NamedVector(startingPoint.names(), point);
-            } else {
-                actualVector = new VectorWithDefault(point);
-            }
-            return FastMath.exp(function.value(actualVector) - offset);
-        }
-
-        private class VectorWithDefault implements NamedValueSet {
-
-            NamedVector vector;
-
-            private VectorWithDefault(double[] point) {
-                this.vector = new NamedVector(nuisancePars, point);
-            }
-
-            @Override
-            public Names names() {
-                return startingPoint.names();
-            }
-
-            @Override
-            public Optional<Value> optValue(String path) {
-                return Optionals.either(vector.optValue(path)).or(startingPoint.optValue(path)).opt();
-            }
-        }
-    }
 }

@@ -62,7 +62,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         XYModel model = new XYModel(new GaussianSpectrum());
         FitState fs = FitState.builder().setDataSet(data).setModel(model).build();
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
-        NamedMatrix hInv = new NamedMatrix(MatrixOperations.inverse(h.getMatrix()), pars.namesAsArray());
+        NamedMatrix hInv = new NamedMatrix(pars.namesAsArray(), MatrixOperations.inverse(h.getMatrix()));
         FittingIOUtils.printNamedMatrix(out(), hInv);
     }
 

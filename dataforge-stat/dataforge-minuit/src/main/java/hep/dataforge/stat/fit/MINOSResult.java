@@ -70,7 +70,7 @@ public class MINOSResult implements IntervalEstimate {
             out.println();
             out.println("Name\tLower\tUpper");
             for (int i = 0; i < this.size(); i++) {
-                out.print(this.names().getName(i));
+                out.print(this.names().get(i));
                 out.print("\t");
                 if (this.errl != null) {
                     out.print(this.errl[i]);

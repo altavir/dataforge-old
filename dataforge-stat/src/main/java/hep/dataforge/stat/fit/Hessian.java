@@ -16,13 +16,13 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.FunctionUtils;
-import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.stat.parametric.ParametricValue;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
-import hep.dataforge.stat.parametric.ParametricValue;
 
 /**
  * Work in progress
@@ -58,7 +58,7 @@ public class Hessian{
             }
         }
         
-        return new NamedMatrix(res, fitPars);
+        return new NamedMatrix(fitPars, res);
     }
 
     

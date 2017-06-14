@@ -40,6 +40,6 @@ public interface NamedValueSet extends NameSetContainer, ValueProvider {
      * @return
      */
     default Value getAt(int num) {
-        return getValue(this.names().getName(num));
+        return getValue(this.names().get(num));
     }
 }

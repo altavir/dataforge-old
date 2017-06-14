@@ -33,11 +33,10 @@ public class NameList implements Names {
     private ArrayList<String> nameList = new ArrayList<>();
 
     /**
-     * <p>
-     * Constructor for NameList.</p>
-     *
-     * @param list a {@link java.lang.String} object.
+     * An index cache to make calls of {@code getNumberByName} faster
      */
+    private transient Map<String, Integer> indexCache = new HashMap<>();
+
     public NameList(String... list) {
         try {
             addNames(java.util.Arrays.asList(list));
@@ -46,12 +45,6 @@ public class NameList implements Names {
         }
     }
 
-    /**
-     * <p>
-     * Constructor for NameList.</p>
-     *
-     * @param names a {@link hep.dataforge.names.Names} object.
-     */
     public NameList(Names names) {
         try {
             addNames(names);
@@ -60,19 +53,12 @@ public class NameList implements Names {
         }
     }
 
-    /**
-     * <p>
-     * Constructor for NameList.</p>
-     *
-     * @param list a {@link java.lang.Iterable} object.
-     * @throws hep.dataforge.exceptions.NamingException if any.
-     */
     public NameList(Iterable<String> list) throws NamingException {
         addNames(list);
     }
 
     /**
-     * Проверка на дублирующиеся имена
+     * Check for duplicates
      *
      * @param names a {@link java.lang.Iterable} object.
      * @throws hep.dataforge.exceptions.NamingException if any.
@@ -83,12 +69,6 @@ public class NameList implements Names {
         }
     }
 
-    /**
-     * <p>
-     * addName.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     */
     public final void addName(String name) {
         if (!nameList.contains(name)) {
             nameList.add(name);
@@ -135,7 +115,7 @@ public class NameList implements Names {
      * {@inheritDoc}
      */
     @Override
-    public String getName(int i) {
+    public String get(int i) {
         return this.nameList.get(i);
     }
 
@@ -144,7 +124,7 @@ public class NameList implements Names {
      */
     @Override
     public int getNumberByName(String str) {
-        return nameList.indexOf(str);
+        return indexCache.computeIfAbsent(str, (name) -> nameList.indexOf(name));
     }
 
     /**

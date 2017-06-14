@@ -16,6 +16,7 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
@@ -30,34 +31,21 @@ import static java.lang.Math.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedGaussianPDFLog extends LogValue {
+public class NamedGaussianPDFLog extends AbstractParametricValue {
 
     private final NamedMatrix infoMatrix;
     private final double norm;
     private final RealVector values;
 
-    /**
-     * <p>
-     * Constructor for NamedGaussianPDFLog.</p>
-     *
-     * @param values
-     * @param covariance a {@link hep.dataforge.maths.NamedMatrix} object.
-     */
     public NamedGaussianPDFLog(NamedValueSet values, NamedMatrix covariance) {
         super(covariance);
         this.values = this.getVector(values);
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
         double det = decomposition.getDeterminant();
-        this.infoMatrix = new NamedMatrix(decomposition.getSolver().getInverse(), values.namesAsArray());
+        this.infoMatrix = new NamedMatrix(values.namesAsArray(), decomposition.getSolver().getInverse());
         norm = 1 / sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
     }
 
-    /**
-     * <p>
-     * Constructor for NamedGaussianPDFLog.</p>
-     *
-     * @param infoMatrix a {@link hep.dataforge.maths.NamedMatrix} object.
-     */
     public NamedGaussianPDFLog(NamedMatrix infoMatrix) {
         super(infoMatrix);
         this.values = new ArrayRealVector(infoMatrix.size());
@@ -67,27 +55,24 @@ public class NamedGaussianPDFLog extends LogValue {
         norm = sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
     public double derivValue(String derivParName, NamedValueSet pars) {
         RealVector difVector = getVector(pars).subtract(values);
-        RealVector c = this.infoMatrix.getRow(derivParName);
+        RealVector c = this.infoMatrix.getRow(derivParName).getVector();
 
         double res = -difVector.dotProduct(c);
         return res;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public double expValue(NamedValueSet point) {
-        RealVector difVector = getVector(point).subtract(values);
-        double expValue = infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
-        return norm * exp(-expValue);
-    }
+//    /**
+//     * {@inheritDoc}
+//     */
+//    @Override
+//    public double expValue(NamedValueSet point) {
+//        RealVector difVector = getVector(point).subtract(values);
+//        double expValue = infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
+//        return norm * exp(-expValue);
+//    }
 
     /**
      * Создаем неименованый вектор, с теми, что нам нужны.

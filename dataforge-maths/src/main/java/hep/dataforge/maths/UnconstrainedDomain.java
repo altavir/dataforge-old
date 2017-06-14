@@ -81,19 +81,13 @@ public class UnconstrainedDomain implements Domain {
 
     /** {@inheritDoc} */
     @Override
-    public boolean isFixed(int num) {
-        return false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
     public RealVector nearestInDomain(RealVector point) {
         return point;
     }
 
     /** {@inheritDoc} */
     @Override
-    public Double volume() {
+    public double volume() {
         return Double.POSITIVE_INFINITY;
     }
 }

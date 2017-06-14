@@ -15,11 +15,11 @@
  */
 package hep.dataforge.stat.simulation;
 
-import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.maths.MathUtils;
-import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.Names;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.values.NamedValueSet;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 
@@ -52,7 +52,7 @@ public class GaussianParameterGenerator implements ParameterGenerator {
 
         this.names = means.names();
         distribution = new MultivariateNormalDistribution(MathUtils.getDoubleArray(means),
-                covariance.getNamedSubMatrix(names.asArray()).getMatrix().getData());
+                covariance.subMatrix(names.asArray()).getMatrix().getData());
     }
 
     /**

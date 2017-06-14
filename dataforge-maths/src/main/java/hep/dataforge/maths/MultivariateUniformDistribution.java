@@ -15,56 +15,48 @@
  */
 package hep.dataforge.maths;
 
+import javafx.util.Pair;
 import org.apache.commons.math3.distribution.AbstractMultivariateRealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;
 
+import java.util.List;
+
 /**
- * Генератор для вектора, равномерно распределенного в области определения
- * (домене)
+ * A uniform distribution in a
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 public class MultivariateUniformDistribution extends AbstractMultivariateRealDistribution {
 
-    private Domain domain;
-
     /**
-     * <p>Constructor for MultivariateUniformDistribution.</p>
-     *
-     * @param rg a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     * @param loVals an array of double.
-     * @param upVals an array of double.
+     * Create a uniform distribution with hyper-square domain
+     * @param rg
+     * @param loVals
+     * @param upVals
+     * @return
      */
-    public MultivariateUniformDistribution(RandomGenerator rg, double[] loVals, double[] upVals) {
-        super(rg, loVals.length);
-        if (loVals.length != upVals.length) {
-            throw new IllegalArgumentException();
-        }
-        assert loVals.length == upVals.length;
-        Double[] lower = new Double[loVals.length];
-        Double[] upper = new Double[upVals.length];
-        for (int i = 0; i < upper.length; i++) {
-            lower[i] = loVals[i];
-            upper[i] = upVals[i];
-        }
-        this.domain = new HyperSquareDomain(lower, upper);
+    public static MultivariateUniformDistribution square(RandomGenerator rg, Double[] loVals, Double[] upVals) {
+        return new MultivariateUniformDistribution(rg, new HyperSquareDomain(loVals, upVals));
     }
 
-    /**
-     * <p>Constructor for MultivariateUniformDistribution.</p>
-     *
-     * @param rg a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     * @param dom a {@link hep.dataforge.maths.Domain} object.
-     */
+    public static MultivariateUniformDistribution square(RandomGenerator rg, List<Pair<Double,Double>> borders) {
+        Double[] loVals = new Double[borders.size()];
+        Double[] upVals = new Double[borders.size()];
+        for (int i = 0; i < borders.size(); i++) {
+            loVals[i] = borders.get(i).getKey();
+            upVals[i] = borders.get(i).getValue();
+        }
+        return new MultivariateUniformDistribution(rg, new HyperSquareDomain(loVals, upVals));
+    }
+
+    private Domain domain;
+
     public MultivariateUniformDistribution(RandomGenerator rg, Domain dom) {
         super(rg, dom.getDimension());
         this.domain = dom;
     }
 
-    /** {@inheritDoc}
-     * @param doubles
-     * @return  */
     @Override
     public double density(double[] doubles) {
         if (doubles.length != this.getDimension()) {
@@ -76,27 +68,18 @@ public class MultivariateUniformDistribution extends AbstractMultivariateRealDis
         return 1 / domain.volume();
     }
 
-    /**
-     * <p>getVolume.</p>
-     *
-     * @return a double.
-     */
     public double getVolume() {
         return domain.volume();
     }
 
-    /** {@inheritDoc}
-     * @return  */
     @Override
     public double[] sample() {
         double[] res = new double[this.getDimension()];
-        Double loval;
-        Double upval;
 
         do {
             for (int i = 0; i < res.length; i++) {
-                loval = domain.getLowerBound(i);
-                upval = domain.getUpperBound(i);
+                double loval = domain.getLowerBound(i);
+                double upval = domain.getUpperBound(i);
                 if (loval == upval) {
                     res[i] = loval;
                 } else {

@@ -17,7 +17,10 @@ package hep.dataforge.maths;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Names;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
 import org.apache.commons.math3.exception.DimensionMismatchException;
@@ -31,10 +34,23 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
-public class NamedVector implements NamedValueSet {
+public class NamedVector implements NamedValueSet, MetaMorph {
 
-    Names nameList;
-    RealVector vector;
+    private Names nameList;
+    private RealVector vector;
+
+    /**
+     * Serialization constructor
+     */
+    public NamedVector() {
+        nameList = Names.of();
+        vector = new ArrayRealVector();
+    }
+
+    public NamedVector(Names nameList, RealVector vector) {
+        this.nameList = nameList;
+        this.vector = vector;
+    }
 
     public NamedVector(String[] names, RealVector v) {
         if (names.length != v.getDimension()) {
@@ -96,8 +112,6 @@ public class NamedVector implements NamedValueSet {
      */
     @Override
     public Double getDouble(String name) {
-        //TODO максимально усклоить эту операцию
-
         int n = this.getNumberByName(name);
         if (n < 0) {
             throw new NameNotFoundException(name);
@@ -106,7 +120,15 @@ public class NamedVector implements NamedValueSet {
     }
 
     public int getNumberByName(String name) {
-        return nameList.asList().indexOf(name);
+        return nameList.getNumberByName(name);
+    }
+
+
+    public NamedVector subVector(String... names) {
+        if (names.length == 0) {
+            return this;
+        }
+        return new NamedVector(names, getArray(names));
     }
 
     /**
@@ -146,5 +168,24 @@ public class NamedVector implements NamedValueSet {
         }
 
         vector.setEntry(n, val);
+    }
+
+    @Override
+    public Meta toMeta() {
+        MetaBuilder builder = new MetaBuilder("vector");
+        for (int i = 0; i < names().size(); i++) {
+            builder.setValue(nameList.get(i), vector.getEntry(i));
+        }
+        return builder;
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        nameList = Names.of(meta.getValueNames());
+        double[] values = new double[nameList.size()];
+        for (int i = 0; i < nameList.size(); i++) {
+            values[i] = meta.getDouble(nameList.get(i));
+        }
+        this.vector = new ArrayRealVector(values);
     }
 }

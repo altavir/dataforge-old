@@ -15,12 +15,13 @@
  */
 package hep.dataforge.maths.integration;
 
-import static java.util.Arrays.fill;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.distribution.MultivariateRealDistribution;
 import org.apache.commons.math3.linear.SingularMatrixException;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.slf4j.LoggerFactory;
+
+import static java.util.Arrays.fill;
 
 /**
  * <p>DistributionSampler class.</p>
@@ -28,31 +29,15 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class DistributionSampler extends Sampler{
+public class DistributionSampler implements Sampler {
 
     private MultivariateRealDistribution distr;
 
-    /**
-     * <p>Constructor for DistributionSampler.</p>
-     *
-     * @param generator a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     * @param distr a {@link org.apache.commons.math3.distribution.MultivariateRealDistribution} object.
-     */
-    public DistributionSampler(RandomGenerator generator, MultivariateRealDistribution distr) {
-        super(generator);
+    public DistributionSampler(MultivariateRealDistribution distr) {
         this.distr = distr;
     }
-    
-    
-    /**
-     * <p>Constructor for DistributionSampler.</p>
-     *
-     * @param rng a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     * @param means an array of double.
-     * @param covariance an array of double.
-     */
+
     public DistributionSampler(RandomGenerator rng, double[] means, double[][] covariance) {
-        super(rng);
         assert means.length == covariance.length;
         try {
             this.distr = new MultivariateNormalDistribution(rng, means, covariance);
@@ -66,21 +51,17 @@ public class DistributionSampler extends Sampler{
             LoggerFactory.getLogger(getClass()).info("The covariance is singular. Using only diagonal elements.");
             this.distr = new MultivariateNormalDistribution(rng, means, diagonal);
         }
-    }    
+    }
 
-    /** {@inheritDoc}
-     * @return  */
     @Override
     public int getDimension() {
         return distr.getDimension();
     }
-    
-    /** {@inheritDoc}
-     * @return  */
+
     @Override
     public Sample nextSample() {
         double[] sample = distr.sample();
         return new Sample(distr.density(sample), sample);
     }
-    
+
 }
