@@ -16,6 +16,7 @@ import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
+ * Mathematical plugin. Stores function library and other useful things.
  *
  * @author Alexander Nozik
  */
