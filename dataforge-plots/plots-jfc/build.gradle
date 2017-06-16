@@ -15,7 +15,7 @@ dependencies {
 
 task extractJFC(type: Copy) {
     from fileTree(dir: 'libs', include: ['*.jar']).exclude("META-INF").collect{zipTree(it)}
-    into sourceSets.main.output.classesDir
+    into compileJava.destinationDir
 }
 
 compileJava.dependsOn(extractJFC)

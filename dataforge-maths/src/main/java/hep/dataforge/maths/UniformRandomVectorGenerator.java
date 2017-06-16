@@ -15,10 +15,11 @@
  */
 package hep.dataforge.maths;
 
-import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import org.apache.commons.math3.exception.TooManyEvaluationsException;
 import org.apache.commons.math3.random.RandomGenerator;
 import org.apache.commons.math3.random.RandomVectorGenerator;
+
+import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 
 /**
  * <p>UniformRandomVectorGenerator class.</p>
@@ -27,57 +28,48 @@ import org.apache.commons.math3.random.RandomVectorGenerator;
  * @version $Id: $Id
  */
 public class UniformRandomVectorGenerator implements RandomVectorGenerator {
-    static final int MAX_TRIES_PER_CALL = 20;
+    private static final int MAX_TRIES_PER_CALL = 20;
     private final Domain domain;
     private final RandomGenerator generator;
 
-    /**
-     * <p>Constructor for UniformRandomVectorGenerator.</p>
-     *
-     * @param generator a {@link org.apache.commons.math3.random.RandomGenerator} object.
-     * @param domain a {@link hep.dataforge.maths.Domain} object.
-     */
     public UniformRandomVectorGenerator(RandomGenerator generator, Domain domain) {
         this.generator = generator;
         this.domain = domain;
     }
-    
-    /**
-     * <p>Constructor for UniformRandomVectorGenerator.</p>
-     *
-     * @param domain a {@link hep.dataforge.maths.Domain} object.
-     */
+
     public UniformRandomVectorGenerator(Domain domain) {
         this.generator = getDefaultRandomGenerator();
         this.domain = domain;
-    }    
+    }
 
     private double[] next() {
         double[] res = new double[domain.getDimension()];
-        double a,b;
+        double a, b;
         for (int i = 0; i < res.length; i++) {
             a = domain.getLowerBound(i);
             b = domain.getUpperBound(i);
-            assert b>=a;
-            res[i] = a + generator.nextDouble()*(b-a);
-            
+            assert b >= a;
+            res[i] = a + generator.nextDouble() * (b - a);
+
         }
         return res;
     }
-    
-    /** {@inheritDoc} */
+
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public double[] nextVector(){
+    public double[] nextVector() {
         double[] res = this.next();
         int i = 0;
-        while(!domain.contains(res)){
+        while (!domain.contains(res)) {
             res = this.next();
             i++;
-            if(i>=MAX_TRIES_PER_CALL){
+            if (i >= MAX_TRIES_PER_CALL) {
                 throw new TooManyEvaluationsException(MAX_TRIES_PER_CALL);
             }
         }
         return res;
     }
-    
+
 }
