@@ -15,7 +15,9 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.cache.Identifiable;
 import hep.dataforge.meta.Configurable;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
@@ -24,21 +26,22 @@ import hep.dataforge.providers.Provider;
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.
  * The plugin is by default configurable and a Provider (both features could be ignored).
  * The plugin must in most cases have an empty constructor in order to be able to load it from library.
- *
+ * <p>
  * The plugin lifecycle is the following:
- *
+ * <p>
  * create -> configure -> attach -> detach -> destroy
- *
+ * <p>
  * Configuration of attached plugin is possible for a context which is not in a runtime mode, but it is not recommended.
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Configurable, Named, Encapsulated, Provider {
+public interface Plugin extends Configurable, Named, Encapsulated, Provider, Identifiable {
 
     String PLUGIN_TARGET = "plugin";
 
     /**
      * Resolve plugin tag either from {@link PluginDef} annotation or Plugin instance.
+     *
      * @param type
      * @return
      */
@@ -106,4 +109,14 @@ public interface Plugin extends Configurable, Named, Encapsulated, Provider {
         return getTag().getName();
     }
 
+
+    @Override
+    default Meta getIdentity() {
+        MetaBuilder id = new MetaBuilder("id");
+        id.putValue("name", this.getName());
+        id.putValue("type", this.getClass().getName());
+        id.putValue("context", getContext().getName());
+        id.putNode("meta", getConfig());
+        return id;
+    }
 }

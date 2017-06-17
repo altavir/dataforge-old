@@ -161,6 +161,6 @@ public class CachePlugin extends BasicPlugin {
     }
 
     public void invalidate() {
-        getManager().close();
+        getManager().getCacheNames().forEach(this::invalidate);
     }
 }

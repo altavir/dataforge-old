@@ -5,6 +5,7 @@
  */
 package hep.dataforge.workspace;
 
+import hep.dataforge.cache.Identifiable;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
@@ -32,7 +33,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Metoid, ValueProvider {
+public class TaskModel implements Named, Metoid, ValueProvider, Identifiable {
 
     //TODO implement builder chain
     private final Workspace workspace;
@@ -208,6 +209,7 @@ public class TaskModel implements Named, Metoid, ValueProvider {
      * @param targetNodeName
      * @return
      */
+    @SuppressWarnings("unchecked")
     public TaskModel dataNode(Class<?> type, String sourceNodeName, String targetNodeName) {
         this.deps.add(new DataNodeDependency(type, sourceNodeName, targetNodeName));
         return this;
@@ -220,13 +222,16 @@ public class TaskModel implements Named, Metoid, ValueProvider {
      * @param nodeName
      * @return
      */
+    @SuppressWarnings("unchecked")
     public TaskModel dataNode(Class<?> type, String nodeName) {
         this.deps.add(new DataNodeDependency(type, nodeName, nodeName));
         return this;
     }
 
+    @Override
     public Meta getIdentity() {
         return new MetaBuilder("task")
+                .setNode(getContext().getIdentity())
                 .setValue("name", getName())
                 .setNode("meta", meta());
     }
@@ -265,7 +270,7 @@ public class TaskModel implements Named, Metoid, ValueProvider {
          * @param tree
          * @param workspace
          */
-        void apply(DataTree.Builder tree, Workspace workspace);
+        void apply(DataTree.Builder<Object> tree, Workspace workspace);
     }
 
 //    /**
@@ -284,7 +289,7 @@ public class TaskModel implements Named, Metoid, ValueProvider {
     /**
      * Data dependency
      */
-    static class DataDependency implements Dependency {
+    static class DataDependency implements Dependency{
 
         /**
          * The gathering function for data
@@ -326,25 +331,25 @@ public class TaskModel implements Named, Metoid, ValueProvider {
          * @param workspace
          */
         @Override
-        public void apply(DataTree.Builder tree, Workspace workspace) {
+        public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             gatherer.apply(workspace)
                     .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
         }
     }
 
-    static class DataNodeDependency implements Dependency {
+    static class DataNodeDependency<T> implements Dependency {
         private final String sourceNodeName;
         private final String targetNodeName;
-        private final Class<?> type;
+        private final Class<T> type;
 
-        public DataNodeDependency(Class<?> type, String sourceNodeName, String targetNodeName) {
+        public DataNodeDependency(Class<T> type, String sourceNodeName, String targetNodeName) {
             this.sourceNodeName = sourceNodeName;
             this.targetNodeName = targetNodeName;
             this.type = type;
         }
 
         @Override
-        public void apply(DataTree.Builder tree, Workspace workspace) {
+        public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             tree.putNode(targetNodeName, workspace.getData().getCheckedNode(sourceNodeName, type));
         }
     }
@@ -363,9 +368,9 @@ public class TaskModel implements Named, Metoid, ValueProvider {
         /**
          * The rule to attach dependency data to data node when it is calculated
          */
-        BiConsumer<DataTree.Builder, DataNode<?>> placementRule;
+        BiConsumer<DataTree.Builder<Object>, DataNode<?>> placementRule;
 
-        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder, DataNode<?>> rule) {
+        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder<Object>, DataNode<?>> rule) {
             this.taskModel = taskModel;
             this.placementRule = rule;
         }
@@ -373,7 +378,7 @@ public class TaskModel implements Named, Metoid, ValueProvider {
         public TaskDependency(TaskModel taskModel, String as) {
             this.taskModel = taskModel;
             if (as.isEmpty()) {
-                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> {
+                this.placementRule = (DataTree.Builder<Object> tree, DataNode<?> result) -> {
                     if (!result.meta().isEmpty()) {
                         if (tree.meta().isEmpty()) {
                             tree.setMeta(result.meta());
@@ -381,10 +386,10 @@ public class TaskModel implements Named, Metoid, ValueProvider {
                             LoggerFactory.getLogger(getClass()).error("Root node meta already exists.");
                         }
                     }
-                    result.dataStream().forEach(data -> tree.putData(data));
+                    result.dataStream().forEach(tree::putData);
                 };
             } else {
-                this.placementRule = (DataTree.Builder tree, DataNode<?> result) -> tree.putNode(as, result);
+                this.placementRule = (DataTree.Builder<Object> tree, DataNode<?> result) -> tree.putNode(as, result);
             }
         }
 
@@ -404,7 +409,7 @@ public class TaskModel implements Named, Metoid, ValueProvider {
          * @param workspace
          */
         @Override
-        public void apply(DataTree.Builder tree, Workspace workspace) {
+        public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             placementRule.accept(tree, workspace.runTask(taskModel));
         }
     }

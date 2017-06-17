@@ -20,7 +20,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class BasicWorkspace extends AbstractWorkspace {
 
-    private DataTree.Builder data = DataTree.builder();
+    private DataTree.Builder<Object> data = DataTree.builder();
     private transient CachePlugin cache;
 
     @NotNull
@@ -96,7 +96,8 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadData(String as, Data data) {
+        @SuppressWarnings("unchecked")
+        public Builder loadData(String as, Data<?> data) {
             if (w.getData().optNode(as).isPresent()) {
                 getContext().getLogger().warn("Overriding non-empty data during workspace data fill");
             }
@@ -105,12 +106,13 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadData(String as, DataNode datanode) {
+        @SuppressWarnings("unchecked")
+        public Builder loadData(String as, DataNode<?> datanode) {
             if (as == null || as.isEmpty()) {
                 if (!w.data.isEmpty()) {
                     getContext().getLogger().warn("Overriding non-empty root data node during workspace construction");
                 }
-                w.data = new DataTree.Builder<>(datanode);
+                w.data = new DataTree.Builder(datanode);
             } else {
                 getData().putNode(as, datanode);
             }

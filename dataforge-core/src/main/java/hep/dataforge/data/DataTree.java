@@ -57,7 +57,7 @@ public class DataTree<T> implements DataNode<T> {
      *
      * @return
      */
-    public static Builder<?> builder() {
+    public static Builder<Object> builder() {
         return new Builder<>(Object.class);
     }
 

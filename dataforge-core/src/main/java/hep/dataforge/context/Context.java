@@ -15,11 +15,13 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.cache.Identifiable;
 import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.io.IOManager;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
@@ -62,7 +64,7 @@ import static hep.dataforge.io.history.Chronicle.CHRONICLE_TARGET;
  *
  * @author Alexander Nozik
  */
-public class Context implements Provider, ValueProvider, History, Named, AutoCloseable {
+public class Context implements Provider, ValueProvider, History, Named, AutoCloseable, Identifiable {
 
     public static Builder builder(String name) {
         return new Builder(name);
@@ -76,14 +78,14 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     private final String name;
     private final PluginManager pm;
     protected Logger logger;
-    protected Chronicle rootLog;
+    private Chronicle rootLog;
     private ClassLoader classLoader = null;
 
     //TODO move to separate manager
     private transient Map<String, Chronicle> historyCache = new HashMap<>();
 
-    protected ExecutorService parallelExecutor;
-    protected ExecutorService singleThreadExecutor;
+    private ExecutorService parallelExecutor;
+    private ExecutorService singleThreadExecutor;
     private Context parent = null;
 
 
@@ -335,9 +337,9 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     public <T> Optional<T> optFeature(Class<T> type) {
         return pluginManager()
                 .stream(true)
-                .filter(it -> type.isInstance(it))
+                .filter(type::isInstance)
                 .findFirst()
-                .map(it -> type.cast(it));
+                .map(type::cast);
     }
 
     /**
@@ -361,6 +363,21 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return serviceStream(serviceClass).filter(predicate).findFirst();
     }
 
+    /**
+     * Get identity for this context
+     *
+     * @return
+     */
+    @Override
+    public Meta getIdentity() {
+        MetaBuilder id = new MetaBuilder("context");
+        id.update(properties);
+        pluginManager().stream(true).forEach(plugin -> {
+            id.putNode(plugin.getIdentity());
+        });
+        return id;
+    }
+
     public static class Builder {
         Context ctx;
 
@@ -376,7 +393,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         public Builder properties(Meta config) {
             if (config != null) {
                 if (config.hasMeta("property")) {
-                    config.getMetaList("property").stream().forEach((propertyNode) -> {
+                    config.getMetaList("property").forEach((propertyNode) -> {
                         ctx.putValue(propertyNode.getString("key"), propertyNode.getValue("value"));
                     });
                 }
