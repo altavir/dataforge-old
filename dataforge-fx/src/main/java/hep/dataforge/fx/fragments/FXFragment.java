@@ -2,10 +2,7 @@ package hep.dataforge.fx.fragments;
 
 import hep.dataforge.fx.FXObject;
 import javafx.beans.binding.ObjectBinding;
-import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
+import javafx.beans.property.*;
 import javafx.beans.value.ObservableObjectValue;
 import javafx.scene.Node;
 import javafx.scene.Parent;
@@ -49,6 +46,7 @@ public abstract class FXFragment implements FXObject {
     private StringProperty title = new SimpleStringProperty("");
     private DoubleProperty preferredWidth = new SimpleDoubleProperty();
     private DoubleProperty preferredHeight = new SimpleDoubleProperty();
+    private BooleanProperty isShowing = new SimpleBooleanProperty(this, "isShowing", false);
     private Parent root;
 
     public FXFragment() {
@@ -92,6 +90,13 @@ public abstract class FXFragment implements FXObject {
         };
     }
 
+    public boolean isShowing() {
+        return isShowing.get();
+    }
+
+    public BooleanProperty isShowingProperty() {
+        return isShowing;
+    }
 
     public String getTitle() {
         return title.get();

@@ -46,11 +46,12 @@ public class XYAdapter extends AxisPointAdapter {
     /**
      * Convert any adapter to XY adapter using meta conversion. If input adapter already is XY adapter,
      * then it is returned as is (since it is immutable)
+     *
      * @param adapter
      * @return
      */
-    public static XYAdapter from(PointAdapter adapter){
-        if(adapter instanceof XYAdapter){
+    public static XYAdapter from(PointAdapter adapter) {
+        if (adapter instanceof XYAdapter) {
             return (XYAdapter) adapter;
         } else {
             return new XYAdapter(adapter.meta());
@@ -80,18 +81,6 @@ public class XYAdapter extends AxisPointAdapter {
         updateCache();
     }
 
-    private void updateCache(){
-        xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
-        xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
-        if (meta().hasMeta(Y_AXIS)) {
-            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(String[]::new);
-            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(String[]::new);
-        } else {
-            yValues = new String[]{Y_VALUE_KEY};
-            yErrors = new String[]{Y_ERROR_KEY};
-        }
-    }
-
     public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
         this(buildAdapterMeta(xName, xErrName, yName, yErrName));
     }
@@ -104,6 +93,17 @@ public class XYAdapter extends AxisPointAdapter {
         this(xName, null, yName, null);
     }
 
+    private void updateCache() {
+        xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
+        xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
+        if (meta().hasMeta(Y_AXIS)) {
+            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(String[]::new);
+            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(String[]::new);
+        } else {
+            yValues = new String[]{Y_VALUE_KEY};
+            yErrors = new String[]{Y_ERROR_KEY};
+        }
+    }
 
     public DataPoint buildXYDataPoint(double x, double y, double yErr) {
         return new MapPoint(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},

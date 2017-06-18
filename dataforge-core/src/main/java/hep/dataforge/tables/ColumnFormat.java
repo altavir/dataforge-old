@@ -4,8 +4,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.BaseMetaHolder;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.utils.SimpleMetaMorph;
 import hep.dataforge.values.ValueType;
 
 import java.util.Arrays;
@@ -19,7 +18,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
 @ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
-public class ColumnFormat extends BaseMetaHolder implements MetaMorph, Named {
+public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     public ColumnFormat() {
     }

@@ -5,11 +5,8 @@
  */
 package hep.dataforge.fx.fragments;
 
-import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.DoubleProperty;
-import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.ToggleButton;
@@ -27,17 +24,34 @@ import java.util.function.Supplier;
  */
 public class FragmentWindow implements AutoCloseable {
 
-    //TODO allow node and node property instead of fragment
+    /**
+     * Build a separate window containing the fragment and bind it to a button
+     * @param button
+     * @param fragmentBuilder
+     * @return
+     */
+    public static FragmentWindow build(ToggleButton button, Supplier<FXFragment> fragmentBuilder) {
+        FXFragment fragment = fragmentBuilder.get();
+        fragment.isShowingProperty().bindBidirectional(button.selectedProperty());
+        return new FragmentWindow(fragment, () -> button.getScene().getWindow());
+    }
 
     private final FXFragment fragment;
     private Stage stage;
     private Supplier<Window> owner;
-    private BooleanProperty isShowing = new SimpleBooleanProperty(this, "isShowing", false);
     private DoubleProperty xPos = new SimpleDoubleProperty();
     private DoubleProperty yPos = new SimpleDoubleProperty();
 
-    {
-        isShowing.addListener((observable, oldValue, newValue) -> {
+
+    public FragmentWindow(FXFragment fragment) {
+        this.fragment = fragment;
+        owner = null;
+    }
+
+    public FragmentWindow(FXFragment fragment, Supplier<Window> owner) {
+        this.fragment = fragment;
+        setOwner(owner);
+        fragment.isShowingProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != getStage().isShowing()) {
                 if (newValue) {
                     show();
@@ -46,16 +60,6 @@ public class FragmentWindow implements AutoCloseable {
                 }
             }
         });
-    }
-
-    public FragmentWindow(FXFragment fragment) {
-        this.fragment = fragment;
-        owner = null;
-    }
-
-    public FragmentWindow(FXFragment fragment, Window owner) {
-        this.fragment = fragment;
-        setOwner(() -> owner);
     }
 
     private final void setOwner(Supplier<Window> owner) {
@@ -68,30 +72,6 @@ public class FragmentWindow implements AutoCloseable {
             }
         }
     }
-
-    /**
-     * Bind this window showing to some observable value
-     *
-     * @param boolVal
-     */
-    public void bindTo(ObservableValue<Boolean> boolVal) {
-        isShowing.bind(boolVal);
-    }
-
-    public void bindTo(BooleanProperty property) {
-        isShowing.bindBidirectional(property);
-    }
-
-    /**
-     * Bind window to switch
-     *
-     * @param button
-     */
-    public void bindTo(ToggleButton button) {
-        bindTo(button.selectedProperty());
-        setOwner(() -> button.getScene().getWindow());
-    }
-
 
     /**
      * Helper method to create stage with given size and title
@@ -162,11 +142,11 @@ public class FragmentWindow implements AutoCloseable {
     }
 
     protected void onShow() {
-        isShowing.set(true);
+        fragment.isShowingProperty().set(true);
     }
 
     protected void onHide() {
-        isShowing.set(false);
+        fragment.isShowingProperty().set(false);
     }
 
 }

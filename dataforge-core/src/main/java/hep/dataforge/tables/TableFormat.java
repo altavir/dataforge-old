@@ -24,6 +24,7 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.utils.MetaMorph;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.stream.Collectors;
@@ -55,7 +56,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
 
 
     public static TableFormat forNames(Iterable<String> names) {
-        return forNames(StreamSupport.stream(names.spliterator(), false).toArray(i -> new String[i]));
+        return forNames(StreamSupport.stream(names.spliterator(), false).toArray(String[]::new));
     }
 
     /**
@@ -93,7 +94,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
 
     @Override
     public Names names() {
-        return Names.of(getColumns().map(it -> it.getName()).collect(Collectors.toList()));
+        return Names.of(getColumns().map(ColumnFormat::getName).collect(Collectors.toList()));
     }
 
     public Meta getColumnMeta(String column) {
@@ -105,7 +106,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
     }
 
     public Stream<ColumnFormat> getColumns() {
-        return meta().getMetaList("column").stream().map(col -> new ColumnFormat(col));
+        return meta().getMetaList("column").stream().map(ColumnFormat::new);
     }
 
     public boolean isEmpty() {
@@ -119,172 +120,14 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
      */
     public TableFormat filter(String... names){
         MetaBuilder newFormat = new MetaBuilder(meta());
-        newFormat.setNode("column", Stream.of(names).map(n -> getColumnMeta(n)).collect(Collectors.toList()));
+        newFormat.setNode("column", Stream.of(names).map(this::getColumnMeta).collect(Collectors.toList()));
         return new TableFormat(newFormat);
     }
 
+    @NotNull
     @Override
     public Iterator<ColumnFormat> iterator() {
         return getColumns().iterator();
     }
 
-    //
-//    private Meta meta;
-//    private transient Names names;
-//    private transient final Map<String, ValueFormatter> formats = new HashMap<>();
-//
-//    public static TableFormat buildFromMeta(Meta meta) {
-//        if (meta.hasMeta("column")) {
-//            return new TableFormat(meta);
-//        } else if (meta.hasValue("names")) {
-//            return TableFormat.forNames(meta.getStringArray("names"));
-//        } else {
-//            return empty();
-//        }
-//    }
-//
-//    public static Meta toMeta(TableFormat format) {
-//        return format.meta;
-//    }
-//
-//    public static TableFormat empty() {
-//        return forNames();
-//    }
-//
-//    public static TableFormat fixedWidth(int width, String... names) {
-//        return TableFormat.fixedWidth(width, Arrays.asList(names));
-//    }
-//
-//    public static TableFormat forNames(String... names) {
-//        return forNames(Arrays.asList(names));
-//    }
-//
-//    public static TableFormat forNames(Iterable<String> names) {
-//        MetaBuilder meta = new MetaBuilder("format");
-//        for (String name : names) {
-//            meta.putNode(new MetaBuilder("column").setValue("name", name));
-//        }
-//        return new TableFormat(meta);
-//    }
-//
-//    public static TableFormat fixedWidth(int width, Iterable<String> names) {
-//        MetaBuilder meta = new MetaBuilder("format");
-//        for (String name : names) {
-//            meta.putNode(new MetaBuilder("column")
-//                    .setValue("name", name)
-//                    .setValue("width", width));
-//        }
-//        return new TableFormat(meta);
-//    }
-//
-//    public static TableFormat forPoint(DataPoint point) {
-//        MetaBuilder meta = new MetaBuilder("format");
-//        for (String name : point.namesAsArray()) {
-//            meta.putNode(new MetaBuilder("column")
-//                    .setValue("name", name)
-//                    .setValue("type", point.getValue(name).valueType().name()));
-//        }
-//        return new TableFormat(meta);
-//    }
-//
-//    public TableFormat(Meta meta) {
-//        this.meta = meta;
-//    }
-//
-//    /**
-//     * A set of names for this tableFormat. Empty names corresponds to
-//     * unformatted table
-//     *
-//     * @return
-//     */
-//    @Override
-//    public Names names() {
-//        if (this.names == null) {
-//            names = Names.of(meta().getMetaList("column").stream().map(node -> node.getString("name", "")).collect(Collectors.toList()));
-//        }
-//        return this.names;
-//    }
-//
-//    @ValueDef(name = "name", required = true, info = "Column name")
-//    @ValueDef(name = "type", multiple = true,
-//            info = "Allowed type for this column. Multiple types are allowed. First type is considered to be primary")
-//    @ValueDef(name = "title", info = "A column title. By default equals column name")
-//    @ValueDef(name = "role", info = "A role of this column")
-//    private Optional<? extends Meta> findColumnMeta(String columnName) {
-//        return meta().getMetaList("column").stream().filter(column -> columnName.equals(column.getString("name"))).findFirst();
-//    }
-//
-//    public Meta getColumnMeta(String columnName) {
-//        Optional<Meta> op = findColumnMeta(columnName).map(m -> m);
-//        return op.orElse(getDefaultColumnMeta());
-//    }
-//
-//    protected Meta getDefaultColumnMeta() {
-//        if (meta.hasMeta("defaultColumn")) {
-//            return meta.getMeta("defaultColumn");
-//        } else {
-//            return new MetaBuilder("column").build();
-//        }
-//    }
-//
-//    public ValueFormatter getValueFormat(String name) {
-//        return formats.computeIfAbsent(name, (String columnName) -> {
-//            Meta columnMeta = getColumnMeta(columnName);
-//            if (columnMeta != null) {
-//                return ValueFormatFactory.build(columnMeta);
-//            } else {
-//                return ValueFormatFactory.EMPTY_FORMAT;
-//            }
-//        });
-//    }
-//
-//    /**
-//     * Format data point as a string
-//     *
-//     * @param point
-//     * @return
-//     */
-//    public String format(DataPoint point) {
-//        return names()
-//                .asList()
-//                .stream()
-//                .map((name) -> getValueFormat(name).format(point.getValue(name)))
-//                .collect(Collectors.joining("\t"));
-//    }
-//
-//    public String getTitle(String columnName) {
-//        return getColumnMeta(columnName).getString("title", columnName);
-//    }
-//
-//    public String getRole(String columnName) {
-//        return getColumnMeta(columnName).getString("role", "");
-//    }
-//
-//    public ValueType getType(String columnName) {
-//        return ValueType.valueOf(getColumnMeta(columnName).getString("type", ValueType.STRING.name()));
-//    }
-//
-//    /**
-//     * A subset of current format
-//     *
-//     * @param newNames
-//     * @return
-//     */
-//    public TableFormat subSet(String... newNames) {
-//        //Если список пустой, значит допустимы все имена
-//        if (this.names.asList().isEmpty()) {
-//            return this;
-//        }
-//        MetaBuilder newMeta = new MetaBuilder("format");
-//        for (String newName : newNames) {
-//            newMeta.putNode(findColumnMeta(newName).orElseThrow(() -> new NameNotFoundException(newName)));
-//        }
-//        return new TableFormat(newMeta.build());
-//    }
-//
-//    @Override
-//    public Meta meta() {
-//        return meta;
-//    }
-//
 }
