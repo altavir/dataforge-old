@@ -1,7 +1,7 @@
 ---
 content_type: "doc_shard"
 title: "How to read this documentation"
-ordering: [0]
+chapter: "howto"
 label: "how_to_read"
 version: 1.1
 date: 02.09.2015

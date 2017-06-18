@@ -1,7 +1,8 @@
 ---
 content_type: "doc_shard"
 title: "KOtlin Dataforge EXtension"
-ordering: [1000,2]
+chapter: extensions
+ordering: 2
 label: "kodex"
 version: 1.0
 published: true

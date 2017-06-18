@@ -1,7 +1,7 @@
 ---
 content_type: "doc_shard"
 title: "Data format"
-ordering: [100]
+chapter: envelope
 label: "data_format"
 version: 1.0
 date: 08.02.2016

@@ -1,7 +1,8 @@
 ---
 content_type: "doc_shard"
 title: "Configuration"
-ordering: [2,6]
+chapter: "meta"
+ordering: 6
 label: "configuration"
 version: 1.0
 date: 27.08.2015

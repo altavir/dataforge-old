@@ -11,8 +11,6 @@ version = '0.2'
 
 ext {
     mainClassName = "com.sysgears.grain.Main"
-    grainVersion = '0.7.0'
-    classpath = sourceSets.main.runtimeClasspath
 }
 
 configurations.all {
@@ -26,17 +24,19 @@ repositories {
 }
 
 dependencies {
-    compile "com.sysgears.grain:grain:$project.grainVersion"
-    compile 'org.codehaus.groovy:groovy:2.4.7'
+    compile "com.sysgears.grain:grain:0.7.0"
+    compile 'org.codehaus.groovy:groovy:2.4.11'
 }
 
-sourceSets {
-    main {
-        groovy {
-            srcDirs = ['src']
-        }
-    }
-}
+/**
+ * List of projects to be documented
+ */
+def documentedProjects = rootProject.subprojects.findAll { it.group.startsWith("hep.dataforge") }
+
+/**
+ * A place for gathered docs
+ */
+def genDocsDir = file("content/docs-gen")
 
 task gendeps {
     doLast {
@@ -53,23 +53,23 @@ task gendeps {
 }
 
 //main grain tasks
-task generate(type: JavaExec) {
+task generate(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
     logging.captureStandardOutput LogLevel.INFO
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args name
+    args ["generate"]
     doFirst {
         println "Starting generate"
     }
     finalizedBy(":site:buildDocs")
 }
 
-task preview(type: JavaExec) {
+task preview(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args name
+    args ["preview"]
 }
 
 //deploy configuration
@@ -84,9 +84,8 @@ remotes {
     }
 }
 
-task deploy {
+task deploy(dependsOn: ":site:generate") {
     group 'grain'
-    dependsOn ":site:generate"
     doLast {
         println "Starting deploy"
         ssh.run {
@@ -105,10 +104,26 @@ tasks.withType(JavaExec) {
     allJvmArgs << '-Dfile.encoding=UTF-8'
 }
 
-clean.doLast { ant.delete(dir: '.cache'); ant.delete(dir: 'target') }
+clean.doLast {
+    ant.delete(dir: '.cache')
+    ant.delete(dir: 'target')
+    genDocsDir.delete()
+}
+
+//Custom actions
+
+task gather(){
+    documentedProjects.each {project->
+        if(project.file("docs")){
+            copy {
+                from project.file("docs")
+                into genDocsDir
+            }
+        }
+    }
+}
 
 task buildDocs(type: Javadoc) {
-    def documentedProjects = rootProject.subprojects.findAll {it.group.startsWith("hep.dataforge")}
     def version = rootProject.version
 
     title "DataForge framework ${version}"

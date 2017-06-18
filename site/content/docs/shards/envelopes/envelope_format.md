@@ -1,7 +1,8 @@
 ---
 content_type: "doc_shard"
 title: "Envelope format"
-ordering: [100,1]
+chapter: envelope
+ordering: 1
 label: "envelope_format"
 version: 1.0
 date: 08.02.2016

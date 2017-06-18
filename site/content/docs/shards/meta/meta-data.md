@@ -1,7 +1,7 @@
 ---
 content_type: "doc_shard"
 title: "Meta-data processor"
-ordering: [2]
+chapter: "meta"
 label: "meta"
 version: 2.0
 date: 27.08.2015

@@ -42,7 +42,7 @@ class ResourceMapper {
      */
     private injectReleases(List resources) {
         //Adding news shards
-        Map newsPage = resources.find { it.url == '/releases.html' };
+        Map newsPage = resources.find { it.url == '/releases.html' } as Map;
         def releases = resources.findAll { it.content_type == 'release' }
         releases.each {
             it << ["notes_ref"  : it.notes_ref ?: "/docs/${it.version_name}/notes.txt",
@@ -60,7 +60,7 @@ class ResourceMapper {
      */
     private injectNews(List resources) {
         //Adding news shards
-        Map newsPage = resources.find { it.url == '/news.html' };
+        Map newsPage = resources.find { it.url == '/news.html' } as Map;
         def news = resources.findAll { it.url =~ /news\/.*/ && it.content_type == 'news_shard' }
         news.sort(new OrderBy({ it.date }))
         newsPage.put("news", news)
@@ -69,10 +69,10 @@ class ResourceMapper {
     }
 
 
-    private loadSections(List resources){
+    private loadSections(List resources) {
         def header = readConfig('/config/header.yml', resources)
         //println "\n Header configuration: ${header} \n"
-        resources.findAll{it.layout}.each{
+        resources.findAll { it.layout }.each {
             Map page = it
             page.putAll(header)
         }
@@ -82,15 +82,28 @@ class ResourceMapper {
      * Inject doc shards in resource map
      */
     private injectShards(List resources) {
-        Map docsPage = resources.find { it.url == '/docs.html' };
-        def shards = resources.findAll { (it.url =~ /shards\/.*/ && it.content_type == 'doc_shard') }
+        def chapters = readConfig('/config/docs.yml', resources).chapters as List
+        Map docsPage = resources.find { it.url == '/docs.html' } as Map;
+        def shards = resources.findAll { it.content_type == 'doc_shard' }
+
+        //Injecting chapter ordering
+        shards.each { shard ->
+            if (shard.chapter) {
+                def chapterInfo = chapters.find { it.section == shard.chapter }
+                if (chapterInfo) {
+                    shard.ordering = shard.ordering ? chapterInfo.ordering + shard.ordering : chapterInfo.ordering
+                }
+            }
+        }
+
+
         shards.sort { shard1, shard2 ->
             for (int i = 0; i < shard1.ordering.size(); i++) {
                 def index1 = shard1.ordering[i];
                 def index2 = shard2.ordering[i];
                 if (!index2 || index1 > index2) {
                     return 1
-                } else if(index2 > index1){
+                } else if (index2 > index1) {
                     return -1
                 }
             }
@@ -113,7 +126,7 @@ class ResourceMapper {
             }
 
             lastOrdering = it.ordering;
-            it << [section: curIndexes.findAll { it }.join(".")]
+            it << [sectionNumber: curIndexes.findAll { it }.join(".")]
             it << [level: it.ordering.size]
         }
 
@@ -125,12 +138,12 @@ class ResourceMapper {
     }
 
 
-    private findResource(String name, List resources){
-        resources.find{it.url == name}
+    private findResource(String name, List resources) {
+        resources.find { it.url == name }
     }
 
-    private readConfig(String name, List resources){
-        File configFile = new File(site.content_dir as String,name)
+    private Map readConfig(String name, List resources) {
+        File configFile = new File(site.content_dir as String, name)
         Yaml yaml = new Yaml();
         yaml.load(configFile.text) as Map ?: [:]
     }

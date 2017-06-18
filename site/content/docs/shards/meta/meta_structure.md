@@ -1,7 +1,8 @@
 ---
 content_type: "doc_shard"
 title: "Meta-data object structure"
-ordering: [2,4]
+chapter: "meta"
+ordering: 4
 label: "meta_structure"
 version: 1.1
 date: 27.08.2015

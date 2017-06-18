@@ -1,7 +1,8 @@
 ---
 content_type: "doc_shard"
 title: "GRoovy INteractive Dataforge"
-ordering: [1000,1]
+chapter: extensions
+ordering: 1
 label: "grind"
 version: 1.0
 published: true
