@@ -119,15 +119,15 @@ public class MapPoint implements DataPoint, MetaMorph {
      */
     @Override
     public String toString() {
-        String res = "[";
+        StringBuilder res = new StringBuilder("[");
         boolean flag = true;
         for (String name : this.names()) {
             if (flag) {
                 flag = false;
             } else {
-                res += ", ";
+                res.append(", ");
             }
-            res += name + ":" + getValue(name).stringValue();
+            res.append(name).append(":").append(getValue(name).stringValue());
         }
         return res + "]";
     }

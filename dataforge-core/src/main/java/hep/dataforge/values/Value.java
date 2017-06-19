@@ -36,6 +36,7 @@ import java.util.*;
  * @version $Id: $Id
  */
 public interface Value extends Serializable {
+    String NULL_STRING = "@null";
 
     Value NULL = new NullValue();
 

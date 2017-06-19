@@ -116,19 +116,13 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     public String readLine() throws IOException {
-        ByteBuffer buffer = ByteBuffer.allocate(1024);
+        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         byte nextChar = getRandomAccess().readByte();
         while (getRandomAccess().getFilePointer() < getRandomAccess().length() && nextChar != '\r') {
-            buffer.put(nextChar);
+            buffer.write(nextChar);
             nextChar = getRandomAccess().readByte();
-
-            if (!buffer.hasRemaining()) {
-                ByteBuffer newBuffer = ByteBuffer.allocate(buffer.capacity() + 1024);
-                newBuffer.put(buffer);
-                buffer = newBuffer;
-            }
         }
-        return new String(buffer.array(), Charset.forName("UTF-8")).replace("\\n", NEWLINE);
+        return new String(buffer.toByteArray(), Charset.forName("UTF-8")).replace("\\n", NEWLINE);
     }
 
     public void seek(long pos) throws IOException {

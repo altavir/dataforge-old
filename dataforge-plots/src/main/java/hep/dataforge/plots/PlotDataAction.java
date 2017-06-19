@@ -97,7 +97,9 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         }
         XYAdapter adapter = new XYAdapter(meta.getMeta("adapter", Meta.buildEmpty("adapter")));
 
-        frame.add(PlottableData.plot(name, meta, adapter, input));
+        PlottableData plottableData = PlottableData.plot(name, adapter, input);
+        plottableData.configure(meta);
+        frame.add(plottableData);
 
 //        if (meta.hasMeta("snapshot")) {
 //            snapshot(name, frame, meta.getMeta("snapshot"));
@@ -115,7 +117,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
     }
 
     @Override
-    protected void afterAction(Context context,String name, Table res, Laminate meta) {
+    protected void afterAction(Context context, String name, Table res, Laminate meta) {
         // это необходимо сделать, чтобы снапшоты и сериализация выполнялись после того, как все графики построены
 //        snapshotTasks.values().stream().forEach((r) -> r.run());
 //        snapshotTasks.clear();

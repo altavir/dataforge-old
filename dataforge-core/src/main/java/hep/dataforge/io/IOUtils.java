@@ -31,6 +31,7 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.values.Value.NULL_STRING;
 import static java.util.regex.Pattern.compile;
 
 /**
@@ -269,7 +270,7 @@ public class IOUtils {
                     return formatWidth("-", width);
                 }
             case NULL:
-                return formatWidth("@null", width);
+                return formatWidth(NULL_STRING, width);
             case NUMBER:
                 return formatWidth(formatNumber(val.numberValue(), width), width);
             case STRING:

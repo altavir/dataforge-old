@@ -17,11 +17,14 @@ package hep.dataforge.tables;
 
 import hep.dataforge.values.Value;
 
+import java.util.Objects;
 import java.util.Scanner;
+
+import static hep.dataforge.values.Value.NULL_STRING;
 
 /**
  * <p>
- SimpleParser class.</p>
+ * SimpleParser class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -48,8 +51,8 @@ public class SimpleParser implements PointParser {
     public SimpleParser(String line) {
         this.format = line.trim().split("[^\\w']*");
     }
-    
-    public SimpleParser(TableFormat format){
+
+    public SimpleParser(TableFormat format) {
         this.format = format.namesAsArray();
     }
 
@@ -68,20 +71,23 @@ public class SimpleParser implements PointParser {
                 values[i] = Value.of(sc.nextDouble());
             } else if (sc.hasNextInt()) {
                 values[i] = Value.of(sc.nextInt());
-            } else if(sc.hasNext()) {
-                values[i] = Value.of(sc.next());
+            } else if (sc.hasNext()) {
+                String next = sc.next();
+                if (Objects.equals(next, NULL_STRING)) {
+                    values[i] = Value.NULL;
+                } else {
+                    values[i] = Value.of(next);
+                }
             } else {
                 values[i] = Value.NULL;
             }
         }
 
-        DataPoint point = new MapPoint(format, values);
-
-//            //Все, что после послднего значения считаем тэгами
+        //            //Все, что после послднего значения считаем тэгами
 //            while (sc.hasNext()) {
 //                point.addTag(sc.next());
 //            }
-        return point;
+        return new MapPoint(format, values);
     }
 
 }

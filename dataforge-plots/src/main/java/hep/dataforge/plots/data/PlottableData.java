@@ -86,14 +86,14 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, Iterable<DataPoint> data) {
-        PlottableData plot = plot(name, adapter, true);
-        plot.fillData(data);
-        if (!meta.isEmpty()) {
-            plot.configure(meta);
-        }
-        return plot;
-    }
+//    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, Iterable<DataPoint> data) {
+//        PlottableData plot = plot(name, adapter, true);
+//        plot.fillData(data);
+//        if (!meta.isEmpty()) {
+//            plot.configure(meta);
+//        }
+//        return plot;
+//    }
 
     /**
      * Non safe method to set data to this plottable. The list must be immutable

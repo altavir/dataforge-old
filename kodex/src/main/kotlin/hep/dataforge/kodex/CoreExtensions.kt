@@ -1,5 +1,6 @@
 package hep.dataforge.kodex
 
+import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MutableMetaNode
 import hep.dataforge.values.NamedValue
@@ -78,11 +79,11 @@ operator fun <T : MutableMetaNode<*>> MutableMetaNode<T>.set(path: String, value
     return this.setValue(path, value);
 }
 
-operator fun <T : MutableMetaNode<*>>  T.plusAssign(value: NamedValue) {
+operator fun <T : MutableMetaNode<*>> T.plusAssign(value: NamedValue) {
     this.setValue(value.name, value.anonymousValue);
 }
 
-operator fun <T : MutableMetaNode<*>>  T.plusAssign(meta: Meta) {
+operator fun <T : MutableMetaNode<*>> T.plusAssign(meta: Meta) {
     this.putNode(meta);
 }
 
@@ -98,4 +99,9 @@ operator fun Meta.plus(meta: Meta): Meta {
  */
 operator fun Meta.plus(value: NamedValue): Meta {
     return this.builder.putValue(value.name, value.anonymousValue);
+}
+
+fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
+    this.configure(hep.dataforge.kodex.buildMeta(this.config.name, transform));
+    return this;
 }
