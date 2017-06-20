@@ -88,7 +88,7 @@ public class WorkManager extends BasicPlugin {
      * @param processName
      */
     protected void onStarted(String processName) {
-        getContext().getLogger().debug("Process '{}' started", processName);
+        getLogger().debug("Process '{}' started", processName);
     }
 
     /**
@@ -97,9 +97,9 @@ public class WorkManager extends BasicPlugin {
      * @param processName
      */
     protected void onFinished(String processName) {
-        getContext().getLogger().debug("Process '{}' finished", processName);
+        getLogger().debug("Process '{}' finished", processName);
 //        if (root.isDone() && parallelExecutor != null) {
-//            getContext().getLogger().info("All processes complete.");
+//            getLogger().info("All processes complete.");
 //        }
 
     }

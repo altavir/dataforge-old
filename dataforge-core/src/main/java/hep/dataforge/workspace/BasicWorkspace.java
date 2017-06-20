@@ -60,7 +60,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
     @Override
     public void clean() {
-        getContext().getLogger().info("Cleaning up cache...");
+        getLogger().info("Cleaning up cache...");
         invalidateCache();
     }
 
@@ -99,7 +99,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         @SuppressWarnings("unchecked")
         public Builder loadData(String as, Data<?> data) {
             if (w.getData().optNode(as).isPresent()) {
-                getContext().getLogger().warn("Overriding non-empty data during workspace data fill");
+                getLogger().warn("Overriding non-empty data during workspace data fill");
             }
             getData().putData(as, data);
             return self();
@@ -110,7 +110,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         public Builder loadData(String as, DataNode<?> datanode) {
             if (as == null || as.isEmpty()) {
                 if (!w.data.isEmpty()) {
-                    getContext().getLogger().warn("Overriding non-empty root data node during workspace construction");
+                    getLogger().warn("Overriding non-empty root data node during workspace construction");
                 }
                 w.data = new DataTree.Builder(datanode);
             } else {

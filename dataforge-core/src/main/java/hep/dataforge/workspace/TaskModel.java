@@ -7,6 +7,7 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.cache.Identifiable;
 import hep.dataforge.context.Context;
+import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
@@ -33,7 +34,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Metoid, ValueProvider, Identifiable {
+public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Encapsulated {
 
     //TODO implement builder chain
     private final Workspace workspace;
@@ -62,6 +63,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable {
         return workspace;
     }
 
+    @Override
     public Context getContext() {
         return getWorkspace().getContext();
     }

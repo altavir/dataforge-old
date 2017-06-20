@@ -63,7 +63,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
         try {
             close();
         } catch (Exception e) {
-            getContext().getLogger().error("Can't close server manager", e);
+            getLogger().error("Can't close server manager", e);
         }
         super.detach();
     }
@@ -128,7 +128,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
                 ratpack.stop();
                 ratpack = null;
             } catch (Exception ex) {
-                getContext().getLogger().error("Failed to stop ratpack server", ex);
+                getLogger().error("Failed to stop ratpack server", ex);
             }
         }
         isStarted.invalidate();

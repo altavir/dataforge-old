@@ -21,10 +21,10 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.loaders.AbstractStateLoader;
 import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -36,16 +36,10 @@ import java.util.regex.Pattern;
  */
 public class FileStateLoader extends AbstractStateLoader {
 
-    public static FileStateLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            return fromEnvelope(storage, envelope);
-        }
-    }
-
     public static FileStateLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
         if (FileStorageEnvelopeType.validate(envelope, STATE_LOADER_TYPE)) {
-            FileStateLoader res = new FileStateLoader(envelope.getFile().getURL().toString(),
-                    storage, FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+            FileStateLoader res = new FileStateLoader(envelope.getFile(),
+                    storage, FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta());
             res.setReadOnly(envelope.isReadOnly());
             return res;
@@ -54,12 +48,12 @@ public class FileStateLoader extends AbstractStateLoader {
         }
     }
 
-    private final String filePath;
+    private final Path path;
     private FileEnvelope file;
 
-    public FileStateLoader(String filePath, Storage storage, String name, Meta annotation) throws IOException, StorageException {
+    public FileStateLoader(Path path, Storage storage, String name, Meta annotation) throws IOException, StorageException {
         super(storage, name, annotation);
-        this.filePath = filePath;
+        this.path = path;
     }
 
     @Override
@@ -68,7 +62,7 @@ public class FileStateLoader extends AbstractStateLoader {
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
-            file = new FileEnvelope(filePath, isReadOnly());
+            file = new FileEnvelope(path, isReadOnly());
         }
     }
 

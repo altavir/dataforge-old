@@ -21,9 +21,10 @@ import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.function.Supplier;
 
@@ -32,18 +33,12 @@ import java.util.function.Supplier;
  */
 public class FilePointLoader extends AbstractPointLoader {
 
-    public static FilePointLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            return fromEnvelope(storage, envelope);
-        }
-    }
-
     public static FilePointLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
         if (FileStorageEnvelopeType.validate(envelope, POINT_LOADER_TYPE)) {
             FilePointLoader res = new FilePointLoader(storage,
-                    FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta(),
-                    envelope.getFile().getURL().toString());
+                    envelope.getFile());
             res.setReadOnly(envelope.isReadOnly());
             return res;
         } else {
@@ -51,7 +46,7 @@ public class FilePointLoader extends AbstractPointLoader {
         }
     }
 
-    private final String uri;
+    private final Path path;
     //FIXME move to abstract
     private TableFormat format;
     private PointParser parser;
@@ -61,9 +56,9 @@ public class FilePointLoader extends AbstractPointLoader {
      */
     private FileEnvelope envelope;
 
-    public FilePointLoader(Storage storage, String name, Meta meta, String uri) {
+    public FilePointLoader(Storage storage, String name, Meta meta, Path path) {
         super(storage, name, meta);
-        this.uri = uri;
+        this.path = path;
     }
 
     @Override
@@ -95,7 +90,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     private FileEnvelope buildEnvelope(boolean readOnly) {
-        return new FileEnvelope(uri, readOnly);
+        return new FileEnvelope(path, readOnly);
     }
 
     /**
@@ -153,11 +148,12 @@ public class FilePointLoader extends AbstractPointLoader {
         }
     }
 
+    @NotNull
     @Override
     public Iterator<DataPoint> iterator() {
         try {
             FileEnvelope reader = buildEnvelope(true);
-            LineIterator iterator = new LineIterator(reader.getDataStream(), "UTF-8");
+            LineIterator iterator = new LineIterator(reader.getData().getStream(), "UTF-8");
             return new Iterator<DataPoint>() {
                 @Override
                 public boolean hasNext() {

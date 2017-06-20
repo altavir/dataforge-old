@@ -77,7 +77,7 @@ public class FileDataFactory extends DataFactory<Binary> {
         MetaBuilder mb = new MetaBuilder(meta);
         mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());
         mb.putValue(FILE_NAME_KEY, file.getName());
-        Data<Binary> fileData = Data.buildStatic(new FileBinary(file), mb.build());
+        Data<Binary> fileData = Data.buildStatic(new FileBinary(file.toPath()), mb.build());
         return fileData;
     }
 

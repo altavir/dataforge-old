@@ -34,7 +34,7 @@ public interface EnvelopeReader {
      * @throws IOException
      */
     default Envelope read(InputStream stream) throws IOException {
-        return read(stream, is -> EnvelopeTag.from(is));
+        return read(stream, EnvelopeTag::from);
     }
 
     Envelope read(InputStream stream, Function<InputStream, EnvelopeTag> tagReader) throws IOException;

@@ -96,7 +96,7 @@ public class CachePlugin extends BasicPlugin {
                             }
 
                             if (err != null) {
-                                getContext().getLogger().error("Failed to load data from cache", err);
+                                getLogger().error("Failed to load data from cache", err);
                             }
                         });
                     } else {

@@ -22,15 +22,23 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeTag;
 import hep.dataforge.io.envelopes.EnvelopeType;
 import hep.dataforge.meta.Meta;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.RandomAccessContent;
-import org.apache.commons.vfs2.VFS;
-import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Reader;
+import java.net.URI;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * A specific envelope to handle file storage format.
@@ -43,49 +51,61 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private static final String NEWLINE = "\r\n";
 
     private final boolean readOnly;
-    private final String uri;
-    private FileObject file;
+    private Path file;
     private Meta meta;
-    private RandomAccessContent randomAccess;
+    private FileChannel channel;
     private EnvelopeTag tag;
     private EnvelopeType type = DefaultEnvelopeType.instance;
 
-    public FileEnvelope(String uri, boolean readOnly){
-        this.uri = uri;
+    public FileEnvelope(Path path, boolean readOnly) {
+        this.file = path;
         this.readOnly = readOnly;
     }
+
+    public FileEnvelope(String uri, boolean readOnly) {
+        this(Paths.get(URI.create(uri)),readOnly);
+    }
+
+    public Path getFile() {
+        return file;
+    }
+
+    private SeekableByteChannel getChannel() throws IOException {
+        if (channel == null) {
+            channel = FileChannel.open(file, READ);
+        }
+        return channel;
+    }
+
+
+    private EnvelopeTag getTag() throws IOException {
+        if (tag == null) {
+            tag = EnvelopeTag.from(getChannel());
+        }
+        return tag;
+    }
+
 
     @Override
     public synchronized void close() throws Exception {
         tag = null;
-
-        if (randomAccess != null) {
-            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope content " + uri);
-            randomAccess.close();
-            randomAccess = null;
-        }
-        if (file != null) {
-            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope FileObject " + uri);
-            file.close();
-            file = null;
+        meta = null;
+        if (channel != null) {
+            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope " + file);
+            channel.close();
+            channel = null;
         }
     }
 
     @Override
     public Binary getData() {
-        ensureOpen();
         try {
-            long dataSize = tag.getDataSize();
+            long dataSize = getTag().getDataSize();
             if (dataSize == INFINITE_DATA_SIZE) {
-                dataSize = getRandomAccess().length() - getDataOffset();
+                dataSize = getChannel().size() - getDataOffset();
             }
             //getRandomAccess().seek(getDataOffset());
-            if (file.isFile()) {
-                File f = new File(file.getURL().getFile());
-                return new FileBinary(f, (int) getDataOffset(), (int) dataSize);
-            } else {
-                return new FileObjectBinary(file, (int) getDataOffset(), (int) dataSize);
-            }
+            return new FileBinary(file, (int) getDataOffset(), (int) dataSize);
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
@@ -94,8 +114,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     @Override
     public synchronized Meta meta() {
         if (meta == null) {
-            ensureOpen();
-            try (InputStream stream = getFile().getContent().getInputStream()) {
+            try (InputStream stream = Channels.newInputStream(getChannel())) {
+                stream.skip(getTag().getLength());
                 meta = type.getReader().read(stream).meta();
             } catch (Exception e) {
                 throw new RuntimeException("Can't read meta from file Envelope", e);
@@ -105,7 +125,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public String readLine(int offset) throws IOException {
-        getRandomAccess().seek(offset);
+        getChannel().position(offset);
         return readLine();
     }
 
@@ -116,37 +136,26 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     public String readLine() throws IOException {
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        byte nextChar = getRandomAccess().readByte();
-        while (getRandomAccess().getFilePointer() < getRandomAccess().length() && nextChar != '\r') {
-            buffer.write(nextChar);
-            nextChar = getRandomAccess().readByte();
+        try (Reader stream = Channels.newReader(getChannel(), "UTF-8")) {
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            int nextChar = stream.read();
+            while (getChannel().position() < getChannel().size() && nextChar != '\r') {
+                buffer.write(nextChar);
+                nextChar = stream.read();
+            }
+            return new String(buffer.toByteArray(), Charset.forName("UTF-8")).replace("\\n", NEWLINE);
         }
-        return new String(buffer.toByteArray(), Charset.forName("UTF-8")).replace("\\n", NEWLINE);
     }
 
     public void seek(long pos) throws IOException {
-        getRandomAccess().seek(pos);
+        getChannel().position(pos);
     }
 
-    public ByteBuffer readBlock(int offset, int length) throws IOException {
-        getRandomAccess().seek(offset);
+    public ByteBuffer readBlock(int pos, int length) throws IOException {
+        getChannel().position(pos);
         ByteBuffer block = ByteBuffer.allocate(length);
-        while (block.hasRemaining()) {
-            block.put(getRandomAccess().readByte());
-        }
-//        content.getChannel().read(block);
+        getChannel().read(block);
         return block;
-    }
-
-    /**
-     * Read everything above data itself
-     *
-     * @return
-     * @throws IOException
-     */
-    private ByteBuffer getHeader() throws IOException {
-        return readBlock(0, (int) getDataOffset());
     }
 
     /**
@@ -155,15 +164,15 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     public synchronized void clearData() throws IOException {
-        ByteBuffer header = getHeader();
-        try (OutputStream stream = getFile().getContent().getOutputStream(false)) {
-            stream.write(header.array());
-            setDataSize(0);
+        ByteBuffer header = readBlock(0, (int) getDataOffset());
+        try (SeekableByteChannel channel = Files.newByteChannel(file, WRITE, TRUNCATE_EXISTING)) {
+            channel.write(header);
+            setDataSize(channel, 0);
         }
     }
 
     public long readerPos() throws IOException {
-        return getRandomAccess().getFilePointer();
+        return getChannel().position();
     }
 
     /**
@@ -172,15 +181,15 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     public void resetPos() throws IOException {
-        getRandomAccess().seek(getDataOffset());
+        getChannel().position(getDataOffset());
     }
 
-    private synchronized void setDataSize(int size) throws IOException {
-        long offset = getRandomAccess().getFilePointer();
-        getRandomAccess().seek(0);//seeking begin
-        getRandomAccess().write(tag.byteHeader());
-        getRandomAccess().seek(offset);//return to the initial position
-        tag.setValue(DATA_LENGTH_KEY, size);//update property
+    private synchronized void setDataSize(SeekableByteChannel channel, int size) throws IOException {
+        long position = channel.position();
+        channel.position(0);//seeking begin
+        channel.write(getTag().byteHeader());
+        channel.position(position);//return to the initial position
+        getTag().setValue(DATA_LENGTH_KEY, size);//update property
     }
 
     /**
@@ -190,15 +199,20 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @param bytes
      * @throws IOException
      */
-    synchronized public void append(byte[] bytes) throws IOException {
-        ensureOpen();
+    synchronized public void append(ByteBuffer bytes) throws IOException {
         if (isReadOnly()) {
-            throw new IOException("Trying to write to readonly file " + uri);
+            throw new IOException("Trying to write to readonly file " + file);
         } else {
-            getRandomAccess().seek(eofPos());
-            getRandomAccess().write(bytes);
-            setDataSize((int) (eofPos() - getRandomAccess().getFilePointer()));
+            try (SeekableByteChannel channel = Files.newByteChannel(file, WRITE, APPEND)) {
+                channel.position(eofPos());
+                channel.write(bytes);
+                setDataSize(channel, (int) (channel.size() - getDataOffset()));
+            }
         }
+    }
+
+    public void append(byte[] bytes) throws IOException {
+        this.append(ByteBuffer.wrap(bytes));
     }
 
     /**
@@ -212,15 +226,11 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public long eofPos() throws IOException {
-        return getRandomAccess().length();
+        return getChannel().size();
     }
 
     public boolean isReadOnly() {
         return readOnly;
-    }
-
-    public String getFilePath() {
-        return uri;
     }
 
     public boolean isEof() {
@@ -239,77 +249,14 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         }
     }
 
-    public BufferedInputStream getDataStream() throws IOException {
-        BufferedInputStream stream = new BufferedInputStream(getFile().getContent().getInputStream());
-        stream.skip(getDataOffset());
-        return stream;
-    }
-
-    /**
-     * @return the content
-     */
-    private synchronized RandomAccessContent getRandomAccess() {
-        try {
-            if (!getFile().getContent().isOpen()) {
-                randomAccess = null;
-            }
-            if (randomAccess == null) {
-                if (isReadOnly()) {
-                    randomAccess = getFile().getContent().getRandomAccessContent(RandomAccessMode.READ);
-                } else {
-                    randomAccess = getFile().getContent().getRandomAccessContent(RandomAccessMode.READWRITE);
-                }
-            }
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-        return randomAccess;
-    }
-
-    /**
-     * @return the file
-     */
-    public synchronized FileObject getFile() throws IOException {
-        if (this.file == null) {
-            this.file = VFS.getManager().resolveFile(uri);
-            if (!file.exists()) {
-                throw new java.io.FileNotFoundException();
-            }
-        }
-        return this.file;
-    }
-
-    /**
-     * Setup envelope properties, data offset and data size
-     *
-     * @throws IOException
-     */
-    private void open() {
-        try (InputStream stream = getFile().getContent().getInputStream()) {
-            tag = EnvelopeTag.from(stream);
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-    }
-
     /**
      * @return the dataOffset
      */
-    private long getDataOffset() {
-        ensureOpen();
-        return tag.getLength() + tag.getMetaSize();
-    }
-
-    /**
-     * ensure envelope is initialized
-     */
-    private synchronized void ensureOpen() {
-        if (!isOpen()) {
-            open();
-        }
+    private long getDataOffset() throws IOException {
+        return getTag().getLength() + getTag().getMetaSize();
     }
 
     public boolean isOpen() {
-        return tag != null;
+        return channel != null;
     }
 }

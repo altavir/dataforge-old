@@ -10,12 +10,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.nio.channels.SeekableByteChannel;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static hep.dataforge.utils.Misc.UTF;
 
 /**
  * Envelope tag converter v2
@@ -23,15 +23,11 @@ import java.util.regex.Pattern;
  */
 public class EnvelopeTag {
 
-    public static final byte[] START_SEQUENCE = {'#', '~'};
-    public static final byte[] END_SEQUENCE = {'~', '#', '\r', '\n'};
-    public static final String CUSTOM_PROPERTY_HEAD = "#?";
+    private static final byte[] START_SEQUENCE = {'#', '~'};
+    private static final byte[] END_SEQUENCE = {'~', '#', '\r', '\n'};
+    private static final String CUSTOM_PROPERTY_HEAD = "#?";
     private static final int DEFAULT_BUFFER_SIZE = 1024;
-    public static byte[] LEGACY_START_SEQUENCE = {'#', '!'};
-    private Map<String, Value> values = new HashMap<>();
-    private MetaType metaType = XMLMetaType.instance;
-    private EnvelopeType envelopeType = DefaultEnvelopeType.instance;
-    private int length = -1;
+    private static byte[] LEGACY_START_SEQUENCE = {'#', '!'};
 
     public static EnvelopeTag from(InputStream stream) {
         try {
@@ -40,6 +36,19 @@ public class EnvelopeTag {
             throw new RuntimeException("Failed to read envelope tag", e);
         }
     }
+
+    public static EnvelopeTag from(SeekableByteChannel channel) {
+        try {
+            return new EnvelopeTag().read(channel);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read envelope tag", e);
+        }
+    }
+
+    private Map<String, Value> values = new HashMap<>();
+    private MetaType metaType = XMLMetaType.instance;
+    private EnvelopeType envelopeType = DefaultEnvelopeType.instance;
+    private int length = -1;
 
     /**
      * Get the length of tag in bytes. -1 means undefined size in case tag was modified
@@ -50,12 +59,14 @@ public class EnvelopeTag {
         return length;
     }
 
-    private Map<String, Value> readLegacyHeader(InputStream stream) throws IOException {
-        length += 28;
-        byte[] bytes = new byte[28];
-        stream.read(bytes);
-        ByteBuffer buffer = ByteBuffer.wrap(bytes);
-
+    /**
+     * Read leagscy version 1 tag without leading tag head
+     *
+     * @param buffer
+     * @return
+     * @throws IOException
+     */
+    private Map<String, Value> readLegacyHeader(ByteBuffer buffer) throws IOException {
         Map<String, Value> res = new HashMap<>();
 
         int type = buffer.getInt();
@@ -78,20 +89,13 @@ public class EnvelopeTag {
     }
 
     /**
-     * Read header line only
+     * Read header line only without leading two symbols
      *
-     * @param stream
      * @throws IOException
      */
-    private Map<String, Value> readHeader(InputStream stream) throws IOException {
-        length += 18;
+    private Map<String, Value> readHeader(ByteBuffer buffer) throws IOException {
 
         Map<String, Value> res = new HashMap<>();
-
-        byte[] body = new byte[14];
-        stream.read(body);
-
-        ByteBuffer buffer = ByteBuffer.wrap(body).order(ByteOrder.BIG_ENDIAN);
 
         //reading type
         int type = buffer.getInt();
@@ -121,12 +125,24 @@ public class EnvelopeTag {
         res.put(Envelope.DATA_LENGTH_KEY, Value.of(dataLength));
 
         byte[] endSequence = new byte[4];
-        stream.read(endSequence);
+        buffer.get(endSequence, 14, 4);
 
         if (!Arrays.equals(endSequence, END_SEQUENCE)) {
             LoggerFactory.getLogger(EnvelopeTag.class).warn("Wrong ending sequence for envelope tag");
         }
         return res;
+    }
+
+    private NamedValue getCustomProperty(String line) {
+        Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*)");
+        Matcher matcher = pattern.matcher(line);
+        if (matcher.matches()) {
+            String key = matcher.group("key");
+            String value = matcher.group("value");
+            return NamedValue.of(key, value);
+        } else {
+            throw new RuntimeException("Custom property definition does not match format");
+        }
     }
 
     /**
@@ -141,7 +157,6 @@ public class EnvelopeTag {
         stream.read(smallBuffer);
 
         if (Arrays.equals(smallBuffer, CUSTOM_PROPERTY_HEAD.getBytes())) {
-            length += 2;
             //reading line
             ByteBuffer customPropertyBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE - 2);
             byte b;
@@ -152,35 +167,35 @@ public class EnvelopeTag {
                     throw new RuntimeException("Custom properties with length more than " + customPropertyBuffer.limit() + " are not supported");
                 }
             } while ('\n' != b);
-            length += customPropertyBuffer.position();
-            String line = new String(customPropertyBuffer.array()).trim();
+            length += customPropertyBuffer.position() + 2;
+            String line = new String(customPropertyBuffer.array(), UTF).trim();
 
-            Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*)");
-            Matcher matcher = pattern.matcher(line);
-            if (matcher.matches()) {
-                String key = matcher.group("key");
-                String value = matcher.group("value");
-                return NamedValue.of(key, value);
-            } else {
-                throw new RuntimeException("Custom property definition does not match format");
-            }
+            return getCustomProperty(line);
         } else {
             stream.reset();
             return null;
         }
     }
 
-//    public static EnvelopeTag fromLegacy(InputStream stream) throws IOException {
-//        EnvelopeTag tag =  new EnvelopeTag();
-//        tag.setValues(readLegacyHeader(stream));
-//        //custom properties
-//        NamedValue value;
-//        do {
-//            value = readCustomProperty(stream);
-//            tag.setValue(value.getName(), value);
-//        } while (value != null);
-//        return tag;
-//    }
+    private NamedValue readCustomProperty(SeekableByteChannel channel) throws IOException {
+        long position = channel.position();
+        ByteBuffer lead = ByteBuffer.allocate(2);
+        channel.read(lead);
+
+
+        if (Arrays.equals(lead.array(), CUSTOM_PROPERTY_HEAD.getBytes())) {
+            //reading line
+            ByteBuffer customPropertyBuffer = ByteBuffer.allocate(DEFAULT_BUFFER_SIZE - 2);
+            channel.read(customPropertyBuffer);
+            Scanner scanner = new Scanner(channel);
+            String line = scanner.nextLine();
+            length += line.length() + 2;
+            return getCustomProperty(line.trim());
+        } else {
+            channel.position(position);
+            return null;
+        }
+    }
 
     /**
      * Convert tag to properties
@@ -198,7 +213,7 @@ public class EnvelopeTag {
      * @return
      */
     public void setValues(Map<String, Value> props) {
-        props.forEach((key, value) -> setValue(key, value));
+        props.forEach(this::setValue);
     }
 
     public void setValue(String name, Object value) {
@@ -251,6 +266,44 @@ public class EnvelopeTag {
         return this;
     }
 
+    public EnvelopeTag read(SeekableByteChannel channel) throws IOException {
+        long position = channel.position();
+        ByteBuffer lead = ByteBuffer.allocate(2);
+        channel.read(lead);
+
+        Map<String, Value> header;
+
+        if (Arrays.equals(lead.array(), LEGACY_START_SEQUENCE)) {
+            length += 28;
+            ByteBuffer legacyBytes = ByteBuffer.allocate(28);
+            channel.read(legacyBytes);
+            header = readLegacyHeader(legacyBytes);
+        } else if (Arrays.equals(lead.array(), START_SEQUENCE)) {
+            length += 18;
+            ByteBuffer bytes = ByteBuffer.allocate(18);
+            channel.read(bytes);
+            header = readHeader(bytes);
+        } else if (Arrays.equals(lead.array(), CUSTOM_PROPERTY_HEAD.getBytes())) {
+            //No tag
+            header = Collections.emptyMap();
+            channel.position(position);
+            length = 0;
+        } else {
+            throw new IOException("Wrong start sequence for envelope tag");
+        }
+
+        setValues(header);
+        //custom properties
+        NamedValue value;
+        do {
+            value = readCustomProperty(channel);
+            if (value != null) {
+                setValue(value.getName(), value);
+            }
+        } while (value != null);
+        return this;
+    }
+
     public EnvelopeTag read(InputStream stream) throws IOException {
 
         length = 2;
@@ -263,9 +316,15 @@ public class EnvelopeTag {
         stream.read(startSequence);
 
         if (Arrays.equals(startSequence, LEGACY_START_SEQUENCE)) {
-            header = readLegacyHeader(stream);
+            length += 28;
+            byte[] bytes = new byte[28];
+            stream.read(bytes);
+            header = readLegacyHeader(ByteBuffer.wrap(bytes));
         } else if (Arrays.equals(startSequence, START_SEQUENCE)) {
-            header = readHeader(stream);
+            length += 18;
+            byte[] body = new byte[18];
+            stream.read(body);
+            header = readHeader(ByteBuffer.wrap(body).order(ByteOrder.BIG_ENDIAN));
         } else if (Arrays.equals(startSequence, CUSTOM_PROPERTY_HEAD.getBytes())) {
             //No tag
             header = Collections.emptyMap();
@@ -287,7 +346,7 @@ public class EnvelopeTag {
         return this;
     }
 
-    public byte[] byteHeader() {
+    public ByteBuffer byteHeader() {
         ByteBuffer buffer = ByteBuffer.allocate(20);
         buffer.put(START_SEQUENCE);
 
@@ -296,7 +355,7 @@ public class EnvelopeTag {
         buffer.putInt((int) values.get(Envelope.META_LENGTH_KEY).longValue());
         buffer.putInt((int) values.get(Envelope.DATA_LENGTH_KEY).longValue());
         buffer.put(END_SEQUENCE);
-        return buffer.array();
+        return buffer;
     }
 
 

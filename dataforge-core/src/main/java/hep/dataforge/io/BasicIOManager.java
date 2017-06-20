@@ -58,8 +58,8 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
 
     @Override
     public void detach() {
-        if (getContext().getLogger() instanceof ch.qos.logback.classic.Logger) {
-            removeLoggerAppender((ch.qos.logback.classic.Logger) getContext().getLogger());
+        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
+            removeLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
         }
         super.detach();
     }

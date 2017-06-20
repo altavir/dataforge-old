@@ -31,7 +31,7 @@ public abstract class AbstractWorkspace implements Workspace {
     @Override
     public Task<?> getTask(String taskName) {
         if (!tasks.containsKey(taskName)) {
-            getContext().getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
+            getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
             List<Task> taskList = getContext().pluginManager().stream(true)
                     .map(plugin -> plugin.provide(Path.of(Task.TASK_TARGET, taskName), Task.class))
                     .filter(Optional::isPresent)
@@ -41,7 +41,7 @@ public abstract class AbstractWorkspace implements Workspace {
                 throw new NameNotFoundException(taskName);
             } else {
                 if (taskList.size() > 1) {
-                    getContext().getLogger().warn("A name conflict during task resolution. " +
+                    getLogger().warn("A name conflict during task resolution. " +
                             "Task with name '{}' is present in multiple plugins. " +
                             "Consider loading task explicitly.", taskName);
                 }

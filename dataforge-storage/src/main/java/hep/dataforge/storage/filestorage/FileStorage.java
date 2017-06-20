@@ -22,27 +22,24 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.StorageUtils;
-import org.apache.commons.vfs2.FileChangeEvent;
-import org.apache.commons.vfs2.FileListener;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.impl.DefaultFileMonitor;
-import org.apache.commons.vfs2.util.RandomAccessMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.time.Instant;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.*;
 
 import static hep.dataforge.storage.filestorage.FileStorageEnvelopeType.FILE_STORAGE_ENVELOPE_TYPE;
 import static hep.dataforge.values.ValueType.BOOLEAN;
-import static org.apache.commons.vfs2.FileType.FOLDER;
+import static java.nio.file.StandardOpenOption.*;
+import static java.nio.file.StandardWatchEventKinds.*;
 
 /**
  * Сервер данных на локальных текстовых файлах.
@@ -53,7 +50,7 @@ import static org.apache.commons.vfs2.FileType.FOLDER;
 @ValueDef(name = "monitor", type = {BOOLEAN}, def = "false",
         info = "Enable file system monitoring for synchronous acess to single storage from different instances")
 @ValueDef(name = "type", def = "file", info = "The type of the storage")
-public class FileStorage extends AbstractStorage implements FileListener {
+public class FileStorage extends AbstractStorage {
 
     static {
         //set up slf4j bridge and logging level
@@ -63,8 +60,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
         }
     }
 
-    private final FileObject dataDir;
-    private DefaultFileMonitor monitor;
+    private final Path dataDir;
+    private WatchService monitor;
+//    private Thread storageMonitorThread;
 
     /**
      * Create a root storage in directory
@@ -74,12 +72,8 @@ public class FileStorage extends AbstractStorage implements FileListener {
      */
     public FileStorage(Context context, Meta config) throws StorageException {
         super(context, config);
-        try {
-            this.dataDir = VFSUtils.getFile(config.getString("path", "."));
-            startup();
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
-        }
+        this.dataDir = Paths.get(config.getString("path", "."));
+        startup();
     }
 
     /**
@@ -92,33 +86,36 @@ public class FileStorage extends AbstractStorage implements FileListener {
      */
     protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
         super(parent, dirName, config);
-        try {
-            //replacing points with path separators we build directory structure
-            dataDir = parent.dataDir.resolveFile(dirName.replace(".", File.separator));
-            startup();
-        } catch (FileSystemException ex) {
-            throw new StorageException(ex);
-        }
+        //replacing points with path separators we build directory structure
+        dataDir = Paths.get(dirName.replace(".", File.separator));
+        startup();
     }
 
-    private boolean checkIfEnvelope(FileObject file) {
-        try {
-            return file.getContent().getRandomAccessContent(RandomAccessMode.READ).readByte() == '#';
+    private boolean checkIfEnvelope(Path file) {
+        try (SeekableByteChannel channel = FileChannel.open(file, READ)) {
+            ByteBuffer buffer = ByteBuffer.allocate(30);
+            channel.read(buffer);
+            String bytes = new String(buffer.array());
+            return bytes.startsWith("#~") || bytes.endsWith("!#\r\n");
         } catch (IOException e) {
             return false;
         }
     }
 
-    private void startup() throws FileSystemException, StorageException {
-        if (!dataDir.exists()) {
+    private void startup() {
+        if (!Files.exists(dataDir)) {
             if (isReadOnly()) {
                 throw new StorageException("The directory for read only file storage does not exist");
             } else {
-                dataDir.createFolder();
+                try {
+                    Files.createDirectories(dataDir);
+                } catch (IOException ex) {
+                    throw new RuntimeException("Failed to create FileStorage directory");
+                }
             }
         }
 
-        if (!dataDir.exists() || dataDir.getType() != FOLDER) {
+        if (!Files.isDirectory(dataDir)) {
             throw new StorageException("File Storage should be based on directory.");
         }
 
@@ -129,19 +126,55 @@ public class FileStorage extends AbstractStorage implements FileListener {
     }
 
     private void startMonitor() {
-        if (monitor == null) {
-            monitor = new DefaultFileMonitor(this);
-            monitor.setRecursive(false);
-            monitor.addFile(dataDir);
-            monitor.start();
+        try {
+            if (monitor == null) {
+                monitor = dataDir.getFileSystem().newWatchService();
+                dataDir.register(monitor, ENTRY_CREATE, ENTRY_DELETE);
+                new Thread(() -> {
+                    try {
+                        while (true) {
+                            WatchKey key = monitor.take();
+                            for (WatchEvent<?> event : key.pollEvents()) {
+                                WatchEvent.Kind<?> kind = event.kind();
+
+                                if (kind == OVERFLOW) {
+                                    continue;
+                                }
+
+                                Object file = event.context();
+                                if (file instanceof Path) {
+                                    updateFile((Path) file);
+                                } else {
+                                    getLogger().warn("Unknown event context type in file monitor: {}", file.getClass());
+                                }
+                            }
+
+                            if (!key.reset()) {
+                                break;
+                            }
+                        }
+                    } catch (ClosedWatchServiceException ex) {
+                        getLogger().debug("Monitor thread stopped");
+                    } catch (Exception ex) {
+                        getLogger().error("Monitor thread stopped due to unhandled exception", ex);
+                    }
+                }).start();
+            }
+        } catch (Exception ex) {
+            getLogger().error("Failed to start FileStorage monitor", ex);
         }
     }
 
     private void stopMonitor() {
-        getContext().getLogger().debug("Stopping monitor in storage {}", getFullPath());
+        getLogger().debug("Stopping monitor in storage {}", getFullPath());
         if (monitor != null) {
-            monitor.stop();
-            monitor = null;
+            try {
+                monitor.close();
+            } catch (Exception ex) {
+                getLogger().error("Failed to stop file monitor");
+            } finally {
+                monitor = null;
+            }
         }
     }
 
@@ -150,37 +183,35 @@ public class FileStorage extends AbstractStorage implements FileListener {
             this.shelves.clear();
             this.loaders.clear();
 
-            for (FileObject file : getDataDir().getChildren()) {
-                updateFile(file);
-            }
-        } catch (FileSystemException ex) {
+            Files.list(dataDir).forEach(this::updateFile);
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    protected Meta buildDirectoryMeta(FileObject directory) throws FileSystemException {
-        return new MetaBuilder("storage")
-                .putValue("file.timeModified", Instant.ofEpochMilli(directory.getContent().getLastModifiedTime()))
-                .build();
+    protected Meta buildDirectoryMeta(Path directory) {
+        return Meta.empty();
+//        return new MetaBuilder("storage")
+//                .putValue("file.timeModified", Instant.ofEpochMilli(directory.getContent().getLastModifiedTime()))
+//                .build();
     }
 
     /**
      * The method should be overridden in descendants to add new loader types
      *
      * @param file
-     * @throws org.apache.commons.vfs2.FileSystemException
      */
-    protected void updateFile(FileObject file) throws FileSystemException {
-        if (file.getType() == FOLDER) {
+    protected void updateFile(Path file) {
+        if (Files.isDirectory(file)) {
             try {
-                String dirName = file.getName().getBaseName();
+                String dirName = file.getFileName().toString();
                 FileStorage shelf = createShelf(dirName, buildDirectoryMeta(file));
                 shelves.putIfAbsent(dirName, shelf);
                 shelf.refresh();
             } catch (StorageException ex) {
                 LoggerFactory.getLogger(getClass())
                         .error("Can't create a File storage from subdirectory {} at {}",
-                                file.getName(), getDataDir().getName().getPath());
+                                file.getFileName(), getDataDir());
             }
         } else {
             try {
@@ -189,16 +220,14 @@ public class FileStorage extends AbstractStorage implements FileListener {
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
             } catch (Exception ex) {
-                getContext().getLogger()
-                        .warn("Can't create a loader from {}", file.getName());
-            } finally {
-                file.close();
+                getLogger()
+                        .warn("Can't create a loader from {}", file.getFileName());
             }
         }
     }
 
-    protected Loader buildLoader(FileObject file) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), isReadOnly())) {
+    protected Loader buildLoader(Path file) throws Exception {
+        try (FileEnvelope envelope = new FileEnvelope(file, isReadOnly())) {
             switch (envelope.meta().getString("type", "")) {
                 case PointLoader.POINT_LOADER_TYPE:
                     return FilePointLoader.fromEnvelope(this, envelope);
@@ -220,7 +249,6 @@ public class FileStorage extends AbstractStorage implements FileListener {
     public void close() throws Exception {
         super.close();
         stopMonitor();
-        dataDir.close();
     }
 
     @Override
@@ -251,17 +279,9 @@ public class FileStorage extends AbstractStorage implements FileListener {
 
     protected Loader createNewFileLoader(String loaderName, Meta meta, String extension) throws StorageException {
         try {
-//            String name = StorageUtils.loaderName(meta);
-            FileObject dir = getDataDir();
-            //Создаем путь к файлу, если его не существует
-            if (!dir.exists()) {
-                dir.createFolder();
-            }
-
-            FileObject dataFile = dir.resolveFile(loaderName + extension);
-            if (!dataFile.exists()) {
-                dataFile.createFile();
-                try (OutputStream stream = dataFile.getContent().getOutputStream()) {
+            Path dataFile = dataDir.resolve(loaderName + extension);
+            if (!Files.exists(dataFile)) {
+                try (OutputStream stream = Files.newOutputStream(dataFile, WRITE, CREATE_NEW)) {
                     Envelope emptyEnvelope = new EnvelopeBuilder()
                             .setContentType(FILE_STORAGE_ENVELOPE_TYPE)
                             .setMeta(meta)
@@ -290,24 +310,7 @@ public class FileStorage extends AbstractStorage implements FileListener {
     /**
      * @return the dataDir
      */
-    public FileObject getDataDir() {
+    public Path getDataDir() {
         return dataDir;
     }
-
-    @Override
-    public void fileCreated(FileChangeEvent event) throws Exception {
-        //evaluate only new files
-        updateFile(event.getFile());
-    }
-
-    @Override
-    public void fileDeleted(FileChangeEvent event) throws Exception {
-        //do nothing, we suppose that file could not be deleted in the runtime
-    }
-
-    @Override
-    public void fileChanged(FileChangeEvent event) throws Exception {
-        //do nothing
-    }
-
 }

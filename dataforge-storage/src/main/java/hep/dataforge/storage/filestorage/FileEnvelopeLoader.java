@@ -12,8 +12,6 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.AbstractEnvelopeLoader;
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -26,20 +24,20 @@ import java.util.Iterator;
  */
 public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
 
-    public static FileEnvelopeLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            if (FileStorageEnvelopeType.validate(envelope)) {
-                FileEnvelopeLoader res = new FileEnvelopeLoader(storage,
-                        FilenameUtils.getBaseName(file.getName().getBaseName()),
-                        envelope.meta(),
-                        file.getURL().toString());
-                res.setReadOnly(readOnly);
-                return res;
-            } else {
-                throw new StorageException("Is not a valid point loader file");
-            }
-        }
-    }
+//    public static FileEnvelopeLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
+//        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
+//            if (FileStorageEnvelopeType.validate(envelope)) {
+//                FileEnvelopeLoader res = new FileEnvelopeLoader(storage,
+//                        FilenameUtils.getBaseName(file.getName().getBaseName()),
+//                        envelope.meta(),
+//                        file.getURL().toString());
+//                res.setReadOnly(readOnly);
+//                return res;
+//            } else {
+//                throw new StorageException("Is not a valid point loader file");
+//            }
+//        }
+//    }
 
     private final String filePath;
     private FileEnvelope file;
@@ -108,7 +106,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
         checkOpen();
         InputStream st;
         try {
-            st = file.getDataStream();
+            st = file.getData().getStream();
         } catch (IOException ex) {
             throw new RuntimeException(ex);
         }

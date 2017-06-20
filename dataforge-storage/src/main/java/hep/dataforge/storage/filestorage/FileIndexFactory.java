@@ -10,12 +10,12 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.ValueProviderIndex;
 import hep.dataforge.values.ValueProvider;
-import org.apache.commons.vfs2.FileObject;
-import org.apache.commons.vfs2.FileSystemException;
-import org.apache.commons.vfs2.VFS;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Iterator;
 import java.util.function.Function;
 
@@ -105,13 +105,12 @@ public class FileIndexFactory implements Encapsulated {
      * Get or build envelope from uri
      *
      * @return
-     * @throws FileSystemException
      * @throws IOException
      */
     private FileEnvelope getEvelope() throws IOException {
         if (envelope == null) {
-            FileObject file = VFS.getManager().resolveFile(uri);
-            if (file.exists() && file.isReadable()) {
+            Path file = Paths.get(uri);
+            if (Files.isReadable(file)) {
                 envelope = new FileEnvelope(uri, true);
             } else {
                 invalidate();

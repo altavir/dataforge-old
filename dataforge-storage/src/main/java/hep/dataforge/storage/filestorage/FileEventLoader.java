@@ -24,8 +24,8 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.JSONMetaWriter;
 import hep.dataforge.storage.loaders.AbstractLoader;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.function.Predicate;
 
@@ -36,16 +36,12 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
 
     private static final byte[] NEWLINE = {'\r', '\n'};
 
-    public static FileEventLoader fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            return fromEnvelope(storage, envelope);
-        }
-    }
-
     public static FileEventLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
         if (FileStorageEnvelopeType.validate(envelope, EVENT_LOADER_TYPE)) {
-            FileEventLoader res = new FileEventLoader(envelope.getFile().getURL().toString(),
-                    storage, FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+            FileEventLoader res = new FileEventLoader(
+                    envelope.getFile(),
+                    storage,
+                    FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta());
             res.setReadOnly(envelope.isReadOnly());
             return res;
@@ -54,13 +50,13 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
         }
     }
 
-    private final String filePath;
+    private final Path path;
     private FileEnvelope file;
     private Predicate<Event> filter;
 
-    public FileEventLoader(String filePath, Storage storage, String name, Meta annotation) {
+    public FileEventLoader(Path path, Storage storage, String name, Meta annotation) {
         super(storage, name, annotation);
-        this.filePath = filePath;
+        this.path = path;
     }
 
 
@@ -70,7 +66,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
-            file = new FileEnvelope(filePath, isReadOnly());
+            file = new FileEnvelope(path, isReadOnly());
         }
     }
 

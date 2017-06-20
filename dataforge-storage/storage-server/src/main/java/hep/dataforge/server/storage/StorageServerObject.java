@@ -55,7 +55,7 @@ public class StorageServerObject implements ServerObject {
                 ServerObject.super.updateChain(chain);
             });
         } catch (Exception e) {
-            getContext().getLogger().error("Failed to load storage chain", e);
+            getLogger().error("Failed to load storage chain", e);
         }
     }
 

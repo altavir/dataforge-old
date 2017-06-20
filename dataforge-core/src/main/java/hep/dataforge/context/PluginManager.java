@@ -101,7 +101,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     public Optional<Plugin> opt(PluginTag tag) {
         //Check for ambiguous tag
         if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
-            getContext().getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
+            getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
         }
         return stream(true).filter(it -> tag.matches(it.getTag())).findFirst();
     }
@@ -115,7 +115,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     public Optional<Plugin> optInContext(PluginTag tag) {
         //Check for ambiguous tag
         if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
-            getContext().getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
+            getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
         }
         return stream(false).filter(it -> tag.matches(it.getTag())).findFirst();
     }
@@ -147,7 +147,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         Optional<Plugin> loadedPlugin = optInContext(plugin.getTag());
 
         if (loadedPlugin.isPresent()) {
-            getContext().getLogger().warn("Plugin with tag {} already exists in {}", plugin.getTag(), getContext().getName());
+            getLogger().warn("Plugin with tag {} already exists in {}", plugin.getTag(), getContext().getName());
             return (T) loadedPlugin.get();
         } else {
             for (PluginTag tag : plugin.dependsOn()) {
@@ -157,7 +157,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
                     load(tag);
                 }
             }
-            getContext().getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
+            getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
             plugin.attach(getContext());
             plugins.add(plugin);
             return plugin;
@@ -182,7 +182,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         try {
             plugin = type.cast(getPluginRepository().get(tag));
         } catch (Exception ex) {
-            getContext().getLogger().debug("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
+            getLogger().debug("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
             try {
                 plugin = type.newInstance();
             } catch (Exception e) {

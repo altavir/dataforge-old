@@ -15,6 +15,10 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.names.Named;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * The interface for something that encapsulated in context
  *
@@ -24,9 +28,18 @@ package hep.dataforge.context;
 public interface Encapsulated {
     /**
      * Get context for this object
+     *
      * @return
      */
-    default Context getContext(){
+    default Context getContext() {
         return Global.getDefaultContext();
+    }
+
+    default Logger getLogger() {
+        if (this instanceof Named) {
+            return LoggerFactory.getLogger(getLogger().getName() + "." + ((Named) this).getName());
+        } else {
+            return getLogger();
+        }
     }
 }

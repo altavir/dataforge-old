@@ -10,12 +10,12 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.loaders.AbstractBinaryLoader;
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.vfs2.FileObject;
 
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
@@ -28,19 +28,12 @@ import java.util.Map;
  */
 public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoader<T> {
 
-    //FIXME concurrent access currently not available
-    public static <T extends Serializable> FileObjectLoader<T> fromFile(Storage storage, FileObject file, boolean readOnly) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file.getURL().toString(), readOnly)) {
-            return fromEnvelope(storage, envelope);
-        }
-    }
-
     public static <T extends Serializable> FileObjectLoader<T> fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
         if (FileStorageEnvelopeType.validate(envelope, OBJECT_LOADER_TYPE)) {
             FileObjectLoader res = new FileObjectLoader(storage,
-                    FilenameUtils.getBaseName(envelope.getFile().getName().getBaseName()),
+                    FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta(),
-                    envelope.getFile().getURL().toString());
+                    envelope.getFile());
             res.setReadOnly(envelope.isReadOnly());
             return res;
         } else {
@@ -48,7 +41,7 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
         }
     }
 
-    private final String filePath;
+    private final Path path;
     private final Map<String, T> dataMap = new HashMap<>();
 
     /**
@@ -56,9 +49,9 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
      */
     private FileEnvelope file;
 
-    public FileObjectLoader(Storage storage, String name, Meta meta, String uri) {
+    public FileObjectLoader(Storage storage, String name, Meta meta, Path path) {
         super(storage, name, meta);
-        this.filePath = uri;
+        this.path = path;
     }
 
     @Override
@@ -67,7 +60,7 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
-            file = new FileEnvelope(filePath, isReadOnly());
+            file = buildEnvelope(isReadOnly());
         }
     }
 
@@ -106,8 +99,9 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
         return dataMap;
     }
 
+    @SuppressWarnings("unchecked")
     protected synchronized Map<String, T> readDataMap() throws StorageException {
-        try (ObjectInputStream ois = new ObjectInputStream(getEnvelope().getDataStream())) {
+        try (ObjectInputStream ois = new ObjectInputStream(getEnvelope().getData().getStream())) {
             return (Map<String, T>) ois.readObject();
         } catch (Exception ex) {
             return new HashMap<>();
@@ -133,8 +127,8 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
         return this.file;
     }
 
-    private FileEnvelope buildEnvelope(boolean readOnly)  {
-        return new FileEnvelope(filePath, readOnly);
+    private FileEnvelope buildEnvelope(boolean readOnly) {
+        return new FileEnvelope(path, readOnly);
     }
 
     @Override

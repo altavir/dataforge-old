@@ -11,7 +11,6 @@ import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Misc;
 import hep.dataforge.values.Value;
-import org.slf4j.Logger;
 
 import javax.cache.Cache;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
@@ -47,10 +46,6 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
         this.valueType = valueType;
         cacheDir = new File(manager.getRootCacheDir(), name);
         scanDirectory();
-    }
-
-    private Logger getLogger() {
-        return getContext().getLogger();
     }
 
     private Envelope read(File file) {
