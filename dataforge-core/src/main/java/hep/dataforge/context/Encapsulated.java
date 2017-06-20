@@ -37,9 +37,9 @@ public interface Encapsulated {
 
     default Logger getLogger() {
         if (this instanceof Named) {
-            return LoggerFactory.getLogger(getLogger().getName() + "." + ((Named) this).getName());
+            return LoggerFactory.getLogger(getContext().getLogger().getName() + "." + ((Named) this).getName());
         } else {
-            return getLogger();
+            return getContext().getLogger();
         }
     }
 }
