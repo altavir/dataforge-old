@@ -1,6 +1,5 @@
 package hep.dataforge.io.envelopes
 
-import hep.dataforge.data.binary.Binary
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import spock.lang.Specification
@@ -22,6 +21,6 @@ class EnvelopeFormatSpec extends Specification {
         def bais = new ByteArrayInputStream(reaArray)
         Envelope res = new DefaultEnvelopeReader().read(bais)
         then:
-        Binary.readToBuffer(res.data).array() == data
+        res.data.buffer.array() == data
     }
 }

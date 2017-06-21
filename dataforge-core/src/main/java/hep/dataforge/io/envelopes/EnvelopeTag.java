@@ -98,7 +98,7 @@ public class EnvelopeTag {
         Map<String, Value> res = new HashMap<>();
 
         //reading type
-        int type = buffer.getInt();
+        int type = buffer.getInt(0);
         EnvelopeType envelopeType = EnvelopeType.resolve(type);
 
         if (envelopeType != null) {
@@ -125,7 +125,8 @@ public class EnvelopeTag {
         res.put(Envelope.DATA_LENGTH_KEY, Value.of(dataLength));
 
         byte[] endSequence = new byte[4];
-        buffer.get(endSequence, 14, 4);
+        buffer.position(14);
+        buffer.get(endSequence);
 
         if (!Arrays.equals(endSequence, END_SEQUENCE)) {
             LoggerFactory.getLogger(EnvelopeTag.class).warn("Wrong ending sequence for envelope tag");
@@ -274,12 +275,12 @@ public class EnvelopeTag {
         Map<String, Value> header;
 
         if (Arrays.equals(lead.array(), LEGACY_START_SEQUENCE)) {
-            length += 28;
+            length = 30;
             ByteBuffer legacyBytes = ByteBuffer.allocate(28);
             channel.read(legacyBytes);
             header = readLegacyHeader(legacyBytes);
         } else if (Arrays.equals(lead.array(), START_SEQUENCE)) {
-            length += 18;
+            length = 20;
             ByteBuffer bytes = ByteBuffer.allocate(18);
             channel.read(bytes);
             header = readHeader(bytes);

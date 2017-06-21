@@ -15,7 +15,6 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.Envelope;
@@ -63,15 +62,15 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public FileEnvelope(String uri, boolean readOnly) {
-        this(Paths.get(URI.create(uri)),readOnly);
+        this(Paths.get(URI.create(uri)), readOnly);
     }
 
     public Path getFile() {
         return file;
     }
 
-    private SeekableByteChannel getChannel() throws IOException {
-        if (channel == null) {
+    private FileChannel getChannel() throws IOException {
+        if (channel == null || !channel.isOpen()) {
             channel = FileChannel.open(file, READ);
         }
         return channel;
@@ -98,7 +97,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     @Override
-    public Binary getData() {
+    public FileBinary getData() {
         try {
             long dataSize = getTag().getDataSize();
             if (dataSize == INFINITE_DATA_SIZE) {
@@ -115,7 +114,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     public synchronized Meta meta() {
         if (meta == null) {
             try (InputStream stream = Channels.newInputStream(getChannel())) {
-                stream.skip(getTag().getLength());
+//                stream.skip(getTag().getLength());
                 meta = type.getReader().read(stream).meta();
             } catch (Exception e) {
                 throw new RuntimeException("Can't read meta from file Envelope", e);
@@ -124,18 +123,16 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         return meta;
     }
 
-    public String readLine(int offset) throws IOException {
-        getChannel().position(offset);
-        return readLine();
-    }
-
     /**
-     * Read the line in current position unescaping new line symbols
+     * Read line starting at given offset
      *
+     * @param offset
      * @return
      * @throws IOException
      */
-    public String readLine() throws IOException {
+    public synchronized String readLine(int offset) throws IOException {
+        //TODO move to binary?
+        getChannel().position(getDataOffset() + offset);
         try (Reader stream = Channels.newReader(getChannel(), "UTF-8")) {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nextChar = stream.read();
@@ -147,14 +144,10 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         }
     }
 
-    public void seek(long pos) throws IOException {
-        getChannel().position(pos);
-    }
 
     public ByteBuffer readBlock(int pos, int length) throws IOException {
-        getChannel().position(pos);
         ByteBuffer block = ByteBuffer.allocate(length);
-        getChannel().read(block);
+        getChannel().read(block, pos);
         return block;
     }
 
@@ -171,7 +164,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         }
     }
 
-    public long readerPos() throws IOException {
+    private long readerPos() throws IOException {
         return getChannel().position();
     }
 
@@ -180,7 +173,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      *
      * @throws IOException
      */
-    public void resetPos() throws IOException {
+    private void resetPos() throws IOException {
         getChannel().position(getDataOffset());
     }
 
@@ -225,7 +218,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         append((line.replace("\n", "\\n") + NEWLINE).getBytes());
     }
 
-    public long eofPos() throws IOException {
+    private long eofPos() throws IOException {
         return getChannel().size();
     }
 
@@ -233,7 +226,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         return readOnly;
     }
 
-    public boolean isEof() {
+    private boolean isEof() {
         try {
             return readerPos() == eofPos();
         } catch (IOException ex) {

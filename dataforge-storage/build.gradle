@@ -10,7 +10,7 @@ dependencies {
     compile project(':dataforge-core')
     compile 'org.glassfish:javax.json:1.0+'
     compile 'commons-io:commons-io:2.+'
-    // https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j
+     // https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j
     compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.23'
 
 

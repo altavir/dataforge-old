@@ -64,7 +64,12 @@ public abstract class MapIndex<T, K> implements ValueIndex<T> {
     @Override
     public Stream<T> pull(Value value) throws StorageException {
         update();
-        return map.get(value).stream().map(this::transform);
+        List<K> list = map.get(value);
+        if(list == null){
+            return Stream.empty();
+        } else {
+            return list.stream().map(this::transform);
+        }
     }
 
     @Override

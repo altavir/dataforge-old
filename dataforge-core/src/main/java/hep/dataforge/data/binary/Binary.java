@@ -19,21 +19,6 @@ import java.nio.channels.ReadableByteChannel;
  */
 public interface Binary {
     //TODO add randomAcessBinary
-    
-    /**
-     * Read binary content to single ByteBuffer
-     * @param binary
-     * @return 
-     */
-    static ByteBuffer readToBuffer(Binary binary) throws IOException{
-        if(binary.size() > 0){
-            ByteBuffer buffer = ByteBuffer.allocate((int) binary.size());
-            binary.getChannel().read(buffer);
-            return buffer;
-        } else {
-            throw new IOException("Can not convert binary of undefined size to buffer");
-        }
-    }
 
     /**
      * Get blocking input stream for this binary
@@ -48,6 +33,21 @@ public interface Binary {
      * @return
      */
     ReadableByteChannel getChannel() throws IOException;
+
+    /**
+     * Read the content of this binary to a single byte buffer.
+     * @return
+     * @throws IOException
+     */
+    default ByteBuffer getBuffer() throws IOException {
+        if (size() >= 0) {
+            ByteBuffer buffer = ByteBuffer.allocate((int) size());
+            getChannel().read(buffer);
+            return buffer;
+        } else {
+            throw new IOException("Can not convert binary of undefined size to buffer");
+        }
+    }
 
     /**
      * The size of this binary. Negative value corresponds to undefined size.

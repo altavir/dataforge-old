@@ -13,19 +13,18 @@ import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 
 
-// TODO support lazy data extraction
 public class BufferedBinary implements Binary {
-    
+
     private final byte[] buffer;
 
     public BufferedBinary(ByteBuffer buffer) {
         this.buffer = buffer.array();
     }
-    
+
     public BufferedBinary(byte[] buffer) {
         this.buffer = buffer;
     }
-    
+
     @Override
     public InputStream getStream() throws IOException {
         return new ByteArrayInputStream(buffer);
@@ -37,8 +36,13 @@ public class BufferedBinary implements Binary {
     }
 
     @Override
+    public ByteBuffer getBuffer() throws IOException {
+        return ByteBuffer.wrap(buffer);
+    }
+
+    @Override
     public long size() throws IOException {
         return buffer.length;
     }
-    
+
 }

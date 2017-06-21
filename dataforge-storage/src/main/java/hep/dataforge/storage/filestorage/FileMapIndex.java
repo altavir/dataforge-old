@@ -14,6 +14,7 @@ import hep.dataforge.values.ValueUtils;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
@@ -26,8 +27,16 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 
     private final transient Context context;
     private final Supplier<FileEnvelope> envelopeProvider;
-    private long lastIndexedPosition = -1;
-    private long lastSavedPosition = -1;
+
+    /**
+     * The size of the data when last indexed
+     */
+    private int indexedSize = 0;
+
+    /**
+     * The size of the data when last saved
+     */
+    private long savedSize = -1;
 
     public FileMapIndex(Context context, Supplier<FileEnvelope> envelopeProvider) {
         this.context = context;
@@ -42,22 +51,29 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             }
             FileEnvelope env = getEnvelope();
             if (!isUpToDate(env)) {
-                if (lastIndexedPosition >= 0) {
-                    env.seek(lastIndexedPosition);
-                } else {
-                    env.resetPos();
-                }
-                while (!env.isEof()) {
-                    long pos = env.readerPos();
-                    String str = env.readLine();
-                    //skipping comments
-                    if (!str.trim().startsWith("#") && !str.trim().isEmpty()) {
-                        T entry = readEntry(str);
-                        Value indexValue = getIndexedValue(entry);
-                        putToIndex(indexValue, (int) pos);
+                ByteBuffer buffer = env.getData().getBuffer(indexedSize);
+                buffer.position(0);
+                int linePos = 0;
+                ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                while (buffer.hasRemaining()) {
+                    byte next = buffer.get();
+                    if (next == '\n') {
+                        String line = new String (baos.toByteArray(), "UTF8");
+                        String str = line.trim();
+                        if (!str.startsWith("#") && !str.isEmpty()) {
+                            T entry = readEntry(str);
+                            Value indexValue = getIndexedValue(entry);
+                            putToIndex(indexValue, linePos);
+                        }
+                        //resetting collection
+                        baos.reset();
+                        linePos = buffer.position();
+                    } else {
+                        baos.write(next);
                     }
+
                 }
-                lastIndexedPosition = env.eofPos();
+                indexedSize = buffer.position();
             }
             if (needsSave()) {
                 saveIndex();
@@ -72,7 +88,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
     protected abstract T readEntry(String str);
 
     protected boolean needsSave() {
-        return lastIndexedPosition - lastSavedPosition >= 200;
+        return indexedSize - savedSize >= 200;
     }
 
     @Override
@@ -85,7 +101,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
     }
 
     private boolean isUpToDate(FileEnvelope env) throws IOException {
-        return env.eofPos() == this.lastIndexedPosition;
+        return env.getData().size() == this.indexedSize;
     }
 
     @Override
@@ -94,7 +110,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         if (indexFile.exists()) {
             indexFile.delete();
         }
-        lastIndexedPosition = -1;
+        indexedSize = 0;
         super.invalidate();
     }
 
@@ -128,22 +144,22 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         if (indexFile.exists()) {
             LoggerFactory.getLogger(getClass()).info("Loading index from file...");
             try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(indexFile))) {
-                long position = ois.readLong();
+                int position = (int) ois.readLong();
                 TreeMap<Value, List<Integer>> newMap = new TreeMap<>(ValueUtils.VALUE_COMPARATPR);
-                while(ois.available()>0){
+                while (ois.available() > 0) {
                     Value val = ValueUtils.readValue(ois);
                     short num = ois.readShort();
                     List<Integer> integers = new ArrayList<>();
                     for (int i = 0; i < num; i++) {
                         integers.add(ois.readInt());
                     }
-                    newMap.put(val,integers);
+                    newMap.put(val, integers);
                 }
 
 
-                if (position > 0 && position >= this.lastIndexedPosition && newMap != null) {
+                if (position > 0 && position >= this.indexedSize) {
                     this.map = newMap;
-                    this.lastIndexedPosition = position;
+                    this.indexedSize = position;
                 }
             } catch (IOException | ClassNotFoundException ex) {
                 LoggerFactory.getLogger(getClass()).error("Failed to read index file. Removing index file", ex);
@@ -170,7 +186,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 indexFile.createNewFile();
             }
             try (ObjectOutputStream ous = new ObjectOutputStream(new FileOutputStream(indexFile))) {
-                ous.writeLong(lastIndexedPosition);
+                ous.writeLong(indexedSize);
                 map.forEach((value, integers) -> {
                     try {
                         ValueUtils.writeValue(ous, value);
@@ -183,7 +199,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                     }
                 });
             }
-            lastSavedPosition = lastIndexedPosition;
+            savedSize = indexedSize;
         } catch (IOException ex) {
             LoggerFactory.getLogger(getClass()).error("Failed to write index file. Removing index file.", ex);
             if (indexFile.exists()) {

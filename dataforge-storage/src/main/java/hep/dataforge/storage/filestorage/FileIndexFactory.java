@@ -20,7 +20,7 @@ import java.util.Iterator;
 import java.util.function.Function;
 
 /**
- * A factory for file indeces
+ * A factory for file indexes
  *
  * @author Alexander Nozik
  */
@@ -73,28 +73,7 @@ public class FileIndexFactory implements Encapsulated {
     protected <T> Iterator<T> buildIterator(Function<String, T> transformation) {
         try {
             FileEnvelope env = getEvelope();
-            env.resetPos();
-            return new Iterator<T>() {
-                @Override
-                public boolean hasNext() {
-                    try {
-                        return env.readerPos() < env.eofPos();
-                    } catch (IOException ex) {
-                        invalidate();
-                        throw new RuntimeException("Cant operate file envelope", ex);
-                    }
-                }
-
-                @Override
-                public T next() {
-                    try {
-                        return transformation.apply(env.readLine());
-                    } catch (IOException ex) {
-                        invalidate();
-                        throw new RuntimeException("Cant operate file envelope", ex);
-                    }
-                }
-            };
+            return env.getData().lines().map(transformation).iterator();
         } catch (IOException ex) {
             invalidate();
             throw new RuntimeException("Cant operate file envelope", ex);

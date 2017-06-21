@@ -22,7 +22,9 @@ import hep.dataforge.storage.loaders.AbstractStateLoader;
 import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Map;
@@ -93,10 +95,9 @@ public class FileStateLoader extends AbstractStateLoader {
     @Override
     protected synchronized void update() throws StorageException {
         try {
-            getFile().resetPos();
+            BufferedReader reader = new BufferedReader(new InputStreamReader(getFile().getData().getStream()));
             states.clear();
-            while (getFile().readerPos() < getFile().eofPos()) {
-                String line = getFile().readLine().trim();
+            reader.lines().forEach(line -> {
                 if (!line.isEmpty()) {
                     Matcher match = Pattern.compile("(?<key>[^=]*)\\s*=\\s*(?<value>.*);").matcher(line);
                     if (match.matches()) {
@@ -105,7 +106,7 @@ public class FileStateLoader extends AbstractStateLoader {
                         states.put(key, value);
                     }
                 }
-            }
+            });
             upToDate = true;
         } catch (Exception ex) {
             throw new StorageException(ex);

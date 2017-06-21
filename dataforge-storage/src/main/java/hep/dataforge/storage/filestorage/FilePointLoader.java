@@ -23,7 +23,9 @@ import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.nio.channels.Channels;
 import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.function.Supplier;
@@ -68,12 +70,15 @@ public class FilePointLoader extends AbstractPointLoader {
         }
         // read format from first line if it is not defined in meta
         if (getFormat() == null) {
-            FileEnvelope reader = buildEnvelope(true);
-            while (!reader.isEof()) {
-                String line = reader.readLine();
-                if (line.startsWith("#f")) {
-                    format = TableFormat.forNames(Names.of(line.substring(2).trim().split("[^\\w']+")));
-                }
+            try (FileEnvelope envelope = buildEnvelope(true)) {
+                new BufferedReader(Channels.newReader(envelope.getData().getChannel(), "UTF8"))
+                        .lines()
+                        .findFirst()
+                        .ifPresent(line -> {
+                            if (line.startsWith("#f")) {
+                                format = TableFormat.forNames(Names.of(line.substring(2).trim().split("[^\\w']+")));
+                            }
+                        });
             }
         }
     }
