@@ -25,6 +25,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.StorageUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,6 +52,10 @@ import static java.nio.file.StandardWatchEventKinds.*;
         info = "Enable file system monitoring for synchronous acess to single storage from different instances")
 @ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage {
+
+    public static String entryName(Path path){
+        return FilenameUtils.getBaseName(path.getFileName().toString());
+    }
 
     static {
         //set up slf4j bridge and logging level
