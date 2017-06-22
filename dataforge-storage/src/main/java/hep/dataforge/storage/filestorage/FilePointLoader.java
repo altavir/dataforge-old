@@ -95,7 +95,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     private FileEnvelope buildEnvelope(boolean readOnly) {
-        return new FileEnvelope(path, readOnly);
+        return FileEnvelope.open(path, readOnly);
     }
 
     /**

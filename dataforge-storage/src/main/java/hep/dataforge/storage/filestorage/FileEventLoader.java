@@ -66,7 +66,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
-            file = new FileEnvelope(path, isReadOnly());
+            file = FileEnvelope.open(path, isReadOnly());
         }
     }
 

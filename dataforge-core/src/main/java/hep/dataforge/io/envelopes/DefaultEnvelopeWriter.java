@@ -37,7 +37,7 @@ import static hep.dataforge.io.envelopes.Envelope.META_LENGTH_KEY;
  */
 public class DefaultEnvelopeWriter implements EnvelopeWriter {
     private static final Set<String> TAG_PROPERTIES = new HashSet<>(
-            Arrays.asList(new String[]{Envelope.TYPE_KEY, Envelope.META_TYPE_KEY, Envelope.META_LENGTH_KEY, Envelope.DATA_LENGTH_KEY})
+            Arrays.asList(Envelope.TYPE_KEY, Envelope.META_TYPE_KEY, Envelope.META_LENGTH_KEY, Envelope.DATA_LENGTH_KEY)
     );
 
     public static final DefaultEnvelopeWriter instance = new DefaultEnvelopeWriter();

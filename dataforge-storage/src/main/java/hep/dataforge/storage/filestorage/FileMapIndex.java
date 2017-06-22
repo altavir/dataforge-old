@@ -132,9 +132,6 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         return context;
     }
 
-//    private void setContext(Context context) {
-//        this.context = context;
-//    }
 
     /**
      * Load index content from external file

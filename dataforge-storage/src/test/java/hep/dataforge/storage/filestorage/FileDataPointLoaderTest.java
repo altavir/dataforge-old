@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.LoaderFactory;
+import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.MapPoint;
@@ -115,6 +116,8 @@ public class FileDataPointLoaderTest {
         System.out.println("pull consistency check");
         DataPoint dp = index.pull(24, 26).findFirst().get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
+
+        ((MapIndex)index).invalidate();
     }
 
 }

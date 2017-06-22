@@ -227,7 +227,7 @@ public class FileStorage extends AbstractStorage {
     }
 
     protected Loader buildLoader(Path file) throws Exception {
-        try (FileEnvelope envelope = new FileEnvelope(file, isReadOnly())) {
+        try (FileEnvelope envelope = FileEnvelope.open(file, isReadOnly())) {
             switch (envelope.meta().getString("type", "")) {
                 case PointLoader.POINT_LOADER_TYPE:
                     return FilePointLoader.fromEnvelope(this, envelope);

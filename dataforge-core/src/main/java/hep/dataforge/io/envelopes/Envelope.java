@@ -34,20 +34,13 @@ import hep.dataforge.meta.Metoid;
 @ValueDef(name = "@envelope.type", info = "Type of the envelope content")
 @ValueDef(name = "@envelope.description", info = "Description of the envelope content")
 public interface Envelope extends Metoid {
-    //Constants
     /**
-     * Properties keys
+     * Property keys
      */
     String TYPE_KEY = "type";
     String META_TYPE_KEY = "metaType";
     String META_LENGTH_KEY = "metaLength";
     String DATA_LENGTH_KEY = "dataLength";
-
-//    /**
-//     * Properties are used only for envelope transport and interpretation
-//     * @return
-//     */
-//    Map<String, Value> getProperties();
 
     /**
      * Meta part of the envelope

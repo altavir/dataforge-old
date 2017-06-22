@@ -16,17 +16,11 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.FileBinary;
-import hep.dataforge.io.envelopes.DefaultEnvelopeType;
-import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.EnvelopeTag;
-import hep.dataforge.io.envelopes.EnvelopeType;
+import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -45,41 +39,62 @@ import static java.nio.file.StandardOpenOption.*;
  * @author Alexander Nozik
  */
 public class FileEnvelope implements Envelope, AutoCloseable {
-
     public static final long INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1);
     private static final String NEWLINE = "\r\n";
+
+    /**
+     * Create empty envelope with given meta
+     *
+     * @param path
+     * @param meta
+     * @return
+     */
+    public static FileEnvelope createEmpty(Path path, Meta meta) throws IOException {
+        try (OutputStream stream = Files.newOutputStream(path, CREATE, WRITE)) {
+            new DefaultEnvelopeWriter().write(stream, new EnvelopeBuilder().setMeta(meta));
+        }
+        return new FileEnvelope(path, false);
+    }
+
+    public static FileEnvelope open(Path path, boolean readOnly) {
+        if (!Files.exists(path)) {
+            throw new RuntimeException("File envelope does not exist");
+        }
+        return new FileEnvelope(path, readOnly);
+    }
+
+    public static FileEnvelope open(String uri, boolean readOnly) {
+        return open(Paths.get(URI.create(uri)), readOnly);
+    }
 
     private final boolean readOnly;
     private Path file;
     private Meta meta;
-    private FileChannel channel;
+    private FileChannel readChannel;
+    private FileChannel writeChannel;
     private EnvelopeTag tag;
     private EnvelopeType type = DefaultEnvelopeType.instance;
 
-    public FileEnvelope(Path path, boolean readOnly) {
+    private FileEnvelope(Path path, boolean readOnly) {
         this.file = path;
         this.readOnly = readOnly;
-    }
-
-    public FileEnvelope(String uri, boolean readOnly) {
-        this(Paths.get(URI.create(uri)), readOnly);
     }
 
     public Path getFile() {
         return file;
     }
 
-    private FileChannel getChannel() throws IOException {
-        if (channel == null || !channel.isOpen()) {
-            channel = FileChannel.open(file, READ);
+    private FileChannel getReadChannel() throws IOException {
+        if (readChannel == null || !readChannel.isOpen()) {
+            readChannel = FileChannel.open(file, READ);
         }
-        return channel;
+        return readChannel;
     }
 
 
     private EnvelopeTag getTag() throws IOException {
         if (tag == null) {
-            tag = EnvelopeTag.from(getChannel());
+            tag = EnvelopeTag.from(getReadChannel());
         }
         return tag;
     }
@@ -89,11 +104,16 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     public synchronized void close() throws Exception {
         tag = null;
         meta = null;
-        if (channel != null) {
-            LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope " + file);
-            channel.close();
-            channel = null;
+        LoggerFactory.getLogger(getClass()).trace("Closing FileEnvelope " + file);
+        if (readChannel != null) {
+            readChannel.close();
+            readChannel = null;
         }
+        if (writeChannel != null) {
+            writeChannel.close();
+            writeChannel = null;
+        }
+
     }
 
     @Override
@@ -101,7 +121,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         try {
             long dataSize = getTag().getDataSize();
             if (dataSize == INFINITE_DATA_SIZE) {
-                dataSize = getChannel().size() - getDataOffset();
+                dataSize = getReadChannel().size() - getDataOffset();
             }
             //getRandomAccess().seek(getDataOffset());
             return new FileBinary(file, (int) getDataOffset(), (int) dataSize);
@@ -113,7 +133,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     @Override
     public synchronized Meta meta() {
         if (meta == null) {
-            try (InputStream stream = Channels.newInputStream(getChannel())) {
+            try (InputStream stream = Channels.newInputStream(getReadChannel())) {
 //                stream.skip(getTag().getLength());
                 meta = type.getReader().read(stream).meta();
             } catch (Exception e) {
@@ -132,11 +152,11 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      */
     public synchronized String readLine(int offset) throws IOException {
         //TODO move to binary?
-        getChannel().position(getDataOffset() + offset);
-        try (Reader stream = Channels.newReader(getChannel(), "UTF-8")) {
+        getReadChannel().position(getDataOffset() + offset);
+        try (Reader stream = Channels.newReader(getReadChannel(), "UTF-8")) {
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             int nextChar = stream.read();
-            while (getChannel().position() < getChannel().size() && nextChar != '\r') {
+            while (getReadChannel().position() < getReadChannel().size() && nextChar != '\r') {
                 buffer.write(nextChar);
                 nextChar = stream.read();
             }
@@ -147,7 +167,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     public ByteBuffer readBlock(int pos, int length) throws IOException {
         ByteBuffer block = ByteBuffer.allocate(length);
-        getChannel().read(block, pos);
+        getReadChannel().read(block, pos);
         return block;
     }
 
@@ -165,7 +185,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     private long readerPos() throws IOException {
-        return getChannel().position();
+        return getReadChannel().position();
     }
 
     /**
@@ -174,7 +194,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     private void resetPos() throws IOException {
-        getChannel().position(getDataOffset());
+        getReadChannel().position(getDataOffset());
     }
 
     private synchronized void setDataSize(SeekableByteChannel channel, int size) throws IOException {
@@ -193,18 +213,23 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @throws IOException
      */
     synchronized public void append(ByteBuffer bytes) throws IOException {
-        if (isReadOnly()) {
-            throw new IOException("Trying to write to readonly file " + file);
-        } else {
-            try (SeekableByteChannel channel = Files.newByteChannel(file, WRITE, APPEND)) {
-                channel.position(eofPos());
-                channel.write(bytes);
-                setDataSize(channel, (int) (channel.size() - getDataOffset()));
-            }
-        }
+        SeekableByteChannel channel = getWriteChannel();
+        channel.position(eofPos());
+        channel.write(bytes);
+        setDataSize(channel, (int) (channel.size() - getDataOffset()));
     }
 
-    public void append(byte[] bytes) throws IOException {
+    private SeekableByteChannel getWriteChannel() throws IOException {
+        if (writeChannel == null || !writeChannel.isOpen()) {
+            if (isReadOnly()) {
+                throw new IOException("Trying to write to readonly file " + file);
+            }
+            writeChannel = FileChannel.open(file, WRITE);
+        }
+        return writeChannel;
+    }
+
+    public synchronized void append(byte[] bytes) throws IOException {
         this.append(ByteBuffer.wrap(bytes));
     }
 
@@ -219,7 +244,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     private long eofPos() throws IOException {
-        return getChannel().size();
+        return getReadChannel().size();
     }
 
     public boolean isReadOnly() {
@@ -250,6 +275,6 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     public boolean isOpen() {
-        return channel != null;
+        return readChannel != null || writeChannel != null;
     }
 }

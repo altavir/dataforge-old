@@ -69,7 +69,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
             this.meta = getFile().meta();
         }
         if (!isOpen()) {
-            file = new FileEnvelope(filePath, isReadOnly());
+            file = FileEnvelope.open(filePath, isReadOnly());
         }
     }
 

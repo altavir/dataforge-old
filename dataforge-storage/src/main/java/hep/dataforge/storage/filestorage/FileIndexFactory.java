@@ -90,7 +90,7 @@ public class FileIndexFactory implements Encapsulated {
         if (envelope == null) {
             Path file = Paths.get(uri);
             if (Files.isReadable(file)) {
-                envelope = new FileEnvelope(uri, true);
+                envelope = FileEnvelope.open(uri, true);
             } else {
                 invalidate();
                 throw new RuntimeException("Can't read file " + uri);
