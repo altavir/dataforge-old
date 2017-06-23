@@ -25,6 +25,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.StorageUtils;
+import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -77,7 +79,13 @@ public class FileStorage extends AbstractStorage {
      */
     public FileStorage(Context context, Meta config) throws StorageException {
         super(context, config);
-        this.dataDir = Paths.get(config.getString("path", "."));
+        try {
+            URI uri = config.optValue("path").map(Value::stringValue).map(URI::create)
+                    .orElse(context.io().getWorkDirectory().toURI());
+            this.dataDir = Paths.get(uri);
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Malformed URL",e);
+        }
         startup();
     }
 
@@ -92,7 +100,8 @@ public class FileStorage extends AbstractStorage {
     protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
         super(parent, dirName, config);
         //replacing points with path separators we build directory structure
-        dataDir = Paths.get(dirName.replace(".", File.separator));
+
+        dataDir = parent.getDataDir().resolve(dirName.replace(".", File.separator));
         startup();
     }
 

@@ -69,7 +69,7 @@ public class EnvelopeTag {
     private Map<String, Value> readLegacyHeader(ByteBuffer buffer) throws IOException {
         Map<String, Value> res = new HashMap<>();
 
-        int type = buffer.getInt();
+        int type = buffer.getInt(0);
         res.put(Envelope.TYPE_KEY, Value.of(type));
 
         short metaTypeCode = buffer.getShort(8);
