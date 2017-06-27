@@ -28,6 +28,10 @@ public class FileStorageFactory implements StorageType {
                 .setValue("monitor", monitor);
     }
 
+    public static MetaBuilder buildStorageMeta(File file, boolean readOnly, boolean monitor) {
+        return buildStorageMeta(file.toURI(),readOnly,monitor);
+    }
+
     /**
      * Build local storage with Global context. Used for tests.
      * @param file

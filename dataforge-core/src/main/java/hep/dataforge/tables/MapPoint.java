@@ -28,6 +28,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
  * Реализация DataPoint на HashMap. В конструкторе дополнительно проверяется,
@@ -38,6 +39,10 @@ import java.util.Optional;
  */
 
 public class MapPoint implements DataPoint, MetaMorph {
+
+    public static MapPoint fromMap(Map<String, Object> map){
+        return new MapPoint(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry->Value.of(entry.getValue()))));
+    }
 
     private Map<String, Value> valueMap;
 

@@ -52,10 +52,14 @@ class Grind {
      * @return
      */
     static MetaBuilder buildMeta(String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        def metaSpec = new GrindMetaBuilder()
-        def metaExec = cl.rehydrate(metaSpec, null, null);
-        metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
-        metaSpec.invokeMethod(nodeName, metaExec) as MetaBuilder
+        if(cl != null) {
+            def metaSpec = new GrindMetaBuilder()
+            def metaExec = cl.rehydrate(metaSpec, null, null);
+            metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
+            metaSpec.invokeMethod(nodeName, metaExec) as MetaBuilder
+        } else {
+            return new MetaBuilder(nodeName)
+        }
     }
 
     /**
