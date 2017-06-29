@@ -34,7 +34,9 @@ import static java.util.Arrays.sort;
  */
 public class MatrixOperations {
 
-    /** Constant <code>MATRIX_SINGULARITY_THRESHOLD="maths.singularity_threshold"</code> */
+    /**
+     * Constant <code>MATRIX_SINGULARITY_THRESHOLD="maths.singularity_threshold"</code>
+     */
     public static String MATRIX_SINGULARITY_THRESHOLD = "maths.singularity_threshold";
 
     /**
