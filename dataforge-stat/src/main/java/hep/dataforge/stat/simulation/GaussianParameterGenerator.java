@@ -20,7 +20,7 @@ import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 
 /**
@@ -45,7 +45,7 @@ public class GaussianParameterGenerator implements ParameterGenerator {
      * @param means
      * @param covariance
      */
-    public GaussianParameterGenerator(NamedValueSet means, NamedMatrix covariance) {
+    public GaussianParameterGenerator(Values means, NamedMatrix covariance) {
         if (!covariance.names().contains(means.names())) {
             throw new IllegalArgumentException("Covariance names must include average values names");
         }
@@ -74,7 +74,7 @@ public class GaussianParameterGenerator implements ParameterGenerator {
     }
 
     @Override
-    public NamedValueSet generate() {
+    public Values generate() {
         double[] vector = distribution.sample();
         return new NamedVector(names, vector);
     }

@@ -15,11 +15,11 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
 
@@ -132,7 +132,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
     @Override
-    protected void pushPoint(DataPoint dp) throws StorageException {
+    protected void pushPoint(Values dp) throws StorageException {
         try {
             if (!getEnvelope().hasData()) {
                 getEnvelope().appendLine(IOUtils.formatCaption(getFormat()));
@@ -155,18 +155,18 @@ public class FilePointLoader extends AbstractPointLoader {
 
     @NotNull
     @Override
-    public Iterator<DataPoint> iterator() {
+    public Iterator<Values> iterator() {
         try {
             FileEnvelope reader = buildEnvelope(true);
             LineIterator iterator = new LineIterator(reader.getData().getStream(), "UTF-8");
-            return new Iterator<DataPoint>() {
+            return new Iterator<Values>() {
                 @Override
                 public boolean hasNext() {
                     return iterator.hasNext();
                 }
 
                 @Override
-                public DataPoint next() {
+                public Values next() {
                     return transform(iterator.next());
                 }
             };
@@ -176,12 +176,12 @@ public class FilePointLoader extends AbstractPointLoader {
 
     }
 
-    private DataPoint transform(String line) {
+    private Values transform(String line) {
         return getParser().parse(line);
     }
 
     @Override
-    public ValueIndex<DataPoint> buildIndex(String name) {
+    public ValueIndex<Values> buildIndex(String name) {
         if (name == null || name.isEmpty()) {
             //use point number index
             return new DefaultIndex<>(this);
@@ -191,7 +191,7 @@ public class FilePointLoader extends AbstractPointLoader {
     }
 
 
-    private class FilePointIndex extends FileMapIndex<DataPoint> {
+    private class FilePointIndex extends FileMapIndex<Values> {
 
         private final String valueName;
 
@@ -201,7 +201,7 @@ public class FilePointLoader extends AbstractPointLoader {
         }
 
         @Override
-        protected Value getIndexedValue(DataPoint entry) {
+        protected Value getIndexedValue(Values entry) {
             return entry.getValue(valueName);
         }
 
@@ -211,7 +211,7 @@ public class FilePointLoader extends AbstractPointLoader {
         }
 
         @Override
-        protected DataPoint readEntry(String str) {
+        protected Values readEntry(String str) {
             return FilePointLoader.this.transform(str);
         }
 

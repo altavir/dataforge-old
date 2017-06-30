@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * <p>GaussianPrior class.</p>
@@ -51,7 +51,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NameNotFoundException {
+    public double derivValue(String derivParName, Values pars) throws NotDefinedException, NameNotFoundException {
         double value = pars.getDouble(parName);
         double dif = value-mean;
 
@@ -86,7 +86,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) throws NameNotFoundException {
+    public double value(Values pars) throws NameNotFoundException {
 //        return this.gaussian.value(pars.getDouble(parName));
         double value = pars.getDouble(parName);
         double dif = value-mean;

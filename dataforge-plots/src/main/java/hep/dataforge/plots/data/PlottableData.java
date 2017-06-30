@@ -18,9 +18,9 @@ package hep.dataforge.plots.data;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
@@ -37,7 +37,7 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
 public class PlottableData extends XYPlottable {
 
     //TODO replace by ObservableList and allow external modification
-    protected List<DataPoint> data = new ArrayList<>();
+    protected List<Values> data = new ArrayList<>();
 
     public PlottableData(String name) {
         super(name);
@@ -50,9 +50,9 @@ public class PlottableData extends XYPlottable {
             throw new IllegalArgumentException("Arrays size mismatch");
         }
 
-        List<DataPoint> data = new ArrayList<>();
+        List<Values> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            MapPoint.Builder point = new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x[i], y[i]).builder();
+            ValueMap.Builder point = new ValueMap(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x[i], y[i]).builder();
 
             if (xErrs != null) {
                 point.putValue(XYAdapter.X_ERROR_KEY, xErrs[i]);
@@ -80,7 +80,7 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-    public static PlottableData plot(String name, XYAdapter adapter, Iterable<DataPoint> data) {
+    public static PlottableData plot(String name, XYAdapter adapter, Iterable<Values> data) {
         PlottableData plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
@@ -100,15 +100,15 @@ public class PlottableData extends XYPlottable {
      *
      * @param data
      */
-    public void setData(@NotNull List<DataPoint> data) {
+    public void setData(@NotNull List<Values> data) {
         this.data = data;
     }
 
-    public void fillData(Iterable<DataPoint> it, boolean append) {
+    public void fillData(Iterable<Values> it, boolean append) {
         if (this.data == null || !append) {
             this.data = new ArrayList<>();
         }
-        for (DataPoint dp : it) {
+        for (Values dp : it) {
             data.add(dp);
         }
         notifyDataChanged();
@@ -120,21 +120,21 @@ public class PlottableData extends XYPlottable {
      *
      * @param it
      */
-    public void fillData(@NotNull Iterable<DataPoint> it) {
+    public void fillData(@NotNull Iterable<Values> it) {
         fillData(it, false);
     }
 
-    public void append(DataPoint dp) {
+    public void append(Values dp) {
         data.add(dp);
         notifyDataChanged();
     }
 
     public void append(Number x, Number y) {
-        append(new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
+        append(new ValueMap(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
     }
 
     @Override
-    protected List<DataPoint> getRawData(Meta query) {
+    protected List<Values> getRawData(Meta query) {
         return data;
     }
 

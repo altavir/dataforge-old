@@ -19,13 +19,16 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.ValueType;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 
 public class TableFormatBuilder {
 
-    Map<String, MetaBuilder> columns;
-    MetaBuilder defaultColumn;
+    private MetaBuilder builder = new MetaBuilder("format");
+    private Map<String, MetaBuilder> columns;
+    private MetaBuilder defaultColumn;
 
     public TableFormatBuilder() {
         columns = new LinkedHashMap<>();
@@ -34,67 +37,69 @@ public class TableFormatBuilder {
     public TableFormatBuilder(String... names) {
         this();
         for (String name : names) {
-            addName(name);
+            add(name);
         }
     }
 
     public TableFormatBuilder(Iterable<String> names) {
         this();
         for (String name : names) {
-            addName(name);
+            add(name);
         }
     }
 
-    private MetaBuilder addName(String name) {
+    private MetaBuilder add(String name, String... purpose) {
         if (!columns.containsKey(name)) {
-            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name);
+            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name).putValues("purpose", purpose);
             columns.put(name, columnBuilder);
             return columnBuilder;
         } else {
-            throw new NamingException("Dublicate name");
+            throw new NamingException("Duplicate name");
         }
     }
 
     public TableFormatBuilder addColumn(String name) {
-        addName(name);
+        add(name);
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, ValueType type) {
-        addName(name).setValue("title", title).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, String title, ValueType type, String... purpose) {
+        add(name, purpose).setValue("title", title).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type) {
-        addName(name).setValue("title", title).setValue("type", type.toString()).setValue("width", width);
+    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type, String... purpose) {
+        add(name, purpose).setValue("title", title)
+                .setValue("type", type.toString())
+                .setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, ValueType type) {
-        addName(name).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, ValueType type, String... purpose) {
+        add(name, purpose).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, int width, ValueType type) {
-        addName(name).setValue("type", type.toString()).setValue("width", width);
+    public TableFormatBuilder addColumn(String name, int width, ValueType type, String... purpose) {
+        add(name, purpose).setValue("type", type.toString()).setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addString(String name) {
-        return addColumn(name, ValueType.STRING);
+    public TableFormatBuilder addString(String name, String... purpose) {
+        return addColumn(name, ValueType.STRING, purpose);
     }
 
-    public TableFormatBuilder addNumber(String name) {
-        return addColumn(name, ValueType.NUMBER);
+    public TableFormatBuilder addNumber(String name, String... purpose) {
+        return addColumn(name, ValueType.NUMBER, purpose);
     }
 
-    public TableFormatBuilder addTime(String name) {
-        return addColumn(name, ValueType.TIME);
+    public TableFormatBuilder addTime(String name, String... purpose) {
+        return addColumn(name, ValueType.TIME,purpose);
     }
 
     public TableFormatBuilder setType(String name, ValueType... type) {
         if (!columns.containsKey(name)) {
-            addName(name);
+            add(name);
         }
         for (ValueType t : type) {
             columns.get(name).putValue("type", t.toString());
@@ -102,19 +107,29 @@ public class TableFormatBuilder {
         return this;
     }
 
-    public TableFormatBuilder setRole(String name, String... role) {
-        if (!columns.containsKey(name)) {
-            addName(name);
-        }
-        for (String r : role) {
-            columns.get(name).putValue("role", r);
-        }
+    /**
+     * Apply custom transform to format meta.
+     * @param transform
+     * @return
+     */
+    public TableFormatBuilder update(Consumer<MetaBuilder> transform){
+        transform.accept(builder);
         return this;
     }
 
+//    public TableFormatBuilder setRole(String name, String... role) {
+//        if (!columns.containsKey(name)) {
+//            add(name);
+//        }
+//        for (String r : role) {
+//            columns.get(name).putValue("role", r);
+//        }
+//        return this;
+//    }
+
     public TableFormatBuilder setTitle(String name, String title) {
         if (!columns.containsKey(name)) {
-            addName(name);
+            add(name);
         }
         columns.get(name).putValue("title", title);
         return this;
@@ -122,14 +137,13 @@ public class TableFormatBuilder {
 
     public TableFormatBuilder setWidth(String name, int width) {
         if (!columns.containsKey(name)) {
-            addName(name);
+            add(name);
         }
         columns.get(name).putValue("width", width);
         return this;
     }
 
     public TableFormat build() {
-        MetaBuilder builder = new MetaBuilder("format");
         for (Meta m : columns.values()) {
             builder.putNode(m);
         }

@@ -7,6 +7,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -17,7 +18,7 @@ import java.util.function.BiFunction;
  *
  * @author Alexander Nozik
  */
-public class VirtualDataPoint<S> implements DataPoint {
+public class VirtualDataPoint<S> implements Values {
 
     private final S source;
     private final BiFunction<String, S, Value> transformation;

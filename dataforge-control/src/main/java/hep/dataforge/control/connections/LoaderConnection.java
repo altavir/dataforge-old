@@ -7,7 +7,7 @@ package hep.dataforge.control.connections;
 
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.PointLoader;
-import hep.dataforge.tables.DataPoint;
+import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -23,7 +23,7 @@ public class LoaderConnection implements PointListenerConnection {
     }
 
     @Override
-    public void accept(DataPoint point) {
+    public void accept(Values point) {
         try {
             loader.push(point);
         } catch (StorageException ex) {

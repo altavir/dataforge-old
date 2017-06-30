@@ -21,11 +21,11 @@ import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.junit.*;
 
 import java.io.File;
@@ -80,7 +80,7 @@ public class FileDataPointLoaderTest {
         System.out.println("push");
         Instant start = DateTimeUtils.now();
         for (int i = 0; i < 1000; i++) {
-            loader.push(new MapPoint(names, i, i * 2, Math.sqrt(i)));
+            loader.push(new ValueMap(names, i, i * 2, Math.sqrt(i)));
 //            System.out.printf("Point with number %d loaded%n", i);
         }
         System.out.printf("Push operation for 1000 element completed in %s%n", Duration.between(start, DateTimeUtils.now()));
@@ -89,7 +89,7 @@ public class FileDataPointLoaderTest {
         System.out.println("direct pull");
 
         start = DateTimeUtils.now();
-        ValueIndex<DataPoint> index = loader.getIndex("key");
+        ValueIndex<Values> index = loader.getIndex("key");
 
 //        IntStream.range(0, 100).mapToObj(i -> {
 //            try {
@@ -114,7 +114,7 @@ public class FileDataPointLoaderTest {
         System.out.printf("Smart pull operation on %d element completed in %s%n", smartPullSize, Duration.between(start, DateTimeUtils.now()));
 
         System.out.println("pull consistency check");
-        DataPoint dp = index.pull(24, 26).findFirst().get();
+        Values dp = index.pull(24, 26).findFirst().get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
 
         ((MapIndex)index).invalidate();

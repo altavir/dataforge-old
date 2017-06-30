@@ -15,12 +15,17 @@
  */
 package hep.dataforge.values;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
- * A value provider with declared ordered list of names
+ * A named set of values with fixed name list.
  */
-public interface NamedValueSet extends NameSetContainer, ValueProvider {
+public interface Values extends NameSetContainer, ValueProvider {
 
     /**
      * Faster search for existing values
@@ -41,5 +46,35 @@ public interface NamedValueSet extends NameSetContainer, ValueProvider {
      */
     default Value getAt(int num) {
         return getValue(this.names().get(num));
+    }
+
+    /**
+     * Convert a DataPoint to a Map. Order is not guaranteed
+     * @return
+     */
+    default Map<String,Value> asMap(){
+        Map<String,Value> res = new HashMap<>();
+        for(String field: this.names()){
+            res.put(field, getValue(field));
+        }
+        return res;
+    }
+
+    /**
+     * Simple check for boolean tag
+     *
+     * @param name
+     * @return
+     */
+    default boolean hasTag(String name) {
+        return names().contains(name) && getValue(name).booleanValue();
+    }
+
+    default Meta toMeta() {
+        MetaBuilder builder = new MetaBuilder("point");
+        for (String name : namesAsArray()) {
+            builder.putValue(name, getValue(name));
+        }
+        return builder.build();
     }
 }

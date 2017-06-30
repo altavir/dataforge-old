@@ -24,6 +24,7 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.BaseMetaHolder;
 import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
@@ -65,7 +66,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
      * @param dataPoint
      * @return
      */
-    public static TableFormat forPoint(DataPoint dataPoint) {
+    public static TableFormat forPoint(Values dataPoint) {
         MetaBuilder builder = new MetaBuilder("format");
         for (String n : dataPoint.names()) {
             builder.putNode(new MetaBuilder("column").setValue("name", n).setValue("type", dataPoint.getValue(n).valueType().name()));
@@ -114,11 +115,13 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
     }
 
     /**
-     * Build a format containing given columns. If some of columns do not exist in initial format, they are replaced by default column format.
+     * Build a format containing given columns. If some of columns do not exist in initial format,
+     * they are replaced by default column format.
+     *
      * @param names
      * @return
      */
-    public TableFormat filter(String... names){
+    public TableFormat filter(String... names) {
         MetaBuilder newFormat = new MetaBuilder(meta());
         newFormat.setNode("column", Stream.of(names).map(this::getColumnMeta).collect(Collectors.toList()));
         return new TableFormat(newFormat);

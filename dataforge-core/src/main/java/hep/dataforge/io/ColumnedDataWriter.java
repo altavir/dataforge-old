@@ -15,10 +15,10 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.Misc;
+import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
@@ -122,7 +122,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      *
      * @param point a {@link hep.dataforge.tables.DataPoint} object.
      */
-    public void writePoint(DataPoint point) {
+    public void writePoint(Values point) {
         writer.println(IOUtils.formatDataPoint(format, point));
         writer.flush();
     }
@@ -133,7 +133,7 @@ public class ColumnedDataWriter implements AutoCloseable {
      *
      * @param collection a {@link java.util.Collection} object.
      */
-    public void writePointList(Collection<DataPoint> collection) {
+    public void writePointList(Collection<Values> collection) {
         collection.stream().forEach((dp) -> {
             writePoint(dp);
         });
@@ -195,7 +195,7 @@ public class ColumnedDataWriter implements AutoCloseable {
         writer.ln();
 
         writer.writeFormatHeader();
-        for (DataPoint dp : data) {
+        for (Values dp : data) {
             writer.writePoint(dp);
         }
         writer.ln();

@@ -18,7 +18,7 @@ package hep.dataforge.stat.parametric;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * <p>
@@ -29,9 +29,9 @@ import hep.dataforge.values.NamedValueSet;
  */
 public interface ParametricFunction extends NameSetContainer {
 
-    double derivValue(String parName, double x, NamedValueSet set);
+    double derivValue(String parName, double x, Values set);
 
-    double value(double x, NamedValueSet set);
+    double value(double x, Values set);
 
     boolean providesDeriv(String name);
 
@@ -39,12 +39,12 @@ public interface ParametricFunction extends NameSetContainer {
         if (providesDeriv(parName)) {
             return new ParametricFunction() {
                 @Override
-                public double derivValue(String parName, double x, NamedValueSet set) {
+                public double derivValue(String parName, double x, Values set) {
                     throw new NotDefinedException();
                 }
 
                 @Override
-                public double value(double x, NamedValueSet set) {
+                public double value(double x, Values set) {
                     return ParametricFunction.this.derivValue(parName, x, set);
                 }
 

@@ -63,6 +63,10 @@ public interface Names extends Iterable<String>, MetaMorph {
         return res;
     }
 
+    default Stream<String> stream(){
+        return asList().stream();
+    }
+
     default String[] asArray() {
         return asList().toArray(new String[size()]);
     }

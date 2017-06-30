@@ -21,10 +21,9 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.utils.BaseMetaHolder;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * Basic implementation for model
@@ -72,11 +71,11 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
      * {@inheritDoc}
      */
     @Override
-    public ParametricValue getDistanceFunction(DataPoint point) {
+    public ParametricValue getDistanceFunction(Values point) {
         return new AbstractParametricValue(names) {
 
             @Override
-            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, Values pars) throws NotDefinedException, NamingException {
                 return disDeriv(derivParName, point, pars);
             }
 
@@ -86,7 +85,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double value(Values pars) throws NamingException {
                 return distance(point, pars);
             }
         };
@@ -96,14 +95,14 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
      * {@inheritDoc}
      */
     @Override
-    public ParametricValue getLogProbFunction(DataPoint point) {
+    public ParametricValue getLogProbFunction(Values point) {
         if (!providesProb()) {
             throw new IllegalStateException("Model does not provide internal probability distribution");
         }
 
         return new AbstractParametricValue(names) {
             @Override
-            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, Values pars) throws NotDefinedException, NamingException {
                 return getLogProbDeriv(derivParName, point, pars);
             }
 
@@ -113,7 +112,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double value(Values pars) throws NamingException {
                 return getLogProb(point, pars);
             }
         };

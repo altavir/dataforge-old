@@ -20,8 +20,7 @@ import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 import static java.lang.Math.log;
@@ -59,7 +58,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException {
+    public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             return this.derivValue(parName, adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
         } else {
@@ -71,7 +70,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double dispersion(DataPoint point, NamedValueSet pars) {
+    public double dispersion(Values point, Values pars) {
         double res = this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
         if (res < 1) {
             return 1;
@@ -83,7 +82,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double distance(DataPoint point, NamedValueSet pars) {
+    public double distance(Values point, Values pars) {
 //        double x = point.binCenter();
         long y = adapter.getCount(point);
         return this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars) - y;
@@ -97,7 +96,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
         this.calculateCountInBin = calculateCountInBin;
     }
 
-    public double value(double binBegin, double binEnd, NamedValueSet set) {
+    public double value(double binBegin, double binEnd, Values set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = ParametricUtils.getSpectrumFunction(source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
@@ -107,7 +106,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     }
 
-    public double derivValue(String parName, double binBegin, double binEnd, NamedValueSet set) {
+    public double derivValue(String parName, double binBegin, double binEnd, Values set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = ParametricUtils.getSpectrumDerivativeFunction(parName, source, set);
             return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
@@ -121,7 +120,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double getLogProb(DataPoint point, NamedValueSet pars) {
+    public double getLogProb(Values point, Values pars) {
         double dist = this.distance(point, pars);
         double disp = this.dispersion(point, pars);
         double base = -log(2 * Math.PI * disp) / 2; // нормировка
@@ -132,7 +131,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) {
+    public double getLogProbDeriv(String parName, Values point, Values pars) {
         return -this.distance(point, pars) * this.disDeriv(parName, point, pars) / this.dispersion(point, pars);
     }
 

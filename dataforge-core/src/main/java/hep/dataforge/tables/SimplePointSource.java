@@ -5,6 +5,8 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.values.Values;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -16,9 +18,9 @@ import java.util.List;
 public class SimplePointSource implements PointSource {
 
     private final TableFormat format;
-    private final List<DataPoint> points;
+    private final List<Values> points;
 
-    public SimplePointSource(TableFormat format, List<DataPoint> points) {
+    public SimplePointSource(TableFormat format, List<Values> points) {
         this.format = format;
         this.points = new ArrayList<>(points);
     }
@@ -38,11 +40,11 @@ public class SimplePointSource implements PointSource {
     }
 
     @Override
-    public Iterator<DataPoint> iterator() {
+    public Iterator<Values> iterator() {
         return points.iterator();
     }
 
-    public void addRow(DataPoint p) {
+    public void addRow(Values p) {
         this.points.add(p);
     }
 

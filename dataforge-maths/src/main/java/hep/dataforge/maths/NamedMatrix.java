@@ -20,7 +20,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -72,7 +72,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @param vector
      * @return
      */
-    public static NamedMatrix diagonal(NamedValueSet vector) {
+    public static NamedMatrix diagonal(Values vector) {
         double[] vectorValues = MathUtils.getDoubleArray(vector);
         double[][] values = new double[vectorValues.length][vectorValues.length];
         for (int i = 0; i < vectorValues.length; i++) {

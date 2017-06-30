@@ -3,6 +3,7 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.Values;
 
 import java.util.Comparator;
 import java.util.function.Predicate;
@@ -15,12 +16,12 @@ import static hep.dataforge.tables.Filtering.getValueCondition;
  */
 public class TableTransform {
 
-    public static Table sort(Table table, Comparator<DataPoint> comparator) {
+    public static Table sort(Table table, Comparator<Values> comparator) {
         return table.transform(stream -> stream.sorted(comparator));
     }
 
     public static Table sort(Table table, String name, boolean ascending) {
-        return table.transform(stream -> stream.sorted((DataPoint o1, DataPoint o2) -> {
+        return table.transform(stream -> stream.sorted((Values o1, Values o2) -> {
             int signum = ascending ? +1 : -1;
             return ValueUtils.compare(o1.getValue(name), o2.getValue(name)) * signum;
         }));
@@ -34,7 +35,7 @@ public class TableTransform {
      * @return a {@link hep.dataforge.tables.Table} object.
      * @throws hep.dataforge.exceptions.NamingException if any.
      */
-    public static Table filter(Table table, Predicate<DataPoint> condition) throws NamingException {
+    public static Table filter(Table table, Predicate<Values> condition) throws NamingException {
         return table.transform(stream -> stream.filter(condition));
     }
 

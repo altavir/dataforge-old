@@ -5,10 +5,10 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.time.Duration;
 import java.time.Instant;
@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 public class RegularPointCollector implements ValueCollector {
 
     private final Map<String, List<Value>> values = new ConcurrentHashMap<>();
-    private final Consumer<DataPoint> consumer;
+    private final Consumer<Values> consumer;
     private final Duration duration;
     private Instant startTime;
     /**
@@ -35,12 +35,12 @@ public class RegularPointCollector implements ValueCollector {
     private List<String> names = new ArrayList<>();
     private Timer timer;
 
-    public RegularPointCollector(Duration duration, Consumer<DataPoint> consumer) {
+    public RegularPointCollector(Duration duration, Consumer<Values> consumer) {
         this.consumer = consumer;
         this.duration = duration;
     }
 
-    public RegularPointCollector(Duration duration, Collection<String> names, Consumer<DataPoint> consumer) {
+    public RegularPointCollector(Duration duration, Collection<String> names, Consumer<Values> consumer) {
         this(duration, consumer);
         this.names = new ArrayList<>(names);
     }
@@ -51,7 +51,7 @@ public class RegularPointCollector implements ValueCollector {
     }
 
     public synchronized void collect(Instant time) {
-        MapPoint.Builder point = new MapPoint.Builder();
+        ValueMap.Builder point = new ValueMap.Builder();
 
         Instant average = Instant.ofEpochMilli((time.toEpochMilli() + startTime.toEpochMilli()) / 2);
 

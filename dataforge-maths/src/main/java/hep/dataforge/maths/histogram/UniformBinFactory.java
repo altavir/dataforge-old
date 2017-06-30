@@ -19,7 +19,7 @@ public class UniformBinFactory implements BinFactory {
 
 
     @Override
-    public Bin getBin(Double... point) {
+    public Bin createBin(Double... point) {
         ArgumentChecker.checkEqualDimensions(point.length, binStart.length);
         Double[] lo = new Double[point.length];
         Double[] up = new Double[point.length];

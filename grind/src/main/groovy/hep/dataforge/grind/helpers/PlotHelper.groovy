@@ -25,9 +25,9 @@ import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.data.PlottableData
 import hep.dataforge.plots.data.PlottableXYFunction
 import hep.dataforge.plots.data.XYPlottable
-import hep.dataforge.tables.DataPoint
 import hep.dataforge.tables.PointAdapter
 import hep.dataforge.tables.XYAdapter
+import hep.dataforge.values.Values
 
 import java.util.function.Function
 
@@ -102,7 +102,7 @@ class PlotHelper {
         return plot(x, y, name, frame);
     }
 
-    XYPlottable plot(Iterable<DataPoint> source, PointAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
+    XYPlottable plot(Iterable<Values> source, PointAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, XYAdapter.from(adapter), source);
         manager.getPlotFrame(frame).add(res)
         return res;
@@ -115,7 +115,7 @@ class PlotHelper {
      * @param cl
      * @return
      */
-    XYPlottable plot(Iterable<DataPoint> source, Map parameters,
+    XYPlottable plot(Iterable<Values> source, Map parameters,
                      @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
         Meta configuration = Grind.buildMeta(parameters, cl);
         String name = configuration.getString("name", "data_${source.hashCode()}")

@@ -22,6 +22,7 @@ import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.values.Values;
 
 import java.util.function.Predicate;
 
@@ -44,7 +45,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
      */
     @Override
     protected Table execute(Context context, String name, Table input, Laminate meta) {
-        Predicate<DataPoint> filterSet = buildFilter(meta);
+        Predicate<Values> filterSet = buildFilter(meta);
 
         Table res;
         if (filterSet != null) {
@@ -58,11 +59,11 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
         return res;
     }
 
-    private Predicate<DataPoint> buildFilter(Meta meta) {
-        Predicate<DataPoint> res = null;
+    private Predicate<Values> buildFilter(Meta meta) {
+        Predicate<Values> res = null;
         if (meta.hasMeta("filter")) {
             for (Meta filter : meta.getMetaList("filter")) {
-                Predicate<DataPoint> predicate = buildConditionSet(filter);
+                Predicate<Values> predicate = buildConditionSet(filter);
                 if (res == null) {
                     res = predicate;
                 } else {

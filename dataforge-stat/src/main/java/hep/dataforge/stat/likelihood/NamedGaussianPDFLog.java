@@ -17,7 +17,7 @@ package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.LUDecomposition;
 import org.apache.commons.math3.linear.RealVector;
@@ -37,7 +37,7 @@ public class NamedGaussianPDFLog extends AbstractParametricValue {
     private final double norm;
     private final RealVector values;
 
-    public NamedGaussianPDFLog(NamedValueSet values, NamedMatrix covariance) {
+    public NamedGaussianPDFLog(Values values, NamedMatrix covariance) {
         super(covariance);
         this.values = this.getVector(values);
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
@@ -56,7 +56,7 @@ public class NamedGaussianPDFLog extends AbstractParametricValue {
     }
 
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) {
+    public double derivValue(String derivParName, Values pars) {
         RealVector difVector = getVector(pars).subtract(values);
         RealVector c = this.infoMatrix.getRow(derivParName).getVector();
 
@@ -68,7 +68,7 @@ public class NamedGaussianPDFLog extends AbstractParametricValue {
 //     * {@inheritDoc}
 //     */
 //    @Override
-//    public double expValue(NamedValueSet point) {
+//    public double expValue(Values point) {
 //        RealVector difVector = getVector(point).subtract(values);
 //        double expValue = infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
 //        return norm * exp(-expValue);
@@ -80,7 +80,7 @@ public class NamedGaussianPDFLog extends AbstractParametricValue {
      * @param set
      * @return
      */
-    private RealVector getVector(NamedValueSet set) {
+    private RealVector getVector(Values set) {
         ArrayRealVector vector = new ArrayRealVector(this.size());
         String[] namesArray = namesAsArray();
         for (int i = 0; i < this.size(); i++) {
@@ -98,7 +98,7 @@ public class NamedGaussianPDFLog extends AbstractParametricValue {
     }
 
     @Override
-    public double value(NamedValueSet pars) {
+    public double value(Values pars) {
         RealVector difVector = getVector(pars).subtract(values);
         return log(norm) - infoMatrix.getMatrix().preMultiply(difVector).dotProduct(difVector) / 2;
     }

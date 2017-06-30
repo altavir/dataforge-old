@@ -8,7 +8,7 @@ package hep.dataforge.stat.parametric;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 public abstract class AbstractParametricBiFunction extends AbstractParametric implements ParametricBiFunction {
 
@@ -25,7 +25,7 @@ public abstract class AbstractParametricBiFunction extends AbstractParametric im
     }
 
     @Override
-    public double derivValue(String parName, double x, double y, NamedValueSet set) {
+    public double derivValue(String parName, double x, double y, Values set) {
         if (!names().contains(parName)) {
             return 0;
         } else {

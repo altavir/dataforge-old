@@ -28,8 +28,8 @@ import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.utils.ArgumentChecker;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.Optionals;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import javafx.util.Pair;
 import org.apache.commons.math3.analysis.MultivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
@@ -49,7 +49,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 
     private MonteCarloIntegrator integrator = new MonteCarloIntegrator();
     private Sampler sampler;
-    private NamedValueSet startingPoint;
+    private Values startingPoint;
     /**
      * The set of parameters over which integration should be made
      */
@@ -97,7 +97,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
         return self();
     }
 
-    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, NamedValueSet means, NamedMatrix covariance, String... parameters) {
+    public MarginalFunctionBuilder setNormalSampler(RandomGenerator generator, Values means, NamedMatrix covariance, String... parameters) {
         return setNormalSampler(
                 generator,
                 new NamedVector(means).subVector(parameters).getVector(),
@@ -140,7 +140,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
      * @param nuisancePars
      * @return
      */
-    public MarginalFunctionBuilder setParameters(NamedValueSet startingPoint, String... nuisancePars) {
+    public MarginalFunctionBuilder setParameters(Values startingPoint, String... nuisancePars) {
         this.startingPoint = startingPoint;
         this.nuisancePars = nuisancePars;
         return self();
@@ -169,7 +169,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
         }
         return new AbstractParametricValue(remaining) {
             @Override
-            public double value(NamedValueSet pars) {
+            public double value(Values pars) {
                 MultivariateFunction func = new ExpLikelihood(offset);
                 MonteCarloIntegrand integrand = new MonteCarloIntegrand(func, getSampler());
                 if (numCalls < 0) {
@@ -195,7 +195,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 
         @Override
         public double value(double[] point) {
-            NamedValueSet actualVector;
+            Values actualVector;
             if (nuisancePars == null || nuisancePars.length == 0) {
                 actualVector = new NamedVector(startingPoint.names(), point);
             } else {
@@ -204,7 +204,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
             return FastMath.exp(getFunction().value(actualVector) - offset);
         }
 
-        private class VectorWithDefault implements NamedValueSet {
+        private class VectorWithDefault implements Values {
 
             NamedVector vector;
 
@@ -239,7 +239,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 //     * @param generator rundom number generator
 //     * @throws NameNotFoundException
 //     */
-//    public MarginalFunctionBuilder(ParametricValue like, NamedValueSet point, NamedMatrix cov,
+//    public MarginalFunctionBuilder(ParametricValue like, Values point, NamedMatrix cov,
 //                                   RandomGenerator generator) throws NameNotFoundException {
 //        //the parameter set is defined by function
 //        this.cov = cov;
@@ -251,7 +251,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 //        this.point = new NamedVector(point);
 //    }
 //
-//    public MarginalFunctionBuilder(ParametricValue like, NamedValueSet point, NamedMatrix cov) {
+//    public MarginalFunctionBuilder(ParametricValue like, Values point, NamedMatrix cov) {
 //        this(like, point, cov, getDefaultRandomGenerator());
 //    }
 //

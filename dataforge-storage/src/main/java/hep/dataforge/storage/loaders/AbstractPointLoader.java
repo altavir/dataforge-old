@@ -26,15 +26,15 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
-import hep.dataforge.tables.DataPoint;
+import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.*;
 import java.util.stream.Collectors;
 
 import static hep.dataforge.storage.commons.StorageMessageUtils.*;
-import static hep.dataforge.tables.DataPoint.buildFromMeta;
 
 /**
  * @author Alexander Nozik
@@ -42,25 +42,25 @@ import static hep.dataforge.tables.DataPoint.buildFromMeta;
 public abstract class AbstractPointLoader extends AbstractLoader implements PointLoader {
 
     protected final Set<PointListener> listeners = new HashSet<>();
-    private HashMap<String, ValueIndex<DataPoint>> indexMap = new HashMap<>();
+    private HashMap<String, ValueIndex<Values>> indexMap = new HashMap<>();
 
     public AbstractPointLoader(Storage storage, String name, Meta meta) {
         super(storage, name, meta);
     }
 
     @Override
-    public void push(Collection<DataPoint> dps) throws StorageException {
-        for (DataPoint dp : dps) {
+    public void push(Collection<Values> dps) throws StorageException {
+        for (Values dp : dps) {
             push(dp);
         }
     }
 
     @Override
-    public synchronized ValueIndex<DataPoint> getIndex(String name) {
+    public synchronized ValueIndex<Values> getIndex(String name) {
         return indexMap.computeIfAbsent(name, this::buildIndex);
     }
 
-    protected abstract ValueIndex<DataPoint> buildIndex(String name);
+    protected abstract ValueIndex<Values> buildIndex(String name);
 
     /**
      * Push point and notify all listeners
@@ -69,7 +69,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
      * @throws StorageException
      */
     @Override
-    public void push(DataPoint dp) throws StorageException {
+    public void push(Values dp) throws StorageException {
         //Notifying the listener
         listeners.forEach((l) -> {
             l.accept(dp);
@@ -83,7 +83,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
      * @param dp
      * @throws StorageException
      */
-    protected abstract void pushPoint(DataPoint dp) throws StorageException;
+    protected abstract void pushPoint(Values dp) throws StorageException;
 
     @Override
     public Envelope respond(Envelope message) {
@@ -101,14 +101,14 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     }
 
                     Meta data = messageMeta.getMeta("data");
-                    for (DataPoint dp : buildFromMeta(data)) {
+                    for (Values dp : ListOfPoints.buildFromMeta(data)) {
                         this.push(dp);
                     }
 
                     return confirmationResponse(message);
 
                 case PULL_OPERATION:
-                    List<DataPoint> points = new ArrayList<>();
+                    List<Values> points = new ArrayList<>();
                     if (messageMeta.hasMeta(QUERY_ELEMENT)) {
                         points = getIndex().query(messageMeta.getMeta(QUERY_ELEMENT)).collect(Collectors.toList());
                     } else if (messageMeta.hasValue("value")) {
@@ -129,7 +129,7 @@ public abstract class AbstractPointLoader extends AbstractLoader implements Poin
                     }
 
                     MetaBuilder dataAn = new MetaBuilder("data");
-                    for (DataPoint dp : points) {
+                    for (Values dp : points) {
                         dataAn.putNode(dp.toMeta());
                     }
                     return new MessageFactory().okResponseBase(message, true, false)

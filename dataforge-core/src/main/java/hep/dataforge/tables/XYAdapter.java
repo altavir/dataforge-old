@@ -20,6 +20,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 /**
  * An adapter to correctly interpret DataPoint into X-Y plot or model. Could have multiple Y-s.
@@ -105,8 +106,8 @@ public class XYAdapter extends AxisPointAdapter {
         }
     }
 
-    public DataPoint buildXYDataPoint(double x, double y, double yErr) {
-        return new MapPoint(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
+    public Values buildXYDataPoint(double x, double y, double yErr) {
+        return new ValueMap(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
                 x, y, yErr);
     }
 
@@ -131,11 +132,11 @@ public class XYAdapter extends AxisPointAdapter {
         return meta().getMetaList(Y_AXIS).get(i).getString("axisTitle", nameFor(VALUE_KEY));
     }
 
-    public Value getX(DataPoint point) {
+    public Value getX(Values point) {
         return point.getValue(xValue);
     }
 
-    public Value getXerr(DataPoint point) {
+    public Value getXerr(Values point) {
         return point.getValue(xError, Value.NULL);
     }
 
@@ -145,7 +146,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public Value getY(DataPoint point) {
+    public Value getY(Values point) {
         return getY(point, 0);
     }
 
@@ -155,7 +156,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public Value getYerr(DataPoint point) {
+    public Value getYerr(Values point) {
         return getYerr(point, 0);
     }
 
@@ -166,11 +167,11 @@ public class XYAdapter extends AxisPointAdapter {
      * @param index
      * @return
      */
-    public Value getY(DataPoint point, int index) {
+    public Value getY(Values point, int index) {
         return point.getValue(yValues[index]);
     }
 
-    public Value getYerr(DataPoint point, int index) {
+    public Value getYerr(Values point, int index) {
         return point.getValue(yErrors[index]);
     }
 
@@ -180,7 +181,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public double getYUpper(DataPoint point) {
+    public double getYUpper(Values point) {
         return getUpperBound(point, Y_AXIS);
     }
 
@@ -190,7 +191,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public double getYLower(DataPoint point) {
+    public double getYLower(Values point) {
         return getLowerBound(point, Y_AXIS);
     }
 
@@ -200,7 +201,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public double getXUpper(DataPoint point) {
+    public double getXUpper(Values point) {
         return getUpperBound(point, X_AXIS);
     }
 
@@ -210,23 +211,23 @@ public class XYAdapter extends AxisPointAdapter {
      * @param point
      * @return
      */
-    public double getXLower(DataPoint point) {
+    public double getXLower(Values point) {
         return getLowerBound(point, X_AXIS);
     }
 
-    public double getYUpper(DataPoint point, int index) {
+    public double getYUpper(Values point, int index) {
         return getUpperBound(point, yAxis(index));
     }
 
-    public double getYLower(DataPoint point, int index) {
+    public double getYLower(Values point, int index) {
         return getLowerBound(point, yAxis(index));
     }
 
-    public boolean providesXError(DataPoint point) {
+    public boolean providesXError(Values point) {
         return point.hasValue(xError);
     }
 
-    public boolean providesYError(DataPoint point) {
+    public boolean providesYError(Values point) {
         return point.hasValue(yErrors[0]);
     }
 

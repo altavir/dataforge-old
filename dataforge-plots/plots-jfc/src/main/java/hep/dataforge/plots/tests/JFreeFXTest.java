@@ -19,7 +19,11 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.PlottableData;
 import hep.dataforge.plots.data.PlottableXYFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
-import hep.dataforge.tables.*;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.ValueMap;
+import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Values;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.BorderPane;
@@ -56,10 +60,10 @@ public class JFreeFXTest extends Application {
 
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
-        List<DataPoint> data = new ArrayList<>();
-        data.add(new MapPoint(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(new MapPoint(names, 1d, 1d, 0.2, 0.5));
-        data.add(new MapPoint(names, 3d, 7d, 0, 0.5));
+        List<Values> data = new ArrayList<>();
+        data.add(new ValueMap(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(new ValueMap(names, 1d, 1d, 0.2, 0.5));
+        data.add(new ValueMap(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
         PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);

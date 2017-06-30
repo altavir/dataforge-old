@@ -21,7 +21,7 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.UniFunction;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
 /**
@@ -40,7 +40,7 @@ public class ParametricUtils {
      * @param pars - Точка, вкоторой вычеслено сечение
      * @return a {@link UniFunction} object.
      */
-    public static UniFunction getNamedProjection(final ParametricValue nFunc, final String parName, final NamedValueSet pars) {
+    public static UniFunction getNamedProjection(final ParametricValue nFunc, final String parName, final Values pars) {
         return new UniFunction() {
             NamedVector curPars = new NamedVector(pars);
 
@@ -73,7 +73,7 @@ public class ParametricUtils {
      * @return a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      */
     public static UnivariateFunction getNamedProjectionDerivative(final ParametricValue nFunc, 
-            final String parName, final String derivativeName, final NamedValueSet pars) {
+            final String parName, final String derivativeName, final Values pars) {
         return new UnivariateFunction() {
             NamedVector curPars = new NamedVector(pars);
 
@@ -95,7 +95,7 @@ public class ParametricUtils {
      * Если null, то разрешено изменение всех параметров.
      * @return a {@link hep.dataforge.stat.parametric.ParametricValue} object.
      */
-    public static ParametricValue getNamedSubFunction(final ParametricValue func, final NamedValueSet initPars, String... freePars) {
+    public static ParametricValue getNamedSubFunction(final ParametricValue func, final Values initPars, String... freePars) {
         if (!initPars.names().contains(func.namesAsArray())) {
             throw new IllegalArgumentException("InitPars does not cover all of func parameters.");
         }
@@ -110,7 +110,7 @@ public class ParametricUtils {
             private final ParametricValue f = func;
 
             @Override
-            public double derivValue(String derivParName, NamedValueSet pars) {
+            public double derivValue(String derivParName, Values pars) {
                 if (!pars.names().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
@@ -126,7 +126,7 @@ public class ParametricUtils {
             }
 
             @Override
-            public double value(NamedValueSet pars) {
+            public double value(Values pars) {
                 if (!pars.names().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
@@ -138,11 +138,11 @@ public class ParametricUtils {
         };
     }
 
-    public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final NamedValueSet pars) {
+    public static UnivariateFunction getSpectrumDerivativeFunction(final String name, final ParametricFunction s, final Values pars) {
         return (double x) -> s.derivValue(name, x, pars);
     }
 
-    public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final NamedValueSet pars) {
+    public static UnivariateFunction getSpectrumFunction(final ParametricFunction s, final Values pars) {
         return (double x) -> s.value(x, pars);
     }
 
@@ -150,7 +150,7 @@ public class ParametricUtils {
         return new AbstractParametricValue(s) {
 
             @Override
-            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, Values pars) throws NotDefinedException, NamingException {
                 return s.derivValue(derivParName, x, pars);
             }
 
@@ -160,7 +160,7 @@ public class ParametricUtils {
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double value(Values pars) throws NamingException {
                 return s.value(x, pars);
             }
         };

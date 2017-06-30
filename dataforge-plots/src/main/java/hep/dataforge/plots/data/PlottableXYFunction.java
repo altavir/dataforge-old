@@ -16,9 +16,9 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Values;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
 
@@ -169,7 +169,7 @@ public class PlottableXYFunction extends XYPlottable {
     }
 
     @Override
-    protected List<DataPoint> getRawData(Meta query) {
+    protected List<Values> getRawData(Meta query) {
         //recalculate cache with default values
         if (query.hasValue("xRange.from")) {
             this.lo.set(query.getDouble("xRange.from"));
@@ -182,7 +182,7 @@ public class PlottableXYFunction extends XYPlottable {
         }
         validateCache();
         return cache.entrySet().stream()
-                .map(entry -> new MapPoint(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, entry.getKey(), entry.getValue()))
+                .map(entry -> new ValueMap(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 

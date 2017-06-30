@@ -1,6 +1,8 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.HyperSquareDomain;
+import hep.dataforge.tables.ValueMap;
+import hep.dataforge.values.Values;
 
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -58,6 +60,11 @@ public class SquareBin extends HyperSquareDomain implements Bin {
     }
 
     @Override
+    public long getCount() {
+        return counter.get();
+    }
+
+    @Override
     public long setCounter(long c) {
         return counter.getAndSet(c);
     }
@@ -65,5 +72,39 @@ public class SquareBin extends HyperSquareDomain implements Bin {
     @Override
     public long getBinID() {
         return binId;
+    }
+
+    @Override
+    public Values describe(String... override) {
+        ValueMap.Builder builder = new ValueMap.Builder();
+        for (int i = 0; i < getDimension(); i++) {
+            String axisName = getAxisName(i, override);
+            Double binStart = getLowerBound(i);
+            Double binEnd = getUpperBound(i);
+            builder.putValue(axisName, binStart);
+            builder.putValue(axisName + ".binEnd", binEnd);
+        }
+        builder.putValue("count.value", getCount());
+        builder.putValue("id", getBinID());
+        return builder.build();
+    }
+
+    protected String getAxisName(int i, String... override) {
+        if (i < override.length) {
+            return override[i];
+        } else if (getDimension() <= 3) {
+            switch (i) {
+                case 0:
+                    return "x";
+                case 1:
+                    return "y";
+                case 2:
+                    return "z";
+                default:
+                    throw new Error("Unreachable statement");
+            }
+        } else {
+            return "axis_" + i;
+        }
     }
 }

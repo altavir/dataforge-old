@@ -15,12 +15,13 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
+import hep.dataforge.values.Values;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.util.Iterator;
-import org.slf4j.LoggerFactory;
 
 /**
  *
@@ -29,7 +30,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class DataPointStringIterator implements Iterator<DataPoint> {
+public class DataPointStringIterator implements Iterator<Values> {
 
     private final Iterator<String> reader;
     private final PointParser parser;
@@ -76,10 +77,10 @@ public class DataPointStringIterator implements Iterator<DataPoint> {
      * @return
      */
     @Override
-    public DataPoint next() {
+    public Values next() {
         String nextLine = reader.next();
         try {
-            DataPoint point = parser.parse(nextLine);
+            Values point = parser.parse(nextLine);
             return point;
         } catch (Exception ex) {
             LoggerFactory.getLogger(getClass()).error("Failed to read DataPoint at {} for line '{}'", pos, nextLine);

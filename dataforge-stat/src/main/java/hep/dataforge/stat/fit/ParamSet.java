@@ -23,8 +23,8 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ParamSet implements NamedValueSet, MetaMorph {
+public class ParamSet implements Values, MetaMorph {
 
     private final HashMap<String, Param> params;
 
@@ -80,7 +80,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
         this.params = new LinkedHashMap<>();
     }
 
-    public ParamSet(NamedValueSet values) {
+    public ParamSet(Values values) {
         this.params = new LinkedHashMap<>(values.names().size());
         for (String name : values.names()) {
             this.params.put(name, new Param(name, values.getDouble(name)));
@@ -353,7 +353,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParErrors(NamedValueSet errors) throws NameNotFoundException {
+    public ParamSet setParErrors(Values errors) throws NameNotFoundException {
         if (!this.names().contains(errors.names())) {
             throw new NameNotFoundException();
         }
@@ -370,7 +370,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParValues(NamedValueSet values) throws NameNotFoundException {
+    public ParamSet setParValues(Values values) throws NameNotFoundException {
         if (!this.names().contains(values.names())) {
             throw new NameNotFoundException();
         }

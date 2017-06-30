@@ -17,10 +17,10 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointListener;
 import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.values.Values;
 
 import java.util.Collection;
 
@@ -56,14 +56,14 @@ public interface PointLoader extends Loader, PointSource {
      * @param name
      * @return
      */
-    ValueIndex<DataPoint> getIndex(String name);
+    ValueIndex<Values> getIndex(String name);
 
     /**
      * get default index
      *
      * @return
      */
-    default ValueIndex<DataPoint> getIndex() {
+    default ValueIndex<Values> getIndex() {
         if (meta().hasValue("index")) {
             return getIndex(meta().getString("index"));
         } else if (meta().hasValue("index.key")) {
@@ -79,7 +79,7 @@ public interface PointLoader extends Loader, PointSource {
      * @param dp
      * @throws StorageException in case push failed
      */
-    void push(DataPoint dp) throws StorageException;
+    void push(Values dp) throws StorageException;
 
     /**
      * Push a collection of DataPoints. This method should be overridden when
@@ -89,7 +89,7 @@ public interface PointLoader extends Loader, PointSource {
      * @param dps
      * @throws StorageException
      */
-    void push(Collection<DataPoint> dps) throws StorageException;
+    void push(Collection<Values> dps) throws StorageException;
 
     /**
      * Set a PointListener which is called on each push operations

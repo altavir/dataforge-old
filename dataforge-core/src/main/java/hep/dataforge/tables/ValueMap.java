@@ -23,6 +23,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -31,26 +32,28 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 /**
- * Реализация DataPoint на HashMap. В конструкторе дополнительно проверяется,
- * что все значения численные. Для нечисленных значений нужно использовать тэги
+ * A simple {@link Values} implementation using HashMap.
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 
-public class MapPoint implements DataPoint, MetaMorph {
+public class ValueMap implements Values, MetaMorph {
 
-    public static MapPoint fromMap(Map<String, Object> map){
-        return new MapPoint(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry->Value.of(entry.getValue()))));
+    public static ValueMap fromMap(Map<String, Object> map) {
+        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
     }
 
     private Map<String, Value> valueMap;
 
-    public MapPoint() {
+    /**
+     * Serialization constructor
+     */
+    public ValueMap() {
         this.valueMap = new LinkedHashMap<>();
     }
 
-    public MapPoint(String[] list, Number... values) {
+    public ValueMap(String[] list, Number... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -60,7 +63,7 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
     }
 
-    public MapPoint(String[] list, Value... values) {
+    public ValueMap(String[] list, Value... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -71,7 +74,7 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
     }
 
-    public MapPoint(String[] list, Object[] values) {
+    public ValueMap(String[] list, Object[] values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
@@ -83,7 +86,7 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
     }
 
-    public MapPoint(Map<String, Value> map) {
+    public ValueMap(Map<String, Value> map) {
         this.valueMap = map;
     }
 
@@ -165,12 +168,12 @@ public class MapPoint implements DataPoint, MetaMorph {
         return Collections.unmodifiableMap(this.valueMap);
     }
 
-    public static class Builder implements GenericBuilder<MapPoint, Builder> {
+    public static class Builder implements GenericBuilder<ValueMap, Builder> {
 
-        private final MapPoint p;
+        private final ValueMap p;
 
-        public Builder(DataPoint dp) {
-            p = new MapPoint(new LinkedHashMap<>(dp.names().size()));
+        public Builder(Values dp) {
+            p = new ValueMap(new LinkedHashMap<>(dp.names().size()));
             for (String name : dp.names()) {
                 p.valueMap.put(name, dp.getValue(name));
             }
@@ -178,11 +181,11 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
 
         public Builder(Map<String, Value> map) {
-            p = new MapPoint(map);
+            p = new ValueMap(map);
         }
 
         public Builder() {
-            p = new MapPoint();
+            p = new ValueMap();
         }
 
         /**
@@ -190,7 +193,7 @@ public class MapPoint implements DataPoint, MetaMorph {
          *
          * @param name  a {@link java.lang.String} object.
          * @param value a {@link hep.dataforge.values.Value} object.
-         * @return a {@link hep.dataforge.tables.MapPoint} object.
+         * @return a {@link ValueMap} object.
          */
         public Builder putValue(String name, Value value) {
             if (value == null) {
@@ -210,7 +213,7 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
 
         @Override
-        public MapPoint build() {
+        public ValueMap build() {
             return p;
         }
 

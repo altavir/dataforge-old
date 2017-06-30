@@ -15,6 +15,8 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.values.Values;
+
 /**
  * <p>PointParser interface.</p>
  *
@@ -26,7 +28,7 @@ public interface PointParser {
      * <p>parse.</p>
      *
      * @param str a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.tables.DataPoint} object.
+     * @return
      */
-    DataPoint parse(String str);
+    Values parse(String str);
 }

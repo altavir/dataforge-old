@@ -17,9 +17,8 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 import java.util.function.Function;
 
@@ -32,14 +31,14 @@ import java.util.function.Function;
  */
 public class WeightedXYModel extends XYModel {
     
-    private final Function<DataPoint, Double> weightFunction;
+    private final Function<Values, Double> weightFunction;
 
-    public WeightedXYModel(ParametricFunction source, Function<DataPoint, Double> weightFunction) {
+    public WeightedXYModel(ParametricFunction source, Function<Values, Double> weightFunction) {
         super(source);
         this.weightFunction = weightFunction;
     }
 
-    public WeightedXYModel(ParametricFunction source, XYAdapter format, Function<DataPoint, Double> weightFunction) {
+    public WeightedXYModel(ParametricFunction source, XYAdapter format, Function<Values, Double> weightFunction) {
         super(source, format);
         this.weightFunction = weightFunction;
     }
@@ -51,14 +50,14 @@ public class WeightedXYModel extends XYModel {
      * @param annotation a {@link hep.dataforge.meta.Meta} object.
      * @param weightFunction a {@link java.util.function.Function} object.
      */
-    public WeightedXYModel(ParametricFunction source, Meta annotation, Function<DataPoint, Double> weightFunction) {
+    public WeightedXYModel(ParametricFunction source, Meta annotation, Function<Values, Double> weightFunction) {
         super(source, annotation);
         this.weightFunction = weightFunction;
     }
 
     /** {@inheritDoc} */
     @Override
-    public double dispersion(DataPoint point, NamedValueSet pars) {
+    public double dispersion(Values point, Values pars) {
         return super.dispersion(point, pars)*weightFunction.apply(point);
     }
 

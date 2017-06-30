@@ -7,9 +7,9 @@
 package hep.dataforge.grind.extensions
 
 import hep.dataforge.exceptions.ValueConversionException
-import hep.dataforge.tables.DataPoint
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import hep.dataforge.values.Values
 
 import java.time.Instant
 
@@ -173,7 +173,7 @@ class ValueExtension {
      * @param self
      * @return
      */
-    static Map<String, Object> unbox(final DataPoint self) {
+    static Map<String, Object> unbox(final Values self) {
         self.names().collectEntries {
             [it: self.getValue(it).unbox()]
         }
@@ -185,7 +185,7 @@ class ValueExtension {
      * @param field
      * @return
      */
-    static Value getAt(final DataPoint self, String field) {
+    static Value getAt(final Values self, String field) {
         return self.getValue(field);
     }
 }

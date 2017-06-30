@@ -20,7 +20,7 @@ import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 import static hep.dataforge.names.NamedUtils.areEqual;
 import static java.lang.Math.log;
@@ -69,7 +69,7 @@ public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
     
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) {
+    public double derivValue(String derivParName, Values pars) {
         double res = this.like.derivValue(derivParName, pars);
         if (priorProb != null) {
             res += priorProb.derivValue(derivParName, pars) / priorProb.value(pars);
@@ -90,7 +90,7 @@ public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
     
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) {
+    public double value(Values pars) {
         double res = this.like.value(pars);
         if (priorProb != null) {
             res += log(priorProb.value(pars));

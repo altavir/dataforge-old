@@ -20,7 +20,7 @@ import hep.dataforge.maths.MathUtils;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.MultiFunction;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * Универсальная обертка, которая объединяет именованную и обычную функцию.
@@ -50,7 +50,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      * {@inheritDoc}
      */
     @Override
-    public double derivValue(String parName, NamedValueSet pars) {
+    public double derivValue(String parName, Values pars) {
         if (nFunc != null) {
             return nFunc.derivValue(parName, pars);
         } else {
@@ -132,7 +132,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      * {@inheritDoc}
      */
     @Override
-    public double value(NamedValueSet pars) {
+    public double value(Values pars) {
         if (nFunc != null) {
             return nFunc.value(pars);
         } else {

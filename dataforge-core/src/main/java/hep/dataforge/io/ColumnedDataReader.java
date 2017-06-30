@@ -15,10 +15,10 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.Table;
+import hep.dataforge.values.Values;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -36,7 +36,7 @@ import java.util.List;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ColumnedDataReader implements Iterable<DataPoint> {
+public class ColumnedDataReader implements Iterable<Values> {
 
     private DataPointStringIterator reader;
 
@@ -67,13 +67,13 @@ public class ColumnedDataReader implements Iterable<DataPoint> {
     }
 
     @Override
-    public Iterator<DataPoint> iterator() {
+    public Iterator<Values> iterator() {
         return reader;
     }
 
     public Table toTable() {
-        List<DataPoint> points = new ArrayList<>();
-        for (DataPoint p : this) {
+        List<Values> points = new ArrayList<>();
+        for (Values p : this) {
             if (p != null) {
                 points.add(p);
             }

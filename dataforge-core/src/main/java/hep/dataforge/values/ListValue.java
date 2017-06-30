@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,22 +24,22 @@ import java.util.stream.Collectors;
 /**
  * A wrapper for value lists which could be used both as listValue and as value.
  * When used as value only first element of listValue is used. If the listValue
- * is empty, than ValueSet is equivalent of Null value.
+ * is empty, than ListValue is equivalent of Null value.
  *
  * @author Alexander Nozik
  */
-public class ValueSet implements Value {
+public class ListValue implements Value {
 
     private final List<Value> values;
 
-    public ValueSet(Collection<Object> values) {
+    public ListValue(Collection<Object> values) {
         this.values = new ArrayList<>();
         values.forEach((o) -> {
             this.values.add(Value.of(o));
         });
     }
 
-    public ValueSet(Value... values) {
+    public ListValue(Value... values) {
         this.values = Arrays.asList(values);
     }
 
@@ -75,6 +77,7 @@ public class ValueSet implements Value {
         }
     }
 
+    @NotNull
     @Override
     public ValueType valueType() {
         if (values.size() > 0) {
@@ -104,7 +107,7 @@ public class ValueSet implements Value {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final ValueSet other = (ValueSet) obj;
+        final ListValue other = (ListValue) obj;
         return Objects.equals(this.values, other.values);
     }
 

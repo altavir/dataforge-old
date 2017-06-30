@@ -1,7 +1,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * Created by darksnake on 17-Oct-16.
@@ -19,7 +19,7 @@ class QOWeight extends AbstractNamedSet {
      */
     private double[] dispersion;
     private FitState source;
-    private NamedValueSet theta; // точка, в которой веса вычислены
+    private Values theta; // точка, в которой веса вычислены
 
     QOWeight(FitState source, String[] list) {
         super(list);
@@ -64,7 +64,7 @@ class QOWeight extends AbstractNamedSet {
      *
      * @return the theta
      */
-    public NamedValueSet getTheta() {
+    public Values getTheta() {
         if (this.theta == null) {
             throw new IllegalStateException("Update operation for weight is required.");
         }

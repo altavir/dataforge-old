@@ -18,6 +18,7 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Map;
 import java.util.Optional;
@@ -29,13 +30,13 @@ import java.util.Optional;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class MaskPoint implements DataPoint {
+public class MaskPoint implements Values {
 
     private final Map<String, String> nameMap;
-    private final DataPoint source;
+    private final Values source;
     private final Names names;
 
-    public MaskPoint(DataPoint source, Map<String, String> nameMap) {
+    public MaskPoint(Values source, Map<String, String> nameMap) {
         this.source = source;
         this.nameMap = nameMap;
         names = Names.of(nameMap.keySet());

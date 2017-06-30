@@ -21,6 +21,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.Values;
 
 import java.util.List;
 import java.util.function.Predicate;
@@ -42,8 +43,8 @@ public class Filtering {
      * @param tags a {@link java.lang.String} object.
      * @return a {@link java.util.function.Predicate} object.
      */
-    public static Predicate<DataPoint> getTagCondition(final String... tags) {
-        return (DataPoint dp) -> {
+    public static Predicate<Values> getTagCondition(final String... tags) {
+        return (Values dp) -> {
             boolean pass = true;
             for (String tag : tags) {
                 pass = pass & dp.hasTag(tag);
@@ -61,11 +62,11 @@ public class Filtering {
      * @param b         a {@link hep.dataforge.values.Value} object.
      * @return a {@link java.util.function.Predicate} object.
      */
-    public static Predicate<DataPoint> getValueCondition(final String valueName, final Value a, final Value b) {
+    public static Predicate<Values> getValueCondition(final String valueName, final Value a, final Value b) {
         if (ValueUtils.compare(a, b) >= 0) {
             throw new IllegalArgumentException();
         }
-        return (DataPoint dp) -> {
+        return (Values dp) -> {
             if (!dp.names().contains(valueName)) {
                 return false;
             } else {
@@ -79,8 +80,8 @@ public class Filtering {
         };
     }
 
-    public static Predicate<DataPoint> getValueEqualityCondition(final String valueName, final Value equals) {
-        return (DataPoint dp) -> {
+    public static Predicate<Values> getValueEqualityCondition(final String valueName, final Value equals) {
+        return (Values dp) -> {
             if (!dp.names().contains(valueName)) {
                 return false;
             } else {
@@ -103,11 +104,11 @@ public class Filtering {
      */
     @NodeDef(name = "is", multiple = true, info = "The filtering condition that must be satisfied", target = "method::hep.dataforge.tables.Filtering.buildCondition")
     @NodeDef(name = "not", multiple = true, info = "The filtering condition that must NOT be satisfied", target = "method::hep.dataforge.tables.Filtering.buildCondition")
-    public static Predicate<DataPoint> buildConditionSet(Meta an) {
-        Predicate<DataPoint> res = null;
+    public static Predicate<Values> buildConditionSet(Meta an) {
+        Predicate<Values> res = null;
         if (an.hasMeta("is")) {
             for (Meta condition : an.getMetaList("is")) {
-                Predicate<DataPoint> predicate = buildCondition(condition);
+                Predicate<Values> predicate = buildCondition(condition);
                 if (res == null) {
                     res = predicate;
                 } else {
@@ -118,7 +119,7 @@ public class Filtering {
 
         if (an.hasMeta("not")) {
             for (Meta condition : an.getMetaList("not")) {
-                Predicate<DataPoint> predicate = buildCondition(condition).negate();
+                Predicate<Values> predicate = buildCondition(condition).negate();
                 if (res == null) {
                     res = predicate;
                 } else {
@@ -141,8 +142,8 @@ public class Filtering {
     @ValueDef(name = "equals", info = "The equality condition value")
     @ValueDef(name = "from", type = {NUMBER}, info = "The lower bound for value. The 'value' parameter should be present")
     @ValueDef(name = "to", type = {NUMBER}, info = "The upper bound for value. The 'value' parameter should be present")
-    public static Predicate<DataPoint> buildCondition(Meta an) {
-        Predicate<DataPoint> res = null;
+    public static Predicate<Values> buildCondition(Meta an) {
+        Predicate<Values> res = null;
         if (an.hasValue("tag")) {
             List<Value> tagList = an.getValue("tag").listValue();
             String[] tags = new String[tagList.size()];
@@ -153,7 +154,7 @@ public class Filtering {
         }
         if (an.hasValue("value")) {
             String valueName = an.getValue("value").stringValue();
-            Predicate<DataPoint> valueCondition;
+            Predicate<Values> valueCondition;
             if (an.hasValue("equals")) {
                 Value equals = an.getValue("equals");
                 valueCondition = getValueEqualityCondition(valueName, equals);

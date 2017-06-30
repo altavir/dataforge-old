@@ -1,8 +1,13 @@
 package hep.dataforge.maths.histogram;
 
+import hep.dataforge.tables.TableFormat;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * A simple histogram with square bins and slow lookup
@@ -22,12 +27,12 @@ public class SimpleHistogram extends Histogram {
     }
 
     @Override
-    public Bin getBin(Double... point) {
-        return binFactory.getBin(point);
+    public Bin createBin(Double... point) {
+        return binFactory.createBin(point);
     }
 
     @Override
-    public Optional<Bin> lookupBin(Double... point) {
+    public Optional<Bin> findBin(Double... point) {
         //Simple slow lookup mechanism
         return binMap.values().stream().filter(bin -> bin.contains(point)).findFirst();
     }
@@ -41,5 +46,21 @@ public class SimpleHistogram extends Histogram {
     @Override
     public Bin getBinById(long id) {
         return binMap.get(id);
+    }
+
+    @NotNull
+    @Override
+    public Iterator<Bin> iterator() {
+        return binMap.values().iterator();
+    }
+
+    @Override
+    public Stream<Bin> binStream() {
+        return binMap.values().stream();
+    }
+
+    @Override
+    protected TableFormat getFormat(String... names) {
+        throw new UnsupportedOperationException("TODO");
     }
 }

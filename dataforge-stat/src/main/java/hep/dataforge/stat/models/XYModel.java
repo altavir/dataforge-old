@@ -18,9 +18,8 @@ package hep.dataforge.stat.models;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 import static java.lang.Math.log;
 import static java.lang.Math.sqrt;
@@ -77,7 +76,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException {
+    public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             if (source.providesDeriv(parName)) {
                 return derivValue(parName, adapter.getX(point).doubleValue(), pars);
@@ -93,11 +92,11 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double dispersion(DataPoint point, NamedValueSet pars) {
+    public double dispersion(Values point, Values pars) {
         return 1d / getWeight(point);
     }
 
-    private double getWeight(DataPoint point) {
+    private double getWeight(Values point) {
         if (point.names().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
         } else {
@@ -110,7 +109,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double distance(DataPoint point, NamedValueSet pars) {
+    public double distance(Values point, Values pars) {
         double x = adapter.getX(point).doubleValue();
         double y = adapter.getY(point).doubleValue();
         return value(x, pars) - y;
@@ -120,7 +119,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double getLogProb(DataPoint point, NamedValueSet pars) {
+    public double getLogProb(Values point, Values pars) {
         double dist = this.distance(point, pars);
         double disp = this.dispersion(point, pars);
         double base; // нормировка
@@ -137,7 +136,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * {@inheritDoc}
      */
     @Override
-    public double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) {
+    public double getLogProbDeriv(String parName, Values point, Values pars) {
         return -this.distance(point, pars) * this.disDeriv(parName, point, pars) / this.dispersion(point, pars);
     }
 
@@ -182,7 +181,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * @param set
      * @return a double.
      */
-    public double value(double x, NamedValueSet set) {
+    public double value(double x, Values set) {
         return source.value(x, set);
     }
 
@@ -194,7 +193,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
      * @param set
      * @return a double.
      */
-    public double derivValue(String parName, double x, NamedValueSet set) {
+    public double derivValue(String parName, double x, Values set) {
         return source.derivValue(parName, x, set);
     }
 }

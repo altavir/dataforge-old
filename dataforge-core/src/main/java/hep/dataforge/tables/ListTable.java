@@ -22,6 +22,7 @@ import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Iterator;
 import java.util.List;
@@ -62,14 +63,14 @@ public class ListTable extends ListOfPoints implements Table {
      * @param format a {@link hep.dataforge.tables.TableFormat} object.
      * @param points a {@link java.lang.Iterable} object.
      */
-    public ListTable(TableFormat format, Iterable<DataPoint> points) {
+    public ListTable(TableFormat format, Iterable<Values> points) {
         this.format = format;
         if (points != null) {
             addRows(points);
         }
     }
 
-    public ListTable(TableFormat format, Stream<DataPoint> points) {
+    public ListTable(TableFormat format, Stream<Values> points) {
         this.format = format;
         if (points != null) {
             addRows(points.collect(Collectors.toList()));
@@ -81,7 +82,7 @@ public class ListTable extends ListOfPoints implements Table {
      *
      * @param points a {@link java.util.List} object.
      */
-    public ListTable(List<DataPoint> points) {
+    public ListTable(List<Values> points) {
         if (points.isEmpty()) {
             throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
         }
@@ -90,7 +91,7 @@ public class ListTable extends ListOfPoints implements Table {
     }
 
 
-    protected void addRow(DataPoint e) throws NamingException {
+    protected void addRow(Values e) throws NamingException {
         if (format.names().size() == 0 || e.names().contains(format.names())) {
             this.data.add(e);
         } else {
@@ -99,7 +100,7 @@ public class ListTable extends ListOfPoints implements Table {
     }
 
     @Override
-    public Table transform(UnaryOperator<Stream<DataPoint>> streamTransform) {
+    public Table transform(UnaryOperator<Stream<Values>> streamTransform) {
         return new ListTable(getFormat(), streamTransform.apply(stream()));
     }
 
@@ -185,7 +186,7 @@ public class ListTable extends ListOfPoints implements Table {
             throw new NonEmptyMetaMorphException(getClass());
         }
         format = new TableFormat(meta.getMeta("format"));
-        data.addAll(DataPoint.buildFromMeta(meta.getMeta("data")));
+        data.addAll(ListOfPoints.buildFromMeta(meta.getMeta("data")));
     }
 
     public static class Builder {
@@ -211,10 +212,10 @@ public class ListTable extends ListOfPoints implements Table {
         /**
          * Если formatter == null, то могут быть любые точки
          *
-         * @param e a {@link hep.dataforge.tables.DataPoint} object.
+         * @param e
          * @throws hep.dataforge.exceptions.NamingException if any.
          */
-        public Builder row(DataPoint e) throws NamingException {
+        public Builder row(Values e) throws NamingException {
             table.addRow(e);
             return this;
         }
@@ -227,16 +228,16 @@ public class ListTable extends ListOfPoints implements Table {
          * @throws NamingException
          */
         public Builder row(Object... values) throws NamingException {
-            table.addRow(new MapPoint(table.format.namesAsArray(), values));
+            table.addRow(new ValueMap(table.format.namesAsArray(), values));
             return this;
         }
 
-        public Builder rows(Iterable<? extends DataPoint> points) {
+        public Builder rows(Iterable<? extends Values> points) {
             table.addRows(points);
             return this;
         }
 
-        public Builder rows(Stream<? extends DataPoint> stream) {
+        public Builder rows(Stream<? extends Values> stream) {
             stream.forEach(it->table.addRow(it));
             return this;
         }

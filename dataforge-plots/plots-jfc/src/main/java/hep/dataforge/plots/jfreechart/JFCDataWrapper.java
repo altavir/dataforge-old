@@ -8,9 +8,9 @@ package hep.dataforge.plots.jfreechart;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plottable;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
 
 import java.util.List;
@@ -25,7 +25,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     private Plottable plottable;
 
     private XYAdapter adapter;
-    private List<DataPoint> data;
+    private List<Values> data;
     private Meta query = Meta.empty();
     private Integer index = 0;
 
@@ -54,14 +54,14 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         }
     }
 
-    private synchronized List<DataPoint> getData() {
+    private synchronized List<Values> getData() {
         if (data == null) {
             data = plottable.getData(query);
         }
         return data;
     }
 
-    private synchronized DataPoint getAt(int i) {
+    private synchronized Values getAt(int i) {
         return getData().get(i);
     }
 

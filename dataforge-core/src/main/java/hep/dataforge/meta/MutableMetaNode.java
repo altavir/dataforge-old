@@ -312,7 +312,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     public T putValues(String name, Object[] values) {
-        if (values != null) {
+        if (values != null && values.length > 0) {
             for (Object obj : values) {
                 putValue(name, obj);
             }
@@ -321,7 +321,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     public T putValues(String name, String... values) {
-        if (values != null) {
+        if (values != null && values.length > 0) {
             for (Object obj : values) {
                 putValue(name, obj);
             }

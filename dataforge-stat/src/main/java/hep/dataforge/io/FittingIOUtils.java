@@ -27,8 +27,11 @@ import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.*;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.ValueMap;
+import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -60,13 +63,13 @@ public class FittingIOUtils {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.value(point);
-            DataPoint dp = new MapPoint(format, values);
+            Values dp = new ValueMap(format, values);
             res.row(dp);
         }
         return res.build();
     }
 
-    public static NamedValueSet getValueSet(String names, String doubles){
+    public static Values getValueSet(String names, String doubles){
         Logger.getAnonymousLogger().warning("Using obsolete input method.");
         setDefault(Locale.ENGLISH);
         int i;
@@ -280,10 +283,10 @@ public class FittingIOUtils {
         printResiduals(out, state.getModel(), state.getPoints(), state.getParameters());
     }
 
-    public static void printResiduals(PrintWriter out, Model model, Iterable<DataPoint> data, ParamSet pars) {
+    public static void printResiduals(PrintWriter out, Model model, Iterable<Values> data, ParamSet pars) {
         out.println();// можно тут вставить шапку
         out.printf("residual\tsigma%n%n");
-        for (DataPoint dp : data) {
+        for (Values dp : data) {
             double dif = model.distance(dp, pars);
             double sigma = sqrt(model.dispersion(dp, pars));
             out.printf("%g\t%g%n", dif / sigma, sigma);
@@ -291,22 +294,22 @@ public class FittingIOUtils {
         out.flush();
     }
 
-    public static void printSpectrum(PrintWriter out, ParametricFunction sp, NamedValueSet pars, double a, double b, int numPoints) {
+    public static void printSpectrum(PrintWriter out, ParametricFunction sp, Values pars, double a, double b, int numPoints) {
         UnivariateFunction func = ParametricUtils.getSpectrumFunction(sp, pars);
         printFunctionSimple(out, func, a, b, numPoints);
         out.flush();
     }
 
-    public static void printSpectrumResiduals(PrintWriter out, XYModel model, Iterable<DataPoint> data, NamedValueSet pars) {
+    public static void printSpectrumResiduals(PrintWriter out, XYModel model, Iterable<Values> data, Values pars) {
         printSpectrumResiduals(out, model.getSpectrum(), data, model.getAdapter(), pars);
     }
 
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,
-            Iterable<DataPoint> data, XYAdapter adapter, NamedValueSet pars) {
+                                              Iterable<Values> data, XYAdapter adapter, Values pars) {
         out.println();// можно тут вставить шапку
         out.printf("%8s\t%8s\t%8s\t%8s\t%8s%n", "x", "data", "error", "fit", "residual");
 
-        for (DataPoint dp : data) {
+        for (Values dp : data) {
             double x = adapter.getX(dp).doubleValue();
             double y = adapter.getY(dp).doubleValue();
             double sigma = adapter.getYerr(dp).doubleValue();

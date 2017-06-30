@@ -20,9 +20,9 @@ import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.Table;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -200,7 +200,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        DataPoint dp = points.getPoint(i);
+        Values dp = points.getPoint(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -237,7 +237,7 @@ public class FitState implements Serializable {
         if (!model.providesProb()) {
             res = -getChi2(set) / 2;
         } else {
-            for (DataPoint dp : points) {
+            for (Values dp : points) {
                 res += model.getLogProb(dp, set);
             }
         }
@@ -268,7 +268,7 @@ public class FitState implements Serializable {
                 res -= d * deriv / s;
             }
         } else {
-            for (DataPoint dp : points) {
+            for (Values dp : points) {
                 res += model.getLogProbDeriv(parName, dp, set);
             }
         }

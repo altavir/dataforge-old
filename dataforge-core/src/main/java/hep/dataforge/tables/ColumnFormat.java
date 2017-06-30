@@ -8,6 +8,7 @@ import hep.dataforge.utils.SimpleMetaMorph;
 import hep.dataforge.values.ValueType;
 
 import java.util.Arrays;
+import java.util.List;
 
 import static hep.dataforge.values.ValueType.NUMBER;
 
@@ -18,6 +19,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
 @ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
+@ValueDef(name = "purpose", multiple = true, info = "The role of data in this column for plotting or other purposes")
 public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     public ColumnFormat() {
@@ -66,9 +68,18 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     /**
      * Get displayed title for this column. By default returns column name
+     *
      * @return
      */
     public String getTitle() {
         return getString("title", this::getName);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<String> getPurpose(){
+        return Arrays.asList(getStringArray("purpose"));
     }
 }

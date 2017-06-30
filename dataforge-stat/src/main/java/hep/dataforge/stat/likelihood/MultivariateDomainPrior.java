@@ -20,7 +20,7 @@ import hep.dataforge.maths.Domain;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 
 /**
@@ -64,7 +64,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException {
+    public double derivValue(String derivParName, Values pars) throws NotDefinedException {
         if(!this.names().contains(derivParName)) {
             return 0;
         } else {
@@ -80,7 +80,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
         /** {@inheritDoc} */
         /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) {
+    public double value(Values pars) {
         NamedVector vector = new NamedVector(pars);
         if(dom.contains(vector.getVector())) {
             return 1/dom.volume();

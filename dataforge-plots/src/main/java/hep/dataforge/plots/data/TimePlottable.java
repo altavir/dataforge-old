@@ -17,11 +17,11 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.tables.DataPoint;
-import hep.dataforge.tables.MapPoint;
+import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
@@ -48,7 +48,7 @@ public class TimePlottable extends XYPlottable {
 
     public static final String DEFAULT_TIMESTAMP_KEY = "timestamp";
 
-    private TreeMap<Instant, DataPoint> map = new TreeMap<>();
+    private TreeMap<Instant, Values> map = new TreeMap<>();
     private final String timestamp;
     private final String yName;
 
@@ -99,7 +99,7 @@ public class TimePlottable extends XYPlottable {
      *
      * @param point
      */
-    public void put(DataPoint point) {
+    public void put(Values point) {
         Value v = point.getValue(yName);
         if (point.hasValue(timestamp)) {
             put(point.getValue(timestamp).timeValue(), v);
@@ -127,7 +127,7 @@ public class TimePlottable extends XYPlottable {
         Map<String, Value> point = new HashMap<>(2);
         point.put(timestamp, Value.of(time));
         point.put(yName, value);
-        this.map.put(time, new MapPoint(point));
+        this.map.put(time, new ValueMap(point));
 
         if (size() > 2) {
             int maxItems = meta().getInt(MAX_ITEMS_KEY, -1);
@@ -140,7 +140,7 @@ public class TimePlottable extends XYPlottable {
     }
 
     @Override
-    protected List<DataPoint> getRawData(Meta query) {
+    protected List<Values> getRawData(Meta query) {
         return new ArrayList<>(map.values());
     }
 
@@ -177,12 +177,12 @@ public class TimePlottable extends XYPlottable {
         int oldsize = size();
         if (maxItems > 0 && oldsize > maxItems) {
             //copying retained elements into new map
-            TreeMap<Instant, DataPoint> newMap = new TreeMap<>();
+            TreeMap<Instant, Values> newMap = new TreeMap<>();
             int step = (int) (Duration.between(first, last).toMillis() / prefItems);
             newMap.put(first, map.firstEntry().getValue());
             newMap.put(last, map.lastEntry().getValue());
             for (Instant x = first; x.isBefore(last); x = x.plusMillis(step)) {
-                Map.Entry<Instant, DataPoint> entry = map.ceilingEntry(x);
+                Map.Entry<Instant, Values> entry = map.ceilingEntry(x);
                 newMap.putIfAbsent(entry.getKey(), entry.getValue());
             }
             //replacing map with new one

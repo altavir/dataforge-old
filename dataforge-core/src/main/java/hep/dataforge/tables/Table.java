@@ -20,6 +20,7 @@ import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.values.Values;
 
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -41,7 +42,7 @@ public interface Table extends MetaMorph, Markedup, NavigablePointSource {
      * @param streamTransform
      * @return
      */
-    Table transform(UnaryOperator<Stream<DataPoint>> streamTransform);
+    Table transform(UnaryOperator<Stream<Values>> streamTransform);
 
     @Override
     default Markup markup(Meta configuration) {

@@ -15,6 +15,8 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.values.Values;
+
 import java.util.function.Consumer;
 
 /**
@@ -23,6 +25,6 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface PointListener extends Consumer<DataPoint> {
+public interface PointListener extends Consumer<Values> {
 
 }

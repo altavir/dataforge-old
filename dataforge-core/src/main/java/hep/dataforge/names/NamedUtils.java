@@ -16,7 +16,7 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -163,7 +163,7 @@ public class NamedUtils {
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      * @return an array of {@link java.lang.Number} objects.
      */
-    public static Number[] getAllNamedSetValues(NamedValueSet set) throws NameNotFoundException {
+    public static Number[] getAllNamedSetValues(Values set) throws NameNotFoundException {
         Number[] res = new Number[set.size()];
         List<String> names = set.names().asList();
         for (int i = 0; i < set.size(); i++) {
@@ -181,7 +181,7 @@ public class NamedUtils {
      * @return an array of double.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public static double[] getNamedSubSetValues(NamedValueSet set, String... names) throws NameNotFoundException {
+    public static double[] getNamedSubSetValues(Values set, String... names) throws NameNotFoundException {
         double[] res = new double[names.length];
         for (int i = 0; i < names.length; i++) {
             res[i] = set.getValue(names[i]).doubleValue();

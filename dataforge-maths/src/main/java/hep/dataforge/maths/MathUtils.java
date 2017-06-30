@@ -6,7 +6,7 @@
 package hep.dataforge.maths;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
@@ -16,7 +16,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction;
  */
 public class MathUtils {
 
-    public static double[] getDoubleArray(NamedValueSet set, String... names) {
+    public static double[] getDoubleArray(Values set, String... names) {
         //fast access method for double vectors
         if (set instanceof NamedVector) {
             return ((NamedVector) set).getArray(names);
@@ -36,7 +36,7 @@ public class MathUtils {
         return res;
     }
 
-    public static String toString(NamedValueSet set, String... names) {
+    public static String toString(Values set, String... names) {
         String res = "[";
         if (names.length == 0) {
             names = set.names().asArray();
