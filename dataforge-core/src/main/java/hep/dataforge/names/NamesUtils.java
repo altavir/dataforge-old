@@ -26,12 +26,12 @@ import static java.util.Arrays.asList;
 
 /**
  * <p>
- * NamedUtils class.</p>
+ * NamesUtils class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class NamedUtils {
+public class NamesUtils {
 
     /**
      * проверка того, что два набора имен полностью совпадают с точностью до
@@ -112,7 +112,7 @@ public class NamedUtils {
      * contains.</p>
      *
      * @param nameList an array of {@link java.lang.String} objects.
-     * @param name a {@link java.lang.String} object.
+     * @param name     a {@link java.lang.String} object.
      * @return a boolean.
      */
     public static boolean contains(String[] nameList, String name) {
@@ -128,7 +128,7 @@ public class NamedUtils {
      * <p>
      * exclude.</p>
      *
-     * @param named a {@link hep.dataforge.names.Names} object.
+     * @param named       a {@link hep.dataforge.names.Names} object.
      * @param excludeName a {@link java.lang.String} object.
      * @return an array of {@link java.lang.String} objects.
      */
@@ -142,7 +142,7 @@ public class NamedUtils {
      * <p>
      * exclude.</p>
      *
-     * @param names an array of {@link java.lang.String} objects.
+     * @param names       an array of {@link java.lang.String} objects.
      * @param excludeName a {@link java.lang.String} object.
      * @return an array of {@link java.lang.String} objects.
      */
@@ -160,12 +160,12 @@ public class NamedUtils {
      * TODO replace by List
      *
      * @param set
-     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      * @return an array of {@link java.lang.Number} objects.
+     * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
     public static Number[] getAllNamedSetValues(Values set) throws NameNotFoundException {
         Number[] res = new Number[set.size()];
-        List<String> names = set.names().asList();
+        List<String> names = set.getNames().asList();
         for (int i = 0; i < set.size(); i++) {
             res[i] = set.getValue(names.get(i)).doubleValue();
         }
@@ -206,6 +206,31 @@ public class NamedUtils {
             }
         }
         return true;
+    }
+
+    /**
+     * Generate a default axis name set for given number of dimensions
+     *
+     * @param dim
+     * @return
+     */
+    public static Names generateNames(int dim) {
+        switch (dim) {
+            case 0:
+                return new NameList();
+            case 1:
+                return new NameList("x");
+            case 2:
+                return new NameList("x", "y");
+            case 3:
+                return new NameList("x", "y", "z");
+            default:
+                List<String> names = new ArrayList<>();
+                for (int i = 0; i < dim; i++) {
+                    names.add("axis_" + (i + 1));
+                }
+                return new NameList(names);
+        }
     }
 
 }

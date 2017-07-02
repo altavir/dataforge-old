@@ -41,7 +41,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
     }
 
     public ParametricMultiFunctionWrapper(ParametricValue nFunc) {
-        this.names = nFunc.names();
+        this.names = nFunc.getNames();
         this.nFunc = nFunc;
         this.multiFunc = null;
     }
@@ -54,13 +54,13 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         if (nFunc != null) {
             return nFunc.derivValue(parName, pars);
         } else {
-            if (!pars.names().contains(names.asArray())) {
+            if (!pars.getNames().contains(names.asArray())) {
                 throw new IllegalArgumentException("Wrong parameter set.");
             }
             if (!names.contains(parName)) {
                 throw new IllegalArgumentException("Wrong derivative parameter name.");
             }
-            return this.multiFunc.derivValue(this.getNumberByName(parName), MathUtils.getDoubleArray(pars, this.names().asArray()));
+            return this.multiFunc.derivValue(this.getNumberByName(parName), MathUtils.getDoubleArray(pars, this.getNames().asArray()));
         }
     }
 
@@ -94,12 +94,12 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 
     private int getNumberByName(String name) {
-        return this.names().asList().indexOf(name);
+        return this.getNames().asList().indexOf(name);
     }
 
     /**
@@ -109,7 +109,7 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      */
     @Override
     public boolean providesDeriv(int n) {
-        if (nFunc != null && nFunc.providesDeriv(this.names().asArray()[n])) {
+        if (nFunc != null && nFunc.providesDeriv(this.getNames().asArray()[n])) {
             return true;
         }
         return multiFunc != null && multiFunc.providesDeriv(n);
@@ -136,10 +136,10 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
         if (nFunc != null) {
             return nFunc.value(pars);
         } else {
-            if (!pars.names().contains(names.asArray())) {
+            if (!pars.getNames().contains(names.asArray())) {
                 throw new IllegalArgumentException("Wrong parameter set.");
             }
-            return this.value(MathUtils.getDoubleArray(pars, this.names().asArray()));
+            return this.value(MathUtils.getDoubleArray(pars, this.getNames().asArray()));
         }
     }
 

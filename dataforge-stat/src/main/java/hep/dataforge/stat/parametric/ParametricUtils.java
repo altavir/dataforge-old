@@ -96,14 +96,14 @@ public class ParametricUtils {
      * @return a {@link hep.dataforge.stat.parametric.ParametricValue} object.
      */
     public static ParametricValue getNamedSubFunction(final ParametricValue func, final Values initPars, String... freePars) {
-        if (!initPars.names().contains(func.namesAsArray())) {
+        if (!initPars.getNames().contains(func.namesAsArray())) {
             throw new IllegalArgumentException("InitPars does not cover all of func parameters.");
         }
         Names names;
         if (freePars.length > 0) {
             names = Names.of(freePars);
         } else {
-            names = initPars.names();
+            names = initPars.getNames();
         }
         return new AbstractParametricValue(names) {
             private final NamedVector allPars = new NamedVector(initPars);
@@ -111,10 +111,10 @@ public class ParametricUtils {
 
             @Override
             public double derivValue(String derivParName, Values pars) {
-                if (!pars.names().contains(this.namesAsArray())) {
+                if (!pars.getNames().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
-                for (String name : this.names()) {
+                for (String name : this.getNames()) {
                     this.allPars.setValue(name, pars.getDouble(name));
                 }
                 return f.derivValue(derivParName, allPars);
@@ -122,15 +122,15 @@ public class ParametricUtils {
 
             @Override
             public boolean providesDeriv(String name) {
-                return f.providesDeriv(name) && this.names().contains(name);
+                return f.providesDeriv(name) && this.getNames().contains(name);
             }
 
             @Override
             public double value(Values pars) {
-                if (!pars.names().contains(this.namesAsArray())) {
+                if (!pars.getNames().contains(this.namesAsArray())) {
                     throw new NameNotFoundException();
                 }
-                for (String name : this.names()) {
+                for (String name : this.getNames()) {
                     this.allPars.setValue(name, pars.getDouble(name));
                 }
                 return f.value(allPars);

@@ -92,7 +92,7 @@ public class ListTable extends ListOfPoints implements Table {
 
 
     protected void addRow(Values e) throws NamingException {
-        if (format.names().size() == 0 || e.names().contains(format.names())) {
+        if (format.getNames().size() == 0 || e.getNames().contains(format.getNames())) {
             this.data.add(e);
         } else {
             throw new DataFormatException("The input data point doesn't contain all required fields.");
@@ -120,7 +120,7 @@ public class ListTable extends ListOfPoints implements Table {
      */
     @Override
     public Column getColumn(String columnName) throws NameNotFoundException {
-        if (!this.format.names().contains(columnName)) {
+        if (!this.format.getNames().contains(columnName)) {
             throw new NameNotFoundException(columnName);
         }
         return new Column() {

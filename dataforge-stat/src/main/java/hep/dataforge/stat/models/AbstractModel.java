@@ -48,7 +48,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
 
     protected AbstractModel(NameSetContainer source, T adapter) {
         this.adapter = adapter;
-        this.names = source.names();
+        this.names = source.getNames();
     }
 
     public T getAdapter() {
@@ -122,7 +122,7 @@ public abstract class AbstractModel<T extends PointAdapter> extends BaseMetaHold
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 }

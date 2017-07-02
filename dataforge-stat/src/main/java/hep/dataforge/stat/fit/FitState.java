@@ -272,7 +272,7 @@ public class FitState implements Serializable {
                 res += model.getLogProbDeriv(parName, dp, set);
             }
         }
-        if ((getPrior() != null) && (getPrior().names().contains(parName))) {
+        if ((getPrior() != null) && (getPrior().getNames().contains(parName))) {
             return res += getPrior().derivValue(parName, set) / getPrior().value(set);
         }
         return res;
@@ -374,7 +374,7 @@ public class FitState implements Serializable {
         public Builder setCovariance(NamedMatrix cov, boolean updateErrors) {
             covariance = cov;
             if (updateErrors) {
-                for (String name : cov.names()) {
+                for (String name : cov.getNames()) {
                     double value = cov.get(name, name);
                     if (value > 0) {
                         pars.setParError(name, Math.sqrt(value));

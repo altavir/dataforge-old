@@ -58,8 +58,8 @@ public class LogLikelihood implements ParametricValue {
     }
 
     @Override
-    public Names names() {
-        return source.getModel().names();
+    public Names getNames() {
+        return source.getModel().getNames();
     }
 
     /**

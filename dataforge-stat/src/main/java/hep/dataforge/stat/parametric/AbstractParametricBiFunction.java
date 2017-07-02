@@ -26,7 +26,7 @@ public abstract class AbstractParametricBiFunction extends AbstractParametric im
 
     @Override
     public double derivValue(String parName, double x, double y, Values set) {
-        if (!names().contains(parName)) {
+        if (!getNames().contains(parName)) {
             return 0;
         } else {
             throw new NotDefinedException();

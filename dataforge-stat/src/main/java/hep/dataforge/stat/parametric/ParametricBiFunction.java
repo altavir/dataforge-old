@@ -37,12 +37,12 @@ public interface ParametricBiFunction extends NameSetContainer {
 
                 @Override
                 public boolean providesDeriv(String name) {
-                    return !names().contains(name);
+                    return !getNames().contains(name);
                 }
 
                 @Override
-                public Names names() {
-                    return ParametricBiFunction.this.names();
+                public Names getNames() {
+                    return ParametricBiFunction.this.getNames();
                 }
             };
         } else {

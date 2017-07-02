@@ -65,7 +65,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
     /** {@inheritDoc} */
     @Override
     public double derivValue(String derivParName, Values pars) throws NotDefinedException {
-        if(!this.names().contains(derivParName)) {
+        if(!this.getNames().contains(derivParName)) {
             return 0;
         } else {
             throw new NotDefinedException();
@@ -75,7 +75,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
         /** {@inheritDoc} */
     @Override
     public boolean providesDeriv(String name) {
-        return !this.names().contains(name);
+        return !this.getNames().contains(name);
     }
         /** {@inheritDoc} */
         /** {@inheritDoc} */

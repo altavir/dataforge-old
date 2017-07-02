@@ -42,7 +42,7 @@ import java.util.*;
 import java.util.logging.Logger;
 
 import static hep.dataforge.io.PrintFunction.printFunctionSimple;
-import static hep.dataforge.names.NamedUtils.combineNames;
+import static hep.dataforge.names.NamesUtils.combineNames;
 import static java.lang.Math.*;
 import static java.util.Locale.setDefault;
 

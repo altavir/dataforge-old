@@ -110,7 +110,7 @@ public class ValueMap implements Values, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(this.valueMap.keySet());
     }
 
@@ -129,7 +129,7 @@ public class ValueMap implements Values, MetaMorph {
     public String toString() {
         StringBuilder res = new StringBuilder("[");
         boolean flag = true;
-        for (String name : this.names()) {
+        for (String name : this.getNames()) {
             if (flag) {
                 flag = false;
             } else {
@@ -173,8 +173,8 @@ public class ValueMap implements Values, MetaMorph {
         private final ValueMap p;
 
         public Builder(Values dp) {
-            p = new ValueMap(new LinkedHashMap<>(dp.names().size()));
-            for (String name : dp.names()) {
+            p = new ValueMap(new LinkedHashMap<>(dp.getNames().size()));
+            for (String name : dp.getNames()) {
                 p.valueMap.put(name, dp.getValue(name));
             }
 

@@ -68,7 +68,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
      */
     public static TableFormat forPoint(Values dataPoint) {
         MetaBuilder builder = new MetaBuilder("format");
-        for (String n : dataPoint.names()) {
+        for (String n : dataPoint.getNames()) {
             builder.putNode(new MetaBuilder("column").setValue("name", n).setValue("type", dataPoint.getValue(n).valueType().name()));
         }
         return new TableFormat(builder.build());
@@ -94,7 +94,7 @@ public class TableFormat extends BaseMetaHolder implements NameSetContainer, Met
     }
 
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(getColumns().map(ColumnFormat::getName).collect(Collectors.toList()));
     }
 

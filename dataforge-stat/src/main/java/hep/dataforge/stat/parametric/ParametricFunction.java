@@ -50,12 +50,12 @@ public interface ParametricFunction extends NameSetContainer {
 
                 @Override
                 public boolean providesDeriv(String name) {
-                    return !names().contains(name);
+                    return !getNames().contains(name);
                 }
 
                 @Override
-                public Names names() {
-                    return ParametricFunction.this.names();
+                public Names getNames() {
+                    return ParametricFunction.this.getNames();
                 }
             };
         } else {

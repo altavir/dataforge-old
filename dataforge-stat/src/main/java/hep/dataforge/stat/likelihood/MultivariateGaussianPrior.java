@@ -45,7 +45,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
     /** {@inheritDoc} */
     @Override
     public double derivValue(String derivParName, Values pars) throws NotDefinedException, NameNotFoundException {
-        if (set.names().contains(derivParName)) {
+        if (set.getNames().contains(derivParName)) {
             double mean = set.getDouble(derivParName);
             double sigma = set.getError(derivParName);
             double value = pars.getDouble(derivParName);
@@ -59,8 +59,8 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public Names names() {
-        return set.names();
+    public Names getNames() {
+        return set.getNames();
     }
 
     /** {@inheritDoc} */

@@ -1,6 +1,7 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.TableFormatBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -27,7 +28,7 @@ public class SimpleHistogram extends Histogram {
     }
 
     @Override
-    public Bin createBin(Double... point) {
+    public SquareBin createBin(Double... point) {
         return binFactory.createBin(point);
     }
 
@@ -42,11 +43,11 @@ public class SimpleHistogram extends Histogram {
         //The call should be thread safe. New bin is added only if it is absent
         return binMap.computeIfAbsent(bin.getBinID(), (id) -> bin);
     }
-
-    @Override
-    public Bin getBinById(long id) {
-        return binMap.get(id);
-    }
+//
+//    @Override
+//    public Bin getBinById(long id) {
+//        return binMap.get(id);
+//    }
 
     @NotNull
     @Override
@@ -60,7 +61,19 @@ public class SimpleHistogram extends Histogram {
     }
 
     @Override
-    protected TableFormat getFormat(String... names) {
-        throw new UnsupportedOperationException("TODO");
+    protected TableFormat getFormat() {
+        TableFormatBuilder builder = new TableFormatBuilder();
+        for (String axisName: getNames()) {
+            builder.addNumber(axisName, "domain.value");
+            builder.addNumber(axisName + ".binEnd");
+        }
+        builder.addNumber("count", "range.value");
+        builder.addColumn("id");
+        return builder.build();
+    }
+
+    @Override
+    public int getDimension() {
+        return this.binFactory.getDimension();
     }
 }

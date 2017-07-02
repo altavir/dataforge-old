@@ -22,7 +22,7 @@ import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.values.Values;
 
-import static hep.dataforge.names.NamedUtils.areEqual;
+import static hep.dataforge.names.NamesUtils.areEqual;
 import static java.lang.Math.log;
 
 /**
@@ -45,7 +45,7 @@ public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
      */
     public AnalyticalPosteriorLogLike(NamedVector centralValues, NamedMatrix covariance) {
         super(centralValues);
-        if (!areEqual(covariance.names(), centralValues.names())) {
+        if (!areEqual(covariance.getNames(), centralValues.getNames())) {
             throw new IllegalArgumentException("Different names for centralValues and covariance.");
         }
         this.like = new NamedGaussianPDFLog(centralValues, covariance);
@@ -61,7 +61,7 @@ public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
      */
     public AnalyticalPosteriorLogLike(NamedVector centralValues, NamedMatrix covariance, ParametricValue priorProb) throws NameNotFoundException {
         this(centralValues, covariance);
-        if (!centralValues.names().contains(priorProb.namesAsArray())) {
+        if (!centralValues.getNames().contains(priorProb.namesAsArray())) {
             throw new IllegalArgumentException("Wrong names for priorProb.");
         }
         this.priorProb = priorProb;

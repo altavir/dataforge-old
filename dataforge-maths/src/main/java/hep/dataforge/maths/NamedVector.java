@@ -78,7 +78,7 @@ public class NamedVector implements Values, MetaMorph {
 
     public NamedVector(Values set) {
         vector = new ArrayRealVector(MathUtils.getDoubleArray(set));
-        this.nameList = Names.of(set.names());
+        this.nameList = Names.of(set.getNames());
     }
 
     @Override
@@ -138,7 +138,7 @@ public class NamedVector implements Values, MetaMorph {
         if (names.length == 0) {
             return vector.toArray();
         } else {
-            if (!this.names().contains(names)) {
+            if (!this.getNames().contains(names)) {
                 throw new NamingException();
             }
             double[] res = new double[names.length];
@@ -157,7 +157,7 @@ public class NamedVector implements Values, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return nameList;
     }
 
@@ -173,7 +173,7 @@ public class NamedVector implements Values, MetaMorph {
     @Override
     public Meta toMeta() {
         MetaBuilder builder = new MetaBuilder("vector");
-        for (int i = 0; i < names().size(); i++) {
+        for (int i = 0; i < getNames().size(); i++) {
             builder.setValue(nameList.get(i), vector.getEntry(i));
         }
         return builder;

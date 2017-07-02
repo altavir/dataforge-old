@@ -108,7 +108,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
         if (names.length == 0) {
             return this;
         }
-        if (!this.names().contains(names)) {
+        if (!this.getNames().contains(names)) {
             throw new IllegalArgumentException();
         }
         int[] numbers = new int[names.length];
@@ -126,7 +126,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 

@@ -30,7 +30,7 @@ import org.apache.commons.math3.random.SynchronizedRandomGenerator;
 import java.io.PrintWriter;
 
 import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
-import static hep.dataforge.names.NamedUtils.exclude;
+import static hep.dataforge.names.NamesUtils.exclude;
 import static hep.dataforge.stat.parametric.ParametricUtils.getNamedProjection;
 import static java.lang.Math.max;
 import static java.lang.Math.min;

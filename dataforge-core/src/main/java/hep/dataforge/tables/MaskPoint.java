@@ -63,7 +63,7 @@ public class MaskPoint implements Values {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 

@@ -46,11 +46,11 @@ public class GaussianParameterGenerator implements ParameterGenerator {
      * @param covariance
      */
     public GaussianParameterGenerator(Values means, NamedMatrix covariance) {
-        if (!covariance.names().contains(means.names())) {
+        if (!covariance.getNames().contains(means.getNames())) {
             throw new IllegalArgumentException("Covariance names must include average values names");
         }
 
-        this.names = means.names();
+        this.names = means.getNames();
         distribution = new MultivariateNormalDistribution(MathUtils.getDoubleArray(means),
                 covariance.subMatrix(names.asArray()).getMatrix().getData());
     }
@@ -69,7 +69,7 @@ public class GaussianParameterGenerator implements ParameterGenerator {
             matrix.setValuesFrom(covariance);
         }
 
-        this.names = means.names();
+        this.names = means.getNames();
         distribution = new MultivariateNormalDistribution(means.getArray(), matrix.getMatrix().getData());
     }
 

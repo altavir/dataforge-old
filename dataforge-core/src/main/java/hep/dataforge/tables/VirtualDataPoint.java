@@ -40,7 +40,7 @@ public class VirtualDataPoint<S> implements Values {
     }
 
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 

@@ -48,7 +48,7 @@ public class HistogramBin implements Values {
      * object.
      */
     protected HistogramBin(HistogramBin source) {
-        parNames = source.names();
+        parNames = source.getNames();
         this.binBegin = source.binBegin;
         this.binEnd = source.binEnd;
         this.count = source.count;
@@ -170,7 +170,7 @@ public class HistogramBin implements Values {
      */
     @Override
     public boolean hasValue(String path) {
-        return names().contains(path);
+        return getNames().contains(path);
         /**
          * {@inheritDoc}
          */
@@ -182,7 +182,7 @@ public class HistogramBin implements Values {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return parNames;
     }
 }

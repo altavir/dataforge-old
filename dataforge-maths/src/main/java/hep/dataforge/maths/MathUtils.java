@@ -27,7 +27,7 @@ public class MathUtils {
         }
         double[] res = new double[names.length];
         for (String name : names) {
-            int index = set.names().getNumberByName(name);
+            int index = set.getNames().getNumberByName(name);
             if (index < 0) {
                 throw new NameNotFoundException(name);
             }
@@ -39,7 +39,7 @@ public class MathUtils {
     public static String toString(Values set, String... names) {
         String res = "[";
         if (names.length == 0) {
-            names = set.names().asArray();
+            names = set.getNames().asArray();
         }
         boolean flag = true;
         for (String name : names) {

@@ -36,7 +36,7 @@ public abstract class GoogleDataHandler implements Handler {
 
     private JsonArrayBuilder makeCols(TableFormat format) {
         JsonArrayBuilder res = Json.createArrayBuilder();
-        for (String valueName : format.names()) {
+        for (String valueName : format.getNames()) {
             ColumnFormat cf = format.getColumnFormat(valueName);
             String type;
             switch (cf.getPrimaryType()) {
@@ -76,7 +76,7 @@ public abstract class GoogleDataHandler implements Handler {
 
     private JsonObjectBuilder makeRow(TableFormat format, Values point) {
         JsonArrayBuilder values = Json.createArrayBuilder();
-        for (String valueName : format.names()) {
+        for (String valueName : format.getNames()) {
             Value value = point.getValue(valueName);
             switch (value.valueType()) {
                 case TIME:

@@ -85,7 +85,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     @Override
     public boolean providesDeriv(String name) {
-        return this.names().contains(name);
+        return this.getNames().contains(name);
     }
 
     public Table sample(double pos, double w, double amp, double a, double b, int number) {

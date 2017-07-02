@@ -74,7 +74,7 @@ public class NameList implements Names {
         if (!nameList.contains(name)) {
             nameList.add(name);
         } else {
-            throw new NamingException("Dublicate names in a Named");
+            throw new NamingException("Duplicate names in a Names");
         }
     }
 

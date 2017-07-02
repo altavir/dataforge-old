@@ -74,7 +74,7 @@ public class GaussianPrior implements ParametricValue{
 
     /** {@inheritDoc} */
     @Override
-    public Names names() {
+    public Names getNames() {
         return this.names;
     }
 

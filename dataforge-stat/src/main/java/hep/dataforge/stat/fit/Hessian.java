@@ -41,7 +41,7 @@ public class Hessian{
      * @return a {@link hep.dataforge.maths.NamedMatrix} object.
      */
     public static NamedMatrix getHessian(ParametricValue function, ParamSet set, String[] fitPars){
-        if(!set.names().contains(fitPars)){
+        if(!set.getNames().contains(fitPars)){
             throw new NameNotFoundException();
         }
         

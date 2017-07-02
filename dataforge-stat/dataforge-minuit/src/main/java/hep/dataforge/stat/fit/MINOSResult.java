@@ -46,13 +46,13 @@ public class MINOSResult implements IntervalEstimate {
     }
 
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(names);
     }
 
     @Override
     public Pair<Value, Value> getInterval(String parName) {
-        int index = names().getNumberByName(parName);
+        int index = getNames().getNumberByName(parName);
         return new Pair<>(Value.of(errl[index]), Value.of(errp[index]));
     }
 
@@ -70,7 +70,7 @@ public class MINOSResult implements IntervalEstimate {
             out.println();
             out.println("Name\tLower\tUpper");
             for (int i = 0; i < this.size(); i++) {
-                out.print(this.names().get(i));
+                out.print(this.getNames().get(i));
                 out.print("\t");
                 if (this.errl != null) {
                     out.print(this.errl[i]);

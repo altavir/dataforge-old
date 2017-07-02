@@ -24,13 +24,13 @@ public interface NameSetContainer {
      * Get the names helper
      * @return
      */
-    Names names();
+    Names getNames();
     
     default int size(){
-        return names().size();
+        return getNames().size();
     }
     
     default String[] namesAsArray(){
-        return names().asArray();
+        return getNames().asArray();
     }
 }

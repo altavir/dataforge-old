@@ -67,7 +67,7 @@ public class Filtering {
             throw new IllegalArgumentException();
         }
         return (Values dp) -> {
-            if (!dp.names().contains(valueName)) {
+            if (!dp.getNames().contains(valueName)) {
                 return false;
             } else {
                 try {
@@ -82,7 +82,7 @@ public class Filtering {
 
     public static Predicate<Values> getValueEqualityCondition(final String valueName, final Value equals) {
         return (Values dp) -> {
-            if (!dp.names().contains(valueName)) {
+            if (!dp.getNames().contains(valueName)) {
                 return false;
             } else {
                 try {

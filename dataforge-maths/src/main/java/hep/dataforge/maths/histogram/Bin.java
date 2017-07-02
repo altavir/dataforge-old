@@ -1,12 +1,15 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.Domain;
+import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * Created by darksnake on 29-Jun-17.
  */
-public interface Bin extends Domain {
+public interface Bin extends Domain, NameSetContainer {
 
     /**
      * Increment counter and return new value
@@ -28,15 +31,19 @@ public interface Bin extends Domain {
      * @param c
      * @return
      */
-    long setCounter(long c);
+    long setCount(long c);
 
     long getBinID();
+
+    @Nullable
+    Names getNames();
+
+    void setNames(Names names);
 
     /**
      * Get the description of this bin as a set of named values
      *
-     * @param namesOverride The names to be used for axis names if not present,then using default
      * @return
      */
-    Values describe(String... namesOverride);
+    Values describe();
 }

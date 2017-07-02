@@ -1,18 +1,24 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.HyperSquareDomain;
+import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.names.Names;
+import hep.dataforge.names.NamesUtils;
 import hep.dataforge.tables.ValueMap;
+import hep.dataforge.utils.ArgumentChecker;
 import hep.dataforge.values.Values;
 
+import java.util.Arrays;
 import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * Created by darksnake on 29-Jun-17.
  */
-public class SquareBin extends HyperSquareDomain implements Bin {
+public class SquareBin extends HyperSquareDomain implements Bin, NameSetContainer {
 
     private final long binId;
     private AtomicLong counter = new AtomicLong(0);
+    private Names names; // optional names for the bin
 
     /**
      * Create a multivariate bin
@@ -20,9 +26,9 @@ public class SquareBin extends HyperSquareDomain implements Bin {
      * @param lower
      * @param upper
      */
-    public SquareBin(long binId, Double[] lower, Double[] upper) {
+    public SquareBin(Double[] lower, Double[] upper) {
         super(lower, upper);
-        this.binId = binId;
+        this.binId = Arrays.hashCode(lower);
     }
 
     /**
@@ -31,9 +37,21 @@ public class SquareBin extends HyperSquareDomain implements Bin {
      * @param lower
      * @param upper
      */
-    public SquareBin(long binId, Double lower, Double upper) {
-        super(new Double[]{lower}, new Double[]{upper});
-        this.binId = binId;
+    public SquareBin(Double lower, Double upper) {
+        this(new Double[]{lower}, new Double[]{upper});
+    }
+
+    @Override
+    public synchronized Names getNames() {
+        if (names == null) {
+            names = NamesUtils.generateNames(getDimension());
+        }
+        return names;
+    }
+
+    public void setNames(Names names) {
+        ArgumentChecker.checkEqualDimensions(getDimension(), names.size());
+        this.names = names;
     }
 
     /**
@@ -65,7 +83,7 @@ public class SquareBin extends HyperSquareDomain implements Bin {
     }
 
     @Override
-    public long setCounter(long c) {
+    public long setCount(long c) {
         return counter.getAndSet(c);
     }
 
@@ -75,36 +93,17 @@ public class SquareBin extends HyperSquareDomain implements Bin {
     }
 
     @Override
-    public Values describe(String... override) {
+    public Values describe() {
         ValueMap.Builder builder = new ValueMap.Builder();
         for (int i = 0; i < getDimension(); i++) {
-            String axisName = getAxisName(i, override);
+            String axisName = getNames().get(i);
             Double binStart = getLowerBound(i);
             Double binEnd = getUpperBound(i);
             builder.putValue(axisName, binStart);
             builder.putValue(axisName + ".binEnd", binEnd);
         }
-        builder.putValue("count.value", getCount());
+        builder.putValue("count", getCount());
         builder.putValue("id", getBinID());
         return builder.build();
-    }
-
-    protected String getAxisName(int i, String... override) {
-        if (i < override.length) {
-            return override[i];
-        } else if (getDimension() <= 3) {
-            switch (i) {
-                case 0:
-                    return "x";
-                case 1:
-                    return "y";
-                case 2:
-                    return "z";
-                default:
-                    throw new Error("Unreachable statement");
-            }
-        } else {
-            return "axis_" + i;
-        }
     }
 }

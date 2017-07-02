@@ -2,7 +2,6 @@ package hep.dataforge.maths.histogram;
 
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
@@ -66,10 +65,10 @@ public class NamedHistogram extends Histogram implements NameSetContainer {
         return histogram.addBin(bin);
     }
 
-    @Override
-    public Bin getBinById(long id) {
-        return histogram.getBinById(id);
-    }
+//    @Override
+//    public Bin getBinById(long id) {
+//        return histogram.getBinById(id);
+//    }
 
     @NotNull
     @Override
@@ -78,16 +77,17 @@ public class NamedHistogram extends Histogram implements NameSetContainer {
     }
 
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 
     @Override
-    protected TableFormat getFormat(String... names) {
-        return histogram.getFormat(names);
+    protected TableFormat getFormat() {
+        return histogram.getFormat();
     }
 
-    public Table asTable() {
-        return asTable(names().asArray());
+    @Override
+    public int getDimension() {
+        return histogram.getDimension();
     }
 }

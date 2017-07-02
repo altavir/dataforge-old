@@ -1,5 +1,7 @@
 package hep.dataforge.maths.histogram;
 
+import hep.dataforge.names.Names;
+import hep.dataforge.names.NamesUtils;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
@@ -42,15 +44,15 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
         return bin.inc();
     }
 
-    public void putAll(Stream<Double[]> stream) {
+    public void fill(Stream<Double[]> stream) {
         stream.parallel().forEach(this::put);
     }
 
-    public void putAll(Iterable<Double[]> iter) {
+    public void fill(Iterable<Double[]> iter) {
         iter.forEach(this::put);
     }
 
-    public abstract Bin getBinById(long id);
+//    public abstract Bin getBinById(long id);
 
     public Stream<Bin> binStream() {
         return StreamSupport.stream(spliterator(), false);
@@ -60,16 +62,25 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
      * Construct a format for table using given names as axis names. The number of input names should equal to the
      * dimension of this histogram or exceed it by one. In later case the last name is count axis name.
      *
-     * @param names
      * @return
      */
-    protected abstract TableFormat getFormat(String... names);
+    protected abstract TableFormat getFormat();
 
     /**
      * @return
      */
-    public Table asTable(String... names) {
-        return new ListTable(getFormat(names), binStream().map(bin -> bin.describe(names)));
+    public Table asTable() {
+        return new ListTable(getFormat(), binStream().map(Bin::describe));
+    }
+
+    public abstract int getDimension();
+
+    /**
+     * Get axis names excluding count axis
+     * @return
+     */
+    public Names getNames(){
+        return NamesUtils.generateNames(getDimension());
     }
 }
 

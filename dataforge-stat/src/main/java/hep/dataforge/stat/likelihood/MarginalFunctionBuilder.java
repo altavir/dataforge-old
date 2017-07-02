@@ -57,7 +57,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
     private ParametricValue function;
 
     private Names allNames() {
-        return function.names();
+        return function.getNames();
     }
 
     private Sampler getSampler() {
@@ -197,7 +197,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
         public double value(double[] point) {
             Values actualVector;
             if (nuisancePars == null || nuisancePars.length == 0) {
-                actualVector = new NamedVector(startingPoint.names(), point);
+                actualVector = new NamedVector(startingPoint.getNames(), point);
             } else {
                 actualVector = new VectorWithDefault(point);
             }
@@ -213,8 +213,8 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
             }
 
             @Override
-            public Names names() {
-                return startingPoint.names();
+            public Names getNames() {
+                return startingPoint.getNames();
             }
 
             @Override
@@ -294,7 +294,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
 //        if (freePars.length > 0) {
 //            variablePars = freePars;
 //        } else {
-//            variablePars = NamedUtils.exclude(like.names(), parName);
+//            variablePars = NamesUtils.exclude(like.names(), parName);
 //        }
 //
 //        return (double x) -> {

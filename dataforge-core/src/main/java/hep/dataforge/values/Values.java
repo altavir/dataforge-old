@@ -35,7 +35,7 @@ public interface Values extends NameSetContainer, ValueProvider {
      */
     @Override
     default boolean hasValue(String path) {
-        return this.names().contains(path);
+        return this.getNames().contains(path);
     }
 
     /**
@@ -45,7 +45,7 @@ public interface Values extends NameSetContainer, ValueProvider {
      * @return
      */
     default Value getAt(int num) {
-        return getValue(this.names().get(num));
+        return getValue(this.getNames().get(num));
     }
 
     /**
@@ -54,7 +54,7 @@ public interface Values extends NameSetContainer, ValueProvider {
      */
     default Map<String,Value> asMap(){
         Map<String,Value> res = new HashMap<>();
-        for(String field: this.names()){
+        for(String field: this.getNames()){
             res.put(field, getValue(field));
         }
         return res;
@@ -67,7 +67,7 @@ public interface Values extends NameSetContainer, ValueProvider {
      * @return
      */
     default boolean hasTag(String name) {
-        return names().contains(name) && getValue(name).booleanValue();
+        return getNames().contains(name) && getValue(name).booleanValue();
     }
 
     default Meta toMeta() {

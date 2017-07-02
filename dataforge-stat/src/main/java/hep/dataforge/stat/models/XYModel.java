@@ -97,7 +97,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
     }
 
     private double getWeight(Values point) {
-        if (point.names().contains(WEIGHT)) {
+        if (point.getNames().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
         } else {
             double r = adapter.getYerr(point).doubleValue();

@@ -174,7 +174,7 @@ class ValueExtension {
      * @return
      */
     static Map<String, Object> unbox(final Values self) {
-        self.names().collectEntries {
+        self.getNames().collectEntries {
             [it: self.getValue(it).unbox()]
         }
     }

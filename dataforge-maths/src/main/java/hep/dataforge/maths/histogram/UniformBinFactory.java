@@ -2,8 +2,6 @@ package hep.dataforge.maths.histogram;
 
 import hep.dataforge.utils.ArgumentChecker;
 
-import java.util.Arrays;
-
 /**
  * Create a uniform binning with given start point and steps
  */
@@ -19,7 +17,7 @@ public class UniformBinFactory implements BinFactory {
 
 
     @Override
-    public Bin createBin(Double... point) {
+    public SquareBin createBin(Double... point) {
         ArgumentChecker.checkEqualDimensions(point.length, binStart.length);
         Double[] lo = new Double[point.length];
         Double[] up = new Double[point.length];
@@ -33,6 +31,10 @@ public class UniformBinFactory implements BinFactory {
                 lo[i] = up[i] - binStep[i];
             }
         }
-        return new SquareBin(Arrays.hashCode(lo), lo, up);
+        return new SquareBin(lo, up);
+    }
+
+    public int getDimension(){
+        return binStart.length;
     }
 }
