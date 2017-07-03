@@ -5,6 +5,7 @@ import hep.dataforge.names.NamesUtils;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.TableFormatBuilder;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -44,12 +45,14 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
         return bin.inc();
     }
 
-    public void fill(Stream<Double[]> stream) {
+    public Histogram fill(Stream<Double[]> stream) {
         stream.parallel().forEach(this::put);
+        return this;
     }
 
-    public void fill(Iterable<Double[]> iter) {
+    public Histogram fill(Iterable<Double[]> iter) {
         iter.forEach(this::put);
+        return this;
     }
 
 //    public abstract Bin getBinById(long id);
@@ -64,7 +67,17 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
      *
      * @return
      */
-    protected abstract TableFormat getFormat();
+    protected TableFormat getFormat() {
+        TableFormatBuilder builder = new TableFormatBuilder();
+        for (String axisName : getNames()) {
+            builder.addNumber(axisName, "domain.value");
+//            builder.addNumber(axisName + ".binEnd");
+        }
+        builder.addNumber("count", "range.value");
+        builder.addColumn("id");
+        return builder.build();
+    }
+
 
     /**
      * @return
@@ -77,9 +90,10 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
 
     /**
      * Get axis names excluding count axis
+     *
      * @return
      */
-    public Names getNames(){
+    public Names getNames() {
         return NamesUtils.generateNames(getDimension());
     }
 }

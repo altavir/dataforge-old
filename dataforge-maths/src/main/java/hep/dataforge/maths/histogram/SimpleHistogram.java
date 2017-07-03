@@ -1,7 +1,5 @@
 package hep.dataforge.maths.histogram;
 
-import hep.dataforge.tables.TableFormat;
-import hep.dataforge.tables.TableFormatBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
@@ -60,17 +58,6 @@ public class SimpleHistogram extends Histogram {
         return binMap.values().stream();
     }
 
-    @Override
-    protected TableFormat getFormat() {
-        TableFormatBuilder builder = new TableFormatBuilder();
-        for (String axisName: getNames()) {
-            builder.addNumber(axisName, "domain.value");
-            builder.addNumber(axisName + ".binEnd");
-        }
-        builder.addNumber("count", "range.value");
-        builder.addColumn("id");
-        return builder.build();
-    }
 
     @Override
     public int getDimension() {

@@ -1,7 +1,6 @@
 package hep.dataforge.maths.histogram;
 
 import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.tables.TableFormat;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +12,10 @@ import java.util.stream.DoubleStream;
  * Created by darksnake on 02.07.2017.
  */
 public class UnivariateHistogram extends Histogram {
+    public static UnivariateHistogram buildUniform(double start, double stop, double step){
+        return new UnivariateHistogram(GridCalculator.getUniformUnivariateGrid(start, stop, step));
+    }
+
     private final double[] borders;
     private TreeMap<Double, Bin> binMap = new TreeMap<>();
 
@@ -20,12 +23,6 @@ public class UnivariateHistogram extends Histogram {
         this.borders = borders;
         Arrays.sort(borders);
     }
-
-    public UnivariateHistogram(Double start, Double stop, Double step) {
-        this.borders =
-                GridCalculator.getUniformUnivariateGrid(start, stop, step);
-    }
-
 
     private Double getValue(Double... point) {
         if (point.length != 1) {
@@ -38,13 +35,19 @@ public class UnivariateHistogram extends Histogram {
     @Override
     public Bin createBin(Double... point) {
         Double value = getValue(point);
-        int index = -Arrays.binarySearch(borders, value);
-        if (index > 0) {
+        int index = Arrays.binarySearch(borders, value);
+        if (index >= 0) {
+            if (index == borders.length - 1) {
+                return new SquareBin(borders[index], Double.POSITIVE_INFINITY);
+            } else {
+                return new SquareBin(borders[index], borders[index + 1]);
+            }
+        } else if (index == -1) {
             return new SquareBin(Double.NEGATIVE_INFINITY, borders[0]);
-        } else if (index >= borders.length) {
+        } else if (index == -borders.length - 1) {
             return new SquareBin(borders[borders.length - 1], Double.POSITIVE_INFINITY);
         } else {
-            return new SquareBin(borders[index], borders[index + 1]);
+            return new SquareBin(borders[-index - 2], borders[-index - 1]);
         }
     }
 
@@ -67,11 +70,6 @@ public class UnivariateHistogram extends Histogram {
     }
 
     @Override
-    protected TableFormat getFormat() {
-        return null;
-    }
-
-    @Override
     public int getDimension() {
         return 1;
     }
@@ -82,7 +80,8 @@ public class UnivariateHistogram extends Histogram {
         return binMap.values().iterator();
     }
 
-    public void fill(DoubleStream stream){
+    public UnivariateHistogram fill(DoubleStream stream) {
         stream.parallel().forEach(this::put);
+        return this;
     }
 }

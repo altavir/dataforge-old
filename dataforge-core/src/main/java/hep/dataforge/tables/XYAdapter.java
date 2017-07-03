@@ -98,8 +98,8 @@ public class XYAdapter extends AxisPointAdapter {
         xValue = meta().getString(X_VALUE_KEY, X_VALUE_KEY);
         xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
         if (meta().hasMeta(Y_AXIS)) {
-            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY)).toArray(String[]::new);
-            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY)).toArray(String[]::new);
+            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, VALUE_KEY)).toArray(String[]::new);
+            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY)).toArray(String[]::new);
         } else {
             yValues = new String[]{Y_VALUE_KEY};
             yErrors = new String[]{Y_ERROR_KEY};

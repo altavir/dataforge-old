@@ -2,7 +2,6 @@ package hep.dataforge.maths.histogram;
 
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -79,11 +78,6 @@ public class NamedHistogram extends Histogram implements NameSetContainer {
     @Override
     public Names getNames() {
         return names;
-    }
-
-    @Override
-    protected TableFormat getFormat() {
-        return histogram.getFormat();
     }
 
     @Override

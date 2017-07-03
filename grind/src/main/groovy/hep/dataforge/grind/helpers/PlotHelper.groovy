@@ -120,7 +120,10 @@ class PlotHelper {
         Meta configuration = Grind.buildMeta(parameters, cl);
         String name = configuration.getString("name", "data_${source.hashCode()}")
         String frameName = configuration.getString("frame", DEFAULT_FRAME)
-        def res = PlottableData.plot(name, new XYAdapter(configuration), source);
+        def res = new PlottableData(name, configuration);
+
+        res.fillData(source);
+
         manager.getPlotFrame(frameName).add(res)
         return res;
     }

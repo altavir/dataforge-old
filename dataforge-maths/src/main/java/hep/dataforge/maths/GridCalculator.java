@@ -41,7 +41,7 @@ public class GridCalculator {
     }
 
     public static double[] getUniformUnivariateGrid(double a, double b, double step) {
-        return getUniformUnivariateGrid(a, b, (int) ((b - a) / step));
+        return getUniformUnivariateGrid(a, b, (int) ((b - a) / step +1));
     }
     
     public static List<Double> getFromData(Iterable<Values> data, String name){

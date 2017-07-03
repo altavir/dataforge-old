@@ -35,14 +35,6 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
 @ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", type = {BOOLEAN}, def = "true", info = "Show errors for points.")
 public class PlottableData extends XYPlottable {
-
-    //TODO replace by ObservableList and allow external modification
-    protected List<Values> data = new ArrayList<>();
-
-    public PlottableData(String name) {
-        super(name);
-    }
-
     public static PlottableData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         PlottableData plot = new PlottableData(name);
 
@@ -86,14 +78,18 @@ public class PlottableData extends XYPlottable {
         return plot;
     }
 
-//    public static PlottableData plot(String name, Meta meta, XYAdapter adapter, Iterable<DataPoint> data) {
-//        PlottableData plot = plot(name, adapter, true);
-//        plot.fillData(data);
-//        if (!meta.isEmpty()) {
-//            plot.configure(meta);
-//        }
-//        return plot;
-//    }
+
+    //TODO replace by ObservableList and allow external modification
+    protected List<Values> data = new ArrayList<>();
+
+    public PlottableData(String name) {
+        super(name);
+    }
+
+    public PlottableData(String name, Meta meta) {
+        super(name);
+        configure(meta);
+    }
 
     /**
      * Non safe method to set data to this plottable. The list must be immutable
