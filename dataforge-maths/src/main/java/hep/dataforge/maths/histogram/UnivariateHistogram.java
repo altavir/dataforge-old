@@ -64,7 +64,7 @@ public class UnivariateHistogram extends Histogram {
     }
 
     @Override
-    protected Bin addBin(Bin bin) {
+    protected synchronized Bin addBin(Bin bin) {
         //The call should be thread safe. New bin is added only if it is absent
         return binMap.computeIfAbsent(bin.getLowerBound(0), (id) -> bin);
     }
@@ -81,7 +81,7 @@ public class UnivariateHistogram extends Histogram {
     }
 
     public UnivariateHistogram fill(DoubleStream stream) {
-        stream.parallel().forEach(this::put);
+        stream.forEach(this::put);
         return this;
     }
 }

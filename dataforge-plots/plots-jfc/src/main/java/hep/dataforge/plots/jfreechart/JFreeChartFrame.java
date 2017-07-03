@@ -275,7 +275,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         opt.ifPresent(plottable -> {
             if (!index.containsKey(name)) {
                 JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
-                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1) + 1);
+                wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
                 index.put(name, wrapper);
                 run(() -> {
                     plot.setDataset(wrapper.getIndex(), wrapper);

@@ -115,7 +115,7 @@ class PlotHelper {
      * @param cl
      * @return
      */
-    XYPlottable plot(Iterable<Values> source, Map parameters,
+    XYPlottable plot(Map parameters, Iterable<Values> source,
                      @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
         Meta configuration = Grind.buildMeta(parameters, cl);
         String name = configuration.getString("name", "data_${source.hashCode()}")
