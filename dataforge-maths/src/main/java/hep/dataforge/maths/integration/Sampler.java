@@ -17,10 +17,13 @@ package hep.dataforge.maths.integration;
 
 import hep.dataforge.maths.MultivariateUniformDistribution;
 import javafx.util.Pair;
+import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
+import org.apache.commons.math3.linear.RealMatrix;
+import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.stream.Stream;
 
 /**
  * <p>Abstract Sampler class.</p>
@@ -33,12 +36,16 @@ public interface Sampler {
         return new DistributionSampler(MultivariateUniformDistribution.square(generator, borders));
     }
 
-
-    Sample nextSample();
-
-    default Stream<Sample> stream() {
-        return Stream.generate(this::nextSample);
+    static Sampler normal(RandomGenerator generator, RealVector means, RealMatrix covariance){
+        return new DistributionSampler(new MultivariateNormalDistribution(generator,means.toArray(),covariance.getData()));
     }
+
+
+    Sample nextSample(@Nullable Sample previousSample);
+
+//    default Stream<Sample> stream() {
+//        return Stream.generate(this::nextSample);
+//    }
 
     int getDimension();
 }

@@ -59,7 +59,7 @@ public class DistributionSampler implements Sampler {
     }
 
     @Override
-    public Sample nextSample() {
+    public Sample nextSample(Sample previous) {
         double[] sample = distr.sample();
         return new Sample(distr.density(sample), sample);
     }

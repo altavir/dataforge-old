@@ -28,9 +28,9 @@ public class MonteCarloIntegrand implements Integrand {
 
     private final MultivariateFunction function;
     private final Sampler sampler;
-    private Double value;
+    private final Double value;
     private int numCalls;
-    private double accuracy;
+    private double accuracy = Double.POSITIVE_INFINITY;
 
     public MonteCarloIntegrand(MonteCarloIntegrand integrand, int numCalls, Double value, double accuracy) {
         this.numCalls = numCalls;
@@ -40,7 +40,7 @@ public class MonteCarloIntegrand implements Integrand {
         this.accuracy = accuracy;
     }
 
-    public MonteCarloIntegrand(MultivariateFunction function, Sampler sampler, int numCalls, Double value, double accuracy) {
+    public MonteCarloIntegrand(Sampler sampler, int numCalls, Double value, double accuracy, MultivariateFunction function) {
         this.numCalls = numCalls;
         this.value = value;
         this.function = function;
@@ -48,10 +48,11 @@ public class MonteCarloIntegrand implements Integrand {
         this.accuracy = accuracy;
     }
 
-    public MonteCarloIntegrand(MultivariateFunction function, Sampler sampler) {
+    public MonteCarloIntegrand(Sampler sampler, MultivariateFunction function) {
         super();
         this.function = function;
         this.sampler = sampler;
+        this.value = Double.NaN;
     }
 
     /**
@@ -68,9 +69,9 @@ public class MonteCarloIntegrand implements Integrand {
         return function.value(x);
     }
 
-    public Sample getSample() {
-        return sampler.nextSample();
-    }
+//    public Sample getSample() {
+//        return sampler.nextSample();
+//    }
 
     public MultivariateFunction getFunction() {
         return function;
@@ -91,7 +92,7 @@ public class MonteCarloIntegrand implements Integrand {
     }
 
     double getRelativeAccuracy() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return accuracy;
     }
 
 }

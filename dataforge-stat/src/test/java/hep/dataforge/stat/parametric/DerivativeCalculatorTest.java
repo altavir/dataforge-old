@@ -18,7 +18,7 @@ package hep.dataforge.stat.parametric;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.stat.likelihood.NamedGaussianPDFLog;
+import hep.dataforge.stat.likelihood.LogGaussian;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.junit.*;
@@ -89,7 +89,7 @@ public class DerivativeCalculatorTest {
         set.setParErrors(errors);
         
         System.out.println("providesValidDerivative");
-        ParametricValue function = new NamedGaussianPDFLog(cov);
+        ParametricValue function = new LogGaussian(cov);
         double tolerance = 1e-4;
         String parName = "par2";
         double realDerivative = function.derivValue(parName, set);

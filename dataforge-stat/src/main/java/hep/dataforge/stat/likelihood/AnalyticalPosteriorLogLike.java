@@ -34,7 +34,7 @@ import static java.lang.Math.log;
  */
 public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
 
-    NamedGaussianPDFLog like;
+    LogGaussian like;
     ParametricValue priorProb = null;
     
     /**
@@ -48,7 +48,7 @@ public class AnalyticalPosteriorLogLike extends AbstractParametricValue {
         if (!areEqual(covariance.getNames(), centralValues.getNames())) {
             throw new IllegalArgumentException("Different names for centralValues and covariance.");
         }
-        this.like = new NamedGaussianPDFLog(centralValues, covariance);
+        this.like = new LogGaussian(centralValues, covariance);
     }    
     
     /**

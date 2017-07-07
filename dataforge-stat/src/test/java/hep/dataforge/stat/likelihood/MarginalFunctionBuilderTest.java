@@ -35,6 +35,9 @@ import static org.junit.Assert.assertEquals;
 public class MarginalFunctionBuilderTest {
 
     static final String[] nameList = {"par1", "par2", "par3"};
+    RandomGenerator generator = new JDKRandomGenerator(54321);
+    NamedVector zero;
+    NamedMatrix cov;
 
     /**
      *
@@ -64,17 +67,15 @@ public class MarginalFunctionBuilderTest {
      */
     @Before
     public void setUp() {
-        double[] d = {1d, 2d, 0.5d};
+        double[] d = {1d, 4d, 0.25d};
         RealMatrix mat = new DiagonalMatrix(d);
-
-        NamedMatrix cov = new NamedMatrix(nameList, mat);
-        testFunc = new NamedGaussianPDFLog(cov);
+        cov = new NamedMatrix(nameList, mat);
+        testFunc = new Gaussian(cov);
         ArrayRealVector vector = new ArrayRealVector(cov.size());
-        NamedVector zero = new NamedVector(nameList, vector);
-        RandomGenerator generator = new JDKRandomGenerator();
-        generator.setSeed(54321);
+        zero = new NamedVector(nameList, vector);
         instance = new MarginalFunctionBuilder()
-                .setFunction(testFunc). zero, cov, generator);
+                .setParameters(zero)
+                .setFunction(testFunc);
     }
 
     /**
@@ -91,8 +92,10 @@ public class MarginalFunctionBuilderTest {
     public void testGetMarginalValue() {
         System.out.println("getMarginalValue");
         int maxCalls = 1000;
-        double expResult = 1 / (2 * Math.PI) / sqrt(2d);
-        double result = instance.getMarginalValue(maxCalls, "par2");
+        double expResult = 1d / sqrt(2 * Math.PI);
+        double result = instance.setMaxCalls(maxCalls)
+                .setNormalSampler(generator, zero, cov, "par2", "par3")
+                .build().value(zero);
         assertEquals(expResult, result, 0.01);
         System.out.printf("The expected value is %g, the test result is %g%n", expResult, result);
         System.out.printf("On %d calls the relative discrepancy is %g%n", maxCalls, abs(result - expResult) / result);
@@ -106,7 +109,10 @@ public class MarginalFunctionBuilderTest {
         System.out.println("getNorm");
         int maxCalls = 10000;
         double expResult = 1.0;
-        double result = instance.getNorm(maxCalls);
+        //zero here is redundant
+        double result = instance.setMaxCalls(maxCalls)
+                .setNormalSampler(generator, zero, cov, nameList)
+                .build().value(zero);
         assertEquals(expResult, result, 0.05);
         System.out.printf("The expected value is %g, the test result is %g%n", expResult, result);
         System.out.printf("On %d calls the relative discrepancy is %g%n", maxCalls, abs(result - expResult) / result);
