@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.PortException;
 import hep.dataforge.exceptions.PortLockException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.utils.BaseMetaHolder;
+import hep.dataforge.utils.MetaHolder;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  *
  * @author Alexander Nozik
  */
-public abstract class PortHandler extends BaseMetaHolder implements AutoCloseable, Metoid {
+public abstract class PortHandler extends MetaHolder implements AutoCloseable, Metoid {
 
     private final ReentrantLock portLock = new ReentrantLock(true);
     protected PortController controller;

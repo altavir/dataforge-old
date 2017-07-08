@@ -22,7 +22,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.utils.BaseMetaHolder;
+import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
@@ -39,7 +39,7 @@ import java.util.stream.StreamSupport;
  */
 @NodeDef(name = "column", multiple = true, required = true, info = "A column format", target = "class::hep.dataforge.tables.ColumnFormat")
 @NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given")
-public class TableFormat extends BaseMetaHolder implements NameSetContainer, MetaMorph, Iterable<ColumnFormat> {
+public class TableFormat extends MetaHolder implements NameSetContainer, MetaMorph, Iterable<ColumnFormat> {
 
     /**
      * An empty format holding information only about the names of columns

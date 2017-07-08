@@ -32,7 +32,7 @@ import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.utils.BaseMetaHolder;
+import hep.dataforge.utils.MetaHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -49,7 +49,7 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
  * @author Darksnake
  */
 @ValueDef(name = "readOnly", type = {BOOLEAN}, info = "Define if push operations are allowed in this storage")
-public abstract class AbstractStorage extends BaseMetaHolder implements Storage {
+public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected final Map<String, Loader> loaders = new HashMap<>();
     protected final Map<String, Storage> shelves = new HashMap<>();
