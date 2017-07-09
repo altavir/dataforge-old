@@ -11,6 +11,9 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static hep.dataforge.tables.XYAdapter.X_VALUE_KEY;
+import static hep.dataforge.tables.XYAdapter.Y_VALUE_KEY;
+
 /**
  * A thread safe histogram
  * Created by darksnake on 29-Jun-17.
@@ -70,10 +73,10 @@ public abstract class Histogram implements BinFactory, Iterable<Bin> {
     protected TableFormat getFormat() {
         TableFormatBuilder builder = new TableFormatBuilder();
         for (String axisName : getNames()) {
-            builder.addNumber(axisName, "domain.value");
+            builder.addNumber(axisName, X_VALUE_KEY);
 //            builder.addNumber(axisName + ".binEnd");
         }
-        builder.addNumber("count", "range.value");
+        builder.addNumber("count", Y_VALUE_KEY);
         builder.addColumn("id");
         return builder.build();
     }

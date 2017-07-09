@@ -48,9 +48,9 @@ public class TableFormatBuilder {
         }
     }
 
-    private MetaBuilder add(String name, String... purpose) {
+    private MetaBuilder add(String name, String... roles) {
         if (!columns.containsKey(name)) {
-            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name).putValues("purpose", purpose);
+            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name).putValues("role", roles);
             columns.put(name, columnBuilder);
             return columnBuilder;
         } else {
@@ -58,43 +58,51 @@ public class TableFormatBuilder {
         }
     }
 
-    public TableFormatBuilder addColumn(String name) {
-        add(name);
+    public TableFormatBuilder addColumn(String name, String... roles) {
+        add(name, roles);
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, ValueType type, String... purpose) {
-        add(name, purpose).setValue("title", title).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, String title, ValueType type, String... roles) {
+        add(name, roles).setValue("title", title).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type, String... purpose) {
-        add(name, purpose).setValue("title", title)
+    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type, String... roles) {
+        add(name, roles).setValue("title", title)
                 .setValue("type", type.toString())
                 .setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, ValueType type, String... purpose) {
-        add(name, purpose).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, ValueType type, String... roles) {
+        add(name, roles).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, int width, ValueType type, String... purpose) {
-        add(name, purpose).setValue("type", type.toString()).setValue("width", width);
+    public TableFormatBuilder addColumn(String name, int width, ValueType type, String... roles) {
+        add(name, roles).setValue("type", type.toString()).setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addString(String name, String... purpose) {
-        return addColumn(name, ValueType.STRING, purpose);
+    public TableFormatBuilder addString(String name, String... roles) {
+        return addColumn(name, ValueType.STRING, roles);
     }
 
-    public TableFormatBuilder addNumber(String name, String... purpose) {
-        return addColumn(name, ValueType.NUMBER, purpose);
+    public TableFormatBuilder addNumber(String name, String... roles) {
+        return addColumn(name, ValueType.NUMBER, roles);
     }
 
-    public TableFormatBuilder addTime(String name, String... purpose) {
-        return addColumn(name, ValueType.TIME,purpose);
+    public TableFormatBuilder addTime(String name, String... roles) {
+        return addColumn(name, ValueType.TIME, roles);
+    }
+
+    /**
+     * Add default timestamp column named "timestamp"
+     * @return
+     */
+    public TableFormatBuilder addTime() {
+        return addColumn("timestamp", ValueType.TIME, "timestamp");
     }
 
     public TableFormatBuilder setType(String name, ValueType... type) {
@@ -109,10 +117,11 @@ public class TableFormatBuilder {
 
     /**
      * Apply custom transform to format meta.
+     *
      * @param transform
      * @return
      */
-    public TableFormatBuilder update(Consumer<MetaBuilder> transform){
+    public TableFormatBuilder update(Consumer<MetaBuilder> transform) {
         transform.accept(builder);
         return this;
     }

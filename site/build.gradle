@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'groovy'
     id 'idea'
-    id 'org.hidetake.ssh' version '2.7.0'
+    id 'org.hidetake.ssh' version '2.9.0'
 }
 
 group = 'hep.dataforge.site'
@@ -15,12 +15,14 @@ ext {
 
 repositories {
     mavenCentral()
+    maven {
+        url 'https://oss.sonatype.org/content/groups/public/'
+    }
 }
 
 dependencies {
-    compile "com.sysgears.grain:grain:0.7.0"
-    compile 'org.codehaus.groovy:groovy:2.4.11'
-0}
+    compile "com.sysgears.grain:grain:0.7.1-SNAPSHOT"
+}
 
 /**
  * List of projects to be documented
@@ -36,20 +38,16 @@ def genDocsDir = file("content/docs-gen")
 //main grain tasks
 task generate(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
-    logging.captureStandardOutput LogLevel.INFO
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args["generate"]
-    doFirst {
-        println "Starting generate"
-    }
+    args(["generate"])
 }
 
 task preview(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args["preview"]
+    args(["preview"])
 }
 
 //deploy configuration
@@ -70,6 +68,7 @@ task deploy(dependsOn: ":site:generate") {
         println "Starting deploy"
         ssh.run {
             session(remotes.mipt) {
+//                put from: fileTree('target').getFiles(), into: '/var/www/dataforge'
                 for (f in file('target').listFiles()) {
                     put from: f, into: '/var/www/dataforge', fileTransfer: 'scp'
                 }

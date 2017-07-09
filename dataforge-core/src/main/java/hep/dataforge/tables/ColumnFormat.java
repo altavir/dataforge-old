@@ -19,7 +19,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
 @ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
-@ValueDef(name = "purpose", multiple = true, info = "The role of data in this column for plotting or other purposes")
+@ValueDef(name = "role", multiple = true, info = "The role of data in this column for plotting or other purposes")
 public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     public ColumnFormat() {
@@ -79,7 +79,7 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
      *
      * @return
      */
-    public List<String> getPurpose(){
-        return Arrays.asList(getStringArray("purpose"));
+    public List<String> getRoles(){
+        return Arrays.asList(getStringArray("role"));
     }
 }

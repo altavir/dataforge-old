@@ -14,10 +14,10 @@ binary_files << '.*\\.pdf'
 
 features {
     highlight = 'pygments' // 'none', 'pygments'
-    markdown = 'txtmark'   // 'txtmark', 'pegdown'
+    markdown = 'flexmark'   // 'txtmark', 'pegdown'
+//    asciidoc = 'none'
     asciidoc {
-        opts = ['source-highlighter': 'coderay',
-                'icons': 'font']
+        opts = ['source-highlighter': 'coderay', 'icons': 'font']
     }
 }
 
@@ -25,7 +25,7 @@ environments {
     dev {
         log.info 'Development environment is used'
         url = "http://localhost:${jetty_port}"
-        show_unpublished = true
+//        show_unpublished = true
     }
     prod {
         log.info 'Production environment is used'
@@ -34,6 +34,7 @@ environments {
         show_unpublished = false
         generate_absolute_links = true
         features {
+            compass = 'none'
             minify_xml = false
             minify_html = false
             minify_js = false
@@ -49,7 +50,7 @@ environments {
 }
 
 python {
-    interpreter = 'jython' // 'auto', 'python', 'jython'
+    interpreter = 'auto' // 'auto', 'python', 'jython'
     //cmd_candidates = ['python2', 'python', 'python2.7']
     //setup_tools = '2.1'
 }
