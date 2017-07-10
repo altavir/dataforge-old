@@ -44,20 +44,19 @@ public class ValueMap implements Values, MetaMorph {
         return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
     }
 
-    private Map<String, Value> valueMap;
+    private final LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
 
     /**
      * Serialization constructor
      */
     public ValueMap() {
-        this.valueMap = new LinkedHashMap<>();
+
     }
 
     public ValueMap(String[] list, Number... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             valueMap.put(list[i], Value.of(values[i]));
         }
@@ -67,7 +66,6 @@ public class ValueMap implements Values, MetaMorph {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             Value val = values[i];
             valueMap.put(list[i], val);
@@ -78,7 +76,6 @@ public class ValueMap implements Values, MetaMorph {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             Value val = Value.of(values[i]);
 
@@ -87,7 +84,7 @@ public class ValueMap implements Values, MetaMorph {
     }
 
     public ValueMap(Map<String, Value> map) {
-        this.valueMap = map;
+        this.valueMap.putAll(map);
     }
 
     /**
@@ -206,6 +203,23 @@ public class ValueMap implements Values, MetaMorph {
         public Builder putValue(String name, Object value) {
             p.valueMap.put(name, Value.of(value));
             return this;
+        }
+
+        /**
+         * Put the value at the beginning of the map
+         * @param name
+         * @param value
+         * @return
+         */
+        public Builder putFirstValue(String name, Object value){
+            synchronized (p) {
+                LinkedHashMap<String, Value> newMap = new LinkedHashMap<>();
+                newMap.put(name, Value.of(value));
+                newMap.putAll(p.valueMap);
+                p.valueMap.clear();
+                p.valueMap.putAll(newMap);
+                return this;
+            }
         }
 
         public Builder addTag(String tag) {

@@ -99,6 +99,7 @@ public class TableFormatBuilder {
 
     /**
      * Add default timestamp column named "timestamp"
+     *
      * @return
      */
     public TableFormatBuilder addTime() {
@@ -116,13 +117,26 @@ public class TableFormatBuilder {
     }
 
     /**
-     * Apply custom transform to format meta.
+     * Add custom meta to the table
+     *
+     * @param meta
+     * @return
+     */
+    public TableFormatBuilder setMeta(Meta meta) {
+        builder.setNode("meta", meta);
+        return this;
+    }
+
+    /**
+     * Apply transformation to custom meta section
      *
      * @param transform
      * @return
      */
-    public TableFormatBuilder update(Consumer<MetaBuilder> transform) {
-        transform.accept(builder);
+    public TableFormatBuilder updateMeta(Consumer<MetaBuilder> transform) {
+        MetaBuilder meta = new MetaBuilder(builder.getMeta("meta",Meta.empty()));
+        transform.accept(meta);
+        setMeta(meta);
         return this;
     }
 

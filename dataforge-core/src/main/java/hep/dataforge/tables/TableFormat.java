@@ -39,6 +39,7 @@ import java.util.stream.StreamSupport;
  */
 @NodeDef(name = "column", multiple = true, required = true, info = "A column format", target = "class::hep.dataforge.tables.ColumnFormat")
 @NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given")
+@NodeDef(name = "meta", info = "Custom table information")
 public class TableFormat extends MetaHolder implements NameSetContainer, MetaMorph, Iterable<ColumnFormat> {
 
     /**
