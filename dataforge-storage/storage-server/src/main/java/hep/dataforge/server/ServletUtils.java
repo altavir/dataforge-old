@@ -76,7 +76,7 @@ public class ServletUtils {
 //    }
     
 //    private static Value toGoogleValue(hep.dataforge.values.Value val) {
-//        switch (val.valueType()) {
+//        switch (val.getType()) {
 //            case NUMBER:
 //                return new NumberValue(val.doubleValue());
 //            case BOOLEAN:

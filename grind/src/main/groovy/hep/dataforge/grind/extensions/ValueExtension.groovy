@@ -49,7 +49,7 @@ class ValueExtension {
     }
 
     static Value plus(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() + other.numberValue());
             case ValueType.STRING:
@@ -70,7 +70,7 @@ class ValueExtension {
     }
 
     static Value minus(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() - other.numberValue());
             case ValueType.STRING:
@@ -88,7 +88,7 @@ class ValueExtension {
 
 
     static Value negative(final Value self) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(-self.numberValue());
             case ValueType.STRING:
@@ -107,7 +107,7 @@ class ValueExtension {
     }
 
     static Value multiply(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() * other.numberValue());
             case ValueType.STRING:
@@ -154,7 +154,7 @@ class ValueExtension {
      * @return
      */
     static Object unbox(final Value self) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return self.doubleValue();
             case ValueType.STRING:

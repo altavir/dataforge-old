@@ -41,16 +41,16 @@ public class LogGaussian extends AbstractParametricValue {
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = new NamedMatrix(values.namesAsArray(), decomposition.getSolver().getInverse());
-        norm = 1 / sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
+        norm = 1 / sqrt(det) / pow(2 * Math.PI, this.getNames().size() / 2d);
     }
 
     public LogGaussian(NamedMatrix infoMatrix) {
         super(infoMatrix);
-        this.values = new ArrayRealVector(infoMatrix.size());
+        this.values = new ArrayRealVector(infoMatrix.getNames().size());
         LUDecomposition decomposition = new LUDecomposition(infoMatrix.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = infoMatrix;
-        norm = sqrt(det) / pow(2 * Math.PI, this.size() / 2d);
+        norm = sqrt(det) / pow(2 * Math.PI, this.getNames().size() / 2d);
     }
 
     @Override
@@ -69,9 +69,9 @@ public class LogGaussian extends AbstractParametricValue {
      * @return
      */
     private RealVector getVector(Values set) {
-        ArrayRealVector vector = new ArrayRealVector(this.size());
+        ArrayRealVector vector = new ArrayRealVector(this.getNames().size());
         String[] namesArray = namesAsArray();
-        for (int i = 0; i < this.size(); i++) {
+        for (int i = 0; i < this.getNames().size(); i++) {
             vector.setEntry(i, set.getDouble(namesArray[i]));
         }
         return vector;

@@ -68,7 +68,7 @@ public class ListOfPoints implements MetaMorph, NavigablePointSource {
      * @param i
      * @return
      */
-    public Values getPoint(int i) {
+    public Values getRow(int i) {
         return data.get(i);
     }
 

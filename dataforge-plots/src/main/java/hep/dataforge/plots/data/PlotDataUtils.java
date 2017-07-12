@@ -47,7 +47,7 @@ public class PlotDataUtils {
                     });
                 });
 
-        ListTable.Builder res = new ListTable.Builder(TableFormat.forNames(names));
+        ListTable.Builder res = new ListTable.Builder(MetaTableFormat.forNames(names));
         res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }

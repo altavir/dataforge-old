@@ -21,7 +21,7 @@ import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
-import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.MetaTableFormat;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
@@ -75,7 +75,7 @@ public class FileDataPointLoaderTest {
 
         FileStorage storage = FileStorageFactory.buildLocal(dir);
 
-        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", TableFormat.forNames(names));
+        PointLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", MetaTableFormat.forNames(names));
 
         System.out.println("push");
         Instant start = DateTimeUtils.now();

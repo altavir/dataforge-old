@@ -95,15 +95,6 @@ public class NamedVector implements Values, MetaMorph {
         return new NamedVector(this.namesAsArray(), vector);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public int size() {
-        return this.nameList.size();
-    }
 
     /**
      * {@inheritDoc}

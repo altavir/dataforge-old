@@ -223,14 +223,14 @@ public class EnvelopeTag {
 
     public void setValue(String name, Value value) {
         if (Envelope.TYPE_KEY.equals(name)) {
-            EnvelopeType type = value.valueType() == ValueType.NUMBER ? EnvelopeType.resolve(value.intValue()) : EnvelopeType.resolve(value.stringValue());
+            EnvelopeType type = value.getType() == ValueType.NUMBER ? EnvelopeType.resolve(value.intValue()) : EnvelopeType.resolve(value.stringValue());
             if (type != null) {
                 envelopeType = type;
             } else {
                 LoggerFactory.getLogger(getClass()).trace("Can't resolve envelope type");
             }
         } else if (Envelope.META_TYPE_KEY.equals(name)) {
-            MetaType type = value.valueType() == ValueType.NUMBER ? MetaType.resolve((short) value.intValue()) : MetaType.resolve(value.stringValue());
+            MetaType type = value.getType() == ValueType.NUMBER ? MetaType.resolve((short) value.intValue()) : MetaType.resolve(value.stringValue());
             if (type != null) {
                 metaType = type;
             } else {

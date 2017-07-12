@@ -185,7 +185,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDis(int i, ParamSet pars) {
-        return model.distance(points.getPoint(i), pars);
+        return model.distance(points.getRow(i), pars);
     }
 
     /**
@@ -200,7 +200,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        Values dp = points.getPoint(i);
+        Values dp = points.getRow(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -218,7 +218,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDispersion(int i, ParamSet pars) {
-        double res = model.dispersion(points.getPoint(i), pars);
+        double res = model.dispersion(points.getRow(i), pars);
         if (res > 0) {
             return res;
         } else {
@@ -318,7 +318,7 @@ public class FitState implements Serializable {
     }
 
     public int getModelDim() {
-        return model.size();
+        return model.getNames().size();
     }
 
     public NavigablePointSource getPoints() {

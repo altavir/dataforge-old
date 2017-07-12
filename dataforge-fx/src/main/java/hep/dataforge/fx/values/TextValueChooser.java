@@ -60,7 +60,7 @@ public class TextValueChooser extends ValueChooserBase<TextField> {
     }
 
     protected String textColor(Value item) {
-        switch (item.valueType()) {
+        switch (item.getType()) {
             case BOOLEAN:
                 if (item.booleanValue()) {
                     return "blue";

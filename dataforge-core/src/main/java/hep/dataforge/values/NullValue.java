@@ -76,9 +76,12 @@ class NullValue implements Value {
      * @return
      */
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         return ValueType.NULL;
     }
 
-
+    @Override
+    public Object value() {
+        return null;
+    }
 }

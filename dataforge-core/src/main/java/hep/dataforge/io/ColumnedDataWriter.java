@@ -15,6 +15,7 @@
  */
 package hep.dataforge.io;
 
+import hep.dataforge.tables.MetaTableFormat;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.Misc;
@@ -37,24 +38,12 @@ public class ColumnedDataWriter implements AutoCloseable {
     private final PrintWriter writer;
     private final TableFormat format;
 
-    /**
-     * <p>
-     * Constructor for ColumnedDataWriter.</p>
-     *
-     * @param stream a {@link java.io.OutputStream} object.
-     * @param names  a {@link java.lang.String} object.
-     */
+
     public ColumnedDataWriter(OutputStream stream, String... names) {
-        this(stream, TableFormat.forNames(names));
+        this(stream, MetaTableFormat.forNames(names));
     }
 
-    /**
-     * <p>
-     * Constructor for ColumnedDataWriter.</p>
-     *
-     * @param stream a {@link java.io.OutputStream} object.
-     * @param format a {@link hep.dataforge.tables.TableFormat} object.
-     */
+
     public ColumnedDataWriter(OutputStream stream, TableFormat format) {
         this(stream, Misc.UTF, format);
     }
@@ -64,29 +53,10 @@ public class ColumnedDataWriter implements AutoCloseable {
         this.format = format;
     }
 
-    /**
-     * <p>
-     * Constructor for ColumnedDataWriter.</p>
-     *
-     * @param file   a {@link java.io.File} object.
-     * @param append a boolean.
-     * @param names  a {@link java.lang.String} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
-        this(file, append, Charset.defaultCharset(), TableFormat.forNames(names));
+        this(file, append, Charset.defaultCharset(), MetaTableFormat.forNames(names));
     }
 
-    /**
-     * <p>
-     * Constructor for ColumnedDataWriter.</p>
-     *
-     * @param file     a {@link java.io.File} object.
-     * @param append   a boolean.
-     * @param format   a {@link hep.dataforge.tables.TableFormat} object.
-     * @param encoding
-     * @throws java.io.FileNotFoundException if any.
-     */
     public ColumnedDataWriter(File file, boolean append, Charset encoding, TableFormat format) throws FileNotFoundException {
         this(new FileOutputStream(file, append), encoding, format);
     }
@@ -116,58 +86,27 @@ public class ColumnedDataWriter implements AutoCloseable {
         }
     }
 
-    /**
-     * <p>
-     * writePoint.</p>
-     *
-     * @param point a {@link hep.dataforge.tables.DataPoint} object.
-     */
     public void writePoint(Values point) {
         writer.println(IOUtils.formatDataPoint(format, point));
         writer.flush();
     }
 
-    /**
-     * <p>
-     * writePointList.</p>
-     *
-     * @param collection a {@link java.util.Collection} object.
-     */
     public void writePointList(Collection<Values> collection) {
         collection.stream().forEach((dp) -> {
             writePoint(dp);
         });
     }
 
-    /**
-     * <p>
-     * writeHeader.</p>
-     */
     public void writeFormatHeader() {
         writer.println(IOUtils.formatCaption(format));
         writer.flush();
     }
 
-    /**
-     * <p>
-     * ln.</p>
-     */
     public void ln() {
         writer.println();
         writer.flush();
     }
 
-    /**
-     * <p>
-     * writeTable.</p>
-     *
-     * @param file   a {@link java.io.File} object.
-     * @param data   a {@link hep.dataforge.tables.Table} object.
-     * @param head   a {@link java.lang.String} object.
-     * @param append a boolean.
-     * @param names  a {@link java.lang.String} object.
-     * @throws java.io.FileNotFoundException if any.
-     */
     public static void writeTable(File file, Table data, String head, boolean append, String... names) throws IOException {
         try (FileOutputStream os = new FileOutputStream(file, append)) {
             writeTable(os, data, head, names);
@@ -179,7 +118,7 @@ public class ColumnedDataWriter implements AutoCloseable {
         TableFormat format;
         if (data.getFormat().isEmpty()) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
-            format = TableFormat.forPoint(data.iterator().next());
+            format = MetaTableFormat.forPoint(data.iterator().next());
             LoggerFactory.getLogger(ColumnedDataWriter.class)
                     .debug("No DataSet format defined. Constucting default based on the first data point");
         } else {

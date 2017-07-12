@@ -15,6 +15,7 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.loaders.AbstractPointLoader;
+import hep.dataforge.tables.MetaTableFormat;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
 import hep.dataforge.tables.TableFormat;
@@ -76,7 +77,7 @@ public class FilePointLoader extends AbstractPointLoader {
                         .findFirst()
                         .ifPresent(line -> {
                             if (line.startsWith("#f")) {
-                                format = TableFormat.forNames(Names.of(line.substring(2).trim().split("[^\\w']+")));
+                                format = MetaTableFormat.forNames(Names.of(line.substring(2).trim().split("[^\\w']+")));
                             }
                         });
             }
@@ -114,9 +115,9 @@ public class FilePointLoader extends AbstractPointLoader {
     public TableFormat getFormat() {
         if (format == null) {
             if (meta().hasMeta("format")) {
-                format = new TableFormat(meta().getMeta("format"));
+                format = new MetaTableFormat(meta().getMeta("format"));
             } else if (meta().hasValue("format")) {
-                format = TableFormat.forNames(meta().getStringArray("format"));
+                format = MetaTableFormat.forNames(meta().getStringArray("format"));
             } else {
                 format = null;
             }

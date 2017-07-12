@@ -241,7 +241,12 @@ public interface Value extends Serializable {
     String stringValue();
 
     @NotNull
-    ValueType valueType();
+    ValueType getType();
+
+    /**
+     * Return underlining object. Used for dynamic calls mostly
+     */
+    Object value();
 
     /**
      * Return list of values representation of current value. If value is
@@ -255,7 +260,7 @@ public interface Value extends Serializable {
     }
 
     default boolean isNull() {
-        return this.valueType().equals(ValueType.NULL);
+        return this.getType().equals(ValueType.NULL);
     }
 
     /**

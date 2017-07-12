@@ -141,8 +141,8 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @param matrix a {@link hep.dataforge.maths.NamedMatrix} object.
      */
     public void setValuesFrom(NamedMatrix matrix) {
-        for (int i = 0; i < matrix.size(); i++) {
-            for (int j = 0; j < matrix.size(); j++) {
+        for (int i = 0; i < matrix.getNames().size(); i++) {
+            for (int j = 0; j < matrix.getNames().size(); j++) {
                 String name1 = matrix.names.get(i);
                 String name2 = matrix.names.get(j);
                 if (names.contains(name1) && names.contains(name2)) {

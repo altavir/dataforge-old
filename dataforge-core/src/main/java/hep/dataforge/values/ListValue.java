@@ -79,9 +79,9 @@ public class ListValue implements Value {
 
     @NotNull
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         if (values.size() > 0) {
-            return values.get(0).valueType();
+            return values.get(0).getType();
         } else {
             return ValueType.NULL;
         }
@@ -121,4 +121,8 @@ public class ListValue implements Value {
         return stringValue();
     }
 
+    @Override
+    public Object value() {
+        return Collections.unmodifiableList(this.values);
+    }
 }

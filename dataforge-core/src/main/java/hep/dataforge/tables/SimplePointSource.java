@@ -31,7 +31,7 @@ public class SimplePointSource implements PointSource {
     }
 
     public SimplePointSource(String... names) {
-        this.format = TableFormat.forNames(names);
+        this.format = MetaTableFormat.forNames(names);
         this.points = new ArrayList<>();
     }
 

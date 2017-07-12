@@ -81,13 +81,13 @@ public class ParametricMultiFunctionWrapper implements ParametricValue, MultiFun
      * {@inheritDoc}
      */
     @Override
-    public int size() {
+    public int getNames().size() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
     public int getDimension() {
-        return size();
+        return getNames().size();
     }
 
     /**

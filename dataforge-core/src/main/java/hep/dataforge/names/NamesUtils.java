@@ -164,9 +164,9 @@ public class NamesUtils {
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
     public static Number[] getAllNamedSetValues(Values set) throws NameNotFoundException {
-        Number[] res = new Number[set.size()];
+        Number[] res = new Number[set.getNames().size()];
         List<String> names = set.getNames().asList();
-        for (int i = 0; i < set.size(); i++) {
+        for (int i = 0; i < set.getNames().size(); i++) {
             res[i] = set.getValue(names.get(i)).doubleValue();
         }
         return res;

@@ -65,7 +65,7 @@ public class MarkupUtils {
 
         if (valueDef.hasValue("def")) {
             Value def = valueDef.getValue("default");
-            if (def.valueType().equals(ValueType.STRING)) {
+            if (def.getType().equals(ValueType.STRING)) {
                 builder.addText(" = \"")
                         .addText(def.stringValue(), "yellow")
                         .addText("\": ");

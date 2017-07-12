@@ -78,7 +78,7 @@ public abstract class GoogleDataHandler implements Handler {
         JsonArrayBuilder values = Json.createArrayBuilder();
         for (String valueName : format.getNames()) {
             Value value = point.getValue(valueName);
-            switch (value.valueType()) {
+            switch (value.getType()) {
                 case TIME:
                     values.add(Json.createObjectBuilder().add("v", formatTime(value.timeValue()))
                             .add("f", value.stringValue()));

@@ -43,16 +43,16 @@ public class Gaussian extends AbstractParametricValue {
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = new NamedMatrix(values.namesAsArray(), decomposition.getSolver().getInverse());
-        norm = 1d / sqrt(det) / pow(2 * Math.PI, super.size() / 2d);
+        norm = 1d / sqrt(det) / pow(2 * Math.PI, super.getNames().size() / 2d);
     }
 
     public Gaussian(NamedMatrix covariance) {
         super(covariance);
-        this.values = new ArrayRealVector(covariance.size());
+        this.values = new ArrayRealVector(covariance.getNames().size());
         LUDecomposition decomposition = new LUDecomposition(covariance.getMatrix());
         double det = decomposition.getDeterminant();
         this.infoMatrix = new NamedMatrix(covariance.namesAsArray(), decomposition.getSolver().getInverse());
-        norm = sqrt(det) * pow(2 * Math.PI, covariance.size() / 2d);
+        norm = sqrt(det) * pow(2 * Math.PI, covariance.getNames().size() / 2d);
     }
 
     @Override
@@ -66,9 +66,9 @@ public class Gaussian extends AbstractParametricValue {
     }
 
     private RealVector getVector(Values set) {
-        ArrayRealVector vector = new ArrayRealVector(this.size());
+        ArrayRealVector vector = new ArrayRealVector(this.getNames().size());
         String[] namesArray = namesAsArray();
-        for (int i = 0; i < this.size(); i++) {
+        for (int i = 0; i < this.getNames().size(); i++) {
             vector.setEntry(i, set.getDouble(namesArray[i]));
         }
         return vector;

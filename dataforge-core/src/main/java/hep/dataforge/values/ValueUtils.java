@@ -21,7 +21,7 @@ public class ValueUtils {
     public static final Comparator<Value> VALUE_COMPARATPR = new ValueComparator();
 
     public static int compare(Value val1, Value val2) {
-        switch (val1.valueType()) {
+        switch (val1.getType()) {
             case NUMBER:
                 return NUMBER_COMPARATOR.compare(val1.numberValue(), val2.numberValue());
             case BOOLEAN:
@@ -32,7 +32,7 @@ public class ValueUtils {
             case TIME:
                 return val1.timeValue().compareTo(val2.timeValue());
             case NULL:
-                return val2.valueType() == ValueType.NULL ? 0 : -1;
+                return val2.getType() == ValueType.NULL ? 0 : -1;
             default:
                 throw new RuntimeException("Uncompareable value");
         }
@@ -72,7 +72,7 @@ public class ValueUtils {
                 writeValue(oos, subValue);
             }
         } else {
-            switch (value.valueType()) {
+            switch (value.getType()) {
                 case NULL:
                     oos.writeChar('0'); // null
                     break;

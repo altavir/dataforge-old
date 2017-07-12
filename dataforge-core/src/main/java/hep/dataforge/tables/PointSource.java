@@ -19,7 +19,7 @@ public interface PointSource extends Iterable<Values> {
 
 //    TableFormat getFormat();
 
-    default Stream<Values> stream() {
+    default Stream<Values> getRows() {
         return StreamSupport.stream(this.spliterator(), false);
     }
     

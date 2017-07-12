@@ -71,7 +71,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public int size() {
+    public int getNames().size() {
         return 1;
     }
 

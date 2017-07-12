@@ -57,9 +57,9 @@ public class FittingIOUtils {
     public static Table getNamedFunctionData(ParametricValue func, List<NamedVector> points) {
         final String[] format = combineNames(func.namesAsArray(), "value");
         ListTable.Builder res = new ListTable.Builder(format);
-        Double[] values = new Double[func.size() + 1];
+        Double[] values = new Double[func.getNames().size() + 1];
         for (NamedVector point : points) {
-            for (int j = 0; j < func.size(); j++) {
+            for (int j = 0; j < func.getNames().size(); j++) {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.value(point);

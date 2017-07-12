@@ -15,12 +15,13 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -29,32 +30,46 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListColumn implements Column {
-    
-    private final Meta columnMeta;
-    private final List<Value> values;
+public final class ListColumn implements Column {
 
-    public ListColumn(Meta meta, List<Value> values) {
-        this.columnMeta = meta;
-        this.values = values;
+    /**
+     * Create a copy of given column if it is not ListColumn.
+     *
+     * @param column
+     * @return
+     */
+    public static ListColumn copy(Column column) {
+        if (column instanceof ListColumn) {
+            return (ListColumn) column;
+        } else {
+            return new ListColumn(column.getFormat(), column.stream());
+        }
     }
 
-    public ListColumn(List<Value> values) {
-        columnMeta = Meta.buildEmpty("column");
-        this.values = values;
+    private final ColumnFormat format;
+    private final List<Value> values;
+
+    public ListColumn(ColumnFormat format, Stream<Value> values) {
+        this.format = format;
+        this.values = values.collect(Collectors.toList());
+        if (!this.values.stream().allMatch(format::isAllowed)) {
+            throw new IllegalArgumentException("Not allowed value in the column");
+        }
+    }
+
+    @Override
+    public List<Value> asList() {
+        return Collections.unmodifiableList(values);
+    }
+
+    @Override
+    public ColumnFormat getFormat() {
+        return format;
     }
 
     /**
      * {@inheritDoc}
-     *
-     * Возвращается копия листа, поэтому исходные данные остаются неизменными
      */
-    @Override
-    public List<Value> asList() {
-        return new ArrayList<>(values);
-    }
-    
-    /** {@inheritDoc} */
     @Override
     public Value get(int n) {
         return values.get(n);
@@ -64,14 +79,10 @@ public class ListColumn implements Column {
         return values.stream();
     }
 
+    @NotNull
     @Override
     public Iterator<Value> iterator() {
         return values.iterator();
-    }
-
-    @Override
-    public Meta meta() {
-        return columnMeta;
     }
 
     @Override

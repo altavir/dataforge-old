@@ -25,11 +25,7 @@ public interface NameSetContainer {
      * @return
      */
     Names getNames();
-    
-    default int size(){
-        return getNames().size();
-    }
-    
+
     default String[] namesAsArray(){
         return getNames().asArray();
     }

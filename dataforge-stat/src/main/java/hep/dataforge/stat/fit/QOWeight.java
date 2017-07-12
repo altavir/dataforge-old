@@ -87,12 +87,12 @@ class QOWeight extends AbstractNamedSet {
         int i;
         int k;
         dispersion = new double[getSource().getDataSize()];
-        derivs = new double[size()][getSource().getDataSize()];
+        derivs = new double[getNames().size()][getSource().getDataSize()];
 
         for (i = 0; i < getSource().getDataSize(); i++) {
 
             this.dispersion[i] = getSource().getDispersion(i, set);
-            for (k = 0; k < this.size(); k++) {
+            for (k = 0; k < this.getNames().size(); k++) {
                 derivs[k][i] = getSource().getDisDeriv(this.getNames().get(k), i, set);
             }
         }

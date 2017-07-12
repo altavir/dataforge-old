@@ -35,7 +35,6 @@ import java.util.stream.Collectors;
  * A simple {@link Values} implementation using HashMap.
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 
 public class ValueMap implements Values, MetaMorph {
@@ -87,13 +86,6 @@ public class ValueMap implements Values, MetaMorph {
         this.valueMap.putAll(map);
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return valueMap.size();
-    }
 
     /**
      * {@inheritDoc}

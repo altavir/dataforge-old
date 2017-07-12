@@ -260,7 +260,7 @@ public class IOUtils {
     }
 
     public static String format(Value val, int width) {
-        switch (val.valueType()) {
+        switch (val.getType()) {
             case BOOLEAN:
                 if (width >= 5) {
                     return Boolean.toString(val.booleanValue());

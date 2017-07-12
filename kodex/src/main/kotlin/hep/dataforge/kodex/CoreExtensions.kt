@@ -16,7 +16,7 @@ import java.time.Instant
 //Value operations
 
 operator fun Value.plus(other: Value): Value {
-    return when (this.valueType()) {
+    return when (this.getType()) {
         ValueType.NUMBER -> Value.of(this.numberValue() + other.numberValue());
         ValueType.STRING -> Value.of(this.stringValue() + other.stringValue());
         ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() + other.timeValue().toEpochMilli()))
@@ -26,17 +26,17 @@ operator fun Value.plus(other: Value): Value {
 }
 
 operator fun Value.minus(other: Value): Value {
-    return when (this.valueType()) {
+    return when (this.getType()) {
         ValueType.NUMBER -> Value.of(this.numberValue() - other.numberValue());
         ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() - other.timeValue().toEpochMilli()))
-        else -> throw RuntimeException("Operation minus not allowed for ${this.valueType()}");
+        else -> throw RuntimeException("Operation minus not allowed for ${this.getType()}");
     }
 }
 
 operator fun Value.times(other: Value): Value {
-    return when (this.valueType()) {
+    return when (this.getType()) {
         ValueType.NUMBER -> Value.of(this.numberValue() * other.numberValue());
-        else -> throw RuntimeException("Operation minus not allowed for ${this.valueType()}");
+        else -> throw RuntimeException("Operation minus not allowed for ${this.getType()}");
     }
 }
 
@@ -55,7 +55,7 @@ operator fun Value.times(other: Any): Value {
 //Value comparison
 
 operator fun Value.compareTo(other: Value): Int {
-    return when (this.valueType()) {
+    return when (this.getType()) {
         ValueType.NUMBER -> this.numberValue().compareTo(other.numberValue());
         ValueType.STRING -> this.stringValue().compareTo(other.stringValue())
         ValueType.TIME -> this.timeValue().compareTo(other.timeValue())

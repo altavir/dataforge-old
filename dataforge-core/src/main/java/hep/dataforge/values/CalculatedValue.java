@@ -72,9 +72,12 @@ public class CalculatedValue implements Value {
     }
 
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         return type;
     }
 
-
+    @Override
+    public Object value() {
+        return getValue().value();
+    }
 }

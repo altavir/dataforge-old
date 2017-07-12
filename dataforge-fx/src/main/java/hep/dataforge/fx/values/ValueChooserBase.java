@@ -85,7 +85,7 @@ public abstract class ValueChooserBase<T extends Node> implements ValueChooser {
      */
     protected Value currentValue() {
         Value value = valueProperty().get();
-        if (value == null || value.valueType() == ValueType.NULL) {
+        if (value == null || value.getType() == ValueType.NULL) {
             ValueDescriptor descriptor = getDescriptor();
             if (descriptor != null) {
                 return descriptor.defaultValue();

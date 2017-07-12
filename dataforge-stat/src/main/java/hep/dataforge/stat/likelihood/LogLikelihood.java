@@ -63,14 +63,6 @@ public class LogLikelihood implements ParametricValue {
     }
 
     /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return source.getModel().size();
-    }
-
-    /**
      * Get a likelihood function calculated as {@code value - offset} to avoid very large or very small values
      *
      * @return

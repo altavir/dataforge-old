@@ -124,7 +124,7 @@ public class ValueDescriptor extends DescriptorBase implements Named {
      * @return
      */
     public boolean isValueAllowed(Value value) {
-        return (type().isEmpty() || type().contains(ValueType.STRING) || type().contains(value.valueType()))
+        return (type().isEmpty() || type().contains(ValueType.STRING) || type().contains(value.getType()))
                 && (allowedValues().isEmpty() || allowedValues().containsKey(value));
     }
 

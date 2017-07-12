@@ -5,6 +5,7 @@ import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.SimpleMetaMorph;
+import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 
 import java.util.Arrays;
@@ -48,13 +49,14 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
     }
 
     /**
-     * Check if value of this type is allowed by the format. It 'type' field of meta is empty then any type is allowed.
+     * Check if value is allowed by the format. It 'type' field of meta is empty then any type is allowed.
      *
-     * @param type
+     * @param value
      * @return
      */
-    public boolean isAllowed(ValueType type) {
-        return !hasValue("type") || Arrays.asList(getStringArray("type")).contains(type.name());
+    public boolean isAllowed(Value value) {
+        //TODO add complex analysis here
+        return !hasValue("type") || Arrays.asList(getStringArray("type")).contains(value.getType().name());
     }
 
     /**

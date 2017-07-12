@@ -92,7 +92,12 @@ public class NamedValue implements Named, Value {
      * @return
      */
     @Override
-    public ValueType valueType() {
-        return value.valueType();
+    public ValueType getType() {
+        return value.getType();
+    }
+
+    @Override
+    public Object value() {
+        return value.value();
     }
 }

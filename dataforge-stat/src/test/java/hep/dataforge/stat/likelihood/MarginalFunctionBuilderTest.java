@@ -71,7 +71,7 @@ public class MarginalFunctionBuilderTest {
         RealMatrix mat = new DiagonalMatrix(d);
         cov = new NamedMatrix(nameList, mat);
         testFunc = new Gaussian(cov);
-        ArrayRealVector vector = new ArrayRealVector(cov.size());
+        ArrayRealVector vector = new ArrayRealVector(cov.getNames().size());
         zero = new NamedVector(nameList, vector);
         instance = new MarginalFunctionBuilder()
                 .setParameters(zero)

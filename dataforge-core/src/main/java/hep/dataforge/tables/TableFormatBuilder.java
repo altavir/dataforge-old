@@ -23,12 +23,31 @@ import hep.dataforge.values.ValueType;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TableFormatBuilder {
 
+    /**
+     * Build a format containing given columns. If some of columns do not exist in initial format,
+     * they are replaced by default column format.
+     *
+     * @param format initial format
+     * @param names
+     * @return
+     */
+    public static TableFormat subSet(TableFormat format, String... names) {
+        MetaBuilder newFormat = new MetaBuilder(format.toMeta());
+        newFormat.setNode("column", Stream.of(names)
+                .map(name -> format.getColumnFormat(name).toMeta())
+                .collect(Collectors.toList())
+        );
+        return new MetaTableFormat(newFormat);
+    }
+
     private MetaBuilder builder = new MetaBuilder("format");
     private Map<String, MetaBuilder> columns;
-    private MetaBuilder defaultColumn;
+//    private MetaBuilder defaultColumn;
 
     public TableFormatBuilder() {
         columns = new LinkedHashMap<>();
@@ -134,7 +153,7 @@ public class TableFormatBuilder {
      * @return
      */
     public TableFormatBuilder updateMeta(Consumer<MetaBuilder> transform) {
-        MetaBuilder meta = new MetaBuilder(builder.getMeta("meta",Meta.empty()));
+        MetaBuilder meta = new MetaBuilder(builder.getMeta("meta", Meta.empty()));
         transform.accept(meta);
         setMeta(meta);
         return this;
@@ -170,10 +189,10 @@ public class TableFormatBuilder {
         for (Meta m : columns.values()) {
             builder.putNode(m);
         }
-        if (defaultColumn != null) {
-            builder.setNode("defaultColumn", defaultColumn);
-        }
-        return new TableFormat(builder.build());
+//        if (defaultColumn != null) {
+//            builder.setNode("defaultColumn", defaultColumn);
+//        }
+        return new MetaTableFormat(builder.build());
     }
 
 }

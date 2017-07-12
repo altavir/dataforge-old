@@ -42,16 +42,6 @@ public class MaskPoint implements Values {
         names = Names.of(nameMap.keySet());
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public int size() {
-        return nameMap.size();
-    }
-
     @Override
     public boolean hasValue(String path) {
         return nameMap.containsKey(path);
