@@ -20,7 +20,10 @@ import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 
+import java.io.ByteArrayOutputStream;
+import java.io.OutputStream;
 import java.nio.ByteBuffer;
+import java.util.function.Consumer;
 
 /**
  * The convenient build for envelopes
@@ -98,6 +101,12 @@ public class EnvelopeBuilder implements Envelope {
     public EnvelopeBuilder setData(byte[] data) {
         this.data = new BufferedBinary(data);
         return this;
+    }
+
+    public EnvelopeBuilder setData(Consumer<OutputStream> data) {
+        ByteArrayOutputStream baos= new ByteArrayOutputStream();
+        data.accept(baos);
+        return setData(baos.toByteArray());
     }
 
     public EnvelopeBuilder setContentType(String type){

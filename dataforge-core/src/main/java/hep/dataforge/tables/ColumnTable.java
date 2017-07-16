@@ -17,6 +17,14 @@ import java.util.stream.Stream;
  */
 public class ColumnTable implements Table {
 
+    public static ColumnTable copy(Table table) {
+        if (table instanceof ColumnTable) {
+            return (ColumnTable) table;
+        } else {
+            return new ColumnTable(table.getColumns().collect(Collectors.toList()));
+        }
+    }
+
     private final Map<String, Column> columns = new LinkedHashMap<>();
     private final int size;
 
@@ -74,46 +82,62 @@ public class ColumnTable implements Table {
         return IntStream.range(0, size - 1).mapToObj(this::getRow);
     }
 
+
+    /**
+     * Add or replace column
+     *
+     * @param column
+     * @return
+     */
+    public ColumnTable addColumn(Column column) {
+        Map<String, Column> map = new LinkedHashMap<>(columns);
+        map.put(column.getName(), column);
+        return new ColumnTable(map.values());
+    }
+
     /**
      * Create a new table with values derived from appropriate rows. The operation does not consume a lot of memory
      * and time since existing columns are immutable and are reused.
-     *
+     * <p>
      * If column with given name exists, it is replaced.
+     *
      * @param format
      * @param transform
      * @return
      */
-    public ColumnTable addColumn(ColumnFormat format, Function<Values, Value> transform){
+    public ColumnTable addColumn(ColumnFormat format, Function<Values, Object> transform) {
         List<Column> list = new ArrayList<>(columns.values());
-        Column newColumn = new ListColumn(format, getRows().map(transform));
+        Column newColumn = ListColumn.build(format, getRows().map(transform));
         list.add(newColumn);
         return new ColumnTable(list);
     }
 
     /**
      * Replace existing column with new values (without changing format)
+     *
      * @param columnName
      * @param transform
      * @return
      */
-    public ColumnTable replaceColumn(String columnName, Function<Values, Value> transform){
-        if(!columns.containsKey(columnName)){
+    public ColumnTable replaceColumn(String columnName, Function<Values, Object> transform) {
+        if (!columns.containsKey(columnName)) {
             throw new NameNotFoundException(columnName);
         }
-        Map<String,Column> map = new LinkedHashMap<>(columns);
-        Column newColumn = new ListColumn(columns.get(columnName).getFormat(), getRows().map(transform));
-        map.put(columnName,newColumn);
+        Map<String, Column> map = new LinkedHashMap<>(columns);
+        Column newColumn = ListColumn.build(columns.get(columnName).getFormat(), getRows().map(transform));
+        map.put(columnName, newColumn);
         return new ColumnTable(map.values());
     }
 
     /**
      * Return a new Table with given columns being removed
+     *
      * @param columnName
      * @return
      */
-    public ColumnTable removeColumn(String... columnName){
-        Map<String,Column> map = new LinkedHashMap<>(columns);
-        for(String c: columnName){
+    public ColumnTable removeColumn(String... columnName) {
+        Map<String, Column> map = new LinkedHashMap<>(columns);
+        for (String c : columnName) {
             map.remove(c);
         }
         return new ColumnTable(map.values());

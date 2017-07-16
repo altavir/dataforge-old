@@ -37,7 +37,7 @@ public abstract class GoogleDataHandler implements Handler {
     private JsonArrayBuilder makeCols(TableFormat format) {
         JsonArrayBuilder res = Json.createArrayBuilder();
         for (String valueName : format.getNames()) {
-            ColumnFormat cf = format.getColumnFormat(valueName);
+            ColumnFormat cf = format.getColumn(valueName);
             String type;
             switch (cf.getPrimaryType()) {
                 case NUMBER:

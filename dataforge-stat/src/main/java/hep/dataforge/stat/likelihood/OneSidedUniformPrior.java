@@ -66,11 +66,6 @@ public class OneSidedUniformPrior implements ParametricValue {
 
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public int getNames().size() {
-        return 1;
-    }
 
     /** {@inheritDoc} */
     @Override

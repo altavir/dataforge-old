@@ -16,6 +16,11 @@ import java.util.stream.Stream;
  */
 public interface TableFormat extends NameSetContainer, Iterable<ColumnFormat> {
 
+    static TableFormat subFormat(TableFormat format, String... names){
+        Names theNames = Names.of(names);
+        return () -> format.getColumns().filter(it -> theNames.contains(it.getName()));
+    }
+
     /**
      * Convert this table format to its meta representation
      * @return
@@ -40,7 +45,7 @@ public interface TableFormat extends NameSetContainer, Iterable<ColumnFormat> {
      * @param column
      * @return
      */
-    default ColumnFormat getColumnFormat(String column) {
+    default ColumnFormat getColumn(String column) {
         return getColumns()
                 .filter(it -> it.getName().equals(column))
                 .findFirst()

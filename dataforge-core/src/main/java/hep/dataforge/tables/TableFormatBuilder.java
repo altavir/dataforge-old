@@ -26,7 +26,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class TableFormatBuilder {
+public class TableFormatBuilder implements TableFormat {
 
     /**
      * Build a format containing given columns. If some of columns do not exist in initial format,
@@ -39,7 +39,7 @@ public class TableFormatBuilder {
     public static TableFormat subSet(TableFormat format, String... names) {
         MetaBuilder newFormat = new MetaBuilder(format.toMeta());
         newFormat.setNode("column", Stream.of(names)
-                .map(name -> format.getColumnFormat(name).toMeta())
+                .map(name -> format.getColumn(name).toMeta())
                 .collect(Collectors.toList())
         );
         return new MetaTableFormat(newFormat);
@@ -195,4 +195,8 @@ public class TableFormatBuilder {
         return new MetaTableFormat(builder.build());
     }
 
+    @Override
+    public Stream<ColumnFormat> getColumns() {
+        return columns.values().stream().map(ColumnFormat::new);
+    }
 }

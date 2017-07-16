@@ -125,7 +125,7 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         return new Column() {
             @Override
             public ColumnFormat getFormat() {
-                return ListTable.this.getFormat().getColumnFormat(columnName);
+                return ListTable.this.getFormat().getColumn(columnName);
             }
 
             @Override
@@ -192,6 +192,13 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         public Builder() {
             table = new ListTable(new MetaTableFormat(Meta.empty()));
         }
+
+//        public Builder format(Consumer<TableFormatBuilder> consumer){
+//            TableFormatBuilder formatBuilder = new TableFormatBuilder();
+//            consumer.accept(formatBuilder);
+//            table.format = formatBuilder.build();
+//            return this;
+//        }
 
         /**
          * Если formatter == null, то могут быть любые точки

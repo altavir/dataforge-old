@@ -116,7 +116,7 @@ public class ColumnedDataWriter implements AutoCloseable {
     public static void writeTable(OutputStream stream, Table data, String head, String... names) {
         ColumnedDataWriter writer;
         TableFormat format;
-        if (data.getFormat().isEmpty()) {
+        if (data.getFormat().getNames().size() == 0) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
             format = MetaTableFormat.forPoint(data.iterator().next());
             LoggerFactory.getLogger(ColumnedDataWriter.class)
@@ -126,7 +126,7 @@ public class ColumnedDataWriter implements AutoCloseable {
         }
 
         if (names.length != 0) {
-            format = format.filter(names);
+            format = TableFormat.subFormat(format, names);
         }
 
         writer = new ColumnedDataWriter(stream, format);

@@ -46,6 +46,10 @@ public final class ListColumn implements Column {
         }
     }
 
+    public static ListColumn build(ColumnFormat format, Stream<?> values) {
+        return new ListColumn(format,values.map(Value::of));
+    }
+
     private final ColumnFormat format;
     private final List<Value> values;
 

@@ -102,7 +102,7 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
     }
 
     @Override
-    public ColumnFormat getColumnFormat(String column) {
+    public ColumnFormat getColumn(String column) {
         return new ColumnFormat(getColumnMeta(column));
     }
 

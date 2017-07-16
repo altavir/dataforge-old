@@ -162,8 +162,7 @@ public class ParamSet implements Values, MetaMorph {
     /**
      * {@inheritDoc}
      */
-    @Override
-    public int getNames().size() {
+    public int size() {
         assert params != null;
         return params.size();
     }
