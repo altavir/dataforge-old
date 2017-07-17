@@ -103,7 +103,7 @@ public class XYAdapter extends AxisPointAdapter {
             yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
                     .toArray(String[]::new);
         } else {
-            yValues = new String[]{Y_VALUE_KEY};
+            yValues = new String[]{Y_AXIS};
             yErrors = new String[]{Y_ERROR_KEY};
         }
     }

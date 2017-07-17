@@ -40,7 +40,7 @@ import java.util.stream.Collectors;
 public class ValueMap implements Values, MetaMorph {
 
     public static ValueMap fromMap(Map<String, Object> map) {
-        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
+        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
     private final LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
@@ -82,8 +82,8 @@ public class ValueMap implements Values, MetaMorph {
         }
     }
 
-    public ValueMap(Map<String, Value> map) {
-        this.valueMap.putAll(map);
+    public ValueMap(Map<String, ?> map) {
+        map.forEach((k,v)-> this.valueMap.put(k, Value.of(v)));
     }
 
 

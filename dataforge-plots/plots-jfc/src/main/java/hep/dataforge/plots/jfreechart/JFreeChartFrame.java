@@ -380,6 +380,18 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         NONE // current thread mode
     }
 
+    @Override
+    public synchronized void remove(String plotName) {
+        this.index.remove(plotName);
+        super.remove(plotName);
+    }
+
+    @Override
+    public synchronized void clear() {
+        this.index.clear();
+        super.clear();
+    }
+
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
 
         private final Map<String, String> titleMap;

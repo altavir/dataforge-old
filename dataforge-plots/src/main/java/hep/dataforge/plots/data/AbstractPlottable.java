@@ -142,6 +142,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
     }
 
     public void setAdapter(T adapter) {
+        this.adapter = adapter;
         this.configureNode(ADAPTER_KEY, adapter.meta());
     }
 

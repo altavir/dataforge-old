@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
@@ -100,7 +101,7 @@ public class PlottableData extends XYPlottable {
         this.data = data;
     }
 
-    public void fillData(Iterable<Values> it, boolean append) {
+    public void fillData(Iterable<? extends Values> it, boolean append) {
         if (this.data == null || !append) {
             this.data = new ArrayList<>();
         }
@@ -116,8 +117,14 @@ public class PlottableData extends XYPlottable {
      *
      * @param it
      */
-    public void fillData(@NotNull Iterable<Values> it) {
+    public void fillData(@NotNull Iterable<? extends Values> it) {
         fillData(it, false);
+    }
+
+    public void fillData(@NotNull Stream<? extends Values> it) {
+        this.data = new ArrayList<>();
+        it.forEach(dp-> data.add(dp));
+        notifyDataChanged();
     }
 
     public void append(Values dp) {
