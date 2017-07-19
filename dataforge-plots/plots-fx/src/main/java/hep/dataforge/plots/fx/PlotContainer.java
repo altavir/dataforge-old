@@ -15,6 +15,7 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -56,6 +57,8 @@ public class PlotContainer implements Initializable, FXObject {
     private Button frameOptionsButton;
     @FXML
     private SplitPane split;
+    @FXML
+    private ProgressIndicator progressIndicator;
 
     private FXPlotFrame plot;
     private Map<Configuration, Stage> configWindows = new HashMap<>();
@@ -264,6 +267,22 @@ public class PlotContainer implements Initializable, FXObject {
     @FXML
     private void onHideAll(ActionEvent event) {
         this.plot.forEach(pl -> pl.configureValue("visible", false));
+    }
+
+    /**
+     * Set data loading progress. 1 means loading complete. Negative values correspond to indeterminate.
+     * @param progress
+     */
+    public void setProgress(double progress){
+        Platform.runLater(()->{
+            if(progress == 1d){
+                progressIndicator.setVisible(false);
+            } else {
+                progressIndicator.setVisible(true);
+                progressIndicator.setProgress(progress);
+            }
+
+        });
     }
 
     protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
