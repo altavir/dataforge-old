@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.work;
+package hep.dataforge.fx.works;
 
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;

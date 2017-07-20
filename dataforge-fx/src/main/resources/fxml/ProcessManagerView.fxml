@@ -3,8 +3,7 @@
 <?import javafx.scene.control.ToolBar?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.BorderPane?>
-
-<BorderPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.work.WorkManagerViewController">
+<BorderPane xmlns="http://javafx.com/javafx/8.0.65" xmlns:fx="http://javafx.com/fxml/1" fx:controller="hep.dataforge.fx.works.WorkManagerViewController">
    <top>
       <ToolBar prefHeight="40.0" BorderPane.alignment="CENTER" />
    </top>
