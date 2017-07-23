@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.data.Data;
 import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
@@ -162,7 +163,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         }
 
         @Override
-        public Stream<Goal> dependencies() {
+        public Stream<Goal<?>> dependencies() {
             return data.nodeGoal().dependencies();
         }
 
@@ -173,8 +174,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             beforeGroup(context, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()
-                    .filter(it -> it.isValid()) // filter valid data only
-                    .collect(Collectors.toMap(d -> d.getName(), d -> d.get()));
+                    .filter(Data::isValid) // filter valid data only
+                    .collect(Collectors.toMap(NamedData::getName, Data::get));
             R res = execute(context, data.getName(), collection, meta);
             afterGroup(context, data.getName(), outputMeta, res);
             return res;

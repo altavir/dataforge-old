@@ -1,11 +1,13 @@
 package hep.dataforge.kodex
 
+import hep.dataforge.goals.Goal
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MutableMetaNode
 import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import kotlinx.coroutines.experimental.future.await
 import java.time.Instant
 
 /**
@@ -104,4 +106,16 @@ operator fun Meta.plus(value: NamedValue): Meta {
 fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
     this.configure(hep.dataforge.kodex.buildMeta(this.config.name, transform));
     return this;
+}
+
+/**
+ * Use goal as a suspending function
+ */
+suspend fun <R> Goal<R>.await(): R {
+    if(this is Coal<R>){
+        //A special case for Coal
+        return this.await();
+    } else {
+        return this.result().await();
+    }
 }
