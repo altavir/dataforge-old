@@ -15,12 +15,12 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import hep.dataforge.values.Values;
 
 import java.io.*;
 import java.math.BigDecimal;
@@ -126,7 +126,7 @@ public class IOUtils {
             reader = new ColumnedDataReader(stream, names);
         }
         ListTable.Builder res = new ListTable.Builder(names);
-        for (DataPoint dp : reader) {
+        for (Values dp : reader) {
             res.row(dp);
         }
         return res.build();
@@ -138,7 +138,7 @@ public class IOUtils {
                 .collect(Collectors.joining("\t"));
     }
 
-    public static String formatDataPoint(TableFormat format, DataPoint dp) {
+    public static String formatDataPoint(TableFormat format, Values dp) {
         return format.getColumns()
                 .map(columnFormat -> format(dp.getValue(columnFormat.getName()), getDefaultTextWidth(columnFormat.getPrimaryType())))
                 .collect(Collectors.joining("\t"));
@@ -260,7 +260,7 @@ public class IOUtils {
     }
 
     public static String format(Value val, int width) {
-        switch (val.valueType()) {
+        switch (val.getType()) {
             case BOOLEAN:
                 if (width >= 5) {
                     return Boolean.toString(val.booleanValue());

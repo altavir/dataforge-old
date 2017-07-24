@@ -74,7 +74,7 @@ public class CachePlugin extends BasicPlugin {
                 CompletableFuture<V> result = new CompletableFuture<V>();
 
                 @Override
-                public Stream<Goal> dependencies() {
+                public Stream<Goal<?>> dependencies() {
                     if (cache.containsKey(id)) {
                         return Stream.empty();
                     } else {

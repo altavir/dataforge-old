@@ -64,11 +64,11 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             listeners.forEach(GoalListener::onGoalStart);
                             T r = compute();
                             //triggering result hooks
-                            listeners.forEach(listener -> listener.onGoalComplete(getExecutor(), r));
+                            listeners.forEach(listener -> listener.onGoalComplete(r));
                             this.result.complete(r);
                         } catch (Exception ex) {
                             //trigger exception hooks
-                            listeners.forEach(listener -> listener.onGoalFailed(getExecutor(), ex));
+                            listeners.forEach(listener -> listener.onGoalFailed(ex));
                             this.result.completeExceptionally(ex);
                         } finally {
                             thread = null;

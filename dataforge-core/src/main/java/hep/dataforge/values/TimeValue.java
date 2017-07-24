@@ -107,8 +107,12 @@ class TimeValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         return ValueType.TIME;
     }
 
+    @Override
+    public Object value() {
+        return this.value;
+    }
 }

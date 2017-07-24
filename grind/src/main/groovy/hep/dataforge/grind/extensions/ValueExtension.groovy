@@ -7,9 +7,9 @@
 package hep.dataforge.grind.extensions
 
 import hep.dataforge.exceptions.ValueConversionException
-import hep.dataforge.tables.DataPoint
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import hep.dataforge.values.Values
 
 import java.time.Instant
 
@@ -49,7 +49,7 @@ class ValueExtension {
     }
 
     static Value plus(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() + other.numberValue());
             case ValueType.STRING:
@@ -70,7 +70,7 @@ class ValueExtension {
     }
 
     static Value minus(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() - other.numberValue());
             case ValueType.STRING:
@@ -88,7 +88,7 @@ class ValueExtension {
 
 
     static Value negative(final Value self) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(-self.numberValue());
             case ValueType.STRING:
@@ -107,7 +107,7 @@ class ValueExtension {
     }
 
     static Value multiply(final Value self, Value other) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return Value.of(self.numberValue() * other.numberValue());
             case ValueType.STRING:
@@ -154,7 +154,7 @@ class ValueExtension {
      * @return
      */
     static Object unbox(final Value self) {
-        switch (self.valueType()) {
+        switch (self.getType()) {
             case ValueType.NUMBER:
                 return self.doubleValue();
             case ValueType.STRING:
@@ -173,8 +173,8 @@ class ValueExtension {
      * @param self
      * @return
      */
-    static Map<String, Object> unbox(final DataPoint self) {
-        self.names().collectEntries {
+    static Map<String, Object> unbox(final Values self) {
+        self.getNames().collectEntries {
             [it: self.getValue(it).unbox()]
         }
     }
@@ -185,7 +185,7 @@ class ValueExtension {
      * @param field
      * @return
      */
-    static Value getAt(final DataPoint self, String field) {
+    static Value getAt(final Values self, String field) {
         return self.getValue(field);
     }
 }

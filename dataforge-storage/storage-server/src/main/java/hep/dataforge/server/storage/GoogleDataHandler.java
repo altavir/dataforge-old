@@ -3,11 +3,11 @@ package hep.dataforge.server.storage;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.ColumnFormat;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.TableFormat;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
@@ -36,8 +36,8 @@ public abstract class GoogleDataHandler implements Handler {
 
     private JsonArrayBuilder makeCols(TableFormat format) {
         JsonArrayBuilder res = Json.createArrayBuilder();
-        for (String valueName : format.names()) {
-            ColumnFormat cf = format.getColumnFormat(valueName);
+        for (String valueName : format.getNames()) {
+            ColumnFormat cf = format.getColumn(valueName);
             String type;
             switch (cf.getPrimaryType()) {
                 case NUMBER:
@@ -60,7 +60,7 @@ public abstract class GoogleDataHandler implements Handler {
         return res;
     }
 
-    private JsonArrayBuilder makeRows(TableFormat format, Iterable<DataPoint> data) {
+    private JsonArrayBuilder makeRows(TableFormat format, Iterable<Values> data) {
         JsonArrayBuilder rows = Json.createArrayBuilder();
         data.forEach(it -> {
             rows.add(makeRow(format, it));
@@ -74,11 +74,11 @@ public abstract class GoogleDataHandler implements Handler {
                 off.getDayOfMonth(), off.getHour(), off.getMinute(), off.getSecond());
     }
 
-    private JsonObjectBuilder makeRow(TableFormat format, DataPoint point) {
+    private JsonObjectBuilder makeRow(TableFormat format, Values point) {
         JsonArrayBuilder values = Json.createArrayBuilder();
-        for (String valueName : format.names()) {
+        for (String valueName : format.getNames()) {
             Value value = point.getValue(valueName);
-            switch (value.valueType()) {
+            switch (value.getType()) {
                 case TIME:
                     values.add(Json.createObjectBuilder().add("v", formatTime(value.timeValue()))
                             .add("f", value.stringValue()));
@@ -120,7 +120,7 @@ public abstract class GoogleDataHandler implements Handler {
         return map;
     }
 
-    private JsonObjectBuilder toJson(TableFormat format, Iterable<DataPoint> data) {
+    private JsonObjectBuilder toJson(TableFormat format, Iterable<Values> data) {
         JsonObjectBuilder res = Json.createObjectBuilder();
 
         res.add("cols", makeCols(format));

@@ -21,9 +21,8 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointSource;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  *
@@ -38,7 +37,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @param pars
      * @return
      */
-    double distance(DataPoint point, NamedValueSet pars);
+    double distance(Values point, Values pars);
 
     /**
      * The derivative of distance
@@ -48,7 +47,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @return
      * @throws NotDefinedException
      */
-    double disDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
+    double disDeriv(String parName, Values point, Values pars) throws NotDefinedException;
 
     /**
      * Inverted weight of the point
@@ -57,7 +56,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @param pars
      * @return
      */
-    double dispersion(DataPoint point, NamedValueSet pars);
+    double dispersion(Values point, Values pars);
 
     /**
      * Provides a ln of probability of obtaining the data point with given
@@ -67,7 +66,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @param pars
      * @return
      */
-    double getLogProb(DataPoint point, NamedValueSet pars) throws NotDefinedException;
+    double getLogProb(Values point, Values pars) throws NotDefinedException;
 
     /**
      *
@@ -77,7 +76,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @return
      * @throws NotDefinedException
      */
-    double getLogProbDeriv(String parName, DataPoint point, NamedValueSet pars) throws NotDefinedException;
+    double getLogProbDeriv(String parName, Values point, Values pars) throws NotDefinedException;
 
 
     /**
@@ -107,14 +106,14 @@ public interface Model extends NameSetContainer, Metoid {
      * @param point
      * @return
      */
-    ParametricValue getDistanceFunction(DataPoint point);
+    ParametricValue getDistanceFunction(Values point);
 
     /**
      *
      * @param point
      * @return
      */
-    ParametricValue getLogProbFunction(DataPoint point);
+    ParametricValue getLogProbFunction(Values point);
 
     /**
      * Пытается угадать набор параметров по набору данных. По-умолчанию этот

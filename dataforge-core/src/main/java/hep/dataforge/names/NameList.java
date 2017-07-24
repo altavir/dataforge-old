@@ -22,6 +22,7 @@ import hep.dataforge.meta.MetaBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Stream;
 
 /**
  * The fast random access implementation of Names based on ArrayList.
@@ -73,7 +74,7 @@ public class NameList implements Names {
         if (!nameList.contains(name)) {
             nameList.add(name);
         } else {
-            throw new NamingException("Dublicate names in a Named");
+            throw new NamingException("Duplicate names in a Names");
         }
     }
 
@@ -150,6 +151,11 @@ public class NameList implements Names {
     @Override
     public List<String> asList() {
         return Collections.unmodifiableList(this.nameList);
+    }
+
+    @Override
+    public Stream<String> stream() {
+        return this.nameList.stream();
     }
 
     @Override

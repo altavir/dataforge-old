@@ -20,9 +20,9 @@ import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.tables.Table;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -185,7 +185,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDis(int i, ParamSet pars) {
-        return model.distance(points.getPoint(i), pars);
+        return model.distance(points.getRow(i), pars);
     }
 
     /**
@@ -200,7 +200,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDisDeriv(final String name, final int i, final ParamSet pars) {
-        DataPoint dp = points.getPoint(i);
+        Values dp = points.getRow(i);
         if (model.providesDeriv(name)) {
             return model.disDeriv(name, dp, pars);
         } else {
@@ -218,7 +218,7 @@ public class FitState implements Serializable {
      * @return a double.
      */
     public double getDispersion(int i, ParamSet pars) {
-        double res = model.dispersion(points.getPoint(i), pars);
+        double res = model.dispersion(points.getRow(i), pars);
         if (res > 0) {
             return res;
         } else {
@@ -237,7 +237,7 @@ public class FitState implements Serializable {
         if (!model.providesProb()) {
             res = -getChi2(set) / 2;
         } else {
-            for (DataPoint dp : points) {
+            for (Values dp : points) {
                 res += model.getLogProb(dp, set);
             }
         }
@@ -268,11 +268,11 @@ public class FitState implements Serializable {
                 res -= d * deriv / s;
             }
         } else {
-            for (DataPoint dp : points) {
+            for (Values dp : points) {
                 res += model.getLogProbDeriv(parName, dp, set);
             }
         }
-        if ((getPrior() != null) && (getPrior().names().contains(parName))) {
+        if ((getPrior() != null) && (getPrior().getNames().contains(parName))) {
             return res += getPrior().derivValue(parName, set) / getPrior().value(set);
         }
         return res;
@@ -318,7 +318,7 @@ public class FitState implements Serializable {
     }
 
     public int getModelDim() {
-        return model.size();
+        return model.getNames().size();
     }
 
     public NavigablePointSource getPoints() {
@@ -374,7 +374,7 @@ public class FitState implements Serializable {
         public Builder setCovariance(NamedMatrix cov, boolean updateErrors) {
             covariance = cov;
             if (updateErrors) {
-                for (String name : cov.names()) {
+                for (String name : cov.getNames()) {
                     double value = cov.get(name, name);
                     if (value > 0) {
                         pars.setParError(name, Math.sqrt(value));

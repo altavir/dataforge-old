@@ -21,16 +21,16 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
-public class BaseMetaHolder implements Metoid, ValueProvider, Described {
+public class MetaHolder implements Metoid, ValueProvider, Described {
 
     private Meta meta;
     private transient NodeDescriptor descriptor;
 
-    public BaseMetaHolder(Meta meta) {
+    public MetaHolder(Meta meta) {
         this.meta = meta;
     }
 
-    public BaseMetaHolder() {
+    public MetaHolder() {
     }
 
 
@@ -65,7 +65,7 @@ public class BaseMetaHolder implements Metoid, ValueProvider, Described {
      */
     protected void setMeta(Meta meta) {
         if (this.meta != null) {
-            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the BaseMetaHolder");
+            LoggerFactory.getLogger(getClass()).warn("Overriding meta of the MetaHolder");
         }
         this.meta = meta;
     }

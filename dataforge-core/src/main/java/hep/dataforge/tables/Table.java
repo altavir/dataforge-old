@@ -19,9 +19,9 @@ import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.values.Value;
 
-import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
@@ -31,17 +31,29 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends MetaMorph, Markedup, NavigablePointSource {
+public interface Table extends Markedup, NavigablePointSource {
 
+    /**
+     * Get an immutable column from this table
+     *
+     * @param name
+     * @return
+     */
     Column getColumn(String name);
 
     /**
-     * Apply row-based transformation
-     *
-     * @param streamTransform
+     * Get columns as a stream
      * @return
      */
-    Table transform(UnaryOperator<Stream<DataPoint>> streamTransform);
+    Stream<Column> getColumns();
+
+    /**
+     * Get a specific value
+     * @param columnName the name of the column
+     * @param rowNumber the number of the row
+     * @return
+     */
+    Value get(String columnName, int rowNumber);
 
     @Override
     default Markup markup(Meta configuration) {
@@ -67,4 +79,13 @@ public interface Table extends MetaMorph, Markedup, NavigablePointSource {
      * @return
      */
     TableFormat getFormat();
+
+    default Meta toMeta() {
+        MetaBuilder res = new MetaBuilder("table");
+        res.putNode("format", getFormat().toMeta());
+        MetaBuilder dataNode = new MetaBuilder("data");
+        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+        res.putNode(dataNode);
+        return res;
+    }
 }

@@ -73,8 +73,8 @@ public abstract class MultiInputGoal<T> extends AbstractGoal<T> {
     }
 
     @Override
-    public Stream<Goal> dependencies() {
-        Stream<Goal> res = Stream.empty();
+    public Stream<Goal<?>> dependencies() {
+        Stream<Goal<?>> res = Stream.empty();
         for (Binding bnd : this.bindings.values()) {
             res = Stream.concat(res, bnd.dependencies());
         }

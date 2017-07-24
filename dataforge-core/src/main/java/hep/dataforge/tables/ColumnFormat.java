@@ -3,11 +3,16 @@ package hep.dataforge.tables;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.SimpleMetaMorph;
+import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static hep.dataforge.values.ValueType.NUMBER;
 
@@ -18,7 +23,21 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
 @ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
+@ValueDef(name = "role", multiple = true, info = "The role of data in this column for plotting or other purposes")
 public class ColumnFormat extends SimpleMetaMorph implements Named {
+
+    /**
+     * Construct simple column format
+     * @param name
+     * @param type
+     * @return
+     */
+    public static ColumnFormat build(String name, ValueType... type){
+        return new ColumnFormat(new MetaBuilder("column")
+                .putValue("name",name)
+                .putValue("type",Stream.of(type).map(Enum::name).collect(Collectors.toList()))
+        );
+    }
 
     public ColumnFormat() {
     }
@@ -46,13 +65,14 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
     }
 
     /**
-     * Check if value of this type is allowed by the format. It 'type' field of meta is empty then any type is allowed.
+     * Check if value is allowed by the format. It 'type' field of meta is empty then any type is allowed.
      *
-     * @param type
+     * @param value
      * @return
      */
-    public boolean isAllowed(ValueType type) {
-        return !hasValue("type") || Arrays.asList(getStringArray("type")).contains(type.name());
+    public boolean isAllowed(Value value) {
+        //TODO add complex analysis here including enum-values
+        return !hasValue("type") || Arrays.asList(getStringArray("type")).contains(value.getType().name());
     }
 
     /**
@@ -66,9 +86,18 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     /**
      * Get displayed title for this column. By default returns column name
+     *
      * @return
      */
     public String getTitle() {
         return getString("title", this::getName);
+    }
+
+    /**
+     *
+     * @return
+     */
+    public List<String> getRoles(){
+        return Arrays.asList(getStringArray("role"));
     }
 }

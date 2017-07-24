@@ -32,6 +32,10 @@ public interface Domain {
         return this.contains(new ArrayRealVector(point));
     }
 
+    default boolean contains(Double[] point) {
+        return this.contains(new ArrayRealVector(point));
+    }
+
     RealVector nearestInDomain(RealVector point);
 
     /**

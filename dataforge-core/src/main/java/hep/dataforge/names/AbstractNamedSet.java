@@ -49,12 +49,12 @@ public class AbstractNamedSet implements NameSetContainer {
      * @param set a {@link hep.dataforge.names.NameSetContainer} object.
      */
     public AbstractNamedSet(NameSetContainer set) {
-        this.names = set.names();
+        this.names = set.getNames();
     }    
     
     /** {@inheritDoc} */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
     

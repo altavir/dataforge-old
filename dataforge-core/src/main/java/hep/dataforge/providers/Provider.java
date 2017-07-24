@@ -74,11 +74,11 @@ public interface Provider {
      * @return
      */
     default <T> Optional<T> provide(String path, Class<T> type) {
-        return provide(Path.of(path)).map(it -> type.cast(it));
+        return provide(Path.of(path)).map(type::cast);
     }
 
     default <T> Optional<T> provide(Path path, Class<T> type) {
-        return provide(path).map(it -> type.cast(it));
+        return provide(path).map(type::cast);
     }
 //
 //    /**

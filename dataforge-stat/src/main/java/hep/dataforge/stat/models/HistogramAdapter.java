@@ -17,8 +17,8 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.AxisPointAdapter;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.values.Values;
 
 /**
  * TODO сделать адаптер для гистограммы с фиксированными бинами
@@ -45,23 +45,23 @@ public class HistogramAdapter extends AxisPointAdapter {
     }
 
 
-    public double getBinBegin(DataPoint point) {
+    public double getBinBegin(Values point) {
         return this.getComponent(point, BIN_BEGIN_NAME).doubleValue();
     }
 
-    public double getBinEnd(DataPoint point) {
+    public double getBinEnd(Values point) {
         return this.getComponent(point, BIN_END_NAME).doubleValue();
     }
 
-    public long getCount(DataPoint point) {
+    public long getCount(Values point) {
         return this.getComponent(point, COUNT_NAME).longValue();
     }
 
-    public double getBinSize(DataPoint point) {
+    public double getBinSize(Values point) {
         return getBinEnd(point) - getBinBegin(point);
     }
 
-    public double getBinCenter(DataPoint point) {
+    public double getBinCenter(Values point) {
         return (getBinEnd(point) + getBinBegin(point)) / 2;
     }
 }

@@ -5,6 +5,9 @@
  */
 package hep.dataforge.goals;
 
+import hep.dataforge.context.Global;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.concurrent.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Stream;
@@ -21,7 +24,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      *
      * @return
      */
-    Stream<Goal> dependencies();
+    Stream<Goal<?>> dependencies();
 
     /**
      * Start this goal goals. Triggers start of dependent goals
@@ -61,7 +64,7 @@ public interface Goal<T> extends RunnableFuture<T> {
     }
 
     @Override
-    default T get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+    default T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
         return result().get(timeout, unit);
     }
 
@@ -78,13 +81,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param r
      */
     default void onStart(Runnable r) {
-        registerListener(new GoalListener<T>() {
-            @Override
-            public void onGoalStart() {
-                r.run();
-            }
-
-        });
+        onStart(Global.instance().singleThreadExecutor(), r);
     }
 
     /**
@@ -109,17 +106,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param consumer
      */
     default void onComplete(BiConsumer<T, Throwable> consumer) {
-        registerListener(new GoalListener<T>() {
-            @Override
-            public void onGoalComplete(Executor goalExecutor, T result) {
-                goalExecutor.execute(() -> consumer.accept(result, null));
-            }
-
-            @Override
-            public void onGoalFailed(Executor goalExecutor, Throwable ex) {
-                goalExecutor.execute(() -> consumer.accept(null, ex));
-            }
-        });
+        onComplete(Global.instance().singleThreadExecutor(), consumer);
     }
 
     /**

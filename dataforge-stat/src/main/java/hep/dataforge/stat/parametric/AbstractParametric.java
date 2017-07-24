@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 
 public abstract class AbstractParametric extends AbstractNamedSet {
@@ -57,7 +57,7 @@ public abstract class AbstractParametric extends AbstractNamedSet {
      * @param set
      * @return
      */
-    protected double getParameter(String name, NamedValueSet set) {
+    protected double getParameter(String name, Values set) {
         //FIXME add default value
         return set.getDouble(name);
     }    

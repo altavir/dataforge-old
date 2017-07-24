@@ -3,19 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.work;
+package hep.dataforge.fx.works;
 
 import hep.dataforge.names.AnonimousNotAlowed;
 import hep.dataforge.names.Name;
-import hep.dataforge.names.Named;
 import javafx.beans.Observable;
 import javafx.beans.binding.BooleanBinding;
 import javafx.beans.binding.DoubleBinding;
 import javafx.beans.property.*;
-import javafx.beans.value.ObservableDoubleValue;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableMap;
+import javafx.concurrent.Worker;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
@@ -33,9 +32,7 @@ import java.util.stream.Collectors;
  * @author Alexander Nozik
  */
 @AnonimousNotAlowed
-public class Work implements Named {
-
-    private final String name;
+public class Work implements Worker<Void> {
 
     private final ObjectProperty<CompletableFuture<?>> futureProperty = new SimpleObjectProperty<>();
 
@@ -115,10 +112,6 @@ public class Work implements Named {
         return children;
     }
 
-    @Override
-    public String getName() {
-        return name;
-    }
 
     public ObjectProperty<CompletableFuture<?>> taskProperty() {
         return futureProperty;
@@ -130,7 +123,7 @@ public class Work implements Named {
 
     protected void setFuture(CompletableFuture<?> task) {
         if (this.futureProperty.get() != null && !getFuture().isDone()) {
-            getManager().getLogger().error("The task for work {} already set",getName());
+            getManager().getLogger().error("The task for work {} already set", getName());
             return;
         }
         getManager().onStarted(getName());
@@ -235,36 +228,91 @@ public class Work implements Named {
         return title;
     }
 
+    @Override
+    public boolean cancel() {
+    }
+
     public String getTitle() {
         return titleProperty().get();
     }
 
-    public void setTitle(String title) {
-        this.titleProperty().set(title);
+    @Override
+    public boolean isRunning() {
+
     }
 
-    public StringProperty statusProperty() {
+    @Override
+    public ReadOnlyBooleanProperty runningProperty() {
+
+    }
+
+    @Override
+    public String getMessage() {
+        return status.get();
+    }
+
+    @Override
+    public ReadOnlyStringProperty messageProperty() {
         return status;
     }
 
-    public String getStatus() {
-        return statusProperty().get();
+
+    @Override
+    public State getState() {
+
     }
 
-    public void setStatus(String status) {
-        this.statusProperty().set(status);
+    @Override
+    public ReadOnlyObjectProperty<State> stateProperty() {
+
     }
 
-    public ObservableDoubleValue progressProperty() {
-        return totalProgress;
+    @Override
+    public Void getValue() {
+
     }
 
-    public ObservableDoubleValue maxProgressProperty() {
-        return totalMaxProgress;
+    @Override
+    public ReadOnlyObjectProperty<Void> valueProperty() {
+
     }
 
-    public double getProgress() {
+    @Override
+    public Throwable getException() {
+
+    }
+
+    @Override
+    public ReadOnlyObjectProperty<Throwable> exceptionProperty() {
+
+    }
+
+    @Override
+    public double getWorkDone() {
         return curProgress.get() + children.values().stream().mapToDouble(Work::getProgress).sum();
+    }
+
+    @Override
+    public ReadOnlyDoubleProperty workDoneProperty() {
+    }
+
+    @Override
+    public double getTotalWork() {
+        return curMaxProgress.get() + children.values().stream().mapToDouble(Work::getTotalWork).sum();
+    }
+
+    @Override
+    public ReadOnlyDoubleProperty totalWorkProperty() {
+    }
+
+    @Override
+    public double getProgress() {
+
+    }
+
+    @Override
+    public ReadOnlyDoubleProperty progressProperty() {
+
     }
 
     /**
@@ -274,10 +322,6 @@ public class Work implements Named {
      */
     public void setProgress(double progress) {
         this.curProgress.set(progress);
-    }
-
-    public double getMaxProgress() {
-        return curMaxProgress.get() + children.values().stream().mapToDouble(Work::getMaxProgress).sum();
     }
 
     public void setMaxProgress(double maxProgress) {

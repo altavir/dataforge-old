@@ -47,7 +47,7 @@ public interface Names extends Iterable<String>, MetaMorph {
     }
 
     static Names of(NameSetContainer set) {
-        return new NameList(set.names());
+        return new NameList(set.getNames());
     }
 
     /**
@@ -61,6 +61,10 @@ public interface Names extends Iterable<String>, MetaMorph {
             res.add(name);
         }
         return res;
+    }
+
+    default Stream<String> stream(){
+        return asList().stream();
     }
 
     default String[] asArray() {

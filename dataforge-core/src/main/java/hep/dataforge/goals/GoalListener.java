@@ -1,9 +1,6 @@
 package hep.dataforge.goals;
 
-import hep.dataforge.context.Global;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.concurrent.Executor;
 
 /**
  * A universal goal state listener
@@ -18,29 +15,12 @@ public interface GoalListener<T> {
 
     }
 
-    /**
-     * Execute when goal is completed successfully
-     *
-     * @param goalExecutor the executor of completed goal
-     * @param result
-     */
-    default void onGoalComplete(Executor goalExecutor, T result) {
+    default void onGoalComplete(T result){
 
     }
 
-    default void onGoalComplete(T result) {
-        onGoalComplete(getDefaultExecutor(), result);
-    }
-
-    default void onGoalFailed(Executor goalExecutor, @Nullable Throwable ex) {
+    default void onGoalFailed(@Nullable Throwable ex){
 
     }
 
-    default void onGoalFailed(@Nullable Throwable ex) {
-        onGoalFailed(getDefaultExecutor(), ex);
-    }
-
-    default Executor getDefaultExecutor() {
-        return Global.instance().singleThreadExecutor();
-    }
 }

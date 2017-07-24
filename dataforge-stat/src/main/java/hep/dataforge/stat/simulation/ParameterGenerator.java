@@ -15,7 +15,7 @@
  */
 package hep.dataforge.stat.simulation;
 
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,14 +30,14 @@ public interface ParameterGenerator {
      * Generate one
      * @return 
      */
-    NamedValueSet generate();
+    Values generate();
     
     /**
      * Generate many
      * @param number
      * @return 
      */
-    default List<NamedValueSet> generate(int number){
+    default List<Values> generate(int number){
         return Stream.generate(()-> generate())
                 .limit(number)
                 .parallel()

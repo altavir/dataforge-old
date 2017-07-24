@@ -198,11 +198,13 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     private synchronized void setDataSize(SeekableByteChannel channel, int size) throws IOException {
+        getTag().setValue(DATA_LENGTH_KEY, size);//update property
         long position = channel.position();
         channel.position(0);//seeking begin
-        channel.write(getTag().byteHeader());
+        ByteBuffer buffer = getTag().byteHeader();
+        buffer.position(0);
+        int d = channel.write(buffer);
         channel.position(position);//return to the initial position
-        getTag().setValue(DATA_LENGTH_KEY, size);//update property
     }
 
     /**

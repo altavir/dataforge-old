@@ -38,7 +38,7 @@ class KMetaBuilder(name: String) : MetaBuilder(name) {
     }
 }
 
-fun buildMeta(name: String, transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
+fun buildMeta(name: String = "meta", transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
     val node = KMetaBuilder(name);
     transform?.invoke(node)
     return node

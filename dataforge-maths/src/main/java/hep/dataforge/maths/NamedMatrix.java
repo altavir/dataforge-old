@@ -20,7 +20,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.Array2DRowRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
@@ -72,7 +72,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @param vector
      * @return
      */
-    public static NamedMatrix diagonal(NamedValueSet vector) {
+    public static NamedMatrix diagonal(Values vector) {
         double[] vectorValues = MathUtils.getDoubleArray(vector);
         double[][] values = new double[vectorValues.length][vectorValues.length];
         for (int i = 0; i < vectorValues.length; i++) {
@@ -108,7 +108,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
         if (names.length == 0) {
             return this;
         }
-        if (!this.names().contains(names)) {
+        if (!this.getNames().contains(names)) {
             throw new IllegalArgumentException();
         }
         int[] numbers = new int[names.length];
@@ -126,7 +126,7 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 
@@ -141,8 +141,8 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
      * @param matrix a {@link hep.dataforge.maths.NamedMatrix} object.
      */
     public void setValuesFrom(NamedMatrix matrix) {
-        for (int i = 0; i < matrix.size(); i++) {
-            for (int j = 0; j < matrix.size(); j++) {
+        for (int i = 0; i < matrix.getNames().size(); i++) {
+            for (int j = 0; j < matrix.getNames().size(); j++) {
                 String name1 = matrix.names.get(i);
                 String name2 = matrix.names.get(j);
                 if (names.contains(name1) && names.contains(name2)) {

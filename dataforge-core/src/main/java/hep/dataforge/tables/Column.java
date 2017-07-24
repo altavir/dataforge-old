@@ -15,7 +15,7 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.meta.Metoid;
+import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 
 import java.util.List;
@@ -29,18 +29,40 @@ import java.util.stream.StreamSupport;
  * @version $Id: $Id
  */
 
-public interface Column extends Iterable<Value>, Metoid {
+public interface Column extends Named, Iterable<Value> {
 
-    default ColumnFormat getFormat() {
-        return new ColumnFormat(meta());
+    ColumnFormat getFormat();
+
+    @Override
+    default String getName() {
+        return getFormat().getName();
     }
 
+    /**
+     * Get the value with the given index
+     * @param n
+     * @return
+     */
     Value get(int n);
 
+    //TODO add custom value type accessors
+
+    /**
+     * Get values as list
+     * @return
+     */
     List<Value> asList();
 
+    /**
+     * The length of the column
+     * @return
+     */
     int size();
 
+    /**
+     * Get the values as a stream
+     * @return
+     */
     default Stream<Value> stream() {
         return StreamSupport.stream(spliterator(), false);
     }

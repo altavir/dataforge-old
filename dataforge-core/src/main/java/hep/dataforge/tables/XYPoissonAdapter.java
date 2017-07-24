@@ -18,6 +18,7 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 /**
  * Specialized adapter for poissonian distributed values
@@ -38,12 +39,12 @@ public class XYPoissonAdapter extends XYAdapter {
     }
 
     @Override
-    public boolean providesYError(DataPoint point) {
+    public boolean providesYError(Values point) {
         return super.providesYError(point) || getY(point).doubleValue()>0;
     }
 
     @Override
-    public Value getYerr(DataPoint point) throws NameNotFoundException {
+    public Value getYerr(Values point) throws NameNotFoundException {
         if(super.providesYError(point)){
             return super.getYerr(point);
         } else {

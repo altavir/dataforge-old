@@ -13,6 +13,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
+ * Utility methods for providers
  * Created by darksnake on 25-Apr-17.
  */
 public class Providers {
@@ -96,7 +97,12 @@ public class Providers {
         } else {
             Method method = providers.get(target);
             try {
-                return Optional.class.cast(method.invoke(provider, name));
+                Object result = method.invoke(provider, name);
+                if(result instanceof Optional){
+                    return (Optional<?>) result;
+                } else {
+                    return Optional.ofNullable(result);
+                }
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
                 throw new RuntimeException("Failed to provide by reflections. The method " + method.getName() + " is not a provider method");
             }

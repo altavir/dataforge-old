@@ -22,7 +22,7 @@ public class StaticGoal<T> extends AbstractGoal<T> {
     }
 
     @Override
-    public Stream<Goal> dependencies() {
+    public Stream<Goal<?>> dependencies() {
         return Stream.empty();
     }
 

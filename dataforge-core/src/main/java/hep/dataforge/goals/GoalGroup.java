@@ -10,6 +10,7 @@ import hep.dataforge.utils.ReferenceRegistry;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import java.util.function.IntFunction;
 import java.util.stream.Stream;
 
 /**
@@ -22,13 +23,13 @@ import java.util.stream.Stream;
  */
 public class GoalGroup implements Goal<Void> {
     private final ReferenceRegistry<GoalListener> listeners = new ReferenceRegistry<>();
-    private final Collection<Goal> dependencies;
+    private final Collection<Goal<?>> dependencies;
     private final CompletableFuture<Void> res;
 
-    public GoalGroup(Collection<Goal> dependencies) {
+    public GoalGroup(Collection<Goal<?>> dependencies) {
         this.dependencies = dependencies;
         res = CompletableFuture
-                .allOf(dependencies.stream().map(dep -> dep.result()).toArray(i -> new CompletableFuture<?>[i]))
+                .allOf(dependencies.stream().map(Goal::result).toArray((IntFunction<CompletableFuture<?>[]>) CompletableFuture[]::new))
                 .whenComplete(new BiConsumer<Void, Throwable>() {
                     @Override
                     public void accept(Void aVoid, Throwable throwable) {
@@ -42,14 +43,14 @@ public class GoalGroup implements Goal<Void> {
     }
 
     @Override
-    public Stream<Goal> dependencies() {
+    public Stream<Goal<?>> dependencies() {
         return dependencies.stream();
     }
 
     @Override
     public void run() {
-        listeners.forEach(l -> l.onGoalStart());
-        dependencies.forEach(it -> it.run());
+        listeners.forEach(GoalListener::onGoalStart);
+        dependencies.forEach(Goal::run);
     }
 
     @Override

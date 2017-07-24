@@ -4,11 +4,11 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 
 /**
- * A simple metamorph implementation based on {@link BaseMetaHolder}.
+ * A simple metamorph implementation based on {@link MetaHolder}.
  * It is supposed, that there is no state fields beside meta itself
  * Created by darksnake on 20-Nov-16.
  */
-public class SimpleMetaMorph extends BaseMetaHolder implements MetaMorph {
+public class SimpleMetaMorph extends MetaHolder implements MetaMorph {
     public SimpleMetaMorph(Meta meta) {
         super(meta);
     }

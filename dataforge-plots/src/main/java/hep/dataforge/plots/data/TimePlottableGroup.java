@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.time.Duration;
 import java.util.Iterator;
@@ -45,7 +45,7 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
         return set;
     }
 
-    public void put(DataPoint point) {
+    public void put(Values point) {
         map.keySet().stream().filter(point::hasValue).forEach(name -> {
             map.get(name).put(point.getValue(name));
         });

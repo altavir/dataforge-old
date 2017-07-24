@@ -12,6 +12,6 @@ The DataForge functionality is largely based on metadata exchange and therefore 
 
 In order to do so one should use an `Envelope` format. It is a combined format for both text metadata and data in single block. An `Envelope` container consists of three main components:
 
-1. **Properties**. A set of key-value bindings defining envelope format: metadata format, encoding and length, data format and length and general envelope version.
-2. **Meta**. A text metadata in any supported format.
-3. **Data**. Ant binary or textual data. The rules to read this data could be derived either from properties header or from envelope meta.
+0. **Properties**. A set of key-value bindings defining envelope format: metadata format and length, data length and general envelope version. Properties in fact are not considered to be a part of envelope itself, but it is usually a part of envelope container.
+1. **Meta**. A text metadata in any supported format.
+2. **Data**. Ant binary or textual data. The rules to read this data could be derived either from properties header or from envelope meta.

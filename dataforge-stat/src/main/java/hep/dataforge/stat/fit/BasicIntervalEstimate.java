@@ -33,7 +33,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
 
 
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(ranges.stream().map(range -> range.parName).distinct().toArray(i -> new String[i]));
     }
 

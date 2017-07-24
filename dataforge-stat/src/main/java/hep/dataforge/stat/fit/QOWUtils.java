@@ -44,7 +44,7 @@ class QOWUtils {
      */
     static RealMatrix covarF(FitState source, QOWeight weight) {
 
-        int fitDim = weight.names().size();
+        int fitDim = weight.getNames().size();
         double[][] res = new double[fitDim][fitDim];
 
         int i;
@@ -168,8 +168,8 @@ class QOWUtils {
                 res[k][l] = summ;
                 //TODO Это правильно. Почему??
                 if ((source.getPrior() != null)
-                        && source.getPrior().names().contains(fitPars[k])
-                        && source.getPrior().names().contains(fitPars[l])) {
+                        && source.getPrior().getNames().contains(fitPars[k])
+                        && source.getPrior().getNames().contains(fitPars[l])) {
                     ParametricValue prior = source.getPrior();
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                     double pi = prior.value(set);
@@ -209,8 +209,8 @@ class QOWUtils {
 
                 //TODO Это правильно. Почему??
                 if ((source.getPrior() != null)
-                        && source.getPrior().names().contains(fitPars[k])
-                        && source.getPrior().names().contains(fitPars[l])) {
+                        && source.getPrior().getNames().contains(fitPars[k])
+                        && source.getPrior().getNames().contains(fitPars[l])) {
                     Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                     ParametricValue prior = source.getPrior();
                     double pi = prior.value(weight.getTheta());
@@ -258,7 +258,7 @@ class QOWUtils {
             }
             res[k] = summ;
             //Поправка на априорную вероятность
-            if ((source.getPrior() != null) && source.getPrior().names().contains(fitPars[k])) {
+            if ((source.getPrior() != null) && source.getPrior().getNames().contains(fitPars[k])) {
                 Logger.getAnonymousLogger().warning("QOW does not interpret prior probability correctly");
                 ParametricValue prior = source.getPrior();
                 res[k] -= prior.derivValue(fitPars[k], set) / prior.value(set);

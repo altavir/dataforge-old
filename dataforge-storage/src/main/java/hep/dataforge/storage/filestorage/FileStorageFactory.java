@@ -13,18 +13,23 @@ import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.StorageType;
 
 import java.io.File;
+import java.net.URI;
 
 /**
  * @author Alexander Nozik
  */
 public class FileStorageFactory implements StorageType {
 
-    public static MetaBuilder buildStorageMeta(String path, boolean readOnly, boolean monitor) {
+    public static MetaBuilder buildStorageMeta(URI path, boolean readOnly, boolean monitor) {
         return new MetaBuilder("storage")
-                .setValue("path", path)
+                .setValue("path", path.toString())
                 .setValue("type", "file")
                 .setValue("readOnly", readOnly)
                 .setValue("monitor", monitor);
+    }
+
+    public static MetaBuilder buildStorageMeta(File file, boolean readOnly, boolean monitor) {
+        return buildStorageMeta(file.toURI(),readOnly,monitor);
     }
 
     /**
@@ -34,7 +39,7 @@ public class FileStorageFactory implements StorageType {
      */
     public static FileStorage buildLocal(File file) {
         return new FileStorage(Global.instance(),
-                new MetaBuilder("storage").setValue("path", file.getAbsolutePath()));
+                new MetaBuilder("storage").setValue("path", file.toURI()));
     }
 
     @Override

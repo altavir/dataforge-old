@@ -19,6 +19,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 /**
  * An adapter to interpret datapoint
@@ -41,5 +42,5 @@ public interface PointAdapter extends Metoid, MetaMorph {
      * @param component
      * @return 
      */
-    Value getComponent(DataPoint point, String component);
+    Value getComponent(Values point, String component);
 }

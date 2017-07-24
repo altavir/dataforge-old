@@ -23,7 +23,7 @@ import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.util.FastMath;
 import org.slf4j.LoggerFactory;
@@ -53,21 +53,13 @@ public class LogLikelihood implements ParametricValue {
      * {@inheritDoc}
      */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
+    public double derivValue(String derivParName, Values pars) throws NotDefinedException, NamingException {
         return derivValue(derivParName, new ParamSet(pars));
     }
 
     @Override
-    public Names names() {
-        return source.getModel().names();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return source.getModel().size();
+    public Names getNames() {
+        return source.getModel().getNames();
     }
 
     /**
@@ -78,7 +70,7 @@ public class LogLikelihood implements ParametricValue {
     public ParametricValue getLikelihood(double offset) {
         return new AbstractParametricValue(this) {
             @Override
-            public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NamingException {
+            public double derivValue(String derivParName, Values pars) throws NotDefinedException, NamingException {
                 return value(pars)*LogLikelihood.this.derivValue(derivParName, pars);
             }
 
@@ -88,7 +80,7 @@ public class LogLikelihood implements ParametricValue {
             }
 
             @Override
-            public double value(NamedValueSet pars) throws NamingException {
+            public double value(Values pars) throws NamingException {
                 return FastMath.exp(LogLikelihood.this.value(pars) - offset);
             }
         };
@@ -107,11 +99,11 @@ public class LogLikelihood implements ParametricValue {
      * @param offsetPoint
      * @return
      */
-    public ParametricValue getLikelihood(NamedValueSet offsetPoint) {
+    public ParametricValue getLikelihood(Values offsetPoint) {
         return getLikelihood(value(offsetPoint));
     }
 
-    public UnivariateFunction getLogLikelihoodProjection(final String axisName, final NamedValueSet allPar) {
+    public UnivariateFunction getLogLikelihoodProjection(final String axisName, final Values allPar) {
         return ParametricUtils.getNamedProjection(this, axisName, allPar);
     }
 
@@ -131,7 +123,7 @@ public class LogLikelihood implements ParametricValue {
      * {@inheritDoc}
      */
     @Override
-    public double value(NamedValueSet pars) throws NamingException {
+    public double value(Values pars) throws NamingException {
         return value(new ParamSet(pars));
     }
 

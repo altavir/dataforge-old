@@ -17,8 +17,8 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Optional;
 
@@ -32,7 +32,7 @@ import static java.lang.Math.sqrt;
  * @version $Id: $Id
  */
 @Deprecated
-public class HistogramBin implements DataPoint {
+public class HistogramBin implements Values {
 
     private static final String[] names = {"binBegin", "binEnd", "count", "binCenter", "binSize"};
     private double binBegin;
@@ -48,7 +48,7 @@ public class HistogramBin implements DataPoint {
      * object.
      */
     protected HistogramBin(HistogramBin source) {
-        parNames = source.names();
+        parNames = source.getNames();
         this.binBegin = source.binBegin;
         this.binEnd = source.binEnd;
         this.count = source.count;
@@ -170,7 +170,7 @@ public class HistogramBin implements DataPoint {
      */
     @Override
     public boolean hasValue(String path) {
-        return names().contains(path);
+        return getNames().contains(path);
         /**
          * {@inheritDoc}
          */
@@ -182,7 +182,7 @@ public class HistogramBin implements DataPoint {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return parNames;
     }
 }

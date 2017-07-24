@@ -19,10 +19,10 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.Values;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -54,11 +54,11 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
         super(name);
     }
 
-    public List<DataPoint> getData(Value from, Value to) {
+    public List<Values> getData(Value from, Value to) {
         return getData(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to));
     }
 
-    public List<DataPoint> getData(Value from, Value to, int numPoints) {
+    public List<Values> getData(Value from, Value to, int numPoints) {
         return getData(new MetaBuilder("").putValue("xRange.from", from).putValue("xRange.to", to).putValue("numPoints", numPoints));
     }
 
@@ -69,7 +69,7 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
      * @return
      */
     @Override
-    public List<DataPoint> getData(Meta query) {
+    public List<Values> getData(Meta query) {
         if (query.isEmpty()) {
             return getRawData(query);
         } else {
@@ -77,9 +77,9 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
         }
     }
 
-    protected abstract List<DataPoint> getRawData(Meta query);
+    protected abstract List<Values> getRawData(Meta query);
 
-    protected Stream<DataPoint> filterXRange(Stream<DataPoint> data, Meta xRange) {
+    protected Stream<Values> filterXRange(Stream<Values> data, Meta xRange) {
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);
         if (from != Value.NULL && to != Value.NULL) {
@@ -93,7 +93,7 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
         }
     }
 
-    protected Stream<DataPoint> filterDataStream(Stream<DataPoint> data, Meta cfg) {
+    protected Stream<Values> filterDataStream(Stream<Values> data, Meta cfg) {
         if (cfg.isEmpty()) {
             return data;
         }

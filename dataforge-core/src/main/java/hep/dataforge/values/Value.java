@@ -147,7 +147,7 @@ public interface Value extends Serializable {
         } else if (l.size() == 1) {
             return of(l.get(0));
         } else {
-            return new ValueSet(l);
+            return new ListValue(l);
         }
     }
 
@@ -158,7 +158,7 @@ public interface Value extends Serializable {
             case 1:
                 return list[0];
             default:
-                return new ValueSet(list);
+                return new ListValue(list);
         }
     }
 
@@ -241,11 +241,16 @@ public interface Value extends Serializable {
     String stringValue();
 
     @NotNull
-    ValueType valueType();
+    ValueType getType();
+
+    /**
+     * Return underlining object. Used for dynamic calls mostly
+     */
+    Object value();
 
     /**
      * Return list of values representation of current value. If value is
-     * instance of ValueSet, than the actual list is returned, otherwise
+     * instance of ListValue, than the actual list is returned, otherwise
      * immutable singleton list is returned.
      *
      * @return
@@ -255,7 +260,7 @@ public interface Value extends Serializable {
     }
 
     default boolean isNull() {
-        return this.valueType().equals(ValueType.NULL);
+        return this.getType().equals(ValueType.NULL);
     }
 
     /**

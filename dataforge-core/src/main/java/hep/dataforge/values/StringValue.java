@@ -131,7 +131,7 @@ class StringValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         return ValueType.STRING;
     }
 
@@ -143,4 +143,8 @@ class StringValue extends AbstractValue {
         return "\"" + value + "\"";
     }
 
+    @Override
+    public Object value() {
+        return this.value;
+    }
 }

@@ -4,10 +4,10 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.DescriptorException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.Table;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import hep.dataforge.values.Values;
 
 import static hep.dataforge.io.IOUtils.format;
 import static hep.dataforge.io.IOUtils.getDefaultTextWidth;
@@ -65,7 +65,7 @@ public class MarkupUtils {
 
         if (valueDef.hasValue("def")) {
             Value def = valueDef.getValue("default");
-            if (def.valueType().equals(ValueType.STRING)) {
+            if (def.getType().equals(ValueType.STRING)) {
                 builder.addText(" = \"")
                         .addText(def.stringValue(), "yellow")
                         .addText("\": ");
@@ -139,7 +139,7 @@ public class MarkupUtils {
         });
         builder.addContent(header);
 
-        for (DataPoint dp : table) {
+        for (Values dp : table) {
             MarkupBuilder row = new MarkupBuilder();
             table.getFormat().getColumns().forEach(c -> {
                 int width = getDefaultTextWidth(c.getPrimaryType());

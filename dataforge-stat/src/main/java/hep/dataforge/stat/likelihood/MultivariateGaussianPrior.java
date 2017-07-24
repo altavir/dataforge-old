@@ -21,7 +21,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * <p>MultivariateGaussianPrior class.</p>
@@ -44,8 +44,8 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException, NameNotFoundException {
-        if (set.names().contains(derivParName)) {
+    public double derivValue(String derivParName, Values pars) throws NotDefinedException, NameNotFoundException {
+        if (set.getNames().contains(derivParName)) {
             double mean = set.getDouble(derivParName);
             double sigma = set.getError(derivParName);
             double value = pars.getDouble(derivParName);
@@ -59,8 +59,8 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public Names names() {
-        return set.names();
+    public Names getNames() {
+        return set.getNames();
     }
 
     /** {@inheritDoc} */
@@ -71,7 +71,7 @@ public class MultivariateGaussianPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public double value(NamedValueSet pars) throws NameNotFoundException {
+    public double value(Values pars) throws NameNotFoundException {
         double res = 1;
         for (Param par : set.getParams()) {
             

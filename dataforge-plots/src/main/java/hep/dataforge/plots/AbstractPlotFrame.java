@@ -75,7 +75,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     public synchronized void remove(String plotName) {
         Plottable removed = plottables.remove(plotName);
         if (removed != null) {
-            removed.removeListener(AbstractPlotFrame.this);
+            removed.removeListener(this);
             updatePlotData(plotName);
             list.invalidate();
         }
@@ -84,6 +84,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     @Override
     public synchronized void clear() {
         Collection<String> names = plottables.keySet();
+        this.forEach(plottable -> plottable.removeListener(this));
         plottables.clear();
         names.forEach(this::updatePlotData);
         list.invalidate();

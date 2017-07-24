@@ -29,9 +29,11 @@ import hep.dataforge.names.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Consumer;
 
 import static hep.dataforge.actions.GenericAction.RESULT_GROUP_KEY;
 import static hep.dataforge.actions.GenericAction.RESULT_NAME_KEY;
@@ -49,7 +51,7 @@ import static hep.dataforge.actions.GenericAction.RESULT_NAME_KEY;
 public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@action.resultGroup";
     public static final String RESULT_NAME_KEY = "@action.resultName";
-  //  public static final String ALLOW_PARALLEL_KEY = "@action.allowParallel";
+    //  public static final String ALLOW_PARALLEL_KEY = "@action.allowParallel";
 
     private String name = null;
 
@@ -78,7 +80,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         } else {
             String res = dataName;
             if (actionMeta.hasValue(RESULT_GROUP_KEY)) {
-                res = Name.joinString(actionMeta.getString(RESULT_GROUP_KEY,""), res);
+                res = Name.joinString(actionMeta.getString(RESULT_GROUP_KEY, ""), res);
             }
             return res;
         }
@@ -90,7 +92,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @return
      */
     protected DataNode<R> wrap(String name, Meta meta, Map<String, ? extends Data<R>> result) {
-        if(name.isEmpty()){
+        if (name.isEmpty()) {
             name = getName();
         }
 
@@ -184,7 +186,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     @Override
     public String getName() {
-        if(name == null) {
+        if (name == null) {
             TypedActionDef def = getDef();
             if (def != null && !def.name().isEmpty()) {
                 return def.name();
@@ -230,13 +232,18 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     }
 
     /**
-     * Create default OuputStream for given Action and given name
+     * Auto closeable output stream. If error occurs, the output is dumped to system err.
      *
      * @param name a {@link java.lang.String} object.
      * @return a {@link java.io.OutputStream} object.
      */
-    public OutputStream buildActionOutput(Context context, String name) {
-        return context.io().out(getName(), name);
+    public void output(Context context, String name, Consumer<OutputStream> writer) {
+        try (OutputStream stream = context.io().out(getName(), name)) {
+            writer.accept(stream);
+        } catch (IOException ex) {
+            context.getLogger().error("Failed to write to default output. Dumping output to System.err", ex);
+            writer.accept(System.err);
+        }
     }
 
     protected final void report(Context context, String reportName, String entry, Object... params) {

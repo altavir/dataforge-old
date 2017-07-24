@@ -167,7 +167,7 @@ public class StorageUtils {
 
 
     private static boolean isNumeric(Value val) {
-        return val.valueType() == ValueType.NUMBER || val.valueType() == ValueType.TIME;
+        return val.getType() == ValueType.NUMBER || val.getType() == ValueType.TIME;
     }
 
     /**

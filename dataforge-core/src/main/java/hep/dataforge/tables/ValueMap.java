@@ -23,54 +23,58 @@ import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 /**
- * Реализация DataPoint на HashMap. В конструкторе дополнительно проверяется,
- * что все значения численные. Для нечисленных значений нужно использовать тэги
+ * A simple {@link Values} implementation using HashMap.
  *
  * @author Alexander Nozik
- * @version $Id: $Id
  */
 
-public class MapPoint implements DataPoint, MetaMorph {
+public class ValueMap implements Values, MetaMorph {
 
-    private Map<String, Value> valueMap;
-
-    public MapPoint() {
-        this.valueMap = new LinkedHashMap<>();
+    public static ValueMap fromMap(Map<String, Object> map) {
+        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
     }
 
-    public MapPoint(String[] list, Number... values) {
+    private final LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
+
+    /**
+     * Serialization constructor
+     */
+    public ValueMap() {
+
+    }
+
+    public ValueMap(String[] list, Number... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             valueMap.put(list[i], Value.of(values[i]));
         }
     }
 
-    public MapPoint(String[] list, Value... values) {
+    public ValueMap(String[] list, Value... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             Value val = values[i];
             valueMap.put(list[i], val);
         }
     }
 
-    public MapPoint(String[] list, Object[] values) {
+    public ValueMap(String[] list, Object[] values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        this.valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             Value val = Value.of(values[i]);
 
@@ -78,17 +82,10 @@ public class MapPoint implements DataPoint, MetaMorph {
         }
     }
 
-    public MapPoint(Map<String, Value> map) {
-        this.valueMap = map;
+    public ValueMap(Map<String, ?> map) {
+        map.forEach((k,v)-> this.valueMap.put(k, Value.of(v)));
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public int size() {
-        return valueMap.size();
-    }
 
     /**
      * {@inheritDoc}
@@ -102,7 +99,7 @@ public class MapPoint implements DataPoint, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(this.valueMap.keySet());
     }
 
@@ -121,7 +118,7 @@ public class MapPoint implements DataPoint, MetaMorph {
     public String toString() {
         StringBuilder res = new StringBuilder("[");
         boolean flag = true;
-        for (String name : this.names()) {
+        for (String name : this.getNames()) {
             if (flag) {
                 flag = false;
             } else {
@@ -160,24 +157,24 @@ public class MapPoint implements DataPoint, MetaMorph {
         return Collections.unmodifiableMap(this.valueMap);
     }
 
-    public static class Builder implements GenericBuilder<MapPoint, Builder> {
+    public static class Builder implements GenericBuilder<ValueMap, Builder> {
 
-        private final MapPoint p;
+        private final ValueMap p;
 
-        public Builder(DataPoint dp) {
-            p = new MapPoint(new LinkedHashMap<>(dp.names().size()));
-            for (String name : dp.names()) {
+        public Builder(Values dp) {
+            p = new ValueMap(new LinkedHashMap<>(dp.getNames().size()));
+            for (String name : dp.getNames()) {
                 p.valueMap.put(name, dp.getValue(name));
             }
 
         }
 
         public Builder(Map<String, Value> map) {
-            p = new MapPoint(map);
+            p = new ValueMap(map);
         }
 
         public Builder() {
-            p = new MapPoint();
+            p = new ValueMap();
         }
 
         /**
@@ -185,7 +182,7 @@ public class MapPoint implements DataPoint, MetaMorph {
          *
          * @param name  a {@link java.lang.String} object.
          * @param value a {@link hep.dataforge.values.Value} object.
-         * @return a {@link hep.dataforge.tables.MapPoint} object.
+         * @return a {@link ValueMap} object.
          */
         public Builder putValue(String name, Value value) {
             if (value == null) {
@@ -200,12 +197,29 @@ public class MapPoint implements DataPoint, MetaMorph {
             return this;
         }
 
+        /**
+         * Put the value at the beginning of the map
+         * @param name
+         * @param value
+         * @return
+         */
+        public Builder putFirstValue(String name, Object value){
+            synchronized (p) {
+                LinkedHashMap<String, Value> newMap = new LinkedHashMap<>();
+                newMap.put(name, Value.of(value));
+                newMap.putAll(p.valueMap);
+                p.valueMap.clear();
+                p.valueMap.putAll(newMap);
+                return this;
+            }
+        }
+
         public Builder addTag(String tag) {
             return putValue(tag, true);
         }
 
         @Override
-        public MapPoint build() {
+        public ValueMap build() {
             return p;
         }
 

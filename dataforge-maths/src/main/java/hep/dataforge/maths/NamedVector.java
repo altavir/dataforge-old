@@ -21,8 +21,8 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
@@ -30,11 +30,11 @@ import org.apache.commons.math3.linear.RealVector;
 import java.util.Optional;
 
 /**
- * A {@link NamedValueSet} implementation wrapping Commons Math {@link RealVector}
+ * A {@link Values} implementation wrapping Commons Math {@link RealVector}
  *
  * @author Alexander Nozik
  */
-public class NamedVector implements NamedValueSet, MetaMorph {
+public class NamedVector implements Values, MetaMorph {
 
     private Names nameList;
     private RealVector vector;
@@ -76,9 +76,9 @@ public class NamedVector implements NamedValueSet, MetaMorph {
         this.nameList = Names.of(names);
     }
 
-    public NamedVector(NamedValueSet set) {
+    public NamedVector(Values set) {
         vector = new ArrayRealVector(MathUtils.getDoubleArray(set));
-        this.nameList = Names.of(set.names());
+        this.nameList = Names.of(set.getNames());
     }
 
     @Override
@@ -95,15 +95,6 @@ public class NamedVector implements NamedValueSet, MetaMorph {
         return new NamedVector(this.namesAsArray(), vector);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * @return
-     */
-    @Override
-    public int size() {
-        return this.nameList.size();
-    }
 
     /**
      * {@inheritDoc}
@@ -138,7 +129,7 @@ public class NamedVector implements NamedValueSet, MetaMorph {
         if (names.length == 0) {
             return vector.toArray();
         } else {
-            if (!this.names().contains(names)) {
+            if (!this.getNames().contains(names)) {
                 throw new NamingException();
             }
             double[] res = new double[names.length];
@@ -157,7 +148,7 @@ public class NamedVector implements NamedValueSet, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return nameList;
     }
 
@@ -173,7 +164,7 @@ public class NamedVector implements NamedValueSet, MetaMorph {
     @Override
     public Meta toMeta() {
         MetaBuilder builder = new MetaBuilder("vector");
-        for (int i = 0; i < names().size(); i++) {
+        for (int i = 0; i < getNames().size(); i++) {
             builder.setValue(nameList.get(i), vector.getEntry(i));
         }
         return builder;

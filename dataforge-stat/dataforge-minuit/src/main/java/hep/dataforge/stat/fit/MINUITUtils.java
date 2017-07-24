@@ -53,7 +53,7 @@ class MINUITUtils {
 
     static ParamSet getValueSet(ParamSet allPar, String[] names, double[] values) {
         assert values.length == names.length;
-        assert allPar.names().contains(names);
+        assert allPar.getNames().contains(names);
 
         ParamSet vector = allPar.copy();
 
@@ -102,7 +102,7 @@ class MINUITUtils {
             this.source = source;
             this.allPar = allPar;
             this.fitPars = fitPars;
-            assert source.getModel().names().contains(fitPars);
+            assert source.getModel().getNames().contains(fitPars);
         }
 
         @Override

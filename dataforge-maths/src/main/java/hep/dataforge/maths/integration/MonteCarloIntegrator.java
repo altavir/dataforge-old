@@ -53,22 +53,22 @@ public class MonteCarloIntegrator implements Integrator<MonteCarloIntegrand> {
     /**
      * Integration with fixed sample size
      *
-     * @param function a
-     * {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
-     * @param sampler a {@link hep.dataforge.maths.integration.Sampler} object.
+     * @param function   a
+     *                   {@link org.apache.commons.math3.analysis.MultivariateFunction} object.
+     * @param sampler    a {@link hep.dataforge.maths.integration.Sampler} object.
      * @param sampleSize a int.
      * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand}
      * object.
      */
     public MonteCarloIntegrand evaluate(MultivariateFunction function, Sampler sampler, int sampleSize) {
-        return evaluate(new MonteCarloIntegrand(function, sampler), sampleSize);
+        return evaluate(new MonteCarloIntegrand(sampler, function), sampleSize);
     }
 
     private MonteCarloIntegrand makeStep(MonteCarloIntegrand integrand) {
         double res = 0;
 
         for (int i = 0; i < sampleSizeStep; i++) {
-            Sample sample = integrand.getSample();
+            Sample sample = integrand.getSampler().nextSample(null);
             res += integrand.getFunctionValue(sample.getArray()) / sample.getWeight();
         }
 
@@ -109,8 +109,8 @@ public class MonteCarloIntegrator implements Integrator<MonteCarloIntegrand> {
     /**
      * Integration with fixed maximum sample size
      *
-     * @param integrand a
-     * {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
+     * @param integrand  a
+     *                   {@link hep.dataforge.maths.integration.MonteCarloIntegrand} object.
      * @param sampleSize a int.
      * @return a {@link hep.dataforge.maths.integration.MonteCarloIntegrand}
      * object.

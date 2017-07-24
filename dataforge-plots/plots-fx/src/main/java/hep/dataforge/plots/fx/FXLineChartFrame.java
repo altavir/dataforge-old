@@ -19,8 +19,8 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.data.XYPlottable;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Values;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;
 import javafx.scene.SnapshotResult;
@@ -91,8 +91,8 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
 
         XYAdapter adapter = XYAdapter.from(plottable.getAdapter());
 
-        Function<DataPoint, Number> xFunc = (DataPoint point) -> adapter.getX(point).numberValue();
-        Function<DataPoint, Number> yFunc = (DataPoint point) -> adapter.getY(point).numberValue();
+        Function<Values, Number> xFunc = (Values point) -> adapter.getX(point).numberValue();
+        Function<Values, Number> yFunc = (Values point) -> adapter.getY(point).numberValue();
 
         //TODO apply filtering here
 

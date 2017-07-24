@@ -2,7 +2,7 @@ plugins {
     id 'java'
     id 'groovy'
     id 'idea'
-    id 'org.hidetake.ssh' version '2.7.0'
+    id 'org.hidetake.ssh' version '2.9.0'
 }
 
 group = 'hep.dataforge.site'
@@ -13,63 +13,41 @@ ext {
     mainClassName = "com.sysgears.grain.Main"
 }
 
-configurations.all {
-    exclude group: 'commons-logging'
-    exclude group: 'rhino'
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds'
-}
-
 repositories {
     mavenCentral()
+    maven {
+        url 'https://oss.sonatype.org/content/groups/public/'
+    }
 }
 
 dependencies {
-    compile "com.sysgears.grain:grain:0.7.0"
-    compile 'org.codehaus.groovy:groovy:2.4.11'
+    compile "com.sysgears.grain:grain:0.7.1-SNAPSHOT"
 }
 
 /**
  * List of projects to be documented
  */
-def documentedProjects = rootProject.subprojects.findAll { it.group.startsWith("hep.dataforge") }
+def documentedProjects = rootProject.subprojects.findAll { it.group.startsWith("hep.dataforge") } - project
 
 /**
  * A place for gathered docs
  */
 def genDocsDir = file("content/docs-gen")
 
-task gendeps {
-    doLast {
-        def classpath = project.classpath.files
-        def depFile = new File(".site-${project.grainVersion}.dep")
-        depFile.withWriter { writer ->
-            classpath.findAll { it.name.endsWith('.jar') }.sort {
-                !it.name.endsWith("grain-${project.grainVersion}.jar")
-            }.each {
-                writer.append(it.toString()).append('\n')
-            }
-        }
-    }
-}
 
 //main grain tasks
 task generate(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
-    logging.captureStandardOutput LogLevel.INFO
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args ["generate"]
-    doFirst {
-        println "Starting generate"
-    }
-    finalizedBy(":site:buildDocs")
+    args(["generate"])
 }
 
 task preview(type: JavaExec, dependsOn: ":site:gather") {
     group 'grain'
     classpath sourceSets.main.runtimeClasspath
     main = mainClassName
-    args ["preview"]
+    args(["preview"])
 }
 
 //deploy configuration
@@ -90,6 +68,7 @@ task deploy(dependsOn: ":site:generate") {
         println "Starting deploy"
         ssh.run {
             session(remotes.mipt) {
+//                put from: fileTree('target').getFiles(), into: '/var/www/dataforge'
                 for (f in file('target').listFiles()) {
                     put from: f, into: '/var/www/dataforge', fileTransfer: 'scp'
                 }
@@ -107,19 +86,23 @@ tasks.withType(JavaExec) {
 clean.doLast {
     ant.delete(dir: '.cache')
     ant.delete(dir: 'target')
-    genDocsDir.delete()
+    genDocsDir.deleteDir()
 }
 
 //Custom actions
 
-task gather(){
-    documentedProjects.each {project->
-        if(project.file("docs")){
-            copy {
-                from project.file("docs")
-                into genDocsDir
+task gather() {
+    doLast {
+        documentedProjects.each { project ->
+            if (project.file("docs").exists()) {
+                println "Copying docs from $project"
+                copy {
+                    from project.file("docs")
+                    into genDocsDir
+                }
             }
         }
+        println "finished gathering shards"
     }
 }
 
@@ -141,3 +124,19 @@ task buildDocs(type: Javadoc) {
         header = "<script type=\"text/javascript\" src=\"http://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML\"></script>";
     }
 }
+
+//junk
+
+//task gendeps {
+//    doLast {
+//        def classpath = project.classpath.files
+//        def depFile = new File(".site-${project.grainVersion}.dep")
+//        depFile.withWriter { writer ->
+//            classpath.findAll { it.name.endsWith('.jar') }.sort {
+//                !it.name.endsWith("grain-${project.grainVersion}.jar")
+//            }.each {
+//                writer.append(it.toString()).append('\n')
+//            }
+//        }
+//    }
+//}

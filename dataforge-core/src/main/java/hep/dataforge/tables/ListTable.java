@@ -20,24 +20,24 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Iterator;
 import java.util.List;
-import java.util.function.UnaryOperator;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
- * The Table implementation using list of DataPoints. Row access is fast, but
+ * An immutable row-based Table based on ArrayList. Row access is fast, but
  * column access could be complicated
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable extends ListOfPoints implements Table {
+public class ListTable extends ListOfPoints implements Table, MetaMorph {
 
     /**
      * Формат описывает набор полей, которые ОБЯЗАТЕЛЬНО присутствуют в каждой
@@ -59,17 +59,17 @@ public class ListTable extends ListOfPoints implements Table {
     /**
      * Проверяет, что все точки соответствуют формату
      *
-     * @param format a {@link hep.dataforge.tables.TableFormat} object.
+     * @param format a {@link MetaTableFormat} object.
      * @param points a {@link java.lang.Iterable} object.
      */
-    public ListTable(TableFormat format, Iterable<DataPoint> points) {
+    public ListTable(TableFormat format, Iterable<Values> points) {
         this.format = format;
         if (points != null) {
             addRows(points);
         }
     }
 
-    public ListTable(TableFormat format, Stream<DataPoint> points) {
+    public ListTable(TableFormat format, Stream<Values> points) {
         this.format = format;
         if (points != null) {
             addRows(points.collect(Collectors.toList()));
@@ -81,27 +81,27 @@ public class ListTable extends ListOfPoints implements Table {
      *
      * @param points a {@link java.util.List} object.
      */
-    public ListTable(List<DataPoint> points) {
+    public ListTable(List<Values> points) {
         if (points.isEmpty()) {
             throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
         }
-        this.format = TableFormat.forPoint(points.get(0));
+        this.format = MetaTableFormat.forPoint(points.get(0));
         addRows(points);
     }
 
 
-    protected void addRow(DataPoint e) throws NamingException {
-        if (format.names().size() == 0 || e.names().contains(format.names())) {
+    protected void addRow(Values e) throws NamingException {
+        if (format.getNames().size() == 0 || e.getNames().contains(format.getNames())) {
             this.data.add(e);
         } else {
             throw new DataFormatException("The input data point doesn't contain all required fields.");
         }
     }
-
-    @Override
-    public Table transform(UnaryOperator<Stream<DataPoint>> streamTransform) {
-        return new ListTable(getFormat(), streamTransform.apply(stream()));
-    }
+//
+//    @Override
+//    public Table transform(UnaryOperator<Stream<Values>> streamTransform) {
+//        return new ListTable(getFormat(), streamTransform.apply(stream()));
+//    }
 
     /**
      * {@inheritDoc}
@@ -119,13 +119,13 @@ public class ListTable extends ListOfPoints implements Table {
      */
     @Override
     public Column getColumn(String columnName) throws NameNotFoundException {
-        if (!this.format.names().contains(columnName)) {
+        if (!this.format.getNames().contains(columnName)) {
             throw new NameNotFoundException(columnName);
         }
         return new Column() {
             @Override
             public ColumnFormat getFormat() {
-                return ListTable.this.getFormat().getColumnFormat(columnName);
+                return ListTable.this.getFormat().getColumn(columnName);
             }
 
             @Override
@@ -139,17 +139,12 @@ public class ListTable extends ListOfPoints implements Table {
             }
 
             public Stream<Value> stream() {
-                return ListTable.this.stream().map(point -> point.getValue(columnName));
+                return ListTable.this.getRows().map(point -> point.getValue(columnName));
             }
 
             @Override
             public Iterator<Value> iterator() {
                 return stream().iterator();
-            }
-
-            @Override
-            public Meta meta() {
-                return ListTable.this.getFormat().getColumnMeta(columnName);
             }
 
             @Override
@@ -159,24 +154,14 @@ public class ListTable extends ListOfPoints implements Table {
         };
     }
 
-    /**
-     * Get a copy of given column. Data is not synchronized
-     *
-     * @param columnName
-     * @return
-     */
-    public Column getColumnCopy(String columnName) {
-        return new ListColumn(getFormat().getColumnMeta(columnName), getColumn(columnName).asList());
+    @Override
+    public Stream<Column> getColumns() {
+        return getFormat().getNames().stream().map(this::getColumn);
     }
 
     @Override
-    public Meta toMeta() {
-        MetaBuilder res = new MetaBuilder("table");
-        res.putNode("format", format.toMeta());
-        MetaBuilder dataNode = new MetaBuilder("data");
-        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
-        res.putNode(dataNode);
-        return res;
+    public Value get(String columnName, int rowNumber) {
+        return getRow(rowNumber).getValue(columnName);
     }
 
     @Override
@@ -184,8 +169,8 @@ public class ListTable extends ListOfPoints implements Table {
         if (this.format != null || !data.isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
-        format = new TableFormat(meta.getMeta("format"));
-        data.addAll(DataPoint.buildFromMeta(meta.getMeta("data")));
+        format = new MetaTableFormat(meta.getMeta("format"));
+        data.addAll(ListOfPoints.buildFromMeta(meta.getMeta("data")));
     }
 
     public static class Builder {
@@ -197,24 +182,31 @@ public class ListTable extends ListOfPoints implements Table {
         }
 
         public Builder(Iterable<String> format) {
-            table = new ListTable(TableFormat.forNames(format));
+            table = new ListTable(MetaTableFormat.forNames(format));
         }
 
         public Builder(String... format) {
-            table = new ListTable(TableFormat.forNames(format));
+            table = new ListTable(MetaTableFormat.forNames(format));
         }
 
         public Builder() {
-            table = new ListTable(new TableFormat(Meta.empty()));
+            table = new ListTable(new MetaTableFormat(Meta.empty()));
         }
+
+//        public Builder format(Consumer<TableFormatBuilder> consumer){
+//            TableFormatBuilder formatBuilder = new TableFormatBuilder();
+//            consumer.accept(formatBuilder);
+//            table.format = formatBuilder.build();
+//            return this;
+//        }
 
         /**
          * Если formatter == null, то могут быть любые точки
          *
-         * @param e a {@link hep.dataforge.tables.DataPoint} object.
+         * @param e
          * @throws hep.dataforge.exceptions.NamingException if any.
          */
-        public Builder row(DataPoint e) throws NamingException {
+        public Builder row(Values e) throws NamingException {
             table.addRow(e);
             return this;
         }
@@ -227,17 +219,17 @@ public class ListTable extends ListOfPoints implements Table {
          * @throws NamingException
          */
         public Builder row(Object... values) throws NamingException {
-            table.addRow(new MapPoint(table.format.namesAsArray(), values));
+            table.addRow(new ValueMap(table.format.namesAsArray(), values));
             return this;
         }
 
-        public Builder rows(Iterable<? extends DataPoint> points) {
+        public Builder rows(Iterable<? extends Values> points) {
             table.addRows(points);
             return this;
         }
 
-        public Builder rows(Stream<? extends DataPoint> stream) {
-            stream.forEach(it->table.addRow(it));
+        public Builder rows(Stream<? extends Values> stream) {
+            stream.forEach(it -> table.addRow(it));
             return this;
         }
         //TODO make methods to add virtual columns

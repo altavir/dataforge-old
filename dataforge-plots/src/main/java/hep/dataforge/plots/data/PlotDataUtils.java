@@ -8,6 +8,7 @@ package hep.dataforge.plots.data;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.tables.*;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -22,7 +23,7 @@ public class PlotDataUtils {
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
 
 
-        Map<Value, MapPoint.Builder> points = new LinkedHashMap<>();
+        Map<Value, ValueMap.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
 
@@ -34,11 +35,11 @@ public class PlotDataUtils {
                     names.add(pl.getName());
                     pl.getData().stream().forEach(point -> {
                         Value x = adapter.getX(point);
-                        MapPoint.Builder mdp;
+                        ValueMap.Builder mdp;
                         if (points.containsKey(x)) {
                             mdp = points.get(x);
                         } else {
-                            mdp = new MapPoint.Builder();
+                            mdp = new ValueMap.Builder();
                             mdp.putValue("x", x);
                             points.put(x, mdp);
                         }
@@ -46,7 +47,7 @@ public class PlotDataUtils {
                     });
                 });
 
-        ListTable.Builder res = new ListTable.Builder(TableFormat.forNames(names));
+        ListTable.Builder res = new ListTable.Builder(MetaTableFormat.forNames(names));
         res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
         return res.build();
     }
@@ -59,8 +60,8 @@ public class PlotDataUtils {
      * @param source
      * @return
      */
-    public static PlottableGroup<PlottableData> buildGroup(String xName, Collection<String> yNames, Stream<DataPoint> source) {
-        List<DataPoint> points = source.collect(Collectors.toList());
+    public static PlottableGroup<PlottableData> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
+        List<Values> points = source.collect(Collectors.toList());
         List<PlottableData> plottables = yNames.stream().map(yName -> {
             PlottableData pl = new PlottableData(yName);
             pl.setAdapter(new XYAdapter(xName, yName));

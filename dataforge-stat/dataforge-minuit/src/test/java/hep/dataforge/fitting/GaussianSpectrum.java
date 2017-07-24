@@ -25,11 +25,10 @@ import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.stat.fit.*;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -67,7 +66,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     }
 
     @Override
-    public double derivValue(String parName, double x, NamedValueSet set) {
+    public double derivValue(String parName, double x, Values set) {
         double pos = set.getDouble("pos");
         double w = set.getDouble("w");
         double dif = x - pos;
@@ -86,7 +85,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     @Override
     public boolean providesDeriv(String name) {
-        return this.names().contains(name);
+        return this.getNames().contains(name);
     }
 
     public Table sample(double pos, double w, double amp, double a, double b, int number) {
@@ -102,14 +101,14 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
             double value = this.value(d, vector);
             double error = Math.sqrt(value);
             double randValue = Math.max(0, rnd.nextGaussian() * error + value);
-            DataPoint p = factory.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
+            Values p = factory.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
             data.row(p);
         }
         return data.build();
     }
 
     @Override
-    public double value(double x, NamedValueSet set) {
+    public double value(double x, Values set) {
         double pos = set.getDouble("pos");
         double w = set.getDouble("w");
         double amp = set.getDouble("amp");

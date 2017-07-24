@@ -20,7 +20,7 @@ public abstract class AbstractValue implements Value {
         if (obj instanceof Value) {
             Value other = (Value) obj;
             try {
-                switch (valueType()) {
+                switch (getType()) {
                     case BOOLEAN:
                         return this.booleanValue() == other.booleanValue();
                     case TIME:
@@ -30,7 +30,7 @@ public abstract class AbstractValue implements Value {
                     case NUMBER:
                         return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
                     case NULL:
-                        return other.valueType() == ValueType.NULL;
+                        return other.getType() == ValueType.NULL;
                     default:
                         //unreachable statement, but using string comparison just to be sure
                         return this.stringValue().equals(other.stringValue());
@@ -51,7 +51,7 @@ public abstract class AbstractValue implements Value {
         } else if (obj instanceof Instant) {
             return this.timeValue().equals(obj);
         } else if (obj == null) {
-            return this.valueType() == ValueType.NULL;
+            return this.getType() == ValueType.NULL;
         } else {
             return super.equals(obj);
         }

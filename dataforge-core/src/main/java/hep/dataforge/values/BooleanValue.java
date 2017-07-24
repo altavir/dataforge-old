@@ -110,7 +110,12 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public ValueType valueType() {
+    public ValueType getType() {
         return ValueType.BOOLEAN;
+    }
+
+    @Override
+    public Object value() {
+        return this.value;
     }
 }

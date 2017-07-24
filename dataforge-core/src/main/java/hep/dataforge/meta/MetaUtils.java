@@ -102,7 +102,7 @@ public class MetaUtils {
         if (contexts.length == 0) {
             return val;
         }
-        if (val.valueType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
+        if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
             String valStr = val.stringValue();
 //            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
             Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?\\}").matcher(valStr);

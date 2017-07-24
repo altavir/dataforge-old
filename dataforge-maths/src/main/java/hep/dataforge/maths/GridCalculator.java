@@ -15,7 +15,8 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.tables.DataPoint;
+import hep.dataforge.values.Values;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -40,12 +41,12 @@ public class GridCalculator {
     }
 
     public static double[] getUniformUnivariateGrid(double a, double b, double step) {
-        return getUniformUnivariateGrid(a, b, (int) ((b - a) / step));
+        return getUniformUnivariateGrid(a, b, (int) ((b - a) / step +1));
     }
     
-    public static List<Double> getFromData(Iterable<DataPoint> data, String name){
+    public static List<Double> getFromData(Iterable<Values> data, String name){
         List<Double> grid = new ArrayList<>();
-        for (DataPoint point : data) {
+        for (Values point : data) {
             grid.add(point.getDouble(name));
         }
         return grid;

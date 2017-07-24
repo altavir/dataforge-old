@@ -18,9 +18,9 @@ package hep.dataforge.stat.models;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
 import hep.dataforge.stat.fit.ParamSet;
-import hep.dataforge.tables.DataPoint;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.values.Values;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
 
@@ -69,9 +69,9 @@ public class HistogramGenerator implements Generator {
 
     /** {@inheritDoc} */
     @Override
-    public NavigablePointSource generateData(Iterable<DataPoint> config) {
+    public NavigablePointSource generateData(Iterable<Values> config) {
         ListTable.Builder res = new ListTable.Builder(names);
-        for (Iterator<DataPoint> it = config.iterator(); it.hasNext();) {
+        for (Iterator<Values> it = config.iterator(); it.hasNext();) {
             res.row(this.generateDataPoint(it.next()));
 
         }
@@ -80,7 +80,7 @@ public class HistogramGenerator implements Generator {
 
     /** {@inheritDoc} */
     @Override
-    public HistogramBin generateDataPoint(DataPoint configPoint) {
+    public HistogramBin generateDataPoint(Values configPoint) {
         double mu = this.getMu(configPoint);
         if (isNaN(mu) || (mu < 0)) {
             throw new IllegalStateException();
@@ -135,7 +135,7 @@ public class HistogramGenerator implements Generator {
     public NavigablePointSource generateUniformHistogram(double begin, double end, int binNumber) {
         assert end > begin;
         ListTable.Builder res = new ListTable.Builder(names);
-        DataPoint bin;
+        Values bin;
         double step = (end - begin) / (binNumber);
         double a = begin;
         double b = begin + step;
@@ -155,7 +155,7 @@ public class HistogramGenerator implements Generator {
         return this.genType.name();
     }
 
-    private double getMu(DataPoint point) throws NameNotFoundException {
+    private double getMu(Values point) throws NameNotFoundException {
         return source.value(point.getValue("binBegin").doubleValue(), point.getValue("binEnd").doubleValue(), params);
     }
 

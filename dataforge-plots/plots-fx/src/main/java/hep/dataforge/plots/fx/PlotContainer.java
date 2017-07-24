@@ -15,8 +15,11 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
+import javafx.application.Platform;
 import javafx.beans.property.BooleanProperty;
+import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.event.ActionEvent;
@@ -56,12 +59,14 @@ public class PlotContainer implements Initializable, FXObject {
     private Button frameOptionsButton;
     @FXML
     private SplitPane split;
+    @FXML
+    private ProgressIndicator progressIndicator;
 
     private FXPlotFrame plot;
     private Map<Configuration, Stage> configWindows = new HashMap<>();
     private BooleanProperty sidebarVisibleProperty = new SimpleBooleanProperty(true);
     private double lastDividerPosition = -1;
-    private BooleanProperty isUpdatingProperty = new SimpleBooleanProperty(false);
+    private DoubleProperty progressProperty = new SimpleDoubleProperty(1.0);
 
     public PlotContainer() {
         FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/PlotContainer.fxml"));
@@ -75,6 +80,9 @@ public class PlotContainer implements Initializable, FXObject {
             LoggerFactory.getLogger("FX").error("Error during fxml initialization", ex);
             throw new Error(ex);
         }
+
+        progressIndicator.progressProperty().bind(progressProperty);
+        progressIndicator.visibleProperty().bind(progressProperty.lessThan(1.0));
     }
 
     public static PlotContainer anchorTo(AnchorPane pane) {
@@ -264,6 +272,20 @@ public class PlotContainer implements Initializable, FXObject {
     @FXML
     private void onHideAll(ActionEvent event) {
         this.plot.forEach(pl -> pl.configureValue("visible", false));
+    }
+
+    /**
+     * Set data loading progress. 1 means loading complete. Negative values correspond to indeterminate.
+     * @param progress
+     */
+    public void setProgress(double progress){
+        Platform.runLater(()->{
+            this.progressProperty.set(progress);
+        });
+    }
+
+    public DoubleProperty progressProperty() {
+        return progressProperty;
     }
 
     protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {

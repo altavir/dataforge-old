@@ -18,7 +18,7 @@ package hep.dataforge.stat.likelihood;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * <p>TwoSidedUniformPrior class.</p>
@@ -54,7 +54,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public double derivValue(String derivParName, NamedValueSet pars) throws NotDefinedException {
+    public double derivValue(String derivParName, Values pars) throws NotDefinedException {
         if (!this.parName.equals(derivParName)) {
             return 0;
         }
@@ -71,13 +71,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
 
     /** {@inheritDoc} */
     @Override
-    public int size() {
-        return 1;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Names names() {
+    public Names getNames() {
         return names;
     }
 
@@ -101,7 +95,7 @@ public class TwoSidedUniformPrior implements ParametricValue {
      * Нормированная априорная информация
      */
     @Override
-    public double value(NamedValueSet pars) {
+    public double value(Values pars) {
         double parValue = pars.getDouble(parName);
         if (parValue >= lowerBorder && parValue <= upperBorder) {
             return norm;

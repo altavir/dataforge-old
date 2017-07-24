@@ -17,7 +17,7 @@ package hep.dataforge.stat.parametric;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.names.NameSetContainer;
-import hep.dataforge.values.NamedValueSet;
+import hep.dataforge.values.Values;
 
 /**
  * A function mapping parameter set to real value
@@ -31,7 +31,7 @@ public interface ParametricValue extends NameSetContainer {
      * @param pars
      * @return
      */
-    double value(NamedValueSet pars);
+    double value(Values pars);
 
     /**
      * Partial derivative value for given parameter
@@ -39,7 +39,7 @@ public interface ParametricValue extends NameSetContainer {
      * @param pars
      * @return
      */
-    default double derivValue(String derivParName, NamedValueSet pars){
+    default double derivValue(String derivParName, Values pars){
         throw new NotDefinedException();
     }
 

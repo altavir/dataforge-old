@@ -23,8 +23,8 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.MetaMorph;
-import hep.dataforge.values.NamedValueSet;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -41,7 +41,7 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ParamSet implements NamedValueSet, MetaMorph {
+public class ParamSet implements Values, MetaMorph {
 
     private final HashMap<String, Param> params;
 
@@ -80,9 +80,9 @@ public class ParamSet implements NamedValueSet, MetaMorph {
         this.params = new LinkedHashMap<>();
     }
 
-    public ParamSet(NamedValueSet values) {
-        this.params = new LinkedHashMap<>(values.names().size());
-        for (String name : values.names()) {
+    public ParamSet(Values values) {
+        this.params = new LinkedHashMap<>(values.getNames().size());
+        for (String name : values.getNames()) {
             this.params.put(name, new Param(name, values.getDouble(name)));
         }
     }
@@ -162,7 +162,6 @@ public class ParamSet implements NamedValueSet, MetaMorph {
     /**
      * {@inheritDoc}
      */
-    @Override
     public int size() {
         assert params != null;
         return params.size();
@@ -180,7 +179,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
      * @return
      */
     @Override
-    public Names names() {
+    public Names getNames() {
         return Names.of(this.params.keySet());
     }
 
@@ -196,7 +195,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
         if (names.length == 0) {
             names = this.namesAsArray();
         }
-        assert this.names().contains(names);
+        assert this.getNames().contains(names);
 
         double[] res = new double[names.length];
 
@@ -219,7 +218,7 @@ public class ParamSet implements NamedValueSet, MetaMorph {
         if (names.length == 0) {
             names = this.namesAsArray();
         }
-        assert this.names().contains(names);
+        assert this.getNames().contains(names);
 
         double[] res = new double[names.length];
 
@@ -353,11 +352,11 @@ public class ParamSet implements NamedValueSet, MetaMorph {
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParErrors(NamedValueSet errors) throws NameNotFoundException {
-        if (!this.names().contains(errors.names())) {
+    public ParamSet setParErrors(Values errors) throws NameNotFoundException {
+        if (!this.getNames().contains(errors.getNames())) {
             throw new NameNotFoundException();
         }
-        for (String name : errors.names()) {
+        for (String name : errors.getNames()) {
             this.setParError(name, errors.getDouble(name));
         }
         return this;
@@ -370,12 +369,12 @@ public class ParamSet implements NamedValueSet, MetaMorph {
      * @return a {@link hep.dataforge.stat.fit.ParamSet} object.
      * @throws hep.dataforge.exceptions.NameNotFoundException if any.
      */
-    public ParamSet setParValues(NamedValueSet values) throws NameNotFoundException {
-        if (!this.names().contains(values.names())) {
+    public ParamSet setParValues(Values values) throws NameNotFoundException {
+        if (!this.getNames().contains(values.getNames())) {
             throw new NameNotFoundException();
         }
         int i;
-        for (String name : values.names()) {
+        for (String name : values.getNames()) {
             this.setParValue(name, values.getDouble(name));
         }
         return this;

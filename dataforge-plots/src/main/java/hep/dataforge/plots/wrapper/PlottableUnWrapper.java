@@ -10,7 +10,7 @@ import hep.dataforge.io.envelopes.UnWrapper;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.data.PlottableData;
-import hep.dataforge.tables.DataPoint;
+import hep.dataforge.values.Values;
 
 import java.io.ObjectInputStream;
 import java.util.List;
@@ -32,7 +32,7 @@ public class PlottableUnWrapper implements UnWrapper<Plottable>{
         try {
             Meta plottableMeta = envelope.meta().getMeta("meta");
             String name = envelope.meta().getString("name");
-            List<DataPoint> data = (List<DataPoint>) new ObjectInputStream(envelope.getData().getStream()).readObject();
+            List<Values> data = (List<Values>) new ObjectInputStream(envelope.getData().getStream()).readObject();
 
             //Restore always as plottableData
             PlottableData pl = new PlottableData(name);

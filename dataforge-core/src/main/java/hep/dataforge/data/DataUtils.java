@@ -47,7 +47,7 @@ public class DataUtils {
             }
 
             @Override
-            public Stream<Goal> dependencies() {
+            public Stream<Goal<?>> dependencies() {
                 return Stream.of(data1.getGoal(), data2.getGoal());
             }
         };
@@ -65,12 +65,12 @@ public class DataUtils {
         Goal<R> combineGoal = new AbstractGoal<R>() {
             @Override
             protected R compute() throws Exception {
-                return transform.apply(data.stream().map(it -> it.get()).collect(Collectors.toList()));
+                return transform.apply(data.stream().map(Data::get).collect(Collectors.toList()));
             }
 
             @Override
-            public Stream<Goal> dependencies() {
-                return data.stream().map(it -> it.getGoal());
+            public Stream<Goal<?>> dependencies() {
+                return data.stream().map(Data::getGoal);
             }
         };
         return new Data<R>(combineGoal, type, meta);
@@ -83,15 +83,15 @@ public class DataUtils {
             @Override
             protected R compute() throws Exception {
                 return transform.apply(dataNode.dataStream()
-                        .filter(it -> it.isValid())
-                        .map(it -> it.get())
+                        .filter(Data::isValid)
+                        .map(Data::get)
                         .collect(Collectors.toList())
                 );
             }
 
             @Override
-            public Stream<Goal> dependencies() {
-                return dataNode.dataStream().map(it -> it.getGoal());
+            public Stream<Goal<?>> dependencies() {
+                return dataNode.dataStream().map(Data::getGoal);
             }
         };
         return new Data<R>(combineGoal, type, dataNode.meta());

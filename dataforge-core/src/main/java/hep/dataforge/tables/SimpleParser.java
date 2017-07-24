@@ -16,6 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.Objects;
 import java.util.Scanner;
@@ -62,7 +63,7 @@ public class SimpleParser implements PointParser {
      * @param line
      */
     @Override
-    public DataPoint parse(String line) {
+    public Values parse(String line) {
         Scanner sc = new Scanner(line);
 
         Value[] values = new Value[format.length];
@@ -87,7 +88,7 @@ public class SimpleParser implements PointParser {
 //            while (sc.hasNext()) {
 //                point.addTag(sc.next());
 //            }
-        return new MapPoint(format, values);
+        return new ValueMap(format, values);
     }
 
 }

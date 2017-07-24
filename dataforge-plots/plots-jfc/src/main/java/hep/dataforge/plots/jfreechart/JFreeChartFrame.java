@@ -275,7 +275,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         opt.ifPresent(plottable -> {
             if (!index.containsKey(name)) {
                 JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
-                wrapper.setIndex(index.values().stream().mapToInt(it -> it.getIndex()).max().orElse(-1) + 1);
+                wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
                 index.put(name, wrapper);
                 run(() -> {
                     plot.setDataset(wrapper.getIndex(), wrapper);
@@ -378,6 +378,18 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
         SWING, // Swing UI thread mode
         JAVAFX, // JavaFX UI thread mode
         NONE // current thread mode
+    }
+
+    @Override
+    public synchronized void remove(String plotName) {
+        this.index.remove(plotName);
+        super.remove(plotName);
+    }
+
+    @Override
+    public synchronized void clear() {
+        this.index.clear();
+        super.clear();
     }
 
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {

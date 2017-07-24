@@ -11,6 +11,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.Values;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,9 +41,7 @@ public class AxisPointAdapter implements PointAdapter {
 
     public AxisPointAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
-        map.entrySet().forEach((entry) -> {
-            mb.setValue(entry.getKey(), entry.getValue());
-        });
+        map.forEach(mb::setValue);
         this.meta = mb.build();
     }
 
@@ -52,11 +51,11 @@ public class AxisPointAdapter implements PointAdapter {
     }
 
     @Override
-    public Value getComponent(DataPoint point, String component) {
+    public Value getComponent(Values point, String component) {
         return point.getValue(nameFor(component));
     }
 
-    public Value getFrom(DataPoint point, String component, Object def) {
+    public Value getFrom(Values point, String component, Object def) {
         return point.getValue(nameFor(component), Value.of(def));
     }
 
@@ -75,11 +74,11 @@ public class AxisPointAdapter implements PointAdapter {
         return this.meta().getMeta(axis, Meta.empty());
     }
 
-    public Value getValue(DataPoint point, String axis) {
+    public Value getValue(Values point, String axis) {
         return getFrom(point, Name.joinString(axis, VALUE_KEY), Value.NULL);
     }
 
-    public Value getError(DataPoint point, String axis) {
+    public Value getError(Values point, String axis) {
         return getFrom(point, Name.joinString(axis, ERROR_KEY), 0);
     }
 
@@ -89,7 +88,7 @@ public class AxisPointAdapter implements PointAdapter {
      * @param point
      * @return
      */
-    public double getUpperBound(DataPoint point, String axis) {
+    public double getUpperBound(Values point, String axis) {
         return point.getDouble(nameFor(Name.joinString(axis, UP_KEY)),
                 getValue(point, axis).doubleValue() + getError(point, axis).doubleValue());
     }
@@ -100,7 +99,7 @@ public class AxisPointAdapter implements PointAdapter {
      * @param point
      * @return
      */
-    public double getLowerBound(DataPoint point, String axis) {
+    public double getLowerBound(Values point, String axis) {
         return point.getDouble(nameFor(Name.joinString(axis, LO_KEY)),
                 getValue(point, axis).doubleValue() - getError(point, axis).doubleValue());
     }
