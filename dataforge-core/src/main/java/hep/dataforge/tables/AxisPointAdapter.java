@@ -113,11 +113,11 @@ public class AxisPointAdapter implements PointAdapter {
      */
     protected String nameFor(String component) {
         //caching name to avoid heavy meta request
-        return nameCache.computeIfAbsent(component, newComponent -> meta().getString(component, () -> {
-                    if (component.endsWith(".value")) {
-                        return component.replace(".value", "");
+        return nameCache.computeIfAbsent(component, newComponent -> meta().getString(newComponent, () -> {
+                    if (newComponent.endsWith(".value")) {
+                        return newComponent.replace(".value", "");
                     } else {
-                        return component;
+                        return newComponent;
                     }
                 })
         );
