@@ -8,6 +8,7 @@ package hep.dataforge.io;
 import hep.dataforge.meta.MetaBuilder;
 
 import java.io.*;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.text.ParseException;
 
@@ -76,5 +77,9 @@ public interface MetaStreamReader {
         bytes = string.getBytes(getCharset());
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         return read(bais, bytes.length);
+    }
+
+    default MetaBuilder readBuffer(ByteBuffer buffer) throws IOException, ParseException {
+        return read(new ByteArrayInputStream(buffer.array()), buffer.limit());
     }
 }

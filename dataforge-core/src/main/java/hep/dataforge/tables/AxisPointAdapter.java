@@ -113,13 +113,14 @@ public class AxisPointAdapter implements PointAdapter {
      */
     protected String nameFor(String component) {
         //caching name to avoid heavy meta request
-        if (this.nameCache.containsKey(component)) {
-            return nameCache.get(component);
-        } else {
-            String valueName = meta().getString(component, component);
-            nameCache.put(component, valueName);
-            return valueName;
-        }
+        return nameCache.computeIfAbsent(component, newComponent -> meta().getString(component, () -> {
+                    if (component.endsWith(".value")) {
+                        return component.replace(".value", "");
+                    } else {
+                        return component;
+                    }
+                })
+        );
     }
 
     @Override
@@ -129,7 +130,7 @@ public class AxisPointAdapter implements PointAdapter {
 
     @Override
     public void fromMeta(Meta meta) {
-        if(this.meta != null && !this.meta.isEmpty()){
+        if (this.meta != null && !this.meta.isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         } else {
             nameCache.clear();

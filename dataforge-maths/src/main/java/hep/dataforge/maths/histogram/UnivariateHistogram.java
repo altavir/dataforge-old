@@ -12,7 +12,7 @@ import java.util.stream.DoubleStream;
  * Created by darksnake on 02.07.2017.
  */
 public class UnivariateHistogram extends Histogram {
-    public static UnivariateHistogram buildUniform(double start, double stop, double step){
+    public static UnivariateHistogram buildUniform(double start, double stop, double step) {
         return new UnivariateHistogram(GridCalculator.getUniformUnivariateGrid(start, stop, step));
     }
 
@@ -84,4 +84,9 @@ public class UnivariateHistogram extends Histogram {
         stream.forEach(this::put);
         return this;
     }
+
+//    public UnivariateHistogram fill(LongStream stream) {
+//        stream.mapToDouble(it -> it).forEach(this::put);
+//        return this;
+//    }
 }

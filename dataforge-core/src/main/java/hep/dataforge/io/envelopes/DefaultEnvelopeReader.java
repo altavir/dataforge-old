@@ -70,7 +70,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         }
 
         Supplier<Binary> supplier = () -> {
-            int dataLength = (int) tag.getDataSize();
+            int dataLength = tag.getDataSize();
             try {
                 //skipping separator for automatic meta reading
                 if (metaLength == -1) {

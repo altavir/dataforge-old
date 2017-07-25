@@ -241,12 +241,12 @@ public class EnvelopeTag {
         }
     }
 
-    public long getMetaSize() {
-        return values.getOrDefault(Envelope.META_LENGTH_KEY, Value.of(0)).longValue();
+    public int getMetaSize() {
+        return values.getOrDefault(Envelope.META_LENGTH_KEY, Value.of(0)).intValue();
     }
 
-    public long getDataSize() {
-        return values.getOrDefault(Envelope.DATA_LENGTH_KEY, Value.of(0)).longValue();
+    public int getDataSize() {
+        return values.getOrDefault(Envelope.DATA_LENGTH_KEY, Value.of(0)).intValue();
     }
 
     public MetaType getMetaType() {

@@ -103,18 +103,18 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
 
     @Override
     public synchronized void setAll(Collection<? extends Plottable> collection) {
-        Set<String> ivalidateNames = new HashSet<>();
+        Set<String> invalidateNames = new HashSet<>();
         plottables.values().forEach(plottable -> {
             plottable.removeListener(AbstractPlotFrame.this);
-            ivalidateNames.add(plottable.getName());
+            invalidateNames.add(plottable.getName());
         });
         plottables.clear();
         collection.forEach(plottable -> {
-            ivalidateNames.add(plottable.getName());
+            invalidateNames.add(plottable.getName());
             plottable.addListener(AbstractPlotFrame.this);
             plottables.put(plottable.getName(), plottable);
         });
-        ivalidateNames.forEach(name -> {
+        invalidateNames.forEach(name -> {
             updatePlotData(name);
             updatePlotConfig(name);
         });

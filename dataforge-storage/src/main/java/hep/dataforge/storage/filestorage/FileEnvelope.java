@@ -20,7 +20,10 @@ import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
 import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -133,9 +136,12 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     @Override
     public synchronized Meta meta() {
         if (meta == null) {
-            try (InputStream stream = Channels.newInputStream(getReadChannel())) {
-//                stream.skip(getTag().getLength());
-                meta = type.getReader().read(stream).meta();
+            try {
+                SeekableByteChannel channel = getReadChannel();
+                channel.position(getTag().getLength());
+                ByteBuffer buffer = ByteBuffer.allocate(getTag().getMetaSize());
+                channel.read(buffer);
+                meta = getTag().getMetaType().getReader().readBuffer(buffer);
             } catch (Exception e) {
                 throw new RuntimeException("Can't read meta from file Envelope", e);
             }

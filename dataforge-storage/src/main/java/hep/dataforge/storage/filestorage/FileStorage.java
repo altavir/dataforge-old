@@ -55,7 +55,7 @@ import static java.nio.file.StandardWatchEventKinds.*;
 @ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage {
 
-    public static String entryName(Path path){
+    public static String entryName(Path path) {
         return FilenameUtils.getBaseName(path.getFileName().toString());
     }
 
@@ -84,7 +84,7 @@ public class FileStorage extends AbstractStorage {
                     .orElse(context.io().getWorkDirectory().toURI());
             this.dataDir = Paths.get(uri);
         } catch (Exception e) {
-            throw new IllegalArgumentException("Malformed URL",e);
+            throw new IllegalArgumentException("Malformed URL", e);
         }
         startup();
     }
@@ -234,8 +234,7 @@ public class FileStorage extends AbstractStorage {
                     loaders.putIfAbsent(loader.getName(), loader);
                 }
             } catch (Exception ex) {
-                getLogger()
-                        .warn("Can't create a loader from {}", file.getFileName());
+                getLogger().warn("Can't create a loader from {}", file.getFileName());
             }
         }
     }

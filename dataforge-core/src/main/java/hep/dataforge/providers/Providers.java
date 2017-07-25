@@ -98,13 +98,13 @@ public class Providers {
             Method method = providers.get(target);
             try {
                 Object result = method.invoke(provider, name);
-                if(result instanceof Optional){
+                if (result instanceof Optional) {
                     return (Optional<?>) result;
                 } else {
                     return Optional.ofNullable(result);
                 }
             } catch (IllegalAccessException | InvocationTargetException | ClassCastException e) {
-                throw new RuntimeException("Failed to provide by reflections. The method " + method.getName() + " is not a provider method");
+                throw new RuntimeException("Failed to provide by reflections. The method " + method.getName() + " is not a provider method", e);
             }
         }
     }
