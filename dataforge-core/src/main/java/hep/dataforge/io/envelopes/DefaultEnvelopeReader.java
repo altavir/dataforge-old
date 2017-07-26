@@ -39,6 +39,12 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
 
     public static final DefaultEnvelopeReader INSTANCE = new DefaultEnvelopeReader();
 
+
+    @Override
+    public Envelope read(InputStream stream) throws IOException {
+        return read(stream, EnvelopeTag::from);
+    }
+
     /**
      * Read an envelope and override properties.
      * <p>
@@ -52,12 +58,11 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
      * @return
      * @throws IOException
      */
-    @Override
     public Envelope read(@NotNull InputStream stream, @NotNull Function<InputStream,EnvelopeTag> tagReader) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(stream);
         EnvelopeTag tag = tagReader.apply(bis);
         MetaStreamReader parser = tag.getMetaType().getReader();
-        int metaLength = (int) tag.getMetaSize();
+        int metaLength = tag.getMetaSize();
         Meta meta;
         if (metaLength == 0) {
             meta = Meta.buildEmpty("meta");

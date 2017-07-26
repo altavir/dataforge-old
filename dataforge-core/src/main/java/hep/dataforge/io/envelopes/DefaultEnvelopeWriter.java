@@ -17,7 +17,6 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.io.MetaStreamWriter;
 import hep.dataforge.values.Value;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -40,19 +39,25 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
             Arrays.asList(Envelope.TYPE_KEY, Envelope.META_TYPE_KEY, Envelope.META_LENGTH_KEY, Envelope.DATA_LENGTH_KEY)
     );
 
-    public static final DefaultEnvelopeWriter instance = new DefaultEnvelopeWriter();
+//    public static final DefaultEnvelopeWriter instance = new DefaultEnvelopeWriter();
 
-    private MetaType metaType = XMLMetaType.instance;
+    private EnvelopeType envelopeType;
+    private MetaType metaType;
 
-    public DefaultEnvelopeWriter withMetaType(@NotNull MetaType metaType) {
-        DefaultEnvelopeWriter newInstance = new DefaultEnvelopeWriter();
-        newInstance.metaType = metaType;
-        return newInstance;
+    public DefaultEnvelopeWriter(EnvelopeType envelopeType, MetaType metaType) {
+        this.envelopeType = envelopeType;
+        this.metaType = metaType;
     }
+
+//    public DefaultEnvelopeWriter withMetaType(@NotNull MetaType metaType) {
+//        DefaultEnvelopeWriter newInstance = new DefaultEnvelopeWriter();
+//        newInstance.metaType = metaType;
+//        return newInstance;
+//    }
 
     @Override
     public void write(OutputStream stream, Envelope envelope) throws IOException {
-        EnvelopeTag tag = new EnvelopeTag().setMetaType(metaType);
+        EnvelopeTag tag = new EnvelopeTag().setEnvelopeType(envelopeType).setMetaType(metaType);
         write(stream, tag, envelope);
     }
 

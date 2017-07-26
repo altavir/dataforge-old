@@ -10,10 +10,13 @@ import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.io.MetaStreamWriter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
+
+import static hep.dataforge.io.envelopes.Envelope.META_TYPE_KEY;
 
 /**
  *
@@ -47,6 +50,15 @@ public interface MetaType {
                     .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
         }
     }
+
+    static MetaType resolve(Map<String, String> properties) {
+        if (properties.containsKey(META_TYPE_KEY)) {
+            return MetaType.resolve(properties.get(META_TYPE_KEY));
+        } else {
+            return XMLMetaType.instance;
+        }
+    }
+
 
     List<Short> getCodes();
 

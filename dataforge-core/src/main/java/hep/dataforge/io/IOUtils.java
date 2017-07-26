@@ -28,6 +28,8 @@ import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -254,7 +256,7 @@ public class IOUtils {
             } else {
                 return getExpFormat(width).format(bd);
             }
-        } catch (Exception ex){
+        } catch (Exception ex) {
             return number.toString();
         }
     }
@@ -280,6 +282,43 @@ public class IOUtils {
                 return formatWidth(val.stringValue(), width);
             default:
                 throw new IllegalArgumentException("Unsupported input value type");
+        }
+    }
+
+    /**
+     * Iterate over text lines in the input stream until new line satisfies the given condition.
+     * The operation is non-buffering so after it, the stream position is at the end of stopping string.
+     * The iteration stops when stream is exhausted.
+     *
+     * @param stream
+     * @param charset charset name for string encoding
+     * @param stopCondition
+     * @param action
+     * @return the stop line (fist line that satisfies the stopping condition)
+     */
+    public static String forEachLine(InputStream stream, String charset, Predicate<String> stopCondition, Consumer<String> action) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (true) {
+            try {
+                int b = stream.read();
+                if (b == '\n') {
+                    String line = baos.toString(charset).trim();
+                    baos.reset();
+                    if (stopCondition.test(line)) {
+                        return line;
+                    } else {
+                        action.accept(line);
+                    }
+                } else {
+                    baos.write(b);
+                }
+            } catch (IOException ex) {
+                try {
+                    return baos.toString(charset).trim();
+                } catch (UnsupportedEncodingException e) {
+                    throw new RuntimeException(e);
+                }
+            }
         }
     }
 

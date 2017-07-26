@@ -2,10 +2,7 @@ package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
-import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
-import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
-import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Named;
@@ -31,7 +28,7 @@ import java.util.stream.Stream;
 public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V>, Encapsulated {
 
     private static DefaultEnvelopeReader reader = new DefaultEnvelopeReader();
-    private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter();
+    private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance);
 
     private final String name;
     private final Class<V> valueType;

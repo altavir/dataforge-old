@@ -15,8 +15,9 @@
  */
 package hep.dataforge.io.envelopes;
 
+import java.util.Map;
+
 /**
- *
  * @author darksnake
  */
 public class DefaultEnvelopeType implements EnvelopeType {
@@ -46,21 +47,29 @@ public class DefaultEnvelopeType implements EnvelopeType {
     }
 
     @Override
-    public EnvelopeReader getReader() {
+    public EnvelopeReader getReader(Map<String, String> properties) {
         return DefaultEnvelopeReader.INSTANCE;
     }
 
     @Override
-    public DefaultEnvelopeWriter getWriter() {
-        return DefaultEnvelopeWriter.instance;
+    public EnvelopeWriter getWriter(Map<String, String> properties) {
+        return new DefaultEnvelopeWriter(this,MetaType.resolve(properties));
     }
 
-    @Override
+    /**
+     * True if metadata length auto detection is allowed
+     *
+     * @return
+     */
     public boolean infiniteDataAllowed() {
         return false;
     }
 
-    @Override
+    /**
+     * True if data length auto detection is allowed
+     *
+     * @return
+     */
     public boolean infiniteMetaAllowed() {
         return false;
     }

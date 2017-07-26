@@ -16,7 +16,6 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.context.Global;
-import hep.dataforge.values.Value;
 
 import java.util.Collections;
 import java.util.Map;
@@ -51,26 +50,25 @@ public interface EnvelopeType {
 
     String description();
 
-    default Map<String, Value> defaultProperties() {
-        return Collections.emptyMap();
+    /**
+     * Get reader with properties override
+     * @param properties
+     * @return
+     */
+    EnvelopeReader getReader(Map<String, String> properties);
+
+    default EnvelopeReader getReader(){
+        return getReader(Collections.emptyMap());
     }
 
-    EnvelopeReader getReader();
-
-    EnvelopeWriter getWriter();
-
     /**
-     * True if metadata length auto detection is allowed
-     *
+     * Get writer with properties override
+     * @param properties
      * @return
      */
-    boolean infiniteMetaAllowed();
+    EnvelopeWriter getWriter(Map<String, String> properties);
 
-    /**
-     * True if data length auto detection is allowed
-     *
-     * @return
-     */
-    boolean infiniteDataAllowed();
-
+    default EnvelopeWriter getWriter(){
+        return getWriter(Collections.emptyMap());
+    }
 }

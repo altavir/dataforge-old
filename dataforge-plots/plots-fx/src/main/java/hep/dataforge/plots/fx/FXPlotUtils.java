@@ -7,7 +7,9 @@ package hep.dataforge.plots.fx;
 
 import hep.dataforge.fx.ApplicationSurrogate;
 import hep.dataforge.fx.FXPlugin;
+import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
+import hep.dataforge.io.envelopes.XMLMetaType;
 import hep.dataforge.plots.PlotFrame;
 import javafx.application.Platform;
 import javafx.scene.Scene;
@@ -35,7 +37,7 @@ public class FXPlotUtils {
             File file = chooser.showSaveDialog(menu.getOwnerWindow());
             if (file != null) {
                 try {
-                    DefaultEnvelopeWriter.instance.write(new FileOutputStream(file), frame.wrap());
+                    new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance).write(new FileOutputStream(file), frame.wrap());
                 } catch (IOException ex) {
                     throw new RuntimeException("Failed to save plot to file", ex);
                 }

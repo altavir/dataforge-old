@@ -21,7 +21,7 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.storage.commons.JSONMetaType;
 
 /**
- *
+ * An envelope type for storage binaries. Infinite data allowed
  * @author darksnake
  */
 public class FileStorageEnvelopeType extends DefaultEnvelopeType {

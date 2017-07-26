@@ -20,6 +20,9 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
 
 /**
  * The message is a pack that can include three principal parts:
@@ -58,12 +61,24 @@ public interface Envelope extends Metoid {
      */
     Binary getData();
 
-    default String getContentType(String def){
-        return meta().getString("@envelope.type",def);
+    default boolean hasMeta(){
+        return !meta().isEmpty();
     }
 
-    default String getContentDescription(){
-        return meta().getString("@envelope.description","");
+    default boolean hasData() {
+        try {
+            return getData().size() > 0;
+        } catch (IOException e) {
+            LoggerFactory.getLogger(getClass()).error("Failed to estimate data size in the envelope", e);
+            return false;
+        }
     }
 
+    default String getContentType(String def) {
+        return meta().getString("@envelope.type", def);
+    }
+
+    default String getContentDescription() {
+        return meta().getString("@envelope.description", "");
+    }
 }

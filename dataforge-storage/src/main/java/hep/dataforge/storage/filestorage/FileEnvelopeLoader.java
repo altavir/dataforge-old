@@ -12,6 +12,7 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.AbstractEnvelopeLoader;
+import hep.dataforge.storage.commons.JSONMetaType;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -91,7 +92,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
         if (!isReadOnly()) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                DefaultEnvelopeWriter.instance.write(baos, env);
+                new DefaultEnvelopeWriter(FileStorageEnvelopeType.instance, JSONMetaType.instance).write(baos, env);
                 file.append(baos.toByteArray());
             } catch (IOException ex) {
                 throw new StorageException("Can't push envelope to loader", ex);

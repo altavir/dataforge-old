@@ -17,7 +17,6 @@ package hep.dataforge.io.envelopes;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.function.Function;
 
 /**
  * interface for reading envelopes
@@ -33,10 +32,5 @@ public interface EnvelopeReader {
      * @return
      * @throws IOException
      */
-    default Envelope read(InputStream stream) throws IOException {
-        return read(stream, EnvelopeTag::from);
-    }
-
-    Envelope read(InputStream stream, Function<InputStream, EnvelopeTag> tagReader) throws IOException;
-
+    Envelope read(InputStream stream) throws IOException;
 }

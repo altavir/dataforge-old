@@ -5,6 +5,7 @@
  */
 package hep.dataforge.io.envelopes;
 
+@Deprecated
 public class WrapperEnvelopeType extends DefaultEnvelopeType {
 
     @Override

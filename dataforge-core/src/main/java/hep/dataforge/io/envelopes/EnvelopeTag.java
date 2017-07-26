@@ -135,7 +135,7 @@ public class EnvelopeTag {
     }
 
     private NamedValue getCustomProperty(String line) {
-        Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*)");
+        Pattern pattern = Pattern.compile("(?<key>[\\w\\.]*)\\s*\\:\\s*(?<value>[^;]*);?");
         Matcher matcher = pattern.matcher(line);
         if (matcher.matches()) {
             String key = matcher.group("key");
