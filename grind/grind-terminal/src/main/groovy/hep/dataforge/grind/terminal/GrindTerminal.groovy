@@ -14,6 +14,7 @@ import hep.dataforge.grind.GrindWorkspaceBuilder
 import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
+import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
@@ -162,8 +163,8 @@ class GrindTerminal extends SimpleConfigurable {
                 context.logger.info("Found 'workspace.groovy' in default location. Using it to build workspace.")
                 shell.bind("ws", new GrindWorkspaceBuilder(context).read(wsFile));
                 context.logger.info("Workspace builder bound to 'ws'")
-            } catch (Exception ex){
-                context.logger.error("Failed to build workspace from 'workspace.groovy'")
+            } catch (Exception ex) {
+                context.logger.error("Failed to build workspace from 'workspace.groovy'", ex)
             }
         }
     }
@@ -177,7 +178,15 @@ class GrindTerminal extends SimpleConfigurable {
             help()
         } else {
             try {
-                println(obj.invokeMethod("help", null))
+                def res = obj.invokeMethod("help", null);
+                if (res instanceof Markup) {
+                    TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
+                    renderer.render(res)
+                    renderer.ln()
+                } else {
+                    println(res);
+                }
+                println();
             } catch (Exception ex) {
                 println("No help article for ${obj}")
             }
@@ -205,6 +214,10 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
+    /**
+     * Start the terminal
+     * @return
+     */
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(getTerminal())

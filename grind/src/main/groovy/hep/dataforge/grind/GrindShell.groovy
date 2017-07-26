@@ -4,7 +4,8 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Encapsulated
 import hep.dataforge.context.Global
-import hep.dataforge.grind.helpers.PlotHelper
+import hep.dataforge.grind.helpers.GrindHelperFactory
+import hep.dataforge.meta.Meta
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
@@ -29,7 +30,15 @@ class GrindShell implements Encapsulated {
 
         //define important properties
         binding.setProperty("context", context)
-        binding.setProperty("plots", new PlotHelper(context))
+
+        //Load all available helpers
+        context.serviceStream(GrindHelperFactory).forEach {
+            def helper = it.build(context, Meta.empty()) //TODO add configuration to the shell
+            if (binding.hasProperty(helper.name)) {
+                context.logger.warn("The helper with the name ${helper.name} already loaded into shell. Overriding.")
+            }
+            binding.setProperty(helper.name, helper);
+        }
         shell = new GroovyShell(context.classLoader, binding, configuration);
     }
 

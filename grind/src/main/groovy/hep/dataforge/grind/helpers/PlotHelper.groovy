@@ -20,6 +20,8 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
+import hep.dataforge.io.markup.Markup
+import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotManager
 import hep.dataforge.plots.data.PlottableData
@@ -34,11 +36,13 @@ import java.util.function.Function
 /**
  * Created by darksnake on 30-Aug-16.
  */
-class PlotHelper {
+class PlotHelper implements GrindHelper {
     static final String DEFAULT_FRAME = "default";
+    Context context;
     PlotManager manager;
 
     PlotHelper(Context context = Global.instance()) {
+        this.context = context;
         this.manager = context.getFeature(PlotManager)
     }
 
@@ -128,4 +132,18 @@ class PlotHelper {
         return res;
     }
 
+    @Override
+    String getName() {
+        return "plots"
+    }
+
+    @Override
+    Context getContext() {
+        return context;
+    }
+
+    @Override
+    Markup help() {
+        return MarkupBuilder.text("This is ").addText("plots", "blue").addText(" helper").build();
+    }
 }
