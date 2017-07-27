@@ -117,7 +117,9 @@ public class MarkupUtils {
             builder.addText(" (mult)", "cyan");
         }
 
-        builder.addText(String.format(": %s", elementDef.getString("info")));
+        if (elementDef.hasValue("info")) {
+            builder.addText(String.format(": %s", elementDef.getString("info")));
+        }
 
         applyDescriptorNode(builder, elementDef);
         return builder;

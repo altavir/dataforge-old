@@ -131,10 +131,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
             return true;
         } else if (obj instanceof Meta) {
             Meta other = (Meta) obj;
-            if (!Objects.equals(getName(), other.getName())) {
-                return false;
-            }
-            return equalsIgnoreName(other);
+            return Objects.equals(getName(), other.getName()) && equalsIgnoreName(other);
         } else {
             return false;
         }

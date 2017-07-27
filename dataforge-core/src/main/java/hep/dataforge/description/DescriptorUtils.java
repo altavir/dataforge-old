@@ -116,46 +116,55 @@ public class DescriptorUtils {
             res = new MetaBuilder("");
         }
 
-        for (NodeDef nodeDef : listAnnotations(element, NodeDef.class, true)) {
-            //TODO replace by map to avoid multiple node parsing
-            boolean exists = res.hasMeta("node") && res.getMetaList("node").stream()
-                    .anyMatch(mb -> mb.getString("name").equals(nodeDef.name()));
-            //warning on duplicate nodes
-            if (exists) {
-                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.name());
-            }else {
+        listAnnotations(element, NodeDef.class, true)
+                .stream()
+                .filter(it -> !it.name().startsWith("@"))
+                .forEach(nodeDef -> {
+                            //TODO replace by map to avoid multiple node parsing
+                            boolean exists = res.hasMeta("node") && res.getMetaList("node").stream()
+                                    .anyMatch(mb -> mb.getString("name").equals(nodeDef.name()));
+                            //warning on duplicate nodes
+                            if (exists) {
+                                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.name());
+                            } else {
 
-                MetaBuilder nodeMeta = new MetaBuilder("node")
-                        .putValue("name", nodeDef.name())
-                        .putValue("info", nodeDef.info())
-                        .putValue("required", nodeDef.required())
-                        .putValue("multiple", nodeDef.multiple())
-                        .putValue("tags", nodeDef.tags());
+                                MetaBuilder nodeMeta = new MetaBuilder("node")
+                                        .putValue("name", nodeDef.name())
+                                        .putValue("info", nodeDef.info())
+                                        .putValue("required", nodeDef.required())
+                                        .putValue("multiple", nodeDef.multiple())
+                                        .putValue("tags", nodeDef.tags());
 
-                // Either target or resource is used
-                if (!nodeDef.target().isEmpty()) {
-                    AnnotatedElement target = findAnnotatedElement(nodeDef.target());
-                    if (target != null) {
-                        nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
-                    }
-                } else if (!nodeDef.resource().isEmpty()) {
-                    nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
-                }
+                                // Either target or resource is used
+                                if (!nodeDef.target().isEmpty()) {
+                                    AnnotatedElement target = findAnnotatedElement(nodeDef.target());
+                                    if (target != null) {
+                                        nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
+                                    }
+                                } else if (!nodeDef.resource().isEmpty()) {
+                                    nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
+                                }
 
-                putDescription(res, nodeMeta);
-            }
+                                putDescription(res, nodeMeta);
+                            }
 
-        }
+                        }
+                );
 
-        for (ValueDef valueDef : listAnnotations(element, ValueDef.class, true)) {
-            boolean exists = res.hasMeta("value") && res.getMetaList("value").stream()
-                    .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
-            if (exists) {
-                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate value with name {} in descriptor", valueDef.name());
-            } else {
-                putDescription(res, ValueDescriptor.build(valueDef).meta());
-            }
-        }
+        //Filtering hidden values
+        listAnnotations(element, ValueDef.class, true)
+                .stream()
+                .filter(it -> !it.name().startsWith("@"))
+                .forEach(valueDef -> {
+                            boolean exists = res.hasMeta("value") && res.getMetaList("value").stream()
+                                    .anyMatch(mb -> mb.getString("name").equals(valueDef.name()));
+                            if (exists) {
+                                LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate value with name {} in descriptor", valueDef.name());
+                            } else {
+                                putDescription(res, ValueDescriptor.build(valueDef).meta());
+                            }
+                        }
+                );
 
         return res;
     }

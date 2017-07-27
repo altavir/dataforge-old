@@ -133,11 +133,6 @@ class PlotHelper implements GrindHelper {
     }
 
     @Override
-    String getName() {
-        return "plots"
-    }
-
-    @Override
     Context getContext() {
         return context;
     }

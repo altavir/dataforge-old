@@ -8,4 +8,9 @@ class PlotHelperFactory implements GrindHelperFactory {
     GrindHelper build(Context context, Meta meta) {
         return new PlotHelper(context);
     }
+
+    @Override
+    String getName() {
+        return "plots"
+    }
 }

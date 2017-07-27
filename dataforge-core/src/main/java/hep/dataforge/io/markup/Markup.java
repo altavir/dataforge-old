@@ -22,7 +22,7 @@ import java.util.stream.Stream;
  * 'style' element contains optional style information.
  * Created by darksnake on 30-Dec-16.
  */
-@ValueDef(name = "type", def = "text", info = "The type of this block")
+@ValueDef(name = "type", info = "The type of this block")
 @NodeDef(name = "meta", info = "Meta specific for this element")
 @NodeDef(name = "style", info = "Style override")
 public class Markup extends SimpleConfigurable implements Described, ValueProvider {
