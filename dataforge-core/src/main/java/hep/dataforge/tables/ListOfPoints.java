@@ -75,7 +75,7 @@ public class ListOfPoints implements MetaMorph, NavigablePointSource {
     /**
      * {@inheritDoc}
      */
-    public Value getValue(int index, String name) throws NameNotFoundException {
+    public Value get(String name, int index) throws NameNotFoundException {
         return this.data.get(index).getValue(name);
     }
 

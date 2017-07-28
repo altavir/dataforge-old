@@ -52,9 +52,10 @@ public class FileEnvelope implements Envelope, AutoCloseable {
      * @param meta
      * @return
      */
+    @Deprecated
     public static FileEnvelope createEmpty(Path path, Meta meta) throws IOException {
         try (OutputStream stream = Files.newOutputStream(path, CREATE, WRITE)) {
-            new DefaultEnvelopeWriter().write(stream, new EnvelopeBuilder().setMeta(meta));
+            DefaultEnvelopeType.instance.getWriter().write(stream, new EnvelopeBuilder().setMeta(meta));
         }
         return new FileEnvelope(path, false);
     }

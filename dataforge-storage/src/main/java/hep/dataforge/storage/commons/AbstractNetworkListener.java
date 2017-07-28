@@ -16,7 +16,7 @@
 package hep.dataforge.storage.commons;
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
-import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
+import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
@@ -180,7 +180,7 @@ public abstract class AbstractNetworkListener implements Metoid, AutoCloseable, 
         }
 
         private void write(Envelope envelope) throws IOException {
-            new DefaultEnvelopeWriter().write(os, envelope);
+            DefaultEnvelopeType.instance.getWriter().write(os, envelope);
             os.flush();
         }
 

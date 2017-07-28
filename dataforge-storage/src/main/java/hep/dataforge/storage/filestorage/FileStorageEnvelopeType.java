@@ -52,7 +52,7 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
 
     @Override
     public DefaultEnvelopeWriter getWriter() {
-        return super.getWriter().withMetaType(JSONMetaType.instance);
+        return new DefaultEnvelopeWriter(this, JSONMetaType.instance);
     }
 
     @Override

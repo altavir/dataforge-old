@@ -10,8 +10,12 @@ import hep.dataforge.values.Values;
 public interface NavigablePointSource extends PointSource{
     Values getRow(int i);
 
-    default Value getValue(int index, String name) throws NameNotFoundException {
+    default Value get(String name, int index) throws NameNotFoundException {
         return getRow(index).getValue(name);
+    }
+
+    default double getDouble(String name, int index){
+        return get(name,index).doubleValue();
     }
 
     /**
