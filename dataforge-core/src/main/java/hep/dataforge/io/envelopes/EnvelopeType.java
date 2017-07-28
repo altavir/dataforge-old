@@ -24,6 +24,7 @@ import java.util.ServiceLoader;
 import java.util.stream.StreamSupport;
 
 /**
+ * Envelope io format description
  * @author Alexander Nozik
  */
 public interface EnvelopeType {

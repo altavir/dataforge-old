@@ -11,7 +11,6 @@ import hep.dataforge.description.ValuesDefs
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.grind.GrindWorkspaceBuilder
-import hep.dataforge.io.BasicIOManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
@@ -63,7 +62,6 @@ class GrindTerminal extends SimpleConfigurable {
                 TerminalBuilder.builder()
                         .name("df")
                         .system(true)
-                        .jna(true)
                         .encoding("UTF-8")
                         .build()
         )
@@ -108,21 +106,26 @@ class GrindTerminal extends SimpleConfigurable {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
 
-            def console = System.console()
-            if (console) {
-                console.readLine('> Please enter your username: ')
-            }
+//            def console = System.console()
+//            if (console) {
+//                console.readLine('> Please enter your username: ')
+//            }
 
         }
 
+
         this.terminal = terminal
+        context.logger.debug("Using ${terminal.class} terminal")
 
         //build shell context
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
             JFCFrameFactory.setDefault(context);
-            context.pluginManager().load(new BasicIOManager(terminal.input(), terminal.output()));
+            //FIXME There is some bug in the groovy compilation here
+//            InputStream inputStream = System.in;
+//            OutputStream outputStream = System.out
+//            context.pluginManager().load(new BasicIOManager(inputStream, outputStream));
         }
 
         //create the shell

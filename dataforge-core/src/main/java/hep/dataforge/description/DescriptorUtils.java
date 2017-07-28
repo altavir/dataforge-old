@@ -48,7 +48,7 @@ public class DescriptorUtils {
             }
         });
 
-        descriptor.childrenDescriptors().values().stream().forEach((NodeDescriptor nd) -> {
+        descriptor.childrenDescriptors().values().forEach((NodeDescriptor nd) -> {
             if (nd.hasDefault()) {
                 builder.setNode(nd.getName(), nd.defaultNode());
             } else {
