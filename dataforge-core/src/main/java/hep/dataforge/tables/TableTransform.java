@@ -52,7 +52,7 @@ public class TableTransform {
         return filter(table, getValueCondition(valueName, a, b));
     }
 
-    public static Table filter(Table table, String valueName, double a, double b) throws NamingException {
+    public static Table filter(Table table, String valueName, Number a, Number b) throws NamingException {
         return filter(table, getValueCondition(valueName, Value.of(a), Value.of(b)));
     }
 
