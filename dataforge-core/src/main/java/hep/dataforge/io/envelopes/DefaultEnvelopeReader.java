@@ -47,7 +47,12 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
 
     @Override
     public Envelope read(@NotNull InputStream stream) throws IOException {
-        BufferedInputStream bis = new BufferedInputStream(stream);
+        BufferedInputStream bis;
+        if (stream instanceof BufferedInputStream) {
+            bis = (BufferedInputStream) stream;
+        } else {
+            bis = new BufferedInputStream(stream);
+        }
         EnvelopeTag tag = EnvelopeTag.from(bis);
         MetaStreamReader parser = tag.getMetaType().getReader();
         int metaLength = tag.getMetaSize();
