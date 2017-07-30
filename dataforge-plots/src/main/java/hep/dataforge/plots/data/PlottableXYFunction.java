@@ -182,7 +182,7 @@ public class PlottableXYFunction extends XYPlottable {
         }
         validateCache();
         return cache.entrySet().stream()
-                .map(entry -> new ValueMap(new String[]{XYAdapter.X_AXIS, XYAdapter.Y_AXIS}, entry.getKey(), entry.getValue()))
+                .map(entry -> ValueMap.of(new String[]{XYAdapter.X_AXIS, XYAdapter.Y_AXIS}, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 

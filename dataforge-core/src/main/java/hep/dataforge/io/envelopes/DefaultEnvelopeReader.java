@@ -21,16 +21,21 @@ import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.Meta;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.SeekableByteChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
+import static java.nio.file.StandardOpenOption.READ;
 
 /**
  * @author darksnake
@@ -41,26 +46,9 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
 
 
     @Override
-    public Envelope read(InputStream stream) throws IOException {
-        return read(stream, EnvelopeTag::from);
-    }
-
-    /**
-     * Read an envelope and override properties.
-     * <p>
-     * The envelope is lazy meaning it will be calculated on demand. If the
-     * stream will be closed before that, than an error will be thrown. In order
-     * to avoid this problem, it is wise to call {@code getData} after read.
-     * </p>
-     *
-     * @param stream
-     * @param tagReader
-     * @return
-     * @throws IOException
-     */
-    public Envelope read(@NotNull InputStream stream, @NotNull Function<InputStream,EnvelopeTag> tagReader) throws IOException {
+    public Envelope read(@NotNull InputStream stream) throws IOException {
         BufferedInputStream bis = new BufferedInputStream(stream);
-        EnvelopeTag tag = tagReader.apply(bis);
+        EnvelopeTag tag = EnvelopeTag.from(bis);
         MetaStreamReader parser = tag.getMetaType().getReader();
         int metaLength = tag.getMetaSize();
         Meta meta;
@@ -70,18 +58,61 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             try {
                 meta = parser.read(bis, metaLength);
             } catch (ParseException ex) {
-                throw new EnvelopeFormatException("Error parsing annotation", ex);
+                throw new EnvelopeFormatException("Error parsing meta", ex);
             }
         }
 
-        Supplier<Binary> supplier = () -> {
-            int dataLength = tag.getDataSize();
+        Binary binary;
+        int dataLength = tag.getDataSize();
+        //skipping separator for automatic meta reading
+        if (metaLength == -1) {
+            bis.skip(separator().length);
+        }
+        binary = readData(bis, dataLength);
+
+        return new SimpleEnvelope(meta, binary);
+    }
+
+    /**
+     * The envelope is lazy meaning it will be calculated on demand. If the
+     * stream will be closed before that, than an error will be thrown. In order
+     * to avoid this problem, it is wise to call {@code getData} after read.
+     *
+     * @return
+     */
+    public Envelope readLazy(Path path) throws IOException {
+        SeekableByteChannel channel = Files.newByteChannel(path, READ);
+        EnvelopeTag tag = EnvelopeTag.from(channel);
+        int metaLength = tag.getMetaSize();
+        int dataLength = tag.getDataSize();
+        if (metaLength < 0 || dataLength < 0) {
+            LoggerFactory.getLogger(getClass()).error("Can't lazy read infinite data or meta. Returning non-lazy envelope");
+            return read(path);
+        }
+
+        ByteBuffer metaBuffer = ByteBuffer.allocate(metaLength);
+        channel.position(tag.getLength());
+        channel.read(metaBuffer);
+        MetaStreamReader parser = tag.getMetaType().getReader();
+
+        Meta meta;
+        if (metaLength == 0) {
+            meta = Meta.buildEmpty("meta");
+        } else {
             try {
-                //skipping separator for automatic meta reading
-                if (metaLength == -1) {
-                    bis.skip(separator().length);
-                }
-                return readData(bis, dataLength);
+                meta = parser.readBuffer(metaBuffer);
+            } catch (ParseException ex) {
+                throw new EnvelopeFormatException("Error parsing annotation", ex);
+            }
+        }
+        channel.close();
+
+        Supplier<Binary> supplier = () -> {
+            try (SeekableByteChannel dataChannel = Files.newByteChannel(path, READ)) {
+                dataChannel.position(tag.getLength() + metaLength);
+                ByteBuffer dataBuffer = ByteBuffer.allocate(dataLength);
+                dataChannel.read(dataBuffer);
+                return new BufferedBinary(dataBuffer);
             } catch (IOException ex) {
                 throw new RuntimeException(ex);
             }

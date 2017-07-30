@@ -16,20 +16,51 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.context.Global;
+import hep.dataforge.io.IOUtils;
+import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
-import java.util.Map;
-import java.util.Objects;
-import java.util.ServiceLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.*;
 import java.util.stream.StreamSupport;
+
+import static java.nio.file.StandardOpenOption.READ;
 
 /**
  * Envelope io format description
+ *
  * @author Alexander Nozik
  */
 public interface EnvelopeType {
 
     ServiceLoader<EnvelopeType> loader = ServiceLoader.load(EnvelopeType.class);
+
+    /**
+     * Infer envelope type from file reading only first line (ignoring empty and sha-bang)
+     *
+     * @param path
+     * @return
+     */
+    static Optional<EnvelopeType> infer(Path path) {
+        try {
+            return IOUtils.nextLine(
+                    Files.newInputStream(path,READ),
+                    "ASCII",
+                    line -> line.isEmpty()|| (line.startsWith("#!") && ! line.endsWith("#!"))
+            ).flatMap(header -> {
+                if (header.startsWith("#~") || (header.startsWith("#!") && header.trim().endsWith("!#"))) {
+                    return Optional.of(DefaultEnvelopeType.instance);
+                } else if (header.startsWith("#~DFTL")) {
+                    return Optional.of(TaglessEnvelopeType.instance);
+                } else {
+                    return Optional.empty();
+                }
+            });
+        } catch (Exception ex) {
+            LoggerFactory.getLogger(EnvelopeType.class).warn("Could not infer envelope type of file {} due to exception: {}", path, ex);
+            return Optional.empty();
+        }
+    }
 
     static EnvelopeType resolve(int code) {
         synchronized (Global.instance()) {
@@ -53,23 +84,25 @@ public interface EnvelopeType {
 
     /**
      * Get reader with properties override
+     *
      * @param properties
      * @return
      */
     EnvelopeReader getReader(Map<String, String> properties);
 
-    default EnvelopeReader getReader(){
+    default EnvelopeReader getReader() {
         return getReader(Collections.emptyMap());
     }
 
     /**
      * Get writer with properties override
+     *
      * @param properties
      * @return
      */
     EnvelopeWriter getWriter(Map<String, String> properties);
 
-    default EnvelopeWriter getWriter(){
+    default EnvelopeWriter getWriter() {
         return getWriter(Collections.emptyMap());
     }
 }

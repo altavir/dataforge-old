@@ -63,7 +63,7 @@ public class FittingIOUtils {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.value(point);
-            Values dp = new ValueMap(format, values);
+            Values dp = ValueMap.of(format, (Object[]) values);
             res.row(dp);
         }
         return res.build();

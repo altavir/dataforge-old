@@ -5,12 +5,13 @@
  */
 package hep.dataforge.plots.wrapper;
 
-import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
 import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeType;
 import hep.dataforge.io.envelopes.UnWrapper;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.Plottable;
+import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
 
@@ -31,6 +32,8 @@ public class PlotUnWrapper implements UnWrapper<PlotFrame> {
     public PlotFrame unWrap(Envelope envelope) {
         String plotFrameClassName = envelope.meta().getString("plotFrameClass", "hep.dataforge.plots.JFreeChartFrame");
         Meta plotMeta = envelope.meta().getMeta("plotMeta");
+
+        EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("envelopeType","default"));
         try {
             PlotFrame frame = (PlotFrame) Class.forName(plotFrameClassName).newInstance();
             frame.configure(plotMeta);
@@ -39,8 +42,13 @@ public class PlotUnWrapper implements UnWrapper<PlotFrame> {
             PlottableUnWrapper unwrapper = new PlottableUnWrapper();
             
             while (dataStream.available() > 0) {
-                Plottable pl = unwrapper.unWrap(DefaultEnvelopeReader.INSTANCE.readWithData(dataStream));
-                frame.add(pl);
+                try {
+                    Plottable pl = unwrapper.unWrap(internalEnvelopeType.getReader().read(dataStream));
+                    frame.add(pl);
+                } catch (Exception ex){
+                    LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable");
+                }
+
             }
 
             return frame;

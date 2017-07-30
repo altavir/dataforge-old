@@ -27,6 +27,7 @@ import java.math.BigDecimal;
 import java.nio.charset.Charset;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
@@ -291,7 +292,7 @@ public class IOUtils {
      * The iteration stops when stream is exhausted.
      *
      * @param stream
-     * @param charset charset name for string encoding
+     * @param charset       charset name for string encoding
      * @param stopCondition
      * @param action
      * @return the stop line (fist line that satisfies the stopping condition)
@@ -318,6 +319,33 @@ public class IOUtils {
                 } catch (UnsupportedEncodingException e) {
                     throw new RuntimeException(e);
                 }
+            }
+        }
+    }
+
+    /**
+     * Return optional next line not fitting skip condition.
+     * @param stream
+     * @param charset
+     * @param skipCondition
+     * @return
+     */
+    public static Optional<String> nextLine(InputStream stream, String charset, Predicate<String> skipCondition) {
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        while (true) {
+            try {
+                int b = stream.read();
+                if (b == '\n') {
+                    String line = baos.toString(charset).trim();
+                    baos.reset();
+                    if (!skipCondition.test(line)) {
+                        return Optional.of(line);
+                    }
+                } else {
+                    baos.write(b);
+                }
+            } catch (IOException ex) {
+                return Optional.empty();
             }
         }
     }

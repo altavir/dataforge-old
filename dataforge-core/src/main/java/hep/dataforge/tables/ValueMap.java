@@ -39,9 +39,26 @@ import java.util.stream.Collectors;
 
 public class ValueMap implements Values, MetaMorph {
 
-    public static ValueMap fromMap(Map<String, Object> map) {
-        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
+    public static ValueMap ofMap(Map<String, ?> map) {
+        ValueMap res = new ValueMap();
+        res.valueMap.putAll(map.entrySet().stream()
+                .collect(Collectors.toMap(Map.Entry::getKey, entry-> Value.of(entry.getValue()))));
+        return res;
     }
+
+    public static ValueMap of(String[] list, Object... values) {
+        if (list.length != values.length) {
+            throw new IllegalArgumentException();
+        }
+        ValueMap res = new ValueMap();
+        for (int i = 0; i < values.length; i++) {
+            Value val = Value.of(values[i]);
+
+            res.valueMap.put(list[i], val);
+        }
+        return res;
+    }
+
 
     private final LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
 
@@ -52,40 +69,9 @@ public class ValueMap implements Values, MetaMorph {
 
     }
 
-    public ValueMap(String[] list, Number... values) {
-        if (list.length != values.length) {
-            throw new IllegalArgumentException();
-        }
-        for (int i = 0; i < values.length; i++) {
-            valueMap.put(list[i], Value.of(values[i]));
-        }
+    public ValueMap(Map<String, Value> map){
+        this.valueMap.putAll(map);
     }
-
-    public ValueMap(String[] list, Value... values) {
-        if (list.length != values.length) {
-            throw new IllegalArgumentException();
-        }
-        for (int i = 0; i < values.length; i++) {
-            Value val = values[i];
-            valueMap.put(list[i], val);
-        }
-    }
-
-    public ValueMap(String[] list, Object[] values) {
-        if (list.length != values.length) {
-            throw new IllegalArgumentException();
-        }
-        for (int i = 0; i < values.length; i++) {
-            Value val = Value.of(values[i]);
-
-            valueMap.put(list[i], val);
-        }
-    }
-
-    public ValueMap(Map<String, ?> map) {
-        map.forEach((k,v)-> this.valueMap.put(k, Value.of(v)));
-    }
-
 
     /**
      * {@inheritDoc}
@@ -162,7 +148,7 @@ public class ValueMap implements Values, MetaMorph {
         private final ValueMap p;
 
         public Builder(Values dp) {
-            p = new ValueMap(new LinkedHashMap<>(dp.getNames().size()));
+            p = new ValueMap();
             for (String name : dp.getNames()) {
                 p.valueMap.put(name, dp.getValue(name));
             }
@@ -199,11 +185,12 @@ public class ValueMap implements Values, MetaMorph {
 
         /**
          * Put the value at the beginning of the map
+         *
          * @param name
          * @param value
          * @return
          */
-        public Builder putFirstValue(String name, Object value){
+        public Builder putFirstValue(String name, Object value) {
             synchronized (p) {
                 LinkedHashMap<String, Value> newMap = new LinkedHashMap<>();
                 newMap.put(name, Value.of(value));

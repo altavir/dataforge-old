@@ -7,7 +7,9 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
+import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.plots.Plottable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.LinkedHashMap;
@@ -16,7 +18,7 @@ import java.util.Map;
 /**
  * @author <a href="mailto:altavir@gmail.com">Alexander Nozik</a>
  */
-public class PlottableGroup<T extends Plottable> implements Iterable<T> {
+public class PlottableGroup<T extends Plottable> extends SimpleConfigurable implements Iterable<T>{
 
     //TODO replace by obsevable collection
     protected final Map<String, T> map = new LinkedHashMap<>();
@@ -24,6 +26,7 @@ public class PlottableGroup<T extends Plottable> implements Iterable<T> {
     public PlottableGroup() {
     }
 
+    @SafeVarargs
     public PlottableGroup(T... plottables) {
         for (T pl : plottables) {
             map.put(pl.getName(), pl);
@@ -53,30 +56,19 @@ public class PlottableGroup<T extends Plottable> implements Iterable<T> {
     }
 
     /**
-     * Apply given configuration to each plottable
-     *
-     * @param config
-     */
-    public void apply(Meta config) {
-        map.values().stream().forEach((pl) -> {
-            pl.configure(config);
-        });
-    }
-
-    /**
      * Set configuration value for each plottable
      *
      * @param name
      * @param value
      */
     public void setValue(String name, Object value) {
-        map.values().stream().forEach((pl) -> {
+        map.values().forEach((pl) -> {
             pl.getConfig().setValue(name, value);
         });
     }
 
     /**
-     * Apply configuration to getPlottables considering each plottable described
+     * Apply configuration to plottables considering each plottable described
      * with appropriate {@code plot} node.
      * <p>
      * <p>
@@ -85,11 +77,11 @@ public class PlottableGroup<T extends Plottable> implements Iterable<T> {
      *
      * @param config
      */
-    public void applyConfig(Meta config) {
-        if (config.hasMeta("eachPlot")) {
-            apply(config.getMeta("eachPlot"));
-        }
-        map.values().stream().forEach((pl) -> {
+    protected void applyConfig(Meta config) {
+        map.values().forEach((pl) -> {
+            pl.configure(config);
+        });
+        map.values().forEach((pl) -> {
             Meta m = MetaUtils.findNodeByValue(config, "plot", "name", pl.getName());
             if (m != null) {
                 pl.configure(m);
@@ -98,6 +90,7 @@ public class PlottableGroup<T extends Plottable> implements Iterable<T> {
     }
 
 
+    @NotNull
     @Override
     public Iterator<T> iterator() {
         return this.map.values().iterator();

@@ -1,11 +1,12 @@
 package hep.dataforge.grind.misc
 
 import hep.dataforge.data.binary.Binary
-import hep.dataforge.io.envelopes.*
+import hep.dataforge.io.envelopes.Envelope
+import hep.dataforge.io.envelopes.EnvelopeType
+import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.Meta
 import org.slf4j.LoggerFactory
 
-import java.nio.charset.Charset
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -21,7 +22,7 @@ class ReWrapper {
         if (Files.isDirectory(path)) {
             String mask = meta.getString("mask", "*");
             String regex = mask.replace(".", "\\.").replace("?", ".?").replace("*", ".+");
-            Files.find(path, Integer.MAX_VALUE, { name, attr -> name.toString().matches(regex)})
+            Files.find(path, Integer.MAX_VALUE, { name, attr -> name.toString().matches(regex) })
         } else {
             reWrapFile(path, meta);
         }
@@ -64,16 +65,7 @@ class ReWrapper {
      * @return
      */
     EnvelopeType inferType(Path path) {
-        String header = Files.lines(path, Charset.forName("US-ASCII")).findFirst().get();
-        switch (header) {
-            case { it.startsWith("#~DF02") }:
-            case { it.startsWith("#!") && it.trim().endsWith("!#") }:
-                return DefaultEnvelopeType.instance
-            case { it.startsWith("#~DFTL") }:
-                return TaglessEnvelopeType.instance
-            default:
-                return null;
-        }
+        return EnvelopeType.infer(path).orElse(null);
     }
 
     EnvelopeType getOutputType(Envelope input, Meta meta) {

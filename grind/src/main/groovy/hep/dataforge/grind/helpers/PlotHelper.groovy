@@ -39,11 +39,16 @@ import java.util.function.Function
 class PlotHelper implements GrindHelper {
     static final String DEFAULT_FRAME = "default";
     Context context;
+
     PlotManager manager;
 
     PlotHelper(Context context = Global.instance()) {
         this.context = context;
         this.manager = context.getFeature(PlotManager)
+    }
+
+    PlotManager getManager() {
+        return manager
     }
 
     def configure(String frame, Closure config) {

@@ -22,10 +22,12 @@ import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Values;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -219,7 +221,14 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
          * @throws NamingException
          */
         public Builder row(Object... values) throws NamingException {
-            table.addRow(new ValueMap(table.format.namesAsArray(), values));
+            table.addRow(ValueMap.of(table.format.namesAsArray(), values));
+            return this;
+        }
+
+        public Builder row(ValueProvider values) {
+            String[] names = table.format.namesAsArray();
+            Map<String, Value> map = Stream.of(names).collect(Collectors.toMap(name -> name, values::getValue));
+            table.addRow(new ValueMap(map));
             return this;
         }
 

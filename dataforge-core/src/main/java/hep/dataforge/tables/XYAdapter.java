@@ -109,7 +109,7 @@ public class XYAdapter extends AxisPointAdapter {
     }
 
     public Values buildXYDataPoint(double x, double y, double yErr) {
-        return new ValueMap(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
+        return ValueMap.of(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
                 x, y, yErr);
     }
 

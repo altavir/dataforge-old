@@ -15,8 +15,13 @@
  */
 package hep.dataforge.io.envelopes;
 
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+
+import static java.nio.file.StandardOpenOption.READ;
 
 /**
  * interface for reading envelopes
@@ -33,4 +38,10 @@ public interface EnvelopeReader {
      * @throws IOException
      */
     Envelope read(InputStream stream) throws IOException;
+
+    default Envelope read(Path file) throws IOException {
+        try (InputStream stream = Files.newInputStream(file, READ)) {
+            return read(stream);
+        }
+    }
 }

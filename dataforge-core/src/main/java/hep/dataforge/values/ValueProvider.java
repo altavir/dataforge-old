@@ -101,8 +101,8 @@ public interface ValueProvider {
         return getValue(name).stringValue();
     }
 
-    default Value getValue(String name, Value def) {
-        return optValue(name).orElse(def);
+    default Value getValue(String name, Object def) {
+        return optValue(name).orElse(Value.of(def));
     }
 
     default Value getValue(String name, Supplier<Value> def) {

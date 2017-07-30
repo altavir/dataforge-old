@@ -5,7 +5,8 @@
  */
 package hep.dataforge.plots.viewer;
 
-import hep.dataforge.io.envelopes.DefaultEnvelopeReader;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeType;
 import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.PlotContainer;
 import hep.dataforge.plots.wrapper.PlotUnWrapper;
@@ -19,7 +20,6 @@ import javafx.stage.FileChooser;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.URL;
 import java.util.HashMap;
@@ -52,7 +52,17 @@ public class PlotViewerController implements Initializable {
             tab.setOnClosed(event -> plotMap.remove(file));
             tabs.getTabs().add(tab);
         }
-        container.setPlot((FXPlotFrame) new PlotUnWrapper().unWrap(new DefaultEnvelopeReader().read(new FileInputStream(file))));
+        EnvelopeType.infer(file.toPath()).ifPresent(type -> {
+            try {
+                Envelope envelope = type.getReader().read(file.toPath());
+                FXPlotFrame frame = (FXPlotFrame) new PlotUnWrapper().unWrap(envelope);
+                container.setPlot(frame);
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+
     }
 
     /**
@@ -65,7 +75,7 @@ public class PlotViewerController implements Initializable {
             chooser.setTitle("Select plot file to load");
             chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge plot", "*.dfp"));
             List<File> list = chooser.showOpenMultipleDialog(loadButton.getScene().getWindow());
-            list.stream().forEach((f) -> {
+            list.forEach((f) -> {
                 try {
                     loadPlot(f);
                 } catch (IOException ex) {
