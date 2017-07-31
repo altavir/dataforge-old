@@ -18,7 +18,7 @@ public class NodeWrapper<T> implements DataNode<T> {
 
     public NodeWrapper(DataNode<T> node, String parentName, Meta parentMeta) {
         if (parentMeta instanceof Laminate) {
-            this.overrideMeta = ((Laminate) parentMeta).addFirstLayer(node.meta());
+            this.overrideMeta = ((Laminate) parentMeta).withFirstLayer(node.meta());
         } else {
             this.overrideMeta = new Laminate(node.meta(), parentMeta);
         }

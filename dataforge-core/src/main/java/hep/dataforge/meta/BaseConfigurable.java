@@ -13,7 +13,7 @@ import hep.dataforge.description.NodeDescriptor;
  * accessible via configure, but outer layer is a mutable Configuration. It also
  * supports value context and descriptor (by default descriptor is loaded from
  * the class).
- *
+ * <p>
  * <p>
  * Note that {@code getConfig()} method provides only mutable part</p>
  *
@@ -21,23 +21,23 @@ import hep.dataforge.description.NodeDescriptor;
  */
 public abstract class BaseConfigurable extends SimpleConfigurable {
 
-    private final Laminate laminate;
+    private Laminate laminate;
 
     public BaseConfigurable() {
-        laminate = new Laminate(getConfig()).setDescriptor(DescriptorUtils.buildDescriptor(getClass()));
+        laminate = new Laminate(getConfig()).withDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }
 
     /**
      * Set unconformable meta layers below configuration layer
+     *
      * @param metaBase
      */
     protected final void setMetaBase(Meta... metaBase) {
-        this.laminate.setLayers(metaBase);
-        this.laminate.addFirstLayer(getConfig());        
+        laminate = new Laminate(metaBase).withFirstLayer(getConfig()).withDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }
 
     protected final void setDescriptor(NodeDescriptor descriptor) {
-        this.laminate.setDescriptor(descriptor);
+        laminate = laminate.withDescriptor(descriptor);
     }
 
     /**

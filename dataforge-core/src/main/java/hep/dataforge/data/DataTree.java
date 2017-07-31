@@ -233,7 +233,7 @@ public class DataTree<T> implements DataNode<T> {
             Stream<DataNode<? extends T>> nodeItself = Stream.of(new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta));
 
             Name childName = parentName.append(nodeEntry.getKey());
-            Laminate childMeta = parentMeta.addFirstLayer(nodeEntry.getValue().meta());
+            Laminate childMeta = parentMeta.withFirstLayer(nodeEntry.getValue().meta());
             Stream<DataNode<? extends T>> childStream = nodeEntry.getValue().nodeStream(childName, childMeta).map(n -> n);
 
             return Stream.concat(nodeItself, childStream);
@@ -265,7 +265,7 @@ public class DataTree<T> implements DataNode<T> {
                     .flatMap(nodeEntry -> {
                         Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());
                         return nodeEntry.getValue()
-                                .dataStream(subNodeName, nodeMeta.addFirstLayer(nodeEntry.getValue().meta()), true);
+                                .dataStream(subNodeName, nodeMeta.withFirstLayer(nodeEntry.getValue().meta()), true);
                     });
             return Stream.concat(dataStream, subStream);
         }

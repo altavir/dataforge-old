@@ -227,8 +227,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     }
 
     protected Laminate inputMeta(Context context, Meta... meta) {
-        return new Laminate(meta)
-                .setDescriptor(getDescriptor());
+        return new Laminate(meta).withDescriptor(getDescriptor());
     }
 
     /**

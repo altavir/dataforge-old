@@ -119,7 +119,7 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
                 .putMetaValue(WRAPPED_TYPE_KEY, PLOTTABLE_WRAPPER_TYPE)
                 .putMetaValue("plottableClass", getClass().getName())
                 .putMetaValue("name", getName())
-                .putMetaNode("meta", new Laminate(meta()).setDescriptor(DescriptorUtils.buildDescriptor(this)))
+                .putMetaNode("meta", new Laminate(meta()).withDescriptor(DescriptorUtils.buildDescriptor(this)))
                 .setContentType("wrapper");
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();

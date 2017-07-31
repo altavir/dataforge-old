@@ -19,8 +19,10 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.names.Named;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
@@ -30,30 +32,18 @@ import java.util.stream.Stream;
 
 /**
  * A chain of immutable meta. The value is taken from the first meta in list
- * that contains it.
+ * that contains it. The list itself is immutable.
  *
  * @author darksnake
  */
 public final class Laminate extends Meta implements Described {
 
-    private String name;
-    private List<Meta> layers;
+    private List<Meta> layers = new ArrayList<>();
     private NodeDescriptor descriptor;
     private Meta descriptorLayer;
 
-    public Laminate(String name) {
-        this.name = name;
-        this.layers = new ArrayList<>();
-    }
-
-    public Laminate(String name, List<Meta> layers) {
-        this.name = name;
-        this.layers = new ArrayList<>(layers);
-        cleanUpLayers();
-    }
-
     public Laminate(List<Meta> layers) {
-        this(layers == null || layers.isEmpty() ? "" : layers.get(0).getName(), layers);
+        layers.forEach(this::addLayer);
     }
 
     /**
@@ -65,29 +55,52 @@ public final class Laminate extends Meta implements Described {
         this(Arrays.asList(layers));
     }
 
-    public Laminate(String name, Meta... layers) {
-        this(name, Arrays.asList(layers));
+    /**
+     * Copy constructor
+     *
+     * @param laminate
+     */
+    public Laminate(Laminate laminate) {
+        this.layers = laminate.layers;
+        this.descriptor = laminate.descriptor;
+        this.descriptorLayer = laminate.descriptorLayer;
+    }
+
+    private void addLayer(Meta layer) {
+        if (layer != null && !layer.isEmpty()) {
+            if(layer instanceof MutableMetaNode){
+                LoggerFactory.getLogger(getClass()).warn("Using mutable meta in the laminate");
+            }
+            this.layers.add(layer);
+        }
+    }
+
+    private void addFirstLayer(Meta layer) {
+        if (layer != null && !layer.isEmpty()) {
+            if(layer instanceof MutableMetaNode){
+                LoggerFactory.getLogger(getClass()).warn("Using mutable meta in the laminate");
+            }
+            this.layers.add(0, layer);
+        }
+    }
+
+    private void setDescriptor(NodeDescriptor descriptor) {
+        this.descriptor = descriptor;
+        /*
+         * Add node descriptor as a separate laminate layer to avoid including it in
+         * hasMeta and hasValue
+         */
+        descriptorLayer = DescriptorUtils.buildDefaultNode(descriptor);
     }
 
     /**
      * Attach descriptor to this laminate to use for default values and aliases
      * (ALIASES NOT IMPLEMENTED YET!).
      */
-    public Laminate setDescriptor(NodeDescriptor descriptor) {
-        //Storing descriptor to pass it to children 
-        this.descriptor = descriptor;
-        buildDescriptorLayer();
-        return this;
-    }
-
-    /**
-     * Add node descriptor as a separate laminate layer to avoid including it in
-     * hasMeta and hasValue
-     */
-    private void buildDescriptorLayer() {
-        if (this.descriptor != null) {
-            descriptorLayer = DescriptorUtils.buildDefaultNode(descriptor);
-        }
+    public Laminate withDescriptor(NodeDescriptor descriptor) {
+        Laminate res =new Laminate(this);
+        res.setDescriptor(descriptor);
+        return res;
     }
 
     /**
@@ -96,37 +109,24 @@ public final class Laminate extends Meta implements Described {
      * @param layer
      * @return
      */
-    public Laminate addFirstLayer(Meta layer) {
-        if (!layer.isEmpty()) {
-            this.layers.add(0, layer);
-        }
-        cleanUpLayers();
-        return this;
+    public Laminate withFirstLayer(Meta layer) {
+        Laminate res = new Laminate(this);
+        res.addFirstLayer(layer);
+        return res;
     }
 
     /**
      * Add layer to stack
      *
-     * @param layer
+     * @param layers
      * @return
      */
-    public Laminate addLayer(Meta layer) {
-        if (!layer.isEmpty()) {
-            this.layers.add(layer);
+    public Laminate withLayer(Meta... layers) {
+        Laminate res = new Laminate(this);
+        for (Meta layer : layers) {
+            res.addLayer(layer);
         }
-        cleanUpLayers();
-        return this;
-    }
-
-    public Laminate setLayers(Meta... layers) {
-        return setLayers(Arrays.asList(layers));
-    }
-
-    public Laminate setLayers(Collection<Meta> layers) {
-        this.layers.clear();
-        this.layers.addAll(layers);
-        cleanUpLayers();
-        return this;
+        return res;
     }
 
     public List<Meta> layers() {
@@ -142,10 +142,6 @@ public final class Laminate extends Meta implements Described {
         List<Meta> layersInverse = new ArrayList<>(this.layers);
         Collections.reverse(layersInverse);
         return layersInverse;
-    }
-
-    private void cleanUpLayers() {
-        this.layers.removeIf((meta) -> meta == null || meta.isEmpty());
     }
 
     @Override
@@ -187,7 +183,7 @@ public final class Laminate extends Meta implements Described {
 
     @Override
     public String getName() {
-        return name;
+        return layers().stream().map(Named::getName).findFirst().orElse(MetaNode.DEFAULT_META_NAME);
     }
 
     /**

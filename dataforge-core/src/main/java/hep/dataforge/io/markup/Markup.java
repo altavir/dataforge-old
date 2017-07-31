@@ -80,19 +80,15 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
      * @return
      */
     public Laminate getStyle() {
-        Laminate laminate = new Laminate();
-
-        if (meta().hasMeta(MARKUP_STYLE_NODE)) {
-            laminate.addFirstLayer(meta().getMeta(MARKUP_STYLE_NODE));
-        }
+        Laminate laminate = new Laminate(meta()
+                .getMetaOrEmpty(MARKUP_STYLE_NODE))
+                .withDescriptor(getDescriptor());
 
         Markup parent = getParent();
 
         if (parent != null) {
-            laminate.addLayer(parent.getStyle());
+             laminate = laminate.withLayer(parent.getStyle());
         }
-
-        laminate.setDescriptor(getDescriptor());
         return laminate;
     }
 

@@ -41,15 +41,12 @@ public class NamedData<T> extends Data<T> implements Named {
      * @return
      */
     public static <T> NamedData<T> wrap(String name, Data<T> data, Meta... externalMeta) {
-        Laminate newMeta = new Laminate(data.meta());
-        for (Meta m : externalMeta) {
-            newMeta.addLayer(m);
-        }
+        Laminate newMeta = new Laminate(data.meta()).withLayer(externalMeta);
         return new NamedData<T>(name, data.getGoal(), data.type(), newMeta);
     }
 
     public static <T> NamedData<T> wrap(Name name, Data<T> data, Laminate externalMeta) {
-        Laminate newMeta = externalMeta.addFirstLayer(data.meta());
+        Laminate newMeta = externalMeta.withFirstLayer(data.meta());
         return new NamedData<T>(name.toString(), data.getGoal(), data.type(), newMeta);
     }
 
