@@ -34,7 +34,7 @@ class PlotView : View("DataForge plot viewer") {
     private val plotMap = HashMap<File, PlotContainer>()
 
     init{
-        loadButton.setOnAction { event ->
+        loadButton.setOnAction {
             val chooser = FileChooser()
             chooser.title = "Select plot file to load"
             chooser.extensionFilters.setAll(FileChooser.ExtensionFilter("DataForge plot", "*.dfp"))
@@ -54,7 +54,7 @@ class PlotView : View("DataForge plot viewer") {
         val container: PlotContainer = plotMap.getOrElse(file){
             val pane = AnchorPane()
             val tab = Tab(file.name, pane)
-            tab.setOnClosed { event -> plotMap.remove(file) }
+            tab.setOnClosed { plotMap.remove(file) }
             tabs.tabs.add(tab)
             PlotContainer.anchorTo(pane)
         }

@@ -38,7 +38,7 @@ import java.util.stream.Stream;
  */
 public final class Laminate extends Meta implements Described {
 
-    private List<Meta> layers = new ArrayList<>();
+    private final List<Meta> layers = new ArrayList<>();
     private NodeDescriptor descriptor;
     private Meta descriptorLayer;
 
@@ -61,7 +61,7 @@ public final class Laminate extends Meta implements Described {
      * @param laminate
      */
     public Laminate(Laminate laminate) {
-        this.layers = laminate.layers;
+        this.layers.addAll(laminate.layers);
         this.descriptor = laminate.descriptor;
         this.descriptorLayer = laminate.descriptorLayer;
     }
@@ -69,7 +69,7 @@ public final class Laminate extends Meta implements Described {
     private void addLayer(Meta layer) {
         if (layer != null && !layer.isEmpty()) {
             if(layer instanceof MutableMetaNode){
-                LoggerFactory.getLogger(getClass()).warn("Using mutable meta in the laminate");
+                LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
             this.layers.add(layer);
         }
@@ -78,7 +78,7 @@ public final class Laminate extends Meta implements Described {
     private void addFirstLayer(Meta layer) {
         if (layer != null && !layer.isEmpty()) {
             if(layer instanceof MutableMetaNode){
-                LoggerFactory.getLogger(getClass()).warn("Using mutable meta in the laminate");
+                LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
             this.layers.add(0, layer);
         }
