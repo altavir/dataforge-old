@@ -13,6 +13,7 @@ import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.utils.GenericBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Collection;
 import java.util.Iterator;
@@ -141,7 +142,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      *
      * @return
      */
-    Stream<NamedData<? extends T>> dataStream(boolean recusive);
+    Stream<NamedData<? extends T>> dataStream(boolean recursive);
 
     default Stream<NamedData<? extends T>> dataStream() {
         return dataStream(true);
@@ -153,7 +154,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      * @param consumer
      */
     default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<? extends T>> consumer) {
-        dataStream().filter(predicate).forEach(d -> consumer.accept(d));
+        dataStream().filter(predicate).forEach(consumer::accept);
     }
 
     /**
@@ -273,6 +274,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
         }
     }
 
+    @NotNull
     @Override
     default Iterator<NamedData<? extends T>> iterator() {
         return dataStream().iterator();
