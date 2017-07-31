@@ -35,6 +35,8 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
+    public static final String DEFAULT_META_NAME = "meta";
+
     private static final long serialVersionUID = 1L;
 
     protected String name;
@@ -43,7 +45,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
 
 
     protected MetaNode() {
-        this("");
+        this(DEFAULT_META_NAME);
     }
 
     protected MetaNode(String name) {

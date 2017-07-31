@@ -88,6 +88,7 @@ public class CachePlugin extends BasicPlugin {
                     if (data.getGoal().isDone()) {
                         data.getInFuture().thenAccept(val-> result.complete(val));
                     } else if (cache.containsKey(id)) {
+                        getLogger().info("Cached result found. Restoring data from cache for id {}", id.hashCode());
                         CompletableFuture.supplyAsync(() -> cache.get(id)).whenComplete((res, err) -> {
                             if (res != null) {
                                 result.complete(res);

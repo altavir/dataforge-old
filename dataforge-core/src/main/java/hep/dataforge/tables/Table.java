@@ -19,7 +19,6 @@ import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
 
 import java.util.stream.Stream;
@@ -80,12 +79,12 @@ public interface Table extends Markedup, NavigablePointSource {
      */
     TableFormat getFormat();
 
-    default Meta toMeta() {
-        MetaBuilder res = new MetaBuilder("table");
-        res.putNode("format", getFormat().toMeta());
-        MetaBuilder dataNode = new MetaBuilder("data");
-        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
-        res.putNode(dataNode);
-        return res;
-    }
+//    default Meta toMeta() {
+//        MetaBuilder res = new MetaBuilder("table");
+//        res.putNode("format", getFormat().toMeta());
+//        MetaBuilder dataNode = new MetaBuilder("data");
+//        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+//        res.putNode(dataNode);
+//        return res;
+//    }
 }

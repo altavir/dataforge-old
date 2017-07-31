@@ -41,7 +41,11 @@ class GrindShell implements Encapsulated {
         //adding package import
         importCustomizer.addStarImports(meta.getStringArray("import.package") { new String[0] })
         //adding static imports
-        importCustomizer.addStaticStars(meta.getStringArray("import.utils") { ["java.lang.Math"] as String[] });
+        importCustomizer.addStaticStars(
+                meta.getStringArray("import.utils") {
+                    ["java.lang.Math", "hep.dataforge.grind.Grind"] as String[]
+                }
+        )
         //adding regular imports
         importCustomizer.addImports(meta.getStringArray("import.classes") { new String[0] });
         //add import with aliases

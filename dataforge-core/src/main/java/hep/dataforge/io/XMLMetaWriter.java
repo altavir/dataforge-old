@@ -6,6 +6,7 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaNode;
 import hep.dataforge.values.Value;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
@@ -82,7 +83,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
     private Element getXMLElement(Meta meta, Document doc) {
         String elementName;
         if (meta.isAnonimous()) {
-            elementName = "meta";
+            elementName = MetaNode.DEFAULT_META_NAME;
         } else {
             elementName = meta.getName();
         }

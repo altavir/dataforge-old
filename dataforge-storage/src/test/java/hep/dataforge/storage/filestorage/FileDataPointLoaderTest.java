@@ -80,7 +80,7 @@ public class FileDataPointLoaderTest {
         System.out.println("push");
         Instant start = DateTimeUtils.now();
         for (int i = 0; i < 1000; i++) {
-            loader.push(new ValueMap(names, i, i * 2, Math.sqrt(i)));
+            loader.push(ValueMap.of(names, i, i * 2, Math.sqrt(i)));
 //            System.out.printf("Point with number %d loaded%n", i);
         }
         System.out.printf("Push operation for 1000 element completed in %s%n", Duration.between(start, DateTimeUtils.now()));

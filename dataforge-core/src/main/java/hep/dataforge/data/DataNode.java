@@ -311,7 +311,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
         }
 
         default B putAll(Collection<NamedData<? extends T>> dataCollection) {
-            dataCollection.stream().forEach(it -> putData(it));
+            dataCollection.forEach(this::putData);
             return self();
         }
 
@@ -320,11 +320,15 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
             return self();
         }
 
-        default B putStatic(String key, T staticData) {
+        default B putStatic(String key, T staticData, Meta meta) {
             if (!type().isInstance(staticData)) {
                 throw new IllegalArgumentException("The data mast be instance of " + type().getName());
             }
-            return putData(NamedData.buildStatic(key, staticData, Meta.empty()));
+            return putData(NamedData.buildStatic(key, staticData, meta));
+        }
+
+        default B putStatic(String key, T staticData) {
+            return putStatic(key, staticData, Meta.empty());
         }
     }
 

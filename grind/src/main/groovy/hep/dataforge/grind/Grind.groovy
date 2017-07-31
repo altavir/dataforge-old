@@ -1,6 +1,8 @@
 package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
+import hep.dataforge.actions.Action
+import hep.dataforge.grind.actions.GrindPipe
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.MetaMorph
 import hep.dataforge.workspace.Workspace
@@ -18,7 +20,7 @@ class Grind {
      * @return
      */
     static MetaBuilder buildMeta(@DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return buildMeta("", cl);
+        return buildMeta("meta", cl);
     }
 
     /**
@@ -42,7 +44,7 @@ class Grind {
     }
 
     static MetaBuilder buildMeta(Map values) {
-        return buildMeta("", values);
+        return buildMeta("meta", values);
     }
 
     /**
@@ -52,7 +54,7 @@ class Grind {
      * @return
      */
     static MetaBuilder buildMeta(String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        if(cl != null) {
+        if (cl != null) {
             def metaSpec = new GrindMetaBuilder()
             def metaExec = cl.rehydrate(metaSpec, null, null);
             metaExec.resolveStrategy = Closure.DELEGATE_ONLY;
@@ -145,7 +147,20 @@ class Grind {
      * @param args
      * @return
      */
-    static <T extends MetaMorph> T morph(Class<T> type, Object... args){
-        MetaMorph.morph(type,buildMeta(args))
+    static <T extends MetaMorph> T morph(Class<T> type, Object... args) {
+        MetaMorph.morph(type, buildMeta(args))
+    }
+
+    /**
+     * Build a simple pipe action
+     * @param cl
+     * @return
+     */
+    static <T, R> Action<T, R> pipe(Map params = Collections.emptyMap(), Closure<R> cl) {
+        return GrindPipe.build(params, cl)
+    }
+
+    static <T, R> Action<T, R> join(Map params = Collections.emptyMap(), Closure<R> cl) {
+        return GrindPipe.build(params, cl)
     }
 }

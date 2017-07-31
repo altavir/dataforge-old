@@ -20,6 +20,7 @@ import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
@@ -58,7 +59,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         int metaLength = tag.getMetaSize();
         Meta meta;
         if (metaLength == 0) {
-            meta = Meta.buildEmpty("meta");
+            meta = Meta.buildEmpty(MetaNode.DEFAULT_META_NAME);
         } else {
             try {
                 meta = parser.read(bis, metaLength);

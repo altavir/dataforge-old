@@ -105,7 +105,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
 
     private Optional<File> getFromHardCache(Meta id) {
         //work around for meta numeric hashcode inequality
-        return hardCache.entrySet().stream().filter(entry -> entry.getKey().equals(id)).findFirst().map(it -> it.getValue());
+        return hardCache.entrySet().stream().filter(entry -> entry.getKey().equals(id)).findFirst().map(Map.Entry::getValue);
     }
 
     @Override
@@ -150,7 +150,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
 
     @Override
     public void putAll(Map<? extends Meta, ? extends V> map) {
-        map.forEach((id, data) -> put(id, data));
+        map.forEach(this::put);
     }
 
     @Override

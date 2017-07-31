@@ -20,10 +20,12 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Iterator;
 import java.util.List;
@@ -144,6 +146,7 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
                 return ListTable.this.getRows().map(point -> point.getValue(columnName));
             }
 
+            @NotNull
             @Override
             public Iterator<Value> iterator() {
                 return stream().iterator();
@@ -164,6 +167,16 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
     @Override
     public Value get(String columnName, int rowNumber) {
         return getRow(rowNumber).getValue(columnName);
+    }
+
+    @Override
+    public Meta toMeta() {
+        MetaBuilder res = new MetaBuilder("table");
+        res.putNode("format", getFormat().toMeta());
+        MetaBuilder dataNode = new MetaBuilder("data");
+        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+        res.putNode(dataNode);
+        return res;
     }
 
     @Override
