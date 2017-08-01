@@ -14,6 +14,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
 import hep.dataforge.plots.PlotManager;
 import javafx.application.Platform;
+import javafx.scene.Scene;
 import javafx.stage.Stage;
 import javafx.stage.Window;
 
@@ -33,7 +34,7 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
 
     private static ServiceLoader<FXPlotFrameFactory> fxPlotFrameFactoryServiceLoader = ServiceLoader.load(FXPlotFrameFactory.class);
 
-    private final Map<String, PlotContainer> containers = new HashMap<>();
+    private final Map<String, Map<String, PlotContainer>> stages = new HashMap<>();
 
     /**
      * Build an FX frame of the given type using spi.
@@ -43,11 +44,15 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
     public static FXPlotFrame buildFXPlotFrame(Meta meta) {
         String type = meta.getString(FX_FRAME_TYPE_KEY, "");
         return StreamSupport.stream(fxPlotFrameFactoryServiceLoader.spliterator(), false)
-                .filter(it -> type.isEmpty()|| it.getName().equals(type))
+                .filter(it -> type.isEmpty() || it.getName().equals(type))
                 .sorted()
                 .findFirst()
                 .orElseThrow(() -> new NameNotFoundException(type))
                 .build(meta);
+    }
+
+    private synchronized Map<String, PlotContainer> getStage(String stage) {
+        return stages.computeIfAbsent(stage, stageName -> new HashMap<>());
     }
 
     protected FXPlotFrame buildFrame(Meta meta) {
@@ -58,40 +63,34 @@ public class FXPlotManager extends BasicPlugin implements PlotManager {
         FXPlugin fx = getContext().getFeature(FXPlugin.class);
         PlotContainer container = FXPlotUtils.displayContainer(fx, name, 800, 600);
         container.setPlot(frame);
-        containers.put(name, container);
         return container;
     }
 
-    @Override
-    public synchronized PlotFrame buildPlotFrame(String stage, String name, Meta meta) {
-        if (!containers.containsKey(name)) {
-            FXPlotFrame frame = buildFrame(meta);
-            frame.configure(meta);
-            PlotContainer container = showPlot(name, frame);
-            containers.put(name, container);
-        }
-        return containers.get(name).getPlot();
+    public synchronized PlotContainer getPlotContainer(String stage, String name) {
+        return getStage(stage).computeIfAbsent(name, plotName -> {
+            FXPlotFrame frame = buildFrame(meta());
+            return showPlot(name, frame);
+        });
     }
 
     @Override
     public PlotFrame getPlotFrame(String stage, String name) throws NameNotFoundException {
-        if (!hasPlotFrame(stage, name)) {
-            return buildPlotFrame(stage, name, Meta.empty());
-        } else {
-            PlotContainer container = containers.get(name);
-            Window window = container.getPane().getScene().getWindow();
-            if (!window.isShowing()) {
-                if (window instanceof Stage) {
-                    Platform.runLater(() -> ((Stage) window).show());
+        PlotContainer container = getPlotContainer(stage, name);
+        Platform.runLater(() -> {
+            Scene scene = container.getPane().getScene();
+            if (scene != null) {
+                Window window = container.getPane().getScene().getWindow();
+                if (window != null && !window.isShowing() && window instanceof Stage) {
+                    ((Stage) window).show();
                 }
             }
-            return container.getPlot();
-        }
+        });
+        return container.getPlot();
     }
 
     @Override
     public boolean hasPlotFrame(String stage, String name) {
-        return containers.containsKey(name);
+        return stages.containsKey(stage) && stages.get(stage).containsKey(name);
     }
 
 }

@@ -16,7 +16,9 @@
 package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
+import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.values.NamedValue
 
 /**
  * A builder to create annotations
@@ -34,7 +36,7 @@ class GrindMetaBuilder extends BuilderSupport {
         return createNode(name, attributes, null);
     }
 
-    private boolean isCollectionOrArray(Object object) {
+    private static boolean isCollectionOrArray(Object object) {
         return object instanceof Collection || object.getClass().isArray()
     }
 
@@ -68,6 +70,20 @@ class GrindMetaBuilder extends BuilderSupport {
     @Override
     void setParent(Object parent, Object child) {
         ((MetaBuilder) parent).attachNode((MetaBuilder) child);
+    }
+
+    void put(Meta meta) {
+        (this.current as MetaBuilder).putNode(meta);
+    }
+
+    void put(NamedValue value) {
+        (this.current as MetaBuilder).putValue(value.name, value.anonymousValue);
+    }
+
+    void put(Map<String, ?> map) {
+        map.each { k, v ->
+            (this.current as MetaBuilder).putValue(k, v);
+        }
     }
 }
 

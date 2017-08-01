@@ -27,32 +27,43 @@ import hep.dataforge.meta.Meta;
 public interface PlotManager extends Configurable {
     String DEFAULT_STAGE_NAME = "";
     
-    /**
-     * Выдает рамку с обновленными парамтрами или создаент новую.
-     *
-     * @param name
-     * @param annotation
-     * @return
-     */
-    PlotFrame buildPlotFrame(String stage, String name, Meta annotation);
-    
-    default PlotFrame buildPlotFrame(String name, Meta annotation){
-        return PlotManager.this.buildPlotFrame(DEFAULT_STAGE_NAME, name, annotation);
-    }
+//    /**
+//     * Выдает рамку с обновленными парамтрами или создаент новую.
+//     *
+//     * @param name
+//     * @param annotation
+//     * @return
+//     */
+//    PlotFrame buildPlotFrame(String stage, String name, Meta annotation);
+//
+//    default PlotFrame buildPlotFrame(String name, Meta annotation){
+//        return PlotManager.this.buildPlotFrame(DEFAULT_STAGE_NAME, name, annotation);
+//    }
 
     /**
-     * Возвращает уже созданную рамку. Выкидывает ошибку, если таковой не
-     * найдено.
+     * Get or create a plot frame with default meta
      *
      * @param name
      * @return
      * @throws NameNotFoundException
      */
-    PlotFrame getPlotFrame(String stage, String name) throws NameNotFoundException;
-    
+    PlotFrame getPlotFrame(String stage, String name);
+
+    default PlotFrame getPlotFrame(String stage, String name, Meta meta){
+        PlotFrame frame = getPlotFrame(stage, name);
+        frame.configure(meta);
+        return frame;
+    }
+
+    default PlotFrame getPlotFrame(String name, Meta meta){
+        return getPlotFrame(DEFAULT_STAGE_NAME,name,meta);
+    }
+
+
     default PlotFrame getPlotFrame(String name){
         return getPlotFrame(DEFAULT_STAGE_NAME, name);
     }
+
 
     boolean hasPlotFrame(String stage, String name);
     

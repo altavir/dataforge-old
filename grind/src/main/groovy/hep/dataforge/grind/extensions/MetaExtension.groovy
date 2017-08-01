@@ -22,13 +22,31 @@ import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.*
 import hep.dataforge.values.MapValueProvider
 import hep.dataforge.values.NamedValue
-import hep.dataforge.values.Value
 
 /**
  * Created by darksnake on 20-Aug-16.
  */
 @CompileStatic
 class MetaExtension {
+
+    static void setProperty(final MetaBuilder self, String name, Object value) {
+        if (value instanceof Meta) {
+            self.setNode(name, (Meta) value)
+        } else if (value instanceof Collection) {
+            self.setNode(name, (Collection<? extends Meta>) value)
+        } else if (value.getClass().isArray()) {
+            self.setNode(name, (Meta[]) value)
+        } else {
+            throw new RuntimeException("Can't convert ${value.getClass()} to Meta")
+        }
+    }
+
+    static Meta getProperty(final Meta self, String name) {
+        return self.getMeta(name)
+    }
+
+
+
     static MetaBuilder plus(final Meta self, MetaBuilder other) {
         return new JoinRule().merge(self, other);
     }
@@ -124,25 +142,8 @@ class MetaExtension {
         return new MetaBuilder(self).update(values)
     }
 
-    //TODO add tests
-    static void setProperty(final MetaBuilder self, String name, Object value) {
-        if (value instanceof Meta) {
-            self.setNode(name, (Meta) value)
-        } else if (value instanceof Collection) {
-            self.setNode(name, (Collection<? extends Meta>) value)
-        } else if (value.getClass().isArray()) {
-            self.setNode(name, (Meta[]) value)
-        } else {
-            throw new RuntimeException("Can't convert ${value.getClass()} to Meta")
-        }
-    }
-
-    static Meta getProperty(final Meta self, String name) {
-        return self.getMeta(name)
-    }
-
-    static Value getAt(final Meta self, String name) {
-        return self.getValue(name);
+    static Object getAt(final Meta self, String name) {
+        return self.getValue(name).value();
     }
 
     static void setAt(final MetaBuilder self, String name, Object value) {

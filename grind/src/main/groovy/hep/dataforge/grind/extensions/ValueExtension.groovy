@@ -6,7 +6,7 @@
 
 package hep.dataforge.grind.extensions
 
-import hep.dataforge.exceptions.ValueConversionException
+import groovy.transform.CompileStatic
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
@@ -17,6 +17,7 @@ import java.time.Instant
  *
  * @author Alexander Nozik
  */
+@CompileStatic
 class ValueExtension {
 
     static Value plus(final Value self, Object obj) {
@@ -65,7 +66,8 @@ class ValueExtension {
     static Value negative(final Value self) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(-self.numberValue());
+                //TODO fix non-dobule values
+                return Value.of( -self.doubleValue());
             case ValueType.STRING:
                 throw new RuntimeException("Can't negate String value")
             case ValueType.TIME:
@@ -94,7 +96,7 @@ class ValueExtension {
                 //TODO implement
                 throw new RuntimeException("Boolean multiply operator is not yet supported")
             case ValueType.NULL:
-                return negate(other);
+                return Value.NULL;
         }
     }
 
@@ -119,29 +121,29 @@ class ValueExtension {
             case Date:
                 return Date.from(self.timeValue());
             default:
-                throw new ValueConversionException("Unknown value cast type: ${type}");
+                throw new RuntimeException("Unknown value cast type: ${type}");
         }
     }
 
-    /**
-     * Unwrap value and return its content in its native form. Possible loss of precision for numbers
-     * @param self
-     * @return
-     */
-    static Object unbox(final Value self) {
-        switch (self.getType()) {
-            case ValueType.NUMBER:
-                return self.doubleValue();
-            case ValueType.STRING:
-                return self.stringValue();
-            case ValueType.TIME:
-                return self.timeValue();
-            case ValueType.BOOLEAN:
-                return self.booleanValue();
-            case ValueType.NULL:
-                return null;
-        }
-    }
+//    /**
+//     * Unwrap value and return its content in its native form. Possible loss of precision for numbers
+//     * @param self
+//     * @return
+//     */
+//    static Object unbox(final Value self) {
+//        switch (self.getType()) {
+//            case ValueType.NUMBER:
+//                return self.doubleValue();
+//            case ValueType.STRING:
+//                return self.stringValue();
+//            case ValueType.TIME:
+//                return self.timeValue();
+//            case ValueType.BOOLEAN:
+//                return self.booleanValue();
+//            case ValueType.NULL:
+//                return null;
+//        }
+//    }
 
     /**
      * Represent DataPoint as a map of typed objects according to value type
@@ -150,7 +152,7 @@ class ValueExtension {
      */
     static Map<String, Object> unbox(final Values self) {
         self.getNames().collectEntries {
-            [it: self.getValue(it).unbox()]
+            [it: self.getValue(it).value()]
         }
     }
 

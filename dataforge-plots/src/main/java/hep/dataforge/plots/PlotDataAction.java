@@ -93,7 +93,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         if (holder.hasPlotFrame(frame_name)) {
             frame = holder.getPlotFrame(frame_name);
         } else {
-            frame = holder.buildPlotFrame(frame_name, findFrameDescription(meta, frame_name));
+            frame = holder.getPlotFrame(frame_name, findFrameDescription(meta, frame_name));
         }
         XYAdapter adapter = new XYAdapter(meta.getMeta("adapter", Meta.buildEmpty("adapter")));
 

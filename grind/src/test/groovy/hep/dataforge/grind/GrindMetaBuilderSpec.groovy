@@ -25,30 +25,39 @@ import spock.lang.Specification
  */
 class GrindMetaBuilderSpec extends Specification {
 
-    def "Check meta building"(){
+    def "Check meta building"() {
         when:
-        Meta root = new GrindMetaBuilder().root(someValue: "some text here"){
-            childNode(childNodeValue:["some","other", "text", "here"], something: 18)
-            childNode(childNodeValue:"some givverish text here", something: 398)
-            otherChildNode{
-                grandChildNode(a: 22, text:"fslfjsldfj")
+        Meta root = new GrindMetaBuilder().root(someValue: "some text here") {
+            childNode(childNodeValue: ["some", "other", "text", "here"], something: 18)
+            childNode(childNodeValue: "some givverish text here", something: 398)
+            otherChildNode {
+                grandChildNode(a: 22, text: "fslfjsldfj")
             }
-            for(int i = 0; i<10; i++){
-                numberedNode(number:i)
+            for (int i = 0; i < 10; i++) {
+                numberedNode(number: i)
             }
         }
-        
+
         then:
         println new XMLMetaWriter().writeString(root)
         root.getInt("otherChildNode.grandChildNode.a") == 22
     }
 
-    def "Check simple meta"(){
+    def "Check simple meta"() {
         when:
         Meta m = Grind.parseMeta("myMeta");
         then:
         m.name == "myMeta"
     }
-	
+
+    def "Check unary operations"() {
+        when:
+        Meta root = new GrindMetaBuilder().root(someValue: "some text here") {
+            put a: 22
+        }
+        then:
+        root.getInt("a") == 22
+    }
+
 }
 
