@@ -6,16 +6,17 @@ import org.junit.Test;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 
 import static org.junit.Assert.assertEquals;
 
 public class TaglessEnvelopeTest {
-    Envelope envelope = new EnvelopeBuilder()
+    private Envelope envelope = new EnvelopeBuilder()
             .setMeta(new MetaBuilder("meta")
                     .putValue("myValue", 12)
-            ).setData("Всем привет!".getBytes());
+            ).setData("Всем привет!".getBytes(Charset.forName("UTF-8")));
 
-    EnvelopeType envelopeType = TaglessEnvelopeType.instance;
+    private EnvelopeType envelopeType = TaglessEnvelopeType.instance;
 
     @Test
     public void testWriteRead() throws IOException {
@@ -27,7 +28,7 @@ public class TaglessEnvelopeTest {
         ByteArrayInputStream bais = new ByteArrayInputStream(baos.toByteArray());
         Envelope restored = envelopeType.getReader().read(bais);
 
-        assertEquals(new String(restored.getData().getBuffer().array()), "Всем привет!");
+        assertEquals(new String(restored.getData().getBuffer().array(),"UTF-8"), "Всем привет!");
     }
 
     @Test
@@ -35,10 +36,10 @@ public class TaglessEnvelopeTest {
         String envString = "<meta myValue=\"12\"/>\n" +
                 "#~=DATA=~#\n" +
                 "Всем привет!";
-        System.out.println(new String(envString));
-        ByteArrayInputStream bais = new ByteArrayInputStream(envString.getBytes());
+        System.out.println(envString);
+        ByteArrayInputStream bais = new ByteArrayInputStream(envString.getBytes("UTF-8"));
         Envelope restored = envelopeType.getReader().read(bais);
 
-        assertEquals(new String(restored.getData().getBuffer().array()), "Всем привет!");
+        assertEquals(new String(restored.getData().getBuffer().array(),"UTF-8"), "Всем привет!");
     }
 }

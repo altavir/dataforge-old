@@ -108,4 +108,8 @@ In this section we will try to cover DataForge main ideas in the form of questio
 
 <hr>
 
-**TODO** beakerx
+**Q:** Is it possible to use DataForge in notebook mode?
+
+**A:** Yes, it is. DataForge can be used as is from [beaker/beakerx](http://beakernotebook.com/) groovy kernel with minor additional adjustments. It is planned to provide separate DataForge kernel to `beakerx` which will automatically call a specific GRIND shell.
+
+<hr>
