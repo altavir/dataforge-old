@@ -30,27 +30,12 @@ import hep.dataforge.values.NamedValue
 class MetaExtension {
 
     static {
-        def metaClass = new ExpandoMetaClass(Meta)
+        def metaClass = new ExpandoMetaClass(Meta,true,true,null)
         metaClass.registerInstanceMethod("getProperty") { String name ->
             return (delegate as Meta).getMetaOrEmpty(name)
         }
+        metaClass.initialize();
 
-    }
-
-    static void setProperty(final MetaBuilder self, String name, Object value) {
-        if (value instanceof Meta) {
-            self.setNode(name, (Meta) value)
-        } else if (value instanceof Collection) {
-            self.setNode(name, (Collection<? extends Meta>) value)
-        } else if (value.getClass().isArray()) {
-            self.setNode(name, (Meta[]) value)
-        } else {
-            throw new RuntimeException("Can't convert ${value.getClass()} to Meta")
-        }
-    }
-
-    static Meta getProperty(final Meta self, String name) {
-        return self.getMeta(name)
     }
 
     static MetaBuilder plus(final Meta self, MetaBuilder other) {

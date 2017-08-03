@@ -6,11 +6,21 @@ import spock.lang.Specification
 
 class MetaExtensionTest extends Specification {
 
-    def "Property access"(){
-        given:
-        Meta meta = Grind.buildMeta(a:22,b:"asdfg")
+    def "Property read"() {
         when:
-        meta.child = Grind.buildMeta(b:33)
+        Meta meta = Grind.buildMeta(a: 22, b: "asdfg") {
+            child(c: 22.8, d: "hocus-pocus")
+        }
+        then:
+        meta.child["c"] == 22.8
+        meta.getValue("child.d") == "hocus-pocus"
+    }
+
+    def "Property write"() {
+        given:
+        Meta meta = Grind.buildMeta(a: 22, b: "asdfg")
+        when:
+        meta.child = Grind.buildMeta(b: 33)
         then:
         meta["child.b"] == 33
         meta.child["b"] == 33

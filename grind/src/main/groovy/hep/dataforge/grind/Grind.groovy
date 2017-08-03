@@ -3,6 +3,7 @@ package hep.dataforge.grind
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.Action
 import hep.dataforge.grind.actions.GrindPipe
+import hep.dataforge.grind.extensions.ExtensionInitializer
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.MetaMorph
 import hep.dataforge.workspace.Workspace
@@ -13,6 +14,10 @@ import org.codehaus.groovy.control.CompilerConfiguration
  */
 @CompileStatic
 class Grind {
+
+    static {
+        ExtensionInitializer.initMeta()
+    }
 
     /**
      * Build anonymous meta node using {@code GrindMetaBuilder}
