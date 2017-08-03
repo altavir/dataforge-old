@@ -29,6 +29,14 @@ import hep.dataforge.values.NamedValue
 @CompileStatic
 class MetaExtension {
 
+    static {
+        def metaClass = new ExpandoMetaClass(Meta)
+        metaClass.registerInstanceMethod("getProperty") { String name ->
+            return (delegate as Meta).getMetaOrEmpty(name)
+        }
+
+    }
+
     static void setProperty(final MetaBuilder self, String name, Object value) {
         if (value instanceof Meta) {
             self.setNode(name, (Meta) value)
@@ -44,8 +52,6 @@ class MetaExtension {
     static Meta getProperty(final Meta self, String name) {
         return self.getMeta(name)
     }
-
-
 
     static MetaBuilder plus(final Meta self, MetaBuilder other) {
         return new JoinRule().merge(self, other);

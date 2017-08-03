@@ -13,6 +13,10 @@ ext {
     mainClassName = "com.sysgears.grain.Main"
 }
 
+artifactoryPublish {
+    skip = true
+}
+
 repositories {
     mavenCentral()
     maven {

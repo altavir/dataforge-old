@@ -18,3 +18,5 @@ site/target/
 site/content/docs-gen/
 site/.cache/
 site/pass.txt
+
+gradle.properties
