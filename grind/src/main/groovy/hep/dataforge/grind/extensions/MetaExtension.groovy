@@ -29,6 +29,15 @@ import hep.dataforge.values.Value
  */
 @CompileStatic
 class MetaExtension {
+
+    static {
+        def metaClass = new ExpandoMetaClass(Meta)
+        metaClass.registerInstanceMethod("getProperty") { String name ->
+            return (delegate as Meta).getMetaOrEmpty(name)
+        }
+
+    }
+
     static MetaBuilder plus(final Meta self, MetaBuilder other) {
         return new JoinRule().merge(self, other);
     }
