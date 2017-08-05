@@ -133,7 +133,7 @@ public class DataTree<T> implements DataNode<T> {
         } else {
             DataNode<? extends T> node = getNode(dataName.cutLast());
             if (node != null) {
-                return node.optData(dataName.getLast().toString()).get();
+                return node.optData(dataName.getLast().toString()).orElse(null);
             } else {
                 return null;
             }
@@ -286,7 +286,8 @@ public class DataTree<T> implements DataNode<T> {
         return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 
-    protected DataTree<T> getNode(Name nodeName) {
+    @SuppressWarnings("unchecked")
+    DataTree<T> getNode(Name nodeName) {
         String child = nodeName.getFirst().toString();
         if (nodeName.length() == 1) {
             return (DataTree<T>) nodes.get(nodeName.toString());
