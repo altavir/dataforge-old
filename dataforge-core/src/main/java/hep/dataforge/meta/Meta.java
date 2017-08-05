@@ -172,6 +172,16 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         return new XMLMetaWriter().writeString(this);
     }
 
+    @Override
+    public String defaultTarget() {
+        return META_TARGET;
+    }
+
+    @Override
+    public String defaultChainTarget() {
+        return VALUE_TARGET;
+    }
+
     private static class EmptyMeta extends Meta{
 
         @Override

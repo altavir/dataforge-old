@@ -233,4 +233,17 @@ public class NamesUtils {
         }
     }
 
+    /**
+     * Check if given string is a valid size=1 name
+     * @param token
+     * @return
+     */
+    public static boolean isValidToken(String token){
+        try {
+            return Name.of(token).length() == 1;
+        }catch (Exception ex){
+            return false;
+        }
+    }
+
 }

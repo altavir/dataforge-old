@@ -35,7 +35,7 @@ class NameToken implements Name {
         if (singlet.matches(".*\\[.*\\]")) {
             int bracketIndex = singlet.indexOf("[");
             this.theName = singlet.substring(0, bracketIndex);
-            this.theQuery = singlet.substring(bracketIndex + 1, singlet.indexOf("]"));
+            this.theQuery = singlet.substring(bracketIndex + 1, singlet.lastIndexOf("]"));
         } else {
             this.theName = singlet;
             this.theQuery = null;

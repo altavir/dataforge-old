@@ -8,4 +8,4 @@ date: 27.08.2015
 published: true
 ---
 Actions
-![Push data flow model](${r '/images/docs/actions.png'})
+![Push data flow model](${r '/docs/images/actions.png'})

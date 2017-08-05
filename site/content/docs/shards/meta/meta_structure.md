@@ -11,7 +11,7 @@ published: true
 <table>
 	<tr>
 		<td>
-			<img src="${r '/images/docs/annotations.png'}" alt="Meta structure"/>
+			<img src="${r '/docs/images/meta.svg'}" alt="Meta structure"/>
 		</td>
 		<td>
 			<p>

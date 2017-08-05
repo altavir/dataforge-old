@@ -44,17 +44,18 @@ public interface Name {
      */
     String NAME_TOKEN_SEPARATOR = ".";
 
+    @Deprecated
     String NAMESPACE_SEPARATOR = ":";
 
     Name EMPTY = new EmptyName();
 
     /**
-     * The length of Name produced from given string
+     * The number of segments of Name produced from given string
      *
      * @param name
      * @return
      */
-    static int lengthOf(String name) {
+    static int sizeOf(String name) {
         return Name.of(name).length();
     }
 

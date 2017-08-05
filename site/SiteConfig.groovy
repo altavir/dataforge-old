@@ -8,9 +8,8 @@ datetime_format = "dd.MM.yyyy"
 
 non_script_files = [/(?i).*\.(js|css)$/]
 
-excludes << '.*\\.yml'
-excludes << '.*\\.rb'
-binary_files << '.*\\.pdf'
+excludes << '.*\\.yml' << '.*\\.rb'
+binary_files << '.*\\.pdf' << '.*\\.svg'
 
 features {
     highlight = 'pygments' // 'none', 'pygments'

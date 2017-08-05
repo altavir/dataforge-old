@@ -30,7 +30,7 @@ public interface MetaProvider {
         if (provider instanceof MetaProvider) {
             return (MetaProvider) provider;
         }
-        return path -> provider.provide(Path.of(path, META_TARGET)).map(it -> Meta.class.cast(it));
+        return path -> provider.provide(Path.of(path, META_TARGET)).map(Meta.class::cast);
     }
 
 

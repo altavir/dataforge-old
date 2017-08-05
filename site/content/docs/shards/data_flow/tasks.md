@@ -7,5 +7,5 @@ version: 1.0
 date: 27.08.2015
 published: true
 ---
-![Pull data flow model](${r '/images/docs/tasks.png'})
+![Pull data flow model](${r '/docs/images/tasks.png'})
 Tasks

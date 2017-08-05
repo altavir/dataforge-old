@@ -16,6 +16,7 @@ import java.util.stream.Stream;
  */
 public interface TableFormat extends NameSetContainer, Iterable<ColumnFormat> {
 
+    @NotNull
     static TableFormat subFormat(TableFormat format, String... names){
         Names theNames = Names.of(names);
         return () -> format.getColumns().filter(it -> theNames.contains(it.getName()));
