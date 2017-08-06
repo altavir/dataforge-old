@@ -25,6 +25,20 @@ public class ColumnTable implements Table {
         }
     }
 
+    /**
+     * Create instance of column table using given columns with appropriate names
+     * @param columns
+     * @return
+     */
+    public static ColumnTable of(Map<String, Column> columns) {
+        return new ColumnTable(
+                columns.entrySet()
+                        .stream()
+                        .map(entry -> ListColumn.copy(entry.getKey(), entry.getValue()))
+                        .collect(Collectors.toList())
+        );
+    }
+
     private final Map<String, Column> columns = new LinkedHashMap<>();
     private final int size;
 

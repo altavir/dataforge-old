@@ -16,7 +16,7 @@ import org.codehaus.groovy.control.CompilerConfiguration
 class Grind {
 
     static {
-        ExtensionInitializer.initMeta()
+        ExtensionInitializer.initAll()
     }
 
     /**

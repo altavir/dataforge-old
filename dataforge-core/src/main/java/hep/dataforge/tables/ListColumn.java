@@ -46,8 +46,23 @@ public final class ListColumn implements Column {
         }
     }
 
+    /**
+     * Create a copy of given column renaming it in process
+     *
+     * @param name
+     * @param column
+     * @return
+     */
+    public static ListColumn copy(String name, Column column) {
+        if (name.equals(column.getName())) {
+            return copy(column);
+        } else {
+            return new ListColumn(ColumnFormat.rename(name, column.getFormat()), column.stream());
+        }
+    }
+
     public static ListColumn build(ColumnFormat format, Stream<?> values) {
-        return new ListColumn(format,values.map(Value::of));
+        return new ListColumn(format, values.map(Value::of));
     }
 
     private final ColumnFormat format;
