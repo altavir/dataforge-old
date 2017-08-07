@@ -81,12 +81,7 @@ public class PlottableGroup<T extends Plottable> extends SimpleConfigurable impl
         map.values().forEach((pl) -> {
             pl.configure(config);
         });
-        map.values().forEach((pl) -> {
-            Meta m = MetaUtils.findNodeByValue(config, "plot", "name", pl.getName());
-            if (m != null) {
-                pl.configure(m);
-            }
-        });
+        map.values().forEach(pl -> MetaUtils.findNodeByValue(config, "plot", "name", pl.getName()).ifPresent(pl::configure));
     }
 
 

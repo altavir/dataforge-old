@@ -7,10 +7,16 @@ package hep.dataforge.io;
 
 import hep.dataforge.meta.MetaBuilder;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.ParseException;
+
+import static java.nio.file.StandardOpenOption.READ;
 
 /**
  * The reader of stream containing meta in some text or binary format. By
@@ -60,8 +66,12 @@ public interface MetaStreamReader {
      * @throws IOException
      * @throws ParseException
      */
-    default MetaBuilder readFile(File file) throws IOException, ParseException {
-        return read(new FileInputStream(file), file.length());
+    default MetaBuilder readFile(Path file) {
+        try (InputStream stream = Files.newInputStream(file, READ)) {
+            return read(stream, Files.size(file));
+        } catch (Exception ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
     /**

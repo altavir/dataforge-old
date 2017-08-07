@@ -1,9 +1,9 @@
 import hep.dataforge.site.ResourceMapper
-import hep.dataforge.site.ThemeTagLib
+import hep.dataforge.site.DFTagLib
 
 // Resource mapper and tag libs.
 resource_mapper = new ResourceMapper(site).map
-tag_libs = [ThemeTagLib]
+tag_libs = [DFTagLib]
 datetime_format = "dd.MM.yyyy"
 
 non_script_files = [/(?i).*\.(js|css)$/]

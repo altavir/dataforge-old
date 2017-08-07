@@ -16,6 +16,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -98,7 +99,7 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
     }
 
     public Meta getColumnMeta(String column) {
-        return MetaUtils.findNodeByValue(meta(), "column", "name", column);
+        return MetaUtils.findNodeByValue(meta(), "column", "name", column).orElseThrow(() -> new NameNotFoundException(column));
     }
 
     @Override

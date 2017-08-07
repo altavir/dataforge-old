@@ -13,10 +13,6 @@ ext {
     mainClassName = "com.sysgears.grain.Main"
 }
 
-artifactoryPublish {
-    skip = true
-}
-
 repositories {
     mavenCentral()
     maven {
@@ -96,6 +92,7 @@ clean.doLast {
 //Custom actions
 
 task gather() {
+    group 'grain'
     doLast {
         documentedProjects.each { project ->
             if (project.file("docs").exists()) {

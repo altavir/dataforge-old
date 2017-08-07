@@ -9,39 +9,41 @@ buildscript {
     }
 }
 
-allprojects {
-    apply plugin: 'idea'
-    apply plugin: "com.jfrog.artifactory"
-    apply plugin: 'maven-publish'
-}
+apply plugin: 'idea'
+apply plugin: "com.jfrog.artifactory"
+apply plugin: 'maven-publish'
 
 subprojects{
-    apply plugin: 'java'
+    if(it.name != "site") {
+        apply plugin: "com.jfrog.artifactory"
+        apply plugin: 'maven-publish'
+        apply plugin: 'java'
 
-    group = 'hep.dataforge'
-    version = '0.4.0 - SNAPSHOT'
+        group = 'hep.dataforge'
+        version = '0.4.0 - SNAPSHOT'
 
 
-    [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
+        [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 
-    sourceCompatibility = 1.8
-    targetCompatibility = 1.8
+        sourceCompatibility = 1.8
+        targetCompatibility = 1.8
 
-    repositories {
-        jcenter()
-        mavenCentral()
-    }
+        repositories {
+            jcenter()
+            mavenCentral()
+        }
 
-    dependencies {
-        testCompile 'org.codehaus.groovy:groovy-all:2.4.+'
-        testCompile group: 'junit', name: 'junit', version: '4.+'
-        testCompile "org.spockframework:spock-core:1.0-groovy-2.+"
-    }
+        dependencies {
+            testCompile 'org.codehaus.groovy:groovy-all:2.4.+'
+            testCompile group: 'junit', name: 'junit', version: '4.+'
+            testCompile "org.spockframework:spock-core:1.0-groovy-2.+"
+        }
 
-    publishing {
-        publications {
-            mavenJava(MavenPublication) {
-                from components.java
+        publishing {
+            publications {
+                mavenJava(MavenPublication) {
+                    from components.java
+                }
             }
         }
     }

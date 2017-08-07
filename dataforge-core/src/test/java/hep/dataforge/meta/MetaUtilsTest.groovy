@@ -21,7 +21,7 @@ class MetaUtilsTest extends Specification {
         when:
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        MetaUtils.writeMeta(new ObjectOutputStream(baos),meta);
+        MetaUtils.writeMeta(new ObjectOutputStream(baos), meta);
         byte[] bytes = baos.toByteArray();
 
         println "Serialized string: \n${new String(bytes, IOUtils.ASCII_CHARSET)}\n"
@@ -46,7 +46,7 @@ class MetaUtilsTest extends Specification {
         when:
 
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        new XMLMetaWriter().write(baos,meta);
+        new XMLMetaWriter().write(baos, meta);
         byte[] bytes = baos.toByteArray();
 
         println "XML : \n${new String(bytes, IOUtils.UTF8_CHARSET)}\n"
@@ -58,5 +58,16 @@ class MetaUtilsTest extends Specification {
         then:
         reconstructed == meta
 
+    }
+
+    def "test query"() {
+        when:
+        Meta meta = new MetaBuilder("test")
+                .putNode(new MetaBuilder("child").putValue("value", 2))
+                .putNode(new MetaBuilder("child").putValue("value", 3).putValue("check",true))
+                .putNode(new MetaBuilder("child").putValue("value", 4))
+                .putNode(new MetaBuilder("child").putValue("value", 5))
+        then:
+        meta.getMeta("child[value = 3, check = true]").getValue("check")
     }
 }

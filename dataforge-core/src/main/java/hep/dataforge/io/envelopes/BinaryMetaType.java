@@ -15,10 +15,11 @@ import java.util.List;
 import java.util.function.Predicate;
 
 /**
+ * Binary meta type
  * Created by darksnake on 02-Mar-17.
  */
 public class BinaryMetaType implements MetaType {
-    public static final Short[] BINARY_META_CODES = {0x424d, 10};
+    public static final Short[] BINARY_META_CODES = {0x4249, 10};
     private static BinaryMetaReader reader = new BinaryMetaReader();
     private static BinaryMetaWriter writer = new BinaryMetaWriter();
 
@@ -29,7 +30,7 @@ public class BinaryMetaType implements MetaType {
 
     @Override
     public String getName() {
-        return "BIN";
+        return "binary";
     }
 
     @Override

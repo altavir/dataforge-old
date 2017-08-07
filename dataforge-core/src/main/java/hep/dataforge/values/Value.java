@@ -47,9 +47,15 @@ public interface Value extends Serializable {
      * @return a {@link hep.dataforge.values.Value} object.
      */
     static Value of(String str) {
+
         //Trying to get integer
         if (str == null || str.isEmpty()) {
             return Value.getNull();
+        }
+
+        //string constants
+        if(str.startsWith("\"") && str.endsWith("\"")){
+            return new StringValue(str.substring(1,str.length()-2));
         }
 
         try {

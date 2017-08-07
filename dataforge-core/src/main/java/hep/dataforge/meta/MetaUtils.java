@@ -6,7 +6,6 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
-import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
@@ -19,6 +18,9 @@ import java.io.ObjectOutput;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -61,12 +63,12 @@ public class MetaUtils {
      * @param condition
      * @return
      */
-    public static Meta findNode(Meta root, String path, Predicate<Meta> condition) {
+    public static Optional<Meta> findNode(Meta root, String path, Predicate<Meta> condition) {
         List<? extends Meta> list = findNodes(root, path, condition);
         if (list.isEmpty()) {
-            return null;
+            return Optional.empty();
         } else {
-            return list.get(0);
+            return Optional.of(list.get(0));
         }
     }
 
@@ -79,7 +81,7 @@ public class MetaUtils {
      * @param value
      * @return
      */
-    public static Meta findNodeByValue(Meta root, String path, String key, Object value) {
+    public static Optional<Meta> findNodeByValue(Meta root, String path, String key, Object value) {
         return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(Value.of(value)));
     }
 
@@ -127,6 +129,64 @@ public class MetaUtils {
     }
 
     /**
+     * Apply query for given list ob objects using extracted meta as reference
+     *
+     * @param objects
+     * @param query
+     * @param metaExtractor
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> query(List<T> objects, String query, Function<T, Meta> metaExtractor) {
+        if (query.isEmpty()) {
+            return objects;
+        }
+        try {
+            int num = Integer.parseInt(query);
+            if (num < 0 || num >= objects.size()) {
+                throw new NamingException("No list element with given index");
+            }
+            return Collections.singletonList(objects.get(num));
+        } catch (NumberFormatException ex) {
+            List<Predicate<Meta>> predicates = new ArrayList<>();
+            String[] tokens = query.split(",");
+            for(String token: tokens){
+                predicates.add(buildQueryPredicate(token));
+            }
+            Predicate<Meta> predicate = meta -> {
+                AtomicBoolean res = new AtomicBoolean(true);
+                predicates.forEach(p -> {
+                    if(!p.test(meta)) {
+                        res.set(false);
+                    }
+                });
+                return res.get();
+            };
+            return objects.stream().filter(obj->predicate.test(metaExtractor.apply(obj))).collect(Collectors.toList());
+        }
+
+
+    }
+
+    /**
+     * Build a meta predicate for a given single token
+     * @param token
+     * @return
+     */
+    private static Predicate<Meta> buildQueryPredicate(String token) {
+        String[] split = token.split("=");
+        if (split.length == 2) {
+            String key = split[0].trim();
+            String value = split[1].trim();
+            //TODO implement compare operators
+            return meta -> meta.getValue(key, Value.getNull()).equals(Value.of(value));
+        } else {
+            throw new NamingException("'" + token + "' is not a valid query");
+        }
+
+    }
+
+    /**
      * Apply query to node list
      *
      * @param <T>
@@ -134,23 +194,8 @@ public class MetaUtils {
      * @param query
      * @return
      */
-    public static <T extends MetaNode> List<T> applyQuery(List<T> nodeList, String query) {
-        if (query.isEmpty()) {
-            return nodeList;
-        }
-
-
-        //TODO make queries more complicated
-        int num;
-        try {
-            num = Integer.parseInt(query);
-        } catch (NumberFormatException ex) {
-            throw new PathSyntaxException("The query ([]) syntax for annotation must contain only integer numbers");
-        }
-        if (num < 0 || num >= nodeList.size()) {
-            throw new NamingException("No list element with given index");
-        }
-        return Collections.singletonList(nodeList.get(num));
+    public static <T extends MetaNode> List<T> query(List<T> nodeList, String query) {
+        return query(nodeList, query, it -> it);
     }
 
     /**

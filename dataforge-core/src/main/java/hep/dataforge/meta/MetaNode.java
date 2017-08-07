@@ -68,7 +68,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
     protected Optional<T> optHead(Name path) {
         Name head = path.getFirst();
         return optChildNodeItem(head.entry())
-                .map(child -> MetaUtils.applyQuery(child, head.getQuery()).get(0));
+                .map(child -> MetaUtils.query(child, head.getQuery()).get(0));
     }
 
     @Provides(META_TARGET)
@@ -83,6 +83,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      * @param path
      * @return
      */
+    @SuppressWarnings("unchecked")
     protected List<T> getMetaList(Name path) {
         if (path.length() == 0) {
             throw new RuntimeException("Empty path not allowed");
@@ -96,7 +97,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
 
         if (!res.isEmpty() && path.hasQuery()) {
             //Filtering nodes using query
-            return MetaUtils.applyQuery(res, path.getQuery());
+            return MetaUtils.query(res, path.getQuery());
         } else {
             return res;
         }

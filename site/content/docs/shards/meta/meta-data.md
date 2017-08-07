@@ -16,7 +16,13 @@ First of all, one need to define main terms:
 
 The fundamental point of the whole DataForge philosophy is that every external input could be either data or meta-data. This point could seem dull at first glance, but in fact, it have a number of very important consequences:
 
-* *No scripts*. DataForge does not allow any external imperative script to operate with data. Any procedure to be performed on data should be presented either by some hard-coded meta-data processor rule (the function that takes data and metadata and produces some output without any additional external information) or as declarative process definition in form of meta-data. Since the most of data analysis nowadays is made by different scripts, the loss of scripting capability could seem to be a tremendous blow to framework functionality, but in fact every thing one could do with script, one also can do with declaration and declaration processing rules. Also purely declarative description allows for easy error check and analysis scaling (via parallelism).
+* *No scripts*. DataForge encourages user not to use imperative code to manipulate data. Any procedure to be performed on data should be presented either by some hard-coded meta-data processor rule (the function that takes data and metadata and produces some output without any additional external information) or as declarative process definition in form of meta-data. Since the most of data analysis nowadays is made by different scripts, the loss of scripting capability could seem to be a tremendous blow to framework functionality, but in fact every thing one could do with script, one also can do with declaration and declaration processing rules. Also purely declarative description allows for easy error check and analysis scaling (via parallelism).
+
+    <hr>
+
+    **Note:** Those, who still like scripting, can still either use DataForge as a library, or use [GRIND](#grind)
+
+    <hr>
 
 * *Automatic scaling*. Since particular analysis of some piece of data depends only on that piece and on it's meta-data, such analysis could be easily scaled for any number of such data pieces.
 
