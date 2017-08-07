@@ -2,12 +2,17 @@ package hep.dataforge.grind.extensions
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MutableMetaNode
+import hep.dataforge.tables.Table
 
 /**
  * A set of dynamic initializers for groovy features. Must be called explicitly at the start of the program.
  */
 class ExtensionInitializer {
 
+    /**
+     * Add property access to meta nodes
+     * @return
+     */
     static def initMeta(){
         Meta.metaClass.getProperty = {String name ->
             delegate.getMetaOrEmpty(name)
@@ -24,5 +29,25 @@ class ExtensionInitializer {
                 throw new RuntimeException("Can't convert ${value.getClass()} to Meta")
             }
         }
+    }
+
+    /**
+     * Add property access to column tables
+     * @return
+     */
+    static def initTable(){
+        Table.metaClass.getProperty = { String propName ->
+            def meta = Table.metaClass.getMetaProperty(propName)
+            if (meta) {
+                meta.getProperty(delegate)
+            } else {
+                return (delegate as Table).getColumn(propName)
+            }
+        }
+    }
+
+    static def initAll(){
+        initMeta()
+        initTable()
     }
 }

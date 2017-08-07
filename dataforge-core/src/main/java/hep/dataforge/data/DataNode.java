@@ -154,7 +154,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      * @param consumer
      */
     default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<? extends T>> consumer) {
-        dataStream().filter(predicate).forEach(consumer::accept);
+        dataStream().filter(predicate).forEach(consumer);
     }
 
     /**
@@ -273,6 +273,10 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
             return new CheckedDataNode<R>(this, checkType);
         }
     }
+
+//    default Collection<Data<T>> find(String query){
+//        if(query.contains(""))
+//    }
 
     @NotNull
     @Override

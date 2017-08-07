@@ -39,6 +39,20 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
         );
     }
 
+    /**
+     * Create a new format instance with changed name. Returns argument if name is not changed
+     * @param name
+     * @param columnFormat
+     * @return
+     */
+    public static ColumnFormat rename(String name, ColumnFormat columnFormat){
+        if(name.equals(columnFormat.getName())){
+            return columnFormat;
+        } else {
+            return new ColumnFormat(columnFormat.toMeta().getBuilder().setValue("name",name).build());
+        }
+    }
+
     public ColumnFormat() {
     }
 
