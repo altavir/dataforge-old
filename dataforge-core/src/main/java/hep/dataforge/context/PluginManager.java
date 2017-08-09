@@ -157,10 +157,13 @@ public class PluginManager implements Encapsulated, AutoCloseable {
                     load(tag);
                 }
             }
-            getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
-            plugin.attach(getContext());
-            plugins.add(plugin);
-            return plugin;
+
+            return context.getLock().modify(()->{
+                getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
+                plugin.attach(getContext());
+                plugins.add(plugin);
+                return plugin;
+            });
         }
     }
 

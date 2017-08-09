@@ -33,7 +33,7 @@ public class FileStorageEnvelopeType extends DefaultEnvelopeType {
      * @return
      */
     public static boolean validate(Envelope envelope){
-        return envelope.getContentType(FILE_STORAGE_ENVELOPE_TYPE).equals(FILE_STORAGE_ENVELOPE_TYPE);
+        return envelope.getType().orElse(FILE_STORAGE_ENVELOPE_TYPE).equals(FILE_STORAGE_ENVELOPE_TYPE);
     }
 
     public static boolean validate(Envelope envelope, String loaderType){

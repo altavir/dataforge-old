@@ -19,7 +19,6 @@ import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
 import hep.dataforge.meta.Laminate;
@@ -74,7 +73,7 @@ public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
             }
 
         } catch (IOException ex) {
-            throw new ContentException("Can't open data source");
+            throw new RuntimeException("Can't open data source");
         }
         return fileData.build();
     }

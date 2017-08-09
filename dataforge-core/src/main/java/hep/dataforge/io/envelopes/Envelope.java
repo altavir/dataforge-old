@@ -20,12 +20,16 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
+import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.time.Instant;
+import java.util.Optional;
 
 /**
- * The message is a pack that can include three principal parts:
+ * The message is a pack that can include two principal parts:
  * <ul>
  * <li>Envelope meta-data</li>
  * <li>binary data</li>
@@ -35,7 +39,9 @@ import java.io.IOException;
  */
 @NodeDef(name = "@envelope", info = "An optional envelope service info node")
 @ValueDef(name = "@envelope.type", info = "Type of the envelope content")
+@ValueDef(name = "@envelope.dataType", info = "Type of the envelope data encoding")
 @ValueDef(name = "@envelope.description", info = "Description of the envelope content")
+@ValueDef(name = "@envelope.time", type = ValueType.TIME, info = "Time of envelope creation")
 public interface Envelope extends Metoid {
     /**
      * Property keys
@@ -61,7 +67,7 @@ public interface Envelope extends Metoid {
      */
     Binary getData();
 
-    default boolean hasMeta(){
+    default boolean hasMeta() {
         return !meta().isEmpty();
     }
 
@@ -74,11 +80,35 @@ public interface Envelope extends Metoid {
         }
     }
 
-    default String getContentType(String def) {
-        return meta().getString("@envelope.type", def);
+    /**
+     * The purpose of the envelope
+     * @return
+     */
+    default Optional<String> getType() {
+        return meta().optValue("@envelope.type").map(Value::stringValue);
     }
 
-    default String getContentDescription() {
+    /**
+     * The type of data encoding
+     * @return
+     */
+    default Optional<String> getDataType() {
+        return meta().optValue("@envelope.dataType").map(Value::stringValue);
+    }
+
+    /**
+     * Textual user friendly description
+     * @return
+     */
+    default String getDescription() {
         return meta().getString("@envelope.description", "");
+    }
+
+    /**
+     * Time of creation of the envelope
+     * @return
+     */
+    default Optional<Instant> getTime() {
+        return meta().optValue("@envelope.time").map(Value::timeValue);
     }
 }

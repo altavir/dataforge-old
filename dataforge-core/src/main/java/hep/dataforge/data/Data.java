@@ -15,15 +15,20 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.goals.AbstractGoal;
 import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.StaticGoal;
+import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 /**
  * A piece of data which is basically calculated asynchronously
@@ -33,6 +38,47 @@ import java.util.function.Supplier;
  * @version $Id: $Id
  */
 public class Data<T> implements Metoid {
+
+    @SuppressWarnings("unchecked")
+    public static <T> Data<T> buildStatic(T content, Meta meta) {
+        return new Data<T>(new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
+    }
+
+    public static <T> Data<T> buildStatic(T content) {
+        return buildStatic(content, Meta.empty());
+    }
+
+    /**
+     * Build data from envelope using given lazy binary transformation
+     * @param envelope
+     * @param type
+     * @param transform
+     * @param <T>
+     * @return
+     */
+    public static <T> Data<T> fromEnvelope(Envelope envelope, Class<T> type, Function<Binary, T> transform) {
+        Goal<T> goal = new AbstractGoal<T>() {
+            @Override
+            protected T compute() throws Exception {
+                return transform.apply(envelope.getData());
+            }
+
+            @Override
+            public Stream<Goal<?>> dependencies() {
+                return Stream.empty();
+            }
+        };
+        return new Data<>(goal,type,envelope.meta());
+    }
+
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(executor, sup), type, meta);
+    }
+
+    public static <T> Data<T> generate(Class<T> type, Meta meta, Supplier<T> sup) {
+        return new Data<T>(new GeneratorGoal<>(sup), type, meta);
+    }
+
 
     private final Goal<T> goal;
     private final Meta meta;
@@ -48,23 +94,6 @@ public class Data<T> implements Metoid {
         this.goal = goal;
         this.meta = Meta.empty();
         this.type = type;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> Data<T> buildStatic(T content, Meta meta) {
-        return new Data<T>(new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
-    }
-
-    public static <T> Data<T> buildStatic(T content) {
-        return buildStatic(content, Meta.empty());
-    }
-
-    public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {
-        return new Data<T>(new GeneratorGoal<>(executor, sup), type, meta);
-    }
-
-    public static <T> Data<T> generate(Class<T> type, Meta meta, Supplier<T> sup) {
-        return new Data<T>(new GeneratorGoal<>(sup), type, meta);
     }
 
     public Goal<T> getGoal() {

@@ -19,7 +19,6 @@ import hep.dataforge.cache.CachePlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.FileDataFactory;
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Laminate;
@@ -84,8 +83,7 @@ public class ActionUtils {
         return ActionUtils.runConfig(context, config.build());
     }
 
-    public static void readProperties(Context context, Meta element)
-            throws ContentException {
+    public static void readProperties(Context context, Meta element) {
         if (element.hasMeta("property")) {
             List<? extends Meta> propertyNodes = element.getMetaList("property");
             propertyNodes.stream().forEach((option) -> {

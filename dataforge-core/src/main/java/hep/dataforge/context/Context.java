@@ -80,6 +80,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     protected Logger logger;
     private Chronicle rootLog;
     private ClassLoader classLoader = null;
+    private final ContextLock lock = new ContextLock(this);
 
     //TODO move to separate manager
     private transient Map<String, Chronicle> historyCache = new HashMap<>();
@@ -121,9 +122,17 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         }
     }
 
+    private void startLoggerAppender() {
+        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
+            io().addLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
+        }
+    }
+
     public void setLogger(Logger logger) {
-        this.logger = logger;
-        startLoggerAppender();
+        lock.modify(() -> {
+            this.logger = logger;
+            startLoggerAppender();
+        });
     }
 
     /**
@@ -161,11 +170,6 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return pluginManager().opt(IOManager.class).orElseGet(() -> Global.instance().io());
     }
 
-    private void startLoggerAppender() {
-        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
-            io().addLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
-        }
-    }
 
     /**
      * Plugin manager for this Context
@@ -186,19 +190,10 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return name;
     }
 
-    /**
-     * <p>
-     * putValue.</p>
-     *
-     * @param name  a {@link java.lang.String} object.
-     * @param value a {@link hep.dataforge.values.Value} object.
-     */
-    public void putValue(String name, Value value) {
-        properties.put(name, value);
-    }
-
     public void putValue(String name, Object value) {
-        properties.put(name, Value.of(value));
+        lock.modify(() -> {
+            properties.put(name, Value.of(value));
+        });
     }
 
     @Override
@@ -212,7 +207,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
-    public Collection<String> listPluigns() {
+    public Collection<String> listPlugins() {
         return pluginManager().list().stream().map(Plugin::getName).collect(Collectors.toSet());
     }
 
@@ -378,6 +373,13 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return id;
     }
 
+    public ContextLock getLock() {
+        return lock;
+    }
+
+    /**
+     * A builder for context
+     */
     public static class Builder {
         Context ctx;
 

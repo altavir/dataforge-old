@@ -19,7 +19,6 @@ import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Values;
@@ -54,7 +53,7 @@ public class TransformTableAction extends OneToOneAction<Table, Table> {
             res = input;
         }
         if (res.size() == 0) {
-            throw new ContentException("The resulting DataSet is empty");
+            throw new RuntimeException("The resulting DataSet is empty");
         }
         return res;
     }

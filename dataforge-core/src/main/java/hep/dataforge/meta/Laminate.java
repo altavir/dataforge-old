@@ -22,6 +22,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -342,7 +343,8 @@ public final class Laminate extends Meta implements Described {
      *
      * @return
      */
-    public Meta collapse() {
+    @NotNull
+    public Meta merge() {
         return new SealedNode(this);
     }
 }

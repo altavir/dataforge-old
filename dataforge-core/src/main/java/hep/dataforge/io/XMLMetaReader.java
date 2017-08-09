@@ -5,7 +5,6 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.NamedValue;
@@ -72,7 +71,7 @@ public class XMLMetaReader implements MetaStreamReader {
         }
     }
 
-    private MetaBuilder buildNode(Element element) throws ContentException {
+    private MetaBuilder buildNode(Element element)  {
         MetaBuilder res = new MetaBuilder(normalizeName(element.getTagName()));
         List<NamedValue> values = getValues(element);
         List<Element> elements = getElements(element);
