@@ -199,7 +199,7 @@ public final class Laminate extends Meta implements Described {
 
 
     public Stream<String> getNodeNames(boolean includeHidden, boolean includeDefaults) {
-        Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden));
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getNodeNames(includeHidden)).distinct();
         if (includeDefaults && descriptorLayer != null) {
             return Stream.concat(names, descriptorLayer.getNodeNames(includeHidden));
         } else {
@@ -218,7 +218,7 @@ public final class Laminate extends Meta implements Described {
     }
 
     public Stream<String> getValueNames(boolean includeHidden, boolean includeDefaults) {
-        Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden));
+        Stream<String> names = layers.stream().flatMap(layer -> layer.getValueNames(includeHidden)).distinct();
         if (includeDefaults && descriptorLayer != null) {
             return Stream.concat(names, descriptorLayer.getValueNames(includeHidden));
         } else {
