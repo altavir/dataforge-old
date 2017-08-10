@@ -103,6 +103,11 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             throw new NamingException(String.format("\"%s\" is not a valid element name in the annotation", name));
         }
 
+        //do not put empty nodes
+        if(node.isEmpty()){
+            return self();
+        }
+
         T newNode = transformNode(name, node);
         List<T> list = super.nodes.get(name);
         List<T> oldList = list != null ? new ArrayList<>(list) : null;

@@ -46,8 +46,11 @@ public class FitResult extends SimpleMetaMorph {
                 .setNode("data", new ListOfPoints(state.getPoints()).toMeta())//setting data
                 .setValue("dataSize", state.getDataSize())
                 .setNode("params", state.getParameters().toMeta())
-                .setValue("chi2", state.getChi2())
                 .setValue("isValid", valid);
+
+        if (valid) {
+            builder.setValue("chi2", state.getChi2());
+        }
 
         //TODO add residuals to data
         if (freeParameters.length == 0) {
@@ -73,7 +76,7 @@ public class FitResult extends SimpleMetaMorph {
     }
 
     public static FitResult build(FitState state, String... freeParameters) {
-        return build(state, true, freeParameters);
+        return build(state, false, freeParameters);
     }
 
     public ParamSet getParameters() {
@@ -115,7 +118,7 @@ public class FitResult extends SimpleMetaMorph {
     }
 
     public double getChi2() {
-        return meta().getDouble("chi2");
+        return meta().getDouble("chi2", Double.NaN);
     }
 
     public Optional<FitState> optState() {

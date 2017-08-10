@@ -199,7 +199,7 @@ public interface Value extends Serializable {
             return of((String) obj);
         } else if (obj instanceof Collection) {
             return of((Collection) obj);
-        } else if (obj instanceof Object[]) {
+        } else if (obj.getClass().isArray()) {
             return of((Object[]) obj);
         } else {
             return of(obj.toString());
