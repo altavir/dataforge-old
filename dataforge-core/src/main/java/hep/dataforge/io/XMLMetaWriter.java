@@ -88,9 +88,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             elementName = meta.getName();
         }
         Element res = doc.createElement(normalizeName(elementName));
-//        MetaBuilder builder = an.getBuilder();
-//        Map<String, Item<Annotation>> elements = builder.getElementMap();
-//        Map<String, Item<Value>> values = builder.getValueMap();
+
 
         meta.getValueNames().forEach(valueName -> {
             List<Value> valueList = meta.getValue(valueName).listValue();
@@ -99,7 +97,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             } else {
                 String val = valueList
                         .stream()
-                        .map((v) -> v.stringValue())
+                        .map(Value::stringValue)
                         .collect(Collectors.joining(", ", "[", "]"));
                 res.setAttribute(normalizeName(valueName), val);
             }

@@ -53,27 +53,30 @@ task wrapper(type: Wrapper) {
     gradleVersion = '3.5'
 }
 
-artifactory {
-    contextUrl = "http://npm.mipt.ru:8081/artifactory"   //The base Artifactory URL if not overridden by the publisher/resolver
-    publish {
-        repository {
-            repoKey = 'gradle-dev-local'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-            maven = true
+if(file('properties.gradle').exists()) {
+    artifactory {
+        contextUrl = "http://npm.mipt.ru:8081/artifactory"
+        //The base Artifactory URL if not overridden by the publisher/resolver
+        publish {
+            repository {
+                repoKey = 'gradle-dev-local'
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+                maven = true
 
+            }
+            defaults {
+                publications('mavenJava')
+            }
         }
-        defaults {
-            publications ('mavenJava')
-        }
-    }
-    resolve {
-        repository {
-            repoKey = 'gradle-dev'
-            username = "${artifactory_user}"
-            password = "${artifactory_password}"
-            maven = true
+        resolve {
+            repository {
+                repoKey = 'gradle-dev'
+                username = "${artifactory_user}"
+                password = "${artifactory_password}"
+                maven = true
 
+            }
         }
     }
 }

@@ -35,14 +35,21 @@ public class ContextLock implements Encapsulated {
     }
 
     /**
+     * Throws {@link ContextLockException} if context is locked
+     */
+    public void tryModify(){
+        lockers.stream().findFirst().ifPresent(lock -> {
+            throw new ContextLockException(lock);
+        });
+    }
+
+    /**
      * Apply thread safe lockable object modification
      *
      * @param mod
      */
     public synchronized <T> T modify(Callable<T> mod) {
-        lockers.stream().findFirst().ifPresent(lock -> {
-            throw new ContextLockException(lock);
-        });
+        tryModify();
         try {
             return context.singleThreadExecutor().submit(mod).get();
         } catch (InterruptedException | ExecutionException e) {
@@ -51,9 +58,7 @@ public class ContextLock implements Encapsulated {
     }
 
     public synchronized void modify(Runnable mod) {
-        lockers.stream().findFirst().ifPresent(lock -> {
-            throw new ContextLockException(lock);
-        });
+        tryModify();
         try {
             context.singleThreadExecutor().submit(mod).get();
         } catch (InterruptedException | ExecutionException e) {

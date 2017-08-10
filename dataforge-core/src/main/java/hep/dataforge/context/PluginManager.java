@@ -143,7 +143,8 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     @SuppressWarnings("unchecked")
-    public synchronized <T extends Plugin> T load(T plugin) {
+    public <T extends Plugin> T load(T plugin) {
+        getContext().getLock().tryModify();
         Optional<Plugin> loadedPlugin = optInContext(plugin.getTag());
 
         if (loadedPlugin.isPresent()) {
@@ -158,12 +159,10 @@ public class PluginManager implements Encapsulated, AutoCloseable {
                 }
             }
 
-            return context.getLock().modify(()->{
-                getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
-                plugin.attach(getContext());
-                plugins.add(plugin);
-                return plugin;
-            });
+            getLogger().info("Loading plugin {} into {}", plugin.getName(), context.getName());
+            plugin.attach(getContext());
+            plugins.add(plugin);
+            return plugin;
         }
     }
 
