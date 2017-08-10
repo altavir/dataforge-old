@@ -74,7 +74,7 @@ public interface Workspace extends Encapsulated {
      *
      * @param taskName
      * @param config
-     * @param overlay  usegiven meta as overaly for existing meta with the same name
+     * @param overlay  use given meta as overaly for existing meta with the same name
      * @return
      */
     default DataNode<?> runTask(String taskName, Meta config, boolean overlay) {

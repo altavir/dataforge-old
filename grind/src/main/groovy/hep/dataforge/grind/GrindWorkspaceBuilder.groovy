@@ -130,7 +130,8 @@ class GrindWorkspaceBuilder {
     }
 
     private DataNode runInWorkspace(Workspace workspace, String taskName, Meta meta) {
-        return workspace.runTask(taskName, meta).computeAll();
+        //turn off overlay. It is already applied by grind
+        return workspace.runTask(taskName, meta, false).computeAll();
     }
 
     DataNode runTask(String taskName, Meta meta) {

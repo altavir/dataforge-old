@@ -93,7 +93,7 @@ public class ColumnTable implements Table {
 
     @Override
     public Stream<Values> getRows() {
-        return IntStream.range(0, size - 1).mapToObj(this::getRow);
+        return IntStream.range(0, size).mapToObj(this::getRow);
     }
 
 
