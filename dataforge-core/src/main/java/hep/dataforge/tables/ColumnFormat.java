@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static hep.dataforge.tables.ColumnFormat.TAG_KEY;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
@@ -23,8 +24,15 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "Column title.")
 @ValueDef(name = "type", multiple = true, info = "A type of this column or a list of allowed types. First entry designates primary type.")
 @ValueDef(name = "precision", type = {NUMBER}, info = "Expected precision for number values or length for string values")
-@ValueDef(name = "role", multiple = true, info = "The role of data in this column for plotting or other purposes")
+@ValueDef(name = TAG_KEY, multiple = true, info = "The role of data in this column for plotting or other purposes")
 public class ColumnFormat extends SimpleMetaMorph implements Named {
+
+    public static final String TAG_KEY = "tag";
+
+//    /**
+//     * mark column as optional so its value is replaced by {@code null} in table builder if it is not present
+//     */
+//    public static final String OPTIONAL_TAG = "optional";
 
     /**
      * Construct simple column format
@@ -111,7 +119,7 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
      *
      * @return
      */
-    public List<String> getRoles(){
-        return Arrays.asList(getStringArray("role"));
+    public List<String> getTags(){
+        return Arrays.asList(getStringArray(TAG_KEY));
     }
 }

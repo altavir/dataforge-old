@@ -210,13 +210,13 @@ public class ConfidenceLimitCalculator {
         //TODO в перспективе можно тут сделать интегрирование с одной жесткой границей
         this.a = a;
         this.b = b;
-        final PolynomialSplineFunction prob = cacheUnivariateFunction(func, a, b, numCachePoints);
+        final PolynomialSplineFunction prob = cacheUnivariateFunction(a, b, numCachePoints, func);
         final UnivariateIntegrator integrator = IntegratorFactory.getGaussRuleIntegrator(DEFAULT_INTEGRATION_NODES);
         final double norm = integrator.integrate(prob, a, b);
         UnivariateFunction integralFunc = new IntegralFunc(a, prob, norm);
         this.probability = prob;
         // На всякий случай удваиваем количество узлов
-        this.integralProbability = cacheUnivariateFunction(integralFunc, a, b, numCachePoints * 2);
+        this.integralProbability = cacheUnivariateFunction(a, b, numCachePoints * 2, integralFunc);
         this.norming = norm;
         assert getIntegralProbability().value(a) == 0;
         assert getIntegralProbability().value(b) == 1;

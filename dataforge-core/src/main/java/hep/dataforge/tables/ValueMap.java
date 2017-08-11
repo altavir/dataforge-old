@@ -25,7 +25,6 @@ import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -138,10 +137,10 @@ public class ValueMap implements Values, MetaMorph {
         return builder.build();
     }
 
-    @Override
-    public Map<String, Value> asMap() {
-        return Collections.unmodifiableMap(this.valueMap);
-    }
+//    @Override
+//    public Map<String, Value> asMap() {
+//        return Collections.unmodifiableMap(this.valueMap);
+//    }
 
     public static class Builder implements GenericBuilder<ValueMap, Builder> {
 

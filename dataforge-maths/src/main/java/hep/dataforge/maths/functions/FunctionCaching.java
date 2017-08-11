@@ -32,14 +32,13 @@ public class FunctionCaching {
     /**
      * <p>cacheUnivariateFunction.</p>
      *
-     * @param func a {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
      * @param a a double.
      * @param b a double.
      * @param numCachePoints a int.
+     * @param func a {@link UnivariateFunction} object.
      * @return a {@link org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction} object.
      */
-    public static PolynomialSplineFunction cacheUnivariateFunction(UnivariateFunction func,
-            double a, double b, int numCachePoints){
+    public static PolynomialSplineFunction cacheUnivariateFunction(double a, double b, int numCachePoints, UnivariateFunction func){
         assert func != null;
         assert a > Double.NEGATIVE_INFINITY;
         double[] grid = getUniformUnivariateGrid(a, b, numCachePoints);

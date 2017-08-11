@@ -26,6 +26,8 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static hep.dataforge.tables.ColumnFormat.TAG_KEY;
+
 public class TableFormatBuilder implements TableFormat {
 
     /**
@@ -67,9 +69,9 @@ public class TableFormatBuilder implements TableFormat {
         }
     }
 
-    private MetaBuilder add(String name, String... roles) {
+    private MetaBuilder add(String name, String... tags) {
         if (!columns.containsKey(name)) {
-            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name).putValues("role", roles);
+            MetaBuilder columnBuilder = new MetaBuilder("column").putValue("name", name).putValues(TAG_KEY, tags);
             columns.put(name, columnBuilder);
             return columnBuilder;
         } else {
@@ -82,38 +84,38 @@ public class TableFormatBuilder implements TableFormat {
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, ValueType type, String... roles) {
-        add(name, roles).setValue("title", title).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, String title, ValueType type, String... tags) {
+        add(name, tags).setValue("title", title).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type, String... roles) {
-        add(name, roles).setValue("title", title)
+    public TableFormatBuilder addColumn(String name, String title, int width, ValueType type, String... tags) {
+        add(name, tags).setValue("title", title)
                 .setValue("type", type.toString())
                 .setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, ValueType type, String... roles) {
-        add(name, roles).setValue("type", type.toString());
+    public TableFormatBuilder addColumn(String name, ValueType type, String... tags) {
+        add(name, tags).setValue("type", type.toString());
         return this;
     }
 
-    public TableFormatBuilder addColumn(String name, int width, ValueType type, String... roles) {
-        add(name, roles).setValue("type", type.toString()).setValue("width", width);
+    public TableFormatBuilder addColumn(String name, int width, ValueType type, String... tags) {
+        add(name, tags).setValue("type", type.toString()).setValue("width", width);
         return this;
     }
 
-    public TableFormatBuilder addString(String name, String... roles) {
-        return addColumn(name, ValueType.STRING, roles);
+    public TableFormatBuilder addString(String name, String... tags) {
+        return addColumn(name, ValueType.STRING, tags);
     }
 
-    public TableFormatBuilder addNumber(String name, String... roles) {
-        return addColumn(name, ValueType.NUMBER, roles);
+    public TableFormatBuilder addNumber(String name, String... tags) {
+        return addColumn(name, ValueType.NUMBER, tags);
     }
 
-    public TableFormatBuilder addTime(String name, String... roles) {
-        return addColumn(name, ValueType.TIME, roles);
+    public TableFormatBuilder addTime(String name, String... tags) {
+        return addColumn(name, ValueType.TIME, tags);
     }
 
     /**
