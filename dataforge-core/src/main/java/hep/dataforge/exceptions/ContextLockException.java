@@ -9,8 +9,12 @@ public class ContextLockException extends RuntimeException {
         this.locker = locker;
     }
 
-    private String getObjectName(){
-        if(locker instanceof Named){
+    public ContextLockException() {
+        this.locker = null;
+    }
+
+    private String getObjectName() {
+        if (locker instanceof Named) {
             return locker.getClass().getSimpleName() + ":" + ((Named) locker).getName();
         } else {
             return locker.getClass().getSimpleName();
@@ -19,6 +23,10 @@ public class ContextLockException extends RuntimeException {
 
     @Override
     public String getMessage() {
-        return "Context is locked by " + getObjectName();
+        if (locker == null) {
+            return "Context is locked";
+        } else {
+            return "Context is locked by " + getObjectName();
+        }
     }
 }

@@ -373,8 +373,22 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return id;
     }
 
-    public ContextLock getLock() {
-        return lock;
+    public void lock(Object obj){
+        this.lock.lock(obj);
+        if(getParent() != null){
+            getParent().lock(obj);
+        }
+    }
+
+    public void unlock(Object obj){
+        this.lock.unlock(obj);
+        if(getParent() != null){
+            getParent().unlock(obj);
+        }
+    }
+
+    public boolean isLocked(){
+        return lock.isLocked();
     }
 
     /**

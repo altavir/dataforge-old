@@ -24,7 +24,6 @@ import hep.dataforge.meta.MetaNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,15 +45,13 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
     public static final DefaultEnvelopeReader INSTANCE = new DefaultEnvelopeReader();
 
 
+    protected EnvelopeTag newTag(){
+        return new EnvelopeTag();
+    }
+
     @Override
     public Envelope read(@NotNull InputStream stream) throws IOException {
-        BufferedInputStream bis;
-        if (stream instanceof BufferedInputStream) {
-            bis = (BufferedInputStream) stream;
-        } else {
-            bis = new BufferedInputStream(stream);
-        }
-        EnvelopeTag tag = EnvelopeTag.from(bis);
+        EnvelopeTag tag = newTag().read(stream);
         MetaStreamReader parser = tag.getMetaType().getReader();
         int metaLength = tag.getMetaSize();
         Meta meta;
@@ -62,7 +59,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             meta = Meta.buildEmpty(MetaNode.DEFAULT_META_NAME);
         } else {
             try {
-                meta = parser.read(bis, metaLength);
+                meta = parser.read(stream, metaLength);
             } catch (ParseException ex) {
                 throw new EnvelopeFormatException("Error parsing meta", ex);
             }
@@ -72,9 +69,9 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         int dataLength = tag.getDataSize();
         //skipping separator for automatic meta reading
         if (metaLength == -1) {
-            bis.skip(separator().length);
+            stream.skip(separator().length);
         }
-        binary = readData(bis, dataLength);
+        binary = readData(stream, dataLength);
 
         return new SimpleEnvelope(meta, binary);
     }
@@ -88,7 +85,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
      */
     public Envelope readLazy(Path path) throws IOException {
         SeekableByteChannel channel = Files.newByteChannel(path, READ);
-        EnvelopeTag tag = EnvelopeTag.from(channel);
+        EnvelopeTag tag = newTag().read(channel);
         int metaLength = tag.getMetaSize();
         int dataLength = tag.getDataSize();
         if (metaLength < 0 || dataLength < 0) {

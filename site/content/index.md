@@ -113,3 +113,9 @@ In this section we will try to cover DataForge main ideas in the form of questio
 **A:** Yes, it is. DataForge can be used as is from [beaker/beakerx](http://beakernotebook.com/) groovy kernel with minor additional adjustments. It is planned to provide separate DataForge kernel to `beakerx` which will automatically call a specific GRIND shell.
 
 <hr>
+
+**Q:** Can I use DataForge on a mobile platform?
+
+**A:** DataForge is modular. Core and the most of api are pretty compact, so it could be used in Android applications. Some modules are designed for PC and could not be used on other platforms. IPhone does not support Java and therefore could use only client-side DataForge applications.
+
+<hr>

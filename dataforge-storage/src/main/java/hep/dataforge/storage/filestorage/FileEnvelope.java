@@ -208,7 +208,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         getTag().setValue(DATA_LENGTH_KEY, size);//update property
         long position = channel.position();
         channel.position(0);//seeking begin
-        ByteBuffer buffer = getTag().byteHeader();
+        ByteBuffer buffer = getTag().toBytes();
         buffer.position(0);
         int d = channel.write(buffer);
         channel.position(position);//return to the initial position

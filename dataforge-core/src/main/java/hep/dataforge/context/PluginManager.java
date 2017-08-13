@@ -15,13 +15,13 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.exceptions.ContextLockException;
 import hep.dataforge.exceptions.NameNotFoundException;
 
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -92,18 +92,19 @@ public class PluginManager implements Encapsulated, AutoCloseable {
         return opt(tag).isPresent();
     }
 
-    /**
-     * Find a loaded plugin
-     *
-     * @param tag
-     * @return
-     */
-    public Optional<Plugin> opt(PluginTag tag) {
-        //Check for ambiguous tag
-        if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
-            getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
+    private Optional<Plugin> opt(Predicate<Plugin> predicate, boolean recursive) {
+        List<Plugin> plugins = stream(false).filter(predicate).collect(Collectors.toList());
+        if (plugins.size() == 0) {
+            if (recursive && getParent() != null) {
+                return getParent().opt(predicate, true);
+            } else {
+                return Optional.empty();
+            }
+        } else if (plugins.size() == 1) {//Check for ambiguous tag
+            return Optional.of(plugins.get(0));
+        } else {
+            throw new RuntimeException("Ambiguous plugin resolution");
         }
-        return stream(true).filter(it -> tag.matches(it.getTag())).findFirst();
     }
 
     /**
@@ -113,11 +114,17 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      * @return
      */
     public Optional<Plugin> optInContext(PluginTag tag) {
-        //Check for ambiguous tag
-        if (stream(false).filter(it -> tag.matches(it.getTag())).count() > 1) {
-            getLogger().warn("Ambiguous plugin resolution with tag {}", tag);
-        }
-        return stream(false).filter(it -> tag.matches(it.getTag())).findFirst();
+        return opt(it -> tag.matches(it.getTag()), false);
+    }
+
+    /**
+     * Find a loaded plugin
+     *
+     * @param tag
+     * @return
+     */
+    public Optional<Plugin> opt(PluginTag tag) {
+        return opt(it -> tag.matches(it.getTag()), true);
     }
 
     /**
@@ -133,7 +140,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
     }
 
     public <T extends Plugin> Optional<T> opt(Class<T> type) {
-        return stream(true).filter(type::isInstance).findFirst().map(type::cast);
+        return opt(type::isInstance,true).map(type::cast);
     }
 
     /**
@@ -144,7 +151,10 @@ public class PluginManager implements Encapsulated, AutoCloseable {
      */
     @SuppressWarnings("unchecked")
     public <T extends Plugin> T load(T plugin) {
-        getContext().getLock().tryModify();
+        if (getContext().isLocked()) {
+            throw new ContextLockException();
+        }
+
         Optional<Plugin> loadedPlugin = optInContext(plugin.getTag());
 
         if (loadedPlugin.isPresent()) {

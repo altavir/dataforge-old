@@ -89,7 +89,7 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
         long dataSize = envelope.getData().size();
         tag.setValue(DATA_LENGTH_KEY, dataSize);
 
-        stream.write(tag.byteHeader().array());
+        stream.write(tag.toBytes().array());
 
         for (Map.Entry<String, Value> entry : tag.getValues().entrySet()) {
             if (TAG_PROPERTIES.contains(entry.getKey())) {

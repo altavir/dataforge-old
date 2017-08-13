@@ -2,7 +2,7 @@
 content_type: "doc_shard"
 title: "Data format"
 chapter: envelope
-label: "data_format"
+label: "envelopes"
 version: 1.0
 date: 08.02.2016
 published: true
