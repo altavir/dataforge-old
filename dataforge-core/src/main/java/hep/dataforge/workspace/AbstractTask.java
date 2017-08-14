@@ -59,20 +59,24 @@ public abstract class AbstractTask<R> implements Task {
      * Apply model transformation to include custom dependencies or change
      * existing ones.
      *
-     * @param model
+     * @param model the model to be transformed
+     * @param meta the whole configuration (not only for this particular task)
      */
-    protected abstract TaskModel transformModel(TaskModel model);
+    protected abstract void updateModel(TaskModel.Builder model, Meta meta);
 
     /**
      * Build new TaskModel and apply specific model transformation for this
-     * task.
+     * task. By default model uses the meta node with the same node as the name of the task.
      *
      * @param workspace
-     * @param taskConfig
+     * @param meta
      * @return
      */
     @Override
-    public TaskModel build(Workspace workspace, Meta taskConfig) {
-        return transformModel(TaskUtils.createDefaultModel(workspace, getName(), taskConfig));
+    public TaskModel build(Workspace workspace, Meta meta) {
+        Meta taskMeta = meta.getMeta(getName(), meta);
+        TaskModel.Builder builder = TaskModel.builder(workspace, getName(), taskMeta);
+        updateModel(builder,meta);
+        return builder.build();
     }
 }

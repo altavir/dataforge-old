@@ -39,7 +39,7 @@ public class CustomTask extends AbstractTask<Object> {
     public static CustomTask fromTemplate(String name, AbstractTask template) {
         return new CustomTask(
                 name,
-                template::transformModel,
+                template::updateModel,
                 model -> data -> template.run(model, data)
         );
     }

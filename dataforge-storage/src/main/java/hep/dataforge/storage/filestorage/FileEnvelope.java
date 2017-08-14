@@ -16,7 +16,10 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.FileBinary;
-import hep.dataforge.io.envelopes.*;
+import hep.dataforge.io.envelopes.DefaultEnvelopeType;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.io.envelopes.EnvelopeTag;
 import hep.dataforge.meta.Meta;
 import org.slf4j.LoggerFactory;
 
@@ -77,9 +80,8 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     private FileChannel readChannel;
     private FileChannel writeChannel;
     private EnvelopeTag tag;
-    private EnvelopeType type = DefaultEnvelopeType.instance;
 
-    private FileEnvelope(Path path, boolean readOnly) {
+    protected FileEnvelope(Path path, boolean readOnly) {
         this.file = path;
         this.readOnly = readOnly;
     }
@@ -88,17 +90,20 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         return file;
     }
 
-    private FileChannel getReadChannel() throws IOException {
+    protected FileChannel getReadChannel() throws IOException {
         if (readChannel == null || !readChannel.isOpen()) {
             readChannel = FileChannel.open(file, READ);
         }
         return readChannel;
     }
 
+    protected EnvelopeTag buildTag(){
+        return new EnvelopeTag();
+    }
 
     private EnvelopeTag getTag() throws IOException {
         if (tag == null) {
-            tag = EnvelopeTag.from(getReadChannel());
+            tag = buildTag().read(getReadChannel());
         }
         return tag;
     }

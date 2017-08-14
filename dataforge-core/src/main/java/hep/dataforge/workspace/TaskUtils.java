@@ -27,18 +27,18 @@ public class TaskUtils {
      *
      * @param model
      */
-    public static TaskModel applyDataModel(TaskModel model, Meta dataModel) {
+    public static TaskModel.Builder applyDataModel(TaskModel.Builder model, Meta dataModel) {
         //Iterating over direct data dependancies
         //PENDING replace by DataFactory for unification?
         if (dataModel.hasMeta("data")) {
-            dataModel.getMetaList("data").stream().forEach((dataElement) -> {
+            dataModel.getMetaList("data").forEach((dataElement) -> {
                 String dataPath = dataElement.getString("name");
                 model.data(dataPath, dataElement.getString("as", dataPath));
             });
         }
         //Iterating over task dependancies
         if (dataModel.hasMeta("task")) {
-            dataModel.getMetaList("task").stream().forEach((taskElement) -> {
+            dataModel.getMetaList("task").forEach((taskElement) -> {
                 String taskName = taskElement.getString("name");
                 Task task = model.getWorkspace().getTask(taskName);
                 //Building model with default data construction
@@ -48,16 +48,9 @@ public class TaskUtils {
         return model;
     }
 
-    public static TaskModel createDefaultModel(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
-        TaskModel model = new TaskModel(workspace, taskName, taskMeta);
-
-        Meta dependencyMeta = Meta.buildEmpty(GATHER_NODE_NAME);
-        // Use @gather node for data construction
-        if (taskMeta.hasMeta(GATHER_NODE_NAME)) {
-            dependencyMeta = taskMeta.getMeta(GATHER_NODE_NAME);
-        }
-
-        return applyDataModel(model, dependencyMeta);
+    public static TaskModel.Builder createDefaultModel(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
+        TaskModel.Builder model = new TaskModel.Builder(new TaskModel(workspace, taskName, taskMeta));
+        return applyDataModel(model, taskMeta.getMetaOrEmpty(GATHER_NODE_NAME));
     }
 
     public static DataTree.Builder gather(TaskModel model) {
@@ -67,33 +60,4 @@ public class TaskUtils {
         });
         return builder;
     }
-
-//    /**
-//     * Search for a Task in context plugins and up the parent plugin. Throw an exception if action not found.
-//     *
-//     * @param context
-//     * @return
-//     */
-//    public static Task<?> buildTask(Context context, String taskName) {
-//        Path path = Path.of(taskName, Task.TASK_TARGET);
-//        return context.pluginManager().stream(true)
-//                .map(plugin -> plugin.provide(path, Task.class))
-//                .filter(Optional::isPresent)
-//                .map(Optional::get)
-//                .findFirst()
-//                .orElseThrow(() -> new NameNotFoundException(taskName));
-//
-//    }
-
-
-//    public static DataTree.Builder gather(TaskModel model, @Nullable Work parentWork) {
-//        Work gatherWork = parentWork == null ? model.getContext().getWorkManager().getWork("gather"): parentWork.addChild("gather");
-//        DataTree.Builder builder = DataTree.builder();
-//        gatherWork.setMaxProgress(model.dependencies().size());
-//        model.dependencies().forEach(dep -> {
-//            dep.apply(builder, model.getWorkspace());
-//            gatherWork.increaseProgress(1.0);
-//        });
-//        return builder;
-//    }
 }

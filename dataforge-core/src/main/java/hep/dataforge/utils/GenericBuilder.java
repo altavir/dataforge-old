@@ -23,4 +23,6 @@ public interface GenericBuilder<T, B extends GenericBuilder> {
      * @return 
      */
     T build();
+
+    //TODO seam builder after build
 }

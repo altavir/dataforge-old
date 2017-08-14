@@ -11,13 +11,17 @@ import hep.dataforge.context.Encapsulated;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
+import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.Metoid;
+import hep.dataforge.meta.SealedNode;
 import hep.dataforge.names.Named;
+import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
@@ -36,27 +40,74 @@ import java.util.stream.Stream;
  */
 public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Encapsulated {
 
-    //TODO implement builder chain
-    private final Workspace workspace;
-    private final String taskName;
-    private final Meta taskMeta;
-    private final Set<Dependency> deps;
-//    private final Set<OutputHook> outs;
+    /**
+     * Create a model builder and apply default model transformation if needed
+     *
+     * @param workspace
+     * @param taskName
+     * @param taskMeta
+     * @return
+     */
+    public static TaskModel.Builder builder(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
+        return TaskUtils.createDefaultModel(workspace, taskName, taskMeta);
+    }
 
+    /**
+     * The workspace this model belongs to
+     */
+    private final Workspace workspace;
+
+    /**
+     * The unique name of the task
+     */
+    private String taskName;
+
+    /**
+     * Meta for this specific task
+     */
+    private Meta taskMeta;
+
+    /**
+     * A set of dependencies
+     */
+    private final Set<Dependency> deps;
+
+    /**
+     * Copy constructor
+     *
+     * @param workspace
+     * @param taskName
+     * @param taskMeta
+     * @param deps
+     */
     protected TaskModel(Workspace workspace, String taskName, Meta taskMeta, Set<Dependency> deps) {
         this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         this.deps = deps;
-//        this.outs = outs;
     }
 
+    /**
+     * A constructor without dependencies
+     *
+     * @param workspace
+     * @param taskName
+     * @param taskMeta
+     */
     public TaskModel(Workspace workspace, String taskName, Meta taskMeta) {
         this.workspace = workspace;
         this.taskName = taskName;
         this.taskMeta = taskMeta;
         deps = new LinkedHashSet<>();
-//        outs = new LinkedHashSet<>();
+    }
+
+    /**
+     * Create a copy of this model an delegate it to builder
+     *
+     * @return
+     */
+    public Builder builder() {
+        return new Builder(this);
     }
 
     public Workspace getWorkspace() {
@@ -85,25 +136,6 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
     public Collection<Dependency> dependencies() {
         return deps;
     }
-//
-//    /**
-//     * An ordered collection of task outputs
-//     *
-//     * @return
-//     */
-//    public Collection<OutputHook> outs() {
-//        return outs;
-//    }
-
-//    /**
-//     * handle result using
-//     *
-//     * @param hook
-//     */
-//    public TaskModel handle(OutputHook hook) {
-//        this.outs.add(hook);
-//        return this;
-//    }
 
     @Override
     public String getName() {
@@ -113,121 +145,6 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
     @Override
     public Meta meta() {
         return taskMeta;
-    }
-
-    /**
-     * Add dependency on Model with given task
-     *
-     * @param model
-     * @param as
-     */
-    public TaskModel dependsOn(TaskModel model, String as) {
-        this.deps.add(new TaskDependency(model, as));
-        return this;
-    }
-
-    /**
-     * dependsOn(model, model.getName());
-     *
-     * @param model
-     */
-    public TaskModel dependsOn(TaskModel model) {
-        return dependsOn(model, model.getName());
-    }
-
-    /**
-     * dependsOn(new TaskModel(workspace, taskName, taskMeta))
-     *
-     * @param taskName
-     * @param taskMeta
-     */
-    public TaskModel dependsOn(String taskName, Meta taskMeta) {
-        return dependsOn(taskName, taskMeta, "");
-    }
-
-    /**
-     * dependsOn(new TaskModel(taskName, taskMeta), as);
-     *
-     * @param taskName
-     * @param taskMeta
-     * @param as
-     */
-    public TaskModel dependsOn(String taskName, Meta taskMeta, String as) {
-        return dependsOn(workspace.getTask(taskName).build(workspace, taskMeta), as);
-    }
-
-    /**
-     * Add data dependency rule using data path mask and name transformation
-     * rule.
-     * <p>
-     * Name change rule should be "pure" to avoid runtime model changes
-     *
-     * @param mask
-     * @param rule
-     */
-    public TaskModel data(String mask, UnaryOperator<String> rule) {
-        this.deps.add(new DataDependency(mask, rule));
-        return this;
-    }
-
-    /**
-     * Type checked data dependency
-     *
-     * @param type
-     * @param mask
-     * @param rule
-     * @return
-     */
-    public TaskModel data(Class<?> type, String mask, UnaryOperator<String> rule) {
-        this.deps.add(new DataDependency(type, mask, rule));
-        return this;
-    }
-
-    /**
-     * data(mask, UnaryOperator.identity());
-     *
-     * @param mask
-     */
-    public TaskModel data(String mask) {
-        return data(mask, UnaryOperator.identity());
-    }
-
-    /**
-     * data(mask, {@code str -> as});
-     *
-     * @param mask
-     * @param as
-     */
-    public TaskModel data(String mask, String as) {
-        //FIXME make smart name transformation here
-        return data(mask, str -> as);
-    }
-
-    /**
-     * Add a dependency on a type checked node
-     *
-     * @param type
-     * @param sourceNodeName
-     * @param targetNodeName
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public TaskModel dataNode(Class<?> type, String sourceNodeName, String targetNodeName) {
-        this.deps.add(new DataNodeDependency(type, sourceNodeName, targetNodeName));
-        return this;
-    }
-
-    /**
-     * Source and target node have the same name
-     *
-     * @param type
-     * @param nodeName
-     * @return
-     */
-    @SuppressWarnings("unchecked")
-    public TaskModel dataNode(Class<?> type, String nodeName) {
-        this.deps.add(new DataNodeDependency(type, nodeName, nodeName));
-        return this;
     }
 
     @Override
@@ -275,23 +192,10 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         void apply(DataTree.Builder<Object> tree, Workspace workspace);
     }
 
-//    /**
-//     * Task output handler
-//     */
-//    public interface OutputHook<T> extends BiConsumer<TaskModel, DataNode<T>>, Encapsulated {
-//        default Executor getExecutor() {
-//            return getContext().singleThreadExecutor();
-//        }
-//
-//        default Consumer<DataNode<T>> handler(TaskModel model) {
-//            return node -> this.accept(model, node);
-//        }
-//    }
-
     /**
      * Data dependency
      */
-    static class DataDependency implements Dependency{
+    static class DataDependency implements Dependency {
 
         /**
          * The gathering function for data
@@ -413,6 +317,195 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         @Override
         public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             placementRule.accept(tree, workspace.runTask(taskModel));
+        }
+    }
+
+    /**
+     * A builder for immutable model
+     */
+    public static class Builder implements GenericBuilder<TaskModel, Builder> {
+        private final TaskModel model;
+
+
+        public Builder(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
+            this.model = new TaskModel(workspace, taskName, taskMeta);
+        }
+
+        public Builder(Workspace workspace, String taskName) {
+            this.model = new TaskModel(workspace, taskName, Meta.empty());
+        }
+
+        public Builder(TaskModel model) {
+            this.model = model.copy();
+        }
+
+        @Override
+        public Builder self() {
+            return this;
+        }
+
+        @Override
+        public TaskModel build() {
+            return model;
+        }
+
+        public Workspace getWorkspace() {
+            return model.getWorkspace();
+        }
+
+        public String getName(){
+            return this.model.getName();
+        }
+
+        /**
+         * Apply meta transformation to model meta
+         *
+         * @param transform
+         * @return
+         */
+        public Builder configure(@NotNull Function<MetaBuilder, Meta> transform) {
+            this.model.taskMeta = transform.apply(this.model.taskMeta.getBuilder());
+            return self();
+        }
+
+        /**
+         * replace model meta
+         *
+         * @param meta
+         * @return
+         */
+        public Builder configure(@NotNull Meta meta) {
+            this.model.taskMeta = new SealedNode(meta);
+            return self();
+        }
+
+        /**
+         * Rename model
+         * @param name
+         * @return
+         */
+        public Builder rename(@NotNull String name) {
+            if (name.isEmpty()) {
+                throw new AnonymousNotAlowedException();
+            } else {
+                model.taskName = name;
+                return self();
+            }
+        }
+
+        /**
+         * Add dependency on Model with given task
+         *
+         * @param model
+         * @param as
+         */
+        public Builder dependsOn(TaskModel model, String as) {
+            model.deps.add(new TaskDependency(model, as));
+            return self();
+        }
+
+        /**
+         * dependsOn(model, model.getName());
+         *
+         * @param model
+         */
+        public Builder dependsOn(TaskModel model) {
+            return dependsOn(model, model.getName());
+        }
+
+        /**
+         * dependsOn(new TaskModel(workspace, taskName, taskMeta))
+         *
+         * @param taskName
+         * @param taskMeta
+         */
+        public Builder dependsOn(String taskName, Meta taskMeta) {
+            return dependsOn(taskName, taskMeta, "");
+        }
+
+        /**
+         * dependsOn(new TaskModel(taskName, taskMeta), as);
+         *
+         * @param taskName
+         * @param taskMeta
+         * @param as
+         */
+        public Builder dependsOn(String taskName, Meta taskMeta, String as) {
+            return dependsOn(model.workspace.getTask(taskName).build(model.workspace, taskMeta), as);
+        }
+
+        /**
+         * Add data dependency rule using data path mask and name transformation
+         * rule.
+         * <p>
+         * Name change rule should be "pure" to avoid runtime model changes
+         *
+         * @param mask
+         * @param rule
+         */
+        public Builder data(String mask, UnaryOperator<String> rule) {
+            model.deps.add(new DataDependency(mask, rule));
+            return self();
+        }
+
+        /**
+         * Type checked data dependency
+         *
+         * @param type
+         * @param mask
+         * @param rule
+         * @return
+         */
+        public Builder data(Class<?> type, String mask, UnaryOperator<String> rule) {
+            model.deps.add(new DataDependency(type, mask, rule));
+            return self();
+        }
+
+        /**
+         * data(mask, UnaryOperator.identity());
+         *
+         * @param mask
+         */
+        public Builder data(String mask) {
+            return data(mask, UnaryOperator.identity());
+        }
+
+        /**
+         * data(mask, {@code str -> as});
+         *
+         * @param mask
+         * @param as
+         */
+        public Builder data(String mask, String as) {
+            //FIXME make smart name transformation here
+            return data(mask, str -> as);
+        }
+
+        /**
+         * Add a dependency on a type checked node
+         *
+         * @param type
+         * @param sourceNodeName
+         * @param targetNodeName
+         * @return
+         */
+        @SuppressWarnings("unchecked")
+        public Builder dataNode(Class<?> type, String sourceNodeName, String targetNodeName) {
+            model.deps.add(new DataNodeDependency(type, sourceNodeName, targetNodeName));
+            return this;
+        }
+
+        /**
+         * Source and target node have the same name
+         *
+         * @param type
+         * @param nodeName
+         * @return
+         */
+        @SuppressWarnings("unchecked")
+        public Builder dataNode(Class<?> type, String nodeName) {
+            model.deps.add(new DataNodeDependency(type, nodeName, nodeName));
+            return this;
         }
     }
 }

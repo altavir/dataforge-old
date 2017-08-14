@@ -172,6 +172,7 @@ public class EnvelopeTag {
 
         ByteBuffer bytes = ByteBuffer.allocate(getLength());
         channel.read(bytes);
+        bytes.flip();
         header = readHeader(bytes);
 
         setValues(header);
