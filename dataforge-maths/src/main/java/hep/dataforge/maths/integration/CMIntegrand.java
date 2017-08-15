@@ -29,12 +29,11 @@ public class CMIntegrand extends UnivariateIntegrand {
     private double relativeAccuracy = Double.POSITIVE_INFINITY;
     private int iterations = 0;
 
-    public CMIntegrand(UnivariateFunction function, Double lower, Double upper) {
-        super(function, lower, upper);
+    public CMIntegrand(Double lower, Double upper, UnivariateFunction function) {
+        super(lower, upper, function);
     }
 
-    public CMIntegrand(UnivariateIntegrand integrand, double absoluteAccuracy, double relativeAccuracy,
-            int iterations, int numCalls, Double value) {
+    public CMIntegrand(double absoluteAccuracy, double relativeAccuracy, int iterations, int numCalls, Double value, UnivariateIntegrand integrand) {
         super(integrand, numCalls, value);
         this.absoluteAccuracy = absoluteAccuracy;
         this.relativeAccuracy = relativeAccuracy;

@@ -34,7 +34,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
 
 
     private final String name;
-    private Function<TaskModel, TaskModel> modelTransformation;
+    private Function<TaskModel.Builder, TaskModel.Builder> modelTransformation;
     private Map<String, Consumer<DataNode<?>>> listeners = new HashMap<>();
     private List<TaskAction> actions;
 
@@ -87,11 +87,11 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     }
 
     @Override
-    protected TaskModel transformModel(TaskModel model) {
-        return modelTransformation.apply(model);
+    protected void updateModel(TaskModel.Builder model, Meta meta) {
+        this.modelTransformation.apply(model);
     }
 
-    public TaskBuilder transformModel(Function<TaskModel, TaskModel> transform) {
+    public TaskBuilder transformModel(Function<TaskModel.Builder, TaskModel.Builder> transform) {
         return copy(tb -> tb.modelTransformation = modelTransformation.andThen(transform));
     }
 
@@ -104,7 +104,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     }
 
     public TaskBuilder dependsOn(String taskName) {
-        return transformModel(model -> model.dependsOn(taskName, model.meta().getMetaOrEmpty(taskName)));
+        return transformModel(model -> model.dependsOn(taskName, model.getMeta().getMetaOrEmpty(taskName)));
     }
 
     public TaskBuilder dependsOnData(String dataMask, String as) {

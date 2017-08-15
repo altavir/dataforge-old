@@ -45,7 +45,7 @@ public class PlottableData extends XYPlottable {
 
         List<Values> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            ValueMap.Builder point = ValueMap.of(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x[i], y[i]).builder();
+            ValueMap.Builder point = ValueMap.of(new String[]{XYAdapter.X_AXIS, XYAdapter.Y_AXIS}, x[i], y[i]).builder();
 
             if (xErrs != null) {
                 point.putValue(XYAdapter.X_ERROR_KEY, xErrs[i]);

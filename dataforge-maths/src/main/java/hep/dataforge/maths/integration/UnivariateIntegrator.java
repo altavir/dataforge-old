@@ -15,8 +15,9 @@
  */
 package hep.dataforge.maths.integration;
 
-import java.util.function.Predicate;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+
+import java.util.function.Predicate;
 
 /**
  * General ancestor for univariate integrators
@@ -31,31 +32,31 @@ public abstract class UnivariateIntegrator<T extends UnivariateIntegrand> implem
      * Create initial Integrand for given function and borders. This method is
      * required to initialize any
      *
+     * @param lower a {@link Double} object.
+     * @param upper a {@link Double} object.
      * @param function a
-     * {@link org.apache.commons.math3.analysis.UnivariateFunction} object.
-     * @param lower a {@link java.lang.Double} object.
-     * @param upper a {@link java.lang.Double} object.
+     * {@link UnivariateFunction} object.
      * @return a T object.
      */
-    protected abstract T init(UnivariateFunction function, Double lower, Double upper);
+    protected abstract T init(Double lower, Double upper, UnivariateFunction function);
 
-    public T evaluate(UnivariateFunction function, Double lower, Double upper) {
-        return evaluate(UnivariateIntegrator.this.init(function, lower, upper));
+    public T evaluate(Double lower, Double upper, UnivariateFunction function) {
+        return evaluate(UnivariateIntegrator.this.init(lower, upper, function));
     }
 
-    public Double integrate(UnivariateFunction function, Double lower, Double upper) {
-        return evaluate(function, lower, upper).getValue();
+    public Double integrate(Double lower, Double upper, UnivariateFunction function) {
+        return evaluate(lower, upper, function).getValue();
     }
 
-    public T evaluate(Predicate<T> condition, UnivariateFunction function, Double lower, Double upper) {
-        return evaluate(init(function, lower, upper), condition);
+    public T evaluate(Predicate<T> condition, Double lower, Double upper, UnivariateFunction function) {
+        return evaluate(init(lower, upper, function), condition);
     }
 
     public T init(UnivariateIntegrand integrand) {
-        return evaluate(integrand.getFunction(), integrand.getLower(), integrand.getUpper());
+        return evaluate(integrand.getLower(), integrand.getUpper(), integrand.getFunction());
     }
 
     public T init(UnivariateIntegrand integrand, Predicate<T> condition) {
-        return evaluate(condition, integrand.getFunction(), integrand.getLower(), integrand.getUpper());
+        return evaluate(condition, integrand.getLower(), integrand.getUpper(), integrand.getFunction());
     }
 }

@@ -49,8 +49,8 @@ public class IterativeUnivariateIntegrator<T extends UnivariateIntegrand> extend
     /** {@inheritDoc}
      * @return  */
     @Override
-    protected T init(UnivariateFunction function, Double lower, Double upper) {
-        return integrator.init(function, lower, upper);
+    protected T init(Double lower, Double upper, UnivariateFunction function) {
+        return integrator.init(lower, upper, function);
     }
 
 //    /** {@inheritDoc}

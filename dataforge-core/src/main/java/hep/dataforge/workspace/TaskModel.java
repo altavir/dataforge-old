@@ -357,6 +357,10 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
             return this.model.getName();
         }
 
+        public Meta getMeta(){
+            return this.model.getMeta();
+        }
+
         /**
          * Apply meta transformation to model meta
          *

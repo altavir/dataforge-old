@@ -99,7 +99,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
     public double value(double binBegin, double binEnd, Values set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = ParametricUtils.getSpectrumFunction(source, set);
-            return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
+            return integrator.evaluate(binBegin, binEnd, spFunc).getValue();
         } else {
             return source.value((binBegin + binEnd) / 2, set) * (binEnd - binBegin);
         }
@@ -109,7 +109,7 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
     public double derivValue(String parName, double binBegin, double binEnd, Values set) {
         if (isCalculateCountInBin()) {
             UnivariateFunction spFunc = ParametricUtils.getSpectrumDerivativeFunction(parName, source, set);
-            return integrator.evaluate(spFunc, binBegin, binEnd).getValue();
+            return integrator.evaluate(binBegin, binEnd, spFunc).getValue();
         } else {
             double val = (binBegin + binEnd) / 2;
             return source.derivValue(parName, val, set) * (binEnd - binBegin);

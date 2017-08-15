@@ -16,8 +16,9 @@
 package hep.dataforge.maths.integration;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
-import static org.junit.Assert.*;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 /**
  *
@@ -36,7 +37,7 @@ public class RiemanIntegratorTest {
     @Test
     public void testIntegration() {
         System.out.println("integration test with simple Rieman integrator");
-        assertEquals(1d, new RiemanIntegrator(400).integrate(gausss, -5d, 5d), 1e-2);
+        assertEquals(1d, new RiemanIntegrator(400).integrate(-5d, 5d, gausss), 1e-2);
     }
     
 }

@@ -23,8 +23,8 @@ public class SplitUnivariateIntegrator extends UnivariateIntegrator<UnivariateIn
     Supplier<UnivariateIntegrator> defaultIntegrator;
 
     @Override
-    protected UnivariateIntegrand init(UnivariateFunction function, Double lower, Double upper) {
-        return new UnivariateIntegrand(function, lower, upper);
+    protected UnivariateIntegrand init(Double lower, Double upper, UnivariateFunction function) {
+        return new UnivariateIntegrand(lower, upper, function);
     }
 
 //    @Override

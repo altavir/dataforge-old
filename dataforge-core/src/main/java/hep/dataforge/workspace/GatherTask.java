@@ -1,6 +1,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Meta;
 
 /**
  * The task that gathers data from workspace and returns it as is.
@@ -8,7 +9,7 @@ import hep.dataforge.data.DataNode;
  * No `@gather` node is needed.
  * Created by darksnake on 07-Aug-16.
  */
-public class GatherTask<R> extends AbstractTask<R> {
+public class GatherTask extends AbstractTask<Object> {
     @Override
     public String getName() {
         return "gather";
@@ -16,12 +17,13 @@ public class GatherTask<R> extends AbstractTask<R> {
 
 
     @Override
-    protected DataNode<R> run(TaskModel model, DataNode data) {
+    protected DataNode<Object> run(TaskModel model, DataNode data) {
         return data;
     }
 
     @Override
-    protected TaskModel transformModel(TaskModel model) {
-        return model;
+    protected void updateModel(TaskModel.Builder model, Meta meta) {
+        //do nothing
     }
+
 }

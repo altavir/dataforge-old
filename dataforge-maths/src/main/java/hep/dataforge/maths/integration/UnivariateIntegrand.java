@@ -35,7 +35,7 @@ public class UnivariateIntegrand implements Integrand {
     private Double value;
     private int numCalls;
 
-    public UnivariateIntegrand(UnivariateFunction function, Double lower, Double upper) {
+    public UnivariateIntegrand(Double lower, Double upper, UnivariateFunction function) {
         this.function = function;
         if (lower >= upper) {
             throw new IllegalArgumentException("Wrong bounds for integrand");

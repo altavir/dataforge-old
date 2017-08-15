@@ -212,7 +212,7 @@ public class ConfidenceLimitCalculator {
         this.b = b;
         final PolynomialSplineFunction prob = cacheUnivariateFunction(a, b, numCachePoints, func);
         final UnivariateIntegrator integrator = IntegratorFactory.getGaussRuleIntegrator(DEFAULT_INTEGRATION_NODES);
-        final double norm = integrator.integrate(prob, a, b);
+        final double norm = integrator.integrate(a, b, prob);
         UnivariateFunction integralFunc = new IntegralFunc(a, prob, norm);
         this.probability = prob;
         // На всякий случай удваиваем количество узлов
@@ -259,7 +259,7 @@ public class ConfidenceLimitCalculator {
             if (x <= a) {
                 return 0;
             }
-            return integrator.integrate(prob, a, x) / norm;
+            return integrator.integrate(a, x, prob) / norm;
         }
     }
 }

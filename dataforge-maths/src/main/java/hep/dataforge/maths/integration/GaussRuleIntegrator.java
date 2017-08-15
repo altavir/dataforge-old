@@ -64,8 +64,8 @@ public class GaussRuleIntegrator extends UnivariateIntegrator<CMIntegrand> {
     /** {@inheritDoc}
      * @return  */
     @Override
-    protected CMIntegrand init(UnivariateFunction function, Double lower, Double upper) {
-        return new CMIntegrand(function, lower, upper);
+    protected CMIntegrand init(Double lower, Double upper, UnivariateFunction function) {
+        return new CMIntegrand(lower, upper, function);
     }
 
     /** {@inheritDoc}
@@ -74,7 +74,7 @@ public class GaussRuleIntegrator extends UnivariateIntegrator<CMIntegrand> {
     public CMIntegrand evaluate(CMIntegrand integrand, Predicate<CMIntegrand> condition) {
         GaussIntegrator integrator = getIntegrator(integrand.getLower(), integrand.getUpper());
         double res = integrator.integrate(integrand.getFunction());
-        return new CMIntegrand(integrand, integrand.getAbsoluteAccuracy(), integrand.getRelativeAccuracy(), 1, numpoints, res);
+        return new CMIntegrand(integrand.getAbsoluteAccuracy(), integrand.getRelativeAccuracy(), 1, numpoints, res, integrand);
     }
 
     private GaussIntegrator getIntegrator(double lower, double upper) {
