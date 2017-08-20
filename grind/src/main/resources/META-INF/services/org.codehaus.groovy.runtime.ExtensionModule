@@ -1,6 +1,3 @@
 moduleName=grind
 moduleVersion=1.0
-extensionClasses=\
-  hep.dataforge.grind.extensions.ValueExtension, \
-  hep.dataforge.grind.extensions.MetaExtension, \
-  hep.dataforge.grind.extensions.DataExtension
+extensionClasses = hep.dataforge.grind.extensions.CoreExtension

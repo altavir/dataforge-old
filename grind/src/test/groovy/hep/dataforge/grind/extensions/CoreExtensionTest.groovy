@@ -4,7 +4,7 @@ import hep.dataforge.grind.Grind
 import hep.dataforge.meta.Meta
 import spock.lang.Specification
 
-class MetaExtensionTest extends Specification {
+class CoreExtensionTest extends Specification {
 
     def "Property read"() {
         when:

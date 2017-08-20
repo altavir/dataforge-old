@@ -11,7 +11,6 @@ import hep.dataforge.io.MetaStreamWriter;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ServiceLoader;
 import java.util.function.Predicate;
 import java.util.stream.StreamSupport;
@@ -47,7 +46,7 @@ public interface MetaType {
     static MetaType resolve(String name){
         synchronized (Global.instance()) {
             return StreamSupport.stream(loader.spliterator(), false)
-                    .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
+                    .filter(it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
         }
     }
 

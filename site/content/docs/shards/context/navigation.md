@@ -21,7 +21,7 @@ token1.token2[3].token3[key = value]
 
 A target and a name could be combined into single string using *path* notation: `<target>::<name>`, where `::` is a target separating symbol. If the provided object is provider itself, then one can use *chain path* notation to access objects provided by it. Chain path consists of path segments separated by `/` symbol. Each of the segments is a fully qualified path. The resolution of chain path begins with the first segment and moves forward until path is fully resolved. If some path names not provided or the objects themselves are not providers, the resolution fails.
 
-![Path notation](${r '/docs-gen/images/naming.svg'})
+![Path notation](${img '/naming.svg'})
 
 ### Default targets
 

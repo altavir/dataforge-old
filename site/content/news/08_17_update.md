@@ -4,4 +4,4 @@ title: "Site update"
 date: 02.08.2017
 published: true
 ---
-Documentation update.
+Documentation and front update.

@@ -35,7 +35,7 @@ public interface Described {
             return MarkupBuilder.text(((Named) this).getName(), "blue");
         } else {
             //TODO add customizable markup for different renderers
-            return null;
+            return new MarkupBuilder();
         }
     }
 }

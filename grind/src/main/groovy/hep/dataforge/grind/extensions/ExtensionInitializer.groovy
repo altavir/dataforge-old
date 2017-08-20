@@ -3,6 +3,7 @@ package hep.dataforge.grind.extensions
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MutableMetaNode
 import hep.dataforge.tables.Table
+import hep.dataforge.workspace.Workspace
 
 /**
  * A set of dynamic initializers for groovy features. Must be called explicitly at the start of the program.
@@ -46,8 +47,16 @@ class ExtensionInitializer {
         }
     }
 
+    static def initWorkspace(){
+        Workspace.metaClass.methodMissing = {String name, Object args ->
+            String str = args.getClass().isArray() ? ((Object[]) args).join(" ") : args.toString()
+            return delegate.runTask(name, str)
+        }
+    }
+
     static def initAll(){
         initMeta()
         initTable()
+        initWorkspace()
     }
 }

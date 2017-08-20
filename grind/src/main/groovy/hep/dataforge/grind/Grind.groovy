@@ -6,8 +6,11 @@ import hep.dataforge.grind.actions.GrindPipe
 import hep.dataforge.grind.extensions.ExtensionInitializer
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.MetaMorph
+import hep.dataforge.workspace.FileBasedWorkspace
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
+
+import java.nio.file.Paths
 
 /**
  * Created by darksnake on 04-Aug-16.
@@ -139,11 +142,11 @@ class Grind {
     }
 
     static Workspace buildWorkspace(File file) {
-        return new GrindWorkspaceBuilder().read(file).build();
+        return FileBasedWorkspace.build(file.toPath());
     }
 
     static Workspace buildWorkspace(String file) {
-        return new GrindWorkspaceBuilder().read(file).build();
+        return FileBasedWorkspace.build(Paths.get(file));
     }
 
     /**

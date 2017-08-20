@@ -13,15 +13,16 @@ apply plugin: 'idea'
 apply plugin: "com.jfrog.artifactory"
 apply plugin: 'maven-publish'
 
+allprojects{
+    group = 'hep.dataforge'
+    version = '0.4.0 - SNAPSHOT'
+}
+
 subprojects{
     if(it.name != "site") {
         apply plugin: "com.jfrog.artifactory"
         apply plugin: 'maven-publish'
         apply plugin: 'java'
-
-        group = 'hep.dataforge'
-        version = '0.4.0 - SNAPSHOT'
-
 
         [compileJava, compileTestJava]*.options*.encoding = 'UTF-8'
 

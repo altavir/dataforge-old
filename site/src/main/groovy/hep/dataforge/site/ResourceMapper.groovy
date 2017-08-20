@@ -30,7 +30,8 @@ class ResourceMapper {
 
 
         injectNews(refinedResources)
-        injectShards(refinedResources)
+        injectDocs(refinedResources)
+        injectModules(refinedResources)
         injectReleases(refinedResources)
         loadSections(refinedResources)
 
@@ -62,7 +63,7 @@ class ResourceMapper {
         //Adding news shards
         Map newsPage = resources.find { it.url == '/news.html' } as Map;
         def news = resources.findAll { it.url =~ /news\/.*/ && it.content_type == 'news_shard' }
-        news.sort(new OrderBy({ it.date }))
+        news.sort(Comparator.comparing{it.date}.reversed())
         newsPage.put("news", news)
         //removing news from published pages
         resources.removeAll(news)
@@ -78,13 +79,22 @@ class ResourceMapper {
         }
     }
 
+
+    private injectDocs(List resources){
+        injectShards(resources,'doc_shard','/docs.html')
+    }
+
+    private injectModules(List resources){
+        injectShards(resources,'module_shard','/modules.html')
+    }
+
     /**
      * Inject doc shards in resource map
      */
-    private injectShards(List resources) {
+    private injectShards(List resources, String type, String path) {
         def chapters = readConfig('/config/docs.yml', resources).chapters as List
-        Map docsPage = resources.find { it.url == '/docs.html' } as Map;
-        def shards = resources.findAll { it.content_type == 'doc_shard' }
+        Map docsPage = resources.find { it.url == path } as Map;
+        def shards = resources.findAll { it.content_type == type }
 
         //Injecting chapter ordering
         shards.each { shard ->

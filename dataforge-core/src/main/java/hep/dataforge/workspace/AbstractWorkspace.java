@@ -8,7 +8,6 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Path;
 
@@ -29,7 +28,8 @@ public abstract class AbstractWorkspace implements Workspace {
     private Context context;
 
     @Override
-    public Task<?> getTask(String taskName) {
+    @SuppressWarnings("unchecked")
+    public Optional<Task<?>> optTask(String taskName) {
         if (!tasks.containsKey(taskName)) {
             getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
             List<Task> taskList = getContext().pluginManager().stream(true)
@@ -38,17 +38,17 @@ public abstract class AbstractWorkspace implements Workspace {
                     .map(Optional::get)
                     .collect(Collectors.toList());
             if (taskList.isEmpty()) {
-                throw new NameNotFoundException(taskName);
+                return Optional.empty();
             } else {
                 if (taskList.size() > 1) {
                     getLogger().warn("A name conflict during task resolution. " +
                             "Task with name '{}' is present in multiple plugins. " +
                             "Consider loading task explicitly.", taskName);
                 }
-                return taskList.get(0);
+                return Optional.of(taskList.get(0));
             }
         }
-        return tasks.get(taskName);
+        return Optional.of(tasks.get(taskName));
     }
 
     @Override
@@ -62,16 +62,8 @@ public abstract class AbstractWorkspace implements Workspace {
     }
 
     @Override
-    public Meta getTarget(String name) {
-        if (!targets.containsKey(name)) {
-            throw new NameNotFoundException(name);
-        }
-        return targets.get(name);
-    }
-
-    @Override
-    public boolean hasTarget(String name) {
-        return targets.containsKey(name);
+    public Optional<Meta> optTarget(String name) {
+        return Optional.ofNullable(targets.get(name));
     }
 
     @Override

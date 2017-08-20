@@ -30,8 +30,8 @@ public class MarkupUtils {
         return builder.build();
     }
 
-    private static MarkupBuilder applyDescriptorHead(MarkupBuilder builder, Described obj) {
-        return builder.addContent(obj.getHeader());
+    private static void applyDescriptorHead(MarkupBuilder builder, Described obj) {
+        builder.addContent(obj.getHeader());
 //        NodeDescriptor descriptor = obj.getDescriptor();
 //        MarkupBuilder builder = new MarkupBuilder();
 //        if (descriptor instanceof ActionDescriptor) {
@@ -82,7 +82,7 @@ public class MarkupUtils {
         return builder;
     }
 
-    private static MarkupBuilder applyDescriptorNode(MarkupBuilder builder, Meta nodeDef) throws DescriptorException {
+    private static void applyDescriptorNode(MarkupBuilder builder, Meta nodeDef) throws DescriptorException {
         if (builder == null) {
             builder = new MarkupBuilder();
         }
@@ -101,7 +101,6 @@ public class MarkupUtils {
             }
             builder.addContent(valueList);
         }
-        return builder;
     }
 
     private static MarkupBuilder descriptorElement(Meta elementDef) throws DescriptorException {

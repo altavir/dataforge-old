@@ -1,8 +1,9 @@
-package hep.dataforge.grind
+package hep.dataforge.grind.workspace
 
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.Action
 import hep.dataforge.data.DataNode
+import hep.dataforge.grind.Grind
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Template
 import hep.dataforge.workspace.GatherTask

@@ -23,9 +23,9 @@ public class TaglessEnvelopeType implements EnvelopeType {
 
     public static final String TAGLESS_ENVELOPE_HEADER = "#~DFTL~#";
     public static final String META_START_PROPERTY = "metaSeparator";
-    public static final String DEFAULT_META_START = "#~=META=~#";
+    public static final String DEFAULT_META_START = "#~META~#";
     public static final String DATA_START_PROPERTY = "dataSeparator";
-    public static final String DEFAULT_DATA_START = "#~=DATA=~#";
+    public static final String DEFAULT_DATA_START = "#~DATA~#";
 
     public static TaglessEnvelopeType instance = new TaglessEnvelopeType();
 

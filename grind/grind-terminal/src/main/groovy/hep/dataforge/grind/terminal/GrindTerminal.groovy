@@ -5,12 +5,9 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.description.Described
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValuesDefs
+import hep.dataforge.description.*
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
-import hep.dataforge.grind.GrindWorkspaceBuilder
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
@@ -21,6 +18,7 @@ import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
 import hep.dataforge.plots.jfreechart.JFCFrameFactory
 import hep.dataforge.values.ValueType
+import hep.dataforge.workspace.FileBasedWorkspace
 import org.jline.reader.EndOfFileException
 import org.jline.reader.LineReader
 import org.jline.reader.LineReaderBuilder
@@ -151,8 +149,24 @@ class GrindTerminal extends SimpleConfigurable {
         shell.bind("describe") { it ->
             if (it instanceof Described) {
                 renderer.render(MarkupUtils.markupDescriptor(it as Described))
-                renderer.ln()
+            } else if (it instanceof NodeDescriptor) {
+                renderer.render(MarkupUtils.markupDescriptor(it))
+            } else if (it instanceof String) {
+                NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(it);
+                if(descriptor.meta().isEmpty()){
+                    renderer.render(MarkupBuilder.text("The description for ")
+                            .addText("${it}", "blue")
+                            .addText(" is empty")
+                            .build()
+                    )
+                } else {
+                    renderer.render(MarkupUtils.markupDescriptor(descriptor))
+                }
+            } else {
+                MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${it}","blue")
+                renderer.render(builder.build());
             }
+            renderer.ln()
             return null;
         }
 
@@ -164,7 +178,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (wsFile.exists()) {
             try {
                 context.logger.info("Found 'workspace.groovy' in default location. Using it to build workspace.")
-                shell.bind("ws", new GrindWorkspaceBuilder(context).read(wsFile));
+                shell.bind("ws", FileBasedWorkspace.build(context,wsFile.toPath()));
                 context.logger.info("Workspace builder bound to 'ws'")
             } catch (Exception ex) {
                 context.logger.error("Failed to build workspace from 'workspace.groovy'", ex)
@@ -180,10 +194,11 @@ class GrindTerminal extends SimpleConfigurable {
         if (obj == null) {
             help()
         } else {
+            TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
             try {
                 def res = obj.invokeMethod("help", null);
                 if (res instanceof Markup) {
-                    TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
+
                     renderer.render(res)
                     renderer.ln()
                 } else {
@@ -191,7 +206,7 @@ class GrindTerminal extends SimpleConfigurable {
                 }
                 println();
             } catch (Exception ex) {
-                println("No help article for ${obj}")
+                renderer.render(MarkupBuilder.text("No help article for ").addText("${obj}","blue").build());
             }
         }
     }

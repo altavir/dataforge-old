@@ -4,12 +4,14 @@
  * and open the template in the editor.
  */
 
-package hep.dataforge.grind
+package hep.dataforge.grind.workspace
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
+import hep.dataforge.grind.Grind
+import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder

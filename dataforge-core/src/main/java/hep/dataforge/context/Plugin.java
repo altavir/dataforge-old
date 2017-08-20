@@ -29,7 +29,7 @@ import hep.dataforge.providers.Provider;
  * <p>
  * The plugin lifecycle is the following:
  * <p>
- * create -> configure -> attach -> detach -> destroy
+ * create - configure - attach - detach - destroy
  * <p>
  * Configuration of attached plugin is possible for a context which is not in a runtime mode, but it is not recommended.
  *

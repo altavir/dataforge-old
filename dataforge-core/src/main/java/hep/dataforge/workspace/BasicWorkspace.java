@@ -71,7 +71,7 @@ public class BasicWorkspace extends AbstractWorkspace {
     }
 
 
-    public static class Builder implements Workspace.Builder<Builder> {
+    public static class Builder implements Workspace.Builder {
 
         BasicWorkspace w = new BasicWorkspace();
 

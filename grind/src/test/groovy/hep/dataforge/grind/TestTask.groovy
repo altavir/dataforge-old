@@ -1,6 +1,7 @@
 package hep.dataforge.grind
 
 import hep.dataforge.data.DataSet
+import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.workspace.MultiStageTask
 import hep.dataforge.workspace.TaskModel
@@ -32,7 +33,7 @@ class TestTask extends MultiStageTask {
     }
 
     @Override
-    protected TaskModel transformModel(TaskModel model) {
-        return model;
+    protected void updateModel(TaskModel.Builder model, Meta meta) {
+
     }
 }
