@@ -12,7 +12,7 @@ import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.utils.Optionals;
-import hep.dataforge.workspace.Task;
+import hep.dataforge.workspace.tasks.Task;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;

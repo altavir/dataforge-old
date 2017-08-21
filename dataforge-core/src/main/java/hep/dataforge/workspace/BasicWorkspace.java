@@ -11,6 +11,8 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.workspace.tasks.Task;
+import hep.dataforge.workspace.tasks.TaskModel;
 import org.jetbrains.annotations.NotNull;
 
 /**

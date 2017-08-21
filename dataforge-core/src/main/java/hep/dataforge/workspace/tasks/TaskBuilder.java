@@ -1,4 +1,4 @@
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.actions.Action;
 import hep.dataforge.actions.ActionUtils;
@@ -155,7 +155,7 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     public TaskBuilder doLast(Action action) {
         return doLast(
                 model -> action,
-                model -> model.meta()
+                TaskModel::meta
         );
     }
 

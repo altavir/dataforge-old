@@ -6,10 +6,9 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.grind.Grind
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Template
-import hep.dataforge.workspace.GatherTask
-import hep.dataforge.workspace.Task
-import hep.dataforge.workspace.TaskModel
 import hep.dataforge.workspace.Workspace
+import hep.dataforge.workspace.tasks.Task
+import hep.dataforge.workspace.tasks.TaskModel
 import javafx.util.Pair
 
 import java.util.function.UnaryOperator
@@ -21,11 +20,11 @@ import java.util.function.UnaryOperator
 @CompileStatic
 class TaskSpec {
     private final String name;
-    private Task prototype = new GatherTask();
-    private UnaryOperator<Meta> trans = UnaryOperator.identity();
-    private List<Pair<Action, UnaryOperator<Meta>>> actions = new ArrayList<>();
+//    private Task prototype = new GatherTask();
+//    private UnaryOperator<Meta> trans = UnaryOperator.identity();
+//    private List<Pair<Action, UnaryOperator<Meta>>> actions = new ArrayList<>();
 
-    TaskSpec(String name) {
+    TaskSpec(Map params, String name) {
         this.name = name
     }
 

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.actions.Action;
 import hep.dataforge.data.DataNode;

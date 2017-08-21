@@ -13,13 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.Described;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
+import hep.dataforge.workspace.Workspace;
 
 /**
  * The main building block of "pull" data flow model.

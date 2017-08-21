@@ -47,7 +47,7 @@ class Grind {
      * @param values
      * @return
      */
-    static MetaBuilder buildMeta(String name, Map values) {
+    static MetaBuilder buildMeta(Map values, String name) {
         return new MetaBuilder(name).update(values);
     }
 
@@ -79,7 +79,7 @@ class Grind {
      * @param cl
      * @return
      */
-    static MetaBuilder buildMeta(String nodeName, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+    static MetaBuilder buildMeta(Map values, String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
         return buildMeta(nodeName, cl).update(values);
     }
 

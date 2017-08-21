@@ -260,11 +260,11 @@ class GrindTerminal extends SimpleConfigurable {
                     if (res != null) {
                         String str = res.toString();
 
-                        //abbreviating the result
-                        //TODO improve string abbreviation
-                        if (str.size() > 50) {
-                            str = str[0..50] + "..."
-                        }
+//                        //abbreviating the result
+//                        //TODO improve string abbreviation
+//                        if (str.size() > 50) {
+//                            str = str[0..50] + "..."
+//                        }
 
                         def resStr = new AttributedStringBuilder()
                                 .style(RES)

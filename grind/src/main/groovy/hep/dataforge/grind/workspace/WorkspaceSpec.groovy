@@ -10,14 +10,17 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
+import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.workspace.BasicWorkspace
-import hep.dataforge.workspace.Task
 import hep.dataforge.workspace.Workspace
+import hep.dataforge.workspace.tasks.Task
+import hep.dataforge.workspace.templates.TaskFactory
+
+import java.util.stream.StreamSupport
 
 /**
  * A DSL helper to build workspace
@@ -49,6 +52,9 @@ class WorkspaceSpec {
         return builder
     }
 
+    /**
+     * A specification to build context via grind workspace definition
+     */
     private class ContextSpec {
         String name = "workspace"
         Map properties = new HashMap()
@@ -101,6 +107,9 @@ class WorkspaceSpec {
         code()
     }
 
+    /**
+     * A specification to build workspace data
+     */
     private class DataSpec {
         def files(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
             WorkspaceSpec.this.builder.loadFileData(place, path, Grind.buildMeta(fileMeta))
@@ -138,17 +147,24 @@ class WorkspaceSpec {
     }
 
     /**
-     * Define new task using task builder
+     * Define new task using task factory
      * @param taskName
      * @param cl
      * @return
      */
-    def task(String taskName, @DelegatesTo(TaskSpec) Closure cl) {
-        def taskSpec = new TaskSpec(taskName)
-        def code = cl.rehydrate(taskSpec, this, this)
-        code.resolveStrategy = Closure.DELEGATE_FIRST
-        code()
-        builder.loadTask(taskSpec.build())
+    def task(Map parameters = Collections.emptyMap(), String taskName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        Meta meta = Grind.buildMeta(parameters, taskName, cl);
+        Task task = StreamSupport.stream(ServiceLoader.load(TaskFactory).spliterator(), false)
+                .filter { it.name == meta.getName() }
+                .map { it.build(context, meta) }
+                .findFirst().orElseThrow { new NameNotFoundException("Task template with name $taskName not found") }
+        builder.loadTask(task)
+//
+//        def taskSpec = new TaskSpec(parameters, taskName)
+//        def code = cl.rehydrate(taskSpec, this, this)
+//        code.resolveStrategy = Closure.DELEGATE_FIRST
+//        code()
+//        builder.loadTask(taskSpec.build())
     }
 
     /**
@@ -199,21 +215,21 @@ class WorkspaceSpec {
 //        this.builder.loadMeta(template.compile(map).rename(name));
 //    }
 
-    /**
-     * Build meta(Builder) using builder but do not add it to workspace
-     * @param name
-     * @param closure
-     * @return
-     */
-    MetaBuilder buildMeta(String name, Closure closure) {
-        return Grind.buildMeta(name, closure)
-    }
-
-    MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
-        MetaBuilder res = Grind.buildMeta(name, closure)
-        values.forEach { key, value -> res.setValue(key.toString(), value) }
-        return res
-    }
+//    /**
+//     * Build meta(Builder) using builder but do not add it to workspace
+//     * @param name
+//     * @param closure
+//     * @return
+//     */
+//    MetaBuilder buildMeta(String name, Closure closure) {
+//        return Grind.buildMeta(name, closure)
+//    }
+//
+//    MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
+//        MetaBuilder res = Grind.buildMeta(name, closure)
+//        values.forEach { key, value -> res.setValue(key.toString(), value) }
+//        return res
+//    }
 
 }
 

@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.cache.Identifiable;
 import hep.dataforge.context.Context;
@@ -21,6 +21,7 @@ import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.NamingUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
+import hep.dataforge.workspace.Workspace;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
@@ -41,7 +42,7 @@ import java.util.stream.Stream;
 public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Encapsulated {
 
     /**
-     * Create a model builder and apply default model transformation if needed
+     * Create an empty model builder
      *
      * @param workspace
      * @param taskName
@@ -49,7 +50,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
      * @return
      */
     public static TaskModel.Builder builder(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
-        return TaskUtils.createDefaultModel(workspace, taskName, taskMeta);
+        return new TaskModel.Builder(new TaskModel(workspace, taskName, taskMeta));
     }
 
     /**

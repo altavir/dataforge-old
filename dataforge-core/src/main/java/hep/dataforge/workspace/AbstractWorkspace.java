@@ -8,8 +8,11 @@ package hep.dataforge.workspace;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Path;
+import hep.dataforge.workspace.tasks.Task;
+import hep.dataforge.workspace.tasks.TaskModel;
 
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +25,11 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 public abstract class AbstractWorkspace implements Workspace {
+
+    /**
+     * The key in the meta designating parent target. The resulting target is obtained by overlaying parent with this one
+     */
+    public static final String PARENT_TARGET_KEY = "@parent";
 
     protected final Map<String, Task> tasks = new HashMap<>();
     protected final Map<String, Meta> targets = new HashMap<>();
@@ -61,9 +69,23 @@ public abstract class AbstractWorkspace implements Workspace {
         return targets.values().stream();
     }
 
+    /**
+     * Automatically constructs a laminate if {@code @parent} value if defined
+     * @param name
+     * @return
+     */
     @Override
     public Optional<Meta> optTarget(String name) {
-        return Optional.ofNullable(targets.get(name));
+        Meta target = targets.get(name);
+        if(target == null){
+            return Optional.empty();
+        } else {
+            if(target.hasValue(PARENT_TARGET_KEY)){
+                return Optional.of(new Laminate(target,optTarget(target.getString(PARENT_TARGET_KEY)).orElse(Meta.empty())));
+            } else {
+                return Optional.of(target);
+            }
+        }
     }
 
     @Override

@@ -18,11 +18,11 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.LIST_TYPE;
 public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     public static MarkupBuilder text(String text) {
-        return new MarkupBuilder().setValue("text", text);
+        return new MarkupBuilder().addText(text);
     }
 
     public static MarkupBuilder text(String text, String color) {
-        return text(text).setValue("color", color);
+        return new MarkupBuilder().addText(text, color);
     }
 
     /**

@@ -26,6 +26,8 @@ import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.GenericBuilder;
+import hep.dataforge.workspace.tasks.Task;
+import hep.dataforge.workspace.tasks.TaskModel;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;

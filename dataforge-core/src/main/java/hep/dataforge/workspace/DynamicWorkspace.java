@@ -2,6 +2,7 @@ package hep.dataforge.workspace;
 
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.workspace.tasks.Task;
 
 import java.util.Optional;
 import java.util.stream.Stream;

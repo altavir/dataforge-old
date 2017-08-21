@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.data.DataNode;
 import org.slf4j.Logger;
@@ -84,7 +84,7 @@ public abstract class MultiStageTask<R> extends AbstractTask<R> {
      *
      * @author Alexander Nozik
      */
-    public static class MultiStageTaskState {
+    protected static class MultiStageTaskState {
 
         private static final String INITAIL_DATA_STAGE = "@data";
 

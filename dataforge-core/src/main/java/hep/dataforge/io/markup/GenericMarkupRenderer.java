@@ -18,6 +18,7 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
 
     /**
      * Called once per render
+     *
      * @param mark
      */
     @Override
@@ -27,6 +28,7 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
 
     /**
      * Override this method to change internal rendering mechanism. This method is recursively called inside rendering procedure
+     *
      * @param element
      */
     protected void doRender(Markup element) {
@@ -50,9 +52,10 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
 
     /**
      * Render element of unknown type. By default logs an error and ignores node
+     *
      * @param markup
      */
-    protected void doRenderOther(Markup markup){
+    protected void doRenderOther(Markup markup) {
         LoggerFactory.getLogger(getClass()).error("Unknown markup type: " + markup.getType());
     }
 
@@ -71,6 +74,8 @@ public abstract class GenericMarkupRenderer implements MarkupRenderer {
         String text = element.getString("text");
         String color = element.getString("color", "");
         renderText(text, color, element);
+//        //render children
+//        element.getContent().forEach(this::doRender);
     }
 
     /**

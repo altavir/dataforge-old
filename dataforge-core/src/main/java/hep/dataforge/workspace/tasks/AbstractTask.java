@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-package hep.dataforge.workspace;
+package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataTree;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.workspace.Workspace;
 
 
 /**
@@ -25,13 +27,21 @@ import hep.dataforge.meta.Meta;
  */
 public abstract class AbstractTask<R> implements Task {
 
+    private static DataTree.Builder<Object> gather(TaskModel model) {
+        DataTree.Builder<Object> builder = DataTree.builder();
+        model.dependencies().forEach(dep -> {
+            dep.apply(builder, model.getWorkspace());
+        });
+        return builder;
+    }
+
     @Override
     public DataNode<R> run(TaskModel model) {
         //validate model
         validate(model);
 
         // gather data
-        DataNode input = TaskUtils.gather(model).build();
+        DataNode input = gather(model).build();
 
         //execute
         DataNode<R> output = run(model, input);
@@ -60,7 +70,7 @@ public abstract class AbstractTask<R> implements Task {
      * existing ones.
      *
      * @param model the model to be transformed
-     * @param meta the whole configuration (not only for this particular task)
+     * @param meta  the whole configuration (not only for this particular task)
      */
     protected abstract void updateModel(TaskModel.Builder model, Meta meta);
 
@@ -76,7 +86,7 @@ public abstract class AbstractTask<R> implements Task {
     public TaskModel build(Workspace workspace, Meta meta) {
         Meta taskMeta = meta.getMeta(getName(), meta);
         TaskModel.Builder builder = TaskModel.builder(workspace, getName(), taskMeta);
-        updateModel(builder,meta);
+        updateModel(builder, meta);
         return builder.build();
     }
 }

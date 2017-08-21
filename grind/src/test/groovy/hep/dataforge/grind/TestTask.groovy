@@ -3,8 +3,8 @@ package hep.dataforge.grind
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
-import hep.dataforge.workspace.MultiStageTask
-import hep.dataforge.workspace.TaskModel
+import hep.dataforge.workspace.tasks.MultiStageTask
+import hep.dataforge.workspace.tasks.TaskModel
 
 /**
  * Created by darksnake on 04-Aug-16.
