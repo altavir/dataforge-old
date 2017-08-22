@@ -8,16 +8,16 @@ import hep.dataforge.tables.XYAdapter
 import hep.dataforge.values.Values
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.collections.FXCollections
+import javafx.collections.MapChangeListener
+import javafx.collections.ObservableList
+import javafx.scene.control.TabPane
 import javafx.scene.control.TableView
 import javafx.util.converter.DoubleStringConverter
 import tornadofx.*
 
 class DemoView : View("Plot demonstration") {
-    private val plottable = PlottableData("default");
 
-    private val frame = JFreeChartFrame().apply {
-        add(plottable)
-    }
+    private val frame = JFreeChartFrame()
 
 
     class PlotData() {
@@ -38,13 +38,41 @@ class DemoView : View("Plot demonstration") {
     }
 
     //private val dataMap = FXCollections.observableHashMap<String, ObservableList<PlotData>>()
-    val data = FXCollections.observableArrayList<PlotData>()
+    val dataMap = FXCollections.observableHashMap<String, ObservableList<PlotData>>().apply {
+        addListener{change: MapChangeListener.Change<out String, out ObservableList<PlotData>> ->
+            dataChanged(change.key)
+        }
+    };
+
+    lateinit var dataPane: TabPane;
 
     override val root = borderpane {
         PlotContainer.centerIn(this).apply {
             plot = frame
         }
+        top {
+            toolbar {
+                val nameField = textfield()
+                button("+"){
+                    action {
+                        createDataSet(nameField.text)
+                    }
+                }
+            }
+        }
         left {
+            dataPane = tabpane()
+
+        }
+    }
+
+    fun createDataSet(plotName: String) {
+        val data = FXCollections.observableArrayList<PlotData>()
+        dataMap.put(plotName, data)
+        dataPane.tab(plotName) {
+            setOnClosed {
+                dataMap.remove(plotName)
+            }
             borderpane {
                 top {
                     toolbar {
@@ -63,15 +91,26 @@ class DemoView : View("Plot demonstration") {
                         column("yErr", PlotData::yErr).useTextField(DoubleStringConverter())
                         columnResizePolicy = TableView.CONSTRAINED_RESIZE_POLICY
                         onEditCommit {
-                            dataChanged()
+                            dataChanged(plotName)
                         }
                     }
                 }
             }
         }
+        dataChanged(plotName)
     }
 
-    fun dataChanged() {
-        plottable.fillData(data.stream().map { it.toValues() })
+    private fun dataChanged(plotName: String) {
+        synchronized(this) {
+            if (dataMap.containsKey(plotName)) {
+                if (!frame.opt(plotName).isPresent) {
+                    frame.add(PlottableData(plotName))
+                }
+
+                (frame.get(plotName) as PlottableData).fillData(dataMap[plotName]!!.stream().map { it.toValues() })
+            } else {
+                frame.remove(plotName)
+            }
+        }
     }
 }
