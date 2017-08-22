@@ -237,4 +237,9 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
             this.nodes.put(nodeName, meta.getMetaList(nodeName).stream().map(this::cloneNode).collect(Collectors.toList()));
         });
     }
+
+    @Override
+    public boolean isEmpty() {
+        return this.nodes.isEmpty() && this.values.isEmpty();
+    }
 }

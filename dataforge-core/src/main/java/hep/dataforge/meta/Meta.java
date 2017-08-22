@@ -86,9 +86,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         return getMetaList(path).stream().findFirst();
     }
 
-    public boolean isEmpty() {
-        return this.getNodeNames().count() == 0 && this.getValueNames().count() == 0;
-    }
+    public abstract boolean isEmpty();
 
     /**
      * List value names of direct descendants. Excludes hidden values
@@ -187,6 +185,11 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         @Override
         public List<? extends Meta> getMetaList(String path) {
             return Collections.emptyList();
+        }
+
+        @Override
+        public boolean isEmpty() {
+            return true;
         }
 
         @Override

@@ -30,10 +30,10 @@ import static org.junit.Assert.assertEquals;
  */
 public class ConfidenceLimitCalculatorTest {
     
-    double sigma = 2d;      
-    double a = -3d * sigma;
-    double b = 3d * sigma;
-    UnivariateFunction gaussian = new Gaussian(0d, sigma);
+    private double sigma = 2d;
+    private double a = -3d * sigma;
+    private double b = 3d * sigma;
+    private UnivariateFunction gaussian = new Gaussian(0d, sigma);
   
     /**
      *

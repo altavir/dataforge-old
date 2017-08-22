@@ -52,7 +52,7 @@ class Grind {
     }
 
     static MetaBuilder buildMeta(Map values) {
-        return buildMeta("meta", values);
+        return buildMeta(values, "meta");
     }
 
     /**

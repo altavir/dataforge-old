@@ -10,6 +10,8 @@ buildscript {
 apply plugin: "io.ratpack.ratpack-java"
 description = 'A servlet for remote view of repository'
 
+mainClassName = 'hep.dataforge.server.TestServer'
+
 dependencies {
     compile project(':dataforge-storage')
     compile 'org.freemarker:freemarker:2.3.26-incubating'

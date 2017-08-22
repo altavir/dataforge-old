@@ -22,30 +22,43 @@ public class ActionTaskFactory implements TaskFactory {
     @Override
     public Task build(Context context, Meta meta) {
         List<Action> actions = meta.getMetaList(ACTION_NODE_KEY).stream()
-                .map(actionMeta-> buildAction(context, actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE)))
+                .map(actionMeta -> buildAction(context, actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE)))
                 .collect(Collectors.toList());
 
-        return new MultiStageTask(Object.class) {
-            @Override
-            protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
-                DataNode res = state.getData();
-                for(Action action:actions){
-                    res = action.run(model.getContext(), res, actionMeta);
-                    state.setData(action.getName(), res);
-                }
-                state.finish(res);
-                return state;
-            }
+        return new ActionTask(meta.getString("name"), actions);
+    }
 
-            @Override
-            protected void updateModel(TaskModel.Builder model, Meta meta) {
+    private static class ActionTask extends MultiStageTask<Object>{
 
-            }
+        private final String name;
+        private final List<Action> actions;
 
-            @Override
-            public String getName() {
-                return meta.getString("name");
+        private ActionTask(String name, List<Action> actions) {
+            super(Object.class);
+            this.name = name;
+            this.actions = actions;
+        }
+
+        @Override
+        protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
+            DataNode res = state.getData();
+            for (Action action : actions) {
+                Meta actionMeta = model.meta().getMetaOrEmpty(name);
+                res = action.run(model.getContext(), res, actionMeta);
+                state.setData(action.getName(), res);
             }
-        };
+            state.finish(res);
+            return state;
+        }
+
+        @Override
+        protected void updateModel(TaskModel.Builder model, Meta meta) {
+
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
     }
 }

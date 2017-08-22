@@ -302,6 +302,9 @@ public class IOUtils {
         while (true) {
             try {
                 int b = stream.read();
+                if(b == -1){
+                    return baos.toString(charset).trim();
+                }
                 if (b == '\n') {
                     String line = baos.toString(charset).trim();
                     baos.reset();

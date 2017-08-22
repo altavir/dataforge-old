@@ -34,7 +34,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
 
     @Override
     public Names getNames() {
-        return Names.of(ranges.stream().map(range -> range.parName).distinct().toArray(i -> new String[i]));
+        return Names.of(ranges.stream().map(range -> range.parName).distinct().toArray(String[]::new));
     }
 
     @Override
@@ -42,7 +42,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
         out.printf("%s\t%s\t%-8s\t%-8s%n", "name", "CL ", "Lower", "Upper");
         ranges.stream().sorted().forEach(range -> {
             out.printf("%s\t%2.2g%%\t%8.8g\t%8.8g%n", range.parName, range.cl,
-                    range.lower, range.upper);
+                    range.lower.doubleValue(), range.upper.doubleValue());
         });
         out.println();
     }

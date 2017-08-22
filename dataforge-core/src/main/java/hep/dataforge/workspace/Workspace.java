@@ -127,7 +127,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @return
      */
     default DataNode<?> runTask(String taskName, String target) {
-        return runTask(taskName, getTarget(target));
+        return runTask(taskName, optTarget(target).orElse(Meta.empty()));
     }
 
     /**

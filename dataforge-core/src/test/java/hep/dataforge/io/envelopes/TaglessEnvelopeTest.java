@@ -34,7 +34,7 @@ public class TaglessEnvelopeTest {
     @Test
     public void testShortForm() throws IOException {
         String envString = "<meta myValue=\"12\"/>\n" +
-                "#~=DATA=~#\n" +
+                "#~DATA~#\n" +
                 "Всем привет!";
         System.out.println(envString);
         ByteArrayInputStream bais = new ByteArrayInputStream(envString.getBytes("UTF-8"));
