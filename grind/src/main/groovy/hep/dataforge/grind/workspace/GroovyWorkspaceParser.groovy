@@ -6,6 +6,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.workspace.Workspace
 import hep.dataforge.workspace.WorkspaceParser
 import org.codehaus.groovy.control.CompilerConfiguration
+import org.codehaus.groovy.control.customizers.ImportCustomizer
 
 @CompileStatic
 class GroovyWorkspaceParser implements WorkspaceParser {
@@ -21,6 +22,10 @@ class GroovyWorkspaceParser implements WorkspaceParser {
 
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
+        ImportCustomizer importCustomizer = new ImportCustomizer();
+        importCustomizer.addStaticStars(["java.lang.Math", "hep.dataforge.grind.Grind"] as String[])
+        compilerConfiguration.addCompilationCustomizers(importCustomizer)
+
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)
         DelegatingScript script = shell.parse(reader) as DelegatingScript;
         WorkspaceSpec spec = new WorkspaceSpec(parentContext)

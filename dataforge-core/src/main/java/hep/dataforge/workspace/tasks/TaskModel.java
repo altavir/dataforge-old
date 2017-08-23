@@ -15,7 +15,6 @@ import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.meta.SealedNode;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.utils.NamingUtils;
@@ -30,6 +29,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
@@ -326,10 +326,12 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
      */
     public static class Builder implements GenericBuilder<TaskModel, Builder> {
         private final TaskModel model;
+        private MetaBuilder taskMeta = new MetaBuilder();
 
 
         public Builder(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
-            this.model = new TaskModel(workspace, taskName, taskMeta);
+            this.model = new TaskModel(workspace, taskName, Meta.empty());
+            this.taskMeta = taskMeta.getBuilder();
         }
 
         public Builder(Workspace workspace, String taskName) {
@@ -338,6 +340,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
 
         public Builder(TaskModel model) {
             this.model = model.copy();
+            this.taskMeta = model.meta().getBuilder();
         }
 
         @Override
@@ -347,6 +350,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
 
         @Override
         public TaskModel build() {
+            model.taskMeta = taskMeta.build();
             return model;
         }
 
@@ -368,8 +372,8 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
          * @param transform
          * @return
          */
-        public Builder configure(@NotNull Function<MetaBuilder, Meta> transform) {
-            this.model.taskMeta = transform.apply(this.model.taskMeta.getBuilder());
+        public Builder configure(@NotNull Consumer<MetaBuilder> transform) {
+            transform.accept(taskMeta);
             return self();
         }
 
@@ -380,7 +384,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
          * @return
          */
         public Builder configure(@NotNull Meta meta) {
-            this.model.taskMeta = new SealedNode(meta);
+            this.taskMeta = meta.getBuilder();
             return self();
         }
 

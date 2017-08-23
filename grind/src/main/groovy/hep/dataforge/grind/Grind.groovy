@@ -137,7 +137,7 @@ class Grind {
                 closure = {};
             }
 
-            return buildMeta(nodeName, values, closure);
+            return buildMeta(values, nodeName, closure);
         }
     }
 

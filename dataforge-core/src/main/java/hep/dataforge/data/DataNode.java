@@ -236,7 +236,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      */
     default GoalGroup nodeGoal() {
         return new GoalGroup(this.dataStream()
-                .map(entry -> entry.getGoal()).collect(Collectors.toList()));
+                .map(Data::getGoal).collect(Collectors.toList()));
     }
 
     /**

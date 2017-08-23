@@ -30,6 +30,7 @@ import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.AttributedStyle
 
+import java.time.Duration
 import java.util.stream.Stream
 
 /**
@@ -58,10 +59,10 @@ class GrindTerminal extends SimpleConfigurable {
         context.logger.debug("Starting grind terminal using system shell")
         return new GrindTerminal(context,
                 TerminalBuilder.builder()
-                        .name("df")
-                        .system(true)
-                        .encoding("UTF-8")
-                        .build()
+                               .name("df")
+                               .system(true)
+                               .encoding("UTF-8")
+                               .build()
         )
     }
 
@@ -75,7 +76,7 @@ class GrindTerminal extends SimpleConfigurable {
      * @param res
      * @return
      */
-    def unwrap(Object res, Closure cl) {
+    def unwrap(Object res, Closure cl = { it }) {
         if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
             res = (res as Closure).call()
         } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
@@ -153,17 +154,17 @@ class GrindTerminal extends SimpleConfigurable {
                 renderer.render(MarkupUtils.markupDescriptor(it))
             } else if (it instanceof String) {
                 NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(it);
-                if(descriptor.meta().isEmpty()){
+                if (descriptor.meta().isEmpty()) {
                     renderer.render(MarkupBuilder.text("The description for ")
-                            .addText("${it}", "blue")
-                            .addText(" is empty")
-                            .build()
+                                                 .addText("${it}", "blue")
+                                                 .addText(" is empty")
+                                                 .build()
                     )
                 } else {
                     renderer.render(MarkupUtils.markupDescriptor(descriptor))
                 }
             } else {
-                MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${it}","blue")
+                MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${it}", "blue")
                 renderer.render(builder.build());
             }
             renderer.ln()
@@ -178,7 +179,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (wsFile.exists()) {
             try {
                 context.logger.info("Found 'workspace.groovy' in default location. Using it to build workspace.")
-                shell.bind("ws", FileBasedWorkspace.build(context,wsFile.toPath()));
+                shell.bind("ws", FileBasedWorkspace.build(context, wsFile.toPath()));
                 context.logger.info("Workspace builder bound to 'ws'")
             } catch (Exception ex) {
                 context.logger.error("Failed to build workspace from 'workspace.groovy'", ex)
@@ -205,8 +206,8 @@ class GrindTerminal extends SimpleConfigurable {
                     println(res);
                 }
                 println();
-            } catch (Exception ex) {
-                renderer.render(MarkupBuilder.text("No help article for ").addText("${obj}","blue").build());
+            } catch (Exception ignored) {
+                renderer.render(MarkupBuilder.text("No help article for ").addText("${obj}", "blue").build());
             }
         }
     }
@@ -232,15 +233,26 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
+    private def eval(String expression) {
+        def start = System.currentTimeMillis()
+        def res = unwrap(shell.eval(expression))
+        def now = System.currentTimeMillis()
+        if (meta().getBoolean("benchmark", true)) {
+            Duration duration = Duration.ofMillis(now - start);
+            shell.context.logger.info("Expression $expression evaluated in $duration")
+        }
+        return res;
+    }
+
     /**
      * Start the terminal
      * @return
      */
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
-                .terminal(getTerminal())
-                .appName("DataForge Grind terminal")
-                .build();
+                                             .terminal(getTerminal())
+                                             .appName("DataForge Grind terminal")
+                                             .build();
         PrintWriter writer = getTerminal().writer();
 
 //
@@ -256,7 +268,7 @@ class GrindTerminal extends SimpleConfigurable {
                     break;
                 }
                 try {
-                    def res = shell.eval(expression);
+                    def res = eval(expression);
                     if (res != null) {
                         String str = res.toString();
 
@@ -279,9 +291,9 @@ class GrindTerminal extends SimpleConfigurable {
                     writer.print(IOUtils.ANSI_RESET);
                 }
             }
-        } catch (UserInterruptException ex) {
+        } catch (UserInterruptException ignored) {
             writer.println("Interrupted by user")
-        } catch (EndOfFileException ex1) {
+        } catch (EndOfFileException ignored) {
             writer.println("Terminated by user")
         } finally {
             shell.getContext().logger.debug("Closing terminal")

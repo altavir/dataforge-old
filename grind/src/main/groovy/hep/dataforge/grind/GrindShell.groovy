@@ -88,7 +88,7 @@ class GrindShell implements Encapsulated {
      * @param res
      * @return
      */
-    private def rememberResult(Object res) {
+    private def postProcess(Object res) {
         if (res != null) {
             bind("res", res)
         };
@@ -102,7 +102,12 @@ class GrindShell implements Encapsulated {
      * @return
      */
     synchronized def eval(String expression) {
-        return rememberResult(shell.evaluate(expression))
+        return postProcess(shell.evaluate(expression))
+    }
+
+
+    synchronized def eval(Reader reader){
+        return postProcess(shell.evaluate(reader))
     }
 
     /**
@@ -113,7 +118,7 @@ class GrindShell implements Encapsulated {
     synchronized def eval(Closure cl) {
         Closure script = cl.rehydrate(binding, null, null);
         script.resolveStrategy = Closure.DELEGATE_ONLY;
-        return rememberResult(script.call())
+        return postProcess(script.call())
     }
 
     /**

@@ -133,7 +133,10 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @return
      */
     public T putNode(Meta element) {
-        if (element.isAnonimous() && !element.hasValue("name")) {
+        if(element.isEmpty()){
+            return self();
+        }
+        if (element.isAnonimous() && !element.hasValue("@name")) {
             throw new AnonymousNotAlowedException();
         }
         return putNode(element.getName(), element, true);
