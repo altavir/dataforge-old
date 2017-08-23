@@ -150,10 +150,17 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
 
     @Override
     public Meta getIdentity() {
-        return new MetaBuilder("task")
+        MetaBuilder id = new MetaBuilder("task")
                 .setNode(getContext().getIdentity())
                 .setValue("name", getName())
                 .setNode("meta", meta());
+
+        MetaBuilder depNode = new MetaBuilder("dependencies");
+
+        dependencies().forEach(dependency -> depNode.putNode(dependency.getIdentity()));
+        id.putNode(depNode);
+
+        return id;
     }
 
     /**
@@ -181,7 +188,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
     /**
      * A rule to add calculate dependency data from workspace
      */
-    public interface Dependency {
+    public interface Dependency extends Identifiable {
 
         /**
          * Apply data to data dree. Could throw exceptions caused by either
@@ -202,20 +209,22 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
          * The gathering function for data
          */
         private final Function<Workspace, Stream<NamedData<?>>> gatherer;
+        private final transient Meta id;
 
         /**
          * The rule to andThen from workspace data name to DataTree path
          */
         private final UnaryOperator<String> pathTransformationRule;
 
-        public DataDependency(Function<Workspace, Stream<NamedData<?>>> gatherer, UnaryOperator<String> rule) {
-            this.gatherer = gatherer;
-            this.pathTransformationRule = rule;
-        }
+//        public DataDependency(Function<Workspace, Stream<NamedData<?>>> gatherer, UnaryOperator<String> rule) {
+//            this.gatherer = gatherer;
+//            this.pathTransformationRule = rule;
+//        }
 
         public DataDependency(String mask, UnaryOperator<String> rule) {
             this.gatherer = (w) -> w.getData().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName()));
             this.pathTransformationRule = rule;
+            id = new MetaBuilder("data").putValue("mask", mask);
         }
 
         /**
@@ -229,6 +238,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
             this.gatherer = (w) -> w.getData().dataStream().filter(data -> NamingUtils.wildcardMatch(mask, data.getName())
                     && type.isAssignableFrom(data.type()));
             this.pathTransformationRule = rule;
+            id = new MetaBuilder("data").putValue("mask", mask).putValue("type", type.getName());
         }
 
         /**
@@ -241,6 +251,11 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             gatherer.apply(workspace)
                     .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
+        }
+
+        @Override
+        public Meta getIdentity() {
+            return id;
         }
     }
 
@@ -258,6 +273,14 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         @Override
         public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             tree.putNode(targetNodeName, workspace.getData().getCheckedNode(sourceNodeName, type));
+        }
+
+        @Override
+        public Meta getIdentity() {
+            return new MetaBuilder("dataNode")
+                    .putValue("source", sourceNodeName)
+                    .putValue("target", targetNodeName)
+                    .putValue("type", type.getName());
         }
     }
 
@@ -319,6 +342,11 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         public void apply(DataTree.Builder<Object> tree, Workspace workspace) {
             placementRule.accept(tree, workspace.runTask(taskModel));
         }
+
+        @Override
+        public Meta getIdentity() {
+            return taskModel.getIdentity();
+        }
     }
 
     /**
@@ -358,11 +386,11 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
             return model.getWorkspace();
         }
 
-        public String getName(){
+        public String getName() {
             return this.model.getName();
         }
 
-        public Meta getMeta(){
+        public Meta getMeta() {
             return this.model.getMeta();
         }
 
@@ -390,6 +418,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
 
         /**
          * Rename model
+         *
          * @param name
          * @return
          */
@@ -405,21 +434,21 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         /**
          * Add dependency on Model with given task
          *
-         * @param model
+         * @param dep
          * @param as
          */
-        public Builder dependsOn(TaskModel model, String as) {
-            model.deps.add(new TaskDependency(model, as));
+        public Builder dependsOn(TaskModel dep, String as) {
+            model.deps.add(new TaskDependency(dep, as));
             return self();
         }
 
         /**
          * dependsOn(model, model.getName());
          *
-         * @param model
+         * @param dep
          */
-        public Builder dependsOn(TaskModel model) {
-            return dependsOn(model, model.getName());
+        public Builder dependsOn(TaskModel dep) {
+            return dependsOn(dep, dep.getName());
         }
 
         /**
