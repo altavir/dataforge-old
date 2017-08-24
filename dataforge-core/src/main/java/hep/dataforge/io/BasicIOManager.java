@@ -15,6 +15,11 @@
  */
 package hep.dataforge.io;
 
+import ch.qos.logback.classic.Logger;
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.spi.ILoggingEvent;
+import ch.qos.logback.core.Appender;
+import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
@@ -45,6 +50,34 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
     public BasicIOManager(InputStream in, OutputStream out) {
         this.out = out;
         this.in = in;
+    }
+
+    /**
+     * Create logger appender for this manager
+     *
+     * @return
+     */
+    public Appender<ILoggingEvent> createLoggerAppender() {
+        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
+        appender.setOutputStream(out());
+        return appender;
+    }
+
+    protected void addLoggerAppender(Logger logger) {
+        LoggerContext loggerContext = logger.getLoggerContext();
+        Appender<ILoggingEvent> appender = createLoggerAppender();
+        appender.setName(LOGGER_APPENDER_NAME);
+        appender.setContext(loggerContext);
+        appender.start();
+        logger.addAppender(appender);
+    }
+
+    protected void removeLoggerAppender(Logger logger) {
+        Appender<ILoggingEvent> app = logger.getAppender(LOGGER_APPENDER_NAME);
+        if (app != null) {
+            logger.detachAppender(app);
+            app.stop();
+        }
     }
 
     @Override

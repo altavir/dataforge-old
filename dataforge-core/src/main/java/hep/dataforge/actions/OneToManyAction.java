@@ -23,12 +23,12 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
         DataTree.Builder<R> builder = DataTree.builder(getOutputType());
         data.forEach(datum -> {
             String inputName = datum.getName();
-            Laminate inputMeta = new Laminate(datum.meta(),actionMeta);
+            Laminate inputMeta = new Laminate(datum.meta(), actionMeta);
             Map<String, Meta> metaMap = prepareMeta(context, inputName, inputMeta);
             metaMap.forEach((outputName, outputMeta) -> {
                 Goal<R> goal = new PipeGoal<>(datum.getGoal(), input -> execute(context, inputName, outputName, input, inputMeta));
-                Data<R> res = new Data<R>(goal,getOutputType(),outputMeta);
-                builder.putData(placement(inputName,outputName),res);
+                Data<R> res = new Data<R>(goal, getOutputType(), outputMeta);
+                builder.putData(placement(inputName, outputName), res);
             });
         });
         return builder.build();
@@ -36,6 +36,7 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
 
     /**
      * The placement rule for result Data. By default each input element is transformed into a node with
+     *
      * @param inputName
      * @param outputName
      * @return
@@ -47,7 +48,6 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
     //TODO add node meta
 
     /**
-     *
      * @param context
      * @param inputName
      * @param meta

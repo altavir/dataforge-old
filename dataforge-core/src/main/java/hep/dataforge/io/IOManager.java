@@ -15,11 +15,6 @@
  */
 package hep.dataforge.io;
 
-import ch.qos.logback.classic.Logger;
-import ch.qos.logback.classic.LoggerContext;
-import ch.qos.logback.classic.spi.ILoggingEvent;
-import ch.qos.logback.core.Appender;
-import ch.qos.logback.core.OutputStreamAppender;
 import hep.dataforge.context.Plugin;
 import hep.dataforge.io.history.Record;
 import hep.dataforge.io.markup.MarkupRenderer;
@@ -168,21 +163,4 @@ public interface IOManager extends Plugin {
         };
     }
 
-    default void addLoggerAppender(Logger logger) {
-        LoggerContext loggerContext = logger.getLoggerContext();
-        OutputStreamAppender<ILoggingEvent> appender = new OutputStreamAppender<>();
-        appender.setName(LOGGER_APPENDER_NAME);
-        appender.setContext(loggerContext);
-        appender.setOutputStream(out());
-        appender.start();
-        logger.addAppender(appender);
-    }
-
-    default void removeLoggerAppender(Logger logger) {
-        Appender<ILoggingEvent> app = logger.getAppender(LOGGER_APPENDER_NAME);
-        if (app != null) {
-            logger.detachAppender(app);
-            app.stop();
-        }
-    }
 }

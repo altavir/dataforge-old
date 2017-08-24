@@ -60,7 +60,7 @@ public interface Name {
     }
 
     static Name of(String str) {
-        if (str.isEmpty()) {
+        if ( str == null || str.isEmpty()) {
             return EMPTY;
         }
 

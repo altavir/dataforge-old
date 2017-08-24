@@ -134,8 +134,8 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         return actionMeta.getString("@action.taskName", "action::" + getName());
     }
 
-    protected Logger getLogger(Meta actionMeta) {
-        return LoggerFactory.getLogger(actionMeta.getString("@action.logger", getTaskName(actionMeta)));
+    protected Logger getLogger(Context context, Meta actionMeta) {
+        return LoggerFactory.getLogger(context.getName() + "." + actionMeta.getString("@action.logger", getTaskName(actionMeta)));
     }
 
     protected boolean isEmptyInputAllowed() {

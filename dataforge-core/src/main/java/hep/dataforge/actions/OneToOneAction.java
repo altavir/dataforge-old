@@ -143,7 +143,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {
-        Logger logger = getLogger(meta);
+        Logger logger = getLogger(context, meta);
         if (res == null) {
             logger.error("Action {} returned 'null' on data {}", getName(), name);
             throw new RuntimeException("Null result of action");//TODO add emty data to handle this
@@ -155,7 +155,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         if (context.getBoolean("actions.reportStart", true)) {
             report(context, name, "Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
         }
-        getLogger(meta).info("Starting action '{}[{}]'", getName(), name);
+        getLogger(context, meta).info("Starting action '{}[{}]'", getName(), name);
     }
 
 }

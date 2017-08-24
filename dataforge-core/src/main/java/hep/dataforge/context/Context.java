@@ -122,19 +122,6 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         }
     }
 
-    private void startLoggerAppender() {
-        if (getLogger() instanceof ch.qos.logback.classic.Logger) {
-            io().addLoggerAppender((ch.qos.logback.classic.Logger) getLogger());
-        }
-    }
-
-    public void setLogger(Logger logger) {
-        lock.modify(() -> {
-            this.logger = logger;
-            startLoggerAppender();
-        });
-    }
-
     /**
      * {@inheritDoc} namespace does not work
      */
