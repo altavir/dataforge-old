@@ -57,7 +57,7 @@ public interface Task<R> extends Named, Described {
     DataNode<R> run(TaskModel model);
 
     /**
-     * Equals build + run
+     * Equals builder + run
      *
      * @param workspace
      * @param taskConfig

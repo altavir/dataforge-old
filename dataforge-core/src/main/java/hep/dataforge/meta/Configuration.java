@@ -165,7 +165,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
     }
 
     /**
-     * Return existing node if it exists, otherwise build and attach empty child
+     * Return existing node if it exists, otherwise builder and attach empty child
      * node
      *
      * @param name

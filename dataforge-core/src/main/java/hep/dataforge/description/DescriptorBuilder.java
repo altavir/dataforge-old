@@ -14,7 +14,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.util.List;
 
 /**
- * Helper class to build descriptors
+ * Helper class to builder descriptors
  * @author Alexander Nozik
  */
 public class DescriptorBuilder implements Metoid {

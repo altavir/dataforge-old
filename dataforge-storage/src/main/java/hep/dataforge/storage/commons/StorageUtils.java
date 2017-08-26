@@ -37,7 +37,7 @@ import static hep.dataforge.io.messages.Dispatcher.*;
 import static hep.dataforge.storage.api.Loader.LOADER_TYPE_KEY;
 
 /**
- * A helper class to build loaders from existing storage
+ * A helper class to builder loaders from existing storage
  *
  * @author darksnake
  */
@@ -205,7 +205,7 @@ public class StorageUtils {
 
 
     /**
-     * Return shelf with given name if it does exist, otherwise build shelf with given meta
+     * Return shelf with given name if it does exist, otherwise builder shelf with given meta
      *
      * @param shelfName
      * @param shelfConfiguration

@@ -99,7 +99,7 @@ public class FileStorage extends AbstractStorage {
      */
     protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
         super(parent, dirName, config);
-        //replacing points with path separators we build directory structure
+        //replacing points with path separators we builder directory structure
 
         dataDir = parent.getDataDir().resolve(dirName.replace(".", File.separator));
         startup();
@@ -207,7 +207,7 @@ public class FileStorage extends AbstractStorage {
         return Meta.empty();
 //        return new MetaBuilder("storage")
 //                .putValue("file.timeModified", Instant.ofEpochMilli(directory.getContent().getLastModifiedTime()))
-//                .build();
+//                .builder();
     }
 
     /**

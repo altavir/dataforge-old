@@ -31,7 +31,7 @@ class GroovyWorkspaceParser implements WorkspaceParser {
         WorkspaceSpec spec = new WorkspaceSpec(parentContext)
         script.setDelegate(spec);
         script.run()
-        return spec.build();
+        return spec.getBuilder();
     }
 
 

@@ -32,7 +32,7 @@ public interface MetaStreamReader {
      * MetaBuilder. If {@code length < 0} then parse input stream until end of
      * annotation is found.
      * <p>
-     * The returned build could be later transformed or
+     * The returned builder could be later transformed or
      * </p>
      *
      * @param stream a stream that should be read.

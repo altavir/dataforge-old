@@ -84,7 +84,7 @@ public class Global extends Context {
     }
 
     /**
-     * Get previously build context o build a new one
+     * Get previously builder context o builder a new one
      *
      * @param name
      * @return

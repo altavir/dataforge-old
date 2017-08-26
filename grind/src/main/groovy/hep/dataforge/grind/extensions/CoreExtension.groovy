@@ -269,7 +269,7 @@ class CoreExtension {
      * @return
      */
     static MetaBuilder transform(final Meta self, Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return new MetaBuilder(self).update(Grind.buildMeta(self.getName(), values, cl))
+        return new MetaBuilder(self).update(Grind.buildMeta(values, self.getName(), cl))
     }
 
     /**
@@ -321,11 +321,11 @@ class CoreExtension {
     }
 
     static Configurable configure(final Configurable self, Map<String, ?> values, Closure configuration) {
-        self.configure(Grind.buildMeta("config", values, configuration));
+        self.configure(Grind.buildMeta(values, "config", configuration));
     }
 
     static Configurable configure(final Configurable self, Map<String, ?> values) {
-        self.configure(Grind.buildMeta("config", values));
+        self.configure(Grind.buildMeta(values, "config"));
     }
 
     static Configurable setAt(final Configurable self, String key, Object value) {

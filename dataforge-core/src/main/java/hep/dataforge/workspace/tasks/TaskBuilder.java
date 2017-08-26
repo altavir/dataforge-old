@@ -5,118 +5,85 @@ import hep.dataforge.actions.ActionUtils;
 import hep.dataforge.actions.GenericAction;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.ContextMetaFactory;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.UnaryOperator;
 
 /**
  * A task defined as a composition of multiple actions. No compile-time type checks (runtime type check are working fine)
  * Created by darksnake on 28-Jan-17.
  */
-public class TaskBuilder<T> extends MultiStageTask<T> {
+public class TaskBuilder {
 
-    @NotNull
-    public static <T> TaskBuilder<T> build(String name, Class<T> type) {
-        return new TaskBuilder<>(name, type);
+    private String name;
+    private Class type = Object.class;
+    private BiConsumer<TaskModel.Builder, Meta> modelBuilder = (model, meta) -> {
+    };
+    private final Map<String, Consumer<DataNode<?>>> listeners = new HashMap<>();
+    private final List<TaskAction> actions = new ArrayList<>();
+
+    public TaskBuilder name(String name) {
+        this.name = name;
+        return this;
     }
 
-    @NotNull
-    public static TaskBuilder<?> build(String name) {
-        return new TaskBuilder<>(name, Object.class);
+    public TaskBuilder type(Class type) {
+        this.type = type;
+        return this;
     }
 
 
-    private final String name;
-    private Function<TaskModel.Builder, TaskModel.Builder> modelTransformation;
-    private Map<String, Consumer<DataNode<?>>> listeners = new HashMap<>();
-    private List<TaskAction> actions;
-
+    public TaskBuilder updateModel(BiConsumer<TaskModel.Builder, Meta> transform) {
+        modelBuilder = modelBuilder.andThen(transform);
+        return this;
+    }
 
     /**
-     * An empty task that could be built upon
+     * Add dependency on a specific task
      *
-     * @param name
+     * @param taskName
+     * @return
      */
-    private TaskBuilder(String name, Class<T> type) {
-        super(type);
-        this.name = name;
-        modelTransformation = UnaryOperator.identity();
-        actions = new ArrayList<>();
-    }
-
-    private TaskBuilder<T> copy(Consumer<TaskBuilder> cons) {
-        TaskBuilder<T> res = new TaskBuilder<>(name, type);
-        res.modelTransformation = this.modelTransformation;
-        res.actions = this.actions;
-        res.listeners = this.listeners;
-        cons.accept(res);
-        return res;
-    }
-
-    @Override
-    public String getName() {
-        return name;
-    }
-
-    @Override
-    protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
-        DataNode data = state.getData();
-        for (TaskAction ta : actions) {
-            Action<?, ?> action = ta.buildAction(model);
-            if (action instanceof GenericAction) {
-                data = data.getCheckedNode("", ((GenericAction) action).getInputType());
-                model.getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.dataSize(true));
-            }
-            data = action.run(model.getContext(), data, ta.buildMeta(model));
-            if (!action.getName().equals(ActionUtils.DEFAULT_ACTION_NAME)) {
-                state.setData(action.getName(), data);
-                //handling individual stages result
-                if (listeners.containsKey(action.getName())) {
-                    data.handle(model.getContext().singleThreadExecutor(), listeners.get(action.getName()));
-                }
-            }
-        }
-        return state.finish(data);
-    }
-
-    @Override
-    protected void updateModel(TaskModel.Builder model, Meta meta) {
-        this.modelTransformation.apply(model);
-    }
-
-    public TaskBuilder transformModel(Function<TaskModel.Builder, TaskModel.Builder> transform) {
-        return copy(tb -> tb.modelTransformation = modelTransformation.andThen(transform));
-    }
-
-    public TaskBuilder dependsOn(String taskName, Meta taskMeta, String as) {
-        return transformModel(model -> model.dependsOn(taskName, taskMeta, as));
-    }
-
-    public TaskBuilder dependsOn(String taskName, Meta taskMeta) {
-        return transformModel(model -> model.dependsOn(taskName, taskMeta));
-    }
-
     public TaskBuilder dependsOn(String taskName) {
-        return transformModel(model -> model.dependsOn(taskName, model.getMeta().getMetaOrEmpty(taskName)));
+        return updateModel((model, meta) -> model.dependsOn(taskName, meta));
     }
 
-    public TaskBuilder dependsOnData(String dataMask, String as) {
-        return transformModel(model -> model.data(dataMask, as));
+    /**
+     * Add dependency on specific task using additional meta transformation (or replacement)
+     *
+     * @param taskName
+     * @param transformMeta
+     * @return
+     */
+    public TaskBuilder dependsOn(String taskName, Function<MetaBuilder, Meta> transformMeta) {
+        return updateModel((model, meta) -> model.dependsOn(taskName, transformMeta.apply(meta.getBuilder())));
     }
 
-    public TaskBuilder dependsOnData(String dataMask) {
-        return transformModel(model -> model.data(dataMask));
+    public TaskBuilder dependsOn(String taskName, String as) {
+        return updateModel((model, meta) -> model.dependsOn(taskName, meta, as));
     }
 
-    public TaskBuilder dependsOnDataNode(Class<?> type, String nodeName) {
-        return transformModel(model -> model.dataNode(type, nodeName));
+    public TaskBuilder dependsOn(String taskName, String as, Function<MetaBuilder, Meta> transformMeta) {
+        return updateModel((model, meta) -> model.dependsOn(taskName, transformMeta.apply(meta.getBuilder()), as));
+    }
+
+    public TaskBuilder data(String dataMask) {
+        return updateModel((model, meta) -> model.data(dataMask));
+    }
+
+    public TaskBuilder data(String dataMask, String as) {
+        return updateModel((model, meta) -> model.data(dataMask, as));
+    }
+
+    public TaskBuilder dataNode(Class<?> type, String nodeName) {
+        return updateModel((model, meta) -> model.dataNode(type, nodeName));
     }
 
     /**
@@ -127,9 +94,8 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
      * @return
      */
     public TaskBuilder doLast(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
-        List<TaskAction> newActions = new ArrayList<>(actions);
-        newActions.add(new TaskAction(actionFactory, metaFactory));
-        return copy(tb -> tb.actions = newActions);
+        actions.add(new TaskAction(actionFactory, metaFactory));
+        return this;
     }
 
     public TaskBuilder doLast(String actionName) {
@@ -190,26 +156,24 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
     //TODO add filter
 
     public TaskBuilder doFirst(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
-        List<TaskAction> newActions = new ArrayList<>(actions);
-        newActions.add(0, new TaskAction(actionFactory, metaFactory));
-        return copy(tb -> tb.actions = newActions);
+        actions.add(0, new TaskAction(actionFactory, metaFactory));
+        return this;
     }
 
     public TaskBuilder handle(String stage, Consumer<DataNode<?>> handler) {
-        HashMap<String, Consumer<DataNode<?>>> newListeners = new HashMap<>(listeners);
-        if (newListeners.containsKey(stage)) {
-            newListeners.put(stage, newListeners.get(stage).andThen(handler));
+        if (listeners.containsKey(stage)) {
+            listeners.put(stage, listeners.get(stage).andThen(handler));
         } else {
-            newListeners.put(stage, handler);
+            listeners.put(stage, handler);
         }
-        return copy(tb -> tb.listeners = newListeners);
+        return this;
     }
 
     private static class TaskAction {
         final Function<TaskModel, Action> actionFactory;
         final Function<TaskModel, Meta> metaFactory;
 
-        public TaskAction(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
+        TaskAction(Function<TaskModel, Action> actionFactory, Function<TaskModel, Meta> metaFactory) {
             this.actionFactory = actionFactory;
             this.metaFactory = metaFactory;
         }
@@ -224,6 +188,57 @@ public class TaskBuilder<T> extends MultiStageTask<T> {
 
         DataNode apply(TaskModel model, DataNode data) {
             return buildAction(model).run(model.getContext(), data, buildMeta(model));
+        }
+    }
+
+    public Task<?> build() {
+        return new CustomTask(type, name, modelBuilder, actions);
+    }
+
+
+    private static class CustomTask extends MultiStageTask {
+
+        private final String name;
+        private final BiConsumer<TaskModel.Builder, Meta> modelBuilder;
+        private final Map<String, Consumer<DataNode<?>>> listeners = new HashMap<>();
+        private final List<TaskAction> actions;
+
+        public CustomTask(Class type, String name, BiConsumer<TaskModel.Builder, Meta> modelBuilder, List<TaskAction> actions) {
+            super(type);
+            this.name = name;
+            this.modelBuilder = modelBuilder;
+            this.actions = actions;
+        }
+
+        @Override
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
+            DataNode data = state.getData();
+            for (TaskAction ta : actions) {
+                Action<?, ?> action = ta.buildAction(model);
+                if (action instanceof GenericAction) {
+                    data = data.getCheckedNode("", ((GenericAction) action).getInputType());
+                    model.getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.dataSize(true));
+                }
+                data = action.run(model.getContext(), data, ta.buildMeta(model));
+                if (!action.getName().equals(ActionUtils.DEFAULT_ACTION_NAME)) {
+                    state.setData(action.getName(), data);
+                    //handling individual stages result
+                    if (listeners.containsKey(action.getName())) {
+                        data.handle(model.getContext().singleThreadExecutor(), listeners.get(action.getName()));
+                    }
+                }
+            }
+            return state.finish(data);
+        }
+
+        @Override
+        protected void updateModel(TaskModel.Builder model, Meta meta) {
+            modelBuilder.accept(model, meta);
         }
     }
 }

@@ -81,7 +81,7 @@ public class FileIndexFactory implements Encapsulated {
     }
 
     /**
-     * Get or build envelope from uri
+     * Get or builder envelope from uri
      *
      * @return
      * @throws IOException

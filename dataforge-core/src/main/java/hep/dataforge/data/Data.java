@@ -45,11 +45,16 @@ public class Data<T> implements Metoid {
     }
 
     public static <T> Data<T> buildStatic(T content) {
-        return buildStatic(content, Meta.empty());
+        Meta meta = Meta.empty();
+        if(content instanceof Metoid){
+            meta = ((Metoid) content).meta();
+        }
+        return buildStatic(content,meta);
     }
 
     /**
      * Build data from envelope using given lazy binary transformation
+     *
      * @param envelope
      * @param type
      * @param transform
@@ -68,7 +73,7 @@ public class Data<T> implements Metoid {
                 return Stream.empty();
             }
         };
-        return new Data<>(goal,type,envelope.meta());
+        return new Data<>(goal, type, envelope.meta());
     }
 
     public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {

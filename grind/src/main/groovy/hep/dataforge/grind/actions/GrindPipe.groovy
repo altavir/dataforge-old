@@ -11,22 +11,25 @@ import hep.dataforge.meta.Laminate
  */
 @CompileStatic
 class GrindPipe<T, R> extends OneToOneAction<T, R> {
-    static <T,R> GrindPipe<T,R> build(Map params = [:], @DelegatesTo(OneToOneCallable) Closure<R> triFunction) {
-        def res = new GrindPipe(params, triFunction)
-        return res;
-    }
+//    static <T, R> GrindPipe<T, R> build(Map params = [:], @DelegatesTo(OneToOneCallable) Closure<R> triFunction) {
+//        def res = new GrindPipe(params, triFunction)
+//        return res;
+//    }
 
-    Closure action;
-    Map params = ["name": "@dynamic"];
+    private final String name
+    private final Closure action;
+    private final Map params
 
-    GrindPipe(Map params = [:], @DelegatesTo(OneToOneCallable) Closure action) {
+    GrindPipe(Map params = [:], String name = "@dynamic",
+              @DelegatesTo(value = OneToOneCallable, strategy = Closure.DELEGATE_ONLY) Closure action) {
+        this.name = name;
         this.action = action
-        this.params.putAll(params)
+        this.params = params
     }
 
     @Override
     String getName() {
-        params.get("name")
+        params.getOrDefault("name", name)
     }
 
     @Override

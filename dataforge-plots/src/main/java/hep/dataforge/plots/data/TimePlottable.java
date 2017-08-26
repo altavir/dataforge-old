@@ -85,7 +85,7 @@ public class TimePlottable extends XYPlottable {
         this(yName, DEFAULT_TIMESTAMP_KEY, yName);
     }
 
-//    public static TimePlottable build(String name, String yName, String color, double thickness) {
+//    public static TimePlottable builder(String name, String yName, String color, double thickness) {
 //        TimePlottable res = new TimePlottable(name, yName);
 //        res.getConfig()
 //                .setValue("color", color)

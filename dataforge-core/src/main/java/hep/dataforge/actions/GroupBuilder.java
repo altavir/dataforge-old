@@ -28,7 +28,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
- * The class to build groups of content with annotation defined rules
+ * The class to builder groups of content with annotation defined rules
  *
  * @author Alexander Nozik
  */

@@ -62,7 +62,7 @@ public interface Plugin extends Configurable, Named, Encapsulated, Provider, Ide
             try {
                 return type.newInstance().getTag();
             } catch (Exception e) {
-                throw new RuntimeException("Failed to build plugin instance to resolve its tag", e);
+                throw new RuntimeException("Failed to builder plugin instance to resolve its tag", e);
             }
         }
     }

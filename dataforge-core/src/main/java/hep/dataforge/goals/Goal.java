@@ -32,7 +32,7 @@ public interface Goal<T> extends RunnableFuture<T> {
     void run();
 
     /**
-     * The encapsulated {@link CompletableFuture}. Used to build goal chains.
+     * The encapsulated {@link CompletableFuture}. Used to builder goal chains.
      *
      * @return
      */

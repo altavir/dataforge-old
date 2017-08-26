@@ -116,7 +116,7 @@ class GrindTerminal extends SimpleConfigurable {
         this.terminal = terminal
         context.logger.debug("Using ${terminal.class} terminal")
 
-        //build shell context
+        //builder shell context
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
@@ -174,15 +174,15 @@ class GrindTerminal extends SimpleConfigurable {
         //binding.setProperty("man", help);
         shell.bind("help", this.&help);
 
-        //binding workspace build from default location
+        //binding workspace builder from default location
         File wsFile = new File("workspace.groovy");
         if (wsFile.exists()) {
             try {
-                context.logger.info("Found 'workspace.groovy' in default location. Using it to build workspace.")
+                context.logger.info("Found 'workspace.groovy' in default location. Using it to builder workspace.")
                 shell.bind("ws", FileBasedWorkspace.build(context, wsFile.toPath()));
                 context.logger.info("Workspace builder bound to 'ws'")
             } catch (Exception ex) {
-                context.logger.error("Failed to build workspace from 'workspace.groovy'", ex)
+                context.logger.error("Failed to builder workspace from 'workspace.groovy'", ex)
             }
         }
     }

@@ -34,7 +34,7 @@ import java.util.Map;
  */
 public abstract class MultiStageTask<R> extends AbstractTask<R> {
 
-    protected final Class<R> type;
+    private final Class<R> type;
 
     public MultiStageTask(Class<R> type) {
         this.type = type;

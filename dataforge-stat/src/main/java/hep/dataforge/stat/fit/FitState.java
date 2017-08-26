@@ -398,7 +398,7 @@ public class FitState implements Serializable {
 
         public FitState build() {
             if (dataSet == null || model == null || pars == null) {
-                throw new IllegalStateException("Can't build FitState, data, model and starting parameters must be provided.");
+                throw new IllegalStateException("Can't builder FitState, data, model and starting parameters must be provided.");
             }
             return new FitState(dataSet, model, pars, covariance, interval, prior);
         }

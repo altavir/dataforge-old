@@ -198,7 +198,7 @@ public class PluginManager implements Encapsulated, AutoCloseable {
             try {
                 plugin = type.newInstance();
             } catch (Exception e) {
-                throw new RuntimeException("Can't build an instance of the plugin " + type.getName());
+                throw new RuntimeException("Can't builder an instance of the plugin " + type.getName());
             }
         }
         initializer.accept(plugin);

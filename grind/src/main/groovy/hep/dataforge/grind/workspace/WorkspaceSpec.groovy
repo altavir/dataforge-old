@@ -15,15 +15,17 @@ import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Named
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Workspace
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.templates.TaskFactory
 
+import java.util.function.Supplier
 import java.util.stream.StreamSupport
 
 /**
- * A DSL helper to build workspace
+ * A DSL helper to builder workspace
  * @author Alexander Nozik
  */
 @CompileStatic
@@ -31,6 +33,10 @@ class WorkspaceSpec {
     private Workspace.Builder builder;
     private final Context context;
 
+    /**
+     * Create a new specification for a workspace
+     * @param context - the context for specification it is by default used as a parent for resulting workspace
+     */
     WorkspaceSpec(Context context) {
         this.builder = BasicWorkspace.builder();
         this.builder.setContext(context);
@@ -38,7 +44,7 @@ class WorkspaceSpec {
     }
 
     /**
-     * build context for the workspace using closure
+     * builder context for the workspace using closure
      */
     def context(Closure cl) {
         def contextSpec = new ContextSpec()
@@ -48,12 +54,12 @@ class WorkspaceSpec {
         builder.setContext(contextSpec.build())
     }
 
-    Workspace.Builder build() {
+    Workspace.Builder getBuilder() {
         return builder
     }
 
     /**
-     * A specification to build context via grind workspace definition
+     * A specification to builder context via grind workspace definition
      */
     private class ContextSpec {
         String name = "workspace"
@@ -100,7 +106,7 @@ class WorkspaceSpec {
      * @param cl
      * @return
      */
-    def data(Closure cl) {
+    def data(@DelegatesTo(DataSpec) Closure cl) {
         def spec = new DataSpec()
         def code = cl.rehydrate(spec, this, this)
         code.resolveStrategy = Closure.DELEGATE_FIRST
@@ -108,7 +114,7 @@ class WorkspaceSpec {
     }
 
     /**
-     * A specification to build workspace data
+     * A specification to builder workspace data
      */
     private class DataSpec {
         def files(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta) {
@@ -130,8 +136,9 @@ class WorkspaceSpec {
             WorkspaceSpec.this.builder.loadData(place, Data.buildStatic(uri))
         }
 
-        def load(Object... args) {
-            loadFromMeta(Grind.buildMeta(args))
+        def load(Map values = [:], String nodeName = "",
+                 @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
+            loadFromMeta(Grind.buildMeta(values, nodeName, cl))
         }
 
         def loadFromMeta(Meta meta) {
@@ -143,7 +150,67 @@ class WorkspaceSpec {
             )
         }
 
+        /**
+         * Add a dynamic data
+         * @param name
+         * @param meta
+         * @param type
+         * @param cl
+         */
+        def <R> void item(String name, Meta meta = Meta.empty(), Class<R> type = Object, Supplier<R> cl) {
+            WorkspaceSpec.this.builder.loadData(name, Data.generate(type, meta, cl))
+        }
+
+        /**
+         * Create a static data item in the workspace
+         * @param name
+         * @param object
+         * @return
+         */
+        def item(String name, Object object) {
+            WorkspaceSpec.this.builder.loadData(name, Data.buildStatic(object));
+        }
+
+        /**
+         * Load static data from map
+         * @param items
+         * @return
+         */
+        def items(Map<String, ?> items) {
+            items.each { key, value ->
+                item(key, Data.buildStatic(value))
+            }
+        }
+
+        /**
+         *        Load static data from collection of Named objects
+         */
+        def items(Collection<? extends Named> something) {
+            something.each {
+                item(it.name, Data.buildStatic(it))
+            }
+        }
+
+        def item(Named object) {
+            item(object.name, Data.buildStatic(object));
+        }
+
         //TODO extend data specification
+    }
+
+    /**
+     * Create a task but do not load it. use {@code task template{...}} to load
+     * @param parameters
+     * @param taskName
+     * @param cl
+     * @return
+     */
+    Task template(Map parameters = Collections.emptyMap(), String taskName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        Meta meta = Grind.buildMeta(parameters, taskName, cl);
+        return StreamSupport.stream(ServiceLoader.load(TaskFactory).spliterator(), false)
+                .filter { it.name == meta.getName() }
+                .map { it.build(context, meta) }
+                .findFirst().orElseThrow { new NameNotFoundException("Task template with name $taskName not found") }
     }
 
     /**
@@ -152,23 +219,16 @@ class WorkspaceSpec {
      * @param cl
      * @return
      */
-    def task(Map parameters = Collections.emptyMap(), String taskName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        Meta meta = Grind.buildMeta(parameters, taskName, cl);
-        Task task = StreamSupport.stream(ServiceLoader.load(TaskFactory).spliterator(), false)
-                .filter { it.name == meta.getName() }
-                .map { it.build(context, meta) }
-                .findFirst().orElseThrow { new NameNotFoundException("Task template with name $taskName not found") }
-        builder.loadTask(task)
-//
-//        def taskSpec = new TaskSpec(parameters, taskName)
-//        def code = cl.rehydrate(taskSpec, this, this)
-//        code.resolveStrategy = Closure.DELEGATE_FIRST
-//        code()
-//        builder.loadTask(taskSpec.build())
+    Task build(String taskName, @DelegatesTo(value = TaskSpec, strategy = Closure.DELEGATE_ONLY) Closure closure) {
+        def taskSpec = new TaskSpec().name(taskName);
+        def code = closure.rehydrate(taskSpec, null, null)
+        code.resolveStrategy = Closure.DELEGATE_ONLY
+        code.call()
+        return taskSpec.build();
     }
 
     /**
-     * load existing task
+     * register existing task
      * @param task
      * @return
      */
@@ -186,11 +246,11 @@ class WorkspaceSpec {
     }
 
     /**
-     * Load meta using grind meta builder
+     * Load meta target using grind meta builder
      * @param closure
      * @return
      */
-    def configuration(Closure closure) {
+    def target(Closure closure) {
         MetaSpec spec = new MetaSpec()
         def code = closure.rehydrate(spec, this, this)
         code.resolveStrategy = Closure.DELEGATE_FIRST
@@ -198,38 +258,17 @@ class WorkspaceSpec {
     }
 
     private class MetaSpec {
-        def methodMissing(String methodName, Closure par) {
-            WorkspaceSpec.this.builder.target(Grind.buildMeta(methodName, par))
+        def methodMissing(String methodName, Closure cl) {
+            WorkspaceSpec.this.builder.target(Grind.buildMeta(methodName, cl))
         }
     }
 
-    def configuration(String name, Closure closure) {
+    def target(String name, Closure closure) {
         this.builder.target(Grind.buildMeta(name, closure))
     }
 
-    def configuration(Meta meta) {
+    def target(Meta meta) {
         this.builder.target(meta)
     }
-
-//    def meta(String name, Meta template, Map map) {
-//        this.builder.loadMeta(template.compile(map).rename(name));
-//    }
-
-//    /**
-//     * Build meta(Builder) using builder but do not add it to workspace
-//     * @param name
-//     * @param closure
-//     * @return
-//     */
-//    MetaBuilder buildMeta(String name, Closure closure) {
-//        return Grind.buildMeta(name, closure)
-//    }
-//
-//    MetaBuilder buildMeta(String name, Map<String, Object> values, Closure closure) {
-//        MetaBuilder res = Grind.buildMeta(name, closure)
-//        values.forEach { key, value -> res.setValue(key.toString(), value) }
-//        return res
-//    }
-
 }
 

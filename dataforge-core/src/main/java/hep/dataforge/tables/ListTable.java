@@ -211,7 +211,7 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
 //        public Builder format(Consumer<TableFormatBuilder> consumer){
 //            TableFormatBuilder formatBuilder = new TableFormatBuilder();
 //            consumer.accept(formatBuilder);
-//            table.format = formatBuilder.build();
+//            table.format = formatBuilder.builder();
 //            return this;
 //        }
 

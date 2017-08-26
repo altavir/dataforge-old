@@ -261,7 +261,7 @@ public class FitHelper {
 //                    try {
                     result = manager.runStage(state, stage, log);
 //                    } catch (Exception ex) {
-//                        result = FitResult.build(state, false, stage.getFreePars());
+//                        result = FitResult.builder(state, false, stage.getFreePars());
 //                    }
                     listener.accept(stage, result);
                 }

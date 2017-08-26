@@ -12,7 +12,7 @@ import spock.lang.Specification
 class GrindPipeTest extends Specification {
     def "One to One action"() {
         given:
-        def action = GrindPipe.build { Math.pow(input, meta.getDouble("pow")) };
+        def action = new GrindPipe<>({ Math.pow(input, meta.getDouble("pow")) });
         def data = DataSet.builder().putStatic("9", 81).putStatic("3", 9).build();
         when:
         DataNode res = action.run(Global.instance(), data, new GrindMetaBuilder().meta(pow: 0.5))

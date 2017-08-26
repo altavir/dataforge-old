@@ -26,7 +26,7 @@ import java.nio.ByteBuffer;
 import java.util.function.Consumer;
 
 /**
- * The convenient build for envelopes
+ * The convenient builder for envelopes
  *
  * @author Alexander Nozik
  */

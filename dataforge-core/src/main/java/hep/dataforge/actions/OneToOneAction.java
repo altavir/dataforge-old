@@ -29,7 +29,7 @@ import org.slf4j.Logger;
 import java.util.stream.Collectors;
 
 /**
- * A template to build actions that reflect strictly one to one content
+ * A template to builder actions that reflect strictly one to one content
  * transformations
  *
  * @param <T>

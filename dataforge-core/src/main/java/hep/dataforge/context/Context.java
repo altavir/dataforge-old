@@ -219,7 +219,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     /**
-     * get or build current log creating the whole log hierarchy
+     * get or builder current log creating the whole log hierarchy
      *
      * @param reportName
      * @return

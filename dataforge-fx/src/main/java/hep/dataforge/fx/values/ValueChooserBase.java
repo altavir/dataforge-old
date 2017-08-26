@@ -98,7 +98,7 @@ public abstract class ValueChooserBase<T extends Node> implements ValueChooser {
     }
 
     /**
-     * True if build node is successful
+     * True if builder node is successful
      *
      * @return
      */

@@ -20,7 +20,7 @@ import java.util.stream.StreamSupport;
 public class FileBasedWorkspace extends DynamicWorkspace {
 
     /**
-     * Find appropriate parser and build a workspace
+     * Find appropriate parser and builder a workspace
      *
      * @param context        a parent context for workspace. Workspace usually creates its own context.
      * @param path           path of the file to create workspace from

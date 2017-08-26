@@ -256,7 +256,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 //        return (EventLoader) buildLoader(new MetaBuilder("loader")
 //                .putValue(Loader.LOADER_NAME_KEY, DEFAULT_EVENT_LOADER_NAME)
 //                .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)
-//                .build());
+//                .builder());
 //    }
 
     @Override
@@ -298,7 +298,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 //        return new MetaBuilder(ENVELOPE_DESTINATION_NODE)
 //                .putValue(TARGET_TYPE_KEY, STORAGE_TARGET_TYPE)
 //                .putValue(TARGET_NAME_KEY, getName())
-//                .build();
+//                .builder();
 //    }
 
     @Override
