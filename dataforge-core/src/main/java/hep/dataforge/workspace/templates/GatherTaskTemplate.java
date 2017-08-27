@@ -11,7 +11,7 @@ import hep.dataforge.workspace.tasks.TaskModel;
  * The task that gathers data from workspace and returns it as is.
  * The task configuration is considered to be dependency configuration.
  */
-public class GatherTaskFactory implements TaskFactory {
+public class GatherTaskTemplate implements TaskTemplate {
     @Override
     public String getName() {
         return "gather";
@@ -46,7 +46,7 @@ public class GatherTaskFactory implements TaskFactory {
 
             @Override
             public String getName() {
-                return meta.getString("name", GatherTaskFactory.this.getName());
+                return meta.getString("name", GatherTaskTemplate.this.getName());
             }
         };
     }

@@ -23,7 +23,7 @@ class GroovyWorkspaceParser implements WorkspaceParser {
         def compilerConfiguration = new CompilerConfiguration()
         compilerConfiguration.scriptBaseClass = DelegatingScript.class.name;
         ImportCustomizer importCustomizer = new ImportCustomizer();
-        importCustomizer.addStaticStars(["java.lang.Math", "hep.dataforge.grind.Grind"] as String[])
+        importCustomizer.addStaticStars(["java.lang.Math", "hep.dataforge.grind.Grind, hep.dataforge.grind.workspace.DefaultTaskLib"] as String[])
         compilerConfiguration.addCompilationCustomizers(importCustomizer)
 
         def shell = new GroovyShell(this.class.classLoader, new Binding(), compilerConfiguration)

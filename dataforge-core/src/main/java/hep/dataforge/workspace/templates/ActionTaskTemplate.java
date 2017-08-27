@@ -13,7 +13,7 @@ import java.util.stream.Collectors;
 
 import static hep.dataforge.actions.ActionUtils.*;
 
-public class ActionTaskFactory implements TaskFactory {
+public class ActionTaskTemplate implements TaskTemplate {
     @Override
     public String getName() {
         return "actions";

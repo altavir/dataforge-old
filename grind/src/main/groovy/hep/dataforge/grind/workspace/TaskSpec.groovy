@@ -1,7 +1,5 @@
 package hep.dataforge.grind.workspace
 
-import hep.dataforge.grind.actions.GrindJoin
-import hep.dataforge.grind.actions.GrindPipe
 import hep.dataforge.workspace.tasks.TaskBuilder
 
 /**

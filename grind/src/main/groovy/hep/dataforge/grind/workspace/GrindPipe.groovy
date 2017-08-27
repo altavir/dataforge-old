@@ -1,4 +1,4 @@
-package hep.dataforge.grind.actions
+package hep.dataforge.grind.workspace
 
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.OneToOneAction

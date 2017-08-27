@@ -20,11 +20,36 @@ import hep.dataforge.actions.Action;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 
+import java.util.function.BiConsumer;
+
 /**
  * A task wrapper for single action
  * Created by darksnake on 21-Aug-16.
  */
 public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
+
+    public static <T, R> Task<R> from(Action<T, R> action, BiConsumer<TaskModel.Builder, Meta> dependencyBuilder) {
+        return new SingleActionTask<T, R>() {
+            @Override
+            public String getName() {
+                return action.getName();
+            }
+
+            @Override
+            protected void updateModel(TaskModel.Builder model, Meta meta) {
+                dependencyBuilder.accept(model, meta);
+            }
+
+            @Override
+            protected Action getAction(TaskModel model) {
+                return action;
+            }
+        };
+    }
+
+    public static <T, R> Task<R> from(Action<T, R> action) {
+        return from(action, (model, meta) -> model.allData());
+    }
 
     protected DataNode<T> gatherNode(DataNode<?> data) {
         return (DataNode<T>) data;

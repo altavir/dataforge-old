@@ -1,4 +1,4 @@
-package hep.dataforge.grind.actions
+package hep.dataforge.grind.workspace
 
 import hep.dataforge.actions.ManyToOneAction
 import hep.dataforge.context.Context

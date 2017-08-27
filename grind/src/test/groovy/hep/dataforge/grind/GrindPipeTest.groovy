@@ -3,7 +3,7 @@ package hep.dataforge.grind
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataSet
-import hep.dataforge.grind.actions.GrindPipe
+import hep.dataforge.grind.workspace.GrindPipe
 import spock.lang.Specification
 
 /**

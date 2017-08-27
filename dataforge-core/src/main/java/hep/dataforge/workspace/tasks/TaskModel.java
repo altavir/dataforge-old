@@ -520,6 +520,15 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         }
 
         /**
+         * Add all data in the workspace as a dependency
+         * @return
+         */
+        public Builder allData(){
+            model.deps.add(new DataDependency("*", UnaryOperator.identity()));
+            return self();
+        }
+
+        /**
          * Add a dependency on a type checked node
          *
          * @param type

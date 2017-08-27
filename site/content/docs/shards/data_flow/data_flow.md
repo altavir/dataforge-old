@@ -7,4 +7,4 @@ version: 1.0
 date: 27.08.2015
 published: true
 ---
-Data flow models
+One of the most important features of DataForge framework is the data flow control. Any
