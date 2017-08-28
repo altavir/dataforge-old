@@ -5,30 +5,39 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.description.NodeDef;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.function.BiPredicate;
 
 /**
+ * A meta-based data filter
+ *
  * @author Alexander Nozik
  */
-public class DataFilter {
+@NodeDef(name = "include")
+@NodeDef(name = "exclude")
+public class DataFilter extends SimpleMetaMorph {
 
-    private static final BiPredicate TRUTH = (key, it) -> true;
-
-    private BiPredicate<String, DataNode> nodeCondition = TRUTH;
-    private BiPredicate<String, Data> dataCondition = TRUTH;
+    private BiPredicate<String, DataNode> nodeCondition;
+    private BiPredicate<String, Data> dataCondition;
 
     public static String applyMask(String pattern) {
         return pattern.replace(".", "\\.").replace("?", ".").replace("*", ".*?");
     }
 
+    public DataFilter(Meta meta) {
+        super(meta);
+        applyMeta(meta);
+    }
+
     public boolean acceptNode(String nodeName, DataNode node) {
-        return this.nodeCondition.test(nodeName, node);
+        return this.nodeCondition == null || this.nodeCondition.test(nodeName, node);
     }
 
     public boolean acceptData(String dataName, Data data) {
-        return this.dataCondition.test(dataName, data);
+        return this.dataCondition == null || this.dataCondition.test(dataName, data);
     }
 
     public <T> DataNode<T> filter(DataNode<T> node) {
@@ -41,15 +50,15 @@ public class DataFilter {
         return builder.build();
     }
 
-    public final void includeData(BiPredicate<String, Data> dataCondition) {
-        if (this.dataCondition == TRUTH) {
+    private void includeData(BiPredicate<String, Data> dataCondition) {
+        if (this.dataCondition == null) {
             this.dataCondition = dataCondition;
         } else {
             this.dataCondition = this.dataCondition.or(dataCondition);
         }
     }
 
-    public final void includeData(String namePattern, Class type) {
+    private void includeData(String namePattern, Class<?> type) {
         Class limitingType;
         if (type == null) {
             limitingType = Object.class;
@@ -61,15 +70,15 @@ public class DataFilter {
         includeData(predicate);
     }
 
-    public final void excludeData(BiPredicate<String, Data> dataCondition) {
+    private void excludeData(BiPredicate<String, Data> dataCondition) {
         this.dataCondition = this.dataCondition.and(dataCondition.negate());
     }
 
-    public final void excludeData(String namePattern) {
+    private void excludeData(String namePattern) {
         excludeData((name, data) -> name.matches(namePattern));
     }
 
-    public final void includeNode(String namePattern, Class type) {
+    private void includeNode(String namePattern, Class type) {
 
         Class limitingType;
         if (type == null) {
@@ -82,19 +91,19 @@ public class DataFilter {
         includeNode(predicate);
     }
 
-    public final void includeNode(BiPredicate<String, DataNode> nodeCondition) {
-        if (this.nodeCondition == TRUTH) {
+    private void includeNode(BiPredicate<String, DataNode> nodeCondition) {
+        if (this.nodeCondition == null) {
             this.nodeCondition = nodeCondition;
         } else {
             this.nodeCondition = this.nodeCondition.or(nodeCondition);
         }
     }
 
-    public final void excludeNode(BiPredicate<String, DataNode> nodeCondition) {
+    private void excludeNode(BiPredicate<String, DataNode> nodeCondition) {
         this.nodeCondition = this.nodeCondition.and(nodeCondition.negate());
     }
 
-    public final void excludeNode(String namePattern) {
+    private void excludeNode(String namePattern) {
         excludeNode((name, node) -> name.matches(namePattern));
     }
 
@@ -108,11 +117,11 @@ public class DataFilter {
         }
     }
 
-    public DataFilter configure(Meta meta) {
+    private void applyMeta(Meta meta) {
         if (meta.hasMeta("include")) {
             meta.getMetaList("include").forEach(include -> {
                 String namePattern = getPattern(include);
-                Class type = Object.class;
+                Class<?> type = Object.class;
                 if (include.hasValue("type")) {
                     try {
                         type = Class.forName(include.getString("type"));
@@ -141,7 +150,11 @@ public class DataFilter {
                 }
             });
         }
-        return this;
     }
 
+    @Override
+    public void fromMeta(Meta meta) {
+        super.fromMeta(meta);
+        applyMeta(meta);
+    }
 }

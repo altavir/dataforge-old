@@ -29,6 +29,7 @@ import static hep.dataforge.data.DataFactory.*;
  */
 @NodeDef(name = NODE_META_KEY, info = "node meta-data")
 @NodeDef(name = NODE_KEY)
+@NodeDef(name = FILTER_KEY, target = "class:hep.dataforge.data.DataFilter")
 @ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
 public abstract class DataFactory<T> implements DataLoader<T> {
@@ -37,6 +38,7 @@ public abstract class DataFactory<T> implements DataLoader<T> {
     public static final String NODE_TYPE_KEY = "type";
     public static final String NODE_KEY = "node";
     public static final String NODE_NAME_KEY = "name";
+    public static final String FILTER_KEY = "filter";
 
     private final Class<T> baseType;
 
@@ -79,9 +81,8 @@ public abstract class DataFactory<T> implements DataLoader<T> {
             dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
         }
 
-        //Configuring filter
-        DataFilter filter = new DataFilter();
-        filter.configure(dataConfig);
+        //Creating filter
+        DataFilter filter = new DataFilter(dataConfig.getMetaOrEmpty(FILTER_KEY));
         // Apply child nodes specific to this factory
         buildChildren(context, builder, filter, dataConfig);
     }
