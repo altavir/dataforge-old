@@ -56,9 +56,8 @@ remotes {
         knownHosts = allowAnyHosts
         role 'webServers'
         host = 'npm.mipt.ru'
-        user = 'darksnake'
-//        authentications = ['keyboard-interactive']
-        password = file("pass.txt").text
+        user = userName
+        password = password
     }
 }
 

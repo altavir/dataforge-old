@@ -256,7 +256,7 @@ public interface Workspace extends Encapsulated, Provider {
          * @return
          */
         default Workspace.Builder loadData(String place, String factoryType, Meta dataConfig) {
-            return loadData(place, DataLoader.getFactory(factoryType), dataConfig);
+            return loadData(place, DataLoader.getFactory(getContext(), factoryType), dataConfig);
         }
 
         default Workspace.Builder loadFileData(String place, String filePath, Meta meta) {

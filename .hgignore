@@ -10,13 +10,12 @@ target/*
 .gradle/*
 .nb-gradle/*
 .nb-gradle*
-.idea/
+.idea/*
 *.iml
 
 ## Grain:
 site/target/
 site/content/docs-gen/
 site/.cache/
-site/pass.txt
 
 gradle.properties

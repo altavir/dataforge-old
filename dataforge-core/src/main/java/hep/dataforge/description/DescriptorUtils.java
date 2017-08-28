@@ -261,7 +261,7 @@ public class DescriptorUtils {
                         return method;
                     }
                 }
-                LoggerFactory.getLogger(DescriptorUtils.class).error("Metoid method not found by given path: " + path);
+                LoggerFactory.getLogger(DescriptorUtils.class).error("Annotated method not found by given path: " + path);
                 return null;
             } catch (ClassNotFoundException ex) {
                 LoggerFactory.getLogger(DescriptorUtils.class).error("Class not found by given path: " + path, ex);

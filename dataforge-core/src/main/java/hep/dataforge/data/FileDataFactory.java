@@ -62,7 +62,7 @@ public class FileDataFactory extends DataFactory<Binary> {
 
         if (dataConfig.hasValue(FILE_NODE)) {
             Value fileValue = dataConfig.getValue(FILE_NODE);
-            fileValue.listValue().stream().forEach((fileName) -> {
+            fileValue.listValue().forEach((fileName) -> {
                 addFile(context, builder, parentFile, new MetaBuilder(FILE_NODE)
                         .putValue("path", fileName));
             });
@@ -77,12 +77,10 @@ public class FileDataFactory extends DataFactory<Binary> {
         MetaBuilder mb = new MetaBuilder(meta);
         mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());
         mb.putValue(FILE_NAME_KEY, file.getName());
-        Data<Binary> fileData = Data.buildStatic(new FileBinary(file.toPath()), mb.build());
-        return fileData;
+        return Data.buildStatic(new FileBinary(file.toPath()), mb.build());
     }
 
     /**
-     *
      * @param context
      * @param builder
      * @param parentFile
@@ -118,6 +116,9 @@ public class FileDataFactory extends DataFactory<Binary> {
     private void addDir(Context context, final DataTree.Builder<Binary> builder, File parentFile, Meta dirNode) {
         DataTree.Builder<Binary> dirBuilder = DataTree.builder(Binary.class);
         File dir = new File(parentFile, dirNode.getString("path"));
+        if (!dir.exists() || !dir.isDirectory()) {
+            throw new RuntimeException("The directory " + dir + " does not exist");
+        }
         dirBuilder.setName(dirNode.getString(NODE_NAME_KEY, dirNode.getName()));
         if (dirNode.hasMeta(NODE_META_KEY)) {
             dirBuilder.setMeta(dirNode.getMeta(NODE_META_KEY));
