@@ -41,7 +41,7 @@ public class FileDataFactory extends DataFactory<Binary> {
     }
 
     @Override
-    protected void buildChildren(Context context, DataTree.Builder<Binary> builder, DataFilter filter, Meta dataConfig) {
+    protected void fill(DataTree.Builder<Binary> builder, Context context, Meta dataConfig) {
         //FIXME add filtering here
         File parentFile;
         if (dataConfig.hasMeta(DATA_DIR_KEY)) {
@@ -92,11 +92,11 @@ public class FileDataFactory extends DataFactory<Binary> {
             context.getLogger().warn("No files matching the filter: " + fileNode.toString());
         } else if (files.size() == 1) {
             File file = files.get(0);
-            Meta fileMeta = fileNode.hasMeta(NODE_META_KEY) ? fileNode.getMeta(NODE_META_KEY) : Meta.empty();
+            Meta fileMeta = fileNode.getMetaOrEmpty(NODE_META_KEY);
             builder.putData(fileName(file), buildFileData(file, fileMeta));
         } else {
             files.forEach(file -> {
-                Meta fileMeta = fileNode.hasMeta(NODE_META_KEY) ? fileNode.getMeta(NODE_META_KEY) : Meta.empty();
+                Meta fileMeta = fileNode.getMetaOrEmpty(NODE_META_KEY);
                 builder.putData(fileName(file), buildFileData(file, fileMeta));
             });
         }

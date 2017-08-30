@@ -21,12 +21,14 @@ import hep.dataforge.io.markup.MarkupRenderer;
 import hep.dataforge.io.markup.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import hep.dataforge.providers.Provides;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 /**
@@ -37,6 +39,8 @@ import java.util.function.Consumer;
  * @version $Id: $Id
  */
 public interface IOManager extends Plugin {
+    String FILE_TARGET = "file";
+
     String LOGGER_APPENDER_NAME = "df.io";
 
     String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
@@ -108,12 +112,17 @@ public interface IOManager extends Plugin {
     InputStream in(String path);
 
     /**
-     * Get a file where {@code path} is relative to root directory.
+     * Get a file where {@code path} is relative to root directory or absolute.
      *
      * @param path a {@link java.lang.String} object.
      * @return a {@link java.io.File} object.
      */
-    File getFile(String path);
+    default File getFile(String path) {
+        return optFile(path).orElseThrow(() -> new RuntimeException("File " + path + " not found in the context"));
+    }
+
+    @Provides(FILE_TARGET)
+    Optional<File> optFile(String path);
 
     /**
      * Return the root directory for this IOManager. By convention, Context

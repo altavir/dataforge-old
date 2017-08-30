@@ -36,7 +36,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-@NodeDef(name = "column", multiple = true, required = true, info = "A column format", target = "class::hep.dataforge.tables.ColumnFormat")
+@NodeDef(name = "column", multiple = true, required = true, info = "A column format", from = "class::hep.dataforge.tables.ColumnFormat")
 @NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given")
 @NodeDef(name = "meta", info = "Custom table information")
 public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {

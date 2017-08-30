@@ -38,18 +38,16 @@ class DataSpec {
         builder.loadData(place, Data.buildStatic(uri))
     }
 
-    def load(Map values = [:], String nodeName = "",
-             @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-        loadFromMeta(Grind.buildMeta(values, nodeName, cl))
-    }
-
     def loadFromMeta(Meta meta) {
-        //TODO remove control values from meta
         builder.loadData(
                 meta.getString("as", ""),
-                meta.getString("loader"),
                 meta
         )
+    }
+
+    def node(Map values = [:], String nodeName = "",
+             @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
+        loadFromMeta(Grind.buildMeta(values, nodeName, cl))
     }
 
     /**

@@ -41,11 +41,11 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
 @ValueDef(name = "model", info = "Could be uses instead of 'model' element in case of non-parametric models")
 @NodeDef(name = "model",
         required = true, info = "The model against which fit should be made",
-        target = "method::hep.dataforge.stat.models.ModelManager.buildModel")
+        from = "method::hep.dataforge.stat.models.ModelManager.buildModel")
 @NodeDef(name = "params", required = true,
         info = "Initial fit parameter set. Both parameters from action annotation and parameters from data annotation are used. "
                 + "The merging of parameters is made supposing the annotation of data is main and annotation of action is secondary.",
-        target = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
+        from = "method::hep.dataforge.stat.fit.ParamSet.fromMeta")
 @NodeDef(name = "stage", multiple = true, info = "Fit stages")
 public class FitAction extends OneToOneAction<Table, FitResult> {
 

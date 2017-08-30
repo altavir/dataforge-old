@@ -15,13 +15,7 @@
  */
 package hep.dataforge.description;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Repeatable;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * <p>
@@ -47,14 +41,14 @@ public @interface NodeDef {
      *
      * @return
      */
-    String target() default "";
+    String from() default "";
 
-    /**
-     * The resource for the resource file with this node's descriptor
-     *
-     * @return
-     */
-    String resource() default "";
+//    /**
+//     * The resource for the resource file with this node's descriptor
+//     *
+//     * @return
+//     */
+//    String resource() default "";
 
     boolean multiple() default false;
 

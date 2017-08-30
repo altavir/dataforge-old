@@ -5,6 +5,7 @@
  */
 package hep.dataforge.description;
 
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.MergeRule;
 import hep.dataforge.meta.Meta;
@@ -94,8 +95,16 @@ public class DescriptorUtils {
         return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e)));
     }
 
-    public static NodeDescriptor buildDescriptor(String path) {
-        return buildDescriptor(findAnnotatedElement(path));
+    public static NodeDescriptor buildDescriptor(String string) {
+        Path path = Path.of(string);
+        if (path.target().isEmpty() || "class".equals(path.target()) || "method".equals(path.target())) {
+            return buildDescriptor(findAnnotatedElement(path));
+        } else if ("resource".equals(path.target())) {
+            return new NodeDescriptor(buildMetaFromResource("node", path.nameString()));
+        } else {
+            throw new NameNotFoundException("Cant create descriptor from given target", string);
+        }
+
     }
 
     public static NodeDescriptor buildDescriptor(String name, AnnotatedElement element) {
@@ -135,15 +144,20 @@ public class DescriptorUtils {
                                         .putValue("multiple", nodeDef.multiple())
                                         .putValue("tags", nodeDef.tags());
 
-                                // Either target or resource is used
-                                if (!nodeDef.target().isEmpty()) {
-                                    AnnotatedElement target = findAnnotatedElement(nodeDef.target());
-                                    if (target != null) {
-                                        nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
-                                    }
-                                } else if (!nodeDef.resource().isEmpty()) {
-                                    nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
+                                // If descriptor target is present, use it
+                                if (!nodeDef.from().isEmpty()) {
+                                    NodeDescriptor descriptor = buildDescriptor(nodeDef.from());
+                                    nodeMeta = MergeRule.replace(nodeMeta, descriptor.meta());
                                 }
+//
+//                                if (!nodeDef.target().isEmpty()) {
+//                                    AnnotatedElement target = findAnnotatedElement(Path.of(nodeDef.target()));
+//                                    if (target != null) {
+//                                        nodeMeta = MergeRule.replace(nodeMeta, buildDescriptorMeta(target));
+//                                    }
+//                                } else if (!nodeDef.resource().isEmpty()) {
+//                                    nodeMeta = MergeRule.replace(nodeMeta, buildMetaFromResource("node", nodeDef.resource()));
+//                                }
 
                                 putDescription(res, nodeMeta);
                             }
@@ -237,19 +251,18 @@ public class DescriptorUtils {
      * @param path
      * @return
      */
-    public static AnnotatedElement findAnnotatedElement(String path) {
-        Path segment = Path.of(path);
-        if (segment.target().isEmpty() || segment.target().equals("class")) {
+    public static AnnotatedElement findAnnotatedElement(Path path) {
+        if (path.target().isEmpty() || path.target().equals("class")) {
             try {
-                return Class.forName(segment.name().toString());
+                return Class.forName(path.name().toString());
             } catch (ClassNotFoundException ex) {
                 LoggerFactory.getLogger(DescriptorUtils.class).error("Class not found by given path: " + path, ex);
                 return null;
             }
-        } else if (segment.target().equals("method")) {
+        } else if (path.target().equals("method")) {
             try {
-                String className = segment.name().cutLast().toString();
-                String methodName = segment.name().getLast().toString();
+                String className = path.name().cutLast().toString();
+                String methodName = path.name().getLast().toString();
 
                 Class dClass = Class.forName(className);
 
@@ -268,7 +281,7 @@ public class DescriptorUtils {
                 return null;
             }
         } else {
-            LoggerFactory.getLogger(DescriptorUtils.class).error("Unknown target for descriptor finder: " + segment.target());
+            LoggerFactory.getLogger(DescriptorUtils.class).error("Unknown target for descriptor finder: " + path.target());
             return null;
         }
     }

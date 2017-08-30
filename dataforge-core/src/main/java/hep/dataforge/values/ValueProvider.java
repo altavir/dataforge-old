@@ -20,6 +20,7 @@ import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -27,6 +28,10 @@ import java.util.function.Supplier;
 public interface ValueProvider {
 
     String VALUE_TARGET = "value";
+    String STRING_TARGET = "string";
+    String NUMBER_TARGET = "number";
+    String BOOLEAN_TARGET = "boolean";
+    String TIME_TARGET = "time";
 
     /**
      * Build a meta provider from given general provider
@@ -52,6 +57,12 @@ public interface ValueProvider {
         return optValue(path).orElseThrow(() -> new NameNotFoundException(path));
     }
 
+    @Provides(BOOLEAN_TARGET)
+    default Optional<Boolean> optBoolean(String name) {
+        return optValue(name).map(Value::booleanValue);
+    }
+
+
     default Boolean getBoolean(String name, boolean def) {
         return optValue(name).map(Value::booleanValue).orElse(def);
     }
@@ -62,6 +73,11 @@ public interface ValueProvider {
 
     default Boolean getBoolean(String name) {
         return getValue(name).booleanValue();
+    }
+
+    @Provides(NUMBER_TARGET)
+    default Optional<Number> optNumber(String name) {
+        return optValue(name).map(Value::numberValue);
     }
 
     default Double getDouble(String name, double def) {
@@ -89,12 +105,17 @@ public interface ValueProvider {
         return getValue(name).intValue();
     }
 
+    @Provides(STRING_TARGET)
+    default Optional<String> optString(String name) {
+        return optValue(name).map(Value::stringValue);
+    }
+
     default String getString(String name, String def) {
-        return optValue(name).map(Value::stringValue).orElse(def);
+        return optString(name).orElse(def);
     }
 
     default String getString(String name, Supplier<String> def) {
-        return optValue(name).map(Value::stringValue).orElseGet(def);
+        return optString(name).orElseGet(def);
     }
 
     default String getString(String name) {
@@ -107,6 +128,11 @@ public interface ValueProvider {
 
     default Value getValue(String name, Supplier<Value> def) {
         return optValue(name).orElseGet(def);
+    }
+
+    @Provides(TIME_TARGET)
+    default Optional<Instant> optTime(String name) {
+        return optValue(name).map(Value::timeValue);
     }
 
     default String[] getStringArray(String name) {

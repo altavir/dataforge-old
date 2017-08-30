@@ -27,16 +27,18 @@ import static hep.dataforge.data.DataFactory.*;
  *
  * @author Alexander Nozik
  */
-@NodeDef(name = NODE_META_KEY, info = "node meta-data")
-@NodeDef(name = NODE_KEY)
-@NodeDef(name = FILTER_KEY, target = "class:hep.dataforge.data.DataFilter")
+@NodeDef(name = NODE_META_KEY, info = "Node meta-data")
+@NodeDef(name = NODE_KEY, info = "Recursively add node to the builder")
+@NodeDef(name = FILTER_KEY, from = "hep.dataforge.data.DataFilter", info = "Filter definition to be applied after node construction is finished")
+@NodeDef(name = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
 @ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
-public abstract class DataFactory<T> implements DataLoader<T> {
+public class DataFactory<T> implements DataLoader<T> {
 
     public static final String NODE_META_KEY = "meta";
     public static final String NODE_TYPE_KEY = "type";
     public static final String NODE_KEY = "node";
+    public static final String ITEM_KEY = "item";
     public static final String NODE_NAME_KEY = "name";
     public static final String FILTER_KEY = "filter";
 
@@ -48,25 +50,30 @@ public abstract class DataFactory<T> implements DataLoader<T> {
 
     @Override
     public DataNode<T> build(Context context, Meta meta) {
-        return builder(context, meta).build();
-    }
+        //Creating filter
+        DataFilter filter = new DataFilter(meta.getMetaOrEmpty(FILTER_KEY));
 
-    protected DataTree.Builder<T> builder(Context context, Meta dataConfig) {
-        DataTree.Builder<T> builder = DataTree.builder(baseType);
-        fillData(context, dataConfig, builder);
-        return builder;
+        DataTree<T> tree = builder(context,meta).build();
+        //Applying filter if needed
+        if (filter.meta().isEmpty()) {
+            return tree;
+        } else {
+            return filter.filter(tree);
+        }
     }
 
     /**
-     * Fill data to existing builder. Useful for custom filtering
+     * Return DataTree.Builder after node fill but before filtering. Any custom logic should be applied after it.
      *
      * @param context
      * @param dataConfig
-     * @param builder
+     * @return
      */
-    protected void fillData(Context context, Meta dataConfig, DataTree.Builder<T> builder) {
+    protected DataTree.Builder<T> builder(Context context, Meta dataConfig) {
+        DataTree.Builder<T> builder = DataTree.builder(baseType);
+
         // Apply node name
-        if (dataConfig.hasMeta(NODE_NAME_KEY)) {
+        if (dataConfig.hasValue(NODE_NAME_KEY)) {
             builder.setName(dataConfig.getString(NODE_NAME_KEY));
         }
 
@@ -77,14 +84,36 @@ public abstract class DataFactory<T> implements DataLoader<T> {
 
         // Apply non-specific child nodes
         if (dataConfig.hasMeta(NODE_KEY)) {
-            //FIXME check types for child nodes
-            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> builder.putNode(build(context, nodeMeta)));
+            dataConfig.getMetaList(NODE_KEY).forEach((Meta nodeMeta) -> {
+                //FIXME check types for child nodes
+                DataNode<T> node = build(context, nodeMeta);
+                builder.putNode(node);
+            });
         }
 
-        //Creating filter
-        DataFilter filter = new DataFilter(dataConfig.getMetaOrEmpty(FILTER_KEY));
+        //Add custom items
+        if (dataConfig.hasMeta(ITEM_KEY)) {
+            dataConfig.getMetaList(ITEM_KEY).forEach(itemMeta -> builder.putData(buildData(context, itemMeta)));
+        }
+
         // Apply child nodes specific to this factory
-        buildChildren(context, builder, filter, dataConfig);
+        fill(builder, context, dataConfig);
+        return builder;
+    }
+
+    @ValueDef(name = NODE_NAME_KEY, required = true, info = "The name for this data item")
+    @ValueDef(name = "path", info = "The context path for the object to be included as data. Chain path is supported")
+    @NodeDef(name = NODE_META_KEY, info = "Meta for this item")
+    protected NamedData<? extends T> buildData(Context context, Meta itemMeta) {
+        String name = itemMeta.getString(NODE_NAME_KEY);
+
+        T obj = itemMeta.optValue("path")
+                .flatMap(path -> context.provide(path.stringValue(), baseType))
+                .orElse(null);
+
+        Meta meta = itemMeta.optMeta(NODE_META_KEY).orElse(Meta.empty());
+
+        return NamedData.buildStatic(name, obj, meta);
     }
 
     /**
@@ -94,6 +123,12 @@ public abstract class DataFactory<T> implements DataLoader<T> {
      * @param builder
      * @param meta
      */
-    protected abstract void buildChildren(Context context, DataTree.Builder<T> builder, DataFilter filter, Meta meta);
+    protected void fill(DataTree.Builder<T> builder, Context context, Meta meta) {
+        //Do nothing for default factory
+    }
 
+    @Override
+    public String getName() {
+        return "default";
+    }
 }

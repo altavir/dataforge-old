@@ -6,8 +6,10 @@
 package hep.dataforge.data;
 
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.SimpleMetaMorph;
+import hep.dataforge.values.ValueType;
 
 import java.util.function.BiPredicate;
 
@@ -16,14 +18,18 @@ import java.util.function.BiPredicate;
  *
  * @author Alexander Nozik
  */
-@NodeDef(name = "include")
-@NodeDef(name = "exclude")
+@NodeDef(name = "include",
+        info = "Define inclusion rule for data and/or dataNode. If not inclusion rule is present, everything is included by default.",
+        from = "method::hep.dataforge.data.DataFilter.applyMeta")
+@NodeDef(name = "exclude",
+        info = "Define exclusion rule for data and/or dataNode. Exclusion rules are allied only to included items.",
+        from = "method::hep.dataforge.data.DataFilter.applyMeta")
 public class DataFilter extends SimpleMetaMorph {
 
     private BiPredicate<String, DataNode> nodeCondition;
     private BiPredicate<String, Data> dataCondition;
 
-    public static String applyMask(String pattern) {
+    private static String applyMask(String pattern) {
         return pattern.replace(".", "\\.").replace("?", ".").replace("*", ".*?");
     }
 
@@ -59,7 +65,7 @@ public class DataFilter extends SimpleMetaMorph {
     }
 
     private void includeData(String namePattern, Class<?> type) {
-        Class limitingType;
+        Class<?> limitingType;
         if (type == null) {
             limitingType = Object.class;
         } else {
@@ -71,16 +77,18 @@ public class DataFilter extends SimpleMetaMorph {
     }
 
     private void excludeData(BiPredicate<String, Data> dataCondition) {
-        this.dataCondition = this.dataCondition.and(dataCondition.negate());
+        if (this.dataCondition != null) {
+            this.dataCondition = this.dataCondition.and(dataCondition.negate());
+        }
     }
 
     private void excludeData(String namePattern) {
         excludeData((name, data) -> name.matches(namePattern));
     }
 
-    private void includeNode(String namePattern, Class type) {
+    private void includeNode(String namePattern, Class<?> type) {
 
-        Class limitingType;
+        Class<?> limitingType;
         if (type == null) {
             limitingType = Object.class;
         } else {
@@ -100,7 +108,9 @@ public class DataFilter extends SimpleMetaMorph {
     }
 
     private void excludeNode(BiPredicate<String, DataNode> nodeCondition) {
-        this.nodeCondition = this.nodeCondition.and(nodeCondition.negate());
+        if (this.nodeCondition != null) {
+            this.nodeCondition = this.nodeCondition.and(nodeCondition.negate());
+        }
     }
 
     private void excludeNode(String namePattern) {
@@ -117,6 +127,10 @@ public class DataFilter extends SimpleMetaMorph {
         }
     }
 
+    @ValueDef(name = "mask", info = "Add rule using glob mask")
+    @ValueDef(name = "pattern", info = "Add rule rule using regex pattern")
+    @ValueDef(name = "forData", type = ValueType.BOOLEAN, def = "true", info = "Apply this rule to individual data")
+    @ValueDef(name = "forNodes", type = ValueType.BOOLEAN, def = "true", info = "Apply this rule to data nodes")
     private void applyMeta(Meta meta) {
         if (meta.hasMeta("include")) {
             meta.getMetaList("include").forEach(include -> {
@@ -129,10 +143,10 @@ public class DataFilter extends SimpleMetaMorph {
                         throw new RuntimeException("type not found", ex);
                     }
                 }
-                if (include.getBoolean("includeData", true)) {
+                if (include.getBoolean("forData", true)) {
                     includeData(namePattern, type);
                 }
-                if (include.getBoolean("includeNodes", true)) {
+                if (include.getBoolean("forNodes", true)) {
                     includeNode(namePattern, type);
                 }
             });
@@ -142,10 +156,10 @@ public class DataFilter extends SimpleMetaMorph {
             meta.getMetaList("exclude").forEach(exclude -> {
                 String namePattern = getPattern(exclude);
 
-                if (exclude.getBoolean("excludeData", true)) {
+                if (exclude.getBoolean("forData", true)) {
                     excludeData(namePattern);
                 }
-                if (exclude.getBoolean("excludeNodes", true)) {
+                if (exclude.getBoolean("forNodes", true)) {
                     excludeNode(namePattern);
                 }
             });

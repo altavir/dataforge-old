@@ -1,5 +1,6 @@
 package hep.dataforge.grind.workspace
 
+import hep.dataforge.actions.Action
 import hep.dataforge.actions.ExecAction
 import hep.dataforge.context.Context
 import hep.dataforge.io.IOUtils
@@ -12,9 +13,11 @@ import java.nio.ByteBuffer
  */
 class ExecSpec {
 
-    private Closure handleInput = {};
+    Closure handleInput = {};
 
-    private Closure handleOutput = { delegate.text };
+    Closure handleOutput = { delegate.text };
+
+    String actionName = "exec";
 
     void input(@DelegatesTo(value = InputTransformer, strategy = Closure.DELEGATE_ONLY) Closure handleInput) {
         this.handleInput = handleInput
@@ -22,6 +25,14 @@ class ExecSpec {
 
     void output(@DelegatesTo(value = OutputTransformer, strategy = Closure.DELEGATE_ONLY) Closure handleOutput) {
         this.handleOutput = handleOutput
+    }
+
+    void name(String name){
+        this. actionName = name;
+    }
+
+    Action build(){
+        return new GrindExecAction();
     }
 
     private class InputTransformer {
@@ -50,6 +61,11 @@ class ExecSpec {
     }
 
     private class GrindExecAction extends ExecAction {
+
+        @Override
+        String getName() {
+            return actionName;
+        }
 
         @Override
         protected ByteBuffer transformInput(String name, Object input, Laminate meta) {

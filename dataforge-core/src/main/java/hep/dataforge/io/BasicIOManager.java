@@ -26,6 +26,7 @@ import hep.dataforge.context.PluginDef;
 import hep.dataforge.names.Name;
 
 import java.io.*;
+import java.util.Optional;
 
 /**
  * <p>
@@ -131,12 +132,16 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
      * {@inheritDoc}
      */
     @Override
-    public File getFile(String path) {
+    public Optional<File> optFile(String path) {
         File file = new File(path);
-        if (file.isAbsolute()) {
-            return file;
+        if(file.exists()) {
+            if (file.isAbsolute()) {
+                return Optional.of(file);
+            } else {
+                return Optional.of(new File(getRootDirectory(), path));
+            }
         } else {
-            return new File(getRootDirectory(), path);
+            return Optional.empty();
         }
     }
 

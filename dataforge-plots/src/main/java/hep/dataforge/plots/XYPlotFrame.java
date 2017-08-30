@@ -28,9 +28,9 @@ import static hep.dataforge.values.ValueType.NUMBER;
  *
  * @author Alexander Nozik
  */
-@NodeDef(name = "xAxis", info = "The description of X axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
-@NodeDef(name = "yAxis", info = "The description of Y axis", target = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
-@NodeDef(name = "legend", info = "The configuration for plot legend", target = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
+@NodeDef(name = "xAxis", info = "The description of X axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
+@NodeDef(name = "yAxis", info = "The description of Y axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis")
+@NodeDef(name = "legend", info = "The configuration for plot legend", from = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 public abstract class XYPlotFrame extends AbstractPlotFrame {
 
 

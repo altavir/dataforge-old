@@ -19,16 +19,16 @@ import hep.dataforge.names.Named;
  */
 public class NamedData<T> extends Data<T> implements Named {
 
+    @SuppressWarnings("unchecked")
+    public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
+        return new NamedData<T>(name, new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
+    }
+
     private final String name;
 
     public NamedData(String name, Goal<T> goal, Class<T> type, Meta meta) {
         super(goal, type, meta);
         this.name = name;
-    }
-
-    @SuppressWarnings("unchecked")
-    public static <T> NamedData<T> buildStatic(String name, T content, Meta meta) {
-        return new NamedData<T>(name, new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
     }
 
     /**

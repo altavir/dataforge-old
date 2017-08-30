@@ -61,8 +61,8 @@ if(file('properties.gradle').exists()) {
         publish {
             repository {
                 repoKey = 'gradle-dev-local'
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
+                username = "${artifactory.user}"
+                password = "${artifactory.pass}"
                 maven = true
 
             }
@@ -73,8 +73,8 @@ if(file('properties.gradle').exists()) {
         resolve {
             repository {
                 repoKey = 'gradle-dev'
-                username = "${artifactory_user}"
-                password = "${artifactory_password}"
+                username = "${artifactory.user}"
+                password = "${artifactory.pass}"
                 maven = true
 
             }

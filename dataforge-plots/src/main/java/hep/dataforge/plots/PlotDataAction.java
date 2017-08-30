@@ -48,7 +48,7 @@ import java.util.Map;
 @ValueDef(name = "groupBy", def = "plot_frame_name",
         info = "Defines the parameter which should be used as a frame name for this plot. The value is supposed to be a String, but in practice could be any type which could be converted to a String.")
 @NodeDef(name = "plotFrame", multiple = true,
-        info = "The description of plot frame", target = "class::hep.dataforge.plots.XYPlotFrame")
+        info = "The description of plot frame", from = "class::hep.dataforge.plots.XYPlotFrame")
 //@NodeDef(name = "snapshot", info = "Save plot shapshots to file",
 //        target = "method::hep.dataforge.plots.PlotDataAction.snapshot")
 //@NodeDef(name = "serialize", info = "Serialize plot to file",
@@ -57,7 +57,7 @@ import java.util.Map;
 //        info = "Save plot shapshots to file with default parameters")
 //@ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
 //        info = "Serialize plot to file with default parameters")
-@NodeDef(name = "adapter", info = "Adapter for data", target = "class::hep.dataforge.tables.XYAdapter")
+@NodeDef(name = "adapter", info = "Adapter for data", from = "class::hep.dataforge.tables.XYAdapter")
 
 public class PlotDataAction extends OneToOneAction<Table, Table> {
 

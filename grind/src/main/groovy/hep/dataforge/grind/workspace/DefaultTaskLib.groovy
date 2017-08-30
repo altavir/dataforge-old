@@ -112,9 +112,18 @@ class DefaultTaskLib {
     /**
      * Execute external process task
      * @param parameters
+     * @param name the name of the task
      * @return
      */
-    static Task exec(Map parameters){
+    static Task exec(Map paremeters = [:], String name,
+                     @DelegatesTo(value = ExecSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
+        ExecSpec spec = new ExecSpec();
+        spec.actionName = name;
+        Closure script = cl.rehydrate(spec, null, null)
+        script.setResolveStrategy(Closure.DELEGATE_ONLY)
+        script.call()
 
+        Action execAction = spec.build();
+        return SingleActionTask.from(execAction, dependencyBuilder(paremeters))
     }
 }

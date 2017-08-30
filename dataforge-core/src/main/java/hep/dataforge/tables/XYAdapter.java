@@ -29,8 +29,8 @@ import hep.dataforge.values.Values;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@NodeDef(name = "x", info = "x axis mapping", target = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
-@NodeDef(name = "y", info = "y axis mapping", target = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
+@NodeDef(name = "x", info = "x axis mapping", from = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
+@NodeDef(name = "y", info = "y axis mapping", from = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
 public class XYAdapter extends AxisPointAdapter {
 
     public static final String X_AXIS = "x";

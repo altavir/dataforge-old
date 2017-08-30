@@ -47,7 +47,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", def = "default", info = "The type of conncetion between points.")
 @ValueDef(name = "thickness", type = {NUMBER}, info = "The type of the line.")
 @NodeDef(name = "adapter", info = "An adapter to interpret the dataset",
-        target = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
+        from = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
 public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
 
     public XYPlottable(String name) {

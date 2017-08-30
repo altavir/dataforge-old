@@ -146,7 +146,7 @@ public final class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Optional<? extends Meta> optMeta(String path) {
+    public Optional<Meta> optMeta(String path) {
         List<Meta> childLayers = new ArrayList<>();
         layers.stream().filter(layer -> layer.hasMeta(path)).forEach((m) -> {
             //FIXME child elements are not chained!
