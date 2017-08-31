@@ -80,7 +80,7 @@ public class ConfigFXNode extends ConfigFX {
             return Optionals.either(Optional.ofNullable(configOverride.get()))
                     .or(() -> getParent()
                             .flatMap(ConfigFXNode::getConfig)
-                            .flatMap(parentConfig -> parentConfig.optMeta(getName()))
+                            .flatMap(parentConfig -> parentConfig.optMeta(getName()).map(it -> (Configuration) it))
                     ).opt().orElse(null);
         }
     };
@@ -220,7 +220,7 @@ public class ConfigFXNode extends ConfigFX {
             getParent()
                     .flatMap(parent -> parent.getConfig())
                     .ifPresent(configuration -> configuration.removeNode(getName()));
-            getParent().ifPresent( parent-> parent.invalidate());
+            getParent().ifPresent(parent -> parent.invalidate());
         }
     }
 
