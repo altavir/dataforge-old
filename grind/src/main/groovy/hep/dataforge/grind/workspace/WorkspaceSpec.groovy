@@ -37,7 +37,7 @@ class WorkspaceSpec {
      * builder context for the workspace using closure
      */
     def context(Closure cl) {
-        def contextSpec = new ContextSpec()
+        def contextSpec = new ContextSpec(builder.context)
         def code = cl.rehydrate(contextSpec, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
         code()
