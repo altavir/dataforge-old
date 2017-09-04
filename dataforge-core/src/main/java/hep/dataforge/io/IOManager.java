@@ -21,13 +21,13 @@ import hep.dataforge.io.markup.MarkupRenderer;
 import hep.dataforge.io.markup.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.providers.Provides;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URL;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -39,7 +39,8 @@ import java.util.function.Consumer;
  * @version $Id: $Id
  */
 public interface IOManager extends Plugin {
-    String FILE_TARGET = "file";
+//    String FILE_TARGET = "file";
+//    String RESOURCE_TARGET = "resource";
 
     String LOGGER_APPENDER_NAME = "df.io";
 
@@ -121,8 +122,23 @@ public interface IOManager extends Plugin {
         return optFile(path).orElseThrow(() -> new RuntimeException("File " + path + " not found in the context"));
     }
 
-    @Provides(FILE_TARGET)
+    /**
+     * Provide a file
+     * @param path
+     * @return
+     */
+//    @Provides(FILE_TARGET)
     Optional<File> optFile(String path);
+
+    /**
+     * Provide a classpath resource URL
+     * @param path
+     * @return
+     */
+//    @Provides(RESOURCE_TARGET)
+    default Optional<URL> optResource(String path){
+        return Optional.ofNullable(getContext().getClassLoader().getResource(path));
+    }
 
     /**
      * Return the root directory for this IOManager. By convention, Context

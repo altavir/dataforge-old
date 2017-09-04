@@ -1,5 +1,6 @@
-package hep.dataforge.actions;
+package hep.dataforge.grind.workspace;
 
+import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
@@ -24,29 +25,13 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
 
     @Override
     protected R execute(Context context, String name, T input, Laminate meta) {
-        //setting up the process
-        ProcessBuilder builder = new ProcessBuilder(getCommand(context, name, meta));
-
-        //updating environment variables
-        if (meta.hasMeta("env")) {
-            MetaUtils.nodeStream(meta.getMeta("env")).forEach(envNode -> {
-                builder.environment().put(envNode.getValue().getString("name", envNode.getKey()), envNode.getValue().getString("value"));
-            });
-        }
-
-        // Setting working directory
-        if (meta.hasValue("workDir")) {
-            builder.directory(context.io().getFile(meta.getString("workDir")));
-        }
-
-        if (meta.getBoolean("inheritIO", true)) {
-            builder.inheritIO();
-        }
-
         Logger logger = getLogger(context, meta);
 
         try {
+
+            ProcessBuilder builder = buildProcess(context,name,input,meta);
             logger.info("Starting process with command \"" + String.join(" ", builder.command()) + "\"");
+
             Process process = builder.start();
 
             //sending input into process
@@ -64,22 +49,17 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
 
             if (process.isAlive()) {
                 logger.debug("Starting listener for process end");
-                //TODO somehow use context executor instead
-                Thread thread = new Thread(() -> {
-                    try {
-                        if (meta.hasValue("timeout")) {
-                            if (!process.waitFor(meta.getInt("timeout"), TimeUnit.MILLISECONDS)) {
-                                process.destroyForcibly();
-                            }
-                        } else {
-                            logger.info("Process finished with exit value " + process.waitFor());
+                try {
+                    if (meta.hasValue("timeout")) {
+                        if (!process.waitFor(meta.getInt("timeout"), TimeUnit.MILLISECONDS)) {
+                            process.destroyForcibly();
                         }
-                    } catch (Exception ex) {
-                        logger.debug("Process failed to complete", ex);
+                    } else {
+                        logger.info("Process finished with exit value " + process.waitFor());
                     }
-                });
-                thread.setName(name + "_listener");
-                thread.start();
+                } catch (Exception ex) {
+                    logger.debug("Process failed to complete", ex);
+                }
             } else {
                 logger.info("Process finished with exit value " + process.exitValue());
             }
@@ -100,6 +80,28 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
 //        }
 //        return command;
 //    }
+
+    protected ProcessBuilder buildProcess(Context context, String name, T input, Laminate meta){
+        //setting up the process
+        ProcessBuilder builder = new ProcessBuilder(getCommand(context, name, meta));
+
+        //updating environment variables
+        if (meta.hasMeta("env")) {
+            MetaUtils.nodeStream(meta.getMeta("env")).forEach(envNode -> {
+                builder.environment().put(envNode.getValue().getString("name", envNode.getKey()), envNode.getValue().getString("value"));
+            });
+        }
+
+        // Setting working directory
+        if (meta.hasValue("workDir")) {
+            builder.directory(context.io().getFile(meta.getString("workDir")));
+        }
+
+        if (meta.getBoolean("inheritIO", true)) {
+            builder.inheritIO();
+        }
+        return builder;
+    }
 
     protected abstract ByteBuffer transformInput(String name, T input, Laminate meta);
 

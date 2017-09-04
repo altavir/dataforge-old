@@ -2,7 +2,6 @@ package hep.dataforge.grind.workspace
 
 import groovy.transform.TupleConstructor
 import hep.dataforge.actions.Action
-import hep.dataforge.actions.ExecAction
 import hep.dataforge.context.Context
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
@@ -207,6 +206,8 @@ class ExecSpec {
         final String name
         final Meta meta
 
+
+        String executable = ""
         List<String> cli = [];
 
         CLITransformer(Context context, String name, Meta meta) {
@@ -215,12 +216,62 @@ class ExecSpec {
             this.meta = meta
         }
 
+        /**
+         * Apply inside parameters only if OS is windows
+         * @param cl
+         * @return
+         */
+        def windows(@DelegatesTo(CLITransformer) Closure cl){
+            if (System.properties['os.name'].toLowerCase().contains('windows')) {
+                this.with(cl)
+            }
+        }
+
+        /**
+         * Apply inside parameters only if OS is linux
+         * @param cl
+         * @return
+         */
+        def linux(@DelegatesTo(CLITransformer) Closure cl){
+            if (System.properties['os.name'].toLowerCase().contains('linux')) {
+                this.with(cl)
+            }
+        }
+
+        def executable(String exec) {
+            this.executable = executable
+        }
+
         def append(String... commands) {
             cli.addAll(commands)
         }
 
+        def argument(String key = "", Object obj) {
+            String value;
+            if (obj instanceof File) {
+                value = obj.absoluteFile.toString();
+            } else if (obj instanceof URL){
+                value = new File(obj.toURI()).absoluteFile.toString();
+            } else {
+                value = obj.toString()
+            }
+
+            if(key){
+                cli.add(key)
+            }
+
+            cli.add(value);
+        }
+
+        /**
+         * Create
+         * @return
+         */
         private List<String> transform() {
-            return cli + Arrays.asList(meta.getStringArray("command", new String[0]))
+            return [] +
+                    meta.getString("exec", executable) +
+                    cli +
+                    Arrays.asList(meta.getStringArray("command", new String[0]))
         }
     }
 
@@ -266,7 +317,7 @@ class ExecSpec {
             def handler = cliTransform.rehydrate(transformer, null, null);
             handler.setResolveStrategy(Closure.DELEGATE_ONLY);
             handler.call()
-            return transformer.transform()
+            return transformer.transform().findAll{!it.isEmpty()}
         }
     }
 }

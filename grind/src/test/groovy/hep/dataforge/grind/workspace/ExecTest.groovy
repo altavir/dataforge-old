@@ -6,7 +6,7 @@ import spock.lang.Timeout
 class ExecTest extends Specification {
 
     @Timeout(3)
-    def "test singleton exec"() {
+    def "get Java version"() {
         given:
         def exec = new ExecSpec()
         exec.with{
@@ -25,5 +25,28 @@ class ExecTest extends Specification {
         then:
         println "Result:"
         println res
+    }
+
+    @Timeout(3)
+    def "run python script"(){
+        given:
+        def exec = new ExecSpec()
+        exec.with{
+            output {
+                process.consumeProcessOutputStream()
+                redirect()
+            }
+            cli {
+                append "python"
+                argument  context.getClassLoader().getResource('workspace/test.py')
+                append "-d 1"
+                append "-r OK"
+            }
+        }
+        when:
+        def res = exec.build().simpleRun("test");
+        println "Result: $res"
+        then:
+        res.endsWith "OK"
     }
 }
