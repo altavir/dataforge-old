@@ -52,7 +52,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     @Override
-    public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
+    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
         checkInput(set);
         List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
         Map<String, ActionResult<R>> results = new HashMap<>();
@@ -72,7 +72,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         return new ActionResult<>(context.getChronicle(reportName), goal, outputMeta, getOutputType());
     }
 
-    protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {
+    protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
         //TODO expand grouping options
         if (actionMeta.hasMeta("byValue")) {
             return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group(input);

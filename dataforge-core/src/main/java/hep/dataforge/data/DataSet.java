@@ -51,7 +51,7 @@ public class DataSet<T> implements DataNode<T> {
      *
      * @return
      */
-    public static Builder builder() {
+    public static Builder<?> builder() {
         return new Builder<>(Object.class);
     }
 

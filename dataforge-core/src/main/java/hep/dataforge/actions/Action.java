@@ -35,6 +35,6 @@ public interface Action<T, R> extends Named, Described {
 
     String ACTION_TARGET = "action";
 
-    DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta);
+    DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta);
 
 }

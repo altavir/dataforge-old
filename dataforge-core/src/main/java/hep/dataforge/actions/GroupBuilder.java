@@ -46,14 +46,14 @@ public class GroupBuilder {
     public static GroupRule byValue(final String tag, String defaultTagValue) {
         return new GroupRule() {
             @Override
-            public <T> List<DataNode<T>> group(DataNode<? extends T> input) {
+            public <T> List<DataNode<T>> group(DataNode<T> input) {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
                 input.forEach((NamedData<? extends T> data) -> {
                     String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(data))
                             .getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
-                        DataSet.Builder<T> builder = DataSet.builder();
+                        DataSet.Builder<T> builder = DataSet.builder(input.type());
                         builder.setName(tagValue);
                         //PENDING share meta here?
                         map.put(tagValue, builder);
@@ -74,6 +74,6 @@ public class GroupBuilder {
     }
 
     public interface GroupRule {
-        <T> List<DataNode<T>> group(DataNode<? extends T> input);
+        <T> List<DataNode<T>> group(DataNode<T> input);
     }
 }

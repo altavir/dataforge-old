@@ -11,11 +11,10 @@ import org.slf4j.Logger;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-@ValueDef(name = "command", required = true, multiple = true, info = "A command or a command line")
+//@ValueDef(name = "command", required = true, multiple = true, info = "A command or a command line")
 @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
 @ValueDef(name = "timeout", type = ValueType.NUMBER, info = "The delay in milliseconds between end of output consumption and process force termination")
 @ValueDef(name = "workDir", info = "The working directory for the process as defined by IOManager::getFile")
@@ -47,7 +46,7 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
         Logger logger = getLogger(context, meta);
 
         try {
-            logger.info("Starting process with command " + builder.command());
+            logger.info("Starting process with command \"" + String.join(" ", builder.command()) + "\"");
             Process process = builder.start();
 
             //sending input into process
@@ -61,7 +60,7 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
             logger.debug("Handling process output");
 
 
-            R out = handleOutput(context, process, meta);
+            R out = handleOutput(context, process, name, meta);
 
             if (process.isAlive()) {
                 logger.debug("Starting listener for process end");
@@ -91,18 +90,18 @@ public abstract class ExecAction<T, R> extends OneToOneAction<T, R> {
         }
     }
 
-    protected List<String> getCommand(Context context, String name, Meta meta) {
-        List<String> command = Arrays.asList(meta.getStringArray("command"));
-        //TODO add smart parameter evaluation here
+    protected abstract List<String> getCommand(Context context, String name, Meta meta);
+//  {
+//        List<String> command = Arrays.asList(meta.getStringArray("command"));
 //        if(meta.hasMeta("parameter")){
 //            meta.getMetaList("parameter").forEach(parMeta ->{
 //
 //            });
 //        }
-        return command;
-    }
+//        return command;
+//    }
 
     protected abstract ByteBuffer transformInput(String name, T input, Laminate meta);
 
-    protected abstract R handleOutput(Context context, Process process, Laminate meta);
+    protected abstract R handleOutput(Context context, Process process, String name, Laminate meta);
 }

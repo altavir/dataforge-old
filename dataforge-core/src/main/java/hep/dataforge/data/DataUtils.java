@@ -131,4 +131,8 @@ public class DataUtils {
     public static <T> DataNode<T> singletonNode(String nodeName, Data<T> data) {
         return DataSet.builder(data.type()).putData(DataNode.DEFAULT_DATA_FRAGMENT_NAME, data).build();
     }
+
+    public static <T> DataNode<T> singletonNode(String nodeName, T object) {
+        return singletonNode(nodeName, Data.buildStatic(object));
+    }
 }

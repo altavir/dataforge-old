@@ -26,7 +26,7 @@ import java.util.stream.Stream;
 public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
-    public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
+    public DataNode<R> run(Context context, DataNode<Void> data, Meta actionMeta) {
         Chronicle log = context.getChronicle(getName());
         Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
         //TODO add optional parallelization here

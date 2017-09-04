@@ -151,4 +151,12 @@ public interface ValueProvider {
             return def.get();
         }
     }
+
+    default String[] getStringArray(String name, String[] def) {
+        if (this.hasValue(name)) {
+            return getStringArray(name);
+        } else {
+            return def;
+        }
+    }
 }

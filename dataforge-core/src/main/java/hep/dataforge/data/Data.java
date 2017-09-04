@@ -45,6 +45,10 @@ public class Data<T> implements Metoid {
     }
 
     public static <T> Data<T> buildStatic(T content) {
+        if(content == null){
+            throw new RuntimeException("Can't create a data from null");
+        }
+
         Meta meta = Meta.empty();
         if(content instanceof Metoid){
             meta = ((Metoid) content).meta();
