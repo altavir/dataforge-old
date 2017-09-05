@@ -2,15 +2,22 @@ package hep.dataforge.grind.workspace
 
 import groovy.transform.TupleConstructor
 import hep.dataforge.actions.Action
+import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
+import hep.dataforge.description.NodeDef
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValuesDefs
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.SimpleMarkupRenderer
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaUtils
+import hep.dataforge.values.ValueType
+import org.slf4j.Logger
 
 import java.nio.ByteBuffer
-import java.util.function.Function
+import java.util.concurrent.TimeUnit
 
 /**
  * A specification for system exec task
@@ -91,70 +98,35 @@ class ExecSpec {
 
     @TupleConstructor
     private class OutputTransformer {
+
         /**
          * The name of the data
          */
         final String name;
+
         /**
          * Context for task execution
          */
         final Context context;
-        /**
-         * The system process for external task
-         */
-        final Process process;
+
         /**
          * task configuration
          */
         final Laminate meta;
 
-        OutputTransformer(Context context, Process process, String name, Laminate meta) {
+        final String out;
+        final String err;
+
+        OutputTransformer(Context context, String name, Laminate meta, String out, String err) {
             this.name = name
             this.context = context
-            this.process = process
+//            this.process = process
             this.meta = meta
+            this.out = out;
+            this.err = err;
         }
-
-        /**
-         * Transformation of result
-         */
-        Function<String, ?> transform;
 
         private OutputStream outputStream;
-
-        private Closure cl;
-
-
-        void eval(Function<String, ?> transform) {
-            this.transform = transform
-        }
-
-        /**
-         * Get the output of the external task as text
-         * @return
-         */
-        String getText() {
-            return process.getText()
-        }
-
-        /**
-         * Get the result using given transformation. If transformation not provided use text ouput of the task
-         * @return
-         */
-        Object getResult() {
-            return transform ? transform.apply(text) : text;
-        }
-
-        def redirect() {
-            cl = {
-                context.logger.debug("Redirecting process output to default task output")
-                process.consumeProcessOutputStream(context.io().out(actionName, name))
-            }
-        }
-
-        def redirect(String stage = "", String name) {
-            cl = { process.consumeProcessOutputStream(context.io().out(stage, name)) }
-        }
 
         /**
          * Create task output (not result)
@@ -192,12 +164,6 @@ class ExecSpec {
         def render(Markedup markedup) {
             new SimpleMarkupRenderer(getStream()).render(markedup.markup())
         }
-
-        private def transform() {
-            if (cl != null) {
-                cl.call()
-            }
-        }
     }
 
     @TupleConstructor
@@ -221,7 +187,7 @@ class ExecSpec {
          * @param cl
          * @return
          */
-        def windows(@DelegatesTo(CLITransformer) Closure cl){
+        def windows(@DelegatesTo(CLITransformer) Closure cl) {
             if (System.properties['os.name'].toLowerCase().contains('windows')) {
                 this.with(cl)
             }
@@ -232,7 +198,7 @@ class ExecSpec {
          * @param cl
          * @return
          */
-        def linux(@DelegatesTo(CLITransformer) Closure cl){
+        def linux(@DelegatesTo(CLITransformer) Closure cl) {
             if (System.properties['os.name'].toLowerCase().contains('linux')) {
                 this.with(cl)
             }
@@ -250,13 +216,13 @@ class ExecSpec {
             String value;
             if (obj instanceof File) {
                 value = obj.absoluteFile.toString();
-            } else if (obj instanceof URL){
+            } else if (obj instanceof URL) {
                 value = new File(obj.toURI()).absoluteFile.toString();
             } else {
                 value = obj.toString()
             }
 
-            if(key){
+            if (key) {
                 cli.add(key)
             }
 
@@ -275,7 +241,14 @@ class ExecSpec {
         }
     }
 
-    private class GrindExecAction extends ExecAction {
+//    @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
+    @ValuesDefs([
+            @ValueDef(name = "timeout", type = ValueType.NUMBER, info = "The delay in milliseconds between end of output consumption and process force termination"),
+            @ValueDef(name = "workDir", info = "The working directory for the process as defined by IOManager::getFile")
+    ])
+    @NodeDef(name = "env", info = "Environment variables as a key-value pairs")
+//    @NodeDef(name = "parameter", info = "The definition for command parameter")
+    private class GrindExecAction extends OneToOneAction<Object, Object> {
 
         @Override
         String getName() {
@@ -283,7 +256,77 @@ class ExecSpec {
         }
 
         @Override
-        protected ByteBuffer transformInput(String name, Object input, Laminate meta) {
+        protected Object execute(Context context, String name, Object input, Laminate meta) {
+            Logger logger = getLogger(context, meta);
+
+            try {
+
+                StringBuilder out = new StringBuilder();
+                StringBuilder err = new StringBuilder()
+
+                ProcessBuilder builder = buildProcess(context, name, input, meta);
+                logger.info("Starting process with command \"" + String.join(" ", builder.command()) + "\"");
+
+                Process process = builder.start();
+                process.consumeProcessOutput(out, err)
+
+                //sending input into process
+                ByteBuffer bytes = transformInput(name, input, meta);
+                if (bytes != null && bytes.limit() > 0) {
+                    logger.debug("The action input is transformed into byte array with length of " + bytes.limit());
+                    process.getOutputStream().write(bytes.array());
+                }
+
+                //consume process output
+                logger.debug("Handling process output");
+
+                if (process.isAlive()) {
+                    logger.debug("Starting listener for process end");
+                    try {
+                        if (meta.hasValue("timeout")) {
+                            if (!process.waitFor(meta.getInt("timeout"), TimeUnit.MILLISECONDS)) {
+                                process.destroyForcibly();
+                            }
+                        } else {
+                            logger.info("Process finished with exit value " + process.waitFor());
+                        }
+                    } catch (Exception ex) {
+                        logger.debug("Process failed to complete", ex);
+                    }
+                } else {
+                    logger.info("Process finished with exit value " + process.exitValue());
+                }
+
+                return transformOutput(context, name, meta, out.toString(), err.toString());
+            } catch (IOException e) {
+                throw new RuntimeException("Process execution failed with error", e);
+            }
+        }
+
+        ProcessBuilder buildProcess(Context context, String name, Object input, Laminate meta) {
+            //setting up the process
+            ProcessBuilder builder = new ProcessBuilder(getCommand(context, name, meta));
+
+            //updating environment variables
+            if (meta.hasMeta("env")) {
+                MetaUtils.nodeStream(meta.getMeta("env")).forEach { envNode ->
+                    builder.environment().put(envNode.getValue().getString("name", envNode.getKey()), envNode.getValue().getString("value"));
+                }
+            }
+
+            // Setting working directory
+            if (meta.hasValue("workDir")) {
+                builder.directory(context.io().getFile(meta.getString("workDir")));
+            }
+
+//            if (meta.getBoolean("inheritIO", true)) {
+//                builder.inheritIO();
+//            }
+            return builder;
+        }
+
+
+        ByteBuffer transformInput(String name, Object input, Laminate meta) {
             def inputTransformer = new InputTransformer(name, input, meta);
             def handler = handleInput.rehydrate(inputTransformer, null, null);
             handler.setResolveStrategy(Closure.DELEGATE_ONLY);
@@ -301,23 +344,28 @@ class ExecSpec {
             }
         }
 
-        @Override
-        protected Object handleOutput(Context context, Process process, String name, Laminate meta) {
-            def outputTransformer = new OutputTransformer(context, process, name, meta);
+        /**
+         * Transform action output. By default use text output
+         * @param context
+         * @param name
+         * @param meta
+         * @param out
+         * @param err
+         * @return
+         */
+        Object transformOutput(Context context, String name, Laminate meta, String out, String err) {
+            def outputTransformer = new OutputTransformer(context, name, meta, out, err);
             def handler = handleOutput.rehydrate(outputTransformer, null, null);
             handler.setResolveStrategy(Closure.DELEGATE_ONLY);
-            handler.call();
-            outputTransformer.transform()
-            return outputTransformer.result;
+            return handler.call() ?: out;
         }
 
-        @Override
-        protected List<String> getCommand(Context context, String name, Meta meta) {
+        List<String> getCommand(Context context, String name, Meta meta) {
             def transformer = new CLITransformer(context, name, meta);
             def handler = cliTransform.rehydrate(transformer, null, null);
             handler.setResolveStrategy(Closure.DELEGATE_ONLY);
             handler.call()
-            return transformer.transform().findAll{!it.isEmpty()}
+            return transformer.transform().findAll { !it.isEmpty() }
         }
     }
 }

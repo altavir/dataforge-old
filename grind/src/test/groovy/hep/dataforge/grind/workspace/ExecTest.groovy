@@ -10,32 +10,28 @@ class ExecTest extends Specification {
         given:
         def exec = new ExecSpec()
         exec.with{
-            output {
-                redirect()
-            }
             cli {
                 append "java"
                 append "-version"
             }
+            output {
+                println "Out: " + out
+                println "Err: " + err
+                return err.split()[0]
+            }
         }
         def action = exec.build()
-//        def data = DataUtils.singletonNode("test","test")
         when:
         def res = action.simpleRun("test")
         then:
-        println "Result:"
-        println res
+        res == "java"
     }
 
-    @Timeout(3)
+    @Timeout(5)
     def "run python script"(){
         given:
         def exec = new ExecSpec()
         exec.with{
-            output {
-                process.consumeProcessOutputStream()
-                redirect()
-            }
             cli {
                 append "python"
                 argument  context.getClassLoader().getResource('workspace/test.py')
@@ -47,6 +43,6 @@ class ExecTest extends Specification {
         def res = exec.build().simpleRun("test");
         println "Result: $res"
         then:
-        res.endsWith "OK"
+        res.trim().endsWith "OK"
     }
 }
