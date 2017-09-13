@@ -9,13 +9,20 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
+import hep.dataforge.io.MetaFileReader;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 
-import java.io.File;
-import java.util.Arrays;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.text.ParseException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static hep.dataforge.utils.NamingUtils.wildcardMatch;
 
@@ -31,6 +38,8 @@ public class FileDataFactory extends DataFactory<Binary> {
     public static final String FILE_NAME_KEY = "fileName";
     public static final String FILE_PATH_KEY = "filePath";
 
+    public static final String META_DIRECTORY = "@meta";
+
     public FileDataFactory() {
         super(Binary.class);
     }
@@ -42,20 +51,25 @@ public class FileDataFactory extends DataFactory<Binary> {
 
     @Override
     protected void fill(DataTree.Builder<Binary> builder, Context context, Meta dataConfig) {
-        //FIXME add filtering here
-        File parentFile;
+        Path parentFile;
         if (dataConfig.hasMeta(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
+            parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY)).toPath();
         } else if (context.hasValue(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(context.getString(DATA_DIR_KEY));
+            parentFile = context.io().getFile(context.getString(DATA_DIR_KEY)).toPath();
         } else {
-            parentFile = context.io().getRootDirectory();
+            parentFile = context.io().getRootDirectory().toPath();
         }
 
+        /**
+         * Add items matching specific file name. Not necessary one.
+         */
         if (dataConfig.hasMeta(FILE_NODE)) {
             dataConfig.getMetaList(FILE_NODE).forEach((node) -> addFile(context, builder, parentFile, node));
         }
 
+        /**
+         * Add content of the directory
+         */
         if (dataConfig.hasMeta(DIRECTORY_NODE)) {
             dataConfig.getMetaList(DIRECTORY_NODE).forEach((node) -> addDir(context, builder, parentFile, node));
         }
@@ -69,15 +83,31 @@ public class FileDataFactory extends DataFactory<Binary> {
         }
     }
 
-    public static Data<Binary> buildFileData(Context context, String filePath, Meta meta) {
-        return buildFileData(context.io().getFile(filePath), meta);
+    public Data<Binary> buildFileData(Context context, String filePath, Meta meta) {
+        return buildFileData(context.io().getFile(filePath).toPath(), meta);
     }
 
-    private static Data<Binary> buildFileData(File file, Meta meta) {
+    private Data<Binary> buildFileData(Path file, Meta meta) {
         MetaBuilder mb = new MetaBuilder(meta);
-        mb.putValue(FILE_PATH_KEY, file.getAbsolutePath());
-        mb.putValue(FILE_NAME_KEY, file.getName());
-        return Data.buildStatic(new FileBinary(file.toPath()), mb.build());
+        mb.putValue(FILE_PATH_KEY, file.toAbsolutePath().toString());
+        mb.putValue(FILE_NAME_KEY, fileName(file));
+
+        Meta fileMeta;
+        if (meta.hasValue("metaFile")) {
+            Path metaFile = file.resolveSibling(meta.getString("metaFile"));
+            mb.removeValue("metaFile");
+            try {
+                Meta base = MetaFileReader.read(metaFile);
+                fileMeta = new Laminate(meta, base);
+            } catch (IOException | ParseException e) {
+                throw new RuntimeException(e);
+            }
+        } else {
+            Path metaFile = Files.list(file.getParent().resolve(META_DIRECTORY)).filter(it-> it.startsWith(file.getFileName().toString())).findFirst();
+            fileMeta = mb.build();
+        }
+
+        return Data.buildStatic(new FileBinary(file), fileMeta);
     }
 
     /**
@@ -86,12 +116,12 @@ public class FileDataFactory extends DataFactory<Binary> {
      * @param parentFile
      * @param fileNode
      */
-    private void addFile(Context context, DataTree.Builder<Binary> builder, File parentFile, Meta fileNode) {
-        List<File> files = listFiles(context, parentFile, fileNode);
+    private void addFile(Context context, DataTree.Builder<Binary> builder, Path parentFile, Meta fileNode) {
+        List<Path> files = listFiles(context, parentFile, fileNode);
         if (files.isEmpty()) {
             context.getLogger().warn("No files matching the filter: " + fileNode.toString());
         } else if (files.size() == 1) {
-            File file = files.get(0);
+            Path file = files.get(0);
             Meta fileMeta = fileNode.getMetaOrEmpty(NODE_META_KEY);
             builder.putData(fileName(file), buildFileData(file, fileMeta));
         } else {
@@ -102,21 +132,25 @@ public class FileDataFactory extends DataFactory<Binary> {
         }
     }
 
-    private String fileName(File file) {
-        return file.getName();
+    private String fileName(Path file) {
+        return file.getFileName().toString();
     }
 
-    private List<File> listFiles(Context context, File parentFile, Meta fileNode) {
-        String path = fileNode.getString("path");
-        return Arrays.asList(parentFile.listFiles((File dir, String name)
-                -> dir.equals(parentFile) && wildcardMatch(path, name)));
-
+    private List<Path> listFiles(Context context, Path parentFile, Meta fileNode) {
+        String mask = fileNode.getString("path");
+        try {
+            return Files.list(parentFile).filter(path -> wildcardMatch(mask, path.toString())).collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 
-    private void addDir(Context context, final DataTree.Builder<Binary> builder, File parentFile, Meta dirNode) {
+    @ValueDef(name = "path", info = "The relative path of directory to be added")
+    @ValueDef(name = "recursive", type = ValueType.BOOLEAN, def = "true", info = "Flag to add subnodes recursively")
+    private void addDir(Context context, final DataTree.Builder<Binary> builder, Path parentFile, Meta dirNode) {
         DataTree.Builder<Binary> dirBuilder = DataTree.builder(Binary.class);
-        File dir = new File(parentFile, dirNode.getString("path"));
-        if (!dir.exists() || !dir.isDirectory()) {
+        Path dir = parentFile.resolve(dirNode.getString("path"));
+        if (!Files.isDirectory(dir)) {
             throw new RuntimeException("The directory " + dir + " does not exist");
         }
         dirBuilder.setName(dirNode.getString(NODE_NAME_KEY, dirNode.getName()));
@@ -126,14 +160,18 @@ public class FileDataFactory extends DataFactory<Binary> {
 
         boolean recurse = dirNode.getBoolean("recursive", true);
 
-        for (File file : dir.listFiles()) {
-            //TODO add file filter here
-            if (file.isFile()) {
-                dirBuilder.putData(fileName(file), buildFileData(file, Meta.empty()));
-            } else if (recurse) {
-                addDir(context, dirBuilder, dir, Meta.empty());
-            }
+        try {
+            Files.list(dir).forEach(file -> {
+                if (Files.isRegularFile(file)) {
+                    dirBuilder.putData(fileName(file), buildFileData(file, Meta.empty()));
+                } else if (recurse && !dir.getFileName().toString().equals(META_DIRECTORY)) {
+                    addDir(context, dirBuilder, dir, Meta.empty());
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
+
         builder.putNode(dirBuilder.build());
 
     }

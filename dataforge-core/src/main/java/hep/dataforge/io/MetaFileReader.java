@@ -14,6 +14,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ServiceLoader;
 
@@ -52,6 +53,10 @@ public class MetaFileReader {
 
     public static MetaBuilder read(File file) throws IOException, ParseException {
         return instance().read(Global.instance(), file, null);
+    }
+
+    public static MetaBuilder read(Path file) throws IOException, ParseException {
+        return instance().read(Global.instance(), file.toFile(), null);
     }
 
     public MetaBuilder read(Context context, String path, Charset encoding) throws IOException, ParseException {
