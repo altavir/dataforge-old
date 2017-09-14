@@ -33,11 +33,11 @@ class PlotView : View("DataForge plot viewer") {
 
     private val plotMap = HashMap<File, PlotContainer>()
 
-    init{
+    init {
         loadButton.setOnAction {
             val chooser = FileChooser()
             chooser.title = "Select plot file to load"
-            chooser.extensionFilters.setAll(FileChooser.ExtensionFilter("DataForge plot", "*.dfp"))
+            chooser.extensionFilters.setAll(FileChooser.ExtensionFilter("DataForge plot", "*.df", "*.dfp"))
             val list = chooser.showOpenMultipleDialog(loadButton.scene.window)
             list.forEach { f ->
                 try {
@@ -51,7 +51,7 @@ class PlotView : View("DataForge plot viewer") {
 
     @Throws(IOException::class)
     fun loadPlot(file: File) {
-        val container: PlotContainer = plotMap.getOrElse(file){
+        val container: PlotContainer = plotMap.getOrElse(file) {
             val pane = AnchorPane()
             val tab = Tab(file.name, pane)
             tab.setOnClosed { plotMap.remove(file) }

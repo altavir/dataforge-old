@@ -238,6 +238,7 @@ public interface Workspace extends Encapsulated, Provider {
 
         /**
          * Load data using universal data loader
+         *
          * @param place
          * @param dataConfig
          * @return
@@ -271,7 +272,7 @@ public interface Workspace extends Encapsulated, Provider {
 //        }
 
         default Workspace.Builder loadFileData(String place, String filePath, Meta meta) {
-            return loadData(place, FileDataFactory.buildFileData(getContext(), filePath, meta));
+            return loadData(place, DataUtils.readFile(getContext().io().getFile(filePath), meta));
         }
 
         default Workspace.Builder loadFileData(String dataName, String filePath) {

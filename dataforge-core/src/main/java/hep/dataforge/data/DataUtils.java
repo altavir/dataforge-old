@@ -16,11 +16,21 @@
 
 package hep.dataforge.data;
 
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.goals.AbstractGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.PipeGoal;
+import hep.dataforge.io.MetaFileReader;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeReader;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Executor;
@@ -33,6 +43,9 @@ import java.util.stream.Stream;
  * Created by darksnake on 06-Sep-16.
  */
 public class DataUtils {
+
+    public static final String META_DIRECTORY = "@meta";
+
     /**
      * Combine two data elements of different type into single data
      */
@@ -134,5 +147,87 @@ public class DataUtils {
 
     public static <T> DataNode<T> singletonNode(String nodeName, T object) {
         return singletonNode(nodeName, Data.buildStatic(object));
+    }
+
+    /**
+     * Read an object from a file using given transformation. Capture a file meta from default directory. Override meta is placed above file meta.
+     *
+     * @param filePath
+     * @param override
+     * @param type
+     * @param reader
+     * @param <T>
+     * @return
+     */
+    @NotNull
+    public static <T> Data<T> readFile(Path filePath, Meta override, Class<T> type, Function<Binary, T> reader) {
+        if (!Files.isRegularFile(filePath)) {
+            throw new IllegalArgumentException(filePath.toString() + " is not existing file");
+        }
+        Binary binary = new FileBinary(filePath);
+        Path metaFileDirectory = filePath.resolveSibling(META_DIRECTORY);
+        Meta fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.getFileName().toString()).orElse(Meta.empty());
+        Laminate meta = new Laminate(fileMeta, override);
+        return Data.generate(type, meta, () -> reader.apply(binary));
+    }
+
+    /**
+     * Read file as Binary Data.
+     *
+     * @param filePath
+     * @param override
+     * @return
+     */
+    @NotNull
+    public static Data<Binary> readFile(Path filePath, Meta override) {
+        return readFile(filePath, override, Binary.class, it -> it);
+    }
+
+    public static <T> DataNode<T> readDirectory(Path directoryPath, Meta override, Class<T> type, Function<Binary, T> reader) {
+        if (!Files.isDirectory(directoryPath)) {
+            throw new IllegalArgumentException(directoryPath.toString() + " is not existing directory");
+        }
+        Meta nodeMeta = MetaFileReader.resolve(directoryPath, META_DIRECTORY).orElse(Meta.empty());
+        DataTree.Builder<T> builder = DataTree.builder(type).setMeta(nodeMeta).setName(directoryPath.getFileName().toString());
+        try {
+            Files.list(directoryPath).filter(it -> !it.getFileName().toString().startsWith("@")).forEach(file -> {
+                if (Files.isRegularFile(file)) {
+                    builder.putData(file.getFileName().toString(), readFile(file, Meta.empty(), type, reader));
+                } else {
+                    builder.putNode(readDirectory(file, Meta.empty(), type, reader));
+                }
+            });
+        } catch (IOException e) {
+            throw new RuntimeException("Can't list files in " + directoryPath.toString());
+        }
+        return builder.build();
+    }
+
+    /**
+     * Transform envelope file into data using given transformation. The meta of the data consists of 3 layers:
+     * <ol>
+     * <li>override - dynamic meta from method argument)</li>
+     * <li>captured - captured from @meta directory</li>
+     * <li>own - envelope owm meta</li>
+     * </ol>
+     *
+     * @param filePath
+     * @param override
+     * @param type
+     * @param reader   a bifunction taking the binary itself and combined meta as arguments and returning
+     * @param <T>
+     * @return
+     */
+    public static <T> Data<T> readEnvelope(Path filePath, Meta override, Class<T> type, BiFunction<Binary, Meta, T> reader) {
+        try {
+            Envelope envelope = EnvelopeReader.readFile(filePath);
+            Binary binary = envelope.getData();
+            Path metaFileDirectory = filePath.resolveSibling(META_DIRECTORY);
+            Meta fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.getFileName().toString()).orElse(Meta.empty());
+            Laminate meta = new Laminate(fileMeta, override, envelope.meta());
+            return Data.generate(type, meta, () -> reader.apply(binary, meta));
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read " + filePath.toString() + " as an envelope", e);
+        }
     }
 }

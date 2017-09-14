@@ -7,29 +7,32 @@ package hep.dataforge.io;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
+import hep.dataforge.io.envelopes.EnvelopeReader;
 import hep.dataforge.io.envelopes.MetaType;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 //TODO add examples for transformations
+
 /**
  * A reader for meta file in any supported format. Additional file formats could
  * be statically registered by plug-ins.
- *
+ * <p>
  * Basically reader performs two types of "on read" transformations:
  * <ul>
  * <li>
- *     Includes: include a meta from given file instead of given node
+ * Includes: include a meta from given file instead of given node
  * </li>
  * <li>
- *     Substitutions: replaces all occurrences of {@code ${<key>}} in child meta nodes by given value. Substitutions are made as strings.
+ * Substitutions: replaces all occurrences of {@code ${<key>}} in child meta nodes by given value. Substitutions are made as strings.
  * </li>
  * </ul>
  *
@@ -47,34 +50,46 @@ public class MetaFileReader {
         return instance;
     }
 
-    public static MetaBuilder read(String name, File file) throws IOException, ParseException {
-        return instance().read(Global.instance(), file, null).rename(name);
+    public static Meta read(Path file) {
+        try {
+            return instance().read(Global.instance(), file, null);
+        } catch (IOException | ParseException e) {
+            throw new RuntimeException("Failed to read meta file " + file.toString(), e);
+        }
     }
 
-    public static MetaBuilder read(File file) throws IOException, ParseException {
-        return instance().read(Global.instance(), file, null);
+    /**
+     * Resolve the file with given name (without extension) in the directory and read it as meta. If multiple files with the same name exist in the directory, the ran
+     *
+     * @param directory
+     * @param name
+     * @return
+     */
+    public static Optional<Meta> resolve(Path directory, String name) {
+        try {
+            return Files.list(directory).filter(it -> it.startsWith(name)).findFirst().map(MetaFileReader::read);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to list files in the directory " + directory.toString(), e);
+        }
     }
 
-    public static MetaBuilder read(Path file) throws IOException, ParseException {
-        return instance().read(Global.instance(), file.toFile(), null);
-    }
-
-    public MetaBuilder read(Context context, String path, Charset encoding) throws IOException, ParseException {
+    public Meta read(Context context, String path, Charset encoding) throws IOException, ParseException {
         return read(context, context.io().getFile(path), encoding);
     }
 
-    public MetaBuilder read(Context context, String path) throws IOException, ParseException {
+    public Meta read(Context context, String path) throws IOException, ParseException {
         return read(context, context.io().getFile(path), null);
     }
 
-    public MetaBuilder read(Context context, File file, Charset encoding) throws IOException, ParseException {
+    public Meta read(Context context, Path file, Charset encoding) throws IOException, ParseException {
+        String fileName = file.getFileName().toString();
         for (MetaType type : loader) {
-            if (type.fileNameFilter().test(file.getName())) {
-                return transform(context, type.getReader().withCharset(encoding).read(new FileInputStream(file), file.length()));
+            if (type.fileNameFilter().test(fileName)) {
+                return transform(context, type.getReader().withCharset(encoding).readFile(file));
             }
         }
-
-        throw new RuntimeException("Could not find appropriate reader for meta file: " + file.toString());
+        //Fall back and try to resolve meta as an envelope ignoring extension
+        return EnvelopeReader.readFile(file).meta();
     }
 
     /**

@@ -17,9 +17,13 @@ import javax.cache.processor.EntryProcessor;
 import javax.cache.processor.EntryProcessorException;
 import javax.cache.processor.EntryProcessorResult;
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
+
+import static java.nio.file.StandardOpenOption.CREATE;
+import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
  * Default implementation for
@@ -34,37 +38,37 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     private final Class<V> valueType;
     private DefaultCacheManager manager;
     private Map<Meta, V> softCache;
-    private Map<Meta, File> hardCache = new HashMap<>();
-    private File cacheDir;
+    private Map<Meta, Path> hardCache = new HashMap<>();
+    private Path cacheDir;
 
     public DefaultCache(String name, DefaultCacheManager manager, Class<V> valueType) {
         this.name = name;
         this.manager = manager;
         this.valueType = valueType;
-        cacheDir = new File(manager.getRootCacheDir(), name);
+        cacheDir = manager.getRootCacheDir().resolve(name);
         scanDirectory();
     }
 
-    private Envelope read(File file) {
-        try (FileInputStream fis = new FileInputStream(file)) {
-            return reader.readWithData(fis);
-        } catch (Exception e) {
-            throw new RuntimeException("File read error", e);
-        }
-    }
+//    private Envelope read(Path file) {
+//        return reader.read(file);
+//    }
 
     private synchronized void scanDirectory() {
-        if (cacheDir.exists()) {
+        if (Files.isDirectory(cacheDir)) {
             hardCache.clear();
-            Stream.of(cacheDir.listFiles((dir, name) -> name.endsWith(".dfcache"))).forEach(file -> {
-                try (FileInputStream fis = new FileInputStream(file)) {
-                    Envelope envelope = reader.read(fis);
-                    hardCache.put(envelope.meta(), file);
-                } catch (Exception e) {
-                    getLogger().error("Failed to read cache file {}", file.getName());
-                    file.delete();
-                }
-            });
+            try {
+                Files.list(cacheDir).filter(it -> it.endsWith("df")).forEach(file -> {
+                    try {
+                        Envelope envelope = reader.read(file);
+                        hardCache.put(envelope.meta(), file);
+                    } catch (Exception e) {
+                        getLogger().error("Failed to read cache file {}. Deleting corrupted file.", file.toString());
+                        file.toFile().delete();
+                    }
+                });
+            } catch (IOException e) {
+                throw new RuntimeException("Can't list contents of" + cacheDir.toString());
+            }
         }
     }
 
@@ -74,15 +78,15 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
             return (V) getSoftCache().get(id);
         } else {
             return getFromHardCache(id).map(cacheFile -> {
-                Envelope envelope = read(cacheFile);
+                Envelope envelope = reader.read(cacheFile);
                 try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
                     V res = (V) ois.readObject();
                     getSoftCache().put(id, res);
                     return res;
                 } catch (Exception ex) {
-                    getLogger().error("Failed to read cached object with id '{}' from file with message: {}", id.toString(), ex.getMessage());
-                    cacheFile.delete();
+                    getLogger().error("Failed to read cached object with id '{}' from file with message: {}. Deleting corrupted file.", id.toString(), ex.getMessage());
                     hardCache.remove(id);
+                    cacheFile.toFile().delete();
                     return null;
                 }
             }).orElse(null);
@@ -103,7 +107,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
                 getFromHardCache(key).isPresent();
     }
 
-    private Optional<File> getFromHardCache(Meta id) {
+    private Optional<Path> getFromHardCache(Meta id) {
         //work around for meta numeric hashcode inequality
         return hardCache.entrySet().stream().filter(entry -> entry.getKey().equals(id)).findFirst().map(Map.Entry::getValue);
     }
@@ -121,15 +125,12 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
             if (data instanceof Named) {
                 fileName += "[" + ((Named) data).getName() + "]";
             }
-            fileName += Integer.toUnsignedLong(id.hashCode()) + ".dfcache";
+            fileName += Integer.toUnsignedLong(id.hashCode()) + ".df";
 
-            if (!cacheDir.exists()) {
-                cacheDir.mkdirs();
-            }
+            Path file = cacheDir.resolve(fileName);
 
-            File file = new File(cacheDir, fileName);
-
-            try (FileOutputStream fos = new FileOutputStream(file)) {
+            try (OutputStream fos = Files.newOutputStream(file, WRITE, CREATE)) {
+                Files.createDirectories(cacheDir);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(data);
@@ -203,7 +204,11 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
         if (softCache != null) {
             softCache.clear();
         }
-        hardCache.values().forEach(file -> file.delete());
+        try {
+            Files.deleteIfExists(cacheDir);
+        } catch (IOException e) {
+            getLogger().error("Failed to delete cache directory {}", cacheDir, e);
+        }
     }
 
     @Override

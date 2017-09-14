@@ -7,20 +7,17 @@ package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.binary.Binary;
-import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.io.MetaFileReader;
-import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.text.ParseException;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -53,11 +50,11 @@ public class FileDataFactory extends DataFactory<Binary> {
     protected void fill(DataTree.Builder<Binary> builder, Context context, Meta dataConfig) {
         Path parentFile;
         if (dataConfig.hasMeta(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY)).toPath();
+            parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
         } else if (context.hasValue(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(context.getString(DATA_DIR_KEY)).toPath();
+            parentFile = context.io().getFile(context.getString(DATA_DIR_KEY));
         } else {
-            parentFile = context.io().getRootDirectory().toPath();
+            parentFile = context.io().getRootDirectory();
         }
 
         /**
@@ -84,30 +81,16 @@ public class FileDataFactory extends DataFactory<Binary> {
     }
 
     public Data<Binary> buildFileData(Context context, String filePath, Meta meta) {
-        return buildFileData(context.io().getFile(filePath).toPath(), meta);
+        return buildFileData(context.io().getFile(filePath), meta);
     }
 
+    @NotNull
     private Data<Binary> buildFileData(Path file, Meta meta) {
         MetaBuilder mb = new MetaBuilder(meta);
         mb.putValue(FILE_PATH_KEY, file.toAbsolutePath().toString());
         mb.putValue(FILE_NAME_KEY, fileName(file));
 
-        Meta fileMeta;
-        if (meta.hasValue("metaFile")) {
-            Path metaFile = file.resolveSibling(meta.getString("metaFile"));
-            mb.removeValue("metaFile");
-            try {
-                Meta base = MetaFileReader.read(metaFile);
-                fileMeta = new Laminate(meta, base);
-            } catch (IOException | ParseException e) {
-                throw new RuntimeException(e);
-            }
-        } else {
-            Path metaFile = Files.list(file.getParent().resolve(META_DIRECTORY)).filter(it-> it.startsWith(file.getFileName().toString())).findFirst();
-            fileMeta = mb.build();
-        }
-
-        return Data.buildStatic(new FileBinary(file), fileMeta);
+        return DataUtils.readFile(file, mb);
     }
 
     /**

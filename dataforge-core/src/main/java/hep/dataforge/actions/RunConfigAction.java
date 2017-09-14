@@ -23,8 +23,8 @@ import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.text.ParseException;
 
 @TypedActionDef(name = "run", info = "Run action with given configuration")
@@ -47,7 +47,7 @@ public class RunConfigAction extends GenericAction {
         String contextName = meta.getString("contextName", getName());
         Context ac = Context.builder(contextName,context).build();
         if (meta.hasValue("configFile")) {
-            File cfgFile = context.io().getFile(meta.getString("configFile"));
+            Path cfgFile = context.io().getFile(meta.getString("configFile"));
             try {
                 cfg = MetaFileReader.instance().read(ac, cfgFile, null);
             } catch (IOException | ParseException ex) {

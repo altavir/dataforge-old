@@ -16,18 +16,23 @@
 package hep.dataforge.io;
 
 import hep.dataforge.context.Plugin;
+import hep.dataforge.data.binary.Binary;
+import hep.dataforge.data.binary.FileBinary;
+import hep.dataforge.data.binary.StreamBinary;
 import hep.dataforge.io.history.Record;
 import hep.dataforge.io.markup.MarkupRenderer;
 import hep.dataforge.io.markup.SimpleMarkupRenderer;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import hep.dataforge.providers.Provides;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -39,7 +44,7 @@ import java.util.function.Consumer;
  * @version $Id: $Id
  */
 public interface IOManager extends Plugin {
-//    String FILE_TARGET = "file";
+    String BINARY_TARGET = "bin";
 //    String RESOURCE_TARGET = "resource";
 
     String LOGGER_APPENDER_NAME = "df.io";
@@ -118,25 +123,42 @@ public interface IOManager extends Plugin {
      * @param path a {@link java.lang.String} object.
      * @return a {@link java.io.File} object.
      */
-    default File getFile(String path) {
+    default Path getFile(String path) {
         return optFile(path).orElseThrow(() -> new RuntimeException("File " + path + " not found in the context"));
     }
 
     /**
      * Provide a file
+     *
      * @param path
      * @return
      */
-    Optional<File> optFile(String path);
+    Optional<Path> optFile(String path);
 
     /**
-     * Provide a classpath resource URL
-     * @param path
+     * Provide file or resource as a binary. The path must be provided in DataForge notation (using ".").
+     * It is automatically converted to system path.
+     *
+     * Absolute paths could not be provided that way.
+     *
+     * @param name
      * @return
      */
-//    @Provides(RESOURCE_TARGET)
-    default Optional<URL> optResource(String path){
-        return Optional.ofNullable(getContext().getClassLoader().getResource(path));
+    @Provides(BINARY_TARGET)
+    default Optional<Binary> optBinary(String name) {
+        String path = name.replace(".", "/");
+        URL resource = getContext().getClassLoader().getResource(path);
+        if (resource != null) {
+            return Optional.of(new StreamBinary(() -> {
+                try {
+                    return resource.openStream();
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to open resource stream", e);
+                }
+            }));
+        } else {
+            return optFile(name).map(FileBinary::new);
+        }
     }
 
     /**
@@ -145,18 +167,20 @@ public interface IOManager extends Plugin {
      *
      * @return a {@link java.io.File} object.
      */
-    File getRootDirectory();
+    Path getRootDirectory();
 
     /**
      * The working directory for output and temporary files. Is always inside root directory
      *
      * @return
      */
-    default File getWorkDirectory() {
-        String tmpDir = getContext().getString(WORK_DIRECTORY_CONTEXT_KEY, ".dataforge");
-        File work = new File(getRootDirectory(), tmpDir);
-        if (!work.exists()) {
-            work.mkdirs();
+    default Path getWorkDirectory() {
+        String workDirName = getContext().getString(WORK_DIRECTORY_CONTEXT_KEY, ".dataforge");
+        Path work = getRootDirectory().resolve(workDirName);
+        try {
+            Files.createDirectories(work);
+        } catch (IOException e) {
+            throw new RuntimeException(getContext().getName() + ": Failed to create work directory " + work, e);
         }
         return work;
     }
@@ -167,11 +191,13 @@ public interface IOManager extends Plugin {
      *
      * @return
      */
-    default File getTmpDirectory() {
+    default Path getTmpDirectory() {
         String tmpDir = getContext().getString(TEMP_DIRECTORY_CONTEXT_KEY, ".dataforge/.temp");
-        File tmp = new File(getRootDirectory(), tmpDir);
-        if (!tmp.exists()) {
-            tmp.mkdirs();
+        Path tmp = getRootDirectory().resolve(tmpDir);
+        try {
+            Files.createDirectories(tmp);
+        } catch (IOException e) {
+            throw new RuntimeException(getContext().getName() + ": Failed to create tmp directory " + tmp, e);
         }
         return tmp;
     }

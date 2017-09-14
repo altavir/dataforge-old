@@ -32,7 +32,7 @@ public class FXPlotUtils {
         MenuItem exportAction = new MenuItem("Export DFP");
         exportAction.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge plot", "*.dfp"));
+            chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge plot", "*.df","*.dfp"));
             chooser.setTitle("Select file to save plot into");
             File file = chooser.showSaveDialog(menu.getOwnerWindow());
             if (file != null) {

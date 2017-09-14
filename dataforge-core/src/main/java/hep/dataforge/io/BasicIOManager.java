@@ -25,7 +25,12 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.names.Name;
 
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 
 /**
@@ -132,13 +137,13 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
      * {@inheritDoc}
      */
     @Override
-    public Optional<File> optFile(String path) {
-        File file = new File(path);
-        if(file.exists()) {
+    public Optional<Path> optFile(String path) {
+        Path file = Paths.get(path);
+        if (Files.exists(file)) {
             if (file.isAbsolute()) {
                 return Optional.of(file);
             } else {
-                return Optional.of(new File(getRootDirectory(), path));
+                return Optional.of(getRootDirectory().resolve(path));
             }
         } else {
             return Optional.empty();
@@ -149,11 +154,13 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
      * {@inheritDoc}
      */
     @Override
-    public File getRootDirectory() {
+    public Path getRootDirectory() {
         String rootDir = getContext().getString(ROOT_DIRECTORY_CONTEXT_KEY, System.getProperty("user.home"));
-        File root = new File(rootDir);
-        if (!root.exists()) {
-            root.mkdirs();
+        Path root = Paths.get(rootDir);
+        try {
+            Files.createDirectories(root);
+        } catch (IOException e) {
+            throw new RuntimeException(getContext().getName() + ": Failed to create root directory " + root, e);
         }
         return root;
     }
@@ -162,8 +169,8 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
     @Override
     public InputStream in(String path) {
         try {
-            return new FileInputStream(getFile(path));
-        } catch (FileNotFoundException ex) {
+            return Files.newInputStream(getFile(path));
+        } catch (IOException ex) {
             throw new RuntimeException(ex);
         }
     }

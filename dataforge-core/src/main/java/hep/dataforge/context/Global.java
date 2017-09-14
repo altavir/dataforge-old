@@ -23,6 +23,7 @@ import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.PrintWriter;
+import java.nio.file.Path;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.ExecutorService;
@@ -97,7 +98,7 @@ public class Global extends Context {
         });
     }
 
-    public static File getFile(String path) {
+    public static Path getFile(String path) {
         return instance.io().getFile(path);
     }
 

@@ -81,7 +81,7 @@ public class FileStorage extends AbstractStorage {
         super(context, config);
         try {
             URI uri = config.optValue("path").map(Value::stringValue).map(URI::create)
-                    .orElse(context.io().getWorkDirectory().toURI());
+                    .orElse(context.io().getWorkDirectory().toUri());
             this.dataDir = Paths.get(uri);
         } catch (Exception e) {
             throw new IllegalArgumentException("Malformed URL", e);

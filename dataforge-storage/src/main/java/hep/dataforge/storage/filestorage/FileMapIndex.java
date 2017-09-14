@@ -15,10 +15,14 @@ import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.TreeMap;
 import java.util.function.Supplier;
+
+import static java.nio.file.StandardOpenOption.*;
 
 /**
  * @author Alexander Nozik
@@ -58,7 +62,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 while (buffer.hasRemaining()) {
                     byte next = buffer.get();
                     if (next == '\n') {
-                        String line = new String (baos.toByteArray(), "UTF8");
+                        String line = new String(baos.toByteArray(), "UTF8");
                         String str = line.trim();
                         if (!str.startsWith("#") && !str.isEmpty()) {
                             T entry = readEntry(str);
@@ -106,9 +110,11 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
 
     @Override
     public void invalidate() throws StorageException {
-        File indexFile = getIndexFile();
-        if (indexFile.exists()) {
-            indexFile.delete();
+        Path indexFile = getIndexFile();
+        try {
+            Files.deleteIfExists(indexFile);
+        } catch (IOException e) {
+            getLogger().error("Failed to reset index file {}", indexFile, e);
         }
         indexedSize = 0;
         super.invalidate();
@@ -118,13 +124,12 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         return envelopeProvider.get();
     }
 
-    private File getIndexFileDirectory() {
-        return new File(context.io().getTmpDirectory(), "storage/fileindex");
+    private Path getIndexFileDirectory() {
+        return context.io().getTmpDirectory().resolve("storage/fileindex");
     }
 
-    private File getIndexFile() throws StorageException {
-//        FileEnvelope env = getEnvelope();
-        return new File(getIndexFileDirectory(), indexFileName());
+    private Path getIndexFile() throws StorageException {
+        return getIndexFileDirectory().resolve(indexFileName());
     }
 
     @Override
@@ -137,10 +142,10 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
      * Load index content from external file
      */
     private synchronized void loadIndex() throws StorageException {
-        File indexFile = getIndexFile();
-        if (indexFile.exists()) {
+        Path indexFile = getIndexFile();
+        if (Files.exists(indexFile)) {
             LoggerFactory.getLogger(getClass()).info("Loading index from file...");
-            try (ObjectInputStream ois = new ObjectInputStream(new FileInputStream(indexFile))) {
+            try (ObjectInputStream ois = new ObjectInputStream(Files.newInputStream(indexFile))) {
                 int position = (int) ois.readLong();
                 TreeMap<Value, List<Integer>> newMap = new TreeMap<>(ValueUtils.VALUE_COMPARATPR);
                 while (ois.available() > 0) {
@@ -160,7 +165,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
                 }
             } catch (IOException | ClassNotFoundException ex) {
                 LoggerFactory.getLogger(getClass()).error("Failed to read index file. Removing index file", ex);
-                indexFile.delete();
+                indexFile.toFile().delete();
             }
         } else {
             LoggerFactory.getLogger(getClass()).debug("Index file not found");
@@ -173,16 +178,10 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
      * @throws StorageException
      */
     private synchronized void saveIndex() throws StorageException {
-        File indexFile = getIndexFile();
+        Path indexFile = getIndexFile();
         try {
             LoggerFactory.getLogger(getClass()).info("Saving index to file...");
-            if (!indexFile.exists()) {
-                if (!indexFile.getParentFile().exists()) {
-                    indexFile.getParentFile().mkdirs();
-                }
-                indexFile.createNewFile();
-            }
-            try (ObjectOutputStream ous = new ObjectOutputStream(new FileOutputStream(indexFile))) {
+            try (ObjectOutputStream ous = new ObjectOutputStream(Files.newOutputStream(indexFile, WRITE, CREATE, TRUNCATE_EXISTING))) {
                 ous.writeLong(indexedSize);
                 map.forEach((value, integers) -> {
                     try {
@@ -199,9 +198,6 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
             savedSize = indexedSize;
         } catch (IOException ex) {
             LoggerFactory.getLogger(getClass()).error("Failed to write index file. Removing index file.", ex);
-            if (indexFile.exists()) {
-                indexFile.delete();
-            }
         }
     }
 

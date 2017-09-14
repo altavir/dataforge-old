@@ -31,6 +31,17 @@ import static java.nio.file.StandardOpenOption.READ;
 public interface EnvelopeReader {
 
     /**
+     * Resolve envelope type and use it to read the file as envelope
+     *
+     * @param path
+     * @return
+     */
+    static Envelope readFile(Path path) throws IOException {
+        EnvelopeType type = EnvelopeType.infer(path).orElse(TaglessEnvelopeType.instance);
+        return type.getReader().read(path);
+    }
+
+    /**
      * Read the whole envelope using internal properties reader.
      *
      * @param stream
@@ -39,9 +50,11 @@ public interface EnvelopeReader {
      */
     Envelope read(InputStream stream) throws IOException;
 
-    default Envelope read(Path file) throws IOException {
+    default Envelope read(Path file) {
         try (InputStream stream = Files.newInputStream(file, READ)) {
             return read(stream);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to read an envelope from " + file, e);
         }
     }
 }

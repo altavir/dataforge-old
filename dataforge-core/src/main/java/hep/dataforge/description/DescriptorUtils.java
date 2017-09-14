@@ -17,11 +17,12 @@ import hep.dataforge.utils.Misc;
 import hep.dataforge.values.Value;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
+import java.net.URISyntaxException;
+import java.nio.file.Paths;
 import java.text.ParseException;
 import java.util.*;
 
@@ -63,18 +64,18 @@ public class DescriptorUtils {
     }
 
     public static MetaBuilder buildMetaFromResource(String name, String resource) {
-        File file = new File(DescriptorUtils.class.getClassLoader().getResource(resource).getFile());
         try {
+            java.nio.file.Path file = Paths.get(DescriptorUtils.class.getClassLoader().getResource(resource).toURI());
             return buildMetaFromFile(name, file);
-        } catch (IOException ex) {
+        } catch (IOException | URISyntaxException ex) {
             throw new RuntimeException("Can't read resource file for descriptor", ex);
         } catch (ParseException ex) {
             throw new RuntimeException("Can't parse resource file for descriptor", ex);
         }
     }
 
-    public static MetaBuilder buildMetaFromFile(String name, File file) throws IOException, ParseException {
-        return MetaFileReader.read(name, file);
+    public static MetaBuilder buildMetaFromFile(String name, java.nio.file.Path file) throws IOException, ParseException {
+        return MetaFileReader.read(file).getBuilder().rename(name);
     }
 
     public static NodeDescriptor buildDescriptor(Object obj) {

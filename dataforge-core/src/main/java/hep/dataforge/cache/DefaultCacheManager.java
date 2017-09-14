@@ -9,8 +9,8 @@ import javax.cache.CacheManager;
 import javax.cache.Caching;
 import javax.cache.configuration.Configuration;
 import javax.cache.spi.CachingProvider;
-import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.ConcurrentHashMap;
@@ -31,8 +31,8 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
         this.context = Global.instance();
     }
 
-    public File getRootCacheDir() {
-        return new File(context.io().getTmpDirectory(), ".cache");
+    public Path getRootCacheDir() {
+        return context.io().getTmpDirectory().resolve("cache");
     }
 
     @Override
@@ -42,7 +42,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public URI getURI() {
-        return getRootCacheDir().toURI();
+        return getRootCacheDir().toUri();
     }
 
     @Override
