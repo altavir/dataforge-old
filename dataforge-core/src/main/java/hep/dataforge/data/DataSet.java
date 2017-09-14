@@ -26,9 +26,9 @@ public class DataSet<T> implements DataNode<T> {
     private final String name;
     private final Meta meta;
     private final Class<T> type;
-    private final Map<String, Data<? extends T>> dataMap;
+    private final Map<String, Data<T>> dataMap;
 
-    protected DataSet(String name, Meta meta, Class<T> type, Map<String, Data<? extends T>> dataMap) {
+    protected DataSet(String name, Meta meta, Class<T> type, Map<String, Data<T>> dataMap) {
         this.name = name;
         this.meta = meta;
         this.type = type;
@@ -56,11 +56,10 @@ public class DataSet<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+    public Stream<NamedData<T>> dataStream(boolean recursive) {
         return dataMap.entrySet().stream()
                 .filter(it -> recursive || !it.getKey().contains("."))
-                .map((Map.Entry<String, Data<? extends T>> entry)
-                        -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
+                .map(entry -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
     }
 
     /**
@@ -72,7 +71,7 @@ public class DataSet<T> implements DataNode<T> {
      * @return
      */
     @Override
-    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+    public Stream<DataNode<T>> nodeStream(boolean recursive) {
         if (recursive) {
             throw new Error("Not implemented");
         }
@@ -81,13 +80,13 @@ public class DataSet<T> implements DataNode<T> {
                 .filter(name -> name.length() > 1) //selecting only composite names
                 .map(name -> name.getFirst().toString())
                 .distinct()
-                .map(str -> new DataSet<>(str, meta, type, subMap(str + ".")));
+                .map(str -> new DataSet<T>(str, meta, type, subMap(str + ".")));
     }
 
-    private Map<String, Data<? extends T>> subMap(String prefix) {
+    private Map<String, Data<T>> subMap(String prefix) {
         return dataMap.entrySet().stream()
                 .filter(entry -> entry.getKey().startsWith(prefix))
-                .collect(Collectors.toMap(entry -> entry.getKey().substring(prefix.length()), entry -> entry.getValue()));
+                .collect(Collectors.toMap(entry -> entry.getKey().substring(prefix.length()), Map.Entry::getValue));
     }
 
     @Override
@@ -141,7 +140,7 @@ public class DataSet<T> implements DataNode<T> {
     public static class Builder<T> implements DataNode.Builder<T, DataSet<T>, Builder<T>> {
 
         private final Class<T> type;
-        private final Map<String, Data<? extends T>> dataMap = new LinkedHashMap<>();
+        private final Map<String, Data<T>> dataMap = new LinkedHashMap<>();
         private String name = "";
         private Meta meta = Meta.empty();
 
@@ -166,7 +165,7 @@ public class DataSet<T> implements DataNode<T> {
             return this;
         }
 
-        public Map<String, Data<? extends T>> getDataMap() {
+        public Map<String, Data<T>> getDataMap() {
             return dataMap;
         }
 

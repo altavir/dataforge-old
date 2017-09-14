@@ -59,7 +59,7 @@ public abstract class DynamicWorkspace implements Workspace {
     }
 
     @Override
-    public Task<?> getTask(String taskName) {
+    public Task<Object> getTask(String taskName) {
         return getWorkspace().getTask(taskName);
     }
 
@@ -69,7 +69,7 @@ public abstract class DynamicWorkspace implements Workspace {
     }
 
     @Override
-    public Optional<Task<?>> optTask(String taskName) {
+    public Optional<Task<Object>> optTask(String taskName) {
         return getWorkspace().optTask(taskName);
     }
 

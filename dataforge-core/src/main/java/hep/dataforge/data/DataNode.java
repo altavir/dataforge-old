@@ -30,7 +30,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Metoid, Provider {
+public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Provider {
 
     String DATA_TARGET = "data";
     String NODE_TARGET = "node";
@@ -68,11 +68,11 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      * @return
      */
     @Provides(DATA_TARGET)
-    Optional<Data<? extends T>> optData(String name);
+    Optional<Data<T>> optData(String name);
 
     @SuppressWarnings("unchecked")
     default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
-        Data<? extends T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
+        Data<T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
         if (type.isAssignableFrom(data.type())) {
             return (Data<R>) data;
         } else {
@@ -111,9 +111,9 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      * @return
      */
     @Provides(NODE_TARGET)
-    Optional<DataNode<? extends T>> optNode(String nodeName);
+    Optional<DataNode<T>> optNode(String nodeName);
 
-    default DataNode<? extends T> getNode(String nodeName) {
+    default DataNode<T> getNode(String nodeName) {
         return optNode(nodeName).get();
     }
 
@@ -142,9 +142,9 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      *
      * @return
      */
-    Stream<NamedData<? extends T>> dataStream(boolean recursive);
+    Stream<NamedData<T>> dataStream(boolean recursive);
 
-    default Stream<NamedData<? extends T>> dataStream() {
+    default Stream<NamedData<T>> dataStream() {
         return dataStream(true);
     }
 
@@ -153,7 +153,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      *
      * @param consumer
      */
-    default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<? extends T>> consumer) {
+    default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<T>> consumer) {
         dataStream().filter(predicate).forEach(consumer);
     }
 
@@ -175,14 +175,14 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
      * @param recursive if true then recursive node stream is returned, otherwise only upper level children are used
      * @return
      */
-    Stream<DataNode<? extends T>> nodeStream(boolean recursive);
+    Stream<DataNode<T>> nodeStream(boolean recursive);
 
     /**
      * A recursive node stream
      *
      * @return
      */
-    default Stream<DataNode<? extends T>> nodeStream() {
+    default Stream<DataNode<T>> nodeStream() {
         return nodeStream(true);
     }
 
@@ -280,7 +280,7 @@ public interface DataNode<T> extends Iterable<NamedData<? extends T>>, Named, Me
 
     @NotNull
     @Override
-    default Iterator<NamedData<? extends T>> iterator() {
+    default Iterator<NamedData<T>> iterator() {
         return dataStream().iterator();
     }
 

@@ -37,7 +37,7 @@ public abstract class AbstractWorkspace implements Workspace {
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<Task<?>> optTask(String taskName) {
+    public Optional<Task<Object>> optTask(String taskName) {
         if (!tasks.containsKey(taskName)) {
             getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
             List<Task> taskList = getContext().pluginManager().stream(true)
@@ -102,7 +102,7 @@ public abstract class AbstractWorkspace implements Workspace {
 
 
     @Override
-    public DataNode<?> runTask(TaskModel model) {
+    public DataNode<Object> runTask(TaskModel model) {
         return getTask(model.getName()).run(model);
     }
 

@@ -208,7 +208,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         /**
          * The gathering function for data
          */
-        private final Function<Workspace, Stream<NamedData<?>>> gatherer;
+        private final Function<Workspace, Stream<NamedData<Object>>> gatherer;
         private final transient Meta id;
 
         /**
@@ -298,9 +298,9 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         /**
          * The rule to attach dependency data to data node when it is calculated
          */
-        BiConsumer<DataTree.Builder<Object>, DataNode<?>> placementRule;
+        BiConsumer<DataTree.Builder<Object>, DataNode<Object>> placementRule;
 
-        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder<Object>, DataNode<?>> rule) {
+        public TaskDependency(TaskModel taskModel, BiConsumer<DataTree.Builder<Object>, DataNode<Object>> rule) {
             this.taskModel = taskModel;
             this.placementRule = rule;
         }
@@ -308,7 +308,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         public TaskDependency(TaskModel taskModel, String as) {
             this.taskModel = taskModel;
             if (as.isEmpty()) {
-                this.placementRule = (DataTree.Builder<Object> tree, DataNode<?> result) -> {
+                this.placementRule = (DataTree.Builder<Object> tree, DataNode<Object> result) -> {
                     if (!result.meta().isEmpty()) {
                         if (tree.meta().isEmpty()) {
                             tree.setMeta(result.meta());
@@ -319,7 +319,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
                     result.dataStream().forEach(tree::putData);
                 };
             } else {
-                this.placementRule = (DataTree.Builder<Object> tree, DataNode<?> result) -> tree.putNode(as, result);
+                this.placementRule = (DataTree.Builder<Object> tree, DataNode<Object> result) -> tree.putNode(as, result);
             }
         }
 

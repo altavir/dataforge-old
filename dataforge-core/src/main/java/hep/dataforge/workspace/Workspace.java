@@ -67,7 +67,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @return
      */
     @Provides(Task.TASK_TARGET)
-    Optional<Task<?>> optTask(String taskName);
+    Optional<Task<Object>> optTask(String taskName);
 
     /**
      * Get task by name. Throw {@link hep.dataforge.exceptions.NameNotFoundException} if task with given name does not exist.
@@ -75,7 +75,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param taskName
      * @return
      */
-    default Task<?> getTask(String taskName) {
+    default Task<Object> getTask(String taskName) {
         return optTask(taskName).orElseThrow(() -> new NameNotFoundException(taskName));
     }
 
@@ -146,7 +146,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param model
      * @return
      */
-    default DataNode<?> runTask(TaskModel model) {
+    default DataNode<Object> runTask(TaskModel model) {
         return this.getTask(model.getName()).run(model);
     }
 

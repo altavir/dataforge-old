@@ -27,12 +27,12 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+    public Stream<NamedData<T>> dataStream(boolean recursive) {
         return Stream.empty();
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream(boolean recusive) {
+    public Stream<DataNode<T>> nodeStream(boolean recusive) {
         return Stream.empty();
     }
 

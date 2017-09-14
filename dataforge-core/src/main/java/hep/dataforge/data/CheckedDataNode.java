@@ -32,7 +32,7 @@ public class CheckedDataNode<T> implements DataNode<T> {
     public Optional<Data<? extends T>> optData(String name) {
         return node.optData(name).flatMap(d -> {
             if (type.isAssignableFrom(d.type())) {
-                return Optional.of((Data<? extends T>) d);
+                return Optional.of((Data<T>) d);
             } else {
                 return Optional.empty();
             }
@@ -43,7 +43,7 @@ public class CheckedDataNode<T> implements DataNode<T> {
     public Optional<DataNode<? extends T>> optNode(String nodeName) {
         return node.optNode(nodeName).flatMap(n -> {
             if (type.isAssignableFrom(n.type())) {
-                return Optional.of((DataNode<? extends T>) n);
+                return Optional.of((DataNode<T>) n);
             } else {
                 return Optional.empty();
             }
@@ -51,13 +51,13 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
-        return node.dataStream(recursive).filter(d -> type.isAssignableFrom(d.type())).map(d -> (NamedData<? extends T>) d);
+    public Stream<NamedData<T>> dataStream(boolean recursive) {
+        return node.dataStream(recursive).filter(d -> type.isAssignableFrom(d.type())).map(d -> (NamedData<T>) d);
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
-        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> (DataNode<? extends T>) n);
+    public Stream<DataNode<T>> nodeStream(boolean recursive) {
+        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> (DataNode<T>) n);
     }
 
     @Override

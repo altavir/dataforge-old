@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 public class DataTree<T> implements DataNode<T> {
 
     private final Class<T> type;
-    private final Map<String, DataTree<? extends T>> nodes = new HashMap<>();
+    private final Map<String, DataTree<T>> nodes = new HashMap<>();
     private final Map<String, Data<T>> data = new HashMap<>();
     private String name = "";
     private Meta meta = Meta.empty();
@@ -42,14 +42,14 @@ public class DataTree<T> implements DataNode<T> {
         this.type = tree.type;
         this.meta = tree.meta;
         this.name = as;
-        tree.nodes.forEach((String key, DataTree<? extends T> tree1) -> {
+        tree.nodes.forEach((String key, DataTree<T> tree1) -> {
             nodes.put(key, new DataTree<>(tree1, key));
         });
         this.data.putAll(tree.data);
     }
 
     public static <T> Builder<T> builder(Class<T> type) {
-        return new Builder(type);
+        return new Builder<>(type);
     }
 
     /**
@@ -220,7 +220,7 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+    public Stream<DataNode<T>> nodeStream(boolean recursive) {
         if (recursive) {
             return nodeStream(Name.EMPTY, new Laminate(meta()));
         } else {
@@ -228,13 +228,13 @@ public class DataTree<T> implements DataNode<T> {
         }
     }
 
-    private Stream<DataNode<? extends T>> nodeStream(Name parentName, Laminate parentMeta) {
-        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<? extends T>> nodeEntry) -> {
-            Stream<DataNode<? extends T>> nodeItself = Stream.of(new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta));
+    private Stream<DataNode<T>> nodeStream(Name parentName, Laminate parentMeta) {
+        return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<T>> nodeEntry) -> {
+            Stream<DataNode<T>> nodeItself = Stream.of(new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta));
 
             Name childName = parentName.append(nodeEntry.getKey());
             Laminate childMeta = parentMeta.withFirstLayer(nodeEntry.getValue().meta());
-            Stream<DataNode<? extends T>> childStream = nodeEntry.getValue().nodeStream(childName, childMeta).map(n -> n);
+            Stream<DataNode<T>> childStream = nodeEntry.getValue().nodeStream(childName, childMeta);
 
             return Stream.concat(nodeItself, childStream);
         });
@@ -242,12 +242,12 @@ public class DataTree<T> implements DataNode<T> {
 
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+    public Stream<NamedData<T>> dataStream(boolean recursive) {
         return dataStream(null, new Laminate(meta()), recursive);
     }
 
-    private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta, boolean recursive) {
-        Stream<NamedData<? extends T>> dataStream = data.entrySet()
+    private Stream<NamedData<T>> dataStream(Name nodeName, Laminate nodeMeta, boolean recursive) {
+        Stream<NamedData<T>> dataStream = data.entrySet()
                 .stream()
                 .map((Map.Entry<String, Data<T>> entry) -> {
                             Name dataName = nodeName == null ? Name.of(entry.getKey()) : nodeName.append(entry.getKey());
@@ -260,7 +260,7 @@ public class DataTree<T> implements DataNode<T> {
         } else {
 
             // iterating over nodes including node name into dataStream
-            Stream<NamedData<? extends T>> subStream = nodes.entrySet()
+            Stream<NamedData<T>> subStream = nodes.entrySet()
                     .stream()
                     .flatMap(nodeEntry -> {
                         Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());

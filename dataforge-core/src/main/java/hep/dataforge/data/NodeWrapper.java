@@ -27,22 +27,22 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> optData(String name) {
+    public Optional<Data<T>> optData(String name) {
         return node.optData(name);
     }
 
     @Override
-    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+    public Optional<DataNode<T>> optNode(String nodeName) {
         return node.optNode(nodeName);
     }
 
     @Override
-    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
+    public Stream<NamedData<T>> dataStream(boolean recursive) {
         return node.dataStream(recursive);
     }
 
     @Override
-    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
+    public Stream<DataNode<T>> nodeStream(boolean recursive) {
         return node.nodeStream(recursive);
     }
 

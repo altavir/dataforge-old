@@ -25,6 +25,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -49,12 +50,12 @@ public class ColumnedDataReader implements Iterable<Values> {
         this.reader = new DataPointStringIterator(stream, format);
     }
 
-    public ColumnedDataReader(File file) throws IOException {
-        String headline = Files.lines(file.toPath())
+    public ColumnedDataReader(Path path) throws IOException {
+        String headline = Files.lines(path)
                 .filter(line -> line.startsWith("#f") || (!line.isEmpty() && !line.startsWith("#")))
                 .findFirst().get().substring(2);
 
-        FileInputStream stream = new FileInputStream(file);
+        InputStream stream = Files.newInputStream(path);
         Iterator<String> iterator = new LineIterator(stream);
         if (!iterator.hasNext()) {
             throw new IllegalStateException();
