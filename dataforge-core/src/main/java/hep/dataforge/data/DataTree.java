@@ -123,15 +123,15 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> optData(String dataName) {
+    public Optional<Data<T>> optData(String dataName) {
         return Optional.ofNullable(getData(Name.of(dataName)));
     }
 
-    protected Data<? extends T> getData(Name dataName) {
+    protected Data<T> getData(Name dataName) {
         if (dataName.length() == 1) {
             return data.get(dataName.toString());
         } else {
-            DataNode<? extends T> node = getNode(dataName.cutLast());
+            DataNode<T> node = getNode(dataName.cutLast());
             if (node != null) {
                 return node.optData(dataName.getLast().toString()).orElse(null);
             } else {
@@ -282,7 +282,7 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+    public Optional<DataNode<T>> optNode(String nodeName) {
         return Optional.ofNullable(getNode(Name.of(nodeName)));
     }
 

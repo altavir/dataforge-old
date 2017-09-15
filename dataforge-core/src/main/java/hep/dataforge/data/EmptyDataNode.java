@@ -22,7 +22,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> optData(String name) {
+    public Optional<Data<T>> optData(String name) {
         return Optional.empty();
     }
 
@@ -48,7 +48,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+    public Optional<DataNode<T>> optNode(String nodeName) {
         return Optional.empty();
     }
 

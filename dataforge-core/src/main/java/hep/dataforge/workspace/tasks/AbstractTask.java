@@ -52,7 +52,7 @@ public abstract class AbstractTask<R> implements Task<R> {
         return output;
     }
 
-    protected void handle(DataNode<R> output) {
+    protected void handle(DataNode<? super R> output) {
         //do nothing
     }
 

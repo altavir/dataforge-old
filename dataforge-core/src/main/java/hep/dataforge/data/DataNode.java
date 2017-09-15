@@ -72,7 +72,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
 
     @SuppressWarnings("unchecked")
     default <R> Data<R> getCheckedData(String dataName, Class<R> type) {
-        Data<T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
+        Data<? extends T> data = optData(dataName).orElseThrow(() -> new NameNotFoundException(dataName));
         if (type.isAssignableFrom(data.type())) {
             return (Data<R>) data;
         } else {
@@ -96,7 +96,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      *
      * @return
      */
-    default Data<? extends T> getData() {
+    default Data<T> getData() {
         return optData(DEFAULT_DATA_FRAGMENT_NAME)
                 .orElse(dataStream(true).findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
     }
@@ -166,7 +166,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
     @SuppressWarnings("unchecked")
     default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
         dataStream().filter(d -> type.isAssignableFrom(d.type()))
-                .forEach(d -> consumer.accept((NamedData<R>) d));
+                .forEach(d -> consumer.accept(d.cast(type)));
     }
 
     /**
@@ -244,7 +244,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      *
      * @param consumer
      */
-    default void handle(Consumer<DataNode<T>> consumer) {
+    default void handle(Consumer<DataNode<? super T>> consumer) {
         nodeGoal().onComplete((res, err) -> consumer.accept(DataNode.this));
     }
 
@@ -254,7 +254,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      * @param executor
      * @param consumer
      */
-    default void handle(Executor executor, Consumer<DataNode<T>> consumer) {
+    default void handle(Executor executor, Consumer<DataNode<? super T>> consumer) {
         nodeGoal().onComplete(executor, (res, err) -> consumer.accept(DataNode.this));
     }
 
@@ -270,7 +270,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
         if (this.type().equals(checkType)) {
             return (DataNode<R>) this;
         } else {
-            return new CheckedDataNode<R>(this, checkType);
+            return new CheckedDataNode<>(this, checkType);
         }
     }
 

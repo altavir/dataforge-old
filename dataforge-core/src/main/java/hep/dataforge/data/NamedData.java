@@ -63,4 +63,14 @@ public class NamedData<T> extends Data<T> implements Named {
     public Data<T> anonymize() {
         return new Data<T>(this.getGoal(), this.type(), this.meta());
     }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public <R> NamedData<R> cast(Class<R> type) {
+        if (type.isAssignableFrom(type())) {
+            return new NamedData<R>(name, (Goal<R>) getGoal(), type, meta());
+        } else {
+            throw new IllegalArgumentException("Invalid type to upcast data");
+        }
+    }
 }

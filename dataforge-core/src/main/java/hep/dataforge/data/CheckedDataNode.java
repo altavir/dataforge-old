@@ -29,7 +29,7 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> optData(String name) {
+    public Optional<Data<T>> optData(String name) {
         return node.optData(name).flatMap(d -> {
             if (type.isAssignableFrom(d.type())) {
                 return Optional.of((Data<T>) d);
@@ -40,10 +40,10 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+    public Optional<DataNode<T>> optNode(String nodeName) {
         return node.optNode(nodeName).flatMap(n -> {
             if (type.isAssignableFrom(n.type())) {
-                return Optional.of((DataNode<T>) n);
+                return Optional.of(n.checked(type));
             } else {
                 return Optional.empty();
             }
@@ -57,7 +57,7 @@ public class CheckedDataNode<T> implements DataNode<T> {
 
     @Override
     public Stream<DataNode<T>> nodeStream(boolean recursive) {
-        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> (DataNode<T>) n);
+        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> n.checked(type));
     }
 
     @Override

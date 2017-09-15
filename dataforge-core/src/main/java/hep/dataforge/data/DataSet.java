@@ -90,7 +90,7 @@ public class DataSet<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<Data<? extends T>> optData(String name) {
+    public Optional<Data<T>> optData(String name) {
         return Optional.ofNullable(dataMap.get(name));
     }
 
@@ -119,7 +119,7 @@ public class DataSet<T> implements DataNode<T> {
     }
 
     @Override
-    public Optional<DataNode<? extends T>> optNode(String nodeName) {
+    public Optional<DataNode<T>> optNode(String nodeName) {
         Builder<T> builder = new Builder<>(type)
                 .setName(nodeName)
                 .setMeta(meta());
@@ -173,7 +173,7 @@ public class DataSet<T> implements DataNode<T> {
         public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
             if (type.isAssignableFrom(data.type())) {
                 if (replace || !dataMap.containsKey(key)) {
-                    dataMap.put(key, data);
+                    dataMap.put(key, data.cast(type));
                 } else {
                     throw new RuntimeException("The data with key " + key + " already exists");
                 }

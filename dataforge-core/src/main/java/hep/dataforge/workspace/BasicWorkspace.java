@@ -39,10 +39,10 @@ public class BasicWorkspace extends AbstractWorkspace {
         return true;
     }
 
-    public DataNode<?> runTask(TaskModel model) {
+    public DataNode<Object> runTask(TaskModel model) {
         //Cache result if cache is available and caching is not blocked
         if (cacheEnabled() && model.meta().getBoolean("cache.enabled", true)) {
-            Task<?> task = getTask(model.getName());
+            Task<Object> task = getTask(model.getName());
             return getCache().cacheNode(model.getName(), model.getIdentity(), task.run(model));
         } else {
             return super.runTask(model);

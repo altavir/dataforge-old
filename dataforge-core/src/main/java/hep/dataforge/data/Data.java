@@ -45,15 +45,15 @@ public class Data<T> implements Metoid {
     }
 
     public static <T> Data<T> buildStatic(T content) {
-        if(content == null){
+        if (content == null) {
             throw new RuntimeException("Can't create a data from null");
         }
 
         Meta meta = Meta.empty();
-        if(content instanceof Metoid){
+        if (content instanceof Metoid) {
             meta = ((Metoid) content).meta();
         }
-        return buildStatic(content,meta);
+        return buildStatic(content, meta);
     }
 
     /**
@@ -149,5 +149,20 @@ public class Data<T> implements Metoid {
         return meta;
     }
 
+    /**
+     * Upcast the data tupe
+     *
+     * @param type
+     * @param <R>
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <R> Data<R> cast(Class<R> type) {
+        if (type.isAssignableFrom(this.type)) {
+            return new Data<R>((Goal<R>) this.goal, type, this.meta);
+        } else {
+            throw new IllegalArgumentException("Invalid type to upcast data");
+        }
+    }
 
 }
