@@ -78,6 +78,10 @@ class GrindShell implements Encapsulated {
         binding.setVariable(key, value)
     }
 
+    def getBinding(){
+        return binding;
+    }
+
     @Override
     Context getContext() {
         return context;
@@ -146,6 +150,14 @@ class GrindShell implements Encapsulated {
             } else {
                 return super.getVariable(propertyName)
             }
+        }
+
+        /**
+         * Get immutable map of internals
+         * @return
+         */
+        Map<String,?> list(){
+            return internals.asImmutable();
         }
 
 

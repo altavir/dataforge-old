@@ -1,5 +1,7 @@
 package hep.dataforge.grind.terminal
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
@@ -30,6 +32,8 @@ import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStringBuilder
 import org.jline.utils.AttributedStyle
 
+import java.nio.file.Files
+import java.nio.file.Path
 import java.time.Duration
 import java.util.stream.Stream
 
@@ -59,10 +63,10 @@ class GrindTerminal extends SimpleConfigurable {
         context.logger.debug("Starting grind terminal using system shell")
         return new GrindTerminal(context,
                 TerminalBuilder.builder()
-                               .name("df")
-                               .system(true)
-                               .encoding("UTF-8")
-                               .build()
+                        .name("df")
+                        .system(true)
+                        .encoding("UTF-8")
+                        .build()
         )
     }
 
@@ -77,7 +81,7 @@ class GrindTerminal extends SimpleConfigurable {
      * @return
      */
     def unwrap(Object res, Closure cl = { it }) {
-        if (getConfig().getBoolean("evalClosures", true) && res instanceof Closure) {
+        if (getConfig().getBoolean("evalClosures", false) && res instanceof Closure) {
             res = (res as Closure).call()
         } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
             res = (res as Data).get();
@@ -121,6 +125,7 @@ class GrindTerminal extends SimpleConfigurable {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots-fx")
             JFCFrameFactory.setDefault(context);
+            (context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
 //            OutputStream outputStream = System.out
@@ -156,9 +161,9 @@ class GrindTerminal extends SimpleConfigurable {
                 NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(it);
                 if (descriptor.meta().isEmpty()) {
                     renderer.render(MarkupBuilder.text("The description for ")
-                                                 .addText("${it}", "blue")
-                                                 .addText(" is empty")
-                                                 .build()
+                            .addText("${it}", "blue")
+                            .addText(" is empty")
+                            .build()
                     )
                 } else {
                     renderer.render(MarkupUtils.markupDescriptor(descriptor))
@@ -169,6 +174,13 @@ class GrindTerminal extends SimpleConfigurable {
             }
             renderer.ln()
             return null;
+        }
+
+        shell.bind("run") { it ->
+            Path scriptPath = context.io().getFile(it as String);
+            Files.newBufferedReader(scriptPath).withCloseable {
+                shell.eval(it)
+            }
         }
 
         //binding.setProperty("man", help);
@@ -188,6 +200,13 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     def help() {
+        println("This is DataForge Grind terminal shell")
+        println("Any Groovy statement is allowed")
+        println("Current list of shell bindings:")
+        shell.binding.list().each { k, v ->
+            println("\t$k")
+        }
+
         println("In order to display state of object and show help type `help <object>`");
     }
 
@@ -239,7 +258,7 @@ class GrindTerminal extends SimpleConfigurable {
         def now = System.currentTimeMillis()
         if (meta().getBoolean("benchmark", true)) {
             Duration duration = Duration.ofMillis(now - start);
-            shell.context.logger.info("Expression $expression evaluated in $duration")
+            shell.context.logger.debug("Expression $expression evaluated in $duration")
         }
         return res;
     }
@@ -250,9 +269,9 @@ class GrindTerminal extends SimpleConfigurable {
      */
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
-                                             .terminal(getTerminal())
-                                             .appName("DataForge Grind terminal")
-                                             .build();
+                .terminal(getTerminal())
+                .appName("DataForge Grind terminal")
+                .build();
         PrintWriter writer = getTerminal().writer();
 
 //
@@ -296,7 +315,7 @@ class GrindTerminal extends SimpleConfigurable {
         } catch (EndOfFileException ignored) {
             writer.println("Terminated by user")
         } finally {
-            shell.getContext().logger.debug("Closing terminal")
+            shell.getContext().logger.info("Closing terminal")
             getTerminal().close()
             shell.getContext().logger.debug("Terminal closed")
         }

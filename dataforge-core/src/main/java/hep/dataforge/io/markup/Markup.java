@@ -111,4 +111,10 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
         return getConfig().getMetaList(MARKUP_CONTENT_NODE).stream().map(Markup::new);
     }
 
+    @Override
+    public String toString() {
+        StringMarkupRenderer r =  new StringMarkupRenderer();
+        r.render(this);
+        return r.toString();
+    }
 }
