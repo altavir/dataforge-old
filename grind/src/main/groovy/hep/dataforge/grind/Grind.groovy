@@ -23,37 +23,13 @@ class Grind {
     }
 
     /**
-     * Build anonymous meta node using {@code GrindMetaBuilder}
-     * @param cl
-     * @return
-     */
-    static MetaBuilder buildMeta(@DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return buildMeta([:], "meta", cl);
-    }
-
-    /**
-     * Build anonymous meta node using {@code GrindMetaBuilder} and root node values
-     * @param values
-     * @param cl
-     * @return
-     */
-    static MetaBuilder buildMeta(Map values, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return buildMeta(values, "", cl);
-    }
-
-    static MetaBuilder buildMeta(String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
-        return buildMeta([:], nodeName, cl);
-    }
-
-    /**
      * Build a fully defined node with given node name, root node values and delegating closure
      * @param nodeName
      * @param values
      * @param cl
      * @return
      */
-    static MetaBuilder buildMeta(Map values = [:], String nodeName = "",
-                                 @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
+    static MetaBuilder buildMeta(String nodeName, Map values = [:], @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
         MetaBuilder builder
         if (cl != null) {
             def metaSpec = new GrindMetaBuilder()
@@ -71,6 +47,29 @@ class Grind {
         builder.update(values)
 
         return builder
+    }
+
+    /**
+     * Build anonymous meta node using {@code GrindMetaBuilder} and root node values
+     * @param values
+     * @param cl
+     * @return
+     */
+    static MetaBuilder buildMeta(Map values, @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
+        return buildMeta("", values, cl);
+    }
+
+    /**
+     * Build anonymous meta node using {@code GrindMetaBuilder}
+     * @param cl
+     * @return
+     */
+    static MetaBuilder buildMeta(@DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return buildMeta("", [:], cl);
+    }
+
+    static MetaBuilder buildMeta(String nodeName, @DelegatesTo(GrindMetaBuilder) Closure cl) {
+        return buildMeta(nodeName, [:], cl);
     }
 
     /**
@@ -157,7 +156,7 @@ class Grind {
                                          Map values = [:],
                                          String nodeName = "",
                                          @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-        MetaMorph.morph(type, buildMeta(values, nodeName, cl))
+        MetaMorph.morph(type, buildMeta(nodeName, values, cl))
     }
 
 //    /**

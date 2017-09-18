@@ -47,7 +47,7 @@ class DataSpec {
 
     def node(Map values = [:], String nodeName = "",
              @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-        loadFromMeta(Grind.buildMeta(values, nodeName, cl))
+        loadFromMeta(Grind.buildMeta(nodeName, values, cl))
     }
 
     /**

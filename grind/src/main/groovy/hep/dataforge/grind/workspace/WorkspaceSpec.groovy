@@ -97,7 +97,7 @@ class WorkspaceSpec {
     }
 
     def target(Map parameters = [:], String name, Closure closure = null) {
-        this.builder.target(Grind.buildMeta(parameters, name, closure))
+        this.builder.target(Grind.buildMeta(name, parameters, closure))
     }
 
     def target(Meta meta) {

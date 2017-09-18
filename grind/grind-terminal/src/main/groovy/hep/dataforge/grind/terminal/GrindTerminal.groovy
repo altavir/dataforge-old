@@ -202,10 +202,10 @@ class GrindTerminal extends SimpleConfigurable {
     def help() {
         println("This is DataForge Grind terminal shell")
         println("Any Groovy statement is allowed")
-        println("Current list of shell bindings:")
-        shell.binding.list().each { k, v ->
-            println("\t$k")
-        }
+//        println("Current list of shell bindings:")
+//        shell.binding.list().each { k, v ->
+//            println("\t$k")
+//        }
 
         println("In order to display state of object and show help type `help <object>`");
     }

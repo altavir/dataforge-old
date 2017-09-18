@@ -13,10 +13,10 @@ import hep.dataforge.io.envelopes.XMLMetaType;
 import hep.dataforge.plots.PlotFrame;
 import javafx.application.Platform;
 import javafx.scene.Scene;
-import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.stage.Window;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -28,13 +28,13 @@ import java.util.function.Consumer;
  */
 public class FXPlotUtils {
 
-    public static void addExportPlotAction(ContextMenu menu, PlotFrame frame) {
-        MenuItem exportAction = new MenuItem("Export DFP");
-        exportAction.setOnAction(event -> {
+    public static MenuItem getDFPlotExportMenuItem(Window window, PlotFrame frame){
+        MenuItem dfpExport = new MenuItem("DF...");
+        dfpExport.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
-            chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge plot", "*.df","*.dfp"));
+            chooser.getExtensionFilters().setAll(new FileChooser.ExtensionFilter("DataForge envelope", "*.df"));
             chooser.setTitle("Select file to save plot into");
-            File file = chooser.showSaveDialog(menu.getOwnerWindow());
+            File file = chooser.showSaveDialog(window);
             if (file != null) {
                 try {
                     new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance).write(new FileOutputStream(file), frame.wrap());
@@ -43,7 +43,7 @@ public class FXPlotUtils {
                 }
             }
         });
-        menu.getItems().add(exportAction);
+        return dfpExport;
     }
 
     /**

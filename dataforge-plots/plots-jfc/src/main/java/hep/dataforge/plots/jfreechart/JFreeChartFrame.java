@@ -25,6 +25,9 @@ import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
 import javafx.scene.Node;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
+import javafx.scene.control.MenuItem;
 import org.jetbrains.annotations.NotNull;
 import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
@@ -91,8 +94,28 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 //        viewer.setCacheShape(false);
 //        viewer.getCanvas().setCache(false);
 
-        FXPlotUtils.addExportPlotAction(viewer.getContextMenu(), this);
+        addExportPlotAction(viewer.getContextMenu(), this);
         return viewer;
+    }
+
+
+    private void addExportPlotAction(ContextMenu menu, JFreeChartFrame frame) {
+
+
+        Menu parent = menu.getItems().stream()
+                .filter(it -> it instanceof javafx.scene.control.Menu && it.getText().equals("Export As"))
+                .map(javafx.scene.control.Menu.class::cast)
+                .findFirst()
+                .orElseGet(() -> {
+                    javafx.scene.control.Menu sub = new Menu("Export As");
+                    menu.getItems().add(sub);
+                    return sub;
+                });
+
+
+        MenuItem dfpExport = FXPlotUtils.getDFPlotExportMenuItem(menu.getOwnerWindow(), frame);
+
+        parent.getItems().add(dfpExport);
     }
 
     public JFreeChartFrame display(Container panel) {
