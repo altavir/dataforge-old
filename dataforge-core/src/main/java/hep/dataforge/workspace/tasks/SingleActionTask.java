@@ -36,7 +36,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
             }
 
             @Override
-            protected void updateModel(TaskModel.Builder model, Meta meta) {
+            protected void buildModel(TaskModel.Builder model, Meta meta) {
                 dependencyBuilder.accept(model, meta);
             }
 

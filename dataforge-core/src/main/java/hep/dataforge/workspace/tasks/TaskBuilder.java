@@ -237,7 +237,7 @@ public class TaskBuilder {
         }
 
         @Override
-        protected void updateModel(TaskModel.Builder model, Meta meta) {
+        protected void buildModel(TaskModel.Builder model, Meta meta) {
             modelBuilder.accept(model, meta);
         }
     }

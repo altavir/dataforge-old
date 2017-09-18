@@ -26,7 +26,7 @@ public class GatherTaskTemplate implements TaskTemplate {
             }
 
             @Override
-            protected void updateModel(TaskModel.Builder model, Meta dataModel) {
+            protected void buildModel(TaskModel.Builder model, Meta dataModel) {
                 if (dataModel.hasMeta("data")) {
                     dataModel.getMetaList("data").forEach((dataElement) -> {
                         String dataPath = dataElement.getString("name");

@@ -33,7 +33,7 @@ class TestTask extends MultiStageTask {
     }
 
     @Override
-    protected void updateModel(TaskModel.Builder model, Meta meta) {
+    protected void buildModel(TaskModel.Builder model, Meta meta) {
 
     }
 }

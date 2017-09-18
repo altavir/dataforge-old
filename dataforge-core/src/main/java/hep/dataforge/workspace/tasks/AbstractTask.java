@@ -72,7 +72,7 @@ public abstract class AbstractTask<R> implements Task<R> {
      * @param model the model to be transformed
      * @param meta  the whole configuration (not only for this particular task)
      */
-    protected abstract void updateModel(TaskModel.Builder model, Meta meta);
+    protected abstract void buildModel(TaskModel.Builder model, Meta meta);
 
     /**
      * Build new TaskModel and apply specific model transformation for this
@@ -86,7 +86,7 @@ public abstract class AbstractTask<R> implements Task<R> {
     public TaskModel build(Workspace workspace, Meta meta) {
         Meta taskMeta = meta.getMeta(getName(), meta);
         TaskModel.Builder builder = TaskModel.builder(workspace, getName(), taskMeta);
-        updateModel(builder, meta);
+        buildModel(builder, meta);
         return builder.build();
     }
 }
