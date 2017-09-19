@@ -20,7 +20,6 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
-import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotManager
@@ -143,7 +142,8 @@ class PlotHelper implements GrindHelper {
     }
 
     @Override
-    Markup help() {
-        return MarkupBuilder.text("This is ").addText("plots", "blue").addText(" helper").build();
+    MarkupBuilder getHeader() {
+        return MarkupBuilder.text("This is ").addText("plots", "blue").addText(" helper");
     }
+
 }

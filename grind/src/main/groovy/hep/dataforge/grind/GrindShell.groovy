@@ -75,10 +75,10 @@ class GrindShell implements Encapsulated {
     }
 
     def bind(String key, Object value) {
-        binding.setVariable(key, value)
+        binding.setInternal(key, value)
     }
 
-    def getBinding(){
+    ShellBinding getBinding(){
         return binding;
     }
 
@@ -128,7 +128,7 @@ class GrindShell implements Encapsulated {
     /**
      *  A shell binding with pre-defined immutable internal properties
      */
-    private class ShellBinding extends Binding {
+    class ShellBinding extends Binding {
         private Map<String, ?> internals = new HashMap<>();
 
         void setInternal(String key, Object obj) {

@@ -31,9 +31,7 @@ public interface Encapsulated {
      *
      * @return
      */
-    default Context getContext() {
-        return Global.getDefaultContext();
-    }
+    Context getContext();
 
     default Logger getLogger() {
         if (this instanceof Named) {

@@ -1,5 +1,6 @@
 package hep.dataforge.workspace;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.workspace.tasks.Task;
@@ -81,6 +82,11 @@ public abstract class DynamicWorkspace implements Workspace {
     @Override
     public Stream<Meta> getTargets() {
         return getWorkspace().getTargets();
+    }
+
+    @Override
+    public Context getContext() {
+        return wsp.getContext();
     }
 
     @Override

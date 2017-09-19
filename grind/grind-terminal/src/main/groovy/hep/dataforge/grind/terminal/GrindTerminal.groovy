@@ -12,7 +12,6 @@ import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
-import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
@@ -55,6 +54,10 @@ class GrindTerminal extends SimpleConfigurable {
     private final GrindShell shell;
     private final Terminal terminal;
 
+
+    final Meta markupConfig = Grind.buildMeta(target: "terminal")
+    final TerminalMarkupRenderer renderer;
+
     /**
      * Build default jline console based on operating system. Do not use for preview inside IDE
      * @return
@@ -73,30 +76,6 @@ class GrindTerminal extends SimpleConfigurable {
     static GrindTerminal dumb(Context context = Global.instance()) {
         context.logger.debug("Starting grind terminal using dumb shell")
         return new GrindTerminal(context);
-    }
-
-    /**
-     * Apply some closure to each of sub-results using shell configuration
-     * @param res
-     * @return
-     */
-    def unwrap(Object res, Closure cl = { it }) {
-        if (getConfig().getBoolean("evalClosures", false) && res instanceof Closure) {
-            res = (res as Closure).call()
-        } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
-            res = (res as Data).get();
-        } else if (res instanceof DataNode) {
-            (res as DataNode).dataStream().forEach { unwrap(it, cl) };
-        }
-
-        if (getConfig().getBoolean("unwrap", true)) {
-            if (res instanceof Collection) {
-                (res as Collection).forEach { unwrap(it, cl) }
-            } else if (res instanceof Stream) {
-                (res as Stream).forEach { unwrap(it, cl) }
-            }
-        }
-        cl.call(res);
     }
 
     GrindTerminal(Context context, Terminal terminal = null) {
@@ -135,53 +114,15 @@ class GrindTerminal extends SimpleConfigurable {
         //create the shell
         shell = new GrindShell(context)
 
-        Meta markupConfig = Grind.buildMeta(target: "terminal")
-        TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
+        renderer = new TerminalMarkupRenderer(terminal);
 
         //bind helper commands
 
-        shell.bind("show") { res ->
-            if (res instanceof Markedup) {
-                renderer.ln()
-                if (res instanceof Named) {
-                    renderer.render(MarkupBuilder.text((res as Named).name, "red").build())
-                    renderer.ln()
-                }
-                renderer.render((res as Markedup).markup(markupConfig))
-            }
-            return null;
-        }
+        shell.bind("show", this.&show);
 
-        shell.bind("describe") { it ->
-            if (it instanceof Described) {
-                renderer.render(MarkupUtils.markupDescriptor(it as Described))
-            } else if (it instanceof NodeDescriptor) {
-                renderer.render(MarkupUtils.markupDescriptor(it))
-            } else if (it instanceof String) {
-                NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(it);
-                if (descriptor.meta().isEmpty()) {
-                    renderer.render(MarkupBuilder.text("The description for ")
-                            .addText("${it}", "blue")
-                            .addText(" is empty")
-                            .build()
-                    )
-                } else {
-                    renderer.render(MarkupUtils.markupDescriptor(descriptor))
-                }
-            } else {
-                MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${it}", "blue")
-                renderer.render(builder.build());
-            }
-            renderer.ln()
-            return null;
-        }
+        shell.bind("describe", this.&describe);
 
-        shell.bind("run") { it ->
-            Path scriptPath = context.io().getFile(it as String);
-            Files.newBufferedReader(scriptPath).withCloseable {
-                shell.eval(it)
-            }
-        }
+        shell.bind("run", this.&run);
 
         //binding.setProperty("man", help);
         shell.bind("help", this.&help);
@@ -199,35 +140,110 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
-    def help() {
-        println("This is DataForge Grind terminal shell")
-        println("Any Groovy statement is allowed")
-//        println("Current list of shell bindings:")
-//        shell.binding.list().each { k, v ->
-//            println("\t$k")
-//        }
+    /**
+     * Apply some closure to each of sub-results using shell configuration
+     * @param res
+     * @return
+     */
+    def unwrap(Object res, Closure cl = { it }) {
+        if (getConfig().getBoolean("evalClosures", false) && res instanceof Closure) {
+            res = (res as Closure).call()
+        } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
+            res = (res as Data).get();
+        } else if (res instanceof DataNode) {
+            (res as DataNode).dataStream().forEach { unwrap(it, cl) };
+        }
 
-        println("In order to display state of object and show help type `help <object>`");
+        if (getConfig().getBoolean("unwrap", true)) {
+            if (res instanceof Collection) {
+                (res as Collection).forEach { unwrap(it, cl) }
+            } else if (res instanceof Stream) {
+                (res as Stream).forEach { unwrap(it, cl) }
+            }
+        }
+        cl.call(res);
+    }
+
+    def show(Object obj) {
+        if (obj instanceof Markedup) {
+            renderer.ln()
+            if (obj instanceof Named) {
+                renderer.render(MarkupBuilder.text((obj as Named).name, "red").build())
+                renderer.ln()
+            }
+            renderer.render((obj as Markedup).markup(markupConfig))
+        }
+        return null;
+    }
+
+    def describe(Object obj) {
+        if (obj instanceof Described) {
+            renderer.render(MarkupUtils.markupDescriptor(obj as Described))
+        } else if (obj instanceof NodeDescriptor) {
+            renderer.render(MarkupUtils.markupDescriptor(obj as NodeDescriptor))
+        } else if (obj instanceof String) {
+            NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(obj);
+            if (descriptor.meta().isEmpty()) {
+                renderer.render(MarkupBuilder.text("The description for ")
+                        .addText("${obj}", "blue")
+                        .addText(" is empty")
+                        .build()
+                )
+            } else {
+                renderer.render(MarkupUtils.markupDescriptor(descriptor))
+            }
+        } else {
+            MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${obj}", "blue")
+            renderer.render(builder.build());
+        }
+        renderer.ln()
+        return null;
+    }
+
+    def run(Object obj) {
+        Path scriptPath;
+        if (obj instanceof File) {
+            scriptPath = (obj as File).toPath();
+        } else if (obj instanceof Path) {
+            scriptPath = obj as Path
+        } else {
+            scriptPath = shell.context.io().getFile(obj as String);
+        }
+
+        Files.newBufferedReader(scriptPath).withCloseable {
+            shell.eval(it)
+        }
+    }
+
+    def help() {
+        this.help(null)
     }
 
     def help(Object obj) {
-        if (obj == null) {
-            help()
-        } else {
-            TerminalMarkupRenderer renderer = new TerminalMarkupRenderer(terminal);
-            try {
-                def res = obj.invokeMethod("help", null);
-                if (res instanceof Markup) {
-
-                    renderer.render(res)
-                    renderer.ln()
-                } else {
-                    println(res);
+        switch (obj) {
+            case null:
+            case "":
+                println("This is DataForge Grind terminal shell")
+                println("Any Groovy statement is allowed")
+                println("Current list of shell bindings:")
+                shell.binding.list().each { k, v ->
+                    println("\t$k")
                 }
-                println();
-            } catch (Exception ignored) {
-                renderer.render(MarkupBuilder.text("No help article for ").addText("${obj}", "blue").build());
-            }
+
+                println("In order to display state of object and show help type `help <object>`");
+                break;
+            case "show":
+                println("Show given object in its visual representation")
+                break;
+            case "describe":
+                println("Show meta description for the object")
+                break;
+            case "run":
+                println("Run given script")
+                break;
+
+            default:
+                describe(obj);
         }
     }
 

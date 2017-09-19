@@ -65,4 +65,9 @@ public class ContextLock implements Encapsulated {
             throw new RuntimeException(e);
         }
     }
+
+    @Override
+    public Context getContext() {
+        return context;
+    }
 }

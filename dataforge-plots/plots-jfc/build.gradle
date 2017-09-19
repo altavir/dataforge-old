@@ -6,17 +6,9 @@ description = 'jFreeChart plugin'
 
 dependencies {
     //JFreeChart dependancies
-    compile 'org.jfree:jcommon:1.0.24'
-    compile 'org.jfree:fxgraphics2d:1.5'
+//    compile 'org.jfree:jcommon:1.0.24'
+//    compile 'org.jfree:fxgraphics2d:1.5'
     compile 'org.jfree:jfreesvg:3.2'
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-
+    compile 'com.github.altavir:jfreechart-fx:1.5.0'
     compile project(':dataforge-plots:plots-fx')
 }
-
-task extractJFC(type: Copy) {
-    from fileTree(dir: 'libs', include: ['*.jar']).exclude("META-INF").collect{zipTree(it)}
-    into compileJava.destinationDir
-}
-
-compileJava.dependsOn(extractJFC)
