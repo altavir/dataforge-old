@@ -15,6 +15,7 @@
  */
 package hep.dataforge.io.envelopes;
 
+import hep.dataforge.data.Data;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
@@ -27,6 +28,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * The message is a pack that can include two principal parts:
@@ -82,6 +84,7 @@ public interface Envelope extends Metoid {
 
     /**
      * The purpose of the envelope
+     *
      * @return
      */
     default Optional<String> getType() {
@@ -90,6 +93,7 @@ public interface Envelope extends Metoid {
 
     /**
      * The type of data encoding
+     *
      * @return
      */
     default Optional<String> getDataType() {
@@ -98,6 +102,7 @@ public interface Envelope extends Metoid {
 
     /**
      * Textual user friendly description
+     *
      * @return
      */
     default String getDescription() {
@@ -106,9 +111,23 @@ public interface Envelope extends Metoid {
 
     /**
      * Time of creation of the envelope
+     *
      * @return
      */
     default Optional<Instant> getTime() {
         return meta().optValue("@envelope.time").map(Value::timeValue);
+    }
+
+    /**
+     * Transform Envelope to Lazy data using given transformation.
+     * In case transformation failed an exception will be thrown in call site.
+     *
+     * @param type
+     * @param transform
+     * @param <T>
+     * @return
+     */
+    default <T> Data<T> map(Class<T> type, Function<Binary, T> transform) {
+        return Data.generate(type, meta(), () -> transform.apply(getData()));
     }
 }

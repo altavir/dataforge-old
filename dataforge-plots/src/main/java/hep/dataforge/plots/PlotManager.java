@@ -15,8 +15,8 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.context.Plugin;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 
 /**
@@ -24,7 +24,7 @@ import hep.dataforge.meta.Meta;
  *
  * @author Alexander Nozik
  */
-public interface PlotManager extends Configurable {
+public interface PlotManager extends Plugin {
     String DEFAULT_STAGE_NAME = "";
     
 //    /**

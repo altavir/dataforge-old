@@ -76,4 +76,13 @@ public interface Task<R> extends Named, Described {
     default MarkupBuilder getHeader() {
         return MarkupBuilder.text(getName(), "blue");
     }
+
+    /**
+     * If true, the task is designated as terminal.
+     * Terminal task is executed immediately after {@code run} is called, without any lazy calculations.
+     * @return
+     */
+    default boolean isTerminal(){
+        return false;
+    }
 }

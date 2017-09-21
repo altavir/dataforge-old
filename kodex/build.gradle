@@ -12,6 +12,12 @@ allprojects{
             javaParameters = true
         }
     }
+
+    kotlin {
+        experimental {
+            coroutines "enable"
+        }
+    }
 }
 
 description = "KOtlin Dataforge EXtension"
@@ -22,5 +28,6 @@ dependencies{
     compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.18'
     compile project(':dataforge-core')
 }
+
 
 

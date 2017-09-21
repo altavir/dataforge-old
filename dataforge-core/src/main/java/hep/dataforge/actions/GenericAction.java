@@ -203,12 +203,13 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      *
      * @return
      */
-    public Class getInputType() {
+    @SuppressWarnings("unchecked")
+    public Class<T> getInputType() {
         TypedActionDef def = getDef();
-        if (getDef() != null) {
-            return def.inputType();
+        if (def != null) {
+            return (Class<T>) def.inputType();
         } else {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
     }
 
@@ -217,12 +218,13 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      *
      * @return
      */
-    public Class getOutputType() {
+    @SuppressWarnings("unchecked")
+    public Class<R> getOutputType() {
         TypedActionDef def = getDef();
-        if (getDef() != null) {
-            return def.outputType();
+        if (def != null) {
+            return (Class<R>) def.outputType();
         } else {
-            return Object.class;
+            return (Class<R>) Object.class;
         }
     }
 

@@ -1,5 +1,7 @@
 package hep.dataforge.utils;
 
+import hep.dataforge.data.AutoCastable;
+import hep.dataforge.exceptions.AutoCastException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
 
@@ -12,7 +14,7 @@ import java.io.ObjectOutput;
  * Ab object that could be represented as meta. Serialized via meta serializer and deserialized back
  * Created by darksnake on 12-Nov-16.
  */
-public interface MetaMorph extends Externalizable {
+public interface MetaMorph extends Externalizable, AutoCastable {
 
     static <T extends MetaMorph> T morph(Class<T> type, Meta meta) {
         try {
@@ -47,5 +49,30 @@ public interface MetaMorph extends Externalizable {
     @Override
     default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
         fromMeta(MetaUtils.readMeta(in));
+    }
+
+    /**
+     * Auto converts MetaMorph to Meta.
+     * Tries to convert one metamorph into another by first converting to meta and then converting back.
+     * If the conversion is failed, catch the exception and rethrow it as {@link AutoCastException}
+     *
+     * @param type
+     * @param <T>
+     * @return
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    default <T> T asType(Class<T> type) {
+        if (type == Meta.class) {
+            return (T) toMeta();
+        } else if (MetaMorph.class.isAssignableFrom(type)) {
+            try {
+                return toMeta().asType(type);
+            } catch (Exception ex) {
+                throw new AutoCastException("", getClass(), type, ex);
+            }
+        } else {
+            return AutoCastable.super.asType(type);
+        }
     }
 }

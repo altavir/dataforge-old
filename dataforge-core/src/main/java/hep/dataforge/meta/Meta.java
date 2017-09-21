@@ -15,11 +15,13 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.data.AutoCastable;
 import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 
@@ -40,7 +42,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public abstract class Meta implements Provider, Named, ValueProvider, Serializable, MetaProvider {
+public abstract class Meta implements Provider, Named, ValueProvider, Serializable, MetaProvider, AutoCastable {
 
     private static final Meta EMPTY = new EmptyMeta();
 
@@ -83,7 +85,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
 
     @Provides(META_TARGET)
     public Optional<Meta> optMeta(String path) {
-        return getMetaList(path).stream().findFirst().map(it-> it);
+        return getMetaList(path).stream().findFirst().map(it -> it);
     }
 
     public abstract boolean isEmpty();
@@ -180,7 +182,23 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         return VALUE_TARGET;
     }
 
-    private static class EmptyMeta extends Meta{
+    /**
+     * Automatically casts meta to MetaMorph
+     * @param type
+     * @param <T>
+     * @return
+     */
+    @Override
+    @SuppressWarnings("unchecked")
+    public <T> T asType(Class<T> type) {
+        if (MetaMorph.class.isAssignableFrom(type)) {
+            return type.cast(MetaMorph.morph((Class<? extends MetaMorph>) type, this));
+        } else {
+            return AutoCastable.super.asType(type);
+        }
+    }
+
+    private static class EmptyMeta extends Meta {
 
         @Override
         public List<? extends Meta> getMetaList(String path) {

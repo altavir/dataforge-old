@@ -101,7 +101,7 @@ public class PlottableData extends XYPlottable {
         this.data = data;
     }
 
-    public void fillData(Iterable<? extends Values> it, boolean append) {
+    public PlottableData fillData(Iterable<? extends Values> it, boolean append) {
         if (this.data == null || !append) {
             this.data = new ArrayList<>();
         }
@@ -109,6 +109,7 @@ public class PlottableData extends XYPlottable {
             data.add(dp);
         }
         notifyDataChanged();
+        return this;
     }
 
 
@@ -117,23 +118,25 @@ public class PlottableData extends XYPlottable {
      *
      * @param it
      */
-    public void fillData(@NotNull Iterable<? extends Values> it) {
-        fillData(it, false);
+    public PlottableData fillData(@NotNull Iterable<? extends Values> it) {
+        return fillData(it, false);
     }
 
-    public void fillData(@NotNull Stream<? extends Values> it) {
+    public PlottableData fillData(@NotNull Stream<? extends Values> it) {
         this.data = new ArrayList<>();
         it.forEach(dp-> data.add(dp));
         notifyDataChanged();
+        return this;
     }
 
-    public void append(Values dp) {
+    public PlottableData append(Values dp) {
         data.add(dp);
         notifyDataChanged();
+        return this;
     }
 
-    public void append(Number x, Number y) {
-        append(ValueMap.of(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
+    public PlottableData append(Number x, Number y) {
+        return append(ValueMap.of(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
     }
 
     @Override

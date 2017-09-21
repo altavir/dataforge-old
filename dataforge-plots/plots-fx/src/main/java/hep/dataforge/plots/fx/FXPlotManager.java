@@ -28,7 +28,7 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-@PluginDef(name = "plots-fx", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"}, info = "Basic plottiong plugin")
+@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = {"hep.dataforge:fx"}, info = "Basic plottiong plugin")
 public class FXPlotManager extends BasicPlugin implements PlotManager {
     public static final String FX_FRAME_TYPE_KEY = "fxFrame.type";
 

@@ -23,6 +23,8 @@ import hep.dataforge.goals.StaticGoal;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -39,11 +41,14 @@ import java.util.stream.Stream;
  */
 public class Data<T> implements Metoid {
 
+    @NotNull
     @SuppressWarnings("unchecked")
     public static <T> Data<T> buildStatic(T content, Meta meta) {
         return new Data<T>(new StaticGoal<T>(content), (Class<T>) content.getClass(), meta);
     }
 
+    @NotNull
+    @Contract("null -> fail")
     public static <T> Data<T> buildStatic(T content) {
         if (content == null) {
             throw new RuntimeException("Can't create a data from null");
@@ -54,6 +59,12 @@ public class Data<T> implements Metoid {
             meta = ((Metoid) content).meta();
         }
         return buildStatic(content, meta);
+    }
+
+    @NotNull
+    public static <T> Data<T> empty(Class<T> type, Meta meta) {
+        Goal<T> emptyGoal = new StaticGoal<>(null);
+        return new Data<>(emptyGoal, type, meta);
     }
 
     /**
@@ -159,7 +170,7 @@ public class Data<T> implements Metoid {
     @SuppressWarnings("unchecked")
     public <R> Data<R> cast(Class<R> type) {
         if (type.isAssignableFrom(this.type)) {
-            return new Data<R>((Goal<R>) this.goal, type, this.meta);
+            return new Data<>((Goal<R>) this.goal, type, this.meta);
         } else {
             throw new IllegalArgumentException("Invalid type to upcast data");
         }
