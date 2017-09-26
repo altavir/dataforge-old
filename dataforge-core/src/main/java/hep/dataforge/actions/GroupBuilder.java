@@ -61,7 +61,7 @@ public class GroupBuilder {
                     map.get(tagValue).putData(data);
                 });
 
-                return map.values().stream().<DataNode<T>>map(item -> item.build()).collect(Collectors.toList());
+                return map.values().stream().<DataNode<T>>map(DataSet.Builder::build).collect(Collectors.toList());
             }
         };
     }

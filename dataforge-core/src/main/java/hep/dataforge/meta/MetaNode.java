@@ -49,7 +49,11 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
     }
 
     protected MetaNode(String name) {
-        this.name = name;
+        if(name == null){
+            this.name = "";
+        } else {
+            this.name = name;
+        }
         values = new LinkedHashMap<>();
         nodes = new LinkedHashMap<>();
     }

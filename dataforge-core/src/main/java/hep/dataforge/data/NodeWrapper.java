@@ -37,12 +37,12 @@ public class NodeWrapper<T> implements DataNode<T> {
     }
 
     @Override
-    public Stream<NamedData<T>> dataStream(boolean recursive) {
+    public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
         return node.dataStream(recursive);
     }
 
     @Override
-    public Stream<DataNode<T>> nodeStream(boolean recursive) {
+    public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
         return node.nodeStream(recursive);
     }
 

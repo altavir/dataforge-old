@@ -92,18 +92,26 @@ public class StorageUtils {
      * @param storage
      * @return
      */
-    public static Stream<Pair<String, Loader>> loaderStream(Storage storage) {
+    public static Stream<Pair<String, Loader>> loaderStream(Storage storage, boolean recursive) {
         try {
-            return Stream.concat(
-                    storage.shelves().stream().flatMap(entry ->
-                            loaderStream(entry)
-                                    .map(pair -> new Pair<>(Name.joinString(entry.getName(), pair.getKey()), pair.getValue()))
-                    ),
-                    storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry))
-            );
+            if(recursive){
+                return Stream.concat(
+                        storage.shelves().stream().flatMap(entry ->
+                                loaderStream(entry)
+                                        .map(pair -> new Pair<>(Name.joinString(entry.getName(), pair.getKey()), pair.getValue()))
+                        ),
+                        storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry))
+                );
+            } else {
+                return storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry));
+            }
         } catch (StorageException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    public static Stream<Pair<String, Loader>> loaderStream(Storage storage){
+        return loaderStream(storage,true);
     }
 
     /**

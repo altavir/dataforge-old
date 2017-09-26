@@ -71,7 +71,7 @@ public class JSONMetaReader implements MetaStreamReader {
     }
 
     public MetaBuilder toMeta(JsonObject source) throws ParseException {
-        return toMeta(null, source);
+        return toMeta("", source);
     }
 
     public MetaBuilder fromString(String string) throws ParseException {

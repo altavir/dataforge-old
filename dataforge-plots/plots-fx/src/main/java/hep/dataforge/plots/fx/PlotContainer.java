@@ -314,7 +314,7 @@ public class PlotContainer implements Initializable, FXObject {
             } else {
                 config = item.getConfig();
                 config.addObserver(this, false);
-                setContent(item);
+                Platform.runLater(()->setContent(item));
             }
         }
 

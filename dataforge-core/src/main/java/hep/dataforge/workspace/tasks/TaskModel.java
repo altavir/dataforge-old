@@ -208,7 +208,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         /**
          * The gathering function for data
          */
-        private final Function<Workspace, Stream<NamedData<Object>>> gatherer;
+        private final Function<Workspace, Stream<NamedData<?>>> gatherer;
         private final transient Meta id;
 
         /**

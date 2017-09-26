@@ -18,7 +18,7 @@ import java.util.Map;
  */
 public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
     @Override
-    public DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta) {
+    public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
         checkInput(data);
         DataTree.Builder<R> builder = DataTree.builder(getOutputType());
         data.forEach(datum -> {

@@ -134,7 +134,7 @@ public class ActionUtils {
     public static <T, I, R> Action<T, R> compose(Action<T, I> first, Action<I, R> second) {
         return new Action<T, R>() {
             @Override
-            public DataNode<R> run(Context context, DataNode<T> data, Meta actionMeta) {
+            public DataNode<R> run(Context context, DataNode<? extends T> data, Meta actionMeta) {
                 return second.run(context, first.run(context, data, actionMeta), actionMeta);
             }
 
@@ -268,12 +268,12 @@ public class ActionUtils {
             }
 
             @Override
-            public Class getInputType() {
+            public Class<T> getInputType() {
                 return inputType;
             }
 
             @Override
-            public Class getOutputType() {
+            public Class<R> getOutputType() {
                 return outputType;
             }
         };

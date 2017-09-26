@@ -3,19 +3,21 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Meta;
 
 import java.util.Optional;
+import java.util.function.BiPredicate;
 import java.util.stream.Stream;
 
 /**
- * A wrapper for DataNode that allowes to access speciffically typed content.
- * Created by darksnake on 07-Sep-16.
+ * Filtered node does not change structure of underlying node, just filters output
+ *
+ * @param <T>
  */
-public class CheckedDataNode<T> implements DataNode<T> {
-    private final DataNode<?> node;
-    private final Class<T> type;
+public class FilteredDataNode<T> implements DataNode<T> {
+    private final DataNode<T> node;
+    private final BiPredicate<String, Data<T>> predicate;
 
-    public CheckedDataNode(DataNode<?> node, Class<T> type) {
+    public FilteredDataNode(DataNode<T> node, BiPredicate<String, Data<T>> predicate) {
         this.node = node;
-        this.type = type;
+        this.predicate = predicate;
     }
 
     @Override
@@ -31,8 +33,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     @Override
     public Optional<Data<T>> optData(String name) {
         return node.optData(name).flatMap(d -> {
-            if (type.isAssignableFrom(d.type())) {
-                return Optional.of(d.cast(type));
+            if (predicate.test(name, d)) {
+                return Optional.of(d);
             } else {
                 return Optional.empty();
             }
@@ -41,28 +43,23 @@ public class CheckedDataNode<T> implements DataNode<T> {
 
     @Override
     public Optional<DataNode<T>> optNode(String nodeName) {
-        return node.optNode(nodeName).flatMap(n -> {
-            if (type.isAssignableFrom(n.type())) {
-                return Optional.of(n.checked(type));
-            } else {
-                return Optional.empty();
-            }
-        });
+        return node.optNode(nodeName).map(it -> new FilteredDataNode<>(it, predicate));
     }
 
     @Override
     public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
-        return node.dataStream(recursive).filter(d -> type.isAssignableFrom(d.type())).map(d -> d.cast(type));
+        return node.dataStream(recursive).filter(d -> predicate.test(d.getName(), d.cast(type())));
     }
 
+    @SuppressWarnings("unchecked")
     @Override
     public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
-        return node.nodeStream(recursive).filter(n -> type.isAssignableFrom(n.type())).map(n -> n.checked(type));
+        return node.nodeStream(recursive).map(n -> n.filter((name, data) -> predicate.test(name, (Data<T>)data)));
     }
 
     @Override
     public Class<T> type() {
-        return type;
+        return node.type();
     }
 
     @Override

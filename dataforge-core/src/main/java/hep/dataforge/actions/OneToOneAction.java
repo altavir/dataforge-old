@@ -48,15 +48,23 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
 
     @Override
-    public DataNode<R> run(Context context, DataNode<T> set, Meta actionMeta) {
+    public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         if (set.isEmpty()) {
             throw new RuntimeException("Running 1 to 1 action on empty data node");
         }
 
-        return wrap(set.getName(), set.meta(),
-                set.dataStream(true).collect(Collectors.toMap(data -> getResultName(data.getName(), actionMeta),
-                        data -> runOne(context, data, actionMeta))));
+        return wrap(
+                set.getName(),
+                set.meta(),
+                set.dataStream(true)
+                        .collect(
+                                Collectors.toMap(
+                                        data -> getResultName(data.getName(), actionMeta),
+                                        data -> runOne(context, data, actionMeta)
+                                )
+                        )
+        );
     }
 
     /**

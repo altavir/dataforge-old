@@ -20,8 +20,8 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -98,7 +98,9 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      */
     default Data<T> getData() {
         return optData(DEFAULT_DATA_FRAGMENT_NAME)
-                .orElse(dataStream(true).findFirst().orElseThrow(() -> new RuntimeException("Data node is empty")));
+                .orElse(dataStream(true).findFirst().map(it -> it.cast(type()))
+                        .orElseThrow(() -> new RuntimeException("Data node is empty"))
+                );
     }
 
     /**
@@ -142,19 +144,10 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      *
      * @return
      */
-    Stream<NamedData<T>> dataStream(boolean recursive);
+    Stream<NamedData<? extends T>> dataStream(boolean recursive);
 
-    default Stream<NamedData<T>> dataStream() {
+    default Stream<NamedData<? extends T>> dataStream() {
         return dataStream(true);
-    }
-
-    /**
-     * Iterate other all data pieces using given predicate
-     *
-     * @param consumer
-     */
-    default void forEachData(Predicate<NamedData> predicate, Consumer<NamedData<T>> consumer) {
-        dataStream().filter(predicate).forEach(consumer);
     }
 
     /**
@@ -163,8 +156,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      * @param type
      * @param consumer
      */
-    @SuppressWarnings("unchecked")
-    default <R> void forEachDataWithType(Class<R> type, Consumer<NamedData<R>> consumer) {
+    default <R> void forEachData(Class<R> type, Consumer<NamedData<R>> consumer) {
         dataStream().filter(d -> type.isAssignableFrom(d.type()))
                 .forEach(d -> consumer.accept(d.cast(type)));
     }
@@ -175,14 +167,14 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      * @param recursive if true then recursive node stream is returned, otherwise only upper level children are used
      * @return
      */
-    Stream<DataNode<T>> nodeStream(boolean recursive);
+    Stream<DataNode<? extends T>> nodeStream(boolean recursive);
 
     /**
      * A recursive node stream
      *
      * @return
      */
-    default Stream<DataNode<T>> nodeStream() {
+    default Stream<DataNode<? extends T>> nodeStream() {
         return nodeStream(true);
     }
 
@@ -274,6 +266,10 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
         }
     }
 
+    default DataNode<T> filter(BiPredicate<String, Data<T>> predicate) {
+        return new FilteredDataNode<>(this, predicate);
+    }
+
 //    default Collection<Data<T>> find(String query){
 //        if(query.contains(""))
 //    }
@@ -281,7 +277,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
     @NotNull
     @Override
     default Iterator<NamedData<T>> iterator() {
-        return dataStream().iterator();
+        return dataStream().map(it -> it.cast(type())).iterator();
     }
 
     interface Builder<T, N extends DataNode<T>, B extends Builder> extends GenericBuilder<N, B>, Metoid {
