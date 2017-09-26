@@ -1,5 +1,7 @@
 package hep.dataforge.kodex
 
+import hep.dataforge.data.Data
+import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
@@ -7,8 +9,10 @@ import hep.dataforge.meta.MutableMetaNode
 import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.future.await
 import java.time.Instant
+import kotlin.coroutines.experimental.CoroutineContext
 
 /**
  * Core DataForge classes extensions
@@ -112,10 +116,18 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
  * Use goal as a suspending function
  */
 suspend fun <R> Goal<R>.await(): R {
-    if(this is Coal<R>){
+    if (this is Coal<R>) {
         //A special case for Coal
         return this.await();
     } else {
         return this.result().await();
     }
+}
+
+fun <T, R> Data<T>.pipe(type: Class<R>, dispatcher: CoroutineContext = CommonPool, transform: suspend (T) -> R): Data<R> {
+    return Data(this.goal.pipe(dispatcher, transform), type, this.meta)
+}
+
+fun <T, R> NamedData<T>.pipe(type: Class<R>, dispatcher: CoroutineContext = CommonPool, transform: suspend (T) -> R): NamedData<R> {
+    return NamedData(this.name, this.goal.pipe(dispatcher, transform), type, this.meta)
 }

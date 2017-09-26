@@ -55,7 +55,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
 
     private String name = null;
 
-    public GenericAction(String name) {
+    protected GenericAction(String name) {
         this.name = name;
     }
 

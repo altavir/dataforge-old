@@ -16,6 +16,12 @@ apply plugin: 'maven-publish'
 allprojects{
     group = 'hep.dataforge'
     version = '0.4.0 - SNAPSHOT'
+
+    repositories {
+        jcenter()
+        mavenCentral()
+        maven { url "https://jitpack.io" }
+    }
 }
 
 subprojects{
@@ -28,12 +34,6 @@ subprojects{
 
         sourceCompatibility = 1.8
         targetCompatibility = 1.8
-
-        repositories {
-            jcenter()
-            mavenCentral()
-            maven { url "https://jitpack.io" }
-        }
 
         dependencies {
             testCompile 'org.codehaus.groovy:groovy-all:2.4.+'
@@ -52,7 +52,7 @@ subprojects{
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '3.5'
+    gradleVersion = '4.2'
 }
 
 if(file('properties.gradle').exists()) {

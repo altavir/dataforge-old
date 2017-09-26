@@ -13,7 +13,7 @@ class CoalTest {
         }
     }
     val secondLevel = firstLevel.map {
-        pipe(it) {
+        it.pipe {
             Thread.sleep(200)
             val res = it + ":Level 2"
             println(res)
@@ -21,14 +21,14 @@ class CoalTest {
         }
     }
     val thirdLevel = secondLevel.map {
-        pipe(it) {
+       it.pipe {
             Thread.sleep(300)
             val res = it.replace("Level 2", "Level 3")
             println(res)
             res
         }
     }
-    val joinGoal = join(thirdLevel) { Pair("joining ${it.size} elements", 10) }
+    val joinGoal = thirdLevel.join { Pair("joining ${it.size} elements", 10) }
 
     @Test
     fun testSingle() {

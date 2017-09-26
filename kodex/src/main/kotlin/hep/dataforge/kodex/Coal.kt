@@ -18,6 +18,7 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param block execution block. Could be suspending
  */
 class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatcher: CoroutineContext = CommonPool, block: suspend () -> R) : Goal<R> {
+    //TODO add Context based CoroutineContext object
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
@@ -88,11 +89,20 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
 /**
  * Join a uniform list of goals
  */
-fun <T, R> join(deps: List<Goal<out T>>, dispatcher: CoroutineContext = CommonPool, block: suspend (List<T>) -> R): Coal<R> {
-    return Coal<R>(deps, dispatcher) {
-        block.invoke(deps.map {
+fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (List<T>) -> R): Coal<R> {
+    return Coal<R>(this, dispatcher) {
+        block.invoke(this.map {
             it.await()
         })
+    }
+}
+
+/**
+ * Transform using map of goals as a dependency
+ */
+fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (Map<String, T>) -> R): Coal<R> {
+    return Coal<R>(this.values, dispatcher) {
+        block.invoke(this.mapValues { it.value.await() })
     }
 }
 
@@ -106,17 +116,9 @@ fun <R> generate(dispatcher: CoroutineContext = CommonPool, block: suspend () ->
 /**
  * Pipe goal
  */
-fun <T, R> pipe(dep: Goal<T>, dispatcher: CoroutineContext = CommonPool, block: suspend (T) -> R): Coal<R> {
-    return Coal<R>(listOf(dep), dispatcher) {
-        block.invoke(dep.await())
+fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext = CommonPool, block: suspend (T) -> R): Coal<R> {
+    return Coal<R>(listOf(this), dispatcher) {
+        block.invoke(this.await())
     }
 }
 
-/**
- * Transform using map of goals as a dependency
- */
-fun <T, R> map(deps: Map<String, Goal<out T>>, dispatcher: CoroutineContext = CommonPool, block: suspend (Map<String, T>) -> R): Coal<R> {
-    return Coal<R>(deps.values, dispatcher) {
-        block.invoke(deps.mapValues { it.value.await() })
-    }
-}
