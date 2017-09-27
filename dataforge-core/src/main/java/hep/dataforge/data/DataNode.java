@@ -202,7 +202,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
     }
 
     default long dataSize() {
-        return dataSize(false);
+        return dataSize(true);
     }
 
     default long nodesSize(boolean recursive) {
@@ -210,7 +210,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
     }
 
     default long nodesSize() {
-        return nodesSize(false);
+        return nodesSize(true);
     }
 
     /**

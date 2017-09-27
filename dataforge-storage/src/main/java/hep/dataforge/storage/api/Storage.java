@@ -23,7 +23,7 @@ import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.values.Value;
@@ -42,7 +42,7 @@ import java.util.Optional;
  *
  * @author Darksnake
  */
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, AutoConnectible {
     //TODO consider removing dispatcher to helper classes
 

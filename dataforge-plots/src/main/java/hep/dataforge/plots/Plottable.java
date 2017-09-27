@@ -22,7 +22,7 @@ import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.values.Value;
@@ -42,7 +42,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 //@ValueDef(name = "preferedPlotter", def = "jFreeChart",
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
 @ValueDef(name = "visible", def = "true", type = {BOOLEAN}, info = "The current visibility of this plottable")
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public interface Plottable extends Named, Metoid, Configurable, Wrappable, Described {
 
     /**

@@ -22,7 +22,7 @@ import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
@@ -44,7 +44,7 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
  *
  * @author Alexander Nozik
  */
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public abstract class AbstractDevice extends MetaHolder implements Device {
     //TODO set up logger as connection
 

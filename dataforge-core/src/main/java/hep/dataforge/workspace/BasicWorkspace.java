@@ -22,7 +22,7 @@ import org.jetbrains.annotations.NotNull;
  */
 public class BasicWorkspace extends AbstractWorkspace {
 
-    private DataTree.Builder<Object> data = DataTree.builder();
+    private DataTree.Builder<Object> data = DataTree.builder().setName("data");
     private transient CachePlugin cache;
 
     @NotNull

@@ -19,7 +19,7 @@ import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -29,7 +29,7 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public abstract class AbstractMultiMeasurementDevice extends AbstractDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();

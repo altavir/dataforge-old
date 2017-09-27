@@ -36,7 +36,7 @@ class WorkspaceSpec {
     /**
      * builder context for the workspace using closure
      */
-    def context(Closure cl) {
+    def context(@DelegatesTo(value = ContextSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
         def contextSpec = new ContextSpec(builder.context)
         def code = cl.rehydrate(contextSpec, this, this)
         code.resolveStrategy = Closure.DELEGATE_ONLY
@@ -53,11 +53,8 @@ class WorkspaceSpec {
      * @param cl
      * @return
      */
-    def data(@DelegatesTo(DataSpec) Closure cl) {
-        def spec = new DataSpec(builder)
-        def code = cl.rehydrate(spec, this, this)
-        code.resolveStrategy = Closure.DELEGATE_FIRST
-        code()
+    void data(@DelegatesTo(value = DataNodeSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
+        builder.loadData("", DataNodeSpec.buildNode(builder.context, cl))
     }
 
     /**

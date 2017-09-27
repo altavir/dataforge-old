@@ -16,7 +16,7 @@ public class NamedMetaHolder extends MetaHolder implements Named {
 
     public NamedMetaHolder(String name, Meta meta) {
         super(meta);
-        if ((name == null || name.isEmpty()) && getClass().isAnnotationPresent(AnonimousNotAlowed.class)) {
+        if ((name == null || name.isEmpty()) && getClass().isAnnotationPresent(AnonymousNotAlowed.class)) {
             throw new AnonymousNotAlowedException();
         }
         this.name = name;

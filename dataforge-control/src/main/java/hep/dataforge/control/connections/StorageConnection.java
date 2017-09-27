@@ -8,7 +8,7 @@ package hep.dataforge.control.connections;
 import hep.dataforge.exceptions.NotConnectedException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageManager;
@@ -17,7 +17,7 @@ import hep.dataforge.storage.commons.StorageManager;
  *
  * @author Alexander Nozik
  */
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public class StorageConnection extends DeviceConnection implements Responder {
 
     private Storage storage;

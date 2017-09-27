@@ -51,7 +51,7 @@ class WorkspaceSpecTest extends Specification {
         Workspace wsp = Grind.buildWorkspace {
             data {
                 (1..10).each {
-                    item("data_$it","value_$it")
+                    item("data_$it", "value_$it")
                 }
             }
             task build("test"){

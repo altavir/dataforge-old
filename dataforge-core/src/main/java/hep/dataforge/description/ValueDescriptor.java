@@ -7,7 +7,7 @@ package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.AnonimousNotAlowed;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-@AnonimousNotAlowed
+@AnonymousNotAlowed
 public class ValueDescriptor extends DescriptorBase implements Named {
 
     public static ValueDescriptor build(ValueDef val) {

@@ -3,8 +3,9 @@ package hep.dataforge.grind.workspace
 import groovy.transform.CompileStatic
 import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
-import hep.dataforge.io.history.History
+import hep.dataforge.io.history.Chronicle
 import hep.dataforge.meta.Laminate
+import hep.dataforge.names.Name
 
 /**
  * Created by darksnake on 07-Aug-16.   
@@ -45,7 +46,8 @@ class GrindPipe<T, R> extends OneToOneAction<T, R> {
     @Override
     protected Object execute(Context context, String name, T input, Laminate meta) {
         if (action != null) {
-            return new OneToOneCallable<T, R>(context.getChronicle(name), name, meta, input).execute(action);
+            Chronicle chronicle = context.getChronicle(Name.joinString(getName(),name))
+            return new OneToOneCallable<T, R>(context, chronicle, name, meta, input).execute(action);
         } else {
             return input;
         }
@@ -53,12 +55,14 @@ class GrindPipe<T, R> extends OneToOneAction<T, R> {
     }
 
     static class OneToOneCallable<T, R> {
-        History log
+        Context context;
+        Chronicle log
         String name
         Laminate meta
         T input
 
-        OneToOneCallable(History log, String name, Laminate meta, T input) {
+        OneToOneCallable(Context context, Chronicle log, String name, Laminate meta, T input) {
+            this.context = context
             this.log = log
             this.name = name
             this.meta = meta

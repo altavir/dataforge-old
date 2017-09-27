@@ -5,10 +5,12 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.StaticGoal;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 
@@ -17,6 +19,7 @@ import hep.dataforge.names.Named;
  *
  * @author Alexander Nozik
  */
+@AnonymousNotAlowed
 public class NamedData<T> extends Data<T> implements Named {
 
     @SuppressWarnings("unchecked")
@@ -28,6 +31,9 @@ public class NamedData<T> extends Data<T> implements Named {
 
     public NamedData(String name, Goal<T> goal, Class<T> type, Meta meta) {
         super(goal, type, meta);
+        if(name == null|| name.isEmpty()){
+            throw new AnonymousNotAlowedException();
+        }
         this.name = name;
     }
 

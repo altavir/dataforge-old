@@ -28,7 +28,7 @@ import hep.dataforge.workspace.Workspace;
 public abstract class AbstractTask<R> implements Task<R> {
 
     private static DataTree.Builder<Object> gather(TaskModel model) {
-        DataTree.Builder<Object> builder = DataTree.builder();
+        DataTree.Builder<Object> builder = DataTree.builder().setName("data");
         model.dependencies().forEach(dep -> {
             dep.apply(builder, model.getWorkspace());
         });

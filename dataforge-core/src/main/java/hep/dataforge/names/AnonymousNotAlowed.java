@@ -15,12 +15,7 @@
  */
 package hep.dataforge.names;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * An annotation for class implementing {@code Named} interface that states that empty
@@ -32,6 +27,6 @@ import java.lang.annotation.Target;
 @Retention(value = RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-public @interface AnonimousNotAlowed {
+public @interface AnonymousNotAlowed {
 
 }

@@ -2,8 +2,9 @@ package hep.dataforge.grind.workspace
 
 import hep.dataforge.actions.ManyToOneAction
 import hep.dataforge.context.Context
-import hep.dataforge.io.history.History
+import hep.dataforge.io.history.Chronicle
 import hep.dataforge.meta.Laminate
+import hep.dataforge.names.Name
 
 class GrindJoin<T, R> extends ManyToOneAction<T, R> {
     private final String name;
@@ -20,7 +21,8 @@ class GrindJoin<T, R> extends ManyToOneAction<T, R> {
 
     @Override
     protected R execute(Context context, String nodeName, Map<String, T> input, Laminate meta) {
-        return new ManyToOneCallable<T, R>(context.getChronicle(name), name, meta, input).execute(action);
+        Chronicle chronicle = context.getChronicle(Name.joinString(getName(), nodeName))
+        return new ManyToOneCallable<T, R>(context, chronicle, nodeName, meta, input).execute(action);
     }
 
     @Override
@@ -39,12 +41,14 @@ class GrindJoin<T, R> extends ManyToOneAction<T, R> {
     }
 
     static class ManyToOneCallable<T, R> {
-        History log
+        Context context
+        Chronicle log
         String name
         Laminate meta
         Map<String, T> input
 
-        ManyToOneCallable(History log, String name, Laminate meta, Map<String, T> input) {
+        ManyToOneCallable(Context context, Chronicle log, String name, Laminate meta, Map<String, T> input) {
+            this.context = context
             this.log = log
             this.name = name
             this.meta = meta

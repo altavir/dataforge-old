@@ -41,7 +41,8 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
             }
 
             @Override
-            protected Action getAction(TaskModel model) {
+            protected Action<T, R> getAction(TaskModel model) {
+                //TODO add access to workspace here
                 return action;
             }
         };
@@ -51,6 +52,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
         return from(action, (model, meta) -> model.allData());
     }
 
+    @SuppressWarnings("unchecked")
     protected DataNode<T> gatherNode(DataNode<?> data) {
         return (DataNode<T>) data;
     }

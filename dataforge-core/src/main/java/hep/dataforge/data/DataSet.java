@@ -5,6 +5,7 @@
  */
 package hep.dataforge.data;
 
+import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import org.slf4j.LoggerFactory;
@@ -171,6 +172,9 @@ public class DataSet<T> implements DataNode<T> {
 
         @Override
         public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
+            if(key==null|| key.isEmpty()){
+                throw new AnonymousNotAlowedException();
+            }
             if (type.isAssignableFrom(data.type())) {
                 if (replace || !dataMap.containsKey(key)) {
                     dataMap.put(key, data);

@@ -1,8 +1,9 @@
 
 // define context
 context{
-    name = "myTestContext"
+    name = "TEST"
     plugin "cache"
+    plugin "plots"
     properties{
         a = 4
         b = false
@@ -10,4 +11,3 @@ context{
 }
 
 task(hep.dataforge.grind.TestTask)
-
