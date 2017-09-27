@@ -22,6 +22,7 @@ import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -69,8 +70,13 @@ public class GroupBuilder {
     @ValueDef(name = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
     @ValueDef(name = "defaultValue", def = "default", info = "Default value which should be used for content "
             + "in which the grouping value is not presented")
-    public static GroupRule byMeta(Meta groupingAnnotation) {
-        return byValue(groupingAnnotation.getString("byValue"), groupingAnnotation.getString("defaultValue", "default"));
+    public static GroupRule byMeta(Meta config) {
+        //TODO expand grouping options
+        if(config.hasValue("byValue")) {
+            return byValue(config.getString("byValue"), config.getString("defaultValue", "default"));
+        } else {
+            return Collections::singletonList;
+        }
     }
 
     public interface GroupRule {

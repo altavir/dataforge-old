@@ -27,7 +27,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -74,12 +73,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
     @SuppressWarnings("unchecked")
     protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {
-        //TODO expand grouping options
-        if (actionMeta.hasMeta("byValue")) {
-            return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group((DataNode<T>) input);
-        } else {
-            return Collections.singletonList((DataNode<T>) input);
-        }
+        return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group((DataNode<T>) input);
     }
 
     /**

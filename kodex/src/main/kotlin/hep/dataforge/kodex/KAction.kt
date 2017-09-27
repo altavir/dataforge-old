@@ -8,6 +8,7 @@ import hep.dataforge.data.DataSet
 import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
 import hep.dataforge.io.history.Chronicle
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
@@ -19,7 +20,16 @@ import kotlin.coroutines.experimental.CoroutineContext
 /**
  * Action environment
  */
-class ActionEnv(val context: Context, var name: String, val meta: MetaBuilder, val log: Chronicle)
+open class ActionEnv<T, R>(val context: Context, var name: String, val meta: MetaBuilder, val log: Chronicle) {
+    lateinit var result: suspend (T) -> R;
+
+    /**
+     * Calculate the result of goal
+     */
+    fun result(f: suspend (T) -> R) {
+        result = f;
+    }
+}
 
 //TODO move dispatcher to contest
 
@@ -34,7 +44,7 @@ class KPipe<T, R>(
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
         private val dispatcher: CoroutineContext = CommonPool,
-        private val transform: suspend ActionEnv.(T) -> R) : GenericAction<T, R>(name) {
+        private val action: ActionEnv<T, R>.() -> Unit) : GenericAction<T, R>(name) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type())) {
@@ -43,47 +53,11 @@ class KPipe<T, R>(
         val builder = DataSet.builder(outputType)
         runBlocking {
             data.dataStream(true).forEach {
-                val env = ActionEnv(context, it.name, meta.builder, context.getChronicle(Name.joinString(it.name, name)))
-                val res = NamedData(env.name, it.goal.pipe(dispatcher) { env.transform(it) }, outputType, env.meta.build())
-                builder.putData(res)
-            }
-        }
-        return builder.build();
-    }
+                val laminate = Laminate(it.meta, meta)
 
-    override fun getInputType(): Class<T> {
-        return inType?:super.getInputType()
-    }
-
-    override fun getOutputType(): Class<R> {
-        return outType?:super.getOutputType()
-    }
-}
-
-/**
- * The same rules as for KPipe
- */
-open class KJoin<T, R>(
-        name: String? = null,
-        private val inType: Class<T>? = null,
-        private val outType: Class<R>? = null,
-        private val dispatcher: CoroutineContext = CommonPool,
-        private val transform: suspend ActionEnv.(Map<String, T>) -> R) : GenericAction<T, R>(name) {
-
-    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
-        if (!this.inputType.isAssignableFrom(data.type())) {
-            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
-        }
-
-        val builder = DataSet.builder(outputType)
-
-        val groups = groupBuilder(meta).group(data);
-
-        runBlocking {
-            groups.forEach {
-                val env = ActionEnv(context, it.name, it.meta.builder, context.getChronicle(Name.joinString(it.name, name)))
-                val goalMap: Map<String, Goal<out T>> = it.dataStream().filter { it.isValid }.collect(Collectors.toMap({ it.name }, { it.goal }))
-                val goal = goalMap.join(dispatcher) { env.transform(it) }
+                val env = ActionEnv<T, R>(context, it.name, laminate.builder, context.getChronicle(Name.joinString(it.name, name)))
+                        .apply(action)
+                val goal = it.goal.pipe(dispatcher, env.result)
                 val res = NamedData(env.name, goal, outputType, env.meta.build())
                 builder.putData(res)
             }
@@ -92,15 +66,60 @@ open class KJoin<T, R>(
     }
 
     override fun getInputType(): Class<T> {
-        return inType?:super.getInputType()
+        return inType ?: super.getInputType()
     }
 
     override fun getOutputType(): Class<R> {
-        return outType?:super.getOutputType()
+        return outType ?: super.getOutputType()
+    }
+}
+
+//class JoinActionEnv<T, R>(context: Context, name: String, meta: MetaBuilder, log: Chronicle) : ActionEnv<T, R>(context, name, meta, log) {
+//    private val groupRules
+//}
+
+//TODO add custom grouping rules with result producer for each of them
+
+/**
+ * The same rules as for KPipe
+ */
+class KJoin<T, R>(
+        name: String? = null,
+        private val inType: Class<T>? = null,
+        private val outType: Class<R>? = null,
+        private val dispatcher: CoroutineContext = CommonPool,
+        private val action: ActionEnv<Map<String, T>, R>.() -> Unit) : GenericAction<T, R>(name) {
+
+    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
+        if (!this.inputType.isAssignableFrom(data.type())) {
+            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
+        }
+
+        val builder = DataSet.builder(outputType)
+
+        val groups = GroupBuilder.byMeta(meta).group(data);
+
+        runBlocking {
+            groups.forEach {
+                val laminate = Laminate(it.meta, meta)
+
+                val goalMap: Map<String, Goal<out T>> = it.dataStream().filter { it.isValid }.collect(Collectors.toMap({ it.name }, { it.goal }))
+
+                val env = ActionEnv<Map<String, T>, R>(context, it.name, laminate.builder, context.getChronicle(Name.joinString(it.name, name)))
+                        .apply(action)
+                val goal = goalMap.join(dispatcher, env.result)
+                val res = NamedData(env.name, goal, outputType, env.meta.build())
+                builder.putData(res)
+            }
+        }
+        return builder.build();
     }
 
-    open fun groupBuilder(meta: Meta): GroupBuilder.GroupRule {
-        return GroupBuilder.byMeta(meta);
+    override fun getInputType(): Class<T> {
+        return inType ?: super.getInputType()
     }
 
+    override fun getOutputType(): Class<R> {
+        return outType ?: super.getOutputType()
+    }
 }
