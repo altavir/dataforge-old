@@ -43,6 +43,7 @@ class PlotHelper implements GrindHelper {
 
     PlotHelper(Context context = Global.instance()) {
         this.context = context;
+        context.pluginManager().getOrLoad("plots")
         this.manager = context.getFeature(PlotManager)
     }
 

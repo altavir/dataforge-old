@@ -49,7 +49,7 @@ public class DataUtils {
     /**
      * Combine two data elements of different type into single data
      */
-    public static <R, S1, S2> Data<R> combine(Data<? extends S1> data1, Data<? extends S2> data2,
+    public static <R, S1, S2> Data<R> combine(Data<S1> data1, Data<S2> data2,
                                               Class<R> type,
                                               Meta meta,
                                               BiFunction<S1, S2, R> transform) {

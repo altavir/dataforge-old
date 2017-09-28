@@ -2,6 +2,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -13,6 +14,7 @@ import java.util.stream.Stream;
 
 /**
  * A column based table. Column access is fast, but row access is slow. Best memory efficiency.
+ * Column table is immutable all operations create new tables.
  * Created by darksnake on 12.07.2017.
  */
 public class ColumnTable implements Table {
@@ -27,6 +29,7 @@ public class ColumnTable implements Table {
 
     /**
      * Create instance of column table using given columns with appropriate names
+     *
      * @param columns
      * @return
      */
@@ -53,6 +56,13 @@ public class ColumnTable implements Table {
             throw new IllegalArgumentException("Column dimension mismatch");
         }
         size = this.columns.values().stream().findFirst().map(Column::size).orElse(0);
+    }
+
+    /**
+     * Create empty column table
+     */
+    public ColumnTable() {
+        size = 0;
     }
 
     @Override
@@ -110,6 +120,21 @@ public class ColumnTable implements Table {
     }
 
     /**
+     * Add a new column built from object stream
+     *
+     * @param name
+     * @param type
+     * @param data
+     * @param tags
+     * @return
+     */
+    public ColumnTable addColumn(String name, ValueType type, Stream<?> data, String... tags) {
+        ColumnFormat format = ColumnFormat.build(name, type, tags);
+        Column column = new ListColumn(format, data.map(Value::of));
+        return addColumn(column);
+    }
+
+    /**
      * Create a new table with values derived from appropriate rows. The operation does not consume a lot of memory
      * and time since existing columns are immutable and are reused.
      * <p>
@@ -119,11 +144,16 @@ public class ColumnTable implements Table {
      * @param transform
      * @return
      */
-    public ColumnTable addColumn(ColumnFormat format, Function<Values, Object> transform) {
+    public ColumnTable buildColumn(ColumnFormat format, Function<Values, Object> transform) {
         List<Column> list = new ArrayList<>(columns.values());
         Column newColumn = ListColumn.build(format, getRows().map(transform));
         list.add(newColumn);
         return new ColumnTable(list);
+    }
+
+    public ColumnTable buildColumn(String name, ValueType type, Function<Values, Object> transform) {
+        ColumnFormat format = ColumnFormat.build(name, type);
+        return buildColumn(format, transform);
     }
 
     /**

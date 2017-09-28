@@ -179,8 +179,8 @@ class CoreExtension {
      * @param field
      * @return
      */
-    static Value getAt(final Values self, String field) {
-        return self.getValue(field);
+    static Object getAt(final Values self, String field) {
+        return self.getValue(field).value();
     }
 
     static Value getProperty(final Values self, String name) {

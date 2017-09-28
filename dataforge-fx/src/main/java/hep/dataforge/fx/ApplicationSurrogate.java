@@ -31,8 +31,10 @@ public class ApplicationSurrogate extends Application {
     }
 
     public static void start() {
-        stageGenerator = new CompletableFuture<>();
-        new Thread(()->launch(ApplicationSurrogate.class)).start();
+        if(!isStarted()) {
+            stageGenerator = new CompletableFuture<>();
+            new Thread(() -> launch(ApplicationSurrogate.class)).start();
+        }
     }
 
     @Override

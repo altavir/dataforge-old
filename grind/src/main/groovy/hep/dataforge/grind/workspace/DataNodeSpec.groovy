@@ -129,7 +129,7 @@ class DataNodeSpec {
     }
 
     private DataNode build() {
-        return tree.build();
+        return tree.setMeta(meta).build();
     }
 
 

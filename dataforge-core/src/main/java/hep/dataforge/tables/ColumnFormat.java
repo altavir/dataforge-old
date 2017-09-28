@@ -8,6 +8,7 @@ import hep.dataforge.names.Named;
 import hep.dataforge.utils.SimpleMetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Arrays;
 import java.util.List;
@@ -40,10 +41,12 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
      * @param type
      * @return
      */
-    public static ColumnFormat build(String name, ValueType... type){
+    @NotNull
+    public static ColumnFormat build(String name, ValueType type, String... tags){
         return new ColumnFormat(new MetaBuilder("column")
                 .putValue("name",name)
-                .putValue("type",Stream.of(type).map(Enum::name).collect(Collectors.toList()))
+                .putValue("type",type)
+                .putValue(TAG_KEY, Stream.of(tags).collect(Collectors.toList()))
         );
     }
 

@@ -40,7 +40,7 @@ class ExecSpec {
      */
     private Closure cliTransform = Closure.IDENTITY;
 
-    private String actionName = "exec";
+    String actionName = "exec";
 
     void input(@DelegatesTo(value = InputTransformer, strategy = Closure.DELEGATE_ONLY) Closure handleInput) {
         this.handleInput = handleInput

@@ -123,21 +123,12 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Optional<Data<T>> optData(String dataName) {
-        return Optional.ofNullable(getData(Name.of(dataName)));
-    }
-
-    protected Data<T> getData(Name dataName) {
-        if (dataName.length() == 1) {
-            return data.get(dataName.toString());
-        } else {
-            DataNode<T> node = getNode(dataName.cutLast());
-            if (node != null) {
-                return node.optData(dataName.getLast().toString()).orElse(null);
-            } else {
-                return null;
-            }
-        }
+        return dataStream(true)
+                .filter(it -> it.getName().equals(dataName))
+                .findFirst()
+                .map(it -> (Data<T>) it);
     }
 
     /**
@@ -230,7 +221,9 @@ public class DataTree<T> implements DataNode<T> {
 
     private Stream<DataNode<? extends T>> nodeStream(Name parentName, Laminate parentMeta) {
         return nodes.entrySet().stream().flatMap((Map.Entry<String, DataTree<T>> nodeEntry) -> {
-            Stream<DataNode<T>> nodeItself = Stream.of(new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta));
+            Stream<DataNode<T>> nodeItself = Stream.of(
+                    new NodeWrapper<>(nodeEntry.getValue(), parentName.toString(), parentMeta.cleanup())
+            );
 
             Name childName = parentName.append(nodeEntry.getKey());
             Laminate childMeta = parentMeta.withFirstLayer(nodeEntry.getValue().meta());

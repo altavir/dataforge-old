@@ -42,7 +42,6 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
 
             @Override
             protected Action<T, R> getAction(TaskModel model) {
-                //TODO add access to workspace here
                 return action;
             }
         };

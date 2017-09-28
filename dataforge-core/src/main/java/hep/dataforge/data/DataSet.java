@@ -91,8 +91,11 @@ public class DataSet<T> implements DataNode<T> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public Optional<Data<T>> optData(String name) {
-        return Optional.ofNullable(dataMap.get(name).cast(type));
+        return Optional.ofNullable(dataMap.get(name))
+                .map(it -> NamedData.wrap(name, it, meta))
+                .map(it -> (Data<T>) it);
     }
 
     @Override
@@ -172,7 +175,7 @@ public class DataSet<T> implements DataNode<T> {
 
         @Override
         public Builder<T> putData(String key, Data<? extends T> data, boolean replace) {
-            if(key==null|| key.isEmpty()){
+            if (key == null || key.isEmpty()) {
                 throw new AnonymousNotAlowedException();
             }
             if (type.isAssignableFrom(data.type())) {

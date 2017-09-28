@@ -13,6 +13,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A data with name
@@ -46,13 +47,15 @@ public class NamedData<T> extends Data<T> implements Named {
      * @param <T>
      * @return
      */
+    @NotNull
     public static <T> NamedData<T> wrap(String name, Data<T> data, Meta... externalMeta) {
         Laminate newMeta = new Laminate(data.meta()).withLayer(externalMeta);
         return new NamedData<T>(name, data.getGoal(), data.type(), newMeta);
     }
 
+    @NotNull
     public static <T> NamedData<T> wrap(Name name, Data<T> data, Laminate externalMeta) {
-        Laminate newMeta = externalMeta.withFirstLayer(data.meta());
+        Laminate newMeta = externalMeta.withFirstLayer(data.meta()).cleanup();
         return new NamedData<T>(name.toString(), data.getGoal(), data.type(), newMeta);
     }
 

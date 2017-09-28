@@ -69,7 +69,7 @@ public final class Laminate extends Meta implements Described {
 
     private void addLayer(Meta layer) {
         if (layer != null && !layer.isEmpty()) {
-            if(layer instanceof MutableMetaNode){
+            if (layer instanceof MutableMetaNode) {
                 LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
             this.layers.add(layer);
@@ -78,7 +78,7 @@ public final class Laminate extends Meta implements Described {
 
     private void addFirstLayer(Meta layer) {
         if (layer != null && !layer.isEmpty()) {
-            if(layer instanceof MutableMetaNode){
+            if (layer instanceof MutableMetaNode) {
                 LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
             this.layers.add(0, layer);
@@ -99,7 +99,7 @@ public final class Laminate extends Meta implements Described {
      * (ALIASES NOT IMPLEMENTED YET!).
      */
     public Laminate withDescriptor(NodeDescriptor descriptor) {
-        Laminate res =new Laminate(this);
+        Laminate res = new Laminate(this);
         res.setDescriptor(descriptor);
         return res;
     }
@@ -346,5 +346,39 @@ public final class Laminate extends Meta implements Described {
     @NotNull
     public Meta merge() {
         return new SealedNode(this);
+    }
+
+    /**
+     * deep flat map of laminate layers
+     *
+     * @return
+     */
+    private Stream<Meta> deepLayerStream() {
+        return this.layers.stream().flatMap(layer -> {
+            if (layer instanceof Laminate) {
+                return ((Laminate) layer).deepLayerStream();
+            } else {
+                return Stream.of(layer);
+            }
+        });
+    }
+
+    /**
+     * Return cleaned up laminate eliminating needless substructures
+     *
+     * @return
+     */
+    public Laminate cleanup() {
+        List<Meta> resLayers = deepLayerStream().collect(Collectors.toList());
+
+        Laminate res = new Laminate(resLayers);
+
+        //TODO search for internal descriptors
+
+        if (descriptor != null) {
+            res.setDescriptor(descriptor);
+        }
+
+        return res;
     }
 }
