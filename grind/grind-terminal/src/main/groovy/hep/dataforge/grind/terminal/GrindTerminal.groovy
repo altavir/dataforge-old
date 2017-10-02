@@ -102,7 +102,7 @@ class GrindTerminal extends SimpleConfigurable {
         //builder shell context
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
-            context.pluginManager().load("hep.dataforge:plots-fx")
+            context.pluginManager().load("hep.dataforge:plots")
             JFCFrameFactory.setDefault(context);
             (context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
