@@ -29,7 +29,7 @@ import static hep.dataforge.data.DataFactory.*;
  */
 @NodeDef(name = NODE_META_KEY, info = "Node meta-data")
 @NodeDef(name = NODE_KEY, info = "Recursively add node to the builder")
-@NodeDef(name = FILTER_KEY, from = "hep.dataforge.data.DataFilter", info = "Filter definition to be applied after node construction is finished")
+@NodeDef(name = FILTER_KEY, from = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished")
 @NodeDef(name = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
 @ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
@@ -51,7 +51,7 @@ public class DataFactory<T> implements DataLoader<T> {
     @Override
     public DataNode<T> build(Context context, Meta meta) {
         //Creating filter
-        DataFilter filter = new DataFilter(meta.getMetaOrEmpty(FILTER_KEY));
+        CustomDataFilter filter = new CustomDataFilter(meta.getMetaOrEmpty(FILTER_KEY));
 
         DataTree<T> tree = builder(context,meta).build();
         //Applying filter if needed
