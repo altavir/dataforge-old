@@ -3,6 +3,7 @@ package hep.dataforge.kodex
 import hep.dataforge.actions.GenericAction
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
+import hep.dataforge.exceptions.AnonymousNotAlowedException
 import hep.dataforge.goals.Goal
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.meta.Laminate
@@ -15,19 +16,19 @@ import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
 
 
-class ActionEnv(val context: Context, var name: String, val meta: MetaBuilder, val log: Chronicle)
+class ActionEnv(val context: Context, val name: String, val meta: Meta, val log: Chronicle)
 
 
 /**
  * Action environment
  */
-class PipeEnv<T, R>(val context: Context, var name: String, val meta: MetaBuilder, val log: Chronicle) {
-    lateinit var result: suspend (T) -> R;
+class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBuilder) {
+    lateinit var result: suspend ActionEnv.(T) -> R;
 
     /**
      * Calculate the result of goal
      */
-    fun result(f: suspend (T) -> R) {
+    fun result(f: suspend ActionEnv.(T) -> R) {
         result = f;
     }
 }
@@ -37,7 +38,7 @@ class PipeEnv<T, R>(val context: Context, var name: String, val meta: MetaBuilde
 /**
  * Coroutine based pipe action.
  * KPipe supports custom CoroutineContext which allows to override specific way coroutines are created.
- * KPipe is executed inside {@link PipeEnv} object, which holds name of given data, execution context, meta and log.
+ * KPipe is executed inside {@link PipeBuilder} object, which holds name of given data, execution context, meta and log.
  * Notice that name and meta could be changed. Output object receives modified name and meta.
  */
 class KPipe<T, R>(
@@ -45,7 +46,7 @@ class KPipe<T, R>(
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
         private val dispatcher: CoroutineContext = CommonPool,
-        private val action: PipeEnv<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type())) {
@@ -56,10 +57,21 @@ class KPipe<T, R>(
             data.dataStream(true).forEach {
                 val laminate = Laminate(it.meta, meta)
 
-                val env = PipeEnv<T, R>(context, it.name, laminate.builder, context.getChronicle(Name.joinString(it.name, name)))
-                        .apply(action)
-                val goal = it.goal.pipe(dispatcher, env.result)
-                val res = NamedData(env.name, goal, outputType, env.meta.build())
+                val pipe = PipeBuilder<T, R>(
+                        context,
+                        it.name,
+                        laminate.builder
+                ).apply(action)
+
+                val env = ActionEnv(
+                        context,
+                        pipe.name,
+                        pipe.meta,
+                        context.getChronicle(Name.joinString(pipe.name, name))
+                )
+
+                val goal = it.goal.pipe(dispatcher) { pipe.result.invoke(env, it) }
+                val res = NamedData(env.name, goal, outputType, env.meta)
                 builder.putData(res)
             }
         }
@@ -76,8 +88,7 @@ class KPipe<T, R>(
 }
 
 
-class JoinGroup<T, R>(name: String?) {
-    internal var nameTransform: (DataNode<out T>) -> String = { name ?: it.name }
+class JoinGroup<T, R>(val context: Context, var name: String?, var meta: MetaBuilder) {
     internal var filter: DataFilter = DataFilter.IDENTITY
     lateinit var result: suspend ActionEnv.(Map<String, T>) -> R
 
@@ -94,10 +105,6 @@ class JoinGroup<T, R>(name: String?) {
 
     fun pattern(pattern: String) {
         filter = DataFilter.byPattern(pattern);
-    }
-
-    fun name(transform: (DataNode<out T>) -> String) {
-        this.nameTransform = transform
     }
 
     fun result(f: suspend ActionEnv.(Map<String, T>) -> R) {
@@ -138,18 +145,26 @@ class KJoin<T, R>(
 
         runBlocking {
             groups.forEach {
-                val group = JoinGroup<T, R>(it.first).apply(it.second);
+                val group = JoinGroup<T, R>(
+                        context,
+                        it.first,
+                        MetaBuilder("meta")
+                ).apply(it.second);
 
                 val node = group.filter.filter(data);
 
-                val laminate = Laminate(node.meta, meta)
+                val laminate = Laminate(group.meta, node.meta, meta)
 
                 val goalMap: Map<String, Goal<out T>> = node
                         .dataStream()
                         .filter { it.isValid }
                         .collect(Collectors.toMap({ it.name }, { it.goal }))
 
-                val groupName: String = group.nameTransform(node)
+                val groupName: String = group.name ?: node.name;
+
+                if(groupName.isEmpty()){
+                    throw AnonymousNotAlowedException("Anonymous groups are not allowed");
+                }
 
                 val env = ActionEnv(
                         context,
@@ -160,7 +175,7 @@ class KJoin<T, R>(
 
 
                 val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
-                val res = NamedData(env.name, goal, outputType, env.meta.build())
+                val res = NamedData(env.name, goal, outputType, env.meta)
                 builder.putData(res)
             }
         }
