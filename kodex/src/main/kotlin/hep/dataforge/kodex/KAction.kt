@@ -162,7 +162,7 @@ class KJoin<T, R>(
 
                 val groupName: String = group.name ?: node.name;
 
-                if(groupName.isEmpty()){
+                if (groupName.isEmpty()) {
                     throw AnonymousNotAlowedException("Anonymous groups are not allowed");
                 }
 
@@ -177,6 +177,78 @@ class KJoin<T, R>(
                 val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
                 val res = NamedData(env.name, goal, outputType, env.meta)
                 builder.putData(res)
+            }
+        }
+
+        return builder.build();
+    }
+
+    override fun getInputType(): Class<T> {
+        return inType ?: super.getInputType()
+    }
+
+    override fun getOutputType(): Class<R> {
+        return outType ?: super.getOutputType()
+    }
+}
+
+
+class SplitBuilder<T, R>(val context: Context) {
+    val fragments: MutableList<Pair<String, (String, Meta) -> Pair<String, Meta>>> = ArrayList()
+    lateinit var result: suspend ActionEnv.(T) -> Map<String, R>
+
+    /**
+     * Calculate the result of goal
+     */
+    fun result(f: suspend ActionEnv.(T) -> Map<String, R>) {
+        result = f;
+    }
+
+
+
+}
+
+class KSplit<T, R>(
+        name: String? = null,
+        private val inType: Class<T>? = null,
+        private val outType: Class<R>? = null,
+        private val dispatcher: CoroutineContext = CommonPool,
+        private val action: SplitBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+
+    override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
+        if (!this.inputType.isAssignableFrom(data.type())) {
+            throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
+        }
+
+        val builder = DataSet.builder(outputType)
+
+
+        runBlocking {
+            data.dataStream(true).forEach {
+
+                val laminate = Laminate(it.meta, meta)
+
+                val split = SplitBuilder<T, R>(context).apply(action)
+
+                val env = ActionEnv(
+                        context,
+                        it.name,
+                        laminate.builder,
+                        context.getChronicle(Name.joinString(it.name, name))
+                )
+
+                val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }
+
+                split.fragments.forEach { rule ->
+                    val goal = commonGoal.pipe {
+                        it[rule.first]!!
+                    }
+                    val (resName, resMeta) = rule.second.invoke(it.name, laminate)
+                    val res = NamedData(resName, goal, outputType, resMeta)
+                    builder.putData(res)
+                }
+
+
             }
         }
 
