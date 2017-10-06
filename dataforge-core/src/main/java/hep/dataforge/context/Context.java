@@ -82,9 +82,10 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     private ClassLoader classLoader = null;
     private final ContextLock lock = new ContextLock(this);
 
-    //TODO move to separate manager
+    //TODO move to separate plugin
     private transient Map<String, Chronicle> historyCache = new HashMap<>();
 
+    //TODO move to plugin
     private ExecutorService parallelExecutor;
     private ExecutorService singleThreadExecutor;
     private Context parent = null;
@@ -168,7 +169,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     /**
-     * {@inheritDoc}
+     * The name of the context
      *
      * @return
      */
@@ -177,6 +178,11 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return name;
     }
 
+    /**
+     * Add property to context
+     * @param name
+     * @param value
+     */
     public void putValue(String name, Object value) {
         lock.modify(() -> {
             properties.put(name, Value.of(value));
@@ -309,6 +315,11 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
                 .orElseThrow(() -> new RuntimeException("Feature could not be loaded by type: " + type.getName()));
     }
 
+    public <T> T loadFeature(String tag, Class<T> type) {
+        return type.cast(pluginManager().getOrLoad(tag));
+    }
+
+
     /**
      * Opt a plugin extending given class
      *
@@ -360,21 +371,33 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return id;
     }
 
-    public void lock(Object obj){
+    /**
+     * Lock this context by given object
+     * @param obj
+     */
+    public void lock(Object obj) {
         this.lock.lock(obj);
-        if(getParent() != null){
+        if (getParent() != null) {
             getParent().lock(obj);
         }
     }
 
-    public void unlock(Object obj){
+    /**
+     * Unlock the context by given object
+     * @param obj
+     */
+    public void unlock(Object obj) {
         this.lock.unlock(obj);
-        if(getParent() != null){
+        if (getParent() != null) {
             getParent().unlock(obj);
         }
     }
 
-    public boolean isLocked(){
+    /**
+     * Find out if context is locked
+     * @return
+     */
+    public boolean isLocked() {
         return lock.isLocked();
     }
 

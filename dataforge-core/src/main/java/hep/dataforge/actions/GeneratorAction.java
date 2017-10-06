@@ -6,15 +6,12 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.goals.GeneratorGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Meta;
 
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Stream;
 
 /**
@@ -28,13 +25,13 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
     @Override
     public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
         Chronicle log = context.getChronicle(getName());
-        Map<String, Data<R>> resultMap = new ConcurrentHashMap<>();
-        //TODO add optional parallelization here
-        nameStream().forEach(name -> {
-            Goal<R> goal = new GeneratorGoal<>(executor(context, actionMeta), () -> generateData(name));
-            resultMap.put(name, new ActionResult<>(log, goal, generateMeta(name), getOutputType()));
+
+        Stream<ActionResult<R>> results = nameStream().map(name -> {
+            Goal<R> goal = new GeneratorGoal<>(buildExecutor(context, actionMeta), () -> generateData(name));
+            return new ActionResult<>(name, getOutputType(), goal, generateMeta(name), log);
         });
-        return wrap(resultNodeName(), actionMeta, resultMap);
+
+        return wrap(resultNodeName(), actionMeta, results);
     }
 
     protected abstract Stream<String> nameStream();

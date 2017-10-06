@@ -24,9 +24,8 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import javafx.util.Pair;
 import org.slf4j.Logger;
-
-import java.util.stream.Collectors;
 
 /**
  * A template to builder actions that reflect strictly one to one content
@@ -57,13 +56,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         return wrap(
                 set.getName(),
                 set.meta(),
-                set.dataStream(true)
-                        .collect(
-                                Collectors.toMap(
-                                        data -> getResultName(data.getName(), actionMeta),
-                                        data -> runOne(context, data, actionMeta)
-                                )
-                        )
+                set.dataStream(true).map(data -> runOne(context, data, actionMeta))
         );
     }
 
@@ -80,34 +73,25 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
                     getName(), getInputType().getName(), data.type().getName()));
         }
-        //FIXME add report manager instead of transmitting report
-        String resultName = getResultName(data.getName(), actionMeta);
+
+        Pair<String, Meta> resultParamters = outputParameters(context, data, actionMeta);
+
         Laminate meta = inputMeta(context, data.meta(), actionMeta);
-        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), executor(context, meta),
+        String resultName = resultParamters.getKey();
+        Meta outputMeta = resultParamters.getValue();
+
+        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), buildExecutor(context, meta),
                 input -> {
-                    Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), resultName));
+                    Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), resultName));
                     return transform(context, resultName, input, meta);
                 }
         );
-        return new ActionResult<>(context.getChronicle(resultName), goal, outputMeta(data, meta), getOutputType());
+        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getChronicle(resultName));
     }
 
     protected Chronicle getLog(Context context, String dataName) {
         return context.getChronicle(Name.joinString(dataName, getName()));
     }
-
-//    protected void buildReport(Context context, String name, Data<? extends T> data) {
-//        Loggable parent;
-//        if (data != null && data instanceof ActionResult) {
-//            Log actionLog = ((ActionResult) data).log();
-//            if (actionLog.getParent() != null) {
-//                //Getting parent from previous report
-//                parent = actionLog.getParent();
-//            } else {
-//                parent = new Log(name, context);
-//            }
-//        }
-//    }
 
     /**
      * @param name      name of the input item
@@ -146,8 +130,8 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @param data
      * @return
      */
-    protected Meta outputMeta(NamedData<? extends T> data, Meta actionMeta) {
-        return data.meta();
+    protected Pair<String, Meta> outputParameters(Context context, NamedData<? extends T> data, Meta actionMeta) {
+        return new Pair<>(getResultName(data.getName(), actionMeta), data.meta());
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {

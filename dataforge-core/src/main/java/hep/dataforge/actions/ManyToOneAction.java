@@ -27,7 +27,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -54,21 +53,15 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
-        Map<String, ActionResult<R>> results = new HashMap<>();
-
-        groups.forEach((group) -> results.put(group.getName(), runGroup(context, group, actionMeta)));
-        return wrap(getResultName(set.getName(), actionMeta), set.meta(), results);
+        return wrap(getResultName(set.getName(), actionMeta), set.meta(), groups.stream().map(group->runGroup(context, group,actionMeta)));
     }
 
     public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
         Meta outputMeta = outputMeta(data).build();
         Goal<R> goal = new ManyToOneGoal(context, data, actionMeta, outputMeta);
-        String reportName = data.getName();
-        if (reportName.isEmpty()) {
-            reportName = getName();
-        }
+        String resultName = data.getName() == null ? getName() : data.getName();
 
-        return new ActionResult<>(context.getChronicle(reportName), goal, outputMeta, getOutputType());
+        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getChronicle(resultName));
     }
 
     @SuppressWarnings("unchecked")
@@ -145,7 +138,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         private final Meta outputMeta;
 
         public ManyToOneGoal(Context context, DataNode<T> data, Meta actionMeta, Meta outputMeta) {
-            super(executor(context, actionMeta));
+            super(buildExecutor(context, actionMeta));
             this.context = context;
             this.data = data;
             this.actionMeta = actionMeta;
@@ -165,7 +158,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         @Override
         protected R compute() throws Exception {
             Laminate meta = inputMeta(context, data.meta(), actionMeta);
-            Thread.currentThread().setName(Name.joinString(getTaskName(actionMeta), data.getName()));
+            Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), data.getName()));
             beforeGroup(context, data);
             // In this moment, all the data is already calculated
             Map<String, T> collection = data.dataStream()

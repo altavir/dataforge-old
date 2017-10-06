@@ -4,6 +4,8 @@ import hep.dataforge.actions.Action
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataSet
+import hep.dataforge.grind.actions.GrindJoin
+import hep.dataforge.grind.actions.GrindPipe
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.tasks.AbstractTask
 import hep.dataforge.workspace.tasks.SingleActionTask
@@ -74,7 +76,7 @@ class DefaultTaskLib {
     }
 
     /**
-     *  A task with single pipe action defined by {@link GrindPipe}
+     *  A task with single pipe action defined by {@link hep.dataforge.grind.actions.GrindPipe}
      * @param params
      * @param name
      * @param action
@@ -82,12 +84,12 @@ class DefaultTaskLib {
      */
     static Task pipe(Map params = [:],
                      String name,
-                     @DelegatesTo(value = GrindPipe.OneToOneCallable, strategy = Closure.DELEGATE_FIRST) Closure action) {
+                     @DelegatesTo(value = GrindPipe.PipeBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
         return SingleActionTask.from(new GrindPipe(params, name, action), dependencyBuilder(params));
     }
 
     /**
-     * A task with single join action defined by {@link GrindJoin}
+     * A task with single join action defined by {@link hep.dataforge.grind.actions.GrindJoin}
      * @param params
      * @param name
      * @param action
@@ -95,7 +97,7 @@ class DefaultTaskLib {
      */
     static Task join(Map params = [:],
                      String name,
-                     @DelegatesTo(value = GrindJoin.ManyToOneCallable, strategy = Closure.DELEGATE_FIRST) Closure action) {
+                     @DelegatesTo(value = GrindJoin.JoinGroupBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
         return SingleActionTask.from(new GrindJoin(params, name, action), dependencyBuilder(params));
     }
 
