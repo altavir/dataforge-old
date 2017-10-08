@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.io.markup.MarkupBuilder
 
+import java.lang.reflect.Method
+
 @CompileStatic
 abstract class AbstractHelper implements GrindHelper {
     private final Context context;
@@ -19,12 +21,20 @@ abstract class AbstractHelper implements GrindHelper {
 
     protected abstract MarkupBuilder getHelperDescription()
 
+    /**
+     * get the list of all methods that need describing
+     * @return
+     */
+    protected Collection<Method> listDescribedMethods(){
+        return getClass().getDeclaredMethods()
+                .findAll { it.isAnnotationPresent(MethodDescription) }
+    }
+
     @Override
     MarkupBuilder getHeader() {
         MarkupBuilder builder = getHelperDescription();
 
-        def methods = getClass().getDeclaredMethods()
-                .findAll { it.isAnnotationPresent(MethodDescription) }
+        def methods = listDescribedMethods()
 
         def descriptions = methods.collect {
             def desc = new MarkupBuilder().text(it.name, "magenta")

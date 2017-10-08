@@ -9,6 +9,8 @@ package hep.dataforge.grind.workspace
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.grind.Grind
+import hep.dataforge.grind.GrindMetaBuilder
+import hep.dataforge.grind.helpers.MethodDescription
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.BasicWorkspace
 import hep.dataforge.workspace.Workspace
@@ -53,6 +55,7 @@ class WorkspaceSpec {
      * @param cl
      * @return
      */
+    @MethodDescription("Load data via closure")
     void data(@DelegatesTo(value = DataNodeSpec, strategy = Closure.DELEGATE_FIRST) Closure cl) {
         builder.loadData("", DataNodeSpec.buildNode(builder.context, cl))
     }
@@ -62,6 +65,7 @@ class WorkspaceSpec {
      * @param task
      * @return
      */
+    @MethodDescription("Register a task")
     def task(Task task) {
         builder.loadTask(task)
     }
@@ -71,8 +75,9 @@ class WorkspaceSpec {
      * @param taskClass
      * @return
      */
+    @MethodDescription("Define a task by its class")
     def task(Class<? extends Task> taskClass) {
-        builder.loadTask(taskClass.newInstance())
+        builder.loadTask(taskClass.getDeclaredConstructor().newInstance())
     }
 
     /**
@@ -80,6 +85,7 @@ class WorkspaceSpec {
      * @param closure
      * @return
      */
+    @MethodDescription("Create a list of targets")
     def targets(Closure closure) {
         MetaSpec spec = new MetaSpec()
         def code = closure.rehydrate(spec, this, this)
@@ -93,10 +99,12 @@ class WorkspaceSpec {
         }
     }
 
-    def target(Map parameters = [:], String name, Closure closure = null) {
+    @MethodDescription("Create new meta using Grind builder")
+    def target(Map parameters = [:], String name, @DelegatesTo(GrindMetaBuilder) Closure closure = null) {
         this.builder.target(Grind.buildMeta(name, parameters, closure))
     }
 
+    @MethodDescription("Assign target as meta")
     def target(Meta meta) {
         this.builder.target(meta)
     }
