@@ -30,7 +30,7 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Repeatable(ValuesDefs.class)
+@Repeatable(ValueDefs.class)
 public @interface ValueDef {
 
     String name();

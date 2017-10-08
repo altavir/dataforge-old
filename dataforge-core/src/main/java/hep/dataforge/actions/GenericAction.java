@@ -161,12 +161,12 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     @Override
     public MarkupBuilder getHeader() {
         ActionDescriptor ad = getDescriptor();
-        return MarkupBuilder.text(ad.getName(), "green")
-                .addText(" {input : ")
-                .addText(ad.inputType(), "cyan")
-                .addText(", output : ")
-                .addText(ad.outputType(), "cyan")
-                .addText(String.format("}: %s", ad.info()));
+        return new MarkupBuilder().text(ad.getName(), "green")
+                .text(" {input : ")
+                .text(ad.inputType(), "cyan")
+                .text(", output : ")
+                .text(ad.outputType(), "cyan")
+                .text(String.format("}: %s", ad.info()));
     }
 
     /**

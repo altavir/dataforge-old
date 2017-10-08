@@ -18,6 +18,8 @@ package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.io.markup.MarkupBuilder
@@ -28,6 +30,7 @@ import hep.dataforge.plots.data.PlottableXYFunction
 import hep.dataforge.plots.data.XYPlottable
 import hep.dataforge.tables.PointAdapter
 import hep.dataforge.tables.XYAdapter
+import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
 
 import java.util.function.Function
@@ -35,14 +38,13 @@ import java.util.function.Function
 /**
  * Created by darksnake on 30-Aug-16.
  */
-class PlotHelper implements GrindHelper {
+class PlotHelper extends AbstractHelper {
     static final String DEFAULT_FRAME = "default";
-    Context context;
 
     PlotManager manager;
 
     PlotHelper(Context context = Global.instance()) {
-        this.context = context;
+        super(context)
         context.pluginManager().getOrLoad("plots")
         this.manager = context.getFeature(PlotManager)
     }
@@ -50,6 +52,7 @@ class PlotHelper implements GrindHelper {
     PlotManager getManager() {
         return manager
     }
+
 
     def configure(String frame, Closure config) {
         manager.getPlotFrame(frame).configure(config);
@@ -59,10 +62,12 @@ class PlotHelper implements GrindHelper {
         manager.getPlotFrame(DEFAULT_FRAME).configure(config);
     }
 
+    @MethodDescription("Apply meta to frame with given name")
     def configure(String frame, Map values, Closure config) {
         manager.getPlotFrame(frame).configure(values, config);
     }
 
+    @MethodDescription("Apply meta to default frame")
     def configure(Map values, Closure config) {
         manager.getPlotFrame(DEFAULT_FRAME).configure(values, config);
     }
@@ -72,7 +77,15 @@ class PlotHelper implements GrindHelper {
      * @param parameters
      * @param function
      */
-    XYPlottable plot(Map parameters, Closure<Double> function) {
+    @MethodDescription("Plot a function defined by a closure.")
+    @ValueDefs([
+            @ValueDef(name = "frame", info = "Frame name"),
+            @ValueDef(name = "name", info = "Plottable name"),
+            @ValueDef(name = "from", type = ValueType.NUMBER, def = "0", info = "Lower x boundary for plot"),
+            @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for plot"),
+            @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per plot")
+    ])
+    XYPlottable plot(Map parameters = [:], Closure<Double> function) {
         String frameName = parameters.get("frame", DEFAULT_FRAME)
         String pltName = parameters.get("name", "function_${function.hashCode()}");
         double from = parameters.get("from", 0d) as Double;
@@ -85,10 +98,8 @@ class PlotHelper implements GrindHelper {
         return res;
     }
 
-    XYPlottable plot(Closure<Double> function) {
-        return plot([:], function);
-    }
 
+    @MethodDescription("Plot data using x and y array")
     XYPlottable plot(double[] x, double[] y, String name = "data", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, x, y);
         manager.getPlotFrame(frame).add(res)
@@ -101,6 +112,7 @@ class PlotHelper implements GrindHelper {
         return res;
     }
 
+    @MethodDescription("Plot data using x-y map")
     XYPlottable plot(Map<Number, Number> dataMap, String name = "data", String frame = DEFAULT_FRAME) {
         def x = [];
         def y = [];
@@ -111,6 +123,7 @@ class PlotHelper implements GrindHelper {
         return plot(x, y, name, frame);
     }
 
+    @MethodDescription("Plot data using iterable point source and adapter")
     XYPlottable plot(Iterable<Values> source, PointAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
         def res = PlottableData.plot(name, XYAdapter.from(adapter), source);
         manager.getPlotFrame(frame).add(res)
@@ -124,6 +137,7 @@ class PlotHelper implements GrindHelper {
      * @param cl
      * @return
      */
+    @MethodDescription("Build data plot using any point source and closure to configure adapter")
     XYPlottable plot(Map parameters, Iterable<Values> source,
                      @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
         Meta configuration = Grind.buildMeta(parameters, cl);
@@ -143,8 +157,8 @@ class PlotHelper implements GrindHelper {
     }
 
     @Override
-    MarkupBuilder getHeader() {
-        return MarkupBuilder.text("This is ").addText("plots", "blue").addText(" helper");
+    protected MarkupBuilder getHelperDescription() {
+        return new MarkupBuilder().text("This is ").text("plots", "blue").text(" helper");
     }
 
 }

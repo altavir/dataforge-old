@@ -11,7 +11,6 @@ class WorkspaceTest {
 
         context {
             name = "TEST"
-            plugin "plots"
         }
 
         data {

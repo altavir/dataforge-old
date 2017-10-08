@@ -62,9 +62,11 @@ def workspace = new WorkspaceSpec(Global.instance()).with {
     }
 
     task pipe("dif", dependsOn: "table") {
-        def power = meta.getDouble("power", context.getDouble("power"))
-        return (input as ColumnTable).buildColumn("y", ValueType.NUMBER) {
-            it["y"] - it["x"]**power
+        result {input ->
+            def power = meta.getDouble("power", context.getDouble("power"))
+            return (input as ColumnTable).buildColumn("y", ValueType.NUMBER) {
+                it["y"] - it["x"]**power
+            }
         }
     }
 

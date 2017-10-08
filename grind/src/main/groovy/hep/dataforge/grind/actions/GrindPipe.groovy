@@ -16,8 +16,10 @@ import javafx.util.Pair
  */
 @CompileStatic
 class GrindPipe<T, R> extends OneToOneAction<T, R> {
-    static GrindPipe build(String name, @DelegatesTo(PipeBuilder) Closure action) {
-        return new GrindPipe(name, action.parameterTypes.first(), Object, action);
+    static GrindPipe build(Map params = [:], String name, @DelegatesTo(PipeBuilder) Closure action) {
+        Class inputType = params.get("inputType", action.parameterTypes.first()) as Class
+        Class outputType = params.get("outputType", Object) as Class
+        return new GrindPipe(name, inputType, outputType, action);
     }
 
 

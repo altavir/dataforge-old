@@ -49,7 +49,7 @@ class GrindMarkupBuilder extends BuilderSupport {
                         .update(attributes);
                 if (value != null) {
                     if ("row" == name) {
-                        value.each { mb.addText(it) }
+                        value.each { mb.text(it) }
                     }
 
                     if (value instanceof Markup) {

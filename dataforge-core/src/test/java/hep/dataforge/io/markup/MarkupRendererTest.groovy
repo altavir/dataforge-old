@@ -14,19 +14,19 @@ class MarkupRendererTest extends Specification {
         SimpleMarkupRenderer r = new SimpleMarkupRenderer(System.out);
         when:
         MarkupBuilder builder = new MarkupBuilder()
-                .addText("this is my text ")
-                .addList(
+                .text("this is my text ")
+                .list(
                 MarkupBuilder.text("first line"),
                 MarkupBuilder.text("second line"),
                 MarkupBuilder.text("red line", "red"),
-                new MarkupBuilder().addText("sub list").addList(
+                new MarkupBuilder().text("sub list").list(
                         MarkupBuilder.text("first line"),
                         MarkupBuilder.text("second line"),
                         MarkupBuilder.text("colored line", "red")
                 ),
                 MarkupBuilder.text("blue line", "blue")
         )
-                .addText("text end")
+                .text("text end")
         Markup markup = builder.build();
         then:
         r.render(markup);
@@ -37,19 +37,19 @@ class MarkupRendererTest extends Specification {
         HTMLMarkupRenderer r = new HTMLMarkupRenderer(System.out);
         when:
         MarkupBuilder builder = new MarkupBuilder()
-                .addText("this is my text ")
-                .addList(
+                .text("this is my text ")
+                .list(
                 MarkupBuilder.text("first line"),
                 MarkupBuilder.text("second line"),
                 MarkupBuilder.text("red line", "red"),
-                new MarkupBuilder().addText("sub list").addList(
+                new MarkupBuilder().text("sub list").list(
                         MarkupBuilder.text("first line"),
                         MarkupBuilder.text("second line"),
                         MarkupBuilder.text("colored line", "red")
                 ),
                 MarkupBuilder.text("blue line", "blue")
         )
-                .addText("text end")
+                .text("text end")
 
         Table table = new ListTable.Builder("x", "y", "z")
                 .row(1, 2, 3)
@@ -58,7 +58,7 @@ class MarkupRendererTest extends Specification {
                 .build()
 
         def tableMarkup = MarkupUtils.markupTable(table).setValue("html.width","100%");
-        builder.addContent(tableMarkup);
+        builder.content(tableMarkup);
         Markup markup = builder.build();
         then:
         println(markup.meta.toString())

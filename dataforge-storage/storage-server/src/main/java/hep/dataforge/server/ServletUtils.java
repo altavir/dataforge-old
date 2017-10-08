@@ -58,7 +58,7 @@ public class ServletUtils {
 //            } else {
 //                vt = ValueType.TEXT;
 //            }
-//            table.addColumn(new ColumnDescription(name, vt, name));
+//            table.column(new ColumnDescription(name, vt, name));
 //        }
 //
 //        for (DataPoint p : source) {

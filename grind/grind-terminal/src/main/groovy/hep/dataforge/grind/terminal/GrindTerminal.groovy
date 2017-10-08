@@ -41,7 +41,7 @@ import java.util.stream.Stream
  * Created by darksnake on 29-Aug-16.
  */
 @CompileStatic
-@ValuesDefs([
+@ValueDefs([
         @ValueDef(name = "evalClosures", type = ValueType.BOOLEAN, def = "true", info = "Automatically replace closures by their results"),
         @ValueDef(name = "evalData", type = ValueType.BOOLEAN, def = "false", info = "Automatically replace data by its value"),
         @ValueDef(name = "unwrap", type = ValueType.BOOLEAN, def = "false", info = "Apply result hooks for each element of collection or stream")
@@ -168,7 +168,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (obj instanceof Markedup) {
             renderer.ln()
             if (obj instanceof Named) {
-                renderer.render(MarkupBuilder.text((obj as Named).name, "red").build())
+                renderer.render(new MarkupBuilder().text((obj as Named).name, "red").build())
                 renderer.ln()
             }
             renderer.render((obj as Markedup).markup(markupConfig))
@@ -184,16 +184,16 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof String) {
             NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(obj);
             if (descriptor.meta().isEmpty()) {
-                renderer.render(MarkupBuilder.text("The description for ")
-                        .addText("${obj}", "blue")
-                        .addText(" is empty")
+                renderer.render(new MarkupBuilder().text("The description for ")
+                        .text("${obj}", "blue")
+                        .text(" is empty")
                         .build()
                 )
             } else {
                 renderer.render(MarkupUtils.markupDescriptor(descriptor))
             }
         } else {
-            MarkupBuilder builder = MarkupBuilder.text("No description found for ").addText("${obj}", "blue")
+            MarkupBuilder builder = new MarkupBuilder().text("No description found for ").text("${obj}", "blue")
             renderer.render(builder.build());
         }
         renderer.ln()

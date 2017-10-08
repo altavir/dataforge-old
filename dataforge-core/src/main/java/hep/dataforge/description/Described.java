@@ -32,7 +32,7 @@ public interface Described {
     @Nullable
     default MarkupBuilder getHeader() {
         if (this instanceof Named) {
-            return MarkupBuilder.text(((Named) this).getName(), "blue");
+            return new MarkupBuilder().text(((Named) this).getName(), "blue");
         } else {
             //TODO add customizable markup for different renderers
             return new MarkupBuilder();

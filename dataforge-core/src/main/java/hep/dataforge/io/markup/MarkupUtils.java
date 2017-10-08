@@ -31,19 +31,19 @@ public class MarkupUtils {
     }
 
     private static void applyDescriptorHead(MarkupBuilder builder, Described obj) {
-        builder.addContent(obj.getHeader());
+        builder.content(obj.getHeader());
 //        NodeDescriptor descriptor = obj.getDescriptor();
 //        MarkupBuilder builder = new MarkupBuilder();
 //        if (descriptor instanceof ActionDescriptor) {
 //            ActionDescriptor ad = (ActionDescriptor) descriptor;
-//            builder.addText(ad.getName(), "green")
-//                    .addText(" {input : ")
-//                    .addText(ad.inputType(), "cyan")
-//                    .addText(", output : ")
-//                    .addText(ad.outputType(), "cyan")
-//                    .addText(String.format("}: %s", ad.info()));
+//            builder.text(ad.getName(), "green")
+//                    .text(" {input : ")
+//                    .text(ad.inputType(), "cyan")
+//                    .text(", output : ")
+//                    .text(ad.outputType(), "cyan")
+//                    .text(String.format("}: %s", ad.info()));
 //        } else if (descriptor.getName() != null && !descriptor.getName().isEmpty()) {
-//            builder.addText(descriptor.getName(), "blue");
+//            builder.text(descriptor.getName(), "blue");
 //        }
 //        return builder;
     }
@@ -52,33 +52,33 @@ public class MarkupUtils {
         MarkupBuilder builder = new MarkupBuilder();
 
         if (valueDef.getBoolean("required", false)) {
-            builder.addText("(*) ", "cyan");
+            builder.text("(*) ", "cyan");
         }
 
-        builder.addText(valueDef.getString("name"), "red");
+        builder.text(valueDef.getString("name"), "red");
 
         if (valueDef.getBoolean("multiple", false)) {
-            builder.addText(" (mult)", "cyan");
+            builder.text(" (mult)", "cyan");
         }
 
-        builder.addText(String.format(" (%s)", valueDef.getString("type", "STRING")));
+        builder.text(String.format(" (%s)", valueDef.getString("type", "STRING")));
 
         if (valueDef.hasValue("def")) {
             Value def = valueDef.getValue("default");
             if (def.getType().equals(ValueType.STRING)) {
-                builder.addText(" = \"")
-                        .addText(def.stringValue(), "yellow")
-                        .addText("\": ");
+                builder.text(" = \"")
+                        .text(def.stringValue(), "yellow")
+                        .text("\": ");
             } else {
-                builder.addText(" = ")
-                        .addText(def.stringValue(), "yellow")
-                        .addText(": ");
+                builder.text(" = ")
+                        .text(def.stringValue(), "yellow")
+                        .text(": ");
             }
         } else {
-            builder.addText(": ");
+            builder.text(": ");
         }
 
-        builder.addText(String.format("%s", valueDef.getString("info")));
+        builder.text(String.format("%s", valueDef.getString("info")));
         return builder;
     }
 
@@ -89,17 +89,17 @@ public class MarkupUtils {
         if (nodeDef.hasMeta("node")) {
             MarkupBuilder elementList = MarkupBuilder.list(-1, "+ ");
             for (Meta elDef : nodeDef.getMetaList("node")) {
-                elementList.addContent(descriptorElement(elDef));
+                elementList.content(descriptorElement(elDef));
             }
-            builder.addContent(elementList);
+            builder.content(elementList);
         }
 
         if (nodeDef.hasMeta("value")) {
             MarkupBuilder valueList = MarkupBuilder.list(-1, "- ");
             for (Meta parDef : nodeDef.getMetaList("value")) {
-                valueList.addContent(descriptorValue(parDef));
+                valueList.content(descriptorValue(parDef));
             }
-            builder.addContent(valueList);
+            builder.content(valueList);
         }
     }
 
@@ -107,17 +107,17 @@ public class MarkupUtils {
         MarkupBuilder builder = new MarkupBuilder();
 
         if (elementDef.getBoolean("required", false)) {
-            builder.addText("(*) ", "cyan");
+            builder.text("(*) ", "cyan");
         }
 
-        builder.addText(elementDef.getString("name"), "magenta");
+        builder.text(elementDef.getString("name"), "magenta");
 
         if (elementDef.getBoolean("multiple", false)) {
-            builder.addText(" (mult)", "cyan");
+            builder.text(" (mult)", "cyan");
         }
 
         if (elementDef.hasValue("info")) {
-            builder.addText(String.format(": %s", elementDef.getString("info")));
+            builder.text(String.format(": %s", elementDef.getString("info")));
         }
 
         applyDescriptorNode(builder, elementDef);
@@ -136,17 +136,17 @@ public class MarkupUtils {
 
         MarkupBuilder header = new MarkupBuilder().setValue("header", true);
         table.getFormat().getColumns().forEach(c -> {
-            header.addColumn(c.getTitle(), getDefaultTextWidth(c.getPrimaryType()));
+            header.column(c.getTitle(), getDefaultTextWidth(c.getPrimaryType()));
         });
-        builder.addContent(header);
+        builder.content(header);
 
         for (Values dp : table) {
             MarkupBuilder row = new MarkupBuilder();
             table.getFormat().getColumns().forEach(c -> {
                 int width = getDefaultTextWidth(c.getPrimaryType());
-                row.addColumn(format(dp.getValue(c.getName()), width), width);
+                row.column(format(dp.getValue(c.getName()), width), width);
             });
-            builder.addContent(row);
+            builder.content(row);
         }
         return builder;
     }

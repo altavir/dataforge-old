@@ -7,7 +7,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
 import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValuesDefs
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.grind.helpers.GrindHelperFactory
 import hep.dataforge.meta.Meta
 import org.codehaus.groovy.control.CompilerConfiguration
@@ -18,7 +18,7 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
  */
 
 @CompileStatic
-@ValuesDefs([
+@ValueDefs([
         @ValueDef(name = "import.utils", multiple = true, info = "The set of (full qualified) names of utility classes that should be imported into the shell"),
         @ValueDef(name = "import.package", multiple = true, info = "The set of (full qualified) package names to be fully imported"),
         @ValueDef(name = "import.classes", multiple = true, info = "The list of class names to be imported")

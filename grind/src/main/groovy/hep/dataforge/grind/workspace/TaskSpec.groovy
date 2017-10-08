@@ -11,11 +11,11 @@ import hep.dataforge.workspace.tasks.TaskBuilder
 class TaskSpec extends TaskBuilder {
 
     def join(Map params = [:], String name = "@dynamic", @DelegatesTo(GrindJoin.JoinGroupBuilder) Closure action) {
-        doLast(new GrindJoin(params, name, action));
+        doLast(GrindJoin.build(params, name, action));
     }
 
     def action(Map params = [:], String name = "@dynamic", @DelegatesTo(GrindPipe.PipeBuilder) Closure action) {
-        doLast(new GrindPipe(params, name, action))
+        doLast(GrindPipe.build(params, name, action))
     }
 
 }

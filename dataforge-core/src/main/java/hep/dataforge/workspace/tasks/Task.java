@@ -74,7 +74,7 @@ public interface Task<R> extends Named, Described {
 
     @Override
     default MarkupBuilder getHeader() {
-        return MarkupBuilder.text(getName(), "blue");
+        return new MarkupBuilder().text(getName(), "blue");
     }
 
     /**

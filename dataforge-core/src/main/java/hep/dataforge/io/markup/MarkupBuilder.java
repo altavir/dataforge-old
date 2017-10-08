@@ -6,6 +6,7 @@ import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.GenericBuilder;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Collection;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -17,13 +18,13 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.LIST_TYPE;
  */
 public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
-    public static MarkupBuilder text(String text) {
-        return new MarkupBuilder().addText(text);
-    }
-
-    public static MarkupBuilder text(String text, String color) {
-        return new MarkupBuilder().addText(text, color);
-    }
+//    public static MarkupBuilder create(String text) {
+//        return new MarkupBuilder().text(text);
+//    }
+//
+//    public static MarkupBuilder create(String text, String color) {
+//        return new MarkupBuilder().text(text, color);
+//    }
 
     /**
      * Create list markup with given level and bullet
@@ -133,17 +134,17 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
         return setContent(Stream.of(content));
     }
 
-    public MarkupBuilder addContent(Meta content) {
+    public MarkupBuilder content(Meta content) {
         builder.putNode(Markup.MARKUP_CONTENT_NODE, content);
         return self();
     }
 
-    public MarkupBuilder addContent(MarkupBuilder content) {
+    public MarkupBuilder content(MarkupBuilder content) {
         builder.putNode(Markup.MARKUP_CONTENT_NODE, content.getMeta());
         return self();
     }
 
-    public MarkupBuilder addContent(Markup content) {
+    public MarkupBuilder content(Markup content) {
         builder.putNode(Markup.MARKUP_CONTENT_NODE, content.getMeta());
         return self();
     }
@@ -154,8 +155,8 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
      * @param text
      * @return
      */
-    public MarkupBuilder addText(String text) {
-        return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
+    public MarkupBuilder text(String text) {
+        return content(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
         );
     }
@@ -167,8 +168,8 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
      * @param color
      * @return
      */
-    public MarkupBuilder addText(String text, String color) {
-        return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
+    public MarkupBuilder text(String text, String color) {
+        return content(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
                 .setValue("color", color)
         );
@@ -180,7 +181,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
      * @return
      */
     public MarkupBuilder ln() {
-        return addText("\n");
+        return text("\n");
     }
 
     /**
@@ -190,8 +191,8 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
      * @param width
      * @return
      */
-    public MarkupBuilder addColumn(String text, int width) {
-        return addContent(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
+    public MarkupBuilder column(String text, int width) {
+        return content(new MetaBuilder(Markup.MARKUP_CONTENT_NODE)
                 .setValue("text", text)
                 .setValue("textWidth", width)
         );
@@ -203,23 +204,27 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
      * @param items
      * @return
      */
-    public MarkupBuilder addList(MarkupBuilder... items) {
-        return addContent(new MarkupBuilder()
+    public MarkupBuilder list(MarkupBuilder... items) {
+        return content(new MarkupBuilder()
                 .setType(GenericMarkupRenderer.LIST_TYPE)
                 .setContent(items)
         );
     }
 
+    public MarkupBuilder list(Collection<MarkupBuilder> items) {
+        return list(items.toArray(new MarkupBuilder[items.size()]));
+    }
 
-    public MarkupBuilder addTable(MarkupBuilder... rows) {
-        return addContent(new MarkupBuilder()
+
+    public MarkupBuilder table(MarkupBuilder... rows) {
+        return content(new MarkupBuilder()
                 .setType(GenericMarkupRenderer.TABLE_TYPE)
                 .setContent(rows)
         );
     }
 
-    public MarkupBuilder addHeader(String text, int level) {
-        return addContent(new MarkupBuilder().setType("header").setValue("level", level).setValue("text", text));
+    public MarkupBuilder header(String text, int level) {
+        return content(new MarkupBuilder().setType("header").setValue("level", level).setValue("text", text));
     }
 
 }

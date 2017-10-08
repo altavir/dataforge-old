@@ -271,7 +271,7 @@ public class DescriptorUtils {
                     // Проверяем что это метод, у которого есть аннотация
                     if (method.getName().equals(methodName)
                             && (method.isAnnotationPresent(ValueDef.class) || method.isAnnotationPresent(NodeDef.class)
-                            || method.isAnnotationPresent(ValuesDefs.class) || method.isAnnotationPresent(NodeDefs.class))) {
+                            || method.isAnnotationPresent(ValueDefs.class) || method.isAnnotationPresent(NodeDefs.class))) {
                         return method;
                     }
                 }

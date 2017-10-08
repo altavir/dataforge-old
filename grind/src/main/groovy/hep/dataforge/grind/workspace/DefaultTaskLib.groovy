@@ -85,7 +85,7 @@ class DefaultTaskLib {
     static Task pipe(Map params = [:],
                      String name,
                      @DelegatesTo(value = GrindPipe.PipeBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
-        return SingleActionTask.from(new GrindPipe(params, name, action), dependencyBuilder(params));
+        return SingleActionTask.from(GrindPipe.build(params, name, action), dependencyBuilder(params));
     }
 
     /**
@@ -98,7 +98,7 @@ class DefaultTaskLib {
     static Task join(Map params = [:],
                      String name,
                      @DelegatesTo(value = GrindJoin.JoinGroupBuilder, strategy = Closure.DELEGATE_FIRST) Closure action) {
-        return SingleActionTask.from(new GrindJoin(params, name, action), dependencyBuilder(params));
+        return SingleActionTask.from(GrindJoin.build(params, name, action), dependencyBuilder(params));
     }
 
     /**

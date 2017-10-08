@@ -18,8 +18,10 @@ import java.util.stream.Stream
 
 //@CompileStatic
 class GrindJoin<T, R> extends GenericAction<T, R> {
-    static GrindJoin build(String name, @DelegatesTo(GrindJoin.JoinGroupBuilder) Closure action) {
-        return new GrindJoin<>(name, Object, Object, action);
+    static GrindJoin build(Map params = [:], String name, @DelegatesTo(GrindJoin.JoinGroupBuilder) Closure action) {
+        Class inputType = params.get("inputType",Object) as Class
+        Class outputType = params.get("outputType",Object) as Class
+        return new GrindJoin<>(name, inputType, outputType, action);
     }
 
 

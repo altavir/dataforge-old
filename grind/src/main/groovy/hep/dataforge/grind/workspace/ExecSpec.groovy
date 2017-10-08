@@ -6,7 +6,7 @@ import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValuesDefs
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.SimpleMarkupRenderer
@@ -242,7 +242,7 @@ class ExecSpec {
     }
 
 //    @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
-    @ValuesDefs([
+    @ValueDefs([
             @ValueDef(name = "timeout", type = ValueType.NUMBER, info = "The delay in milliseconds between end of output consumption and process force termination"),
             @ValueDef(name = "workDir", info = "The working directory for the process as defined by IOManager::getFile")
     ])

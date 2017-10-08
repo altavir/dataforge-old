@@ -58,16 +58,16 @@ public interface Table extends Markedup, NavigablePointSource {
     default Markup markup(Meta configuration) {
         MarkupBuilder builder = new MarkupBuilder().setType(TABLE_TYPE);
         //render header
-        builder.addContent(new MarkupBuilder()
+        builder.content(new MarkupBuilder()
                 .setValue("header", true)
                 .setType("tr") //optional
-                .setContent(getFormat().getColumns().map(col -> MarkupBuilder.text(col.getTitle())))
+                .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(col.getTitle())))
         );
         //render table itself
         forEach(dp -> {
-            builder.addContent(new MarkupBuilder()
+            builder.content(new MarkupBuilder()
                     .setType("td") // optional
-                    .setContent(getFormat().getColumns().map(col -> MarkupBuilder.text(dp.getString(col.getName())))));
+                    .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(dp.getString(col.getName())))));
         });
         return builder.build();
     }

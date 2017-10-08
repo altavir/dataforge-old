@@ -15,15 +15,10 @@
  */
 package hep.dataforge.description;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
- * <p>ValuesDefs class.</p>
+ * <p>ValueDefs class.</p>
  *
  * @author Alexander Nozik
  * @version $Id: $Id
@@ -32,6 +27,6 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-public @interface ValuesDefs {
+public @interface ValueDefs {
     ValueDef[] value();
 }

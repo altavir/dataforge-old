@@ -25,19 +25,19 @@ class TerminalMarkupRendererTest extends Specification {
     def "Test terminal markup"() {
         when:
         MarkupBuilder builder = new MarkupBuilder()
-                .addText("this is my text ")
-                .addList(
+                .text("this is my text ")
+                .list(
                 MarkupBuilder.text("first line"),
                 MarkupBuilder.text("second line"),
                 MarkupBuilder.text("red line", "red"),
-                new MarkupBuilder().addText("sub list").addList(
+                new MarkupBuilder().text("sub list").list(
                         MarkupBuilder.text("first line"),
                         MarkupBuilder.text("second line"),
                         MarkupBuilder.text("colored line", "cyan")
                 ),
                 MarkupBuilder.text("blue line", "blue")
         )
-                .addText("text end")
+                .text("text end")
         Markup markup = builder.build();
         then:
         println(markup.meta.toString())

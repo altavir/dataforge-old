@@ -15,7 +15,7 @@ import hep.dataforge.workspace.Workspace
 import hep.dataforge.workspace.tasks.Task
 
 /**
- * A DSL helper to builder workspace
+ * A DSL helper to build workspace
  * @author Alexander Nozik
  */
 @CompileStatic
