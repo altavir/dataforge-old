@@ -15,10 +15,10 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.EnvelopeWriter;
-import hep.dataforge.io.envelopes.WrapperEnvelopeType;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.SimpleConfigurable;
 import javafx.beans.binding.ListBinding;
@@ -148,12 +148,12 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     @Override
     public Envelope wrap() {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        EnvelopeWriter writer = new WrapperEnvelopeType().getWriter();
+        EnvelopeWriter writer = DefaultEnvelopeType.instance.getWriter();
         for (Plottable pl : this) {
             try {
                 writer.write(baos, pl.wrap());
             } catch (IOException ex) {
-                throw new RuntimeException("Failed to write plotable to envelope", ex);
+                throw new RuntimeException("Failed to write plottable to envelope", ex);
             } catch (UnsupportedOperationException uex) {
                 LoggerFactory.getLogger(getClass()).error("Failed to wrap plottable {} becouse wits wrapper is not implemented", pl.getName());
             }

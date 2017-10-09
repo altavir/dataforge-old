@@ -16,7 +16,6 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.Described;
-import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Wrappable;
 import hep.dataforge.meta.Configurable;
@@ -31,7 +30,6 @@ import hep.dataforge.values.Values;
 import java.util.List;
 
 import static hep.dataforge.values.ValueType.BOOLEAN;
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * Единичный набор данных для отрисовки
@@ -51,12 +49,12 @@ public interface Plottable extends Named, Metoid, Configurable, Wrappable, Descr
      * @param query
      * @return
      */
-    @NodeDef(name = "xRange", info = "X filter")
-    @ValueDef(name = "xRange.from", type = {NUMBER}, info = "X range from")
-    @ValueDef(name = "xRange.to", type = {NUMBER}, info = "X range to")
-    @ValueDef(name = "numPoints", type = {NUMBER}, info = "A required number of visible points. The real number could differ from requested one.")
     List<Values> getData(Meta query);
 
+    /**
+     * Get the whole data set without limitations
+     * @return
+     */
     default List<Values> getData() {
         return getData(Meta.empty());
     }

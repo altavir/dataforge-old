@@ -16,7 +16,7 @@ import static hep.dataforge.io.envelopes.Wrappable.WRAPPED_TYPE_KEY;
 public interface UnWrapper<T> {
 
     /**
-     * Type frome envelope meta 'type' field
+     * Type from envelope meta 'type' field
      *
      * @return
      */

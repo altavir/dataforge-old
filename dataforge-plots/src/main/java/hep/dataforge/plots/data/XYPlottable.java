@@ -68,6 +68,10 @@ public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
      * @param query
      * @return
      */
+    @NodeDef(name = "xRange", info = "X filter")
+    @ValueDef(name = "xRange.from", type = {NUMBER}, info = "X range from")
+    @ValueDef(name = "xRange.to", type = {NUMBER}, info = "X range to")
+    @ValueDef(name = "numPoints", type = {NUMBER}, info = "A required number of visible points. The real number could differ from requested one.")
     @Override
     public List<Values> getData(Meta query) {
         if (query.isEmpty()) {

@@ -3,10 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.io.envelopes;
+package hep.dataforge.io.messages;
 
-import hep.dataforge.io.messages.Dispatcher;
-import hep.dataforge.io.messages.Responder;
+import hep.dataforge.io.envelopes.Envelope;
 
 /**
  * A Responder that does not respond itself but delegates response to
