@@ -140,11 +140,13 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     @ProvidesNames(PLOT_TARGET)
     public Stream<String> list() {
-        return plots.entrySet().stream().flatMap(entry ->)
-        return Stream.concat(
-                plots.values().stream().flatMap(group -> group.listPlots().map(it -> Name.joinString(group.name, it))),
-                plots.keySet().stream()
-        );
+        return plots.values().stream().flatMap(pl -> {
+            if (pl instanceof PlotGroup) {
+                return ((PlotGroup) pl).list().map(it -> Name.joinString(pl.getName(), it));
+            } else {
+                return Stream.of(pl.getName());
+            }
+        });
     }
 
     /**
@@ -237,22 +239,19 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             EnvelopeWriter writer = DefaultEnvelopeType.instance.getWriter();
 
-            for (PlotGroup subGroup : group.groups.values()) {
+            for (Plottable plot : group.plots.values()) {
                 try {
-                    writer.write(baos, wrap(subGroup));
+                    Envelope env;
+                    if(plot instanceof PlotGroup){
+                        env = wrap((PlotGroup) plot);
+                    } else if(plot instanceof Plot){
+                        env = plotWrapper.wrap((Plot) plot);
+                    } else {
+                        throw new RuntimeException("Unknown plottable type");
+                    }
+                    writer.write(baos, env);
                 } catch (IOException ex) {
                     throw new RuntimeException("Failed to write plot group to envelope", ex);
-                }
-            }
-
-
-            for (Plot pl : group.plots.values()) {
-                try {
-                    writer.write(baos, plotWrapper.wrap(pl));
-                } catch (IOException ex) {
-                    throw new RuntimeException("Failed to write plot to envelope", ex);
-                } catch (UnsupportedOperationException uex) {
-                    LoggerFactory.getLogger(getClass()).error("Failed to wrap plottable {} because its wrapper is not implemented", pl.getName());
                 }
             }
 

@@ -211,8 +211,13 @@ public class PlotContainer implements Initializable, FXObject {
     public void setPlot(FXPlotFrame plot) {
         this.plot = plot;
 
-        ObservableList<Plot> plots = FXCollections.observableArrayList(plot.getPlots().getChildPlots());
+        ObservableList<Plot> plots = FXCollections.observableArrayList();
 
+        plot.getPlots().forEach(it-> {
+            if(it instanceof Plot){
+                plots.add((Plot) it);
+            }
+        });
 
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
@@ -272,12 +277,12 @@ public class PlotContainer implements Initializable, FXObject {
 
     @FXML
     private void onShowAll(ActionEvent event) {
-        this.plot.getPlots().forEachPlot(pl -> pl.configureValue("visible", true));
+        this.plot.getPlots().forEach(pl -> pl.configureValue("visible", true));
     }
 
     @FXML
     private void onHideAll(ActionEvent event) {
-        this.plot.getPlots().forEachPlot(pl -> pl.configureValue("visible", false));
+        this.plot.getPlots().forEach(pl -> pl.configureValue("visible", false));
     }
 
     /**

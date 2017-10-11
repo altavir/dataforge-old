@@ -81,10 +81,10 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
     }
 
     @Override
-    public void notifyConfigurationChanged(String name) {
-        Plottable plt = getPlots().
-
-                root.getPlotMeta(Name.of(name)).ifPresent(laminate -> updatePlotConfig(name, laminate));
+    public void notifyConfigurationChanged(String path) {
+        getPlots().list().filter(it -> it.startsWith(path)).forEach(name ->
+                root.getPlotMeta(Name.of(name)).ifPresent(laminate -> updatePlotConfig(name, laminate))
+        );
     }
 
     @Override
