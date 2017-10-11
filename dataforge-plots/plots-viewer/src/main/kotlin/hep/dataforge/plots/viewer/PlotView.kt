@@ -8,7 +8,6 @@ package hep.dataforge.plots.viewer
 import hep.dataforge.io.envelopes.EnvelopeType
 import hep.dataforge.plots.fx.FXPlotFrame
 import hep.dataforge.plots.fx.PlotContainer
-import hep.dataforge.plots.wrapper.PlotUnWrapper
 import javafx.scene.Parent
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
@@ -62,7 +61,7 @@ class PlotView : View("DataForge plot viewer") {
         EnvelopeType.infer(file.toPath()).ifPresent { type ->
             try {
                 val envelope = type.reader.read(file.toPath())
-                val frame = PlotUnWrapper().unWrap(envelope) as FXPlotFrame
+                val frame = PlotFrameWrapper().unWrap(envelope) as FXPlotFrame
                 container.plot = frame
             } catch (e: IOException) {
                 throw RuntimeException(e)

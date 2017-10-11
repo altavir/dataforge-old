@@ -91,8 +91,8 @@ class KPipe<T, R>(
 }
 
 
-class JoinGroup<T, R>(val context: Context, internal val node: DataNode<out T>) {
-    var name: String = node.name;
+class JoinGroup<T, R>(val context: Context, name: String? = null, internal val node: DataNode<out T>) {
+    var name: String = name ?: node.name;
     var meta: MetaBuilder = node.meta.builder
 
     lateinit var result: suspend ActionEnv.(Map<String, T>) -> R
@@ -115,7 +115,7 @@ class JoinGroupBuilder<T, R> {
     fun byValue(tag: String, defaultTag: String = "@default", action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { context, node ->
             GroupBuilder.byValue(tag, defaultTag).group(node).map {
-                JoinGroup<T, R>(context, node).apply(action)
+                JoinGroup<T, R>(context, null, node).apply(action)
             }
         }
     }
@@ -126,7 +126,7 @@ class JoinGroupBuilder<T, R> {
     fun group(groupName: String, filter: DataFilter, action: JoinGroup<T, R>.() -> Unit) {
         groupRules += { context, node ->
             listOf(
-                    JoinGroup<T, R>(context, filter.filter(node)).apply(action)
+                    JoinGroup<T, R>(context, groupName, filter.filter(node)).apply(action)
             )
         }
     }
@@ -137,7 +137,7 @@ class JoinGroupBuilder<T, R> {
     fun result(resultName: String? = null, f: suspend ActionEnv.(Map<String, T>) -> R) {
         groupRules += { context, node ->
             listOf(
-                    JoinGroup<T, R>(context, node).apply {
+                    JoinGroup<T, R>(context, resultName, node).apply {
                         result(f)
                         if (resultName != null) {
                             name = resultName

@@ -23,7 +23,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.data.PlottableData;
+import hep.dataforge.plots.data.PlotData;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.XYAdapter;
 
@@ -97,7 +97,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         }
         XYAdapter adapter = new XYAdapter(meta.getMeta("adapter", Meta.buildEmpty("adapter")));
 
-        PlottableData plottableData = PlottableData.plot(name, adapter, input);
+        PlotData plottableData = PlotData.plot(name, adapter, input);
         plottableData.configure(meta);
         frame.add(plottableData);
 

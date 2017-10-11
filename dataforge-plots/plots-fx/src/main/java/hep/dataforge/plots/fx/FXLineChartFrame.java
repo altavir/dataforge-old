@@ -15,10 +15,11 @@
  */
 package hep.dataforge.plots.fx;
 
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.plots.Plottable;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.data.XYPlottable;
+import hep.dataforge.plots.data.XYPlot;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Values;
 import javafx.embed.swing.SwingFXUtils;
@@ -73,8 +74,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
     }
 
     @Override
-    protected void updatePlotData(String name) {
-        Plottable plottable = get(name);
+    protected void updatePlotData(String name, Plot plot) {
         XYChart.Series<Number, Number> series = getSeries(name);
 
         if (series == null) {
@@ -85,25 +85,25 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
             series.getData().clear();
         }
 
-        if (!(plottable instanceof XYPlottable)) {
-            LoggerFactory.getLogger(getClass()).warn("The provided Plottable is not a subclass of XYPlottable");
+        if (!(plot instanceof XYPlot)) {
+            LoggerFactory.getLogger(getClass()).warn("The provided Plot is not a subclass of XYPlot");
         }
 
-        XYAdapter adapter = XYAdapter.from(plottable.getAdapter());
+        XYAdapter adapter = XYAdapter.from(plot.getAdapter());
 
         Function<Values, Number> xFunc = (Values point) -> adapter.getX(point).numberValue();
         Function<Values, Number> yFunc = (Values point) -> adapter.getY(point).numberValue();
 
         //TODO apply filtering here
 
-        series.getData().addAll(plottable.getData().stream()
+        series.getData().addAll(plot.getData().stream()
                 .map(point -> new XYChart.Data<>(xFunc.apply(point), yFunc.apply(point)))
                 .collect(Collectors.toList()));
 
     }
 
     @Override
-    protected void updatePlotConfig(String name) {
+    protected void updatePlotConfig(String name, Laminate laminate) {
 
     }
 
@@ -118,7 +118,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
     }
 
     @Override
-    public void snapshot(OutputStream stream, Meta config) {
+    public void save(OutputStream stream, Meta config) {
         //FIXME fix method to actually use parameters
         this.chart.snapshot(new Callback<SnapshotResult, Void>() {
             @Override

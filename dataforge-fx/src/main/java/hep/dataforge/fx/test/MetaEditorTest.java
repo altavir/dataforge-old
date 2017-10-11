@@ -64,7 +64,7 @@ public class MetaEditorTest extends Application {
             }
 
             @Override
-            public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+            public void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
                 logger.info("The node {} changed", name);
             }
         });

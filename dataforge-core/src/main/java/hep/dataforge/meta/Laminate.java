@@ -262,10 +262,9 @@ public final class Laminate extends Meta implements Described {
      *
      * @param valueName
      * @param collector
-     * @param <A>
      * @return
      */
-    public <A> Value collectValue(String valueName, Collector<Value, A, Value> collector) {
+    public Value collectValue(String valueName, Collector<Value, ?, Value> collector) {
         return layers.stream()
                 .filter(layer -> layer.hasValue(valueName))
                 .map(layer -> layer.getValue(valueName))

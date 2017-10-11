@@ -1,13 +1,6 @@
 description = 'jFreeChart plugin'
 
-//configurations {
-//    jfc
-//}
-
 dependencies {
-    //JFreeChart dependancies
-//    compile 'org.jfree:jcommon:1.0.24'
-//    compile 'org.jfree:fxgraphics2d:1.5'
     compile 'org.jfree:jfreesvg:3.2'
     compile 'com.github.altavir:jfreechart-fx:1.5.0'
     compile project(':dataforge-plots:plots-fx')

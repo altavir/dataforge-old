@@ -16,9 +16,11 @@
 package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.fx.FXObject;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotUtils;
-import hep.dataforge.plots.Plottable;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
@@ -56,13 +58,13 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 /**
  * @author Alexander Nozik
  */
-public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlotFrame {
+public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObject, FXPlotFrame {
 
     private final JFreeChart chart;
     private final XYPlot plot;
@@ -89,10 +91,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
     public Node getFXNode() {
         mode = Mode.JAVAFX;
         ChartViewer viewer = new ChartViewer(getChart());
-//        viewer.setPrefSize(800,600);
-//        viewer.setCache(false);
-//        viewer.setCacheShape(false);
-//        viewer.getCanvas().setCache(false);
 
         addExportPlotAction(viewer.getContextMenu(), this);
         return viewer;
@@ -285,98 +283,83 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
             this.chart.setTitle(meta.getString("title", ""));
         });
 //        plot.getRenderer().setLegendItemLabelGenerator((XYDataset dataset, int series) -> {
-//            Plottable p = get(dataset.getSeriesKey(series).toString());
+//            Plot p = get(dataset.getSeriesKey(series).toString());
 //            return p.getConfig().getString("title", p.getName());
 //        });
     }
 
 
     @Override
-    protected synchronized void updatePlotData(String name) {
-        Optional<Plottable> opt = opt(name);
-
-        opt.ifPresent(plottable -> {
-            if (!index.containsKey(name)) {
-                JFCDataWrapper wrapper = new JFCDataWrapper(plottable);
-                wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
-                index.put(name, wrapper);
-                run(() -> {
-                    plot.setDataset(wrapper.getIndex(), wrapper);
-                });
-            } else {
-                JFCDataWrapper wrapper = index.get(name);
-                wrapper.setPlottable(plottable);
-                wrapper.invalidateData();
-                run(() -> plot.datasetChanged(new DatasetChangeEvent(plot, wrapper)));
-            }
-        });
-
-
-        //removing data set if necessary
-        if (!opt.isPresent()) {
-            if (index.containsKey(name)) {
-                run(() -> {
-                    plot.setDataset(index.get(name).getIndex(), null);
-                });
-                index.remove(name);
-            }
+    protected synchronized void updatePlotData(String name, Plot plot) {
+        if (!index.containsKey(name)) {
+            JFCDataWrapper wrapper = new JFCDataWrapper(plot);
+            wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
+            index.put(name, wrapper);
+            run(() -> {
+                this.plot.setDataset(wrapper.getIndex(), wrapper);
+            });
+        } else {
+            JFCDataWrapper wrapper = index.get(name);
+            wrapper.setPlot(plot);
+            wrapper.invalidateData();
+            run(() -> this.plot.datasetChanged(new DatasetChangeEvent(this.plot, wrapper)));
         }
     }
 
     @Override
-    protected synchronized void updatePlotConfig(String name) {
-        opt(name).ifPresent(plottable -> {
-
-            if (!index.containsKey(name)) {
-                updatePlotData(name);
+    protected synchronized void updatePlotConfig(String name, Laminate meta) {
+        XYLineAndShapeRenderer render;
+        if (meta.getBoolean("showErrors", false)) {
+            render = new XYErrorRenderer();
+        } else {
+            switch (meta.getString("connectionType", "default")) {
+                case "step":
+                    render = new XYStepRenderer();
+                    break;
+                case "spline":
+                    render = new XYSplineRenderer();
+                    break;
+                default:
+                    render = new XYLineAndShapeRenderer();
             }
+        }
+        boolean showLines = meta.getBoolean("showLine", false);
+        boolean showSymbols = meta.getBoolean("showSymbol", true);
+        render.setDefaultShapesVisible(showSymbols);
+        render.setDefaultLinesVisible(showLines);
 
-            Meta meta = plottable.meta();
+        //Build Legend map to avoid serialization issues
+        double thickness = PlotUtils.getThickness(meta);
+        if (thickness > 0) {
+            render.setSeriesStroke(0, new BasicStroke((float) thickness));
+        }
 
-            XYLineAndShapeRenderer render;
-            if (meta.getBoolean("showErrors", false)) {
-                render = new XYErrorRenderer();
-            } else {
-                switch (meta.getString("connectionType", "default")) {
-                    case "step":
-                        render = new XYStepRenderer();
-                        break;
-                    case "spline":
-                        render = new XYSplineRenderer();
-                        break;
-                    default:
-                        render = new XYLineAndShapeRenderer();
+        Color color = PlotUtils.getAWTColor(meta);
+        if (color != null) {
+            render.setSeriesPaint(0, color);
+        }
+
+        boolean visible = meta
+                .collectValue(
+                        "visible",
+                        Collectors.reducing(Value.of(true), (v1, v2) -> Value.of(v1.booleanValue() && v2.booleanValue()))
+                )
+                .booleanValue();
+
+        render.setSeriesVisible(0, visible);
+
+        run(() -> {
+            plot.setRenderer(index.get(name).getIndex(), render);
+
+            // update configuration to default colors
+            if (color == null) {
+                Paint paint = render.lookupSeriesPaint(0);
+                if (paint instanceof Color) {
+                    //TODO replace by meta overlay
+                    getPlots().opt(name)
+                            .ifPresent(it -> it.configureValue("color", Value.of(PlotUtils.awtColorToString((Color) paint))));
                 }
             }
-            boolean showLines = meta.getBoolean("showLine", false);
-            boolean showSymbols = meta.getBoolean("showSymbol", true);
-            render.setDefaultShapesVisible(showSymbols);
-            render.setDefaultLinesVisible(showLines);
-
-            //Build Legend map to avoid serialization issues
-            double thickness = PlotUtils.getThickness(meta);
-            if (thickness > 0) {
-                render.setSeriesStroke(0, new BasicStroke((float) thickness));
-            }
-
-            Color color = PlotUtils.getAWTColor(meta);
-            if (color != null) {
-                render.setSeriesPaint(0, color);
-            }
-
-            render.setSeriesVisible(0, meta.getBoolean("visible", true));
-
-            run(() -> {
-                plot.setRenderer(index.get(name).getIndex(), render);
-
-                // update configuration to default colors
-                if (color == null) {
-                    Paint paint = render.lookupSeriesPaint(0);
-                    if (paint instanceof Color) {
-                        plottable.getConfig().setValue("color", Value.of(PlotUtils.awtColorToString((Color) paint)), false);
-                    }
-                }
-            });
         });
     }
 
@@ -387,7 +370,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
      * @param cfg
      */
     @Override
-    public synchronized void snapshot(OutputStream stream, Meta cfg) {
+    public synchronized void save(OutputStream stream, Meta cfg) {
         new Thread(() -> {
             try {
                 new SunPNGEncoderAdapter().encode(chart.createBufferedImage(cfg.getInt("width", 800), cfg.getInt("height", 600)), stream);
@@ -405,14 +388,17 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXPlot
 
     @Override
     public synchronized void remove(String plotName) {
-        this.index.remove(plotName);
         super.remove(plotName);
+        run(() -> {
+            plot.setDataset(index.get(plotName).getIndex(), null);
+        });
+        index.remove(plotName);
     }
 
     @Override
     public synchronized void clear() {
-        this.index.clear();
         super.clear();
+        this.index.clear();
     }
 
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {

@@ -1,8 +1,8 @@
 package hep.dataforge.plots.gnuplot;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.data.PlottableData;
-import hep.dataforge.plots.data.PlottableXYFunction;
+import hep.dataforge.plots.data.PlotData;
+import hep.dataforge.plots.data.PlotXYFunction;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
@@ -23,7 +23,7 @@ public class GnuPlotTest {
 
         Function<Double,Double> func = (x1) -> x1 * x1;
 
-        PlottableXYFunction funcPlot = PlottableXYFunction.plotFunction("func", func, 0.1, 4, 200);
+        PlotXYFunction funcPlot = PlotXYFunction.plotFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 
@@ -35,7 +35,7 @@ public class GnuPlotTest {
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
+        PlotData dataPlot = PlotData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
 
         frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
 

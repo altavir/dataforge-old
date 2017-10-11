@@ -92,8 +92,14 @@ public class DescriptorUtils {
      * @param element
      * @return
      */
-    public static NodeDescriptor buildDescriptor(AnnotatedElement element) {
-        return descriptorCache.computeIfAbsent(element, e -> new NodeDescriptor(buildDescriptorMeta(e)));
+    public static synchronized NodeDescriptor buildDescriptor(AnnotatedElement element) {
+        if (descriptorCache.containsKey(element)) {
+            return descriptorCache.get(element);
+        } else {
+            NodeDescriptor descriptor = new NodeDescriptor(buildDescriptorMeta(element));
+            descriptorCache.put(element, descriptor);
+            return descriptor;
+        }
     }
 
     public static NodeDescriptor buildDescriptor(String string) {

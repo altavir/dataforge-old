@@ -1,7 +1,7 @@
 package hep.dataforge.plots.demo
 
-import hep.dataforge.plots.data.PlottableData
-import hep.dataforge.plots.fx.PlotContainer
+import hep.dataforge.kodex.fx.plots.PlotContainer
+import hep.dataforge.plots.data.PlotData
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
 import hep.dataforge.tables.ValueMap
 import hep.dataforge.tables.XYAdapter
@@ -47,9 +47,7 @@ class DemoView : View("Plot demonstration") {
     lateinit var dataPane: TabPane;
 
     override val root = borderpane {
-        PlotContainer.centerIn(this).apply {
-            plot = frame
-        }
+        center = PlotContainer(frame).root
         top {
             toolbar {
                 val nameField = textfield()
@@ -104,10 +102,10 @@ class DemoView : View("Plot demonstration") {
         synchronized(this) {
             if (dataMap.containsKey(plotName)) {
                 if (!frame.opt(plotName).isPresent) {
-                    frame.add(PlottableData(plotName))
+                    frame.add(PlotData(plotName))
                 }
 
-                (frame.get(plotName) as PlottableData).fillData(dataMap[plotName]!!.stream().map { it.toValues() })
+                (frame.get(plotName) as hep.dataforge.plots.data.PlotData).fillData(dataMap[plotName]!!.stream().map { it.toValues() })
             } else {
                 frame.remove(plotName)
             }

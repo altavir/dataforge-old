@@ -28,7 +28,7 @@ import java.util.function.Consumer;
  */
 public class FXPlotUtils {
 
-    public static MenuItem getDFPlotExportMenuItem(Window window, PlotFrame frame){
+    public static MenuItem getDFPlotExportMenuItem(Window window, PlotFrame frame) {
         MenuItem dfpExport = new MenuItem("DF...");
         dfpExport.setOnAction(event -> {
             FileChooser chooser = new FileChooser();
@@ -37,7 +37,8 @@ public class FXPlotUtils {
             File file = chooser.showSaveDialog(window);
             if (file != null) {
                 try {
-                    new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance).write(new FileOutputStream(file), frame.wrap());
+                    new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance)
+                            .write(new FileOutputStream(file), new PlotFrame.Wrapper().wrap(frame));
                 } catch (IOException ex) {
                     throw new RuntimeException("Failed to save plot to file", ex);
                 }

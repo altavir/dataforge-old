@@ -24,23 +24,24 @@ import java.util.Iterator;
 /**
  * @author darksnake
  */
-public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
+@Deprecated
+public class TimePlottableGroup extends PlottableGroup<TimePlot> {
 
     public TimePlottableGroup() {
     }
 
-    public TimePlottableGroup(TimePlottable... plottables) {
+    public TimePlottableGroup(TimePlot... plottables) {
         super(plottables);
     }
 
-    public TimePlottableGroup(Iterable<TimePlottable> plottables) {
+    public TimePlottableGroup(Iterable<TimePlot> plottables) {
         super(plottables);
     }
 
     public static TimePlottableGroup buildSet(String... names) {
         TimePlottableGroup set = new TimePlottableGroup();
         for (String name : names) {
-            set.add(new TimePlottable(name, name));
+            set.add(new TimePlot(name, name));
         }
         return set;
     }
@@ -79,7 +80,7 @@ public class TimePlottableGroup extends PlottableGroup<TimePlottable> {
     }
 
     @Override
-    public Iterator<TimePlottable> iterator() {
+    public Iterator<TimePlot> iterator() {
         return this.map.values().iterator();
     }
 }

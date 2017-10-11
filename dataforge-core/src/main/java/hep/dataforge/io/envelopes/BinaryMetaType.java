@@ -48,7 +48,7 @@ public class BinaryMetaType implements MetaType {
         return str -> str.toLowerCase().endsWith(".meta");
     }
 
-    private static class BinaryMetaReader implements MetaStreamReader {
+    public static class BinaryMetaReader implements MetaStreamReader {
 
         @Override
         public MetaBuilder read(InputStream stream, long length) throws IOException, ParseException {
@@ -73,7 +73,7 @@ public class BinaryMetaType implements MetaType {
         }
     }
 
-    private static class BinaryMetaWriter implements MetaStreamWriter {
+    public static class BinaryMetaWriter implements MetaStreamWriter {
 
         @Override
         public MetaStreamWriter withCharset(Charset charset) {

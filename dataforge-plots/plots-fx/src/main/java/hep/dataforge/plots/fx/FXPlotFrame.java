@@ -16,25 +16,12 @@
 
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.fx.FXObject;
-import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.PlotFrame;
-
-import java.io.OutputStream;
-
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * Created by darksnake on 04-Sep-16.
  */
 public interface FXPlotFrame extends PlotFrame, FXObject {
-    /**
-     * Generate a snapshot
-     *
-     * @param config
-     */
-    @ValueDef(name = "width", type = {NUMBER}, def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", type = {NUMBER}, def = "600", info = "The height of the snapshot in pixels")
-    void snapshot(OutputStream stream, Meta config);
+
 }

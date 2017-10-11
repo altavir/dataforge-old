@@ -20,7 +20,7 @@ class TimePlottableTest extends Specification {
 
     def "test maxItems"(){
         when:
-        TimePlottable pl = new TimePlottable("test",null);
+        TimePlot pl = new TimePlot("test",null);
         pl.setMaxItems(50);
         Instant time = DateTimeUtils.now();
         for(int i = 0; i<60; i++){
@@ -33,7 +33,7 @@ class TimePlottableTest extends Specification {
     
     def "test maxAge"(){
         when:
-        TimePlottable pl = new TimePlottable("test",null);
+        TimePlot pl = new TimePlot("test",null);
         pl.setMaxAge(Duration.ofMillis(500));
         Instant time = DateTimeUtils.now();
         for(int i = 0; i<60; i++){

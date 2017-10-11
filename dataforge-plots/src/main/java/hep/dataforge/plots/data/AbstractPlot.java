@@ -15,40 +15,32 @@
  */
 package hep.dataforge.plots.data;
 
-import hep.dataforge.description.DescriptorUtils;
-import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotStateListener;
-import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.PointAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
-
 /**
  * @author darksnake
  */
-public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleConfigurable implements Plottable {
+public abstract class AbstractPlot<T extends PointAdapter> extends SimpleConfigurable implements Plot {
 
-    public static final String ADAPTER_KEY = "adapter";
+    public static final String ADAPTER_KEY = "@adapter";
     public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
     private final String name;
     private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
     private T adapter;
 
-//    public AbstractPlottable(String name, @NotNull T adapter) {
+//    public AbstractPlot(String name, @NotNull T adapter) {
 //        this(name);
 //        setAdapter(adapter);
 //    }
 
-    public AbstractPlottable(@NotNull String name) {
+    public AbstractPlot(@NotNull String name) {
         this.name = name;
     }
 
@@ -102,36 +94,6 @@ public abstract class AbstractPlottable<T extends PointAdapter> extends SimpleCo
 
     public String getTitle() {
         return meta().getString("title", getName());
-    }
-
-    @Override
-    public Envelope wrap() {
-        return wrapBuilder().build();
-    }
-
-    /**
-     * Protected method to customize wrap
-     *
-     * @return
-     */
-    protected EnvelopeBuilder wrapBuilder() {
-        EnvelopeBuilder builder = new EnvelopeBuilder()
-                .putMetaValue(WRAPPED_TYPE_KEY, PLOTTABLE_WRAPPER_TYPE)
-                .putMetaValue("plottableClass", getClass().getName())
-                .putMetaValue("name", getName())
-                .putMetaNode("meta", new Laminate(meta()).withDescriptor(DescriptorUtils.buildDescriptor(this)))
-                .setContentType("wrapper");
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        try (ObjectOutputStream os = new ObjectOutputStream(baos)) {
-            os.writeObject(getData());
-
-        } catch (IOException ex) {
-            throw new RuntimeException(ex);
-        }
-
-        builder.setData(baos.toByteArray());
-        return builder;
     }
 
     /**

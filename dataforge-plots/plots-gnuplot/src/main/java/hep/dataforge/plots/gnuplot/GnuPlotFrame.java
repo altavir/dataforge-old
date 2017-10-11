@@ -3,7 +3,9 @@ package hep.dataforge.plots.gnuplot;
 import com.panayotis.gnuplot.JavaPlot;
 import com.panayotis.gnuplot.plot.DataSetPlot;
 import com.panayotis.gnuplot.terminal.GNUPlotTerminal;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.values.Value;
 
@@ -21,22 +23,19 @@ public class GnuPlotFrame extends XYPlotFrame {
     private GNUPlotTerminal terminal;
 
     @Override
-    protected void updatePlotData(String name) {
-        opt(name).ifPresent(plottable -> {
-            plots.computeIfAbsent(name, str -> {
-                DataSetPlot dpl = new DataSetPlot(new PlottableDataSet(plottable));
-                javaPlot.addPlot(dpl);
-                dpl.setTitle(plottable.meta().getString("title",plottable.getName()));
-                return dpl;
-            });
-
-            refresh();
+    protected void updatePlotData(String name, Plot plot) {
+        plots.computeIfAbsent(name, str -> {
+            DataSetPlot dpl = new DataSetPlot(new PlottableDataSet(plot));
+            javaPlot.addPlot(dpl);
+            dpl.setTitle(plot.meta().getString("title", plot.getName()));
+            return dpl;
         });
 
+        refresh();
     }
 
     @Override
-    protected void updatePlotConfig(String name) {
+    protected void updatePlotConfig(String name, Laminate laminate) {
 
     }
 
@@ -71,7 +70,7 @@ public class GnuPlotFrame extends XYPlotFrame {
     /**
      * Push the plot to the output
      */
-    public void plot(){
+    public void plot() {
         javaPlot.plot();
     }
 

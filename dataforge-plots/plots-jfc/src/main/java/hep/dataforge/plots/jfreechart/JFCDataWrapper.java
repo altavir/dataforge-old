@@ -7,6 +7,7 @@ package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
@@ -16,13 +17,13 @@ import org.jfree.data.xy.AbstractIntervalXYDataset;
 import java.util.List;
 
 /**
- * Wrapper for plottable. Multiple xs are not allowed
+ * Wrapper for plot. Multiple xs are not allowed
  *
  * @author Alexander Nozik
  */
 final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
-    private Plottable plottable;
+    private Plot plot;
 
     private XYAdapter adapter;
     private List<Values> data;
@@ -30,9 +31,9 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     private Integer index = 0;
 
 
-    public JFCDataWrapper(Plottable plottable) {
-        this.plottable = plottable;
-        adapter = XYAdapter.from(plottable.getAdapter());
+    public JFCDataWrapper(Plot plot) {
+        this.plot = plot;
+        adapter = XYAdapter.from(plot.getAdapter());
     }
 
     public Integer getIndex() {
@@ -43,20 +44,20 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         this.index = index;
     }
 
-    public Plottable getPlottable() {
-        return plottable;
+    public Plottable getPlot() {
+        return plot;
     }
 
-    public void setPlottable(Plottable plottable) {
-        if (this.plottable != plottable) {
-            this.plottable = plottable;
+    public void setPlot(Plot plot) {
+        if (this.plot != plot) {
+            this.plot = plot;
             invalidateData();
         }
     }
 
     private synchronized List<Values> getData() {
         if (data == null) {
-            data = plottable.getData(query);
+            data = plot.getData(query);
         }
         return data;
     }
@@ -73,9 +74,9 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     @Override
     public Comparable getSeriesKey(int i) {
         if (getSeriesCount() == 1) {
-            return plottable.getName();
+            return plot.getName();
         } else {
-            return Name.joinString(plottable.getName(), adapter.getYTitle(i));
+            return Name.joinString(plot.getName(), adapter.getYTitle(i));
         }
     }
 

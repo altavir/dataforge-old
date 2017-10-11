@@ -16,10 +16,23 @@
 package hep.dataforge.plots;
 
 /**
- *
+ * Listener for plot state changes
  * @author darksnake
  */
 public interface PlotStateListener {
-    void notifyDataChanged(String name);
-    void notifyConfigurationChanged(String name);
+
+    default void notifyDataChanged(String name){
+        notifyGroupChanged(name);
+    }
+
+    default void notifyConfigurationChanged(String name){
+        notifyGroupChanged(name);
+    }
+
+    /**
+     * notify that plot composition changed (added/ removed plot).
+     * If plot is present, then fully update data and config, otherwise remove it
+     * @param name
+     */
+    void notifyGroupChanged(String name);
 }

@@ -7,6 +7,7 @@ package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
+import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.*;
 
@@ -16,10 +17,10 @@ import java.util.*;
  *
  * @author Alexander Nozik
  */
-public class NodeDescriptor extends DescriptorBase implements Named {
+public class NodeDescriptor extends SimpleMetaMorph implements Named {
 
     public NodeDescriptor(String name) {
-        super(name);
+        super(Meta.buildEmpty(name));
     }
 
     public NodeDescriptor(Meta meta) {

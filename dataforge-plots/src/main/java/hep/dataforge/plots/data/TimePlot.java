@@ -28,7 +28,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
-import static hep.dataforge.plots.data.TimePlottable.*;
+import static hep.dataforge.plots.data.TimePlot.*;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
@@ -40,7 +40,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = MAX_AGE_KEY, type = {NUMBER}, def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
 @ValueDef(name = MAX_ITEMS_KEY, type = {NUMBER}, def = "1000", info = "The maximum number of items. Negative means no limit")
 @ValueDef(name = PREF_ITEMS_KEY, type = {NUMBER}, def = "400", info = "The preferred number of items to leave after cleanup.")
-public class TimePlottable extends XYPlottable {
+public class TimePlot extends XYPlot {
 
     public static final String MAX_AGE_KEY = "maxAge";
     public static final String MAX_ITEMS_KEY = "maxItems";
@@ -58,7 +58,7 @@ public class TimePlottable extends XYPlottable {
      * @param name
      * @param yName
      */
-    public TimePlottable(String name, String timestamp, String yName) {
+    public TimePlot(String name, String timestamp, String yName) {
         super(name);
         super.setAdapter(new XYAdapter(timestamp, yName));
         this.timestamp = timestamp;
@@ -71,7 +71,7 @@ public class TimePlottable extends XYPlottable {
      * @param name
      * @param yName
      */
-    public TimePlottable(String name, String yName) {
+    public TimePlot(String name, String yName) {
         this(name, DEFAULT_TIMESTAMP_KEY, yName);
     }
 
@@ -81,12 +81,12 @@ public class TimePlottable extends XYPlottable {
      *
      * @param yName
      */
-    public TimePlottable(String yName) {
+    public TimePlot(String yName) {
         this(yName, DEFAULT_TIMESTAMP_KEY, yName);
     }
 
-//    public static TimePlottable builder(String name, String yName, String color, double thickness) {
-//        TimePlottable res = new TimePlottable(name, yName);
+//    public static TimePlot builder(String name, String yName, String color, double thickness) {
+//        TimePlot res = new TimePlot(name, yName);
 //        res.getConfig()
 //                .setValue("color", color)
 //                .setValue("thickness", thickness);

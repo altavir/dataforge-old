@@ -13,6 +13,7 @@ import hep.dataforge.fx.configuration.ConfigEditor;
 import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
@@ -22,6 +23,7 @@ import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -52,7 +54,7 @@ public class PlotContainer implements Initializable, FXObject {
     @FXML
     private VBox sideBar;
     @FXML
-    private ListView<Plottable> plottableslList;
+    private ListView<Plot> plottableslList;
     @FXML
     private Button optionsPannelButton;
     @FXML
@@ -120,7 +122,7 @@ public class PlotContainer implements Initializable, FXObject {
      */
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        plottableslList.setCellFactory((ListView<Plottable> param) -> new PlottableListCell());
+        plottableslList.setCellFactory((ListView<Plot> param) -> new PlottableListCell());
         plottableslList.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         root.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
         split.getDividers().get(0).positionProperty().addListener(
@@ -165,7 +167,7 @@ public class PlotContainer implements Initializable, FXObject {
      *
      * @return
      */
-    public ListView<Plottable> getPlottableslListView() {
+    public ListView<Plot> getPlottableslListView() {
         return plottableslList;
     }
 
@@ -208,11 +210,15 @@ public class PlotContainer implements Initializable, FXObject {
      */
     public void setPlot(FXPlotFrame plot) {
         this.plot = plot;
+
+        ObservableList<Plot> plots = FXCollections.observableArrayList(plot.getPlots().getChildPlots());
+
+
         FXUtils.runNow(() -> {
             plotPane.getChildren().retainAll(optionsPannelButton);
             plotPane.setCenter(plot.getFXNode());
 
-            plottableslList.setItems(plot.plottables());
+            plottableslList.setItems(plots);
         });
     }
 
@@ -266,12 +272,12 @@ public class PlotContainer implements Initializable, FXObject {
 
     @FXML
     private void onShowAll(ActionEvent event) {
-        this.plot.forEach(pl -> pl.configureValue("visible", true));
+        this.plot.getPlots().forEachPlot(pl -> pl.configureValue("visible", true));
     }
 
     @FXML
     private void onHideAll(ActionEvent event) {
-        this.plot.forEach(pl -> pl.configureValue("visible", false));
+        this.plot.getPlots().forEachPlot(pl -> pl.configureValue("visible", false));
     }
 
     /**
@@ -288,7 +294,7 @@ public class PlotContainer implements Initializable, FXObject {
         return progressProperty;
     }
 
-    protected class PlottableListCell extends ListCell<Plottable> implements ConfigChangeListener {
+    protected class PlottableListCell extends ListCell<Plot> implements ConfigChangeListener {
 
         private HBox content;
         private CheckBox title;
@@ -298,10 +304,10 @@ public class PlotContainer implements Initializable, FXObject {
          * Configuration to which this cell is bound
          */
         private Configuration config;
-        private Plottable plottable;
+        private Plottable plot;
 
         @Override
-        protected synchronized void updateItem(Plottable item, boolean empty) {
+        protected synchronized void updateItem(Plot item, boolean empty) {
             super.updateItem(item, empty);
 
             //cleaning up after item with different config
@@ -321,11 +327,11 @@ public class PlotContainer implements Initializable, FXObject {
         private void clearContent() {
             setText(null);
             setGraphic(null);
-            plottable = null;
+            plot = null;
         }
 
         private synchronized void setContent(Plottable item) {
-            this.plottable = item;
+            this.plot = item;
             setText(null);
 
             title = new CheckBox();
@@ -362,7 +368,7 @@ public class PlotContainer implements Initializable, FXObject {
                 switch (name) {
                     case "title":
                         if(newItem == null){
-                            title.setText(plottable.getName());
+                            title.setText(plot.getName());
                         } else {
                             title.setText(newItem.stringValue());
                         }
@@ -388,7 +394,7 @@ public class PlotContainer implements Initializable, FXObject {
         }
 
         @Override
-        public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+        public void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
             //ignore
         }
 

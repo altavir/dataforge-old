@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,43 +13,48 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots.tests;
+package hep.dataforge.plots.demo;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.data.PlottableData;
-import hep.dataforge.plots.data.PlottableXYFunction;
-import hep.dataforge.plots.fx.FXPlotUtils;
-import hep.dataforge.plots.fx.PlotContainer;
+import hep.dataforge.plots.data.PlotData;
+import hep.dataforge.plots.data.PlotXYFunction;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Values;
+import javafx.application.Application;
+import javafx.scene.Scene;
+import javafx.scene.layout.BorderPane;
+import javafx.stage.Stage;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
 /**
- *
  * @author Alexander Nozik
  */
-public class PlotContainerTest {
+public class JFreeFXTest extends Application {
 
     /**
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        PlotContainer container = FXPlotUtils.displayContainer("My test container", 800, 600);
+        launch(args);
+    }
+
+    @Override
+    public void start(Stage stage) {
+        BorderPane root = new BorderPane();
 
         JFreeChartFrame frame = new JFreeChartFrame();
+        root.setCenter(frame.getFXNode());
 
-        container.setPlot(frame);
+        Function<Double, Double> func = (x1) -> x1 * x1;
 
-        Function<Double,Double> func = (x1) -> x1 * x1;
-
-        PlottableXYFunction funcPlot = PlottableXYFunction.plotFunction("func", func, 0.1, 4, 200);
+        PlotXYFunction funcPlot = PlotXYFunction.plotFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 
@@ -61,11 +66,17 @@ public class PlotContainerTest {
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlottableData dataPlot = PlottableData.plot("dataPlot", new XYAdapter("myX", "myXErr", "myY", "myYErr"), ds);
+        PlotData dataPlot = PlotData.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
 
-        frame.getConfig().setNode(new MetaBuilder("yAxis").putValue("type", "log"));
+        frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 
         frame.add(dataPlot);
+
+        Scene scene = new Scene(root, 800, 600);
+
+        stage.setTitle("my plot");
+        stage.setScene(scene);
+        stage.show();
     }
 
 }

@@ -81,7 +81,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     @Override
     protected void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-        observers.forEach((ConfigChangeListener obs) -> obs.notifyElementChanged(name, oldItem, newItem));
+        observers.forEach((ConfigChangeListener obs) -> obs.notifyNodeChanged(name, oldItem, newItem));
         super.notifyNodeChanged(name, oldItem, newItem);
     }
 

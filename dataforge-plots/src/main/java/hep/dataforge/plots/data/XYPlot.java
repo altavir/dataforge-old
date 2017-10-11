@@ -28,13 +28,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static hep.dataforge.fx.configuration.ConfigFXTreeItem.NO_CONFIGURATOR_TAG;
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
+import static hep.dataforge.plots.data.AbstractPlot.ADAPTER_KEY;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
- * Plottable with x and y axis. It is possible to have multiple y axis
+ * Plot with x and y axis. It is possible to have multiple y axis
  *
  * @author Alexander Nozik
  */
@@ -46,11 +46,11 @@ import static hep.dataforge.values.ValueType.NUMBER;
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
 @ValueDef(name = "connectionType", allowed = "[default, step, spline]", def = "default", info = "The type of conncetion between points.")
 @ValueDef(name = "thickness", type = {NUMBER}, info = "The type of the line.")
-@NodeDef(name = "adapter", info = "An adapter to interpret the dataset",
-        from = "class::hep.dataforge.tables.XYAdapter", tags = {NO_CONFIGURATOR_TAG, FINAL_TAG})
-public abstract class XYPlottable extends AbstractPlottable<XYAdapter> {
+@NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset",
+        from = "class::hep.dataforge.tables.XYAdapter", tags = {FINAL_TAG})
+public abstract class XYPlot extends AbstractPlot<XYAdapter> {
 
-    public XYPlottable(String name) {
+    public XYPlot(String name) {
         super(name);
     }
 

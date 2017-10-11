@@ -35,12 +35,6 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
 
     @Override
-    protected abstract void updatePlotData(String name);
-
-    @Override
-    protected abstract void updatePlotConfig(String name);
-
-    @Override
     protected void applyConfig(Meta config) {
         if (config == null) {
             return;

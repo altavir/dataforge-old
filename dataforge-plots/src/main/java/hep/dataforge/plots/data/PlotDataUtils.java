@@ -13,7 +13,6 @@ import hep.dataforge.values.Values;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * @author Alexander Nozik
@@ -22,18 +21,18 @@ public class PlotDataUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
 
-
         Map<Value, ValueMap.Builder> points = new LinkedHashMap<>();
         List<String> names = new ArrayList<>();
         names.add("x");
 
-        StreamSupport.stream(frame.spliterator(),false)
-                .filter(pl-> !visibleOnly || pl.meta().getBoolean("visible", true) )
-                .forEach(pl->{
+        frame.getPlots().list()
+                .map(frame::get)
+                .filter(pl -> !visibleOnly || pl.meta().getBoolean("visible", true))
+                .forEach(pl -> {
                     XYAdapter adapter = XYAdapter.from(pl.getAdapter());
 
                     names.add(pl.getName());
-                    pl.getData().stream().forEach(point -> {
+                    pl.getData().forEach(point -> {
                         Value x = adapter.getX(point);
                         ValueMap.Builder mdp;
                         if (points.containsKey(x)) {
@@ -48,7 +47,7 @@ public class PlotDataUtils {
                 });
 
         ListTable.Builder res = new ListTable.Builder(MetaTableFormat.forNames(names));
-        res.rows(points.values().stream().map(p -> p.build()).collect(Collectors.toList()));
+        res.rows(points.values().stream().map(ValueMap.Builder::build).collect(Collectors.toList()));
         return res.build();
     }
 
@@ -60,16 +59,16 @@ public class PlotDataUtils {
      * @param source
      * @return
      */
-    public static PlottableGroup<PlottableData> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
+    public static PlottableGroup<PlotData> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
         List<Values> points = source.collect(Collectors.toList());
-        List<PlottableData> plottables = yNames.stream().map(yName -> {
-            PlottableData pl = new PlottableData(yName);
+        List<PlotData> plottables = yNames.stream().map(yName -> {
+            PlotData pl = new PlotData(yName);
             pl.setAdapter(new XYAdapter(xName, yName));
             return pl;
         }).collect(Collectors.toList());
-        plottables.forEach(pl-> pl.setData(points));
+        plottables.forEach(pl -> pl.setData(points));
 
-        return new PlottableGroup<PlottableData>(plottables);
+        return new PlottableGroup<PlotData>(plottables);
     }
 
 }

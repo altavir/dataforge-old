@@ -16,6 +16,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.values.Value;
+
 import java.util.List;
 
 /**
@@ -46,7 +47,7 @@ public interface ConfigChangeListener {
      * @param newItem the item of elements after change. If null, then item has
      * been removed
      */
-    default void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem){
+    default void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem){
         //do nothing by default
     }
 

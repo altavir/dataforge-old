@@ -1,4 +1,4 @@
-package hep.dataforge.plots.tests;/**
+package hep.dataforge.plots.demo;/**
  * Created by darksnake on 29-Apr-17.
  */
 

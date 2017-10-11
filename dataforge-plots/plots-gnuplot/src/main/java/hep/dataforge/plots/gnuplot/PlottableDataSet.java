@@ -1,24 +1,24 @@
 package hep.dataforge.plots.gnuplot;
 
 import com.panayotis.gnuplot.dataset.DataSet;
-import hep.dataforge.plots.Plottable;
+import hep.dataforge.plots.Plot;
 
 /**
- * Simple wrapper for a plottable
+ * Simple wrapper for a plot
  * Created by darksnake on 10-May-17.
  */
 public class PlottableDataSet implements DataSet {
-    private final Plottable plottable;
+    private final Plot plot;
     private String[] mapping;
 
-    public PlottableDataSet(Plottable plottable) {
-        this.plottable = plottable;
+    public PlottableDataSet(Plot plot) {
+        this.plot = plot;
         mapping = new String[]{"x.value", "y.value"};
     }
 
     @Override
     public int size() {
-        return plottable.getData().size();
+        return plot.getData().size();
     }
 
     @Override
@@ -28,6 +28,6 @@ public class PlottableDataSet implements DataSet {
 
     @Override
     public String getPointValue(int point, int dimension) {
-        return plottable.getComponent(point, mapping[dimension]).stringValue();
+        return plot.getComponent(point, mapping[dimension]).stringValue();
     }
 }

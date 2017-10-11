@@ -141,7 +141,7 @@ public class SimpleConfigurable implements Configurable, Metoid {
             }
 
             @Override
-            public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+            public void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
                 applyElementChange(name, oldItem, newItem);
             }
         });

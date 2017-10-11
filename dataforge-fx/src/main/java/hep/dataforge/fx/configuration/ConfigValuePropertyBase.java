@@ -10,11 +10,12 @@ import hep.dataforge.meta.ConfigChangeListener;
 import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
-import java.util.List;
 import javafx.beans.InvalidationListener;
 import javafx.beans.property.ObjectProperty;
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
+
+import java.util.List;
 
 /**
  * Configuration value represented as JavaFX property. Using slightly modified
@@ -185,7 +186,7 @@ public abstract class ConfigValuePropertyBase<T> extends ObjectProperty<T> {
         }
 
         @Override
-        public void notifyElementChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+        public void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
             //do nothing
         }
     }
