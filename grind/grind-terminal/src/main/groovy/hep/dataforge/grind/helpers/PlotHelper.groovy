@@ -24,7 +24,7 @@ import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
-import hep.dataforge.plots.PlotManager
+import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.data.PlotData
 import hep.dataforge.plots.data.PlotXYFunction
 import hep.dataforge.plots.data.XYPlot
@@ -41,15 +41,15 @@ import java.util.function.Function
 class PlotHelper extends AbstractHelper {
     static final String DEFAULT_FRAME = "default";
 
-    PlotManager manager;
+    PlotPlugin manager;
 
     PlotHelper(Context context = Global.instance()) {
         super(context)
         context.pluginManager().getOrLoad("plots")
-        this.manager = context.getFeature(PlotManager)
+        this.manager = context.getFeature(PlotPlugin)
     }
 
-    PlotManager getManager() {
+    PlotPlugin getManager() {
         return manager
     }
 

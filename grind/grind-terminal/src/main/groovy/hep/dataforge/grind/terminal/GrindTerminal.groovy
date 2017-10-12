@@ -17,7 +17,6 @@ import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
-import hep.dataforge.plots.jfreechart.JFCFrameFactory
 import hep.dataforge.values.ValueType
 import hep.dataforge.workspace.FileBasedWorkspace
 import org.jline.reader.EndOfFileException
@@ -103,7 +102,6 @@ class GrindTerminal extends SimpleConfigurable {
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.pluginManager().load("hep.dataforge:plots")
-            JFCFrameFactory.setDefault(context);
             (context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;

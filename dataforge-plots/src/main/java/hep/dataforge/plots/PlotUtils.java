@@ -81,8 +81,8 @@ public class PlotUtils {
         frame.configureValue("title", title);
     }
 
-    public static PlotManager getPlotManager(Context context){
-        return context.getFeature(PlotManager.class);
+    public static PlotPlugin getPlotManager(Context context){
+        return context.getFeature(PlotPlugin.class);
     }
 
 }

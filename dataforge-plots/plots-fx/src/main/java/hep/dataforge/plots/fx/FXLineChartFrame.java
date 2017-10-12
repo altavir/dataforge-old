@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots.fx;
 
+import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plot;
@@ -41,7 +42,7 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Nozik
  */
-public class FXLineChartFrame extends XYPlotFrame implements FXPlotFrame {
+public class FXLineChartFrame extends XYPlotFrame implements FXObject {
 
     LineChart<Number, Number> chart;
 

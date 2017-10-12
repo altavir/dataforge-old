@@ -22,7 +22,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.fx.FXPlotFrame;
 import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
@@ -64,7 +63,7 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Nozik
  */
-public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObject, FXPlotFrame {
+public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObject {
 
     private final JFreeChart chart;
     private final XYPlot plot;

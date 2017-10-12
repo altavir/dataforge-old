@@ -5,6 +5,7 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.ApplicationSurrogate
 import hep.dataforge.fx.FXObject
 import hep.dataforge.fx.configuration.ConfigEditor
+import hep.dataforge.kodex.fx.dfIcon
 import hep.dataforge.meta.Configuration
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotGroup
@@ -18,6 +19,7 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.TreeItem
+import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
@@ -28,9 +30,16 @@ import javafx.stage.Stage
 import tornadofx.*
 import java.util.*
 
-class PlotContainer<T>(val plot: T) : Fragment()
-        where T : PlotFrame,
-              T : FXObject {
+
+internal val defaultDisplay: (PlotFrame) -> Node = {
+    if (it is FXObject) {
+        it.fxNode
+    } else {
+        throw IllegalArgumentException("Can't display a plot frame since it is not an FX object")
+    }
+}
+
+class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
 
     private val configWindows = HashMap<Configuration, Stage>()
 
@@ -52,7 +61,7 @@ class PlotContainer<T>(val plot: T) : Fragment()
                     borderpane {
                         minHeight = 300.0
                         minWidth = 300.0
-                        center = plot.fxNode
+                        center = display(plot)
                     }
                     val collapseButton = button(text = "<<") {
                         graphicTextGap = 0.0
@@ -115,7 +124,9 @@ class PlotContainer<T>(val plot: T) : Fragment()
                             override fun notifyConfigurationChanged(name: String?) {}//ignore
                             override fun notifyGroupChanged(name: String?) {
                                 //repopulate on list change
-                                populate()
+                                runLater {
+                                    populate()
+                                }
                             }
                         })
 
@@ -124,6 +135,9 @@ class PlotContainer<T>(val plot: T) : Fragment()
                             graphic = hbox {
                                 hgrow = Priority.ALWAYS
                                 checkbox(item.config.getString("title", item.name)) {
+                                    if (item == plot.plots) {
+                                        text = "<<< All plots >>>"
+                                    }
                                     isSelected = item.config.getBoolean("visible", true)
                                     selectedProperty().addListener { _, _, newValue ->
                                         item.config.setValue("visible", newValue)
@@ -196,6 +210,11 @@ class PlotContainer<T>(val plot: T) : Fragment()
         sidebar.children.addAll(index, Arrays.asList(*nodes))
     }
 
+    fun addToSideBar(vararg nodes: Node) {
+        sidebar.children.addAll(Arrays.asList(*nodes))
+    }
+
+
     /**
      * Display configurator in separate scene
      *
@@ -220,9 +239,10 @@ class PlotContainer<T>(val plot: T) : Fragment()
 
     companion object {
 
-        fun <T> display(plot: T, title: String = "", width: Double = 800.0, height: Double = 600.0): PlotContainer<T>
-                where T : PlotFrame,
-                      T : FXObject {
+        /**
+         * for testing
+         */
+        fun display(plot: PlotFrame, title: String = "", width: Double = 800.0, height: Double = 600.0) {
             Platform.setImplicitExit(false)
             ApplicationSurrogate.start()
 
@@ -239,7 +259,6 @@ class PlotContainer<T>(val plot: T) : Fragment()
             }
 
             Platform.setImplicitExit(true)
-            return container
         }
     }
 }

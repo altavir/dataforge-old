@@ -6,8 +6,6 @@
 package hep.dataforge.plots.viewer
 
 import hep.dataforge.io.envelopes.EnvelopeType
-import hep.dataforge.plots.fx.FXPlotFrame
-import hep.dataforge.plots.fx.PlotContainer
 import javafx.scene.Parent
 import javafx.scene.control.Button
 import javafx.scene.control.Tab

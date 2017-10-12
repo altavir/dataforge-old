@@ -12,8 +12,8 @@ import javafx.stage.Stage;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import java.util.function.Supplier;
 
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
@@ -25,16 +25,19 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
 @ValueDef(name = "implicitExit", type = {BOOLEAN}, def = "false", info = "A Platform implicitExit parameter")
 public class FXPlugin extends BasicPlugin {
 
-    private Stage stage;
+    /**
+     * the parent stage for all windows
+     */
+    private Stage parent;
     private Set<Stage> windows = new HashSet<>();
 
     @Override
     public void attach(Context context) {
-        if (stage == null) {
+        if (parent == null) {
             configureValue("implicitExit", false);
             context.getLogger().debug("FX application not found. Starting application surrogate.");
             ApplicationSurrogate.start();
-            stage = ApplicationSurrogate.getStage();
+            parent = ApplicationSurrogate.getStage();
         }
         super.attach(context);
     }
@@ -66,15 +69,15 @@ public class FXPlugin extends BasicPlugin {
         }
     }
 
-    public synchronized Stage getStage() {
+    public synchronized Stage getParent() {
         if (getContext() == null) {
             throw new RuntimeException("Plugin not attached");
         }
-        return stage;
+        return parent;
     }
 
-    public synchronized void setStage(Stage stage) {
-        this.stage = stage;
+    public synchronized void setParent(Stage parent) {
+        this.parent = parent;
     }
 
     private synchronized void addStage(Stage stage) {
@@ -82,33 +85,36 @@ public class FXPlugin extends BasicPlugin {
         this.windows.add(stage);
     }
 
-    /**
-     * Show new Stage in a separate window. Supplier should not show window, only construct stage.
-     *
-     * @param sup
-     */
-    public void show(Supplier<Stage> sup) {
-        Platform.runLater(() -> {
-            Stage newStage = sup.get();
-            newStage.initOwner(getStage().getOwner());
-            addStage(newStage);
-            newStage.show();
-        });
-    }
+//    /**
+//     * Show new Stage in a separate window. Supplier should not show window, only construct stage.
+//     *
+//     * @param sup
+//     */
+//    public void show(Supplier<Stage> sup) {
+//        Platform.runLater(() -> {
+//            Stage newStage = sup.get();
+//            newStage.initOwner(getStage().getOwner());
+//            addStage(newStage);
+//            newStage.show();
+//        });
+//    }
 
     /**
-     * Show something in a pre-constructed stage.
+     * Show something in a pre-constructed stage. Blocks thread until stage is created
      *
      * @param cons
      */
-    public void show(Consumer<Stage> cons) {
-        Platform.runLater(() -> {
-            Stage newStage = new Stage();
-            newStage.initOwner(getStage().getOwner());
-            cons.accept(newStage);
-            addStage(newStage);
-            newStage.show();
+    public Stage show(Consumer<Stage> cons) {
+        CompletableFuture<Stage> promise = new CompletableFuture<>();
+        FXUtils.runNow(() -> {
+            Stage stage = new Stage();
+            stage.initOwner(getParent().getOwner());
+            cons.accept(stage);
+            addStage(stage);
+            stage.show();
+            promise.complete(stage);
         });
+        return promise.join();
     }
 
 }

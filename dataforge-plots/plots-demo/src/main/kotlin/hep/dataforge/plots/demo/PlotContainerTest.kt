@@ -15,11 +15,10 @@
  */
 package hep.dataforge.plots.demo
 
-import hep.dataforge.kodex.fx.plots.PlotContainer
+import hep.dataforge.kodex.fx.plots.PlotManager
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.PlotData
 import hep.dataforge.plots.data.PlotXYFunction
-import hep.dataforge.plots.jfreechart.JFreeChartFrame
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.ValueMap
 import hep.dataforge.tables.XYAdapter
@@ -32,13 +31,11 @@ import java.util.*
  */
 
 fun main(args: Array<String>) {
-    val frame = JFreeChartFrame()
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
     val funcPlot = PlotXYFunction.plotFunction("func", func, 0.1, 4.0, 200)
 
-    frame.add(funcPlot)
 
     val names = arrayOf("myX", "myY", "myXErr", "myYErr")
 
@@ -50,11 +47,23 @@ fun main(args: Array<String>) {
 
     val dataPlot = PlotData.plot("dataPlot", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
-    frame.config.setNode(MetaBuilder("yAxis").putValue("type", "log"))
 
-    frame.add(dataPlot)
+    val manager = PlotManager();
+    manager.startGlobal();
 
-    PlotContainer.display(frame)
+    manager.display("test", "testLog") {
+        add(funcPlot)
+        config.setNode(MetaBuilder("yAxis").putValue("type", "log"))
+        add(dataPlot)
+    }
+    manager.display("test", "test") {
+        add(funcPlot)
+        add(dataPlot)
+    }
+    manager.display("test1") {
+        add(funcPlot)
+    }
+
 }
 
 

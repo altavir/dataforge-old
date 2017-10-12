@@ -8,6 +8,9 @@ dependencies {
     compile project(':dataforge-plots')
     compile 'org.controlsfx:controlsfx:8.40.12'
     compile "no.tornado:tornadofx:1.7.8"
+
+    // optional dependency for JFreeChart
+    compileOnly project(":dataforge-plots:plots-jfc")
 }
 
 
