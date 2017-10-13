@@ -56,8 +56,8 @@ class DataNodeSpec {
         if (!tree.isEmpty()) {
             throw new RuntimeException("Trying to load data into non-empty tree. Load should be called first.")
         }
-        def newRoot = node("", DataLoader.SMART.build(context, meta))
-        tree = new DataTree.Builder(newRoot)
+        //def newRoot = node("", DataLoader.SMART.build(context, meta))
+        tree = new DataTree.Builder(DataLoader.SMART.build(context, meta))
     }
 
     void load(Map values = [:], String nodeName = "", @DelegatesTo(GrindMetaBuilder) Closure cl = null) {

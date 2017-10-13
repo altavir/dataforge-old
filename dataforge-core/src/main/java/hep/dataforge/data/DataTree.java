@@ -8,6 +8,7 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
 import java.util.HashMap;
@@ -140,9 +141,7 @@ public class DataTree<T> implements DataNode<T> {
     protected void putData(Name name, Data<? extends T> data, boolean replace) {
         if (name.length() == 0) {
             throw new IllegalArgumentException("Name must not be empty");
-        }
-
-        if (name.length() == 1) {
+        } else if (name.length() == 1) {
             String key = name.toString();
             checkedPutData(key, data, replace);
         } else {
@@ -307,7 +306,7 @@ public class DataTree<T> implements DataNode<T> {
 
     public static class Builder<T> implements DataNode.Builder<T, DataTree<T>, Builder<T>> {
 
-        private final DataTree<T> tree;
+        private DataTree<T> tree;
 
         /**
          * Create copy-builder for a DataNode. Does not change initial node
@@ -351,7 +350,14 @@ public class DataTree<T> implements DataNode<T> {
 
         @Override
         public Builder<T> putNode(String key, DataNode<? extends T> node) {
-            this.tree.putNode(Name.of(key), node);
+            if (key == null || key.isEmpty()) {
+                if (!tree.isEmpty()) {
+                    LoggerFactory.getLogger(getClass()).warn("Overriding non-empty data tree root");
+                }
+                tree = cloneNode(node.checked(tree.type), node.getName());
+            } else {
+                this.tree.putNode(Name.of(key), node);
+            }
             return this;
         }
 
