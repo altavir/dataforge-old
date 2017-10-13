@@ -6,11 +6,13 @@
 package hep.dataforge.plots.viewer
 
 import hep.dataforge.io.envelopes.EnvelopeType
+import hep.dataforge.kodex.fx.plots.PlotContainer
+import hep.dataforge.plots.PlotFrame
 import javafx.scene.Parent
 import javafx.scene.control.Button
 import javafx.scene.control.Tab
 import javafx.scene.control.TabPane
-import javafx.scene.layout.AnchorPane
+import javafx.scene.layout.BorderPane
 import javafx.stage.FileChooser
 import org.slf4j.LoggerFactory
 import tornadofx.*
@@ -28,7 +30,7 @@ class PlotView : View("DataForge plot viewer") {
     private val loadButton: Button by fxid();
     private val tabs: TabPane by fxid();
 
-    private val plotMap = HashMap<File, PlotContainer>()
+    private val plotMap = HashMap<File, BorderPane>()
 
     init {
         loadButton.setOnAction {
@@ -48,19 +50,19 @@ class PlotView : View("DataForge plot viewer") {
 
     @Throws(IOException::class)
     fun loadPlot(file: File) {
-        val container: PlotContainer = plotMap.getOrElse(file) {
-            val pane = AnchorPane()
+        val pane: BorderPane = plotMap.getOrElse(file) {
+            val pane = BorderPane()
             val tab = Tab(file.name, pane)
             tab.setOnClosed { plotMap.remove(file) }
             tabs.tabs.add(tab)
-            PlotContainer.anchorTo(pane)
+            pane
         }
 
         EnvelopeType.infer(file.toPath()).ifPresent { type ->
             try {
                 val envelope = type.reader.read(file.toPath())
-                val frame = PlotFrameWrapper().unWrap(envelope) as FXPlotFrame
-                container.plot = frame
+                val frame = PlotFrame.Wrapper().unWrap(envelope) as PlotFrame
+                pane.center =  PlotContainer(frame).root;
             } catch (e: IOException) {
                 throw RuntimeException(e)
             }

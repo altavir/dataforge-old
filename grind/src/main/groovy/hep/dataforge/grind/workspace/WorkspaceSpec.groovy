@@ -100,7 +100,11 @@ class WorkspaceSpec {
     }
 
     @MethodDescription("Create new meta using Grind builder")
-    def target(Map parameters = [:], String name, @DelegatesTo(GrindMetaBuilder) Closure closure = null) {
+    def target(String name, @DelegatesTo(GrindMetaBuilder) Closure closure = null) {
+        this.builder.target(Grind.buildMeta(name, [:], closure))
+    }
+
+    def target(String name, Map parameters, @DelegatesTo(GrindMetaBuilder) Closure closure = null) {
         this.builder.target(Grind.buildMeta(name, parameters, closure))
     }
 
