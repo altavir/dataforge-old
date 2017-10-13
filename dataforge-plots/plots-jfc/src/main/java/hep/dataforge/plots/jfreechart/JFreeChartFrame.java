@@ -22,7 +22,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.XYPlotFrame;
-import hep.dataforge.plots.fx.FXPlotUtils;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
 import javafx.scene.Node;

@@ -47,15 +47,17 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
     val sideBarExpandedProperty = SimpleBooleanProperty(true)
     var sideBarExpanded by sideBarExpandedProperty
 
-    val progresProperty = SimpleDoubleProperty(1.0)
-    var progres by progresProperty
+    val progressProperty = SimpleDoubleProperty(1.0)
+    var progress by progressProperty
 
+    val sideBarPositionProperty = SimpleDoubleProperty(0.8)
+    var sideBarPoistion by sideBarPositionProperty
 
     lateinit var sidebar: VBox;
 
     override val root = borderpane {
         center {
-            val sideBarPosition = SimpleDoubleProperty(0.8)
+
             splitpane(orientation = Orientation.HORIZONTAL) {
                 stackpane {
                     borderpane {
@@ -72,18 +74,18 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                         action {
                             when {
                                 sideBarExpandedProperty.get() -> setDividerPosition(0, 1.0)
-                                sideBarPosition.value > 0 -> setDividerPosition(0, sideBarPosition.value)
-                                else -> setDividerPosition(0, sideBarPosition.get())
+                                sideBarPositionProperty.value > 0 -> setDividerPosition(0, sideBarPositionProperty.value)
+                                else -> setDividerPosition(0, sideBarPositionProperty.get())
                             }
                         }
                     }
                     borderpane {
                         isMouseTransparent = true
-                        center = progressindicator(progresProperty) {
+                        center = progressindicator(progressProperty) {
                             maxWidth = 50.0
                             prefWidth = 50.0
                             alignment = Pos.CENTER
-                            visibleWhen(progresProperty.lessThan(1.0))
+                            visibleWhen(progressProperty.lessThan(1.0))
                         }
                     }
                     sideBarExpandedProperty.addListener { _, _, newValue ->
@@ -93,7 +95,7 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                             collapseButton.text = "<<"
                         }
                     }
-                    setDividerPositions(sideBarPosition.get())
+                    setDividerPositions(sideBarPositionProperty.get())
                 }
                 sidebar = vbox {
                     button(text = "Frame config") {
@@ -199,7 +201,7 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                 dividers[0].positionProperty().addListener { _, _, newValue ->
                     sideBarExpandedProperty.set(newValue.toDouble() < 0.99)
                     if (newValue.toDouble() < 0.98) {
-                        sideBarPosition.set(newValue.toDouble())
+                        sideBarPositionProperty.set(newValue.toDouble())
                     }
                 }
             }
