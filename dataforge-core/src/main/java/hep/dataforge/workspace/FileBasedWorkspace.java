@@ -10,9 +10,7 @@ import java.nio.file.Path;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
-import java.util.ServiceLoader;
 import java.util.function.Function;
-import java.util.stream.StreamSupport;
 
 /**
  * Dynamic workspace that is parsed from file using external algorithm. Workspace is reloaded only if file is changed
@@ -27,17 +25,16 @@ public class FileBasedWorkspace extends DynamicWorkspace {
      * @param transformation a finalization transformation applied to workspace after loading
      * @return
      */
-    public static Workspace build(Context context, Path path, Function<Workspace.Builder, Workspace> transformation) {
+    public static FileBasedWorkspace build(Context context, Path path, Function<Workspace.Builder, Workspace> transformation) {
         String fileName = path.getFileName().toString();
-        return StreamSupport.stream(ServiceLoader.load(WorkspaceParser.class).spliterator(), false)
+        return context.serviceStream(WorkspaceParser.class)
                 .filter(parser -> parser.listExtensions().stream().anyMatch(fileName::endsWith))
                 .findFirst()
-                .map(parser -> parser.parse(context, path))
-                .map(transformation)
+                .map(parser -> new FileBasedWorkspace(path, p -> transformation.apply(parser.parse(context, p))))
                 .orElseThrow(() -> new RuntimeException("Workspace parser for " + path + " not found"));
     }
 
-    public static Workspace build(Context context, Path path) {
+    public static FileBasedWorkspace build(Context context, Path path) {
         return build(context, path, GenericBuilder::build);
     }
 
