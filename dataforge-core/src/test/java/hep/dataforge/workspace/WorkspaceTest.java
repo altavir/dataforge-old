@@ -4,7 +4,6 @@ import hep.dataforge.cache.CachePlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.DataNode;
-import hep.dataforge.io.BasicIOManager;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -23,7 +22,7 @@ public class WorkspaceTest {
 
     {
         Context context = Global.getContext("TEST");
-        context.pluginManager().load(BasicIOManager.class);
+//        context.pluginManager().load(BasicIOManager.class);
 
         CachePlugin cache = context.loadFeature("cache", CachePlugin.class);
         cache.configureValue("fileCache.enabled", false);

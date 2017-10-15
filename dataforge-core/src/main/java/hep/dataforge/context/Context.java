@@ -180,6 +180,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
     /**
      * Add property to context
+     *
      * @param name
      * @param value
      */
@@ -366,13 +367,19 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         MetaBuilder id = new MetaBuilder("context");
         id.update(properties);
         pluginManager().stream(true).forEach(plugin -> {
-            id.putNode(plugin.getIdentity());
+            if(plugin.getClass().isAnnotationPresent(PluginDef.class)){
+                if(!plugin.getClass().getAnnotation(PluginDef.class).support()) {
+                    id.putNode(plugin.getIdentity());
+                }
+
+            }
         });
         return id;
     }
 
     /**
      * Lock this context by given object
+     *
      * @param obj
      */
     public void lock(Object obj) {
@@ -384,6 +391,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
     /**
      * Unlock the context by given object
+     *
      * @param obj
      */
     public void unlock(Object obj) {
@@ -395,6 +403,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
     /**
      * Find out if context is locked
+     *
      * @return
      */
     public boolean isLocked() {

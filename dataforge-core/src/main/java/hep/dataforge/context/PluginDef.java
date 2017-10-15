@@ -18,7 +18,6 @@ package hep.dataforge.context;
 import java.lang.annotation.*;
 
 /**
- *
  * @author Alexander Nozik
  */
 @Target({ElementType.TYPE})
@@ -27,10 +26,19 @@ import java.lang.annotation.*;
 @Inherited
 public @interface PluginDef {
     String group() default "";
+
     String name();
 
     String version() default "";
+
     String info();
+
     String[] dependsOn() default {};
+
+    /**
+     * Designate a support plugin that does not affect computation results
+     * @return
+     */
+    boolean support() default true;
 
 }
