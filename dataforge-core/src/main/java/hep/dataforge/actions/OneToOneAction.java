@@ -119,7 +119,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         return transform(context, "simpleRun", input, inputMeta(context, metaLayers));
     }
 
-    protected abstract R execute(Context context, String name, T input, Laminate inputMeta);
+    protected abstract R execute(Context context, String name, T input, Laminate meta);
 
     /**
      * Build output meta for given data. This meta is calculated on action call
@@ -140,14 +140,14 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
             logger.error("Action {} returned 'null' on data {}", getName(), name);
             throw new RuntimeException("Null result of action");//TODO add emty data to handle this
         }
-        logger.info("Action '{}[{}]' is finished", getName(), name);
+        logger.debug("Action '{}[{}]' is finished", getName(), name);
     }
 
     protected void beforeAction(Context context, String name, T datum, Laminate meta) {
-        if (context.getBoolean("actions.reportStart", true)) {
+        if (context.getBoolean("actions.reportStart", false)) {
             report(context, name, "Starting action {} on data with name {} with following configuration: \n\t {}", getName(), name, meta.toString());
         }
-        getLogger(context, meta).info("Starting action '{}[{}]'", getName(), name);
+        getLogger(context, meta).debug("Starting action '{}[{}]'", getName(), name);
     }
 
 }

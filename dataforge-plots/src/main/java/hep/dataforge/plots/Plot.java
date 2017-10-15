@@ -32,6 +32,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.List;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
@@ -94,7 +95,7 @@ public interface Plot extends Plottable {
                     .putMetaValue("plottableClass", getClass().getName())
                     .putMetaValue("name", getName())
                     .putMetaNode("descriptor", plot.getDescriptor().toMeta())
-                    .putMetaNode("meta", plot.getConfig())
+                    .putMetaNode(DEFAULT_META_NAME, plot.getConfig())
                     .setContentType("wrapper");
 
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -112,7 +113,7 @@ public interface Plot extends Plottable {
         @Override
         public Plot unWrap(Envelope envelope) {
             try {
-                Meta meta = envelope.meta().getMeta("meta");
+                Meta meta = envelope.meta().getMeta(DEFAULT_META_NAME);
                 String name = envelope.meta().getString("name");
 
                 ListOfPoints data = (ListOfPoints) new ObjectInputStream(envelope.getData().getStream()).readObject();

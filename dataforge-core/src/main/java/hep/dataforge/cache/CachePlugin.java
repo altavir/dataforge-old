@@ -59,7 +59,7 @@ public class CachePlugin extends BasicPlugin {
                     throw new RuntimeException("Failed to load explicit cache manager", e);
                 }
             } else {
-                manager = new DefaultCacheManager(getContext());
+                manager = new DefaultCacheManager(getContext(), meta());
             }
         }
         return manager;
@@ -71,7 +71,7 @@ public class CachePlugin extends BasicPlugin {
         } else {
             Cache<Meta, V> cache = getCache(cacheName, data.type());
             Goal<V> cachedGoal = new Goal<V>() {
-                CompletableFuture<V> result = new CompletableFuture<V>();
+                CompletableFuture<V> result = new CompletableFuture<>();
 
                 @Override
                 public Stream<Goal<?>> dependencies() {
@@ -86,7 +86,7 @@ public class CachePlugin extends BasicPlugin {
                 public void run() {
                     //TODO add executor
                     if (data.getGoal().isDone()) {
-                        data.getInFuture().thenAccept(val-> result.complete(val));
+                        data.getInFuture().thenAccept(val -> result.complete(val));
                     } else if (cache.containsKey(id)) {
                         getLogger().info("Cached result found. Restoring data from cache for id {}", id.hashCode());
                         CompletableFuture.supplyAsync(() -> cache.get(id)).whenComplete((res, err) -> {
@@ -105,14 +105,14 @@ public class CachePlugin extends BasicPlugin {
                     }
                 }
 
-                private void evalData(){
+                private void evalData() {
                     data.getGoal().run();
                     data.getGoal().result().whenComplete((res, err) -> {
                         if (err != null) {
                             result.completeExceptionally(err);
                         } else {
-                            cache.put(id, res);
                             result.complete(res);
+                            cache.put(id, res);
                         }
                     });
                 }
@@ -150,6 +150,7 @@ public class CachePlugin extends BasicPlugin {
 
     @Override
     protected synchronized void applyConfig(Meta config) {
+        //reset the manager
         if (manager != null) {
             manager.close();
         }

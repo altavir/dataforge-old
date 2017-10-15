@@ -57,7 +57,7 @@ class WorkspaceSpec {
      */
     @MethodDescription("Load data via closure")
     void data(@DelegatesTo(value = DataNodeSpec, strategy = Closure.DELEGATE_FIRST) Closure cl) {
-        builder.loadData("", DataNodeSpec.buildNode(builder.context, cl))
+        builder.data("", DataNodeSpec.buildNode(builder.context, cl))
     }
 
     /**
@@ -67,7 +67,7 @@ class WorkspaceSpec {
      */
     @MethodDescription("Register a task")
     def task(Task task) {
-        builder.loadTask(task)
+        builder.task(task)
     }
 
     /**
@@ -77,7 +77,7 @@ class WorkspaceSpec {
      */
     @MethodDescription("Define a task by its class")
     def task(Class<? extends Task> taskClass) {
-        builder.loadTask(taskClass.getDeclaredConstructor().newInstance())
+        builder.task(taskClass.getDeclaredConstructor().newInstance())
     }
 
     /**

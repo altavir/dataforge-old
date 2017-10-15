@@ -34,6 +34,8 @@ import java.util.function.Function;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * The model for task execution. Is computed without actual task invocation.
  *
@@ -153,7 +155,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
         MetaBuilder id = new MetaBuilder("task")
                 .setNode(getContext().getIdentity())
                 .setValue("name", getName())
-                .setNode("meta", meta());
+                .setNode(DEFAULT_META_NAME, meta());
 
         MetaBuilder depNode = new MetaBuilder("dependencies");
 

@@ -16,6 +16,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * Basic markup element wrapper. A markup element must have a type designation, fields specific for this markup element (like 'text' for text markup).
  * The structure of intrinsic meta could be as complex as needed as long as its upper layer nodes do not have name conflict with standard markup nodes like 'style'
@@ -23,7 +25,7 @@ import java.util.stream.Stream;
  * Created by darksnake on 30-Dec-16.
  */
 @ValueDef(name = "type", info = "The type of this block")
-@NodeDef(name = "meta", info = "Meta specific for this element")
+@NodeDef(name = DEFAULT_META_NAME, info = "Meta specific for this element")
 @NodeDef(name = "style", info = "Style override")
 public class Markup extends SimpleConfigurable implements Described, ValueProvider {
     /**

@@ -31,6 +31,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * A class for point set visualization
  *
@@ -38,7 +40,7 @@ import java.util.stream.StreamSupport;
  */
 @NodeDef(name = "column", multiple = true, required = true, info = "A column format", from = "class::hep.dataforge.tables.ColumnFormat")
 @NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given")
-@NodeDef(name = "meta", info = "Custom table information")
+@NodeDef(name = DEFAULT_META_NAME, info = "Custom table information")
 public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
 
     /**

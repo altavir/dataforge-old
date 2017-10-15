@@ -21,6 +21,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 
 import static hep.dataforge.data.DataFactory.*;
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 
 /**
  * A factory for data tree
@@ -35,7 +36,7 @@ import static hep.dataforge.data.DataFactory.*;
 @ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
 public class DataFactory<T> implements DataLoader<T> {
 
-    public static final String NODE_META_KEY = "meta";
+    public static final String NODE_META_KEY = DEFAULT_META_NAME;
     public static final String NODE_TYPE_KEY = "type";
     public static final String NODE_KEY = "node";
     public static final String ITEM_KEY = "item";

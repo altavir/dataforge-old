@@ -37,6 +37,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.storage.commons.StorageUtils.buildPath;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
@@ -306,12 +307,12 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @ValueDef(name = "type", allowed = "[loader,storage]", def = "loader", info = "The type of target.")
     @ValueDef(name = "allowCreate", type = {BOOLEAN}, def = "true",
             info = "Allow to create new loader or storage if it is not found.")
-    @NodeDef(name = "meta", info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
+    @NodeDef(name = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     public Responder getResponder(Meta targetInfo) {
         String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET);
         String targetName = targetInfo.getString(TARGET_NAME_KEY, "");
         boolean allowCreate = targetInfo.getBoolean("allowCreate", true);
-        Meta addMeta = targetInfo.getMeta("meta", Meta.empty());
+        Meta addMeta = targetInfo.getMeta(DEFAULT_META_NAME, Meta.empty());
         try {
             switch (targetType) {
                 case STORAGE_TARGET:

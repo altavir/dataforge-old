@@ -2,6 +2,7 @@ package hep.dataforge.kodex
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.values.NamedValue
 
 /**
@@ -38,7 +39,7 @@ class KMetaBuilder(name: String) : MetaBuilder(name) {
     }
 }
 
-fun buildMeta(name: String = "meta", transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
+fun buildMeta(name: String = DEFAULT_META_NAME, transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
     val node = KMetaBuilder(name);
     transform?.invoke(node)
     return node

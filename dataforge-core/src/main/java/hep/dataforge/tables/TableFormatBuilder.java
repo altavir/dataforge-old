@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.tables.ColumnFormat.TAG_KEY;
 
 public class TableFormatBuilder implements TableFormat {
@@ -144,7 +145,7 @@ public class TableFormatBuilder implements TableFormat {
      * @return
      */
     public TableFormatBuilder setMeta(Meta meta) {
-        builder.setNode("meta", meta);
+        builder.setNode(DEFAULT_META_NAME, meta);
         return this;
     }
 
@@ -155,7 +156,7 @@ public class TableFormatBuilder implements TableFormat {
      * @return
      */
     public TableFormatBuilder updateMeta(Consumer<MetaBuilder> transform) {
-        MetaBuilder meta = new MetaBuilder(builder.getMeta("meta", Meta.empty()));
+        MetaBuilder meta = new MetaBuilder(builder.getMeta(DEFAULT_META_NAME, Meta.empty()));
         transform.accept(meta);
         setMeta(meta);
         return this;

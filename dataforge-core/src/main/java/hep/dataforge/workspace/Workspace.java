@@ -33,6 +33,8 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * A place to store tasks and their results
  *
@@ -96,7 +98,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param overlay  use given meta as overaly for existing meta with the same name
      * @return
      */
-    default DataNode<?> runTask(String taskName, Meta config, boolean overlay) {
+    default DataNode<Object> runTask(String taskName, Meta config, boolean overlay) {
         Task<?> task = getTask(taskName);
         if (overlay && hasTarget(config.getName())) {
             config = new Laminate(config, getTarget(config.getName()));
@@ -105,7 +107,7 @@ public interface Workspace extends Encapsulated, Provider {
         return runTask(model);
     }
 
-    default DataNode<?> runTask(String taskName, Meta config) {
+    default DataNode<Object> runTask(String taskName, Meta config) {
         return this.runTask(taskName, config, true);
     }
 
@@ -115,7 +117,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param config
      * @return
      */
-    default DataNode<?> runTask(Meta config) {
+    default DataNode<Object> runTask(Meta config) {
         return runTask(config.getName(), config);
     }
 
@@ -126,7 +128,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param target
      * @return
      */
-    default DataNode<?> runTask(String taskName, String target) {
+    default DataNode<Object> runTask(String taskName, String target) {
         return runTask(taskName, optTarget(target).orElse(Meta.empty()));
     }
 
@@ -136,7 +138,7 @@ public interface Workspace extends Encapsulated, Provider {
      * @param taskName
      * @return
      */
-    default DataNode<?> runTask(String taskName) {
+    default DataNode<Object> runTask(String taskName) {
         return runTask(taskName, taskName);
     }
 
@@ -210,12 +212,12 @@ public interface Workspace extends Encapsulated, Provider {
                         factory = new FileDataFactory();
                     }
                     String as = dataMeta.getString("as", "");
-                    loadData(as, factory.build(getContext(), dataMeta));
+                    data(as, factory.build(getContext(), dataMeta));
                 });
             }
             if (meta.hasMeta("config")) {
                 meta.getMetaList("config").forEach((Meta configMeta) -> {
-                    target(configMeta.getString("name"), configMeta.getMeta("meta"));
+                    target(configMeta.getString("name"), configMeta.getMeta(DEFAULT_META_NAME));
                 });
             }
 
@@ -224,7 +226,7 @@ public interface Workspace extends Encapsulated, Provider {
 
         Workspace.Builder setContext(Context ctx);
 
-        Workspace.Builder loadData(String as, Data<?> data);
+        Workspace.Builder data(String as, Data<?> data);
 
         /**
          * Load a data node to workspace data tree.
@@ -233,7 +235,7 @@ public interface Workspace extends Encapsulated, Provider {
          * @param datanode
          * @return
          */
-        Workspace.Builder loadData(@Nullable String as, DataNode<?> datanode);
+        Workspace.Builder data(@Nullable String as, DataNode<?> datanode);
 
 
         /**
@@ -243,8 +245,8 @@ public interface Workspace extends Encapsulated, Provider {
          * @param dataConfig
          * @return
          */
-        default Workspace.Builder loadData(String place, Meta dataConfig) {
-            return loadData(place, DataLoader.SMART.build(getContext(), dataConfig));
+        default Workspace.Builder data(String place, Meta dataConfig) {
+            return data(place, DataLoader.SMART.build(getContext(), dataConfig));
         }
 
         /**
@@ -255,8 +257,24 @@ public interface Workspace extends Encapsulated, Provider {
          * @param dataConfig
          * @return
          */
-        default Workspace.Builder loadData(String place, DataLoader<?> factory, Meta dataConfig) {
-            return loadData(place, factory.build(getContext(), dataConfig));
+        default Workspace.Builder data(String place, DataLoader<?> factory, Meta dataConfig) {
+            return data(place, factory.build(getContext(), dataConfig));
+        }
+
+        /**
+         * Add static data to the workspace
+         *
+         * @param name
+         * @param object
+         * @param meta
+         * @return
+         */
+        default Workspace.Builder staticData(String name, Object object, Meta meta) {
+            return data(name, Data.buildStatic(object, meta));
+        }
+
+        default Workspace.Builder staticData(String name, Object object) {
+            return data(name, Data.buildStatic(object));
         }
 
 //        /**
@@ -267,16 +285,16 @@ public interface Workspace extends Encapsulated, Provider {
 //         * @param dataConfig
 //         * @return
 //         */
-//        default Workspace.Builder loadData(String place, String factoryType, Meta dataConfig) {
-//            return loadData(place, SmartDataLoader.getFactory(getContext(), factoryType), dataConfig);
+//        default Workspace.Builder data(String place, String factoryType, Meta dataConfig) {
+//            return data(place, SmartDataLoader.getFactory(getContext(), factoryType), dataConfig);
 //        }
 
-        default Workspace.Builder loadFileData(String place, String filePath, Meta meta) {
-            return loadData(place, DataUtils.readFile(getContext().io().getFile(filePath), meta));
+        default Workspace.Builder fileData(String place, String filePath, Meta meta) {
+            return data(place, DataUtils.readFile(getContext().io().getFile(filePath), meta));
         }
 
-        default Workspace.Builder loadFileData(String dataName, String filePath) {
-            return loadFileData(dataName, filePath, Meta.empty());
+        default Workspace.Builder fileData(String dataName, String filePath) {
+            return fileData(dataName, filePath, Meta.empty());
         }
 
         Workspace.Builder target(String name, Meta meta);
@@ -285,10 +303,10 @@ public interface Workspace extends Encapsulated, Provider {
             return target(meta.getName(), meta);
         }
 
-        Workspace.Builder loadTask(Task task);
+        Workspace.Builder task(Task task);
 
-        default Workspace.Builder loadTask(Class<Task> type) throws IllegalAccessException, InstantiationException {
-            return loadTask(type.newInstance());
+        default Workspace.Builder task(Class<Task> type) throws IllegalAccessException, InstantiationException {
+            return task(type.newInstance());
         }
     }
 

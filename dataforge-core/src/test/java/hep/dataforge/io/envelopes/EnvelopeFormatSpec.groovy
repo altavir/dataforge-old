@@ -11,7 +11,7 @@ class EnvelopeFormatSpec extends Specification {
     def "Test read/write"() {
         given:
         byte[] data = "This is my data".bytes
-        Meta meta = new MetaBuilder("meta").setValue("myValue", "This is my meta")
+        Meta meta = new MetaBuilder().setValue("myValue", "This is my meta")
         Envelope envelope = new EnvelopeBuilder().setMeta(meta).setData(data).build()
         when:
         def baos = new ByteArrayOutputStream();

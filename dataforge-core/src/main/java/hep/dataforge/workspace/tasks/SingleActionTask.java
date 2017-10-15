@@ -19,6 +19,8 @@ package hep.dataforge.workspace.tasks;
 import hep.dataforge.actions.Action;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.function.BiConsumer;
 
@@ -28,6 +30,8 @@ import java.util.function.BiConsumer;
  */
 public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
 
+    @NotNull
+    @Contract(pure = true)
     public static <T, R> Task<R> from(Action<T, R> action, BiConsumer<TaskModel.Builder, Meta> dependencyBuilder) {
         return new SingleActionTask<T, R>() {
             @Override
@@ -47,6 +51,8 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
         };
     }
 
+    @NotNull
+    @Contract(pure = true)
     public static <T, R> Task<R> from(Action<T, R> action) {
         return from(action, (model, meta) -> model.allData());
     }

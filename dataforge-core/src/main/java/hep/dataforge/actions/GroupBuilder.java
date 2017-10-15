@@ -21,7 +21,6 @@ import hep.dataforge.data.NamedData;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -57,7 +56,7 @@ public class GroupBuilder {
                     if (!map.containsKey(tagValue)) {
                         DataSet.Builder<T> builder = DataSet.builder(input.type());
                         builder.setName(tagValue);
-                        builder.setMeta(new MetaBuilder("meta").putValue("tagValue", tagValue));
+                        //builder.setMeta(new MetaBuilder(DEFAULT_META_NAME).putValue("tagValue", tagValue));
                         //PENDING share meta here?
                         map.put(tagValue, builder);
                     }

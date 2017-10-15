@@ -23,7 +23,7 @@ class DataNodeSpec {
 //     */
 //    def resource(String place, String path) {
 //        URI uri = URI.create(path)
-//        builder.loadData(place, Data.buildStatic(uri))
+//        builder.data(place, Data.buildStatic(uri))
 //    }
 //
 

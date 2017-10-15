@@ -36,14 +36,13 @@ public class BasicWorkspace extends AbstractWorkspace {
     }
 
     protected boolean cacheEnabled() {
-        return true;
+        return getContext().getBoolean("cache.enabled", true);
     }
 
     public DataNode<Object> runTask(TaskModel model) {
         //Cache result if cache is available and caching is not blocked
         if (cacheEnabled() && model.meta().getBoolean("cache.enabled", true)) {
-            Task<Object> task = getTask(model.getName());
-            return getCache().cacheNode(model.getName(), model.getIdentity(), task.run(model));
+            return getCache().cacheNode(model.getName(), model.getIdentity(), super.runTask(model));
         } else {
             return super.runTask(model);
         }
@@ -99,7 +98,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Builder loadData(String as, Data<?> data) {
+        public Builder data(String as, Data<?> data) {
             if (w.getData().optNode(as).isPresent()) {
                 getLogger().warn("Overriding non-empty data during workspace data fill");
             }
@@ -109,7 +108,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
         @Override
         @SuppressWarnings("unchecked")
-        public Builder loadData(String as, DataNode<?> datanode) {
+        public Builder data(String as, DataNode<?> datanode) {
             if (as == null || as.isEmpty()) {
                 if (!w.data.isEmpty()) {
                     getLogger().warn("Overriding non-empty root data node during workspace construction");
@@ -122,7 +121,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         }
 
         @Override
-        public Builder loadTask(Task task) {
+        public Builder task(Task task) {
             w.tasks.put(task.getName(), task);
             return self();
         }

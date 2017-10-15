@@ -184,7 +184,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
             if (def != null && !def.name().isEmpty()) {
                 return def.name();
             } else {
-                throw new RuntimeException("Name not defined");
+                return "";
             }
         } else {
             return name;

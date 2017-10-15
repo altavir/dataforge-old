@@ -22,6 +22,8 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.
  * The plugin is by default configurable and a Provider (both features could be ignored).
@@ -116,7 +118,7 @@ public interface Plugin extends Configurable, Named, Encapsulated, Provider, Ide
         id.putValue("name", this.getName());
         id.putValue("type", this.getClass().getName());
         id.putValue("context", getContext().getName());
-        id.putNode("meta", getConfig());
+        id.putNode(DEFAULT_META_NAME, getConfig());
         return id;
     }
 }

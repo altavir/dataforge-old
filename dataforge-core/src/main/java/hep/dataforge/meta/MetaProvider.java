@@ -13,12 +13,14 @@ import hep.dataforge.providers.Provides;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 /**
  * @author Alexander Nozik
  */
 public interface MetaProvider {
 
-    String META_TARGET = "meta";
+    String META_TARGET = DEFAULT_META_NAME;
 
     /**
      * Build a meta provider from given general provider

@@ -2,12 +2,14 @@ package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Named;
+import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.utils.Misc;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
+import org.jetbrains.annotations.NotNull;
 
 import javax.cache.Cache;
 import javax.cache.configuration.CacheEntryListenerConfiguration;
@@ -26,10 +28,11 @@ import static java.nio.file.StandardOpenOption.CREATE;
 import static java.nio.file.StandardOpenOption.WRITE;
 
 /**
- * Default implementation for
+ * Default implementation for jCache caching
  * Created by darksnake on 10-Feb-17.
  */
-public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V>, Encapsulated {
+@ValueDef(name = "fileCache.enabled", type = ValueType.BOOLEAN, def = "true", info = "If false, then file cache is read but never written to")
+public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Encapsulated {
 
     private static DefaultEnvelopeReader reader = new DefaultEnvelopeReader();
     private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance);
@@ -42,6 +45,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     private Path cacheDir;
 
     public DefaultCache(String name, DefaultCacheManager manager, Class<V> valueType) {
+        super(manager.meta());
         this.name = name;
         this.manager = manager;
         this.valueType = valueType;
@@ -73,6 +77,7 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public V get(Meta id) {
         if (getSoftCache().containsKey(id)) {
             return (V) getSoftCache().get(id);
@@ -117,10 +122,14 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
 
     }
 
+    protected boolean hardCacheEnabled() {
+        return meta().getBoolean("fileCache.enabled", true);
+    }
+
     @Override
     public synchronized void put(Meta id, V data) {
         getSoftCache().put(id, data);
-        if (data instanceof Serializable) {
+        if (hardCacheEnabled() && data instanceof Serializable) {
             String fileName = data.getClass().getSimpleName();
             if (data instanceof Named) {
                 fileName += "[" + ((Named) data).getName() + "]";
@@ -256,17 +265,18 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
         throw new UnsupportedOperationException();
     }
 
+    @NotNull
     @Override
     public Iterator<Entry<Meta, V>> iterator() {
         return softCache.entrySet().stream()
-                .<Entry<Meta, V>>map(entry -> new DefaultEntry(entry.getKey(), () -> entry.getValue()))
+                .<Entry<Meta, V>>map(entry -> new DefaultEntry(entry.getKey(), entry::getValue))
                 .iterator();
     }
 
 
     @Override
     public <C extends Configuration<Meta, V>> C getConfiguration(Class<C> clazz) {
-        return clazz.cast(new MetaCacheConfiguration<V>(getConfig(), valueType));
+        return clazz.cast(new MetaCacheConfiguration<V>(meta(), valueType));
     }
 
     @Override
@@ -274,20 +284,20 @@ public class DefaultCache<V> extends SimpleConfigurable implements Cache<Meta, V
         return getCacheManager().getContext();
     }
 
-    @Override
-    protected void applyValueChange(String name, Value oldItem, Value newItem) {
-        super.applyValueChange(name, oldItem, newItem);
-        //update cache size preserving all of the elements
-        if (Objects.equals(name, "softCache.size") && softCache != null) {
-            Map<Meta, V> lru = Misc.getLRUCache(newItem.intValue());
-            lru.putAll(softCache);
-            softCache = lru;
-        }
-    }
+//    @Override
+//    protected void applyValueChange(String name, Value oldItem, Value newItem) {
+//        super.applyValueChange(name, oldItem, newItem);
+//        //update cache size preserving all of the elements
+//        if (Objects.equals(name, "softCache.size") && softCache != null) {
+//            Map<Meta, V> lru = Misc.getLRUCache(newItem.intValue());
+//            lru.putAll(softCache);
+//            softCache = lru;
+//        }
+//    }
 
     private synchronized Map<Meta, V> getSoftCache() {
         if (softCache == null) {
-            softCache = Misc.getLRUCache(getConfig().getInt("softCache.size", 500));
+            softCache = Misc.getLRUCache(meta().getInt("softCache.size", 500));
         }
         return softCache;
     }

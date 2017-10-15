@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.util.Collection;
 import java.util.Optional;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
@@ -144,7 +145,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
             EnvelopeBuilder builder = new EnvelopeBuilder()
                     .putMetaValue(WRAPPER_KEY, PLOT_FRAME_WRAPPER_TYPE)
                     .putMetaValue("plotFrameClass", getClass().getName())
-                    .putMetaNode("meta", frame.getConfig())
+                    .putMetaNode(DEFAULT_META_NAME, frame.getConfig())
                     .setContentType("wrapper")
                     .setData(baos.toByteArray());
             return builder.build();
@@ -153,7 +154,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
         @Override
         public PlotFrame unWrap(Envelope envelope) {
             String plotFrameClassName = envelope.meta().getString("plotFrameClass", "hep.dataforge.plots.JFreeChartFrame");
-            Meta plotMeta = envelope.meta().getMeta("meta");
+            Meta plotMeta = envelope.meta().getMeta(DEFAULT_META_NAME);
 
             EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("envelopeType", "default"));
             try {

@@ -12,7 +12,7 @@ import static org.junit.Assert.assertEquals;
 
 public class TaglessEnvelopeTest {
     private Envelope envelope = new EnvelopeBuilder()
-            .setMeta(new MetaBuilder("meta")
+            .setMeta(new MetaBuilder()
                     .putValue("myValue", 12)
             ).setData("Всем привет!".getBytes(Charset.forName("UTF-8")));
 

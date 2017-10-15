@@ -22,6 +22,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.plots.Plot.Wrapper.PLOT_WRAPPER_TYPE;
 
 /**
@@ -258,7 +259,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             EnvelopeBuilder builder = new EnvelopeBuilder()
                     .putMetaValue(WRAPPER_KEY, PLOT_GROUP_WRAPPER_TYPE)
                     .putMetaValue("name", group.getName())
-                    .putMetaNode("meta", group.getConfig())
+                    .putMetaNode(DEFAULT_META_NAME, group.getConfig())
                     .setContentType("wrapper")
                     .setData(baos.toByteArray());
 
@@ -272,7 +273,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         public PlotGroup unWrap(Envelope envelope) {
             checkValidEnvelope(envelope);
             String groupName = envelope.meta().getString("name");
-            Meta groupMeta = envelope.meta().getMeta("meta");
+            Meta groupMeta = envelope.meta().getMeta(DEFAULT_META_NAME);
             PlotGroup group = new PlotGroup(groupName);
             group.configure(groupMeta);
 

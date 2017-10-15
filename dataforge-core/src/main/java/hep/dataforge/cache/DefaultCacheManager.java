@@ -3,6 +3,8 @@ package hep.dataforge.cache;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.Encapsulated;
 import hep.dataforge.context.Global;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.MetaHolder;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -18,12 +20,13 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by darksnake on 08-Feb-17.
  */
-public class DefaultCacheManager implements CacheManager, Encapsulated {
+public class DefaultCacheManager extends MetaHolder implements CacheManager, Encapsulated {
 
     private final Context context;
     private Map<String, DefaultCache> map;
 
-    public DefaultCacheManager(Context context) {
+    public DefaultCacheManager(Context context, Meta cfg) {
+        super(cfg);
         this.context = context;
     }
 
@@ -37,7 +40,7 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
 
     @Override
     public CachingProvider getCachingProvider() {
-        return new DefaultCachingProvider();
+        return new DefaultCachingProvider(context);
     }
 
     @Override
@@ -55,10 +58,11 @@ public class DefaultCacheManager implements CacheManager, Encapsulated {
         return new Properties();
     }
 
+
     @Override
+    @SuppressWarnings("unchecked")
     public <K, V, C extends Configuration<K, V>> Cache<K, V> createCache(String cacheName, C configuration) throws IllegalArgumentException {
-        //TODO add configuration for cache
-        return getCache(cacheName);
+        return new DefaultCache(cacheName, this, configuration.getValueType());
     }
 
     @Override

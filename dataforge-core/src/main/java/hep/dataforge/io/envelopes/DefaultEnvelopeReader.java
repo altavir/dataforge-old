@@ -20,7 +20,6 @@ import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.exceptions.EnvelopeFormatException;
 import hep.dataforge.io.MetaStreamReader;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaNode;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
@@ -35,6 +34,7 @@ import java.text.ParseException;
 import java.util.function.Supplier;
 
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static java.nio.file.StandardOpenOption.READ;
 
 /**
@@ -56,7 +56,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         int metaLength = tag.getMetaSize();
         Meta meta;
         if (metaLength == 0) {
-            meta = Meta.buildEmpty(MetaNode.DEFAULT_META_NAME);
+            meta = Meta.buildEmpty(DEFAULT_META_NAME);
         } else {
             try {
                 meta = parser.read(stream, metaLength);
@@ -100,7 +100,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
 
         Meta meta;
         if (metaLength == 0) {
-            meta = Meta.buildEmpty("meta");
+            meta = Meta.buildEmpty(DEFAULT_META_NAME);
         } else {
             try {
                 meta = parser.readBuffer(metaBuffer);

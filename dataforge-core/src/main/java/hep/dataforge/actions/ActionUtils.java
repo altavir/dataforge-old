@@ -35,6 +35,8 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+
 public class ActionUtils {
 
     public static final String DEFAULT_ACTION_NAME = "";
@@ -185,7 +187,7 @@ public class ActionUtils {
 
             MetaBuilder id = new MetaBuilder("action").setValue("context", context.getName());
             for (Meta actionMeta : sequenceMeta.getMetaList(ACTION_NODE_KEY)) {
-                id = id.setNode("meta", actionMeta);
+                id = id.setNode(DEFAULT_META_NAME, actionMeta);
                 String actionType = actionMeta.getString(ACTION_TYPE, SEQUENCE_ACTION_TYPE);
                 Action action = buildAction(context, actionType);
                 res = action.run(context, res, actionMeta);
