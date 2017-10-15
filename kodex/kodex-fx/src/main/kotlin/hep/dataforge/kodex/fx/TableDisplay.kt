@@ -1,4 +1,4 @@
-package hep.dataforge.kodex.fx.plots
+package hep.dataforge.kodex.fx
 
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
@@ -8,7 +8,7 @@ import hep.dataforge.values.ValueType
 import org.controlsfx.control.spreadsheet.*
 import tornadofx.*
 
-class TableDisplay(val table: Table, meta: Meta) : Fragment(meta.optString("title").orElse(null)), Metoid {
+class TableDisplay(val table: Table, meta: Meta = Meta.empty()) : Fragment(meta.optString("title").orElse(null)), Metoid {
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {
@@ -23,7 +23,7 @@ class TableDisplay(val table: Table, meta: Meta) : Fragment(meta.optString("titl
 
         for (i in (1..table.size())) {
             rows += (1..format.count())
-                    .map { j -> buildCell(i, j, table.get(format.names[j], i)) }
+                    .map { j -> buildCell(i, j, table.get(format.names[j - 1], i - 1)) }
                     .observable()
         }
     }

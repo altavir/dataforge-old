@@ -26,7 +26,7 @@ allprojects{
 
 subprojects{
     if(it.name != "site") {
-        apply plugin: "com.jfrog.artifactory"
+        //apply plugin: "com.jfrog.artifactory"
         apply plugin: 'maven-publish'
         apply plugin: 'java'
 
