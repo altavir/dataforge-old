@@ -29,9 +29,9 @@ import hep.dataforge.values.Values;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@NodeDef(name = "x", info = "x axis mapping", from = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
-@NodeDef(name = "y", info = "y axis mapping", from = "method::hep.dataforge.tables.AxisPointAdapter.getAxisMeta")
-public class XYAdapter extends AxisPointAdapter {
+@NodeDef(name = "x", info = "x axis mapping", from = "method::hep.dataforge.tables.AxisValuesAdapter.getAxisMeta")
+@NodeDef(name = "y", info = "y axis mapping", from = "method::hep.dataforge.tables.AxisValuesAdapter.getAxisMeta")
+public class XYAdapter extends AxisValuesAdapter {
 
     public static final String X_AXIS = "x";
     public static final String Y_AXIS = "y";
@@ -51,7 +51,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @param adapter
      * @return
      */
-    public static XYAdapter from(PointAdapter adapter) {
+    public static XYAdapter from(ValuesAdapter adapter) {
         if (adapter instanceof XYAdapter) {
             return (XYAdapter) adapter;
         } else {
@@ -60,17 +60,17 @@ public class XYAdapter extends AxisPointAdapter {
     }
 
     private static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
-        return new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
+        return new MetaBuilder(ValuesAdapter.DATA_ADAPTER_KEY)
                 .putValue(X_VALUE_KEY, xName)
                 .putValue(Y_VALUE_KEY, yName)
                 .putValue(X_ERROR_KEY, xErrName)
                 .putValue(Y_ERROR_KEY, yErrName);
     }
 
-    private String xValue;
-    private String[] yValues;
-    private String xError;
-    private String[] yErrors;
+    private String xValueName;
+    private String[] yValuesNames;
+    private String xErrorName;
+    private String[] yErrorsNames;
 
 
     public XYAdapter() {
@@ -95,16 +95,16 @@ public class XYAdapter extends AxisPointAdapter {
     }
 
     private void updateCache() {
-        xValue = meta().getString(X_VALUE_KEY, X_AXIS);
-        xError = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
+        xValueName = meta().getString(X_VALUE_KEY, X_AXIS);
+        xErrorName = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
         if (meta().hasMeta(Y_AXIS)) {
-            yValues = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, Y_AXIS))
+            yValuesNames = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, Y_AXIS))
                     .toArray(String[]::new);
-            yErrors = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
+            yErrorsNames = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
                     .toArray(String[]::new);
         } else {
-            yValues = new String[]{Y_AXIS};
-            yErrors = new String[]{Y_ERROR_KEY};
+            yValuesNames = new String[]{Y_AXIS};
+            yErrorsNames = new String[]{Y_ERROR_KEY};
         }
     }
 
@@ -127,7 +127,7 @@ public class XYAdapter extends AxisPointAdapter {
      * @return
      */
     public int getYCount() {
-        return yValues.length;
+        return yValuesNames.length;
     }
 
     public String getYTitle(int i) {
@@ -135,11 +135,11 @@ public class XYAdapter extends AxisPointAdapter {
     }
 
     public Value getX(Values point) {
-        return point.getValue(xValue);
+        return point.getValue(xValueName);
     }
 
     public Value getXerr(Values point) {
-        return point.getValue(xError, Value.NULL);
+        return point.getValue(xErrorName, Value.NULL);
     }
 
     /**
@@ -170,11 +170,11 @@ public class XYAdapter extends AxisPointAdapter {
      * @return
      */
     public Value getY(Values point, int index) {
-        return point.getValue(yValues[index]);
+        return point.getValue(yValuesNames[index]);
     }
 
     public Value getYerr(Values point, int index) {
-        return point.getValue(yErrors[index]);
+        return point.getValue(yErrorsNames[index]);
     }
 
     /**
@@ -226,27 +226,39 @@ public class XYAdapter extends AxisPointAdapter {
     }
 
     public boolean providesXError(Values point) {
-        return point.hasValue(xError);
+        return point.hasValue(xErrorName);
     }
 
     public boolean providesYError(Values point) {
-        return point.hasValue(yErrors[0]);
+        return point.hasValue(yErrorsNames[0]);
     }
-
-    //TODO override name searches for x and y axis
 
     /**
      * Return a default TableFormat corresponding to this adapter
+     * TODO move to utils
      *
      * @return
      */
     public TableFormat getFormat() {
-        //FIXME wrong table format here
-        //TODO move to utils
-        return new TableFormatBuilder()
-                .addNumber(xValue)
-                .addNumber(yValues[0])
-                .build();
+        updateCache();
+        TableFormatBuilder builder = new TableFormatBuilder()
+                .addNumber(xValueName, X_VALUE_KEY);
+
+        if (meta().hasValue(X_ERROR_KEY)) {
+            builder.addNumber(xErrorName, X_ERROR_KEY);
+        }
+
+        for (String yValueKey : yValuesNames) {
+            builder.addNumber(yValueKey, Y_VALUE_KEY);
+        }
+
+        if (meta().hasValue(Y_ERROR_KEY)) {
+            for (String yErrorKey : yErrorsNames) {
+                builder.addNumber(yErrorKey, Y_ERROR_KEY);
+            }
+        }
+
+        return builder.build();
     }
 
 

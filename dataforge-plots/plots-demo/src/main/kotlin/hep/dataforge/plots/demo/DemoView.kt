@@ -1,7 +1,7 @@
 package hep.dataforge.plots.demo
 
 import hep.dataforge.kodex.fx.plots.PlotContainer
-import hep.dataforge.plots.data.PlotData
+import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
 import hep.dataforge.tables.ValueMap
 import hep.dataforge.tables.XYAdapter
@@ -37,7 +37,7 @@ class DemoView : View("Plot demonstration") {
         }
     }
 
-    //private val dataMap = FXCollections.observableHashMap<String, ObservableList<PlotData>>()
+    //private val dataMap = FXCollections.observableHashMap<String, ObservableList<DataPlot>>()
     val dataMap = FXCollections.observableHashMap<String, ObservableList<PlotData>>().apply {
         addListener{change: MapChangeListener.Change<out String, out ObservableList<PlotData>> ->
             dataChanged(change.key)
@@ -102,10 +102,10 @@ class DemoView : View("Plot demonstration") {
         synchronized(this) {
             if (dataMap.containsKey(plotName)) {
                 if (!frame.opt(plotName).isPresent) {
-                    frame.add(PlotData(plotName))
+                    frame.add(DataPlot(plotName))
                 }
 
-                (frame.get(plotName) as hep.dataforge.plots.data.PlotData).fillData(dataMap[plotName]!!.stream().map { it.toValues() })
+                (frame.get(plotName) as DataPlot).fillData(dataMap[plotName]!!.stream().map { it.toValues() })
             } else {
                 frame.remove(plotName)
             }

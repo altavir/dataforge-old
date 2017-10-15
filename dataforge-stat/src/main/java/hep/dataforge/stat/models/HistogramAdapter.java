@@ -16,8 +16,8 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.tables.AxisPointAdapter;
-import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.tables.AxisValuesAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Values;
 
 /**
@@ -26,7 +26,7 @@ import hep.dataforge.values.Values;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistogramAdapter extends AxisPointAdapter {
+public class HistogramAdapter extends AxisValuesAdapter {
 
     public static final String BIN_BEGIN_NAME = "binBegin";
     public static final String BIN_END_NAME = "binEnd";
@@ -37,7 +37,7 @@ public class HistogramAdapter extends AxisPointAdapter {
     }
     
     public HistogramAdapter(String binBeginName, String binEndName, String countName) {
-        super(new MetaBuilder(PointAdapter.DATA_ADAPTER_KEY)
+        super(new MetaBuilder(ValuesAdapter.DATA_ADAPTER_KEY)
                 .putValue(BIN_BEGIN_NAME, binBeginName)
                 .putValue(BIN_END_NAME, binEndName)
                 .putValue(COUNT_NAME, countName)

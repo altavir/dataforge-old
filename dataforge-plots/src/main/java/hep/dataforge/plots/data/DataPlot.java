@@ -35,9 +35,9 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
 @ValueDef(name = "showLine", type = {BOOLEAN}, def = "false", info = "Show the connecting line.")
 @ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "true", info = "Show symbols for data point.")
 @ValueDef(name = "showErrors", type = {BOOLEAN}, def = "true", info = "Show errors for points.")
-public class PlotData extends XYPlot {
-    public static PlotData plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
-        PlotData plot = new PlotData(name);
+public class DataPlot extends XYPlot {
+    public static DataPlot plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
+        DataPlot plot = new DataPlot(name);
 
         if (x.length != y.length) {
             throw new IllegalArgumentException("Arrays size mismatch");
@@ -61,33 +61,31 @@ public class PlotData extends XYPlot {
         return plot;
     }
 
-    public static PlotData plot(String name, double[] x, double[] y) {
+    public static DataPlot plot(String name, double[] x, double[] y) {
         return plot(name, x, y, null, null);
     }
 
-    public static PlotData plot(String name, XYAdapter adapter, boolean showErrors) {
+    public static DataPlot plot(String name, XYAdapter adapter, boolean showErrors) {
         MetaBuilder builder = new MetaBuilder("dataPlot").setValue("showErrors", showErrors);
-        PlotData plot = new PlotData(name);
+        DataPlot plot = new DataPlot(name);
         plot.setAdapter(adapter);
         plot.configure(builder);
         return plot;
     }
 
-    public static PlotData plot(String name, XYAdapter adapter, Iterable<Values> data) {
-        PlotData plot = plot(name, adapter, true);
+    public static DataPlot plot(String name, XYAdapter adapter, Iterable<Values> data) {
+        DataPlot plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
     }
 
-
-    //TODO replace by ObservableList and allow external modification
     protected List<Values> data = new ArrayList<>();
 
-    public PlotData(String name) {
+    public DataPlot(String name) {
         super(name);
     }
 
-    public PlotData(String name, Meta meta) {
+    public DataPlot(String name, Meta meta) {
         super(name);
         configure(meta);
     }
@@ -101,7 +99,7 @@ public class PlotData extends XYPlot {
         this.data = data;
     }
 
-    public PlotData fillData(Iterable<? extends Values> it, boolean append) {
+    public DataPlot fillData(Iterable<? extends Values> it, boolean append) {
         if (this.data == null || !append) {
             this.data = new ArrayList<>();
         }
@@ -118,24 +116,24 @@ public class PlotData extends XYPlot {
      *
      * @param it
      */
-    public PlotData fillData(@NotNull Iterable<? extends Values> it) {
+    public DataPlot fillData(@NotNull Iterable<? extends Values> it) {
         return fillData(it, false);
     }
 
-    public PlotData fillData(@NotNull Stream<? extends Values> it) {
+    public DataPlot fillData(@NotNull Stream<? extends Values> it) {
         this.data = new ArrayList<>();
         it.forEach(dp-> data.add(dp));
         notifyDataChanged();
         return this;
     }
 
-    public PlotData append(Values dp) {
+    public DataPlot append(Values dp) {
         data.add(dp);
         notifyDataChanged();
         return this;
     }
 
-    public PlotData append(Number x, Number y) {
+    public DataPlot append(Number x, Number y) {
         return append(ValueMap.of(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
     }
 

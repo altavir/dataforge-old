@@ -59,16 +59,16 @@ public class PlotDataUtils {
      * @param source
      * @return
      */
-    public static PlottableGroup<PlotData> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
+    public static PlottableGroup<DataPlot> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
         List<Values> points = source.collect(Collectors.toList());
-        List<PlotData> plottables = yNames.stream().map(yName -> {
-            PlotData pl = new PlotData(yName);
+        List<DataPlot> plottables = yNames.stream().map(yName -> {
+            DataPlot pl = new DataPlot(yName);
             pl.setAdapter(new XYAdapter(xName, yName));
             return pl;
         }).collect(Collectors.toList());
         plottables.forEach(pl -> pl.setData(points));
 
-        return new PlottableGroup<PlotData>(plottables);
+        return new PlottableGroup<DataPlot>(plottables);
     }
 
 }

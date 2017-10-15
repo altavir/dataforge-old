@@ -10,6 +10,7 @@ import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ReferenceRegistry;
+import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
 import java.io.BufferedInputStream;
@@ -151,6 +152,20 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     }
 
     /**
+     * Stream of all plots excluding intermediate nodes
+     * @return
+     */
+    public Stream<Pair<String, Plottable>> stream() {
+        return plots.values().stream().flatMap(pl -> {
+            if (pl instanceof PlotGroup) {
+                return ((PlotGroup) pl).stream().map(pair -> new Pair<>(Name.joinString(pl.getName(), pair.getKey()), pair.getValue()));
+            } else {
+                return Stream.of(new Pair<>(pl.getName(), pl));
+            }
+        });
+    }
+
+    /**
      * Recursively apply action to all children
      *
      * @param action
@@ -243,9 +258,9 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             for (Plottable plot : group.plots.values()) {
                 try {
                     Envelope env;
-                    if(plot instanceof PlotGroup){
+                    if (plot instanceof PlotGroup) {
                         env = wrap((PlotGroup) plot);
-                    } else if(plot instanceof Plot){
+                    } else if (plot instanceof Plot) {
                         env = plotWrapper.wrap((Plot) plot);
                     } else {
                         throw new RuntimeException("Unknown plottable type");

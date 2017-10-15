@@ -19,14 +19,14 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotStateListener;
-import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * @author darksnake
  */
-public abstract class AbstractPlot<T extends PointAdapter> extends SimpleConfigurable implements Plot {
+public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfigurable implements Plot {
 
     public static final String ADAPTER_KEY = "@adapter";
     public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";

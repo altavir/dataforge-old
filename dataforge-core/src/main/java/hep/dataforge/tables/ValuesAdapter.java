@@ -25,7 +25,7 @@ import hep.dataforge.values.Values;
  * An adapter to interpret datapoint
  * @author Alexander Nozik
  */
-public interface PointAdapter extends Metoid, MetaMorph {
+public interface ValuesAdapter extends Metoid, MetaMorph {
     
     String DATA_ADAPTER_KEY = "adapter";
 

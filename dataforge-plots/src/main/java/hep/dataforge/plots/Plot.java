@@ -20,9 +20,9 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonymousNotAlowed;
-import hep.dataforge.plots.data.PlotData;
+import hep.dataforge.plots.data.DataPlot;
 import hep.dataforge.tables.ListOfPoints;
-import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 
@@ -69,7 +69,7 @@ public interface Plot extends Plottable {
      *
      * @return
      */
-    PointAdapter getAdapter();
+    ValuesAdapter getAdapter();
 
     default Value getComponent(int index, String component) {
         return getAdapter().getComponent(getData().get(index), component);
@@ -119,7 +119,7 @@ public interface Plot extends Plottable {
                 ListOfPoints data = (ListOfPoints) new ObjectInputStream(envelope.getData().getStream()).readObject();
 
                 //Restore always as plottableData
-                PlotData pl = new PlotData(name, meta);
+                DataPlot pl = new DataPlot(name, meta);
                 pl.fillData(data);
                 return pl;
             } catch (Exception ex) {

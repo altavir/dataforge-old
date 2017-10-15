@@ -25,10 +25,10 @@ import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
-import hep.dataforge.plots.data.PlotData
-import hep.dataforge.plots.data.PlotXYFunction
+import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
-import hep.dataforge.tables.PointAdapter
+import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.XYAdapter
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
@@ -92,7 +92,7 @@ class PlotHelper extends AbstractHelper {
         double to = parameters.get("to", 1d) as Double;
         int numPoints = parameters.get("numPoints", 100) as Integer;
         Function<Double, Double> func = { Double x -> function.call(x) as Double } as Function
-        PlotXYFunction res = PlotXYFunction.plotFunction(pltName, func, from, to, numPoints);
+        XYFunctionPlot res = XYFunctionPlot.plotFunction(pltName, func, from, to, numPoints);
         res.configure(parameters)
         manager.getPlotFrame(frameName).add(res)
         return res;
@@ -101,13 +101,13 @@ class PlotHelper extends AbstractHelper {
 
     @MethodDescription("Plot data using x and y array")
     XYPlot plot(double[] x, double[] y, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = PlotData.plot(name, x, y);
+        def res = DataPlot.plot(name, x, y);
         manager.getPlotFrame(frame).add(res)
         return res;
     }
 
     XYPlot plot(List x, List y, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = PlotData.plot(name, x as double[], y as double[]);
+        def res = DataPlot.plot(name, x as double[], y as double[]);
         manager.getPlotFrame(frame).add(res)
         return res;
     }
@@ -124,8 +124,8 @@ class PlotHelper extends AbstractHelper {
     }
 
     @MethodDescription("Plot data using iterable point source and adapter")
-    XYPlot plot(Iterable<Values> source, PointAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = PlotData.plot(name, XYAdapter.from(adapter), source);
+    XYPlot plot(Iterable<Values> source, ValuesAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
+        def res = DataPlot.plot(name, XYAdapter.from(adapter), source);
         manager.getPlotFrame(frame).add(res)
         return res;
     }
@@ -143,7 +143,7 @@ class PlotHelper extends AbstractHelper {
         Meta configuration = Grind.buildMeta(parameters, cl);
         String name = configuration.getString("name", "data_${source.hashCode()}")
         String frameName = configuration.getString("frame", DEFAULT_FRAME)
-        def res = new PlotData(name, configuration);
+        def res = new DataPlot(name, configuration);
 
         res.fillData(source);
 

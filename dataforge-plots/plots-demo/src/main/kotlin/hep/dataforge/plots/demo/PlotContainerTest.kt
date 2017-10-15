@@ -17,8 +17,8 @@ package hep.dataforge.plots.demo
 
 import hep.dataforge.kodex.fx.plots.PlotManager
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.plots.data.PlotData
-import hep.dataforge.plots.data.PlotXYFunction
+import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.ValueMap
 import hep.dataforge.tables.XYAdapter
@@ -34,7 +34,7 @@ fun main(args: Array<String>) {
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
-    val funcPlot = PlotXYFunction.plotFunction("func", func, 0.1, 4.0, 200)
+    val funcPlot = XYFunctionPlot.plotFunction("func", func, 0.1, 4.0, 200)
 
 
     val names = arrayOf("myX", "myY", "myXErr", "myYErr")
@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
     val ds = ListTable(data)
 
-    val dataPlot = PlotData.plot("dataPlot", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
+    val dataPlot = DataPlot.plot("dataPlot", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
 
     val manager = PlotManager();

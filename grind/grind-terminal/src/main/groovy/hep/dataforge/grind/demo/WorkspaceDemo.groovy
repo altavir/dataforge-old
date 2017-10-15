@@ -5,7 +5,7 @@ import hep.dataforge.grind.GrindShell
 import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotPlugin
-import hep.dataforge.plots.data.PlotData
+import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.tables.ColumnTable
 import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
@@ -80,7 +80,7 @@ new GrindShell().eval {
     frame.configure("yAxis.type": "log")
 
     workspace.run("dif").dataStream().forEach {
-        frame.add new PlotData(it.name, it.meta).fillData(it.get() as Table)
+        frame.add new DataPlot(it.name, it.meta).fillData(it.get() as Table)
     }
     Platform.implicitExit = true
 }

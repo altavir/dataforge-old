@@ -17,7 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ValueDef(name = "label", def = "label", info = "Point label key")
-public class AxisPointAdapter implements PointAdapter {
+public class AxisValuesAdapter implements ValuesAdapter {
 
     public static final String VALUE_KEY = "value";
     public static final String ERROR_KEY = "err";
@@ -27,11 +27,11 @@ public class AxisPointAdapter implements PointAdapter {
     private Meta meta;
     private final Map<String, String> nameCache = new HashMap<>();
 
-    public AxisPointAdapter() {
+    public AxisValuesAdapter() {
         meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
     }
 
-    public AxisPointAdapter(Meta meta) {
+    public AxisValuesAdapter(Meta meta) {
         if (meta == null) {
             this.meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
         } else {
@@ -39,7 +39,7 @@ public class AxisPointAdapter implements PointAdapter {
         }
     }
 
-    public AxisPointAdapter(Map<String, String> map) {
+    public AxisValuesAdapter(Map<String, String> map) {
         MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
         map.forEach(mb::setValue);
         this.meta = mb.build();

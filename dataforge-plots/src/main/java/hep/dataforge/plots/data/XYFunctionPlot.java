@@ -33,12 +33,12 @@ import java.util.stream.Collectors;
  *
  * @author Alexander Nozik
  */
-public class PlotXYFunction extends XYPlot {
+public class XYFunctionPlot extends XYPlot {
 
     private static final int DEFAULT_DENSITY = 200;
 
-    public static PlotXYFunction plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
-        PlotXYFunction p = new PlotXYFunction(name);
+    public static XYFunctionPlot plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
+        XYFunctionPlot p = new XYFunctionPlot(name);
         p.setFunction(function);
         p.setXRange(from, to, false);
         p.setDensity(numPoints, false);
@@ -57,7 +57,7 @@ public class PlotXYFunction extends XYPlot {
     /**
      * @param name
      */
-    public PlotXYFunction(String name) {
+    public XYFunctionPlot(String name) {
         super(name);
         getConfig().setValue("showLine", true);
         getConfig().setValue("showSymbol", false);

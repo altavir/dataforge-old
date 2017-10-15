@@ -109,7 +109,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
                 });
 
 
-        MenuItem dfpExport = FXPlotUtils.getDFPlotExportMenuItem(menu.getOwnerWindow(), frame);
+        MenuItem dfpExport = PlotUtils.getDFPlotExportMenuItem(menu.getOwnerWindow(), frame);
 
         parent.getItems().add(dfpExport);
     }

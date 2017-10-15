@@ -21,7 +21,7 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.PointAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Values;
 
@@ -31,7 +31,7 @@ import hep.dataforge.values.Values;
  * @param <T>
  * @author Alexander Nozik
  */
-public abstract class AbstractModel<T extends PointAdapter> extends MetaHolder implements Model {
+public abstract class AbstractModel<T extends ValuesAdapter> extends MetaHolder implements Model {
 //TODO add default parameters to model
 
     private final Names names;

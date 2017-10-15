@@ -16,8 +16,8 @@
 package hep.dataforge.plots.demo;
 
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.plots.data.PlotData;
-import hep.dataforge.plots.data.PlotXYFunction;
+import hep.dataforge.plots.data.DataPlot;
+import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
@@ -54,7 +54,7 @@ public class JFreeFXTest extends Application {
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 
-        PlotXYFunction funcPlot = PlotXYFunction.plotFunction("func", func, 0.1, 4, 200);
+        XYFunctionPlot funcPlot = XYFunctionPlot.plotFunction("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 
@@ -66,7 +66,7 @@ public class JFreeFXTest extends Application {
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        PlotData dataPlot = PlotData.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        DataPlot dataPlot = DataPlot.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 
