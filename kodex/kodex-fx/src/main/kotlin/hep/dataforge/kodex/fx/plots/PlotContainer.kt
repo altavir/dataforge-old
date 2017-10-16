@@ -5,12 +5,12 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.ApplicationSurrogate
 import hep.dataforge.fx.FXObject
 import hep.dataforge.fx.configuration.ConfigEditor
+import hep.dataforge.kodex.fx.TableDisplay
 import hep.dataforge.kodex.fx.dfIcon
 import hep.dataforge.meta.Configuration
-import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.PlotGroup
-import hep.dataforge.plots.PlotStateListener
-import hep.dataforge.plots.Plottable
+import hep.dataforge.meta.Meta
+import hep.dataforge.plots.*
+import hep.dataforge.plots.data.DataPlot
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -42,6 +42,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
 class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
 
     private val configWindows = HashMap<Configuration, Stage>()
+    private val dataWindows = HashMap<Plot, Stage>()
 
 
     val sideBarExpandedProperty = SimpleBooleanProperty(true)
@@ -182,6 +183,16 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
 
 
                             }
+
+                            if (item is DataPlot) {
+                                contextmenu{
+                                    item("Show data") {
+                                        action {
+                                            displayData(item)
+                                        }
+                                    }
+                                }
+                            }
                             text = null;
                         }
 
@@ -231,6 +242,22 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                 width = 400.0
                 title = header
                 setOnCloseRequest { configWindows.remove(config) }
+                initOwner(root.scene.window)
+            }
+        }.apply {
+            show()
+            toFront()
+        }
+    }
+
+    private fun displayData(plot: DataPlot) {
+        dataWindows.getOrPut(plot) {
+            Stage().apply {
+                scene = Scene(TableDisplay(PlotUtils.extractData(plot, Meta.empty())).root)
+                height = 400.0
+                width = 400.0
+                title = "Data: ${plot.name}"
+                setOnCloseRequest { dataWindows.remove(plot) }
                 initOwner(root.scene.window)
             }
         }.apply {
