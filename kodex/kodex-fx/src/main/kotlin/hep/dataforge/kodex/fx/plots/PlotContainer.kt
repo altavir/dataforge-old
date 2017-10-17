@@ -138,6 +138,7 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                             graphic = hbox {
                                 hgrow = Priority.ALWAYS
                                 checkbox(item.config.getString("title", item.name)) {
+                                    minWidth = 0.0
                                     if (item == plot.plots) {
                                         text = "<<< All plots >>>"
                                     }

@@ -35,18 +35,7 @@ public interface Generator {
      */
     NavigablePointSource generateData(Iterable<Values> config);
 
-    /**
-     * <p>generateDataPoint.</p>
-     *
-     * @param configPoint a {@link hep.dataforge.tables.DataPoint} object.
-     * @return a {@link hep.dataforge.tables.DataPoint} object.
-     */
     Values generateDataPoint(Values configPoint);
 
-    /**
-     * <p>getGeneratorType.</p>
-     *
-     * @return a {@link java.lang.String} object.
-     */
     String getGeneratorType();
 }

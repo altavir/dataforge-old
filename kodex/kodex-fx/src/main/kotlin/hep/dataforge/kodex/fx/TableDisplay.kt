@@ -11,6 +11,9 @@ import javafx.scene.input.ClipboardContent
 import org.controlsfx.control.spreadsheet.*
 import tornadofx.*
 
+/**
+ * Table display fragment
+ */
 class TableDisplay(val table: Table, meta: Meta = Meta.empty())
     : Fragment(title = meta.optString("title").orElse(null), icon = ImageView(dfIcon)), Metoid {
 
