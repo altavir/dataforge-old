@@ -137,16 +137,16 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     public void update(Meta annotation) {
         if (annotation != null) {
-            annotation.getValueNames().forEach((valueName) -> {
+            annotation.getValueNames(true).forEach((valueName) -> {
                 setValue(valueName, annotation.getValue(valueName));
             });
 
-            annotation.getNodeNames().forEach((elementName) -> {
+            annotation.getNodeNames(true).forEach((elementName) -> {
                 setNode(elementName,
                         annotation
                                 .getMetaList(elementName)
                                 .stream()
-                                .map((el) -> new Configuration(el))
+                                .map(Configuration::new)
                                 .collect(Collectors.toList())
                 );
             });

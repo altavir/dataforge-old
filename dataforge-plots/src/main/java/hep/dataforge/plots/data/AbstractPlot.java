@@ -23,12 +23,13 @@ import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
 
+import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
+
 /**
  * @author darksnake
  */
 public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfigurable implements Plot {
 
-    public static final String ADAPTER_KEY = "@adapter";
     public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
     private final String name;

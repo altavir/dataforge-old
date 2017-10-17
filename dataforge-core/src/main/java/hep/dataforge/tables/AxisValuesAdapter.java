@@ -28,19 +28,19 @@ public class AxisValuesAdapter implements ValuesAdapter {
     private final Map<String, String> nameCache = new HashMap<>();
 
     public AxisValuesAdapter() {
-        meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
+        meta = Meta.buildEmpty(ADAPTER_KEY);
     }
 
     public AxisValuesAdapter(Meta meta) {
         if (meta == null) {
-            this.meta = Meta.buildEmpty(DATA_ADAPTER_KEY);
+            this.meta = Meta.buildEmpty(ADAPTER_KEY);
         } else {
             this.meta = meta;
         }
     }
 
     public AxisValuesAdapter(Map<String, String> map) {
-        MetaBuilder mb = new MetaBuilder(DATA_ADAPTER_KEY);
+        MetaBuilder mb = new MetaBuilder(ADAPTER_KEY);
         map.forEach(mb::setValue);
         this.meta = mb.build();
     }

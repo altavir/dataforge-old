@@ -168,6 +168,23 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                                             }
                                         }
                                     }
+
+                                    contextmenu {
+                                        if (item is DataPlot) {
+                                            item("Show data") {
+                                                action {
+                                                    displayData(item)
+                                                }
+                                            }
+                                        } else if (item is PlotGroup) {
+                                            item("Show all") {
+                                                action { item.forEach { it.configureValue("visible", true) } }
+                                            }
+                                            item("Hide all") {
+                                                action { item.forEach { it.configureValue("visible", false) } }
+                                            }
+                                        }
+                                    }
                                 }
 
                                 pane {
@@ -183,28 +200,9 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
 
 
                             }
-
-                            if (item is DataPlot) {
-                                contextmenu{
-                                    item("Show data") {
-                                        action {
-                                            displayData(item)
-                                        }
-                                    }
-                                }
-                            }
                             text = null;
                         }
 
-                        // global context menu
-                        contextmenu {
-                            item("Show all") {
-                                action { plot.plots.forEach { it.configureValue("visible", true) } }
-                            }
-                            item("Hide all") {
-                                action { plot.plots.forEach { it.configureValue("visible", false) } }
-                            }
-                        }
                     }
                 }
 

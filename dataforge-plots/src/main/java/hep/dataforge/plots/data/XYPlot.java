@@ -29,7 +29,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
-import static hep.dataforge.plots.data.AbstractPlot.ADAPTER_KEY;
+import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 import static hep.dataforge.values.ValueType.NUMBER;
 

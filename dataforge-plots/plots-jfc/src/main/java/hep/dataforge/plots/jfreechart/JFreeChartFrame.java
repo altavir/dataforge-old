@@ -307,7 +307,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
     @Override
     protected synchronized void updatePlotConfig(String name, Laminate meta) {
         XYLineAndShapeRenderer render;
-        if (meta.getBoolean("showErrors", false)) {
+        if (meta.getBoolean("showErrors", true)) {
             render = new XYErrorRenderer();
         } else {
             switch (meta.getString("connectionType", "default")) {

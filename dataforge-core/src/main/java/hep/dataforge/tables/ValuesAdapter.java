@@ -27,7 +27,7 @@ import hep.dataforge.values.Values;
  */
 public interface ValuesAdapter extends Metoid, MetaMorph {
     
-    String DATA_ADAPTER_KEY = "adapter";
+    String ADAPTER_KEY = "@adapter";
 
     /**
      * Аннотация, описывающая данный тип адаптера

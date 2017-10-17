@@ -37,7 +37,7 @@ public class HistogramAdapter extends AxisValuesAdapter {
     }
     
     public HistogramAdapter(String binBeginName, String binEndName, String countName) {
-        super(new MetaBuilder(ValuesAdapter.DATA_ADAPTER_KEY)
+        super(new MetaBuilder(ValuesAdapter.ADAPTER_KEY)
                 .putValue(BIN_BEGIN_NAME, binBeginName)
                 .putValue(BIN_END_NAME, binEndName)
                 .putValue(COUNT_NAME, countName)

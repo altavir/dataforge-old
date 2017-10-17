@@ -59,8 +59,8 @@ public class XYAdapter extends AxisValuesAdapter {
         }
     }
 
-    private static final MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
-        return new MetaBuilder(ValuesAdapter.DATA_ADAPTER_KEY)
+    private static MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
+        return new MetaBuilder(ValuesAdapter.ADAPTER_KEY)
                 .putValue(X_VALUE_KEY, xName)
                 .putValue(Y_VALUE_KEY, yName)
                 .putValue(X_ERROR_KEY, xErrName)
@@ -74,7 +74,7 @@ public class XYAdapter extends AxisValuesAdapter {
 
 
     public XYAdapter() {
-        this(Meta.buildEmpty(DATA_ADAPTER_KEY));
+        this(Meta.buildEmpty(ADAPTER_KEY));
     }
 
     public XYAdapter(Meta meta) {
