@@ -29,7 +29,6 @@ import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import org.jetbrains.annotations.NotNull;
-import org.jfree.chart.ChartPanel;
 import org.jfree.chart.JFreeChart;
 import org.jfree.chart.axis.DateAxis;
 import org.jfree.chart.axis.LogarithmicAxis;
@@ -49,7 +48,6 @@ import org.jfree.data.general.DatasetChangeEvent;
 import org.jfree.data.xy.XYDataset;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
 import java.awt.*;
 import java.io.IOException;
 import java.io.OutputStream;
@@ -70,10 +68,12 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
     /**
      * Index mapping names to datasets
      */
-    private final Map<String, JFCDataWrapper> index = new HashMap<>();
-//    private final Map<String, Integer> index = new HashMap<>();
-
-    private Mode mode = Mode.NONE;
+    private transient final Map<String, JFCDataWrapper> index = new HashMap<>();
+    /**
+     * Caches for color and shape
+     */
+    private transient final Map<String, Color> colorCache = new HashMap<>();
+    private transient final Map<String, Shape> shapeCache = new HashMap<>();
 
     public JFreeChartFrame() {
         this(Meta.empty());
@@ -87,9 +87,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
 
     @Override
     public Node getFXNode() {
-        mode = Mode.JAVAFX;
         ChartViewer viewer = new ChartViewer(getChart());
-
         addExportPlotAction(viewer.getContextMenu(), this);
         return viewer;
     }
@@ -114,30 +112,8 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
         parent.getItems().add(dfpExport);
     }
 
-    public JFreeChartFrame display(Container panel) {
-        mode = Mode.SWING;
-        ChartPanel cp = new ChartPanel(getChart());
-//        cp.getPopupMenu().add(new JMenuItem(exportAction(getChart())));
-
-        panel.add(cp);
-        panel.revalidate();
-        panel.repaint();
-        return this;
-    }
-
     private void run(Runnable run) {
-        if (mode == Mode.NONE || Platform.isFxApplicationThread()) {
-            //run immediately
-            run.run();
-        } else if (mode == Mode.SWING) {
-            if (SwingUtilities.isEventDispatchThread()) {
-                run.run();
-            } else {
-                SwingUtilities.invokeLater(run);
-            }
-        } else {
-            Platform.runLater(run);
-        }
+        Platform.runLater(run);
     }
 
     public JFreeChart getChart() {
@@ -332,9 +308,14 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
             render.setSeriesStroke(0, new BasicStroke((float) thickness));
         }
 
-        Color color = PlotUtils.getAWTColor(meta);
+        Color color = PlotUtils.getAWTColor(meta, colorCache.get(name));
         if (color != null) {
             render.setSeriesPaint(0, color);
+        }
+
+        Shape shape = shapeCache.get(name);
+        if (shape != null) {
+            render.setSeriesShape(0, shape);
         }
 
         boolean visible = meta
@@ -349,15 +330,12 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
         run(() -> {
             plot.setRenderer(index.get(name).getIndex(), render);
 
-            // update configuration to default colors
-            if (color == null) {
-                Paint paint = render.lookupSeriesPaint(0);
-                if (paint instanceof Color) {
-                    //TODO replace by meta overlay
-                    getPlots().opt(name)
-                            .ifPresent(it -> it.configureValue("color", Value.of(PlotUtils.awtColorToString((Color) paint))));
-                }
+            // update cache to default colors
+            Paint paint = render.lookupSeriesPaint(0);
+            if (paint instanceof Color) {
+                colorCache.put(name, (Color) paint);
             }
+            shapeCache.put(name, render.lookupSeriesShape(0));
         });
     }
 
@@ -376,12 +354,6 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
                 LoggerFactory.getLogger(getClass()).error("IO error during image encoding", ex);
             }
         }).start();
-    }
-
-    private enum Mode {
-        SWING, // Swing UI thread mode
-        JAVAFX, // JavaFX UI thread mode
-        NONE // current thread mode
     }
 
     @Override

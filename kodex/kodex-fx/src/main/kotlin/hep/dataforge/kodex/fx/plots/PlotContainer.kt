@@ -45,20 +45,19 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
     private val dataWindows = HashMap<Plot, Stage>()
 
 
-    val sideBarExpandedProperty = SimpleBooleanProperty(true)
+    private val sideBarExpandedProperty = SimpleBooleanProperty(false)
     var sideBarExpanded by sideBarExpandedProperty
+
+    private val sideBarPositionProperty = SimpleDoubleProperty(0.7)
+    var sideBarPoistion by sideBarPositionProperty
 
     val progressProperty = SimpleDoubleProperty(1.0)
     var progress by progressProperty
 
-    val sideBarPositionProperty = SimpleDoubleProperty(0.8)
-    var sideBarPoistion by sideBarPositionProperty
-
-    lateinit var sidebar: VBox;
+    private lateinit var sidebar: VBox;
 
     override val root = borderpane {
         center {
-
             splitpane(orientation = Orientation.HORIZONTAL) {
                 stackpane {
                     borderpane {
@@ -66,37 +65,40 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                         minWidth = 300.0
                         center = display(plot)
                     }
-                    val collapseButton = button(text = "<<") {
+                    button {
                         graphicTextGap = 0.0
                         opacity = 0.4
                         textAlignment = TextAlignment.JUSTIFY
                         StackPane.setAlignment(this, Pos.TOP_RIGHT)
                         font = Font.font("System Bold", 12.0)
                         action {
-                            when {
-                                sideBarExpandedProperty.get() -> setDividerPosition(0, 1.0)
-                                sideBarPositionProperty.value > 0 -> setDividerPosition(0, sideBarPositionProperty.value)
-                                else -> setDividerPosition(0, sideBarPositionProperty.get())
+                            sideBarExpanded = !sideBarExpanded;
+                        }
+                        sideBarExpandedProperty.addListener { _, _, expanded ->
+                            if (expanded) {
+                                setDividerPosition(0, sideBarPoistion);
+                            } else {
+                                setDividerPosition(0, 1.0);
                             }
                         }
+                        textProperty().bind(
+                                sideBarExpandedProperty.stringBinding {
+                                    if (it == null || it) {
+                                        ">>"
+                                    } else {
+                                        "<<"
+                                    }
+                                }
+                        )
                     }
-                    borderpane {
-                        isMouseTransparent = true
-                        center = progressindicator(progressProperty) {
-                            maxWidth = 50.0
-                            prefWidth = 50.0
-                            alignment = Pos.CENTER
-                            visibleWhen(progressProperty.lessThan(1.0))
-                        }
+
+                    progressindicator(progressProperty) {
+                        maxWidth = 50.0
+                        prefWidth = 50.0
+                        StackPane.setAlignment(this, Pos.CENTER)
+                        visibleWhen(progressProperty.lessThan(1.0))
                     }
-                    sideBarExpandedProperty.addListener { _, _, newValue ->
-                        if (newValue) {
-                            collapseButton.text = ">>"
-                        } else {
-                            collapseButton.text = "<<"
-                        }
-                    }
-                    setDividerPositions(sideBarPositionProperty.get())
+
                 }
                 sidebar = vbox {
                     button(text = "Frame config") {
@@ -107,9 +109,11 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                         }
                     }
                     treeview<Plottable> {
+                        minWidth = 0.0
                         root = TreeItem(plot.plots);
                         root.isExpanded = true
                         vgrow = Priority.ALWAYS
+
                         //function to populate tree view
                         fun populate() = populate { parent ->
                             val value = parent.value;
@@ -122,6 +126,7 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
 
                         populate()
 
+                        //TODO replace by fine grained tree control
                         plot.plots.addListener(object : PlotStateListener {
                             override fun notifyDataChanged(name: String?) {}//ignore
                             override fun notifyConfigurationChanged(name: String?) {}//ignore
@@ -152,21 +157,17 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
 
                                     item.config.addObserver { name, _, newItem ->
                                         when (name) {
-                                            "title" -> if (newItem == null) {
-                                                text = item.name
+                                            "title" -> text = if (newItem == null) {
+                                                item.name
                                             } else {
-                                                text = newItem.stringValue()
+                                                newItem.stringValue()
                                             }
-                                            "color" -> if (newItem == null) {
-                                                textFill = Color.BLACK
+                                            "color" -> textFill = if (newItem == null) {
+                                                Color.BLACK
                                             } else {
-                                                textFill = Color.valueOf(newItem.stringValue())
+                                                Color.valueOf(newItem.stringValue())
                                             }
-                                            "visible" -> if (newItem == null) {
-                                                isSelected = true
-                                            } else {
-                                                isSelected = newItem.booleanValue()
-                                            }
+                                            "visible" -> isSelected = newItem?.booleanValue() ?: true
                                         }
                                     }
 
@@ -207,12 +208,13 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                     }
                 }
 
+                dividers[0].position = 1.0
 
                 dividers[0].positionProperty().addListener { _, _, newValue ->
-                    sideBarExpandedProperty.set(newValue.toDouble() < 0.99)
-                    if (newValue.toDouble() < 0.98) {
+                    if (newValue.toDouble() < 0.9) {
                         sideBarPositionProperty.set(newValue.toDouble())
                     }
+                    sideBarExpanded = newValue.toDouble() < 0.99
                 }
             }
         }

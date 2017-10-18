@@ -17,7 +17,7 @@ import java.util.stream.Stream;
 /**
  * @author Alexander Nozik
  */
-public class PlotDataUtils {
+public class DataPlotUtils {
 
     public static Table collectXYDataFromPlot(XYPlotFrame frame, boolean visibleOnly) {
 

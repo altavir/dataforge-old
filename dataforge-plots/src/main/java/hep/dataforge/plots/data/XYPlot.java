@@ -40,7 +40,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
  */
 @ValueDef(name = "color", info = "The color of line or symbol.", tags = {"color"})
 @ValueDef(name = "showLine", type = {BOOLEAN}, def = "true", info = "Show the connecting line.")
-@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "false", info = "Show symbols for data point.")
+@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "true", info = "Show symbols for data point.")
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")

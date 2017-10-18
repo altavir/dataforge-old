@@ -16,10 +16,7 @@ import org.slf4j.LoggerFactory;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
@@ -130,29 +127,34 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      */
     public synchronized PlotGroup remove(String path) {
         Name name = Name.of(path);
-        opt(name.cutLast()).ifPresent(group -> {
+        if (name.length() == 1) {
             Plottable removed = plots.remove(name.getLast().toString());
             if (removed != null) {
                 removed.removeListener(listener);
                 groupChanged(path);
             }
-        });
+        } else {
+            opt(name.cutLast()).ifPresent(group -> {
+                if (group instanceof PlotGroup) {
+                    ((PlotGroup) group).remove(name.getLast().toString());
+                }
+            });
+        }
         return this;
+    }
+
+    public void clear() {
+        new HashSet<>(this.plots.keySet()).forEach(this::remove);
     }
 
     @ProvidesNames(PLOT_TARGET)
     public Stream<String> list() {
-        return plots.values().stream().flatMap(pl -> {
-            if (pl instanceof PlotGroup) {
-                return ((PlotGroup) pl).list().map(it -> Name.joinString(pl.getName(), it));
-            } else {
-                return Stream.of(pl.getName());
-            }
-        });
+        return stream().map(Pair::getKey);
     }
 
     /**
      * Stream of all plots excluding intermediate nodes
+     *
      * @return
      */
     public Stream<Pair<String, Plottable>> stream() {
@@ -171,14 +173,16 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * @param action
      */
     public void forEach(Consumer<Plottable> action) {
-        this.plots.values().stream()
-                .flatMap(it -> Stream.concat(Stream.of(it), it.getChildren().values().stream()))
-                .forEach(action);
+        stream().map(Pair::getValue).forEach(action);
     }
 
     @Provides(PLOT_TARGET)
     public Optional<Plottable> opt(String name) {
         return opt(Name.of(name));
+    }
+
+    public boolean has(String name) {
+        return opt(name).isPresent();
     }
 
     public Optional<Plottable> opt(Name name) {

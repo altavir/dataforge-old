@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
@@ -28,11 +29,16 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.values.ValueType.BOOLEAN;
+
 /**
  * A class for dynamic function values calculation for plot
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "showLine", type = {BOOLEAN}, def = "true", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "false", info = "Show symbols for data point.")
+@ValueDef(name = "showErrors", type = {BOOLEAN}, def = "false", info = "Show errors for points.")
 public class XYFunctionPlot extends XYPlot {
 
     private static final int DEFAULT_DENSITY = 200;
@@ -59,8 +65,8 @@ public class XYFunctionPlot extends XYPlot {
      */
     public XYFunctionPlot(String name) {
         super(name);
-        getConfig().setValue("showLine", true);
-        getConfig().setValue("showSymbol", false);
+//        getConfig().setValue("showLine", true);
+//        getConfig().setValue("showSymbol", false);
         function.addListener((ObservableValue<? extends Function<Double, Double>> observable,
                               Function<Double, Double> oldValue, Function<Double, Double> newValue) -> {
             invalidateCache();

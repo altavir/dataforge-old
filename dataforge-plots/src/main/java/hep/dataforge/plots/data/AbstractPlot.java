@@ -42,7 +42,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
 //    }
 
     public AbstractPlot(@NotNull String name) {
-        this.name = name;
+        this.name = name.replace(".","_");
     }
 
     @Override
