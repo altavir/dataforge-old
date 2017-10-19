@@ -87,7 +87,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
      * Remove all plottables
      */
     default void clear() {
-        getPlots().list().forEach(this::remove);
+        getPlots().clear();
     }
 
 

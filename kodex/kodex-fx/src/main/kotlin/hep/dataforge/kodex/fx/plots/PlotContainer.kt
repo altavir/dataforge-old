@@ -169,6 +169,11 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                                 action { item.forEach { it.configureValue("visible", false) } }
                                             }
                                         }
+                                        if (cell.treeItem is PlotTreeItem) {
+                                            item("Sort") {
+                                                action { (cell.treeItem as PlotTreeItem).sort() }
+                                            }
+                                        }
                                     }
                                 }
 
@@ -266,10 +271,14 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                 runLater { children.setAll(value.children.map { PlotTreeItem(it) }) }
             }
         }
+
+        fun sort() {
+            children.sortBy { it.value.name }
+        }
     }
 
     private fun getFullName(item: TreeItem<Plottable>): String {
-        if (item.parent == null|| item.parent.value.name.isEmpty()) {
+        if (item.parent == null || item.parent.value.name.isEmpty()) {
             return item.value.name;
         } else {
             return Name.joinString(getFullName(item.parent), item.value.name)

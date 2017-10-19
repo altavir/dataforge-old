@@ -61,7 +61,7 @@ public class ActionManager extends BasicPlugin {
                 .opt();
     }
 
-    private void put(Action action) {
+    public void put(Action action) {
         if (actionMap.containsKey(action.getName())) {
             LoggerFactory.getLogger(getClass()).warn("Duplicate action names in ActionManager.");
         } else {
@@ -69,7 +69,7 @@ public class ActionManager extends BasicPlugin {
         }
     }
 
-    private void put(Task task) {
+    public void put(Task task) {
         if (taskMap.containsKey(task.getName())) {
             LoggerFactory.getLogger(getClass()).warn("Duplicate task names in ActionManager.");
         } else {

@@ -259,7 +259,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      */
     @SuppressWarnings("unchecked")
     default <R> DataNode<R> checked(Class<R> checkType) {
-        if (this.type().equals(checkType)) {
+        if (checkType.isAssignableFrom(this.type())) {
             return (DataNode<R>) this;
         } else {
             return new CheckedDataNode<>(this, checkType);

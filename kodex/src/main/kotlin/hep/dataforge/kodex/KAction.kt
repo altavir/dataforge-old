@@ -104,7 +104,7 @@ class JoinGroup<T, R>(val context: Context, name: String? = null, internal val n
 }
 
 
-class JoinGroupBuilder<T, R> {
+class JoinGroupBuilder<T, R>(val context: Context, val meta: Meta) {
 
 
     private val groupRules: MutableList<(Context, DataNode<out T>) -> List<JoinGroup<T, R>>> = ArrayList();
@@ -171,8 +171,7 @@ class KJoin<T, R>(
         val builder = DataSet.builder(outputType)
 
         runBlocking {
-            JoinGroupBuilder<T, R>().apply(action).buildGroups(context, data).forEach { group ->
-
+            JoinGroupBuilder<T, R>(context, meta).apply(action).buildGroups(context, data).forEach { group ->
 
                 val laminate = Laminate(group.meta, meta)
 

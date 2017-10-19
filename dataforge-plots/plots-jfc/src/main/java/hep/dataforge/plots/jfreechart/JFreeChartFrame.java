@@ -361,7 +361,7 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
     public synchronized void remove(String plotName) {
         super.remove(plotName);
         run(() -> {
-            plot.setDataset(index.get(plotName).getIndex(), null);
+            Optional.ofNullable(index.get(plotName)).map(JFCDataWrapper::getIndex).ifPresent(it -> plot.setDataset(it, null));
         });
         index.remove(plotName);
     }
@@ -374,6 +374,9 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
     @Override
     public synchronized void clear() {
         super.clear();
+        index.values().forEach(wr -> {
+            plot.setDataset(wr.getIndex(), null);
+        });
         this.index.clear();
     }
 
