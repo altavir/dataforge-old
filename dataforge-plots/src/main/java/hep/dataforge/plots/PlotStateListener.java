@@ -22,11 +22,11 @@ package hep.dataforge.plots;
 public interface PlotStateListener {
 
     default void notifyDataChanged(String name){
-        notifyGroupChanged(name);
+
     }
 
     default void notifyConfigurationChanged(String name){
-        notifyGroupChanged(name);
+
     }
 
     /**

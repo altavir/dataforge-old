@@ -73,7 +73,7 @@ class PlotHelper extends AbstractHelper {
     }
 
     /**
-     * Plot function and return resulting plot to be configured if necessary
+     * Plot function and return resulting frame to be configured if necessary
      * @param parameters
      * @param function
      */
@@ -81,9 +81,9 @@ class PlotHelper extends AbstractHelper {
     @ValueDefs([
             @ValueDef(name = "frame", info = "Frame name"),
             @ValueDef(name = "name", info = "Plot name"),
-            @ValueDef(name = "from", type = ValueType.NUMBER, def = "0", info = "Lower x boundary for plot"),
-            @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for plot"),
-            @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per plot")
+            @ValueDef(name = "from", type = ValueType.NUMBER, def = "0", info = "Lower x boundary for frame"),
+            @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for frame"),
+            @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per frame")
     ])
     XYPlot plot(Map parameters = [:], Closure<Double> function) {
         String frameName = parameters.get("frame", DEFAULT_FRAME)
@@ -131,13 +131,13 @@ class PlotHelper extends AbstractHelper {
     }
 
     /**
-     * Build data plot using any point source and closure to configure adapter
+     * Build data frame using any point source and closure to configure adapter
      * @param source
      * @param parameters
      * @param cl
      * @return
      */
-    @MethodDescription("Build data plot using any point source and closure to configure adapter")
+    @MethodDescription("Build data frame using any point source and closure to configure adapter")
     XYPlot plot(Map parameters, Iterable<Values> source,
                 @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
         Meta configuration = Grind.buildMeta(parameters, cl);

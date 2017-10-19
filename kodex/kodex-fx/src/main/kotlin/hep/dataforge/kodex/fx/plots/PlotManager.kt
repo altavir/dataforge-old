@@ -42,7 +42,7 @@ class PlotManager : BasicPlugin(), PlotPlugin {
                         display(stage, name, this)
                     }
                 }
-                .plot
+                .frame
     }
 
     private fun display(stage: String, name: String, container: PlotContainer) {

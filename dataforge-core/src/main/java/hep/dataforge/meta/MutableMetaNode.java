@@ -104,7 +104,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         }
 
         //do not put empty nodes
-        if(node.isEmpty()){
+        if (node.isEmpty()) {
             return self();
         }
 
@@ -133,7 +133,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @return
      */
     public T putNode(Meta element) {
-        if(element.isEmpty()){
+        if (element.isEmpty()) {
             return self();
         }
         if (element.isAnonimous() && !element.hasValue("@name")) {
@@ -268,7 +268,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     /**
-     * Replace a value item with given name.
+     * Replace a value item with given name. If value is null, remove corresponding value from node.
      *
      * @param name
      * @param value
@@ -302,6 +302,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         return setValue(name, value, true);
     }
 
+
     public T setValue(String name, Object object) {
         return setValue(name, Value.of(object));
     }
@@ -315,7 +316,9 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @return
      */
     public T putValue(String name, Object value) {
-        putValue(name, Value.of(value));
+        if (value != null) {
+            putValue(name, Value.of(value));
+        }
         return self();
     }
 

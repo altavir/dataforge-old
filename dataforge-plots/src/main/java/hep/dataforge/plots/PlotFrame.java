@@ -40,6 +40,10 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
 public interface PlotFrame extends PlotStateListener, Configurable {
 
+    /**
+     * Get root plot node
+     * @return
+     */
     PlotGroup getPlots();
 
     /**
@@ -98,12 +102,6 @@ public interface PlotFrame extends PlotStateListener, Configurable {
     default Plot get(String name) {
         return opt(name).orElseThrow(() -> new NameNotFoundException(name));
     }
-
-//    /**
-//     * Immutable observable list of plottables
-//     * @return
-//     */
-//    ObservableList<Plot> plottables();
 
     /**
      * Save plot as image

@@ -61,10 +61,10 @@ public class XYAdapter extends AxisValuesAdapter {
 
     private static MetaBuilder buildAdapterMeta(String xName, String xErrName, String yName, String yErrName) {
         return new MetaBuilder(ValuesAdapter.ADAPTER_KEY)
-                .putValue(X_VALUE_KEY, xName)
-                .putValue(Y_VALUE_KEY, yName)
-                .putValue(X_ERROR_KEY, xErrName)
-                .putValue(Y_ERROR_KEY, yErrName);
+                .setValue(X_VALUE_KEY, xName)
+                .setValue(Y_VALUE_KEY, yName)
+                .setValue(X_ERROR_KEY, xErrName)
+                .setValue(Y_ERROR_KEY, yErrName);
     }
 
     private String xValueName;

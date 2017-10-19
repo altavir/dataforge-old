@@ -54,6 +54,7 @@ import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -363,6 +364,11 @@ public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObje
             plot.setDataset(index.get(plotName).getIndex(), null);
         });
         index.remove(plotName);
+    }
+
+    @Override
+    public Optional<Value> getActualColor(String name) {
+        return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.awtColorToString(color)));
     }
 
     @Override

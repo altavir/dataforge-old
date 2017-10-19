@@ -9,6 +9,7 @@ import hep.dataforge.kodex.fx.TableDisplay
 import hep.dataforge.kodex.fx.dfIcon
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 import hep.dataforge.plots.*
 import hep.dataforge.plots.data.DataPlot
 import javafx.application.Platform
@@ -39,7 +40,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
     }
 }
 
-class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
+class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
 
     private val configWindows = HashMap<Configuration, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()
@@ -63,7 +64,7 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                     borderpane {
                         minHeight = 300.0
                         minWidth = 300.0
-                        center = display(plot)
+                        center = display(frame)
                     }
                     button {
                         graphicTextGap = 0.0
@@ -105,53 +106,35 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
                         minWidth = 0.0
                         maxWidth = Double.MAX_VALUE
                         action {
-                            displayConfigurator("Plot frame configuration", plot.config, DescriptorUtils.buildDescriptor(plot))
+                            displayConfigurator("Plot frame configuration", frame.config, DescriptorUtils.buildDescriptor(frame))
                         }
                     }
                     treeview<Plottable> {
                         minWidth = 0.0
-                        root = TreeItem(plot.plots);
-                        root.isExpanded = true
+                        root = PlotTreeItem(frame.plots);
                         vgrow = Priority.ALWAYS
-
-                        //function to populate tree view
-                        fun populate() = populate { parent ->
-                            val value = parent.value;
-                            if (value is PlotGroup) {
-                                value.children.values
-                            } else {
-                                null
-                            }
-                        }
-
-                        populate()
-
-                        //TODO replace by fine grained tree control
-                        plot.plots.addListener(object : PlotStateListener {
-                            override fun notifyDataChanged(name: String?) {}//ignore
-                            override fun notifyConfigurationChanged(name: String?) {}//ignore
-                            override fun notifyGroupChanged(name: String?) {
-                                //repopulate on list change
-                                runLater {
-                                    populate()
-                                }
-                            }
-                        })
 
                         //cell format
                         cellFormat { item ->
+                            val cell = this
                             graphic = hbox {
                                 hgrow = Priority.ALWAYS
                                 checkbox(item.config.getString("title", item.name)) {
                                     minWidth = 0.0
-                                    if (item == plot.plots) {
+                                    if (item == frame.plots) {
                                         text = "<<< All plots >>>"
                                     }
                                     isSelected = item.config.getBoolean("visible", true)
                                     selectedProperty().addListener { _, _, newValue ->
                                         item.config.setValue("visible", newValue)
                                     }
-                                    if (item.config.hasValue("color")) {
+
+
+                                    if (frame is XYPlotFrame) {
+                                        frame.getActualColor(getFullName(cell.treeItem)).ifPresent {
+                                            textFill = Color.valueOf(it.stringValue())
+                                        }
+                                    } else if (item.config.hasValue("color")) {
                                         textFill = Color.valueOf(item.config.getString("color"))
                                     }
 
@@ -266,6 +249,33 @@ class PlotContainer(val plot: PlotFrame, display: (PlotFrame) -> Node = defaultD
             toFront()
         }
     }
+
+    private class PlotTreeItem(plot: Plottable, graphics: Node? = null) : TreeItem<Plottable>(plot, graphics), PlotStateListener {
+        init {
+            children.setAll(value.children.map { PlotTreeItem(it) })
+            plot.addListener(this)
+            isExpanded = true
+        }
+
+        override fun isLeaf(): Boolean {
+            return value !is PlotGroup
+        }
+
+        override fun notifyGroupChanged(name: String?) {
+            if (Name.of(name).length() == 1) {
+                runLater { children.setAll(value.children.map { PlotTreeItem(it) }) }
+            }
+        }
+    }
+
+    private fun getFullName(item: TreeItem<Plottable>): String {
+        if (item.parent == null|| item.parent.value.name.isEmpty()) {
+            return item.value.name;
+        } else {
+            return Name.joinString(getFullName(item.parent), item.value.name)
+        }
+    }
+
 
     companion object {
 

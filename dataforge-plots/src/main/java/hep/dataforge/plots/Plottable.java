@@ -5,8 +5,8 @@ import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 
+import java.util.Collection;
 import java.util.Collections;
-import java.util.Map;
 
 public interface Plottable extends Named, Metoid, Configurable, Described {
     /**
@@ -23,7 +23,7 @@ public interface Plottable extends Named, Metoid, Configurable, Described {
      */
     void removeListener(PlotStateListener listener);
 
-    default Map<String, Plottable> getChildren(){
-        return Collections.emptyMap();
+    default Collection<Plottable> getChildren(){
+        return Collections.emptyList();
     }
 }

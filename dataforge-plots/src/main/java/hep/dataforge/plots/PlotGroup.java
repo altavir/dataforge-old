@@ -26,7 +26,7 @@ import static hep.dataforge.plots.Plot.Wrapper.PLOT_WRAPPER_TYPE;
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-public class PlotGroup extends SimpleConfigurable implements Plottable, Provider {
+public class PlotGroup extends SimpleConfigurable implements Plottable, Provider, PlotStateListener {
     public static final String PLOT_TARGET = "plot";
 
 
@@ -36,22 +36,6 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     private Map<String, Plottable> plots = new HashMap<>();
     private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
 
-    private PlotStateListener listener = new PlotStateListener() {
-        @Override
-        public void notifyDataChanged(String name) {
-            dataChanged(name);
-        }
-
-        @Override
-        public void notifyConfigurationChanged(String name) {
-            configChanged(name);
-        }
-
-        @Override
-        public void notifyGroupChanged(String name) {
-            groupChanged(name);
-        }
-    };
 
     public PlotGroup(String name) {
         this.name = name;
@@ -67,7 +51,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         return name;
     }
 
-    private void dataChanged(String name) {
+    @Override
+    public void notifyDataChanged(String name) {
         if (getName().isEmpty()) {
             //for root group
             listeners.forEach(l -> l.notifyDataChanged(name));
@@ -76,21 +61,23 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         }
     }
 
-    private void groupChanged(String name) {
-        if (getName().isEmpty()) {
-            //for root group
-            listeners.forEach(l -> l.notifyGroupChanged(name));
-        } else {
-            listeners.forEach(l -> l.notifyGroupChanged(Name.joinString(getName(), name)));
-        }
-    }
-
-    private void configChanged(String name) {
+    @Override
+    public void notifyConfigurationChanged(String name) {
         if (getName().isEmpty()) {
             //for root group
             listeners.forEach(l -> l.notifyConfigurationChanged(name));
         } else {
             listeners.forEach(l -> l.notifyConfigurationChanged(Name.joinString(getName(), name)));
+        }
+    }
+
+    @Override
+    public void notifyGroupChanged(String name) {
+        if (getName().isEmpty()) {
+            //for root group
+            listeners.forEach(l -> l.notifyGroupChanged(name));
+        } else {
+            listeners.forEach(l -> l.notifyGroupChanged(Name.joinString(getName(), name)));
         }
     }
 
@@ -114,8 +101,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     public synchronized PlotGroup add(Plottable plot) {
         this.plots.put(plot.getName(), plot);
-        plot.addListener(listener);
-        groupChanged(plot.getName());
+        plot.addListener(this);
+        notifyGroupChanged(plot.getName());
         return this;
     }
 
@@ -130,8 +117,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         if (name.length() == 1) {
             Plottable removed = plots.remove(name.getLast().toString());
             if (removed != null) {
-                removed.removeListener(listener);
-                groupChanged(path);
+                removed.removeListener(this);
+                notifyGroupChanged(path);
             }
         } else {
             opt(name.cutLast()).ifPresent(group -> {
@@ -226,8 +213,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     }
 
     @Override
-    public Map<String, Plottable> getChildren() {
-        return Collections.unmodifiableMap(plots);
+    public Collection<Plottable> getChildren() {
+        return plots.values();
     }
 
     @Override

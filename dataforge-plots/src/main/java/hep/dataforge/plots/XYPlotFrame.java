@@ -19,6 +19,9 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.values.Value;
+
+import java.util.Optional;
 
 import static hep.dataforge.values.ValueType.BOOLEAN;
 import static hep.dataforge.values.ValueType.NUMBER;
@@ -84,4 +87,13 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
     @ValueDef(name = "show", type = {BOOLEAN}, def = "true", info = "Display or hide the legend")
     protected abstract void updateLegend(Meta legendMeta);
+
+    /**
+     * Get actual color value for displayed plot. Some color could be assigned even if it is missing from configuration
+     * @param name
+     * @return
+     */
+    public Optional<Value> getActualColor(String name){
+        return opt(name).flatMap(plot -> plot.meta().optValue("color"));
+    }
 }

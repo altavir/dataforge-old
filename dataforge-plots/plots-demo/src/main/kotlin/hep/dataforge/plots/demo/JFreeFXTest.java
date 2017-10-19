@@ -74,7 +74,7 @@ public class JFreeFXTest extends Application {
 
         Scene scene = new Scene(root, 800, 600);
 
-        stage.setTitle("my plot");
+        stage.setTitle("my frame");
         stage.setScene(scene);
         stage.show();
     }

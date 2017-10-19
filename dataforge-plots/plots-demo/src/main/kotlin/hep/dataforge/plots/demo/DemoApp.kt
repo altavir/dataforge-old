@@ -7,5 +7,5 @@ class DemoApp: App(DemoView::class) {
 }
 
 fun main(args: Array<String>) {
-    Application.launch(*args);
+    Application.launch(DemoApp::class.java,*args);
 }
