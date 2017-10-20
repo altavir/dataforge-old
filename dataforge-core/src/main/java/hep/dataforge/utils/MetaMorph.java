@@ -39,15 +39,24 @@ public interface MetaMorph extends Externalizable, AutoCastable {
      * @param meta
      */
     void fromMeta(Meta meta);
+    
+    default String getMetaMorphTag(){
+        return getClass().getName();
+    }
 
     @Override
     default void writeExternal(ObjectOutput out) throws IOException {
-        //TODO add type tag to avoid reconstructing metamorph from meta saved form another type
+        out.writeUTF(getMetaMorphTag());
         MetaUtils.writeMeta(out, toMeta());
     }
 
     @Override
     default void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        String tag = in.readUTF();
+        Class<?> type = Class.forName(tag);
+        if(!getClass().isAssignableFrom(type)){
+            throw new RuntimeException("Trying to reconstruct metamorph from wrong source");
+        }
         fromMeta(MetaUtils.readMeta(in));
     }
 

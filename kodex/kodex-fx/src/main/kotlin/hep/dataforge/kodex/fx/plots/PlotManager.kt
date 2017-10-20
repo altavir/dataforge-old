@@ -57,8 +57,8 @@ class PlotManager : BasicPlugin(), PlotPlugin {
         return stages.containsKey(stage) && (stages[stage]?.containsKey(name) ?: false);
     }
 
-    fun display(stage: String = DEFAULT_STAGE_NAME, name: String = DEFAULT_PLOT_NAME, action: PlotFrame.() -> Unit) {
-        getPlotFrame(stage, name).apply(action)
+    fun display(stage: String = DEFAULT_STAGE_NAME, name: String = DEFAULT_PLOT_NAME, action: PlotFrame.() -> Unit): PlotFrame {
+        return getPlotFrame(stage, name).apply(action)
     }
 
 }

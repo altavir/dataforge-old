@@ -117,7 +117,7 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
      * {@inheritDoc}
      */
     @Override
-    public OutputStream out(Name stage, Name name) {
+    public OutputStream out(Name stage, Name name, String type) {
         return out();
     }
 

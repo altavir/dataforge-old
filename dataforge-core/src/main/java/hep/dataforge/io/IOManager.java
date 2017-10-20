@@ -53,6 +53,8 @@ public interface IOManager extends Plugin {
     String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
     String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
 
+    String DEFAULT_OUTPUT_TYPE = "dataforge/output";
+
     /**
      * Output stream for specific stage and specific name. All parameters could
      * be null. In this case default values are used.
@@ -61,7 +63,7 @@ public interface IOManager extends Plugin {
      * @param name
      * @return
      */
-    OutputStream out(Name stage, Name name);
+    OutputStream out(Name stage, Name name, String type);
 
     /**
      * Custom output builder using given configuration
@@ -70,13 +72,19 @@ public interface IOManager extends Plugin {
      * @return
      */
     default OutputStream out(Meta outConfig) {
-        return out(Name.of(outConfig.getString("stage", "")),
-                Name.of(outConfig.getString("name", ""))
+        return out(
+                Name.of(outConfig.getString("stage", "")),
+                Name.of(outConfig.getString("name", "")),
+                DEFAULT_OUTPUT_TYPE
         );
     }
 
+    default OutputStream out(String stage, String name, String type) {
+        return out(Name.of(stage), Name.of(name), type);
+    }
+
     default OutputStream out(String stage, String name) {
-        return out(Name.of(stage), Name.of(name));
+        return out(stage, name, DEFAULT_OUTPUT_TYPE);
     }
 
     default MarkupRenderer getMarkupRenderer() {
@@ -138,7 +146,7 @@ public interface IOManager extends Plugin {
     /**
      * Provide file or resource as a binary. The path must be provided in DataForge notation (using ".").
      * It is automatically converted to system path.
-     *
+     * <p>
      * Absolute paths could not be provided that way.
      *
      * @param name

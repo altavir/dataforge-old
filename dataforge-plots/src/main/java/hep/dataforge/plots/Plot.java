@@ -94,7 +94,7 @@ public interface Plot extends Plottable {
                     .putMetaValue(WRAPPER_KEY, PLOT_WRAPPER_TYPE)
                     .putMetaValue("plottableClass", getClass().getName())
                     .putMetaValue("name", getName())
-                    .putMetaNode("descriptor", plot.getDescriptor().toMeta())
+                    //.putMetaNode("descriptor", plot.getDescriptor().toMeta())
                     .putMetaNode(DEFAULT_META_NAME, plot.getConfig())
                     .setContentType("wrapper");
 
