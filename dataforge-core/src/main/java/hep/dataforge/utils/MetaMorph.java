@@ -16,14 +16,34 @@ import java.io.ObjectOutput;
  */
 public interface MetaMorph extends Externalizable, AutoCastable {
 
+    /**
+     *
+     * @param type
+     * @param meta
+     * @param <T>
+     * @return
+     */
     static <T extends MetaMorph> T morph(Class<T> type, Meta meta) {
         try {
-            T res = type.newInstance();
+            T res = type.getConstructor().newInstance();
             res.fromMeta(meta);
             return res;
         } catch (Exception e) {
             throw new RuntimeException("Failed to reconstruct metamorph from meta", e);
         }
+    }
+
+    /**
+     * Create a metamorph from input stream using its own tag
+     * @param in
+     * @return
+     * @throws Exception
+     */
+    @SuppressWarnings("unchecked")
+    static MetaMorph morph(ObjectInput in) throws Exception {
+        String tag = in.readUTF();
+        Class<? extends MetaMorph> type = (Class<? extends MetaMorph>) Class.forName(tag);
+        return morph(type,MetaUtils.readMeta(in));
     }
 
     /**

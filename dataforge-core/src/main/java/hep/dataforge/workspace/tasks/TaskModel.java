@@ -51,8 +51,9 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
      * @param taskMeta
      * @return
      */
+    @NotNull
     public static TaskModel.Builder builder(Workspace workspace, String taskName, @NotNull Meta taskMeta) {
-        return new TaskModel.Builder(new TaskModel(workspace, taskName, taskMeta));
+        return new TaskModel.Builder(workspace, taskName, taskMeta);
     }
 
     /**
@@ -403,6 +404,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
          * @return
          */
         public Builder configure(@NotNull Consumer<MetaBuilder> transform) {
+//            taskMeta = new MetaBuilder(getName());
             transform.accept(taskMeta);
             return self();
         }
