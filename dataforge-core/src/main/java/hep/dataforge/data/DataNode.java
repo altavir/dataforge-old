@@ -36,10 +36,12 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
     String NODE_TARGET = "node";
     String DEFAULT_DATA_FRAGMENT_NAME = "@default";
 
+    @NotNull
     static <T> DataNode<T> empty(String name, Class<T> type) {
         return new EmptyDataNode<>(name, type);
     }
 
+    @NotNull
     static DataNode empty() {
         return new EmptyDataNode<>("", Object.class);
     }

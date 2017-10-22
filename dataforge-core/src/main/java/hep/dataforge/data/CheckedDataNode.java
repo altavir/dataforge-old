@@ -1,6 +1,7 @@
 package hep.dataforge.data;
 
 import hep.dataforge.meta.Meta;
+import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -16,6 +17,10 @@ public class CheckedDataNode<T> implements DataNode<T> {
     public CheckedDataNode(DataNode<?> node, Class<T> type) {
         this.node = node;
         this.type = type;
+        //TODO add warning for incompatible types
+        if(isEmpty()){
+            LoggerFactory.getLogger(getClass()).warn("The checked node is empty");
+        }
     }
 
     @Override

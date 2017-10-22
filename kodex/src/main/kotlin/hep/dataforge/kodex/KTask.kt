@@ -24,59 +24,95 @@ class KTask(
     override fun buildModel(model: TaskModel.Builder, meta: Meta) {
         modelTransform.invoke(model, meta);
     }
+
+    //TODO add validation
 }
 
 class KTaskBuilder(val name: String) {
     var modelTransform: TaskModel.Builder.(Meta) -> Unit = { data("*") };
-    private val dataTransforms: MutableList<DataTransformation> = ArrayList();
+
+    private class DataTransformation<T, R>(
+            val inputType: Class<T>,
+            val outputType: Class<R>,
+            val from: String = "",
+            val to: String = "",
+            val transform: TaskModel.(DataNode<T>) -> DataNode<R>
+    ) {
+        fun apply(model: TaskModel, node: DataNode<Any>): DataNode<*> {
+            val localData = node.getCheckedNode(from, inputType)
+            return transform.invoke(model, localData);
+        }
+    }
+
+    private val dataTransforms: MutableList<DataTransformation<*, *>> = ArrayList();
 
     fun model(modelTransform: TaskModel.Builder.(Meta) -> Unit) {
         this.modelTransform = modelTransform
     }
 
-    fun transform(placement: String = "", transform: TaskModel.(DataNode<Any>) -> DataNode<*>) {
-        dataTransforms += DataTransformation(placement, transform);
+    fun <T, R> transform(inputType: Class<T>, outputType: Class<R>, from: String = "", to: String = "", transform: TaskModel.(DataNode<T>) -> DataNode<R>) {
+        dataTransforms += DataTransformation(inputType, outputType, from, to, transform);
     }
 
-    fun <T, R> action(from: String = "", to: String = "", inputType: Class<T>, action: Action<T, R>) {
-        val transform: TaskModel.(DataNode<Any>) -> DataNode<*> = { data ->
-            val localData = data.getCheckedNode(from, inputType)
-            action.run(context, localData, meta) as DataNode<*>
+    inline fun <reified T, reified R> transform(from: String = "", to: String = "", noinline transform: TaskModel.(DataNode<T>) -> DataNode<R>) {
+        transform(T::class.java, R::class.java, from, to, transform)
+    }
+
+//    /**
+//     * delegate execution to existing task applying model transformation from this builder
+//     */
+//    fun task(task: Task<*>, from: String = "", to: String = ""){
+//        dataTransforms += DataTransformation(to){
+//            task.ru
+//        }
+//    }
+
+    inline fun <reified T, reified R> action(action: Action<T, R>, from: String = "", to: String = "") {
+        val transform: TaskModel.(DataNode<T>) -> DataNode<R> = { data ->
+            action.run(context, data, meta)
         }
-        dataTransforms += DataTransformation(to, transform)
+        transform(from, to, transform)
     }
 
-    inline fun <reified T, R> pipe(from: String = "",
-                                   to: String = "",
-                                   actionName: String = "pipe",
-                                   noinline action: PipeBuilder<T, R>.() -> Unit) {
-        val pipe: Action<T, R> = KPipe(name = Name.joinString(name, actionName), action = action);
-        action<T, R>(from, to, T::class.java, pipe);
+    inline fun <reified T, reified R> pipe(
+            actionName: String = "pipe",
+            from: String = "",
+            to: String = "",
+            noinline action: PipeBuilder<T, R>.() -> Unit) {
+        val pipe: Action<T, R> = KPipe(
+                name = Name.joinString(name, actionName),
+                inType = T::class.java,
+                outType = R::class.java,
+                action = action
+        )
+        action<T, R>(pipe, from, to);
     }
 
-    inline fun <reified T, R> join(from: String = "",
-                                   to: String = "",
-                                   actionName: String = "join",
-                                   noinline action: JoinGroupBuilder<T, R>.() -> Unit) {
-        val join: Action<T, R> = KJoin(name = Name.joinString(name, actionName), action = action);
-        action<T, R>(from, to, T::class.java, join);
+    inline fun <reified T, reified R> join(
+            actionName: String = "join",
+            from: String = "",
+            to: String = "",
+            noinline action: JoinGroupBuilder<T, R>.() -> Unit) {
+        val join: Action<T, R> = KJoin(
+                name = Name.joinString(name, actionName),
+                inType = T::class.java,
+                outType = R::class.java,
+                action = action
+        )
+        action<T, R>(join, from, to);
     }
-
-    private class DataTransformation(
-            val placement: String = "",
-            val transform: TaskModel.(DataNode<Any>) -> DataNode<*>
-    )
-
 
     internal fun build(): KTask {
         val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
             val model = this;
-            val builder: DataTree.Builder<Any> = DataTree.builder()
-            dataTransforms.forEach {
-                val res = it.transform.invoke(model, data);
-                builder.putNode(it.placement, res)
+            if (dataTransforms.isEmpty()) {
+                //return data node as is
+                data
+            } else {
+                val builder: DataTree.Builder<Any> = DataTree.builder()
+                dataTransforms.forEach { builder.putNode(it.to, it.apply(model, data)) }
+                builder.build()
             }
-            builder.build()
         }
         return KTask(name, modelTransform, transform);
     }

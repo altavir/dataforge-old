@@ -12,6 +12,7 @@ import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.Metoid;
@@ -473,7 +474,11 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
          * @param as
          */
         public Builder dependsOn(String taskName, Meta taskMeta, String as) {
-            return dependsOn(model.workspace.getTask(taskName).build(model.workspace, taskMeta), as);
+            try {
+                return dependsOn(model.workspace.getTask(taskName).build(model.workspace, taskMeta), as);
+            } catch (NameNotFoundException ex) {
+                throw new RuntimeException("Task with name " + ex.getName() + " not found", ex);
+            }
         }
 
         /**
@@ -525,9 +530,10 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
 
         /**
          * Add all data in the workspace as a dependency
+         *
          * @return
          */
-        public Builder allData(){
+        public Builder allData() {
             model.deps.add(new DataDependency("*", UnaryOperator.identity()));
             return self();
         }

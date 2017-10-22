@@ -170,7 +170,7 @@ public class Data<T> implements Metoid {
     @SuppressWarnings("unchecked")
     public <R> Data<R> cast(Class<R> type) {
         if (type.isAssignableFrom(this.type)) {
-            return new Data<>((Goal<R>) this.goal, type, this.meta);
+            return (Data<R>) this;
         } else {
             throw new IllegalArgumentException("Invalid type to upcast data");
         }
