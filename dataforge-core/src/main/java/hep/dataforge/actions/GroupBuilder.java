@@ -18,7 +18,6 @@ package hep.dataforge.actions;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 
@@ -51,8 +50,7 @@ public class GroupBuilder {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
                 input.forEach((NamedData<? extends T> data) -> {
-                    String tagValue = DescriptorUtils.buildDefaultNode(DescriptorUtils.buildDescriptor(data))
-                            .getString(tag, defaultTagValue);
+                    String tagValue = data.meta().getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
                         DataSet.Builder<T> builder = DataSet.builder(input.type());
                         builder.setName(tagValue);

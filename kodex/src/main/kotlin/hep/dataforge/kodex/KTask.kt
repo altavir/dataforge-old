@@ -31,6 +31,8 @@ class KTask(
 class KTaskBuilder(val name: String) {
     var modelTransform: TaskModel.Builder.(Meta) -> Unit = { data("*") };
 
+
+
     private class DataTransformation<T, R>(
             val inputType: Class<T>,
             val outputType: Class<R>,

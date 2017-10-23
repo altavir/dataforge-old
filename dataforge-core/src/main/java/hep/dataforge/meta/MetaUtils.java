@@ -308,7 +308,6 @@ public class MetaUtils {
      * @param name the name of the node. If null, then the name is being read from stream
      * @return
      * @throws IOException
-     * @throws ClassNotFoundException
      */
     public static MetaBuilder readMeta(ObjectInput in, String name) throws IOException {
         MetaBuilder res = new MetaBuilder(name);
@@ -343,4 +342,19 @@ public class MetaUtils {
     public static MetaBuilder readMeta(ObjectInput in) throws IOException {
         return readMeta(in, null);
     }
+
+    /**
+     * Check each of given paths in the given node. Return first subnode that do actually exist
+     * @param meta
+     * @param paths
+     * @return
+     */
+    public static Optional<Meta> optEither(Meta meta, String... paths){
+        return Stream.of(paths).map(meta::optMeta).filter(Optional::isPresent).findFirst().map(Optional::get);
+    }
+
+    public static Optional<Value> optEitherValue(Meta meta, String... paths){
+        return Stream.of(paths).map(meta::optValue).filter(Optional::isPresent).findFirst().map(Optional::get);
+    }
+
 }

@@ -17,7 +17,6 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.Data;
-import hep.dataforge.data.DataFactory;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.goals.AbstractGoal;
@@ -52,7 +51,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     @Override
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
-        List<DataNode<T>> groups = buildGroups(context, set, actionMeta);
+        List<DataNode<T>> groups = buildGroups(context, (DataNode<T>) set, actionMeta);
         return wrap(getResultName(set.getName(), actionMeta), set.meta(), groups.stream().map(group->runGroup(context, group,actionMeta)));
     }
 
@@ -64,9 +63,8 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getChronicle(resultName));
     }
 
-    @SuppressWarnings("unchecked")
-    protected List<DataNode<T>> buildGroups(Context context, DataNode<? extends T> input, Meta actionMeta) {
-        return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group((DataNode<T>) input);
+    protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
+        return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group(input);
     }
 
     /**
@@ -95,9 +93,9 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
             if (!data.type().equals(input.type())) {
                 dataNode.putValue("type", data.type().getName());
             }
-            if (!data.meta().isEmpty()) {
-                dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());
-            }
+//            if (!data.meta().isEmpty()) {
+//                dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());
+//            }
             builder.putNode(dataNode);
         });
         return builder;
