@@ -50,6 +50,11 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Encap
         this.manager = manager;
         this.valueType = valueType;
         cacheDir = manager.getRootCacheDir().resolve(name);
+        try {
+            Files.createDirectories(cacheDir);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to create cache directory");
+        }
         scanDirectory();
     }
 
@@ -139,7 +144,6 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Encap
             Path file = cacheDir.resolve(fileName);
 
             try (OutputStream fos = Files.newOutputStream(file, WRITE, CREATE)) {
-                Files.createDirectories(cacheDir);
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
                 ObjectOutputStream oos = new ObjectOutputStream(baos);
                 oos.writeObject(data);
