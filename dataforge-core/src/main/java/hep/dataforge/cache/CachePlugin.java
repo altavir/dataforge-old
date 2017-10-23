@@ -6,6 +6,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.BasicPlugin;
+import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
@@ -18,7 +19,10 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 
 import javax.cache.Cache;
+import javax.cache.CacheException;
 import javax.cache.CacheManager;
+import javax.cache.Caching;
+import java.io.Serializable;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -46,27 +50,40 @@ public class CachePlugin extends BasicPlugin {
         return bypass;
     }
 
-    public void setManager(CacheManager manager) {
-        this.manager = manager;
+//    public void setManager(CacheManager manager) {
+//        this.manager = manager;
+//    }
+
+    @Override
+    public void attach(Context context) {
+        super.attach(context);
+        try {
+            manager = Caching.getCachingProvider(context.getClassLoader()).getCacheManager();
+            context.getLogger().info("Loaded cache manager" + manager.toString());
+        } catch (CacheException ex) {
+            context.getLogger().warn("Cache provider not found. Will use default cache implementation.");
+            manager = new DefaultCacheManager(getContext(), meta());
+        }
+    }
+
+    @Override
+    public void detach() {
+        super.detach();
+        if (manager != null) {
+            manager.close();
+            manager = null;
+        }
     }
 
     public synchronized CacheManager getManager() {
         if (manager == null) {
-            if (getConfig().hasValue("cacheManager")) {
-                try {
-                    manager = (CacheManager) Class.forName(getConfig().getString("cacheManager")).newInstance();
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to load explicit cache manager", e);
-                }
-            } else {
-                manager = new DefaultCacheManager(getContext(), meta());
-            }
+            throw new IllegalStateException("Cache plugin not attached");
         }
         return manager;
     }
 
     public <V> Data<V> cache(String cacheName, Meta id, Data<V> data) {
-        if (bypass.test(data)) {
+        if (bypass.test(data)|| !Serializable.class.isAssignableFrom(data.type())) {
             return data;
         } else {
             Cache<Meta, V> cache = getCache(cacheName, data.type());
@@ -145,18 +162,22 @@ public class CachePlugin extends BasicPlugin {
     }
 
     private <V> Cache<Meta, V> getCache(String name, Class<V> type) {
-        return getManager().getCache(name, Meta.class, type);
+        Cache<Meta, V> cache = getManager().getCache(name, Meta.class, type);
+        if (cache == null) {
+            cache = getManager().createCache(name, new MetaCacheConfiguration<>(meta(), type));
+        }
+        return cache;
     }
 
-    @Override
-    protected synchronized void applyConfig(Meta config) {
-        //reset the manager
-        if (manager != null) {
-            manager.close();
-        }
-        manager = null;
-        super.applyConfig(config);
-    }
+//    @Override
+//    protected synchronized void applyConfig(Meta config) {
+//        //reset the manager
+//        if (manager != null) {
+//            manager.close();
+//        }
+//        manager = null;
+//        super.applyConfig(config);
+//    }
 
     public void invalidate(String cacheName) {
         getManager().destroyCache(cacheName);

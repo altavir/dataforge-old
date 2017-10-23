@@ -14,6 +14,7 @@ class KTask(
         private val dataTransform: TaskModel.(DataNode<Any>) -> DataNode<Any>
 ) : AbstractTask<Any>() {
     override fun run(model: TaskModel, data: DataNode<out Any>): DataNode<Any> {
+        model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta.toString()}")
         return dataTransform.invoke(model, data.checked(Any::class.java));
     }
 
@@ -30,7 +31,6 @@ class KTask(
 
 class KTaskBuilder(val name: String) {
     var modelTransform: TaskModel.Builder.(Meta) -> Unit = { data("*") };
-
 
 
     private class DataTransformation<T, R>(

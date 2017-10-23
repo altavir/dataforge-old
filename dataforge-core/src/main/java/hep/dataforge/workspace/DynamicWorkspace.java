@@ -4,6 +4,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.workspace.tasks.Task;
+import hep.dataforge.workspace.tasks.TaskModel;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -86,11 +87,16 @@ public abstract class DynamicWorkspace implements Workspace {
 
     @Override
     public Context getContext() {
-        return wsp.getContext();
+        return getWorkspace().getContext();
     }
 
     @Override
     public void clean() {
         getWorkspace().clean();
+    }
+
+    @Override
+    public DataNode<Object> runTask(TaskModel model) {
+        return getWorkspace().runTask(model);
     }
 }

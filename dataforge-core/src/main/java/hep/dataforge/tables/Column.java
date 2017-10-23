@@ -18,6 +18,7 @@ package hep.dataforge.tables;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 
+import java.io.Serializable;
 import java.util.List;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -29,7 +30,7 @@ import java.util.stream.StreamSupport;
  * @version $Id: $Id
  */
 
-public interface Column extends Named, Iterable<Value> {
+public interface Column extends Named, Iterable<Value>, Serializable {
 
     ColumnFormat getFormat();
 

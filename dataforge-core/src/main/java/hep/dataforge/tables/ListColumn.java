@@ -15,6 +15,9 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -30,7 +33,7 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public final class ListColumn implements Column {
+public final class ListColumn implements Column, MetaMorph {
 
     /**
      * Create a copy of given column if it is not ListColumn.
@@ -65,8 +68,11 @@ public final class ListColumn implements Column {
         return new ListColumn(format, values.map(Value::of));
     }
 
-    private final ColumnFormat format;
-    private final List<Value> values;
+    private ColumnFormat format;
+    private List<Value> values;
+
+    public ListColumn() {
+    }
 
     public ListColumn(ColumnFormat format, Stream<Value> values) {
         this.format = format;
@@ -107,5 +113,18 @@ public final class ListColumn implements Column {
     @Override
     public int size() {
         return values.size();
+    }
+
+    @Override
+    public Meta toMeta() {
+        return new MetaBuilder("column")
+                .putNode("format", format.toMeta())
+                .putValue("data", values);
+    }
+
+    @Override
+    public void fromMeta(Meta meta) {
+        this.format = MetaMorph.morph(ColumnFormat.class, meta.getMeta("format"));
+        this.values = meta.getValue("data").listValue();
     }
 }

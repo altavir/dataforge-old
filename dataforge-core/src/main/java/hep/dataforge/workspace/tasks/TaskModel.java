@@ -481,6 +481,14 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, En
             }
         }
 
+        public Builder dependsOn(Task task, Meta taskMeta, String as) {
+            return dependsOn(task.build(model.workspace, taskMeta), as);
+        }
+
+        public Builder dependsOn(Task task, Meta taskMeta) {
+            return dependsOn(task, taskMeta, "");
+        }
+
         /**
          * Add data dependency rule using data path mask and name transformation
          * rule.

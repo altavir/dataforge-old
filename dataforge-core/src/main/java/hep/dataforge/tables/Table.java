@@ -21,6 +21,7 @@ import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
+import java.io.Serializable;
 import java.util.stream.Stream;
 
 import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
@@ -30,7 +31,7 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends Markedup, NavigablePointSource {
+public interface Table extends Markedup, NavigablePointSource, Serializable {
 
     /**
      * Get an immutable column from this table
