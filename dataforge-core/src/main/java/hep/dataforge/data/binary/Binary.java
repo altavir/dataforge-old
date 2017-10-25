@@ -7,6 +7,7 @@ package hep.dataforge.data.binary;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.nio.channels.ReadableByteChannel;
 
@@ -17,8 +18,11 @@ import java.nio.channels.ReadableByteChannel;
  *
  * @author Alexander Nozik
  */
-public interface Binary {
-    //TODO add randomAcessBinary
+public interface Binary extends Serializable {
+    //TODO add randomAcessBinary?
+
+    Binary EMPTY = new BufferedBinary(new byte[0]);
+
 
     /**
      * Get blocking input stream for this binary
@@ -36,6 +40,7 @@ public interface Binary {
 
     /**
      * Read the content of this binary to a single byte buffer.
+     *
      * @return
      * @throws IOException
      */

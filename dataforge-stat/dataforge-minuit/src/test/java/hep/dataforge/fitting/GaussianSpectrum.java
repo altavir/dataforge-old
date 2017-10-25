@@ -21,6 +21,7 @@ import hep.dataforge.maths.GridCalculator;
 import hep.dataforge.maths.MatrixOperations;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.stat.fit.*;
 import hep.dataforge.stat.models.XYModel;
@@ -50,14 +51,14 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
 
     public static FitResult fit(Table data, ParamSet pars, String engine) {
         FitManager fm = new FitManager();
-        XYModel model = new XYModel( new GaussianSpectrum());
+        XYModel model = new XYModel(Meta.empty(), new GaussianSpectrum());
         FitState state = new FitState(data, model, pars);
 
         return fm.runStage(state, engine, "run", "pos");
     }
 
     public static void printInvHessian(Table data, ParamSet pars) {
-        XYModel model = new XYModel(new GaussianSpectrum());
+        XYModel model = new XYModel(Meta.empty(),new GaussianSpectrum());
         FitState fs = FitState.builder().setDataSet(data).setModel(model).build();
         NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
         NamedMatrix hInv = new NamedMatrix(pars.namesAsArray(), MatrixOperations.inverse(h.getMatrix()));

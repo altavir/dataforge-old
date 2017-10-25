@@ -26,6 +26,7 @@ import hep.dataforge.values.ValueType;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ import java.util.function.Function;
 @ValueDef(name = "@envelope.dataType", info = "Type of the envelope data encoding")
 @ValueDef(name = "@envelope.description", info = "Description of the envelope content")
 @ValueDef(name = "@envelope.time", type = ValueType.TIME, info = "Time of envelope creation")
-public interface Envelope extends Metoid {
+public interface Envelope extends Metoid, Serializable {
     /**
      * Property keys
      */

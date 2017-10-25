@@ -22,10 +22,7 @@ import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.Collection;
 import java.util.Optional;
 
@@ -38,7 +35,9 @@ import static hep.dataforge.values.ValueType.NUMBER;
  * @author Alexander Nozik
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-public interface PlotFrame extends PlotStateListener, Configurable {
+public interface PlotFrame extends PlotStateListener, Configurable, Serializable {
+
+    Wrapper wrapper = new Wrapper();
 
     /**
      * Get root plot node
@@ -116,6 +115,28 @@ public interface PlotFrame extends PlotStateListener, Configurable {
         throw new UnsupportedOperationException();
     }
 
+//    default Object writeReplace() throws ObjectStreamException {
+//        return new PlotFrameEnvelope(wrapper.wrap(this));
+//    }
+
+    /**
+     * Use exclusively for plot frame serialization
+     */
+    class PlotFrameEnvelope extends SimpleEnvelope {
+
+        public PlotFrameEnvelope() {
+        }
+
+        public PlotFrameEnvelope(Envelope envelope) {
+            super(envelope.meta(), envelope.getData());
+        }
+
+        private Object readResolve() throws ObjectStreamException {
+            return wrapper.unWrap(this);
+        }
+    }
+
+
     class Wrapper implements hep.dataforge.io.envelopes.Wrapper<PlotFrame> {
 
         public static final String PLOT_FRAME_WRAPPER_TYPE = "df.plots.frame";
@@ -143,9 +164,10 @@ public interface PlotFrame extends PlotStateListener, Configurable {
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
                     .putMetaValue(WRAPPER_KEY, PLOT_FRAME_WRAPPER_TYPE)
-                    .putMetaValue("plotFrameClass", getClass().getName())
+                    .putMetaValue("plotFrameClass", frame.getClass().getName())
                     .putMetaNode(DEFAULT_META_NAME, frame.getConfig())
                     .setContentType("wrapper")
+                    //.putMetaNode("root.meta",frame.ro)
                     .setData(baos.toByteArray());
             return builder.build();
         }
@@ -153,7 +175,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
         @Override
         public PlotFrame unWrap(Envelope envelope) {
             String plotFrameClassName = envelope.meta().getString("plotFrameClass", "hep.dataforge.plots.JFreeChartFrame");
-            Meta plotMeta = envelope.meta().getMeta(DEFAULT_META_NAME);
+            Meta plotMeta = envelope.meta().getMetaOrEmpty(DEFAULT_META_NAME);
 
             EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("envelopeType", "default"));
             try {
@@ -168,7 +190,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
                         Plot pl = unwrapper.unWrap(internalEnvelopeType.getReader().read(dataStream));
                         frame.add(pl);
                     } catch (Exception ex) {
-                        LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable");
+                        LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable", ex);
                     }
 
                 }

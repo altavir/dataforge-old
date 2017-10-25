@@ -5,10 +5,9 @@
  */
 package hep.dataforge.data.binary;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.FileChannel;
@@ -98,6 +97,16 @@ public class FileBinary implements Binary {
 
     public Stream<String> lines() throws IOException {
         return new BufferedReader(new InputStreamReader(getStream())).lines();
+    }
+
+
+    @NotNull
+    private Object writeReplace() throws ObjectStreamException {
+        try {
+            return new BufferedBinary(getBuffer().array());
+        } catch (IOException e) {
+            throw new WriteAbortedException("Failed to get byte buffer", e);
+        }
     }
 
 }

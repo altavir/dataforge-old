@@ -17,7 +17,9 @@ package hep.dataforge.io.envelopes;
 
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
+import java.io.ObjectStreamException;
 import java.util.function.Supplier;
 
 /**
@@ -62,6 +64,11 @@ public class LazyEnvelope implements Envelope {
      */
     private Supplier<Binary> getDataSupplier() {
         return supplier;
+    }
+
+    @NotNull
+    private Object writeReplace() throws ObjectStreamException {
+        return new SimpleEnvelope(meta(), getData());
     }
 
 }

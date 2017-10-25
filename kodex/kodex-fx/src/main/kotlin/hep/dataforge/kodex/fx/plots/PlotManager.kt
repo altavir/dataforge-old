@@ -61,4 +61,14 @@ class PlotManager : BasicPlugin(), PlotPlugin {
         return getPlotFrame(stage, name).apply(action)
     }
 
+    fun display(stage: String = DEFAULT_STAGE_NAME, name: String = DEFAULT_PLOT_NAME, frame: PlotFrame): PlotFrame {
+        return stages
+                .computeIfAbsent(stage) { HashMap() }
+                .computeIfAbsent(name) {
+                    PlotContainer(frame).apply {
+                        display(stage, name, this)
+                    }
+                }.frame
+    }
+
 }

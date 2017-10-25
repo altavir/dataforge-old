@@ -1,5 +1,6 @@
 package hep.dataforge.plots;
 
+import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Laminate;
@@ -91,7 +92,10 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         if (path.length() == 0) {
             return Optional.of(new Laminate(getConfig()));
         } else if (path.length() == 1) {
-            return opt(path).map(plot -> new Laminate(plot.getConfig(), getConfig()));
+            return opt(path).map(plot ->
+                    new Laminate(plot.getConfig(), getConfig())
+                            .withDescriptor(DescriptorUtils.buildDescriptor(plot.getClass()))
+            );
         } else {
             return opt(path.getFirst())
                     .flatMap(group -> getPlotMeta(path.cutFirst()))
@@ -225,7 +229,6 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     public void setDescriptor(NodeDescriptor descriptor) {
         this.descriptor = descriptor;
     }
-
 
     public static class Wrapper implements hep.dataforge.io.envelopes.Wrapper<PlotGroup> {
         public static final String PLOT_GROUP_WRAPPER_TYPE = "df.plots.group";

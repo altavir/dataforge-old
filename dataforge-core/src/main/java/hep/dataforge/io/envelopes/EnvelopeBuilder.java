@@ -19,8 +19,10 @@ import hep.dataforge.data.binary.Binary;
 import hep.dataforge.data.binary.BufferedBinary;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayOutputStream;
+import java.io.ObjectStreamException;
 import java.io.OutputStream;
 import java.nio.ByteBuffer;
 import java.util.function.Consumer;
@@ -134,5 +136,10 @@ public class EnvelopeBuilder implements Envelope {
 
     public Envelope build() {
         return new SimpleEnvelope(meta, data);
+    }
+
+    @NotNull
+    private Object writeReplace() throws ObjectStreamException {
+        return new SimpleEnvelope(meta(), getData());
     }
 }

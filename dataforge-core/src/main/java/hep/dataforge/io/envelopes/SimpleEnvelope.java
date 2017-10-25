@@ -18,13 +18,21 @@ package hep.dataforge.io.envelopes;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.meta.Meta;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+
 /**
+ * The simplest in-memory envelope
  *
  * @author Alexander Nozik
  */
 public class SimpleEnvelope implements Envelope {
-    protected final Meta meta;
-    protected final Binary data;
+    protected Meta meta;
+    protected Binary data;
+
+    public SimpleEnvelope() {
+    }
 
     public SimpleEnvelope(Meta meta, Binary data) {
         this.meta = meta;
@@ -33,12 +41,22 @@ public class SimpleEnvelope implements Envelope {
 
     @Override
     public Binary getData() {
-        return data;
+        return data == null ? Binary.EMPTY : data;
     }
 
     @Override
     public Meta meta() {
-        return meta;
+        return meta == null ? Meta.empty() : meta;
     }
-    
+
+    private void writeObject(ObjectOutputStream out) throws IOException {
+        DefaultEnvelopeType.instance.getWriter().write(out, this);
+    }
+
+    private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
+        Envelope envelope = DefaultEnvelopeType.instance.getReader().read(in);
+        this.meta = envelope.meta();
+        this.data = envelope.getData();
+    }
+
 }

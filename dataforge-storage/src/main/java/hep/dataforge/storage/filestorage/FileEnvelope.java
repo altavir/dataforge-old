@@ -16,17 +16,12 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.data.binary.FileBinary;
-import hep.dataforge.io.envelopes.DefaultEnvelopeType;
-import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.envelopes.EnvelopeBuilder;
-import hep.dataforge.io.envelopes.EnvelopeTag;
+import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.Reader;
+import java.io.*;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
@@ -97,7 +92,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
         return readChannel;
     }
 
-    protected EnvelopeTag buildTag(){
+    protected EnvelopeTag buildTag() {
         return new EnvelopeTag();
     }
 
@@ -291,4 +286,10 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     public boolean isOpen() {
         return readChannel != null || writeChannel != null;
     }
+
+    @NotNull
+    private Object writeReplace() throws ObjectStreamException {
+        return new SimpleEnvelope(meta(), getData());
+    }
+
 }

@@ -5,8 +5,12 @@
  */
 package hep.dataforge.data.binary;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectStreamException;
+import java.io.WriteAbortedException;
 import java.nio.channels.Channels;
 import java.nio.channels.ReadableByteChannel;
 import java.util.function.Supplier;
@@ -20,7 +24,7 @@ public class StreamBinary implements Binary {
         this.sup = sup;
         this.size = size;
     }
-    
+
     public StreamBinary(Supplier<InputStream> sup) {
         this.sup = sup;
         size = -1;
@@ -40,6 +44,15 @@ public class StreamBinary implements Binary {
     @Override
     public long size() throws IOException {
         return size;
+    }
+
+    @NotNull
+    private Object writeReplace() throws ObjectStreamException {
+        try {
+            return new BufferedBinary(getBuffer().array());
+        } catch (IOException e) {
+            throw new WriteAbortedException("Failed to get byte buffer", e);
+        }
     }
 
 }

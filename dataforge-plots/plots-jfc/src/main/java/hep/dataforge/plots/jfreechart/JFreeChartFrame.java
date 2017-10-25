@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 import java.awt.*;
 import java.io.IOException;
+import java.io.ObjectStreamException;
 import java.io.OutputStream;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -61,7 +62,7 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Nozik
  */
-public class JFreeChartFrame extends XYPlotFrame implements FXObject {
+public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializable {
 
     private final JFreeChart chart;
     private final XYPlot plot;
@@ -378,6 +379,10 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject {
             plot.setDataset(wr.getIndex(), null);
         });
         this.index.clear();
+    }
+
+    private Object writeReplace() throws ObjectStreamException {
+        return new PlotFrameEnvelope(wrapper.wrap(this));
     }
 
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {
