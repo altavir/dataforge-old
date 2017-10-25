@@ -18,6 +18,7 @@ package hep.dataforge.stat.models;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.values.Values;
@@ -31,7 +32,7 @@ import static java.lang.Math.log;
  * количества отсчетов в каждом бине, берется интеграл от спектра. Эта операция
  * может быть очень накладной, поэтому в тех случаях, когда бины очень
  * маленькие, лучше использовать SpectrumModel, где берется точечная оценка.
- *
+ * <p>
  * Количества отсчетов не нормируются на ширину бина.
  *
  * @author Alexander Nozik
@@ -44,13 +45,13 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
 
     private boolean calculateCountInBin = false;
 
-    public HistogramModel(ParametricFunction source) {
-        super(source, new HistogramAdapter());
+    public HistogramModel(Meta meta, ParametricFunction source) {
+        super(meta, source.getNames(), new HistogramAdapter());
         this.source = source;
     }
 
-    public HistogramModel(ParametricFunction source, String binBeginName, String binEndName, String countName) {
-        super(source, new HistogramAdapter(binBeginName, binEndName, countName));
+    public HistogramModel(Meta meta, ParametricFunction source, String binBeginName, String binEndName, String countName) {
+        super(meta, source.getNames(), new HistogramAdapter(binBeginName, binEndName, countName));
         this.source = source;
     }
 

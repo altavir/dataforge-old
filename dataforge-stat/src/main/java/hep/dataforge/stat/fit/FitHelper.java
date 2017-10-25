@@ -9,9 +9,7 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
-import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.NavigablePointSource;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.utils.Misc;
 import org.jetbrains.annotations.NotNull;
@@ -87,7 +85,7 @@ public class FitHelper {
                     result.optState().ifPresent(state -> {
                         writer.printf("%n**RESIDUALS**%n");
                         if (state.getModel() instanceof XYModel) {
-                            FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getPoints(), state.getParameters());
+                            FittingIOUtils.printSpectrumResiduals(writer, (XYModel) state.getModel(), state.getData(), state.getParameters());
                         } else {
                             FittingIOUtils.printResiduals(writer, state);
                         }
@@ -182,10 +180,10 @@ public class FitHelper {
             return this;
         }
 
-        public FitBuilder function(ParametricFunction func, XYAdapter adapter) {
-            this.model = new XYModel(func, adapter);
-            return this;
-        }
+//        public FitBuilder function(ParametricFunction func, XYAdapter adapter) {
+//            this.model = new XYModel(func, adapter);
+//            return this;
+//        }
 
         public FitBuilder params(Meta meta) {
             if (meta instanceof Laminate) {

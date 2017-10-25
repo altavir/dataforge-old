@@ -42,6 +42,7 @@ public interface PlotFrame extends PlotStateListener, Configurable {
 
     /**
      * Get root plot node
+     *
      * @return
      */
     PlotGroup getPlots();

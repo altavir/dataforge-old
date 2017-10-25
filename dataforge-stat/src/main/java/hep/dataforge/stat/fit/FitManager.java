@@ -23,7 +23,6 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Path;
-import hep.dataforge.providers.Provider;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.Table;
@@ -34,12 +33,12 @@ import java.util.Optional;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(group = "hep.dataforge", name = "fitting", info = "Basic dataforge fitting plugin")
-public class FitManager extends BasicPlugin implements Provider {
+@PluginDef(group = "hep.dataforge", name = "fitting", dependsOn = "hep.dataforge:models", info = "Basic dataforge fitting plugin")
+public class FitManager extends BasicPlugin {
 
     public static final String FIT_ENGINE_TARGET = "fitEngine";
-    private ModelManager modelManager;
     private HashMap<String, FitEngine> engineList = new HashMap<>();
+    private transient ModelManager modelManager;
 
     public FitManager() {
         addEngine("QOW", new QOWFitEngine());
@@ -49,7 +48,7 @@ public class FitManager extends BasicPlugin implements Provider {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        modelManager = new ModelManager(context);
+        modelManager = context.getFeature(ModelManager.class);
     }
 
     @Override
@@ -86,6 +85,13 @@ public class FitManager extends BasicPlugin implements Provider {
         }
     }
 
+    private ModelManager getModelManager() {
+        if (modelManager == null) {
+            throw new IllegalStateException("Fit plugin or model manage not attached to context");
+        }
+        return modelManager;
+    }
+
     /**
      * Add new fit engine to manager
      *
@@ -97,28 +103,21 @@ public class FitManager extends BasicPlugin implements Provider {
     }
 
     public Model buildModel(String name) {
-        return getModelManager().buildModel(name);
+        return getModelManager().getModel(name).orElseThrow(() -> new RuntimeException("Model not defined"));
     }
 
-    public Model buildModel(Meta modelAnnotation) {
-        return getModelManager().buildModel(modelAnnotation);
+    public Model buildModel(Meta meta) {
+        return getModelManager().getModel(meta).orElseThrow(() -> new RuntimeException("Model not defined"));
     }
 
     public FitState buildState(Table data, String modelName, ParamSet pars) {
-        Model model = getModelManager().buildModel(modelName);
+        Model model = buildModel(modelName);
         return new FitState(data, model, pars);
     }
 
-    public FitState buildState(Table data, Meta modelAnnotation, ParamSet pars) {
-        Model model = getModelManager().buildModel(modelAnnotation);
+    public FitState buildState(Table data, Meta meta, ParamSet pars) {
+        Model model = buildModel(meta);
         return new FitState(data, model, pars);
-    }
-
-    public ModelManager getModelManager() {
-        if (modelManager == null) {
-            throw new RuntimeException("Fit manager not attached to context");
-        }
-        return modelManager;
     }
 
     public FitResult runDefaultStage(FitState state, String... freePars) {

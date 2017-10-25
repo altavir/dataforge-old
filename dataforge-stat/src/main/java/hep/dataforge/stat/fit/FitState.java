@@ -26,7 +26,6 @@ import hep.dataforge.values.Values;
 import org.apache.commons.math3.linear.DiagonalMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
-import java.io.Serializable;
 import java.util.Optional;
 
 import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
@@ -40,8 +39,7 @@ import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-//TODO добавить параметры по-умолчанию в модель
-public class FitState implements Serializable {
+public class FitState {
 
     private final NavigablePointSource points;
 
@@ -80,7 +78,7 @@ public class FitState implements Serializable {
      * @param state a {@link hep.dataforge.stat.fit.FitState} object.
      */
     protected FitState(FitState state) {
-        this.points = state.getPoints();
+        this.points = state.getData();
         this.model = state.getModel();
         this.prior = state.getPrior();
         this.covariance = state.covariance;
@@ -321,15 +319,13 @@ public class FitState implements Serializable {
         return model.getNames().size();
     }
 
-    public NavigablePointSource getPoints() {
+    public NavigablePointSource getData() {
         return points;
     }
 
     public int getDataSize() {
         return points.size();
     }
-
-
 
     /**
      *

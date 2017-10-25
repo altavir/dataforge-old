@@ -76,7 +76,7 @@ class KTaskBuilder(val name: String) {
         transform(from, to, transform)
     }
 
-    inline fun <reified T, reified R> pipe(
+    inline fun <reified T, reified R> pipeAction(
             actionName: String = "pipe",
             from: String = "",
             to: String = "",
@@ -90,7 +90,24 @@ class KTaskBuilder(val name: String) {
         action<T, R>(pipe, from, to);
     }
 
-    inline fun <reified T, reified R> join(
+    inline fun <reified T, reified R> pipe(
+            actionName: String = "pipe",
+            from: String = "",
+            to: String = "",
+            noinline action: suspend ActionEnv.(T) -> R) {
+        val pipe: Action<T, R> = KPipe(
+                name = Name.joinString(name, actionName),
+                inType = T::class.java,
+                outType = R::class.java,
+                action = {
+                    result(action)
+                }
+        )
+        action<T, R>(pipe, from, to);
+    }
+
+
+    inline fun <reified T, reified R> joinAction(
             actionName: String = "join",
             from: String = "",
             to: String = "",
@@ -100,6 +117,22 @@ class KTaskBuilder(val name: String) {
                 inType = T::class.java,
                 outType = R::class.java,
                 action = action
+        )
+        action<T, R>(join, from, to);
+    }
+
+    inline fun <reified T, reified R> join(
+            actionName: String = "join",
+            from: String = "",
+            to: String = "",
+            noinline action: suspend ActionEnv.(Map<String, T>) -> R) {
+        val join: Action<T, R> = KJoin(
+                name = Name.joinString(name, actionName),
+                inType = T::class.java,
+                outType = R::class.java,
+                action = {
+                    result(null, action)
+                }
         )
         action<T, R>(join, from, to);
     }

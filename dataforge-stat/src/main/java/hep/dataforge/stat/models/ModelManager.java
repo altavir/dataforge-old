@@ -15,89 +15,81 @@
  */
 package hep.dataforge.stat.models;
 
+import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.PluginDef;
 import hep.dataforge.description.ValueDef;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ContextMetaFactory;
+import org.jetbrains.annotations.Nullable;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * The library of available models
- * <p>
- * TODO andThen ModelManager into Library
- * </p>
  *
  * @author Alexander Nozik
  */
-public class ModelManager implements Encapsulated {
+@PluginDef(group = "hep.dataforge", name = "models", info = "Storage plugin for fit models")
+public class ModelManager extends BasicPlugin {
+    public static final String MODEL_TARGET = "model";
+
+    public static String MODEL_NAME = "modelName";
 
     /**
-     * Constant <code>MODEL_NAME="name"</code>
+     * Static method to restore model from meta if possible
+     *
+     * @param meta
+     * @return
      */
-    public static String MODEL_NAME = "modelName";
-    private final HashMap<String, ContextMetaFactory<Model>> modelList = new HashMap<>();
-    private final HashMap<String, ModelDescriptor> descriptorList = new HashMap<>();
-    private Context context;
-
-
-    public ModelManager(Context context) {
-        this.context = context;
+    public static Optional<Model> restoreModel(@Nullable Context context, Meta meta) {
+        return context.optFeature(ModelManager.class).flatMap(manager -> manager.getModel(meta));
     }
 
-    @Override
-    public Context getContext() {
-        return context;
+    private final Set<ModelFactory> factories = new HashSet<>();
+
+    public void addModel(ModelFactory factory) {
+        factories.add(factory);
     }
+
 
     public void addModel(String name, ContextMetaFactory<Model> mf) {
-        modelList.put(name.toLowerCase(), mf);
+        addModel(ModelFactory.build(name, null, mf));
     }
 
-    public void addModel(String name, ContextMetaFactory<Model> mf, ModelDescriptor descriptor) {
-        modelList.put(name.toLowerCase(), mf);
-        descriptorList.put(name.toLowerCase(), descriptor);
+    public void addModel(String name, ModelDescriptor descriptor, ContextMetaFactory<Model> mf) {
+        addModel(ModelFactory.build(name, descriptor, mf));
     }
 
-    /**
-     * <p>
-     * listDescriptors.</p>
-     *
-     * @return a {@link java.util.Map} object.
-     */
-    public Map<String, ModelDescriptor> listDescriptors() {
-        return descriptorList;
+    private Optional<ModelFactory> findFactory(String name) {
+        return factories.stream().filter(it -> Objects.equals(it.getName(), name)).findFirst();
     }
 
     @ValueDef(name = "modelName", info = "The name of the pre-loaded model to use.")
-    public Model buildModel(Meta a) {
+    public Optional<Model> getModel(Meta a) {
         String modelName = a.getString(MODEL_NAME);
-        ContextMetaFactory<Model> factory = modelList.get(modelName.toLowerCase());
-        if (factory == null) {
-            throw new NameNotFoundException(modelName);
-        }
-        return factory.build(context, a);
+        return findFactory(modelName.toLowerCase()).map(factory -> factory.build(getContext(), a));
     }
 
-    public Model buildModel(String name) throws NameNotFoundException {
-        ContextMetaFactory<Model> factory = modelList.get(name.toLowerCase());
-        if (factory == null) {
-            throw new NameNotFoundException(name);
-        }
-        return factory.build(context, Meta.buildEmpty("model"));
+    @Provides(MODEL_TARGET)
+    public Optional<Model> getModel(String name) {
+        return findFactory(name.toLowerCase()).map(factory -> factory.build(getContext(), Meta.buildEmpty("model")));
     }
 
-    /**
-     * <p>
-     * getModelNameList.</p>
-     *
-     * @return a {@link java.util.Set} object.
-     */
-    public Set<String> getModelNameList() {
-        return modelList.keySet();
+    @ProvidesNames(MODEL_TARGET)
+    public Stream<String> listModels() {
+        return factories.stream().map(Named::getName);
+    }
+
+    @Override
+    public String defaultTarget() {
+        return MODEL_TARGET;
     }
 }

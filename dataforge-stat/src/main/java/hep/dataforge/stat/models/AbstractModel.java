@@ -17,7 +17,7 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.names.NameSetContainer;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
@@ -41,15 +41,15 @@ public abstract class AbstractModel<T extends ValuesAdapter> extends MetaHolder 
      */
     protected T adapter;
 
-    protected AbstractModel(Names names, T adapter) {
+    protected AbstractModel(Meta meta, Names names, T adapter) {
+        super(meta);
         this.adapter = adapter;
         this.names = names;
     }
 
-    protected AbstractModel(NameSetContainer source, T adapter) {
-        this.adapter = adapter;
-        this.names = source.getNames();
-    }
+//    protected AbstractModel(Meta meta, NameSetContainer source, T adapter) {
+//        this(meta, source.getNames(), adapter);
+//    }
 
     public T getAdapter() {
         return adapter;

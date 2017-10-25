@@ -280,7 +280,7 @@ public class FittingIOUtils {
     }
 
     public static void printResiduals(PrintWriter out, FitState state) {
-        printResiduals(out, state.getModel(), state.getPoints(), state.getParameters());
+        printResiduals(out, state.getModel(), state.getData(), state.getParameters());
     }
 
     public static void printResiduals(PrintWriter out, Model model, Iterable<Values> data, ParamSet pars) {

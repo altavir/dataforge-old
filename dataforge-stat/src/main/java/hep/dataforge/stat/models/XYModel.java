@@ -39,38 +39,16 @@ public class XYModel extends AbstractModel<XYAdapter> {
     private final ParametricFunction source;
 
 
-    public XYModel(ParametricFunction source) {
-        super(source, XYAdapter.DEFAULT_ADAPTER);
+    public XYModel(Meta meta, ParametricFunction source) {
+        super(meta, source.getNames(), new XYAdapter(meta));
         this.source = source;
     }
 
 
-    public XYModel(ParametricFunction source, XYAdapter format) {
-        super(source, format);
+    public XYModel(Meta meta, XYAdapter format, ParametricFunction source) {
+        super(meta, source.getNames(), format);
         this.source = source;
     }
-
-
-    public XYModel(ParametricFunction source, Meta annotation) {
-        super(source, new XYAdapter(annotation));
-        this.source = source;
-    }
-
-
-    public XYModel(ParametricFunction source, String xName, String xErrName, String yName, String yErrName) {
-        super(source, new XYAdapter(xName, yName, xErrName, yErrName));
-        this.source = source;
-    }
-
-    public XYModel(ParametricFunction source, String xName, String yName, String yErrName) {
-        super(source, new XYAdapter(xName, yName, yErrName));
-        this.source = source;
-    }
-
-//    public XYModel(String name, NamedSpectrum source, String xName, String yName) {
-//        super(name, source, new XYAdapter(xName, yName));
-//        this.source = source;
-//    }
 
     /**
      * {@inheritDoc}

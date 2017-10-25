@@ -15,9 +15,12 @@
  */
 package hep.dataforge.stat.fit;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.stat.models.Model;
+import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.NavigablePointSource;
 import hep.dataforge.utils.MetaMorph;
@@ -43,7 +46,7 @@ public class FitResult extends SimpleMetaMorph {
         FitResult res = new FitResult();
         res.state = state;
         MetaBuilder builder = new MetaBuilder("fitResult")
-                .setNode("data", new ListOfPoints(state.getPoints()).toMeta())//setting data
+                .setNode("data", new ListOfPoints(state.getData()).toMeta())//setting data
                 .setValue("dataSize", state.getDataSize())
                 .setNode("params", state.getParameters().toMeta())
                 .setValue("isValid", valid);
@@ -65,11 +68,9 @@ public class FitResult extends SimpleMetaMorph {
 
         //FIXME add interval estimate
 
-        //setting model
-        if (state.getModel() instanceof MetaMorph) {
-            builder.setNode("model", ((MetaMorph) state.getModel()).toMeta());
-        }
 
+        //setting model if possible
+        builder.setNode("model", state.getModel().getMeta());
 
         res.setMeta(builder.build());
         return res;
@@ -125,8 +126,20 @@ public class FitResult extends SimpleMetaMorph {
         return Optional.ofNullable(state);
     }
 
+    /**
+     * Provide a model if possible
+     * @param context
+     * @return
+     */
+    public Optional<Model> optModel(Context context) {
+        return Optionals.either(optState().map(FitState::getModel))
+                .or(meta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
+                .opt();
+    }
+
     public NavigablePointSource getData() {
-        return MetaMorph.morph(ListOfPoints.class, meta().getMeta("data"));
+        return optState().map(FitState::getData)
+                .orElseGet(() -> MetaMorph.morph(ListOfPoints.class, meta().getMeta("data")));
     }
 
     /**

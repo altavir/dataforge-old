@@ -83,7 +83,7 @@ public class CachePlugin extends BasicPlugin {
     }
 
     public <V> Data<V> cache(String cacheName, Meta id, Data<V> data) {
-        if (bypass.test(data)|| !Serializable.class.isAssignableFrom(data.type())) {
+        if (bypass.test(data) || !Serializable.class.isAssignableFrom(data.type())) {
             return data;
         } else {
             Cache<Meta, V> cache = getCache(cacheName, data.type());
@@ -129,7 +129,11 @@ public class CachePlugin extends BasicPlugin {
                             result.completeExceptionally(err);
                         } else {
                             result.complete(res);
-                            cache.put(id, res);
+                            try {
+                                cache.put(id, res);
+                            } catch (Exception ex) {
+                                getContext().getLogger().error("Failed to put result into the cache", ex);
+                            }
                         }
                     });
                 }

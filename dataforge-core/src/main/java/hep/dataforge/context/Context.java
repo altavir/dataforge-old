@@ -30,6 +30,7 @@ import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -164,6 +165,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      *
      * @return
      */
+    @NotNull
     public final PluginManager pluginManager() {
         return this.pm;
     }
@@ -328,6 +330,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @param <T>
      * @return
      */
+    @NotNull
     public <T> Optional<T> optFeature(Class<T> type) {
         return pluginManager()
                 .stream(true)

@@ -30,35 +30,25 @@ import java.util.function.Function;
  * @version $Id: $Id
  */
 public class WeightedXYModel extends XYModel {
-    
+
     private final Function<Values, Double> weightFunction;
 
-    public WeightedXYModel(ParametricFunction source, Function<Values, Double> weightFunction) {
-        super(source);
+    public WeightedXYModel(Meta meta, ParametricFunction source, Function<Values, Double> weightFunction) {
+        super(meta, source);
         this.weightFunction = weightFunction;
     }
 
-    public WeightedXYModel(ParametricFunction source, XYAdapter format, Function<Values, Double> weightFunction) {
-        super(source, format);
+    public WeightedXYModel(Meta meta, XYAdapter format, ParametricFunction source, Function<Values, Double> weightFunction) {
+        super(meta, format, source);
         this.weightFunction = weightFunction;
     }
 
     /**
-     * <p>Constructor for WeightedXYModel.</p>
-     *
-     * @param source a {@link hep.dataforge.stat.parametric.ParametricFunction} object.
-     * @param annotation a {@link hep.dataforge.meta.Meta} object.
-     * @param weightFunction a {@link java.util.function.Function} object.
+     * {@inheritDoc}
      */
-    public WeightedXYModel(ParametricFunction source, Meta annotation, Function<Values, Double> weightFunction) {
-        super(source, annotation);
-        this.weightFunction = weightFunction;
-    }
-
-    /** {@inheritDoc} */
     @Override
     public double dispersion(Values point, Values pars) {
-        return super.dispersion(point, pars)*weightFunction.apply(point);
+        return super.dispersion(point, pars) * weightFunction.apply(point);
     }
 
     @Override

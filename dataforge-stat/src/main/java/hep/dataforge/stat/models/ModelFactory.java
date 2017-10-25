@@ -5,15 +5,35 @@
  */
 package hep.dataforge.stat.models;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Named;
 import hep.dataforge.utils.ContextMetaFactory;
 
 /**
+ * A factory
  *
  * @author Alexander Nozik
  */
-@FunctionalInterface
-public interface ModelFactory extends ContextMetaFactory<Model> {
-    default ModelDescriptor descriptor(){
-        return null;
+public interface ModelFactory extends ContextMetaFactory<Model>, Named {
+    static ModelFactory build(String name, ModelDescriptor descriptor, ContextMetaFactory<Model> factory) {
+        return new ModelFactory() {
+            @Override
+            public ModelDescriptor getDescriptor() {
+                return descriptor;
+            }
+
+            @Override
+            public String getName() {
+                return name;
+            }
+
+            @Override
+            public Model build(Context context, Meta meta) {
+                return factory.build(context, meta);
+            }
+        };
     }
+
+    ModelDescriptor getDescriptor();
 }

@@ -44,7 +44,6 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     private final RandomGenerator rnd;
 
     public GaussianSpectrum() {
-
         super(list);
         rnd = new JDKRandomGenerator();
     }

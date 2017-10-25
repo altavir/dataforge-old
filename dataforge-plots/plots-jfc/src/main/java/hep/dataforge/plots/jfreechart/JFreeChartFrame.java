@@ -61,7 +61,7 @@ import java.util.stream.Collectors;
 /**
  * @author Alexander Nozik
  */
-public class JFreeChartFrame extends XYPlotFrame implements Serializable, FXObject {
+public class JFreeChartFrame extends XYPlotFrame implements FXObject {
 
     private final JFreeChart chart;
     private final XYPlot plot;
