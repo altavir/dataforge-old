@@ -1,6 +1,7 @@
 package hep.dataforge.kodex
 
 import hep.dataforge.goals.Goal
+import hep.dataforge.goals.GoalGroup
 import hep.dataforge.goals.GoalListener
 import hep.dataforge.utils.ReferenceRegistry
 import kotlinx.coroutines.experimental.*
@@ -23,11 +24,12 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
     private val deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
-        listeners.forEach { it.onGoalStart() }
         try {
+            //TODO add try-catch for listeners response
+            listeners.forEach { it.onGoalStart() }
             val res = block.invoke()
             listeners.forEach { it.onGoalComplete(res) }
-            res
+            return@async res
         } catch (ex: Throwable) {
             listeners.forEach { it.onGoalFailed(ex) }
             //rethrow exception
@@ -71,18 +73,21 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
         return deferred.isCompleted
     }
 
+    override fun isRunning(): Boolean {
+        return deferred.isActive
+    }
+
     override fun result(): CompletableFuture<R> {
         return deferred.asCompletableFuture();
     }
 
     override fun registerListener(listener: GoalListener<R>) {
-        listeners.add(listener)
+        listeners.add(listener, true)
     }
 
     override fun dependencies(): Stream<Goal<*>> {
         return deps.stream().map { it }
     }
-
 }
 
 
@@ -122,3 +127,6 @@ fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext = CommonPool, block: suspen
     }
 }
 
+fun Collection<Goal<out Any>>.group(): GoalGroup {
+    return GoalGroup(this);
+}

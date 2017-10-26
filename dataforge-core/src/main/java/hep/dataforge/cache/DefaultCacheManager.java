@@ -1,7 +1,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.context.Global;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaHolder;
@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * Created by darksnake on 08-Feb-17.
  */
-public class DefaultCacheManager extends MetaHolder implements CacheManager, Encapsulated {
+public class DefaultCacheManager extends MetaHolder implements CacheManager, ContextAware {
 
     private final Context context;
     private Map<String, DefaultCache> map;

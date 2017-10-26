@@ -37,6 +37,10 @@ class KMetaBuilder(name: String) : MetaBuilder(name) {
         transform?.invoke(node)
         attachNode(node)
     }
+
+    fun node(name: String, meta: Meta) {
+        putNode(name, meta)
+    }
 }
 
 fun buildMeta(name: String = DEFAULT_META_NAME, transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {

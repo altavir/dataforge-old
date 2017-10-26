@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.api;
 
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
@@ -43,7 +43,7 @@ import java.util.Optional;
  * @author Darksnake
  */
 @AnonymousNotAlowed
-public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, Encapsulated, AutoConnectible {
+public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, ContextAware, AutoConnectible {
     //TODO consider removing dispatcher to helper classes
 
     String LOADER_TARGET = "loader";

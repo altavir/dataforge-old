@@ -1,7 +1,7 @@
 package hep.dataforge.server;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import org.jetbrains.annotations.Nullable;
 import ratpack.handling.Chain;
 
@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 /**
  *
  */
-public interface ServerObject extends Encapsulated, AutoCloseable {
+public interface ServerObject extends ContextAware, AutoCloseable {
 
     /**
      * Get server manager for this object

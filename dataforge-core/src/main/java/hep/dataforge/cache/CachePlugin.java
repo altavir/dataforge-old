@@ -144,6 +144,11 @@ public class CachePlugin extends BasicPlugin {
                 }
 
                 @Override
+                public boolean isRunning() {
+                    return !result.isDone();
+                }
+
+                @Override
                 public void registerListener(GoalListener<V> listener) {
                     //do nothing
                 }

@@ -41,7 +41,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
 
     @Override
     public synchronized void run() {
-        if (!isStarted()) {
+        if (!isRunning()) {
             //start all dependencies so they will occupy threads
             computation = CompletableFuture
                     .allOf(dependencies()
@@ -49,7 +49,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                                 dep.run();//starting all dependencies
                                 return dep.result();
                             })
-                            .toArray(num -> new CompletableFuture[num]))
+                            .toArray(CompletableFuture[]::new))
                     .whenCompleteAsync((res, err) -> {
                         if (err != null) {
                             getLogger().error("One of goal dependencies failed with exception", err);
@@ -98,7 +98,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
      * care
      */
     protected void abort() {
-        if (isStarted()) {
+        if (isRunning()) {
             if (this.computation != null) {
                 this.computation.cancel(true);
             }
@@ -108,7 +108,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
         }
     }
 
-    protected boolean isStarted() {
+    public boolean isRunning() {
         return this.result.isDone() || this.computation != null;
     }
 

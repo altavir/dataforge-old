@@ -1,7 +1,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
@@ -32,7 +32,7 @@ import static java.nio.file.StandardOpenOption.WRITE;
  * Created by darksnake on 10-Feb-17.
  */
 @ValueDef(name = "fileCache.enabled", type = ValueType.BOOLEAN, def = "true", info = "If false, then file cache is read but never written to")
-public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Encapsulated {
+public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, ContextAware {
 
     private static DefaultEnvelopeReader reader = new DefaultEnvelopeReader();
     private static DefaultEnvelopeWriter writer = new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance);

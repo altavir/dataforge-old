@@ -2,7 +2,7 @@ package hep.dataforge.grind
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
-import hep.dataforge.context.Encapsulated
+import hep.dataforge.context.ContextAware
 import hep.dataforge.context.Global
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
@@ -28,7 +28,7 @@ import org.codehaus.groovy.control.customizers.ImportCustomizer
         @NodeDef(name = "import", info = "Import customization"),
         @NodeDef(name = "import.one", multiple = true, info = "A single import. Can contain alas. If field is present, then using static import")
 ])
-class GrindShell implements Encapsulated {
+class GrindShell implements ContextAware {
 
     private Context context;
     private ShellBinding binding = new ShellBinding();

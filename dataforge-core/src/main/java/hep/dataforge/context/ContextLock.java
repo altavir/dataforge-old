@@ -10,7 +10,7 @@ import java.util.concurrent.ExecutionException;
 /**
  * Lock class for context
  */
-public class ContextLock implements Encapsulated {
+public class ContextLock implements ContextAware {
 
     private final Context context;
     /**

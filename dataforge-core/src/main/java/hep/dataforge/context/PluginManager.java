@@ -29,7 +29,7 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
-public class PluginManager implements Encapsulated, AutoCloseable {
+public class PluginManager implements ContextAware, AutoCloseable {
 
 
     /**

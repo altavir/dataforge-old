@@ -1,7 +1,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 
 import javax.cache.CacheManager;
 import javax.cache.configuration.OptionalFeature;
@@ -12,7 +12,7 @@ import java.util.Properties;
 /**
  * Created by darksnake on 08-Feb-17.
  */
-public class DefaultCachingProvider implements CachingProvider, Encapsulated {
+public class DefaultCachingProvider implements CachingProvider, ContextAware {
     private final Context context;
 
     public DefaultCachingProvider(Context context) {

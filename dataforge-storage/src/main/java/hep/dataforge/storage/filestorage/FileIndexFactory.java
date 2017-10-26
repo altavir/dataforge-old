@@ -6,7 +6,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.storage.commons.DefaultIndex;
 import hep.dataforge.storage.commons.ValueProviderIndex;
 import hep.dataforge.values.ValueProvider;
@@ -24,7 +24,7 @@ import java.util.function.Function;
  *
  * @author Alexander Nozik
  */
-public class FileIndexFactory implements Encapsulated {
+public class FileIndexFactory implements ContextAware {
 
     private final Context context;
     private String uri;

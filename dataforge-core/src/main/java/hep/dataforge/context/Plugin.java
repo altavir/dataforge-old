@@ -37,7 +37,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Configurable, Named, Encapsulated, Provider, Identifiable {
+public interface Plugin extends Configurable, Named, ContextAware, Provider, Identifiable {
 
     String PLUGIN_TARGET = "plugin";
 

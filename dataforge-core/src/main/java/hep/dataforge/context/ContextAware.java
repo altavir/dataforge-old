@@ -25,7 +25,7 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Encapsulated {
+public interface ContextAware {
     /**
      * Get context for this object
      *

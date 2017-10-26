@@ -31,6 +31,11 @@ public interface Goal<T> extends RunnableFuture<T> {
      */
     void run();
 
+    default Goal<T> start() {
+        run();
+        return this;
+    }
+
     /**
      * The encapsulated {@link CompletableFuture}. Used to builder goal chains.
      *
@@ -53,6 +58,10 @@ public interface Goal<T> extends RunnableFuture<T> {
         return result().cancel(mayInterruptIfRunning);
     }
 
+    default boolean cancel() {
+        return cancel(true);
+    }
+
     @Override
     default boolean isCancelled() {
         return result().isCancelled();
@@ -62,6 +71,8 @@ public interface Goal<T> extends RunnableFuture<T> {
     default boolean isDone() {
         return result().isDone();
     }
+
+    boolean isRunning();
 
     @Override
     default T get(long timeout, @NotNull TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
@@ -80,8 +91,8 @@ public interface Goal<T> extends RunnableFuture<T> {
      *
      * @param r
      */
-    default void onStart(Runnable r) {
-        onStart(Global.instance().singleThreadExecutor(), r);
+    default Goal<T> onStart(Runnable r) {
+        return onStart(Global.instance().singleThreadExecutor(), r);
     }
 
     /**
@@ -90,7 +101,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param executor
      * @param r
      */
-    default void onStart(Executor executor, Runnable r) {
+    default Goal<T> onStart(Executor executor, Runnable r) {
         registerListener(new GoalListener<T>() {
             @Override
             public void onGoalStart() {
@@ -98,6 +109,7 @@ public interface Goal<T> extends RunnableFuture<T> {
             }
 
         });
+        return this;
     }
 
     /**
@@ -105,8 +117,8 @@ public interface Goal<T> extends RunnableFuture<T> {
      *
      * @param consumer
      */
-    default void onComplete(BiConsumer<T, Throwable> consumer) {
-        onComplete(Global.instance().singleThreadExecutor(), consumer);
+    default Goal<T> onComplete(BiConsumer<T, Throwable> consumer) {
+        return onComplete(Global.instance().singleThreadExecutor(), consumer);
     }
 
     /**
@@ -115,7 +127,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param exec
      * @param consumer
      */
-    default void onComplete(Executor exec, BiConsumer<T, Throwable> consumer) {
+    default Goal<T> onComplete(Executor exec, BiConsumer<T, Throwable> consumer) {
         registerListener(new GoalListener<T>() {
             @Override
             public void onGoalComplete(T result) {
@@ -127,5 +139,6 @@ public interface Goal<T> extends RunnableFuture<T> {
                 exec.execute(() -> consumer.accept(null, ex));
             }
         });
+        return this;
     }
 }

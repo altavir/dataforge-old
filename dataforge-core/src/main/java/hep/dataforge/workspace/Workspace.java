@@ -16,7 +16,7 @@
 package hep.dataforge.workspace;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.context.Global;
 import hep.dataforge.data.*;
 import hep.dataforge.exceptions.NameNotFoundException;
@@ -41,7 +41,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Workspace extends Encapsulated, Provider {
+public interface Workspace extends ContextAware, Provider {
 
 //    String DATA_STAGE_NAME = "@data";
 
@@ -193,7 +193,7 @@ public interface Workspace extends Encapsulated, Provider {
      */
     void clean();
 
-    interface Builder extends GenericBuilder<Workspace, Workspace.Builder>, Encapsulated {
+    interface Builder extends GenericBuilder<Workspace, Workspace.Builder>, ContextAware {
 
         default Workspace.Builder loadFrom(Meta meta) {
             if (meta.hasValue("context")) {

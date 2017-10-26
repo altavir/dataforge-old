@@ -15,7 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.ControlUtils;
 import hep.dataforge.control.RoleDef;
@@ -70,7 +70,7 @@ import static hep.dataforge.control.connections.Roles.*;
 @RoleDef(name = VIEW_ROLE)
 @RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
 @StateDef(@ValueDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized"))
-public interface Device extends AutoConnectible, Metoid, Encapsulated, Named, Responder {
+public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Responder {
 
     String INITIALIZED_STATE = "init";
 

@@ -6,7 +6,7 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.values.Value;
@@ -27,7 +27,7 @@ import static java.nio.file.StandardOpenOption.*;
 /**
  * @author Alexander Nozik
  */
-public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Serializable, Encapsulated {
+public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Serializable, ContextAware {
 
     private final transient Context context;
     private final Supplier<FileEnvelope> envelopeProvider;

@@ -7,7 +7,7 @@ package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.cache.Identifiable;
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Encapsulated;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
@@ -42,7 +42,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Encapsulated {
+public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, ContextAware {
 
     /**
      * Create an empty model builder
