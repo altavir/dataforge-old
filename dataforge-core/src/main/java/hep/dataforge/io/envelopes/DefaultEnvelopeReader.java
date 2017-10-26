@@ -27,6 +27,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -45,7 +46,7 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
     public static final DefaultEnvelopeReader INSTANCE = new DefaultEnvelopeReader();
 
 
-    protected EnvelopeTag newTag(){
+    protected EnvelopeTag newTag() {
         return new EnvelopeTag();
     }
 
@@ -128,7 +129,8 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
         return SEPARATOR;
     }
 
-    public Binary readData(InputStream stream, int length) throws IOException {
+    @NotNull
+    private Binary readData(InputStream stream, int length) throws IOException {
         if (length == -1) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
             while (stream.available() > 0) {
@@ -136,9 +138,9 @@ public class DefaultEnvelopeReader implements EnvelopeReader {
             }
             return new BufferedBinary(baos.toByteArray());
         } else {
-            byte[] bytes = new byte[length];
-            stream.read(bytes);
-            return new BufferedBinary(bytes);
+            ByteBuffer buffer = ByteBuffer.allocate(length);
+            Channels.newChannel(stream).read(buffer);
+            return new BufferedBinary(buffer);
         }
     }
 

@@ -17,16 +17,18 @@ package hep.dataforge.plots;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.io.envelopes.*;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.envelopes.EnvelopeBuilder;
+import hep.dataforge.io.envelopes.SimpleEnvelope;
 import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
-import org.slf4j.LoggerFactory;
 
-import java.io.*;
+import java.io.ObjectStreamException;
+import java.io.OutputStream;
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 
-import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
@@ -111,7 +113,7 @@ public interface PlotFrame extends PlotStateListener, Configurable, Serializable
      */
     @ValueDef(name = "width", type = {NUMBER}, def = "800", info = "The width of the snapshot in pixels")
     @ValueDef(name = "height", type = {NUMBER}, def = "600", info = "The height of the snapshot in pixels")
-    default void save(OutputStream stream, Meta config) {
+    default void asImage(OutputStream stream, Meta config) {
         throw new UnsupportedOperationException();
     }
 
@@ -138,8 +140,9 @@ public interface PlotFrame extends PlotStateListener, Configurable, Serializable
 
 
     class Wrapper implements hep.dataforge.io.envelopes.Wrapper<PlotFrame> {
-
         public static final String PLOT_FRAME_WRAPPER_TYPE = "df.plots.frame";
+        public static final String PLOT_FRAME_CLASS_KEY = "frame.class";
+        public static final String PLOT_FRAME_META_KEY = "frame.meta";
 
         @Override
         public String getName() {
@@ -153,47 +156,30 @@ public interface PlotFrame extends PlotStateListener, Configurable, Serializable
 
         @Override
         public Envelope wrap(PlotFrame frame) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            EnvelopeWriter writer = DefaultEnvelopeType.instance.getWriter();
-
-            try {
-                writer.write(baos, new PlotGroup.Wrapper().wrap(frame.getPlots()));
-            } catch (IOException ex) {
-                throw new RuntimeException("Failed to write plottable to envelope", ex);
-            }
+            Envelope rootEnv = PlotGroup.WRAPPER.wrap(frame.getPlots());
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .putMetaValue(WRAPPER_KEY, PLOT_FRAME_WRAPPER_TYPE)
-                    .putMetaValue("plotFrameClass", frame.getClass().getName())
-                    .putMetaNode(DEFAULT_META_NAME, frame.getConfig())
+                    .setMeta(rootEnv.meta())
+                    .setData(rootEnv.getData())
                     .setContentType("wrapper")
-                    //.putMetaNode("root.meta",frame.ro)
-                    .setData(baos.toByteArray());
+                    .putMetaValue(WRAPPER_TYPE_KEY, PLOT_FRAME_WRAPPER_TYPE)
+                    .putMetaValue(PLOT_FRAME_CLASS_KEY, frame.getClass().getName())
+                    .putMetaNode(PLOT_FRAME_META_KEY, frame.getConfig());
             return builder.build();
         }
 
         @Override
         public PlotFrame unWrap(Envelope envelope) {
-            String plotFrameClassName = envelope.meta().getString("plotFrameClass", "hep.dataforge.plots.JFreeChartFrame");
-            Meta plotMeta = envelope.meta().getMetaOrEmpty(DEFAULT_META_NAME);
+            PlotGroup root = PlotGroup.WRAPPER.unWrap(envelope);
 
-            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("envelopeType", "default"));
+            String plotFrameClassName = envelope.meta().getString(PLOT_FRAME_CLASS_KEY, "hep.dataforge.plots.JFreeChartFrame");
+            Meta plotMeta = envelope.meta().getMetaOrEmpty(PLOT_FRAME_META_KEY);
+
             try {
                 PlotFrame frame = (PlotFrame) Class.forName(plotFrameClassName).getConstructor().newInstance();
                 frame.configure(plotMeta);
-                //Buffering stream to avoid rebufferization
-                BufferedInputStream dataStream = new BufferedInputStream(envelope.getData().getStream());
-                Plot.Wrapper unwrapper = new Plot.Wrapper();
-
-                while (dataStream.available() > 0) {
-                    try {
-                        Plot pl = unwrapper.unWrap(internalEnvelopeType.getReader().read(dataStream));
-                        frame.add(pl);
-                    } catch (Exception ex) {
-                        LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable", ex);
-                    }
-
-                }
+                frame.addAll(root);
+                frame.getPlots().configure(root.meta());
 
                 return frame;
             } catch (Exception ex) {

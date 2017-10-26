@@ -12,24 +12,24 @@ import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ReferenceRegistry;
 import javafx.util.Pair;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
-import java.io.BufferedInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
-import static hep.dataforge.plots.Plot.Wrapper.PLOT_WRAPPER_TYPE;
 
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-public class PlotGroup extends SimpleConfigurable implements Plottable, Provider, PlotStateListener {
+public class PlotGroup extends SimpleConfigurable implements Plottable, Provider, PlotStateListener, Iterable<Plottable> {
     public static final String PLOT_TARGET = "plot";
 
+    public static final Wrapper WRAPPER = new Wrapper();
 
     private final String name;
     private NodeDescriptor descriptor = new NodeDescriptor("group");
@@ -158,15 +158,6 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         });
     }
 
-    /**
-     * Recursively apply action to all children
-     *
-     * @param action
-     */
-    public void forEach(Consumer<Plottable> action) {
-        stream().map(Pair::getValue).forEach(action);
-    }
-
     @Provides(PLOT_TARGET)
     public Optional<Plottable> opt(String name) {
         return opt(Name.of(name));
@@ -230,6 +221,17 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         this.descriptor = descriptor;
     }
 
+    /**
+     * Iterate over direct descendants
+     *
+     * @return
+     */
+    @NotNull
+    @Override
+    public Iterator<Plottable> iterator() {
+        return this.plots.values().iterator();
+    }
+
     public static class Wrapper implements hep.dataforge.io.envelopes.Wrapper<PlotGroup> {
         public static final String PLOT_GROUP_WRAPPER_TYPE = "df.plots.group";
         private static Plot.Wrapper plotWrapper = new Plot.Wrapper();
@@ -266,7 +268,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             }
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .putMetaValue(WRAPPER_KEY, PLOT_GROUP_WRAPPER_TYPE)
+                    .putMetaValue(WRAPPER_TYPE_KEY, PLOT_GROUP_WRAPPER_TYPE)
                     .putMetaValue("name", group.getName())
                     .putMetaNode(DEFAULT_META_NAME, group.getConfig())
                     .setContentType("wrapper")
@@ -280,29 +282,24 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
         @Override
         public PlotGroup unWrap(Envelope envelope) {
-            checkValidEnvelope(envelope);
+            //checkValidEnvelope(envelope);
             String groupName = envelope.meta().getString("name");
-            Meta groupMeta = envelope.meta().getMeta(DEFAULT_META_NAME);
+            Meta groupMeta = envelope.meta().getMetaOrEmpty(DEFAULT_META_NAME);
             PlotGroup group = new PlotGroup(groupName);
             group.configure(groupMeta);
 
-            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("envelopeType", "default"));
+            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("@envelope.internalType", "default"));
 
             try {
-                //Buffering stream to avoid rebufferization
-                BufferedInputStream dataStream = new BufferedInputStream(envelope.getData().getStream());
+                InputStream dataStream = envelope.getData().getStream();
 
                 while (dataStream.available() > 0) {
                     Envelope item = internalEnvelopeType.getReader().read(dataStream);
-
-                    if (item.meta().getString(WRAPPER_KEY).equals(PLOT_GROUP_WRAPPER_TYPE)) {
-                        group.add(unWrap(item));
-                    } else if (item.meta().getString(WRAPPER_KEY).equals(PLOT_WRAPPER_TYPE)) {
-                        try {
-                            group.add(plotWrapper.unWrap(item));
-                        } catch (Exception ex) {
-                            LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable");
-                        }
+                    try {
+                        Plottable pl = Plottable.class.cast(hep.dataforge.io.envelopes.Wrapper.unwrap(item));
+                        group.add(pl);
+                    } catch (Exception ex) {
+                        LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable", ex);
                     }
                 }
 

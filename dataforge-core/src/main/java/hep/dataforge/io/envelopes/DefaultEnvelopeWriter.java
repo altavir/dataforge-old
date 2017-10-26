@@ -16,15 +16,13 @@
 package hep.dataforge.io.envelopes;
 
 import hep.dataforge.io.MetaStreamWriter;
-import hep.dataforge.values.Value;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.channels.Channels;
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import static hep.dataforge.io.envelopes.DefaultEnvelopeType.SEPARATOR;
@@ -85,37 +83,16 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
         }
         tag.setValue(META_LENGTH_KEY, metaSize);
 
-//        byte[] dataBytes = envelope.getData().array();
-        long dataSize = envelope.getData().size();
-        tag.setValue(DATA_LENGTH_KEY, dataSize);
+        tag.setValue(DATA_LENGTH_KEY, envelope.getData().size());
 
         stream.write(tag.toBytes().array());
-
-        for (Map.Entry<String, Value> entry : tag.getValues().entrySet()) {
-            if (TAG_PROPERTIES.contains(entry.getKey())) {
-            } else {
-                stream.write(String.format("#? %s: %s", entry.getKey(), entry.getValue().stringValue()).getBytes());
-                stream.write(SEPARATOR);
-            }
-        }
 
         stream.write(meta);
         if (meta.length > 0) {
             stream.write(SEPARATOR);
         }
 
-        if (dataSize > 0) {
-            InputStream inputStream = envelope.getData().getStream();
-            for (int i = 0; i < dataSize; i++) {
-                stream.write(inputStream.read());
-            }
-        } else if (dataSize < 0) {
-            InputStream inputStream = envelope.getData().getStream();
-            while (inputStream.available() > 0) {
-                stream.write(inputStream.read());
-            }
-        }
-
+        Channels.newChannel(stream).write(envelope.getData().getBuffer());
     }
 
 }

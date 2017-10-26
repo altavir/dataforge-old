@@ -119,7 +119,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
     }
 
     @Override
-    public void save(OutputStream stream, Meta config) {
+    public void asImage(OutputStream stream, Meta config) {
         //FIXME fix method to actually use parameters
         this.chart.snapshot(new Callback<SnapshotResult, Void>() {
             @Override

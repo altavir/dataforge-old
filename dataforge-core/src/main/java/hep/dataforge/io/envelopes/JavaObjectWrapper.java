@@ -33,7 +33,7 @@ public class JavaObjectWrapper implements Wrapper<Object> {
     public Envelope wrap(Object obj) {
         EnvelopeBuilder builder = new EnvelopeBuilder()
                 .setContentType("wrapper")
-                .putMetaValue(WRAPPER_KEY, JAVA_OBJECT_TYPE)
+                .putMetaValue(WRAPPER_TYPE_KEY, JAVA_OBJECT_TYPE)
                 .putMetaValue(JAVA_CLASS_KEY, obj.getClass().getName());
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         try (ObjectOutputStream stream = new ObjectOutputStream(baos)) {
@@ -47,8 +47,8 @@ public class JavaObjectWrapper implements Wrapper<Object> {
 
     @Override
     public Object unWrap(Envelope envelope) {
-        if (!getName().equals(envelope.meta().getString(WRAPPER_KEY, ""))) {
-            throw new Error("Wrong wrapped type: " + envelope.meta().getString(WRAPPER_KEY, ""));
+        if (!getName().equals(envelope.meta().getString(WRAPPER_TYPE_KEY, ""))) {
+            throw new Error("Wrong wrapped type: " + envelope.meta().getString(WRAPPER_TYPE_KEY, ""));
         }
         try {
             ObjectInputStream stream = new ObjectInputStream(envelope.getData().getStream());

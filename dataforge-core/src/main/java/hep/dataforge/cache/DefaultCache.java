@@ -88,8 +88,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
             return (V) getSoftCache().get(id);
         } else {
             return getFromHardCache(id).map(cacheFile -> {
-                Envelope envelope = reader.read(cacheFile);
-                try (ObjectInputStream ois = new ObjectInputStream(envelope.getData().getStream())) {
+                try (ObjectInputStream ois = new ObjectInputStream(reader.read(cacheFile).getData().getStream())) {
                     V res = (V) ois.readObject();
                     getSoftCache().put(id, res);
                     return res;

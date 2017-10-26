@@ -41,8 +41,9 @@ fun main(args: Array<String>) {
 
 
     val frame = manager.display("test", "before") {
-        add(funcPlot)
         add(dataPlot)
+        //add(DataPlot.plot("dataPlot2", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds))
+        add(funcPlot)
     }
 
     val baos = ByteArrayOutputStream();

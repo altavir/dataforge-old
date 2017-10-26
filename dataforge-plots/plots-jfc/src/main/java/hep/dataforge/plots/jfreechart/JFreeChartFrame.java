@@ -348,7 +348,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
      * @param cfg
      */
     @Override
-    public synchronized void save(OutputStream stream, Meta cfg) {
+    public synchronized void asImage(OutputStream stream, Meta cfg) {
         new Thread(() -> {
             try {
                 new SunPNGEncoderAdapter().encode(chart.createBufferedImage(cfg.getInt("width", 800), cfg.getInt("height", 600)), stream);
@@ -381,6 +381,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         this.index.clear();
     }
 
+    @NotNull
     private Object writeReplace() throws ObjectStreamException {
         return new PlotFrameEnvelope(wrapper.wrap(this));
     }

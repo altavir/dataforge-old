@@ -90,7 +90,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
         Element res = doc.createElement(normalizeName(elementName));
 
 
-        meta.getValueNames().forEach(valueName -> {
+        meta.getValueNames(true).forEach(valueName -> {
             List<Value> valueList = meta.getValue(valueName).listValue();
             if (valueList.size() == 1) {
                 res.setAttribute(normalizeName(valueName), valueList.get(0).stringValue());
@@ -103,7 +103,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             }
         });
 
-        meta.getNodeNames().forEach(nodeName -> {
+        meta.getNodeNames(true).forEach(nodeName -> {
             List<? extends Meta> elementList = meta.getMetaList(nodeName);
             if (elementList.size() == 1) {
                 Element el = getXMLElement(elementList.get(0), doc);
