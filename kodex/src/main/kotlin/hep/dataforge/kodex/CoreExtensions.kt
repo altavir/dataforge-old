@@ -1,5 +1,6 @@
 package hep.dataforge.kodex
 
+import hep.dataforge.context.Context
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
@@ -111,6 +112,9 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
     this.configure(hep.dataforge.kodex.buildMeta(this.config.name, transform));
     return this;
 }
+
+val Context.coroutineContext: CoroutineContext
+    get() = optFeature(KodexPlugin::class.java).map { it.dispatcher }.orElse(CommonPool)
 
 /**
  * Use goal as a suspending function

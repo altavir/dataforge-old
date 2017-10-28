@@ -1,5 +1,6 @@
 package hep.dataforge.kodex
 
+import hep.dataforge.context.Context
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.GoalGroup
 import hep.dataforge.goals.GoalListener
@@ -14,11 +15,12 @@ import kotlin.coroutines.experimental.CoroutineContext
 
 /**
  * Coroutine implementation of Goal
+ * @param id - string id of the Coal
  * @param deps - dependency goals
  * @param dispatcher custom coroutine dispatcher. By default common pool
  * @param block execution block. Could be suspending
  */
-class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatcher: CoroutineContext = CommonPool, block: suspend () -> R) : Goal<R> {
+class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatcher: CoroutineContext = CommonPool, val id: String = "", block: suspend () -> R) : Goal<R> {
     //TODO add Context based CoroutineContext object
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
@@ -27,6 +29,9 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
         try {
             //TODO add try-catch for listeners response
             listeners.forEach { it.onGoalStart() }
+            if (!id.isEmpty()) {
+                Thread.currentThread().name = "Goal:$id"
+            }
             val res = block.invoke()
             listeners.forEach { it.onGoalComplete(res) }
             return@async res
@@ -91,6 +96,10 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
 }
 
 
+fun <R> Context.coal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
+    return Coal<R>(deps, coroutineContext, id, block);
+}
+
 /**
  * Join a uniform list of goals
  */
@@ -115,7 +124,7 @@ fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext = CommonPo
  * Create a simple generator Coal (no dependencies)
  */
 fun <R> generate(dispatcher: CoroutineContext = CommonPool, block: suspend () -> R): Coal<R> {
-    return Coal<R>(Collections.emptyList(), dispatcher, block);
+    return Coal<R>(Collections.emptyList(), dispatcher, "", block);
 }
 
 /**
