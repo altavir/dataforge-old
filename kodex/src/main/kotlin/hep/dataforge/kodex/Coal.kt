@@ -52,6 +52,11 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
         deferred.start();
     }
 
+    override fun start(): Coal<R> {
+        run()
+        return this
+    }
+
     override fun get(): R {
         run()
         return runBlocking { deferred.await() }
