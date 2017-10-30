@@ -53,7 +53,10 @@ public class LogFragment extends FXFragment implements AutoCloseable {
 
         FXUtils.runNow(() -> {
             Instant time = Instant.ofEpochMilli(eventObject.getTimeStamp());
-            pane.appendColored(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ", "gray");
+            pane.append(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ");
+
+            pane.appendColored(eventObject.getLoggerName(),"gray");
+
             pane.appendStyled(eventObject.getFormattedMessage().replace("\n", "\n\t") + "\r\n", style);
         });
 

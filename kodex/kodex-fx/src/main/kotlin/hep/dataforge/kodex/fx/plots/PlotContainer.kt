@@ -198,14 +198,14 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
                 dividers[0].position = 1.0
 
-                dividers[0].positionProperty().addListener { _, _, newValue ->
-                    if (newValue.toDouble() < 0.9) {
-                        sideBarPositionProperty.set(newValue.toDouble())
+                dividers[0].positionProperty().onChange {
+                    if (it.toDouble() < 0.9) {
+                        sideBarPositionProperty.set(it.toDouble())
                     }
-                    sideBarExpanded = newValue.toDouble() < 0.99
+                    sideBarExpanded = it.toDouble() < 0.99
                 }
 
-                this@borderpane.widthProperty().addListener { observable, oldValue, newValue ->
+                this@borderpane.widthProperty().onChange {
                     if(sideBarExpanded){
                         dividers[0].position = sideBarPoistion
                     } else{
