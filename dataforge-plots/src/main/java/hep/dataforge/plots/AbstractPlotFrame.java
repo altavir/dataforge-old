@@ -19,13 +19,14 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Optional;
 
 /**
  * @author Alexander Nozik
  */
-public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame {
+public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame, PlotStateListener {
 
     private PlotGroup root = new PlotGroup("");
 
@@ -56,17 +57,12 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         });
     }
 
-    @Override
-    public synchronized void add(Plottable plot) {
-        root.add(plot);
-    }
-
     /**
      * Reload data for plottable with given name.
      *
      * @param name
      */
-    protected abstract void updatePlotData(String name, Plot plot);
+    protected abstract void updatePlotData(String name, @Nullable Plot plot);
 
     /**
      * Reload an annotation for given plottable.
@@ -89,12 +85,10 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
 
     @Override
     public void notifyGroupChanged(String name) {
-        Optional<Plot> plt = opt(name);
-        if (plt.isPresent()) {
-            updatePlotData(name, plt.get());
+        Plot plt = opt(name).orElse(null);
+        updatePlotData(name, plt);
+        if (plt != null) {
             notifyConfigurationChanged(name);
-        } else {
-            root.remove(name);
         }
     }
 }

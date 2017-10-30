@@ -69,7 +69,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected AbstractStorage(Context context, Meta meta) {
         super(meta);
-        this.name = meta.getString("name", "root");
+        this.name = meta.getString("name", "");
         this.context = context;
         this.parent = null;
         connectionHelper = new ConnectionHelper(this, context.getLogger());

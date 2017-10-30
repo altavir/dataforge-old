@@ -37,7 +37,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
  * @author Alexander Nozik
  */
 @ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
-public interface PlotFrame extends PlotStateListener, Configurable, Serializable {
+public interface PlotFrame extends Configurable, Serializable {
 
     Wrapper wrapper = new Wrapper();
 
@@ -53,7 +53,9 @@ public interface PlotFrame extends PlotStateListener, Configurable, Serializable
      *
      * @param plotable
      */
-    void add(Plottable plotable);
+    default void add(Plottable plotable){
+        getPlots().add(plotable);
+    }
 
     /**
      * Add (replace) all plottables to the frame

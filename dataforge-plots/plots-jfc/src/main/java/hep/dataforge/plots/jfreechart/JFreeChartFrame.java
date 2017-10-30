@@ -65,7 +65,7 @@ import java.util.stream.Collectors;
 public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializable {
 
     private final JFreeChart chart;
-    private final XYPlot plot;
+    private final XYPlot xyPlot;
 
     /**
      * Index mapping names to datasets
@@ -82,8 +82,8 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     public JFreeChartFrame(Meta frameMeta) {
-        plot = new XYPlot();
-        chart = new JFreeChart(plot);
+        xyPlot = new XYPlot();
+        chart = new JFreeChart(xyPlot);
         configure(frameMeta);
     }
 
@@ -196,33 +196,33 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
             switch (axisName) {
                 case "x":
-                    plot.setDomainAxis(axis);
+                    xyPlot.setDomainAxis(axis);
                     switch (crosshair) {
                         case "free":
-                            plot.setDomainCrosshairVisible(true);
-                            plot.setDomainCrosshairLockedOnData(false);
+                            xyPlot.setDomainCrosshairVisible(true);
+                            xyPlot.setDomainCrosshairLockedOnData(false);
                             break;
                         case "data":
-                            plot.setDomainCrosshairVisible(true);
-                            plot.setDomainCrosshairLockedOnData(true);
+                            xyPlot.setDomainCrosshairVisible(true);
+                            xyPlot.setDomainCrosshairLockedOnData(true);
                             break;
                         case "none":
-                            plot.setDomainCrosshairVisible(false);
+                            xyPlot.setDomainCrosshairVisible(false);
                     }
                     break;
                 case "y":
-                    plot.setRangeAxis(axis);
+                    xyPlot.setRangeAxis(axis);
                     switch (crosshair) {
                         case "free":
-                            plot.setRangeCrosshairVisible(true);
-                            plot.setRangeCrosshairLockedOnData(false);
+                            xyPlot.setRangeCrosshairVisible(true);
+                            xyPlot.setRangeCrosshairLockedOnData(false);
                             break;
                         case "data":
-                            plot.setRangeCrosshairVisible(true);
-                            plot.setRangeCrosshairLockedOnData(true);
+                            xyPlot.setRangeCrosshairVisible(true);
+                            xyPlot.setRangeCrosshairLockedOnData(true);
                             break;
                         case "none":
-                            plot.setRangeCrosshairVisible(false);
+                            xyPlot.setRangeCrosshairVisible(false);
                     }
                     break;
                 default:
@@ -245,7 +245,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         run(() -> {
             if (legendMeta.getBoolean("show", true)) {
                 if (chart.getLegend() == null) {
-                    chart.addLegend(new LegendTitle(plot));
+                    chart.addLegend(new LegendTitle(xyPlot));
                 }
             } else {
                 chart.removeLegend();
@@ -267,18 +267,25 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
     @Override
     protected synchronized void updatePlotData(String name, Plot plot) {
-        if (!index.containsKey(name)) {
+        if (plot == null) {
+            int num = Optional.ofNullable(index.get(name)).map(JFCDataWrapper::getIndex).orElse(-1);
+            if (num >= 0) {
+                run(() -> xyPlot.setDataset(num, null));
+            }
+            index.remove(name);
+
+        } else if (!index.containsKey(name)) {
             JFCDataWrapper wrapper = new JFCDataWrapper(plot);
             wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
             index.put(name, wrapper);
             run(() -> {
-                this.plot.setDataset(wrapper.getIndex(), wrapper);
+                this.xyPlot.setDataset(wrapper.getIndex(), wrapper);
             });
         } else {
             JFCDataWrapper wrapper = index.get(name);
             wrapper.setPlot(plot);
             wrapper.invalidateData();
-            run(() -> this.plot.datasetChanged(new DatasetChangeEvent(this.plot, wrapper)));
+            run(() -> this.xyPlot.datasetChanged(new DatasetChangeEvent(this.xyPlot, wrapper)));
         }
     }
 
@@ -330,7 +337,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         render.setSeriesVisible(0, visible);
 
         run(() -> {
-            plot.setRenderer(index.get(name).getIndex(), render);
+            xyPlot.setRenderer(index.get(name).getIndex(), render);
 
             // update cache to default colors
             Paint paint = render.lookupSeriesPaint(0);
@@ -359,27 +366,18 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    public synchronized void remove(String plotName) {
-        super.remove(plotName);
-        run(() -> {
-            Optional.ofNullable(index.get(plotName)).map(JFCDataWrapper::getIndex).ifPresent(it -> plot.setDataset(it, null));
-        });
-        index.remove(plotName);
-    }
-
-    @Override
     public Optional<Value> getActualColor(String name) {
         return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.awtColorToString(color)));
     }
 
-    @Override
-    public synchronized void clear() {
-        super.clear();
-        index.values().forEach(wr -> {
-            plot.setDataset(wr.getIndex(), null);
-        });
-        this.index.clear();
-    }
+//    @Override
+//    public synchronized void clear() {
+//        super.clear();
+//        index.values().forEach(wr -> {
+//            xyPlot.setDataset(wr.getIndex(), null);
+//        });
+//        this.index.clear();
+//    }
 
     @NotNull
     private Object writeReplace() throws ObjectStreamException {
