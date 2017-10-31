@@ -90,8 +90,10 @@ public class XYAdapter extends AxisValuesAdapter {
         this(xName, null, yName, yErrName);
     }
 
-    public XYAdapter(String xName, String yName) {
-        this(xName, null, yName, null);
+    public XYAdapter(String xName, String... yName) {
+        this(new MetaBuilder(ValuesAdapter.ADAPTER_KEY)
+                .setValue(X_VALUE_KEY, xName)
+                .setValue(Y_VALUE_KEY, yName));
     }
 
     private void updateCache() {

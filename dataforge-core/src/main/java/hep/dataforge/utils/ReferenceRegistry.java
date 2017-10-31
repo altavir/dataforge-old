@@ -5,22 +5,17 @@
  */
 package hep.dataforge.utils;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
-import java.util.AbstractCollection;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 /**
  * A registry of listener references. References could be weak to allow GC to
  * finilize referenced objects.
- *
- *
  *
  * @author Alexander Nozik
  */
@@ -34,7 +29,6 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
 
     /**
      * Listeners could be added either as strong references or weak references.
-     *
      *
      * @param obj
      */
@@ -65,11 +59,7 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
         strongRegistry.remove(obj);
         Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
 
-        if (reference != null) {
-            return weakRegistry.remove(reference);
-        } else {
-            return false;
-        }
+        return reference != null && weakRegistry.remove(reference);
     }
 
     /**
@@ -79,23 +69,13 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
         weakRegistry.removeIf(ref -> ref.get() == null);
     }
 
+    @NotNull
     @Override
     public synchronized Iterator<T> iterator() {
         cleanUp();
-        //FIXME concurrency problem here?
-        final Iterator<Reference<T>> referenceIterator = weakRegistry.iterator();
-        return new Iterator<T>() {
-            @Override
-            public boolean hasNext() {
-                return referenceIterator.hasNext();
-            }
-
-            @Override
-            public T next() {
-                return referenceIterator.next().get();
-            }
-        };
+        return weakRegistry.stream().map(Reference::get).filter(Objects::nonNull).iterator();
     }
+
 
     @Override
     public int size() {
@@ -104,14 +84,14 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
 
     public Optional<T> findFirst(Predicate<T> predicate) {
         return this.weakRegistry.stream()
-                .map(ref -> ref.get())
+                .map(Reference::get)
                 .filter((t) -> t != null && predicate.test(t))
                 .findFirst();
     }
 
     public List<T> findAll(Predicate<T> predicate) {
         return this.weakRegistry.stream()
-                .map(ref -> ref.get())
+                .map(Reference::get)
                 .filter((t) -> t != null && predicate.test(t))
                 .collect(Collectors.toList());
     }

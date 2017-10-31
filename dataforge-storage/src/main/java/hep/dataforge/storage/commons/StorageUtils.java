@@ -22,8 +22,8 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.storage.api.Loader;
-import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
@@ -50,7 +50,7 @@ public class StorageUtils {
 //    }
 
     public static String loaderType(Meta loaderAnnotation) {
-        return loaderAnnotation.getString(LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
+        return loaderAnnotation.getString(LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
     }
 
     public static String shelfName(Meta shelfAnnotation) {

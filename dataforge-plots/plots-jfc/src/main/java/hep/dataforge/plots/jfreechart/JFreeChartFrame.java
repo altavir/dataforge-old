@@ -264,17 +264,19 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 //        });
     }
 
+    @Override
+    protected void removePlot(String name) {
+        int num = Optional.ofNullable(index.get(name)).map(JFCDataWrapper::getIndex).orElse(-1);
+        if (num >= 0) {
+            run(() -> xyPlot.setDataset(num, null));
+        }
+        index.remove(name);
+        super.removePlot(name);
+    }
 
     @Override
     protected synchronized void updatePlotData(String name, Plot plot) {
-        if (plot == null) {
-            int num = Optional.ofNullable(index.get(name)).map(JFCDataWrapper::getIndex).orElse(-1);
-            if (num >= 0) {
-                run(() -> xyPlot.setDataset(num, null));
-            }
-            index.remove(name);
-
-        } else if (!index.containsKey(name)) {
+        if (!index.containsKey(name)) {
             JFCDataWrapper wrapper = new JFCDataWrapper(plot);
             wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
             index.put(name, wrapper);

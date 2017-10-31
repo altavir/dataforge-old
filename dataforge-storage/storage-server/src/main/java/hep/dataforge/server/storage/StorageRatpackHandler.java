@@ -58,11 +58,11 @@ public class StorageRatpackHandler implements Handler {
                 case EventLoader.EVENT_LOADER_TYPE:
                     renderEvents(ctx, (EventLoader) loader);
                     return;
-                case PointLoader.POINT_LOADER_TYPE:
+                case TableLoader.POINT_LOADER_TYPE:
                     if ("pull".equals(ctx.getRequest().getQueryParams().get("action"))) {
-                        new PointLoaderDataHandler((PointLoader) loader).handle(ctx);
+                        new PointLoaderDataHandler((TableLoader) loader).handle(ctx);
                     } else {
-                        renderPoints(ctx, (PointLoader) loader);
+                        renderPoints(ctx, (TableLoader) loader);
                     }
                     return;
                 case ObjectLoader.OBJECT_LOADER_TYPE:
@@ -136,7 +136,7 @@ public class StorageRatpackHandler implements Handler {
         defaultRenderLoader(ctx, loader);
     }
 
-    protected MetaBuilder pointLoaderPlotOptions(PointLoader loader) {
+    protected MetaBuilder pointLoaderPlotOptions(TableLoader loader) {
         return new MetaBuilder("options")
                 .putValue("width", "90%")
                 .putValue("height", 500)
@@ -146,7 +146,7 @@ public class StorageRatpackHandler implements Handler {
                 );
     }
 
-    protected void renderPoints(Context ctx, PointLoader loader) {
+    protected void renderPoints(Context ctx, TableLoader loader) {
         try {
             ctx.getResponse().contentType("text/html");
 //            Template template = Utils.freemarkerConfig().getTemplate("PointLoaderTemplate.ftl");

@@ -61,7 +61,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected AbstractStorage(@NotNull Storage parent, String name, Meta meta) {
         super(new Laminate(meta, parent.getMeta()));
-        this.name = name;
+        this.name = name.replace(".","_");
         this.parent = parent;
         context = parent.getContext();
         connectionHelper = new ConnectionHelper(this, context.getLogger());
@@ -69,7 +69,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected AbstractStorage(Context context, Meta meta) {
         super(meta);
-        this.name = meta.getString("name", "");
+        this.name = meta.getString("name", "").replace(".","_");
         this.context = context;
         this.parent = null;
         connectionHelper = new ConnectionHelper(this, context.getLogger());

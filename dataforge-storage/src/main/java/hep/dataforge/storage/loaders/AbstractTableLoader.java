@@ -21,8 +21,8 @@ import hep.dataforge.exceptions.WrongTargetException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
@@ -39,12 +39,12 @@ import static hep.dataforge.storage.commons.StorageMessageUtils.*;
 /**
  * @author Alexander Nozik
  */
-public abstract class AbstractPointLoader extends AbstractLoader implements PointLoader {
+public abstract class AbstractTableLoader extends AbstractLoader implements TableLoader {
 
     protected final Set<PointListener> listeners = new HashSet<>();
     private HashMap<String, ValueIndex<Values>> indexMap = new HashMap<>();
 
-    public AbstractPointLoader(Storage storage, String name, Meta meta) {
+    public AbstractTableLoader(Storage storage, String name, Meta meta) {
         super(storage, name, meta);
     }
 

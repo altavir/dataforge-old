@@ -6,7 +6,7 @@
 package hep.dataforge.server.storage;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.storage.api.PointLoader;
+import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
@@ -23,9 +23,9 @@ public class PointLoaderDataHandler extends GoogleDataHandler {
 
 //    private static DateTimeFormatter formatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME.withZone(ZoneId.systemDefault());
 
-    private final PointLoader loader;
+    private final TableLoader loader;
 
-    public PointLoaderDataHandler(PointLoader loader) {
+    public PointLoaderDataHandler(TableLoader loader) {
         this.loader = loader;
     }
 

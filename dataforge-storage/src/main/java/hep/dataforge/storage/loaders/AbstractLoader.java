@@ -22,8 +22,8 @@ import hep.dataforge.exceptions.PushFailedException;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Loader;
-import hep.dataforge.storage.api.PointLoader;
 import hep.dataforge.storage.api.Storage;
+import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.commons.StorageUtils;
 
 import static hep.dataforge.storage.commons.AbstractStorage.LOADER_TARGET;
@@ -100,7 +100,7 @@ public abstract class AbstractLoader implements Loader {
 
     @Override
     public String getType() {
-        return meta().getString(LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
+        return meta().getString(LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
     }
 
     protected void tryPush() throws PushFailedException {

@@ -19,7 +19,7 @@ import hep.dataforge.meta.Configuration;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Name;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -62,7 +62,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
      *
      * @param name
      */
-    protected abstract void updatePlotData(String name, @Nullable Plot plot);
+    protected abstract void updatePlotData(String name, @NotNull Plot plot);
 
     /**
      * Reload an annotation for given plottable.
@@ -83,12 +83,28 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         );
     }
 
+    /**
+     * Actually remove plot
+     *
+     * @param name
+     */
+    protected void removePlot(String name) {
+
+    }
+
     @Override
     public void notifyGroupChanged(String name) {
-        Plot plt = opt(name).orElse(null);
-        updatePlotData(name, plt);
-        if (plt != null) {
+        Plottable plt = getPlots().opt(name).orElse(null);
+        if (plt == null) {
+            removePlot(name);
+        } else if (plt instanceof PlotGroup) {
+            plt.getChildren().forEach(child -> {
+                notifyGroupChanged(Name.joinString(name, child.getName()));
+            });
+        } else if (plt instanceof Plot) {
+            updatePlotData(name, (Plot) plt);
             notifyConfigurationChanged(name);
         }
     }
+
 }

@@ -242,8 +242,8 @@ public class FileStorage extends AbstractStorage {
     protected Loader buildLoader(Path file) throws Exception {
         try (FileEnvelope envelope = FileEnvelope.open(file, isReadOnly())) {
             switch (envelope.meta().getString("type", "")) {
-                case PointLoader.POINT_LOADER_TYPE:
-                    return FilePointLoader.fromEnvelope(this, envelope);
+                case TableLoader.POINT_LOADER_TYPE:
+                    return FileTableLoader.fromEnvelope(this, envelope);
                 case EventLoader.EVENT_LOADER_TYPE:
                     return FileEventLoader.fromEnvelope(this, envelope);
                 case StateLoader.STATE_LOADER_TYPE:
@@ -277,7 +277,7 @@ public class FileStorage extends AbstractStorage {
 
     protected Loader buildLoaderByType(String loaderName, Meta loaderConfiguration, String type) throws StorageException {
         switch (type) {
-            case PointLoader.POINT_LOADER_TYPE:
+            case TableLoader.POINT_LOADER_TYPE:
                 return createNewFileLoader(loaderName, loaderConfiguration, ".points");
             case StateLoader.STATE_LOADER_TYPE:
                 return createNewFileLoader(loaderName, loaderConfiguration, ".state");

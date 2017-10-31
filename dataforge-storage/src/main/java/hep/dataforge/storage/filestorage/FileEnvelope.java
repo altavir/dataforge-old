@@ -124,7 +124,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     public FileBinary getData() {
         try {
             long dataSize = getTag().getDataSize();
-            if (dataSize == INFINITE_DATA_SIZE) {
+            if (dataSize <= 0) {
                 dataSize = getReadChannel().size() - getDataOffset();
             }
             //getRandomAccess().seek(getDataOffset());

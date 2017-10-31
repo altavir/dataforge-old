@@ -33,7 +33,7 @@ import java.util.Collection;
  */
 @NodeDef(name = "format", required = true, info = "data point format for this loader")
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
-public interface PointLoader extends Loader, PointSource {
+public interface TableLoader extends Loader, PointSource {
 
     String POINT_LOADER_TYPE = "point";
     String DEFAULT_INDEX_FIELD = "";

@@ -14,7 +14,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.storage.commons.DefaultIndex;
-import hep.dataforge.storage.loaders.AbstractPointLoader;
+import hep.dataforge.storage.loaders.AbstractTableLoader;
 import hep.dataforge.tables.MetaTableFormat;
 import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.SimpleParser;
@@ -34,11 +34,11 @@ import java.util.function.Supplier;
 /**
  * @author Alexander Nozik
  */
-public class FilePointLoader extends AbstractPointLoader {
+public class FileTableLoader extends AbstractTableLoader {
 
-    public static FilePointLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
+    public static FileTableLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
         if (FileStorageEnvelopeType.validate(envelope, POINT_LOADER_TYPE)) {
-            FilePointLoader res = new FilePointLoader(storage,
+            FileTableLoader res = new FileTableLoader(storage,
                     FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta(),
                     envelope.getFile());
@@ -59,7 +59,7 @@ public class FilePointLoader extends AbstractPointLoader {
      */
     private FileEnvelope envelope;
 
-    public FilePointLoader(Storage storage, String name, Meta meta, Path path) {
+    public FileTableLoader(Storage storage, String name, Meta meta, Path path) {
         super(storage, name, meta);
         this.path = path;
     }
@@ -208,12 +208,16 @@ public class FilePointLoader extends AbstractPointLoader {
 
         @Override
         protected String indexFileName() {
-            return getStorage().getName() + "/index_" + getName() + "_" + valueName;
+            if (getStorage().isAnonimous()) {
+                return getName() + "_" + valueName;
+            } else {
+                return getStorage().getName() + "/" + getName() + "_" + valueName;
+            }
         }
 
         @Override
         protected Values readEntry(String str) {
-            return FilePointLoader.this.transform(str);
+            return FileTableLoader.this.transform(str);
         }
 
     }

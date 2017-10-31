@@ -23,10 +23,12 @@ import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
+import hep.dataforge.names.AlphanumComparator;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;
@@ -43,7 +45,7 @@ import java.util.Optional;
  * @author Darksnake
  */
 @AnonymousNotAlowed
-public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, ContextAware, AutoConnectible {
+public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, ContextAware, AutoConnectible, Comparable<Named> {
     //TODO consider removing dispatcher to helper classes
 
     String LOADER_TARGET = "loader";
@@ -192,5 +194,10 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
                 return parentPath + "." + getName();
             }
         }
+    }
+
+    @Override
+    default int compareTo(@NotNull Named o) {
+        return AlphanumComparator.INSTANCE.compare(this.getName(), o.getName());
     }
 }

@@ -6,7 +6,7 @@
 package hep.dataforge.control.connections;
 
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.storage.api.PointLoader;
+import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
@@ -16,9 +16,9 @@ import org.slf4j.LoggerFactory;
  */
 public class LoaderConnection implements PointListenerConnection {
 
-    private final PointLoader loader;
+    private final TableLoader loader;
 
-    public LoaderConnection(PointLoader loader) {
+    public LoaderConnection(TableLoader loader) {
         this.loader = loader;
     }
 

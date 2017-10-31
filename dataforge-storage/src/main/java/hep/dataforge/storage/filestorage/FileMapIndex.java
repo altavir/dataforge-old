@@ -181,6 +181,9 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
         Path indexFile = getIndexFile();
         try {
             LoggerFactory.getLogger(getClass()).info("Saving index to file...");
+            if(!Files.exists(indexFile.getParent())){
+                Files.createDirectories(indexFile.getParent());
+            }
             try (ObjectOutputStream ous = new ObjectOutputStream(Files.newOutputStream(indexFile, WRITE, CREATE, TRUNCATE_EXISTING))) {
                 ous.writeLong(indexedSize);
                 map.forEach((value, integers) -> {

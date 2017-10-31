@@ -21,17 +21,18 @@ import hep.dataforge.events.EventHandler;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
+import hep.dataforge.names.AlphanumComparator;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Path;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * A typed loader.
  *
- *
  * @author Alexander Nozik
  */
 @RoleDef(name = "eventListener", objectType = EventHandler.class, info = "Handle events produced by this loader")
-public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoConnectible {
+public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoConnectible, Comparable<Named> {
 
     String LOADER_NAME_KEY = "name";
     String LOADER_TYPE_KEY = "type";
@@ -57,7 +58,7 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
     String getType();
 
     boolean isReadOnly();
-    
+
     boolean isOpen();
 
     void open() throws Exception;
@@ -72,7 +73,17 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
      * @return
      */
     default String getPath() {
-        return getStorage().getFullPath() + Path.PATH_SEGMENT_SEPARATOR + getName();
+        if (getStorage().isAnonimous()) {
+            return getName();
+        } else {
+            return getStorage().getFullPath() + Path.PATH_SEGMENT_SEPARATOR + getName();
+        }
     }
     //TODO add getRelativePath method
+
+
+    @Override
+    default int compareTo(@NotNull Named o) {
+        return AlphanumComparator.INSTANCE.compare(this.getName(), o.getName());
+    }
 }

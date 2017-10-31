@@ -41,7 +41,7 @@ public class LoaderFactory {
             builder.putValue("index", indexField);
         }
 
-        builder.putValue(Loader.LOADER_TYPE_KEY, PointLoader.POINT_LOADER_TYPE);
+        builder.putValue(Loader.LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
 
         if (format != null) {
             builder.putNode(format.toMeta());
@@ -72,9 +72,9 @@ public class LoaderFactory {
      * @return
      * @throws StorageException
      */
-    public static PointLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, TableFormat format)
+    public static TableLoader buildPointLoder(Storage storage, String loaderName, String shelfName, String indexField, TableFormat format)
             throws StorageException {
-        return (PointLoader) findShelf(storage, shelfName).buildLoader(loaderName, buildDataPointLoaderMeta(indexField, format));
+        return (TableLoader) findShelf(storage, shelfName).buildLoader(loaderName, buildDataPointLoaderMeta(indexField, format));
     }
 
     /**

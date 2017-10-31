@@ -175,7 +175,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         } else {
             return opt(name.cutLast()).flatMap(plot -> {
                 if (plot instanceof PlotGroup) {
-                    return ((PlotGroup) plot).opt(name);
+                    return ((PlotGroup) plot).opt(name.getLast());
                 } else {
                     return Optional.empty();
                 }
