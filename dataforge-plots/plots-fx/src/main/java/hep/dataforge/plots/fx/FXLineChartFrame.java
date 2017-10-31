@@ -30,6 +30,7 @@ import javafx.scene.chart.LineChart;
 import javafx.scene.chart.NumberAxis;
 import javafx.scene.chart.XYChart;
 import javafx.util.Callback;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import javax.imageio.ImageIO;
@@ -75,7 +76,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
     }
 
     @Override
-    protected void updatePlotData(String name, Plot plot) {
+    protected void updatePlotData(String name, @NotNull Plot plot) {
         XYChart.Series<Number, Number> series = getSeries(name);
 
         if (series == null) {

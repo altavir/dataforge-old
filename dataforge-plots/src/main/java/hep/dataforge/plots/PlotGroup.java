@@ -98,8 +98,13 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             );
         } else {
             return opt(path.getFirst())
-                    .flatMap(group -> getPlotMeta(path.cutFirst()))
-                    .map(laminate -> laminate.withFirstLayer(getConfig()));
+                    .flatMap(group -> {
+                        if (group instanceof PlotGroup) {
+                            return ((PlotGroup) group).getPlotMeta(path.cutFirst());
+                        } else {
+                            return Optional.empty();
+                        }
+                    }).map(laminate -> laminate.withFirstLayer(getConfig()));
         }
     }
 
@@ -207,7 +212,6 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         listeners.forEach(l -> l.notifyConfigurationChanged(getName()));
     }
 
-    @Override
     public Collection<Plottable> getChildren() {
         return plots.values();
     }

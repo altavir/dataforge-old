@@ -8,6 +8,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -23,7 +24,7 @@ public class GnuPlotFrame extends XYPlotFrame {
     private GNUPlotTerminal terminal;
 
     @Override
-    protected void updatePlotData(String name, Plot plot) {
+    protected void updatePlotData(String name, @NotNull Plot plot) {
         plots.computeIfAbsent(name, str -> {
             DataSetPlot dpl = new DataSetPlot(new PlottableDataSet(plot));
             javaPlot.addPlot(dpl);

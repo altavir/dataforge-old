@@ -16,6 +16,8 @@
 package hep.dataforge.plots.demo
 
 import hep.dataforge.kodex.fx.plots.PlotManager
+import hep.dataforge.kodex.fx.plots.group
+import hep.dataforge.kodex.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
@@ -52,16 +54,18 @@ fun main(args: Array<String>) {
     manager.startGlobal();
 
     manager.display("test", "testLog") {
-        add(funcPlot)
+        plot(funcPlot)
         config.setNode(MetaBuilder("yAxis").putValue("type", "log"))
-        add(dataPlot)
+        plot(dataPlot)
     }
     manager.display("test", "test") {
-        add(funcPlot)
-        add(dataPlot)
+        group("sub") {
+            plot(funcPlot)
+            plot(dataPlot)
+        }
     }
     manager.display("test1") {
-        add(funcPlot)
+        plot(funcPlot)
     }
 
 }

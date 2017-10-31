@@ -275,14 +275,12 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    protected synchronized void updatePlotData(String name, Plot plot) {
+    protected synchronized void updatePlotData(String name, @NotNull Plot plot) {
         if (!index.containsKey(name)) {
             JFCDataWrapper wrapper = new JFCDataWrapper(plot);
             wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
             index.put(name, wrapper);
-            run(() -> {
-                this.xyPlot.setDataset(wrapper.getIndex(), wrapper);
-            });
+            run(() -> this.xyPlot.setDataset(wrapper.getIndex(), wrapper));
         } else {
             JFCDataWrapper wrapper = index.get(name);
             wrapper.setPlot(plot);

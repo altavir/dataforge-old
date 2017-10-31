@@ -5,9 +5,6 @@ import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 
-import java.util.Collection;
-import java.util.Collections;
-
 public interface Plottable extends Named, Metoid, Configurable, Described {
     /**
      * Add plottable state listener
@@ -22,8 +19,4 @@ public interface Plottable extends Named, Metoid, Configurable, Described {
      * @param listener
      */
     void removeListener(PlotStateListener listener);
-
-    default Collection<Plottable> getChildren(){
-        return Collections.emptyList();
-    }
 }

@@ -68,6 +68,8 @@ infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
 }
 
 
+
+
 //fun TableView<Values>.table(table: Table){
 //
 //}

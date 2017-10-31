@@ -206,9 +206,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                 }
 
                 this@borderpane.widthProperty().onChange {
-                    if(sideBarExpanded){
+                    if (sideBarExpanded) {
                         dividers[0].position = sideBarPoistion
-                    } else{
+                    } else {
                         dividers[0].position = 1.0
                     }
                 }
@@ -263,21 +263,24 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         }
     }
 
-    private class PlotTreeItem(plot: Plottable, graphics: Node? = null) : TreeItem<Plottable>(plot, graphics), PlotStateListener {
+    private class PlotTreeItem(plot: Plottable, graphics: Node? = null) : TreeItem<Plottable>(plot, graphics) {
         init {
-            children.setAll(value.children.map { PlotTreeItem(it) })
-            plot.addListener(this)
+            (value as? PlotGroup)?.let { plt ->
+                children.setAll(plt.children.map { PlotTreeItem(it) })
+                plot.addListener { name ->
+                    if (Name.of(name).length() == 1) {
+                        (value as? PlotGroup)?.let { plt ->
+                            children.setAll(plt.children.map { PlotTreeItem(it) })
+                        }
+                    }
+                }
+            }
+
             isExpanded = true
         }
 
         override fun isLeaf(): Boolean {
             return value !is PlotGroup
-        }
-
-        override fun notifyGroupChanged(name: String?) {
-            if (Name.of(name).length() == 1) {
-                runLater { children.setAll(value.children.map { PlotTreeItem(it) }) }
-            }
         }
 
         fun sort() {

@@ -98,7 +98,7 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
         if (plt == null) {
             removePlot(name);
         } else if (plt instanceof PlotGroup) {
-            plt.getChildren().forEach(child -> {
+            ((PlotGroup) plt).getChildren().forEach(child -> {
                 notifyGroupChanged(Name.joinString(name, child.getName()));
             });
         } else if (plt instanceof Plot) {
