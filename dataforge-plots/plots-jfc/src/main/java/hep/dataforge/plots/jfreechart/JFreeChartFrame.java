@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.XYPlotFrame;
@@ -265,13 +266,13 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    protected void removePlot(String name) {
-        int num = Optional.ofNullable(index.get(name)).map(JFCDataWrapper::getIndex).orElse(-1);
+    public void plotRemoved(Name name) {
+        String plotName = name.toString();
+        int num = Optional.ofNullable(index.get(plotName)).map(JFCDataWrapper::getIndex).orElse(-1);
         if (num >= 0) {
             run(() -> xyPlot.setDataset(num, null));
         }
-        index.remove(name);
-        super.removePlot(name);
+        index.remove(plotName);
     }
 
     @Override

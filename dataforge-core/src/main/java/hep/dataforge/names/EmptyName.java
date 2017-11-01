@@ -38,7 +38,7 @@ class EmptyName implements Name {
     }
 
     @Override
-    public int length() {
+    public int getLength() {
         return 0;
     }
 

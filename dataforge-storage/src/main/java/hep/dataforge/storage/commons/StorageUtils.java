@@ -230,7 +230,7 @@ public class StorageUtils {
      * @return
      */
     public static Storage buildPath(Storage storage, Name path) {
-        if (path.length() == 0) {
+        if (path.getLength() == 0) {
             return storage;
         } else {
             return buildPath(getOrBuildShelf(storage, path.getFirst().toString(), Meta.empty()), path.cutFirst());

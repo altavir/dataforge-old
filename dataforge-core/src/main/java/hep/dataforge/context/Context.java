@@ -237,7 +237,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         return historyCache.computeIfAbsent(reportName, str -> {
             Name name = Name.of(str);
             History parent;
-            if (name.length() > 1) {
+            if (name.getLength() > 1) {
                 parent = getChronicle(name.cutLast().toString());
             } else {
                 parent = Context.this;

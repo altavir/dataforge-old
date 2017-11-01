@@ -26,7 +26,7 @@ import java.util.Optional;
 /**
  * @author Alexander Nozik
  */
-public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame, PlotStateListener {
+public abstract class AbstractPlotFrame extends SimpleConfigurable implements PlotFrame, PlotListener {
 
     private PlotGroup root = new PlotGroup("");
 
@@ -71,39 +71,23 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
      */
     protected abstract void updatePlotConfig(String name, Laminate config);
 
+
     @Override
-    public void notifyDataChanged(String name) {
-        opt(name).ifPresent(plt -> updatePlotData(name, plt));
+    public void dataChanged(Name name, Plot plot) {
+        updatePlotData(name.toString(), plot);
     }
 
     @Override
-    public void notifyConfigurationChanged(String path) {
-        getPlots().list().filter(it -> it.startsWith(path)).forEach(name ->
-                root.getPlotMeta(Name.of(name)).ifPresent(laminate -> updatePlotConfig(name, laminate))
-        );
-    }
-
-    /**
-     * Actually remove plot
-     *
-     * @param name
-     */
-    protected void removePlot(String name) {
-
+    public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
+        if (plottable instanceof Plot) {
+            updatePlotConfig(name.toString(), laminate);
+        }
     }
 
     @Override
-    public void notifyGroupChanged(String name) {
-        Plottable plt = getPlots().opt(name).orElse(null);
-        if (plt == null) {
-            removePlot(name);
-        } else if (plt instanceof PlotGroup) {
-            ((PlotGroup) plt).getChildren().forEach(child -> {
-                notifyGroupChanged(Name.joinString(name, child.getName()));
-            });
-        } else if (plt instanceof Plot) {
-            updatePlotData(name, (Plot) plt);
-            notifyConfigurationChanged(name);
+    public void plotAdded(Name name, Plottable plottable) {
+        if(plottable instanceof Plot){
+            updatePlotData(name.toString(),(Plot) plottable);
         }
     }
 

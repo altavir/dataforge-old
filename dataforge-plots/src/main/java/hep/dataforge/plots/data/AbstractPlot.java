@@ -15,10 +15,12 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
-import hep.dataforge.plots.PlotStateListener;
+import hep.dataforge.plots.PlotListener;
 import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -33,7 +35,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
     private final String name;
-    private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
+    private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();
     private T adapter;
 
 //    public AbstractPlot(String name, @NotNull T adapter) {
@@ -42,11 +44,11 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
 //    }
 
     public AbstractPlot(@NotNull String name) {
-        this.name = name.replace(".","_");
+        this.name = name.replace(".", "_");
     }
 
     @Override
-    public void addListener(@NotNull PlotStateListener listener) {
+    public void addListener(@NotNull PlotListener listener) {
         getListeners().add(listener);
     }
 
@@ -56,7 +58,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     }
 
     @Override
-    public void removeListener(@NotNull PlotStateListener listener) {
+    public void removeListener(@NotNull PlotListener listener) {
         this.getListeners().remove(listener);
     }
 
@@ -78,7 +80,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      */
     @Override
     protected synchronized void applyConfig(Meta config) {
-        getListeners().forEach((l) -> l.notifyConfigurationChanged(getName()));
+        getListeners().forEach((l) -> l.metaChanged(Name.of(getName()), this, new Laminate(meta())));
 
         //invalidate adapter
         if (config.hasMeta(ADAPTER_KEY)) {
@@ -90,7 +92,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      * Notify all listeners that data changed
      */
     public synchronized void notifyDataChanged() {
-        getListeners().forEach((l) -> l.notifyDataChanged(getName()));
+        getListeners().forEach((l) -> l.dataChanged(Name.of(getName()), this));
     }
 
     public String getTitle() {
@@ -100,7 +102,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     /**
      * @return the listeners
      */
-    private ReferenceRegistry<PlotStateListener> getListeners() {
+    private ReferenceRegistry<PlotListener> getListeners() {
         return listeners;
     }
 

@@ -367,7 +367,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 nodes.remove(path);
             } else {
                 Name namePath = Name.of(path);
-                if (namePath.length() > 1) {
+                if (namePath.getLength() > 1) {
                     //FIXME many path to string and string to path conversions
                     getHead(namePath).removeNode(namePath.cutFirst().toString());
                 }
@@ -410,7 +410,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 values.remove(path);
             } else {
                 Name namePath = Name.of(path);
-                if (namePath.length() > 1) {
+                if (namePath.getLength() > 1) {
                     getHead(namePath).removeValue(namePath.cutFirst().toString());
                 }
             }
@@ -427,7 +427,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     protected void setNodeItem(String path, List<? extends Meta> elements) {
         if (!nodes.containsKey(path)) {
             Name namePath = Name.of(path);
-            if (namePath.length() > 1) {
+            if (namePath.getLength() > 1) {
                 String headName = namePath.getFirst().entry();
                 T headNode;
                 if (nodes.containsKey(headName)) {
@@ -451,7 +451,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     protected void setValueItem(String path, Value value) {
         if (!this.values.containsKey(path)) {
             Name namePath = Name.of(path);
-            if (namePath.length() > 1) {
+            if (namePath.getLength() > 1) {
                 String headName = namePath.getFirst().entry();
                 T headNode;
                 if (nodes.containsKey(headName)) {

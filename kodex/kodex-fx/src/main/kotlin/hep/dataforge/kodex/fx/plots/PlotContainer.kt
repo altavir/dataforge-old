@@ -8,6 +8,7 @@ import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.kodex.fx.TableDisplay
 import hep.dataforge.kodex.fx.dfIcon
 import hep.dataforge.meta.Configuration
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.*
@@ -111,7 +112,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                     }
                     treeview<Plottable> {
                         minWidth = 0.0
-                        root = PlotTreeItem(frame.plots);
+                        root = fillTree(frame.plots);
                         vgrow = Priority.ALWAYS
 
                         //cell format
@@ -169,9 +170,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                                 action { item.forEach { it.configureValue("visible", false) } }
                                             }
                                         }
-                                        if (cell.treeItem is PlotTreeItem) {
+                                        if (!cell.treeItem.isLeaf) {
                                             item("Sort") {
-                                                action { (cell.treeItem as PlotTreeItem).sort() }
+                                                action { cell.treeItem.children.sortBy { it.value.name } }
                                             }
                                         }
                                     }
@@ -263,36 +264,42 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         }
     }
 
-    private class PlotTreeItem(plot: Plottable, graphics: Node? = null) : TreeItem<Plottable>(plot, graphics) {
-        init {
-            (value as? PlotGroup)?.let { plt ->
-                children.setAll(plt.children.map { PlotTreeItem(it) })
-                plot.addListener { name ->
-                    if (Name.of(name).length() == 1) {
-                        (value as? PlotGroup)?.let { plt ->
-                            children.setAll(plt.children.map { PlotTreeItem(it) })
-                        }
-                    }
-                }
+    private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
+        override fun dataChanged(name: Name?, plot: Plot?) {
+        }
+
+        override fun metaChanged(name: Name?, plottable: Plottable?, laminate: Laminate?) {
+        }
+
+        override fun plotAdded(name: Name, plottable: Plottable) {
+            if (name.length == 1) {
+                item.children.add(fillTree(plottable))
             }
-
-            isExpanded = true
         }
 
-        override fun isLeaf(): Boolean {
-            return value !is PlotGroup
+        override fun plotRemoved(name: Name) {
+            if (name.length == 1) {
+                item.children.removeIf { it.value.name == name.toString() }
+            }
         }
 
-        fun sort() {
-            children.sortBy { it.value.name }
+    }
+
+    private fun fillTree(plot: Plottable): TreeItem<Plottable> {
+        val item = TreeItem(plot)
+        plot.addListener(ContainerChangeListener(item))
+        if (plot is PlotGroup) {
+            item.children.setAll(plot.children.map { fillTree(it) })
         }
+        item.isExpanded = true
+        return item
     }
 
     private fun getFullName(item: TreeItem<Plottable>): String {
-        if (item.parent == null || item.parent.value.name.isEmpty()) {
-            return item.value.name;
+        return if (item.parent == null || item.parent.value.name.isEmpty()) {
+            item.value.name;
         } else {
-            return Name.joinString(getFullName(item.parent), item.value.name)
+            Name.joinString(getFullName(item.parent), item.value.name)
         }
     }
 

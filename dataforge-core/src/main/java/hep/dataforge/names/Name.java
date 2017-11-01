@@ -56,7 +56,7 @@ public interface Name {
      * @return
      */
     static int sizeOf(String name) {
-        return Name.of(name).length();
+        return Name.of(name).getLength();
     }
 
     static Name of(String str) {
@@ -126,13 +126,13 @@ public interface Name {
         }
 
         List<NameToken> list = new ArrayList<>();
-        for (Name segmentName : segments) {
-            if (segmentName == EMPTY) {
-                //do nothing
-            } else if (segmentName instanceof NameToken) {
-                list.add((NameToken) segmentName);
-            } else {
-                list.addAll(((NamePath) segmentName).getNames());
+        for (Name segment : segments) {
+            if (segment != EMPTY) {
+                if (segment instanceof NameToken) {
+                    list.add((NameToken) segment);
+                } else {
+                    list.addAll(((NamePath) segment).getNames());
+                }
             }
         }
         return of(list);
@@ -191,7 +191,7 @@ public interface Name {
      *
      * @return a int.
      */
-    int length();
+    int getLength();
 
     /**
      * первый токен

@@ -71,7 +71,7 @@ public class DataTree<T> implements DataNode<T> {
      * @return
      */
     public static <T> DataTree<T> emptyTree(Class<T> type, Name name) {
-        if (name.length() == 1) {
+        if (name.getLength() == 1) {
             DataTree<T> res = new DataTree<>(type);
             res.name = name.toString();
             return res;
@@ -139,9 +139,9 @@ public class DataTree<T> implements DataNode<T> {
      * @param data
      */
     protected void putData(Name name, Data<? extends T> data, boolean replace) {
-        if (name.length() == 0) {
+        if (name.getLength() == 0) {
             throw new IllegalArgumentException("Name must not be empty");
-        } else if (name.length() == 1) {
+        } else if (name.getLength() == 1) {
             String key = name.toString();
             checkedPutData(key, data, replace);
         } else {
@@ -158,9 +158,9 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     protected void putNode(Name name, DataNode<? extends T> node) {
-        if (name.length() == 0) {
+        if (name.getLength() == 0) {
             throw new IllegalArgumentException("Can't put node with empty name");
-        } else if (name.length() == 1) {
+        } else if (name.getLength() == 1) {
             String key = name.toString();
             checkedPutNode(key, node);
         } else {
@@ -281,7 +281,7 @@ public class DataTree<T> implements DataNode<T> {
     @SuppressWarnings("unchecked")
     DataTree<T> getNode(Name nodeName) {
         String child = nodeName.getFirst().toString();
-        if (nodeName.length() == 1) {
+        if (nodeName.getLength() == 1) {
             return nodes.get(nodeName.toString());
         } else if (this.nodes.containsKey(child)) {
             return this.nodes.get(child).getNode(nodeName.cutFirst());
@@ -365,7 +365,7 @@ public class DataTree<T> implements DataNode<T> {
         public Builder<T> removeNode(String nodeName) {
             Name theName = Name.of(nodeName);
             DataTree parentTree;
-            if (theName.length() == 1) {
+            if (theName.getLength() == 1) {
                 parentTree = tree;
             } else {
                 parentTree = tree.getNode(theName.cutLast());
@@ -380,7 +380,7 @@ public class DataTree<T> implements DataNode<T> {
         public Builder<T> removeData(String dataName) {
             Name theName = Name.of(dataName);
             DataTree parentTree;
-            if (theName.length() == 1) {
+            if (theName.getLength() == 1) {
                 parentTree = tree;
             } else {
                 parentTree = tree.getNode(theName.cutLast());

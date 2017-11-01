@@ -199,7 +199,7 @@ public class DescriptorUtils {
     private static void putDescription(MetaBuilder builder, Meta meta) {
         Name nodeName = Name.of(meta.getString("name"));
         MetaBuilder currentNode = builder;
-        while (nodeName.length() > 1) {
+        while (nodeName.getLength() > 1) {
             String childName = nodeName.getFirst().toString();
             MetaBuilder finalCurrentNode = currentNode;
             currentNode = finalCurrentNode.getMetaList("node").stream()

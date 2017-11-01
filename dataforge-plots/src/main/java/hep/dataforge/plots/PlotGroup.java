@@ -1,6 +1,5 @@
 package hep.dataforge.plots;
 
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Laminate;
@@ -26,7 +25,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-public class PlotGroup extends SimpleConfigurable implements Plottable, Provider, PlotStateListener, Iterable<Plottable> {
+public class PlotGroup extends SimpleConfigurable implements Plottable, Provider, PlotListener, Iterable<Plottable> {
     public static final String PLOT_TARGET = "plot";
 
     public static final Wrapper WRAPPER = new Wrapper();
@@ -35,7 +34,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     private NodeDescriptor descriptor = new NodeDescriptor("group");
 
     private Map<String, Plottable> plots = new HashMap<>();
-    private ReferenceRegistry<PlotStateListener> listeners = new ReferenceRegistry<>();
+    private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();
 
 
     public PlotGroup(String name) {
@@ -52,67 +51,58 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         return name;
     }
 
-    @Override
-    public void notifyDataChanged(String name) {
-        if (getName().isEmpty()) {
-            //for root group
-            listeners.forEach(l -> l.notifyDataChanged(name));
-        } else {
-            listeners.forEach(l -> l.notifyDataChanged(Name.joinString(getName(), name)));
-        }
+    private Name getNameForListener(Name arg) {
+        return Name.join(Name.of(this.getName()), arg);
     }
 
     @Override
-    public void notifyConfigurationChanged(String name) {
-        if (getName().isEmpty()) {
-            //for root group
-            listeners.forEach(l -> l.notifyConfigurationChanged(name));
-        } else {
-            listeners.forEach(l -> l.notifyConfigurationChanged(Name.joinString(getName(), name)));
-        }
+    public void dataChanged(Name name, Plot plot) {
+        listeners.forEach(l -> l.dataChanged(getNameForListener(name), plot));
     }
 
     @Override
-    public void notifyGroupChanged(String name) {
-        if (getName().isEmpty()) {
-            //for root group
-            listeners.forEach(l -> l.notifyGroupChanged(name));
-        } else {
-            listeners.forEach(l -> l.notifyGroupChanged(Name.joinString(getName(), name)));
-        }
+    public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
+        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withFirstLayer(getMeta())));
+    }
+
+    @Override
+    public void plotAdded(Name name, Plottable plottable) {
+        listeners.forEach(l -> l.plotAdded(getNameForListener(name), plottable));
+    }
+
+    @Override
+    public void plotRemoved(Name name) {
+        listeners.forEach(l -> l.plotRemoved(getNameForListener(name)));
     }
 
     /**
-     * Get layered plot meta for plot with given name.
+     * Recursively notify listeners about all added plots
      *
-     * @param path
-     * @return
+     * @param plot
      */
-    public Optional<Laminate> getPlotMeta(Name path) {
-        if (path.length() == 0) {
-            return Optional.of(new Laminate(getConfig()));
-        } else if (path.length() == 1) {
-            return opt(path).map(plot ->
-                    new Laminate(plot.getConfig(), getConfig())
-                            .withDescriptor(DescriptorUtils.buildDescriptor(plot.getClass()))
-            );
-        } else {
-            return opt(path.getFirst())
-                    .flatMap(group -> {
-                        if (group instanceof PlotGroup) {
-                            return ((PlotGroup) group).getPlotMeta(path.cutFirst());
-                        } else {
-                            return Optional.empty();
-                        }
-                    }).map(laminate -> laminate.withFirstLayer(getConfig()));
+    private void notifyPlotAdded(Plottable plot) {
+        Name plotName = Name.of(plot.getName());
+        plotAdded(plotName, plot);
+        metaChanged(plotName, plot, new Laminate(plot.meta()));
+        if (plot instanceof PlotGroup) {
+            ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotAdded);
         }
     }
 
     public synchronized PlotGroup add(Plottable plot) {
         this.plots.put(plot.getName(), plot);
         plot.addListener(this);
-        notifyGroupChanged(plot.getName());
+
+        notifyPlotAdded(plot);
         return this;
+    }
+
+    private void notifyPlotRemoved(Plottable plot) {
+        if (plot instanceof PlotGroup) {
+            ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotRemoved);
+        }
+        //remove children first
+        plotRemoved(Name.of(getName()));
     }
 
     /**
@@ -123,11 +113,11 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      */
     public synchronized PlotGroup remove(String path) {
         Name name = Name.of(path);
-        if (name.length() == 1) {
+        if (name.getLength() == 1) {
             Plottable removed = plots.remove(name.getLast().toString());
             if (removed != null) {
+                notifyPlotRemoved(removed);
                 removed.removeListener(this);
-                notifyGroupChanged(path);
             }
         } else {
             opt(name.cutLast()).ifPresent(group -> {
@@ -173,9 +163,9 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     }
 
     public Optional<Plottable> opt(Name name) {
-        if (name.length() == 0) {
+        if (name.getLength() == 0) {
             throw new RuntimeException("Zero length names are not allowed");
-        } else if (name.length() == 1) {
+        } else if (name.getLength() == 1) {
             return Optional.ofNullable(plots.get(name.toString()));
         } else {
             return opt(name.cutLast()).flatMap(plot -> {
@@ -193,7 +183,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      *
      * @param listener
      */
-    public void addListener(PlotStateListener listener) {
+    public void addListener(PlotListener listener) {
         listeners.add(listener);
     }
 
@@ -202,14 +192,28 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      *
      * @param listener
      */
-    public void removeListener(PlotStateListener listener) {
+    public void removeListener(PlotListener listener) {
         listeners.remove(listener);
+    }
+
+    /**
+     * Notify that config for this element and children is changed
+     */
+    private void notifyConfigChanged() {
+        metaChanged(Name.EMPTY, this, new Laminate(meta()));
+        getChildren().forEach(pl -> {
+            if (pl instanceof PlotGroup) {
+                ((PlotGroup) pl).notifyConfigChanged();
+            } else {
+                metaChanged(Name.of(pl.getName()), pl, new Laminate(pl.meta()));
+            }
+        });
     }
 
     @Override
     protected void applyConfig(Meta config) {
         super.applyConfig(config);
-        listeners.forEach(l -> l.notifyConfigurationChanged(getName()));
+        notifyConfigChanged();
     }
 
     public Collection<Plottable> getChildren() {

@@ -136,7 +136,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @Override
     public final Loader buildLoader(String loaderName, Meta loaderConfiguration) throws StorageException {
         Name name = Name.of(loaderName);
-        if (name.length() == 1) {
+        if (name.getLength() == 1) {
             Loader loader = createLoader(loaderName, loaderConfiguration);
             this.loaders.put(loaderName, loader);
             return loader;
@@ -160,7 +160,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @Override
     public final Storage buildShelf(String shelfName, Meta shelfConfiguration) throws StorageException {
         Name name = Name.of(shelfName);
-        if (name.length() == 1) {
+        if (name.getLength() == 1) {
             Storage shelf = createShelf(shelfName, shelfConfiguration);
             this.shelves.put(shelfName, shelf);
             return shelf;
@@ -212,7 +212,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @Provides(STORAGE_TARGET)
     public Optional<Storage> optShelf(String name) {
         Name shelfName = Name.of(name);
-        if (shelfName.length() == 1) {
+        if (shelfName.getLength() == 1) {
             return Optional.ofNullable(shelves.get(name));
         } else {
             return optShelf(shelfName.getFirst().toString()).flatMap(child -> child.optShelf(shelfName.cutFirst().toString()));

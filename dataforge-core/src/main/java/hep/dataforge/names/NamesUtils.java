@@ -240,7 +240,7 @@ public class NamesUtils {
      */
     public static boolean isValidToken(String token){
         try {
-            return Name.of(token).length() == 1;
+            return Name.of(token).getLength() == 1;
         }catch (Exception ex){
             return false;
         }

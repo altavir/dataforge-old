@@ -44,7 +44,7 @@ class NamePath implements Name {
 
     @Override
     public Name cutFirst() {
-        switch (length()) {
+        switch (getLength()) {
             case 2:
                 return names.getLast();
             case 1:
@@ -58,7 +58,7 @@ class NamePath implements Name {
 
     @Override
     public Name cutLast() {
-        switch (length()) {
+        switch (getLength()) {
             case 2:
                 return names.getFirst();
             case 1:
@@ -104,7 +104,7 @@ class NamePath implements Name {
     }
 
     @Override
-    public int length() {
+    public int getLength() {
         return names.size();
     }
 
@@ -135,7 +135,7 @@ class NamePath implements Name {
 
     @Override
     public String[] asArray() {
-        String[] res = new String[length()];
+        String[] res = new String[getLength()];
         return names.stream().map((token) -> token.toString()).collect(Collectors.toList()).toArray(res);
     }
 

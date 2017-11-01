@@ -78,7 +78,7 @@ public class DataSet<T> implements DataNode<T> {
         }
         return dataStream()
                 .map(data -> Name.of(data.getName())) // converting strings to Names
-                .filter(name -> name.length() > 1) //selecting only composite names
+                .filter(name -> name.getLength() > 1) //selecting only composite names
                 .map(name -> name.getFirst().toString())
                 .distinct()
                 .map(str -> new DataSet<>(str, meta, type, subMap(str + ".")));

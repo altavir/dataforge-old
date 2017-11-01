@@ -89,11 +89,11 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      */
     @SuppressWarnings("unchecked")
     protected List<T> getMetaList(Name path) {
-        if (path.length() == 0) {
+        if (path.getLength() == 0) {
             throw new RuntimeException("Empty path not allowed");
         }
         List<T> res;
-        if (path.length() == 1) {
+        if (path.getLength() == 1) {
             res = optChildNodeItem(path.ignoreQuery().toString()).orElse(Collections.emptyList());
         } else {
             res = optHead(path).map(it -> it.getMetaList(path.cutFirst())).orElse(Collections.emptyList());
@@ -114,10 +114,10 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      * @return
      */
     public Optional<Value> optValue(Name path) {
-        if (path.length() == 0) {
+        if (path.getLength() == 0) {
             throw new RuntimeException("Empty path not allowed");
         }
-        if (path.length() == 1) {
+        if (path.getLength() == 1) {
             return Optional.ofNullable(values.get(path.toString()));
         } else {
             return optHead(path).flatMap(it -> it.optValue(path.cutFirst()));

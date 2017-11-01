@@ -120,7 +120,7 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
             MetaBuilder.this.setNode(name, elements);
         } else {
             Name n = Name.of(name);
-            if (n.length() == 1) {
+            if (n.getLength() == 1) {
                 optChildNodeItem(name).ifPresent(list -> {
                     if (list.size() != elements.length) {
                         throw new RuntimeException("Can't update element item with an item of different size");

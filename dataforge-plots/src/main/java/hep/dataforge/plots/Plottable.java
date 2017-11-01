@@ -11,12 +11,12 @@ public interface Plottable extends Named, Metoid, Configurable, Described {
      *
      * @param listener
      */
-    void addListener(PlotStateListener listener);
+    void addListener(PlotListener listener);
 
     /**
      * Remove plottable state listener
      *
      * @param listener
      */
-    void removeListener(PlotStateListener listener);
+    void removeListener(PlotListener listener);
 }
