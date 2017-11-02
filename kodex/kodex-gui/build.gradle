@@ -1,4 +1,3 @@
-apply plugin: 'kotlin'
 
 description = "A tornadofx based kotlin library"
 

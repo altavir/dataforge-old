@@ -8,7 +8,7 @@ import hep.dataforge.values.NamedValue
 /**
  * Kotlin meta builder extension
  */
-class KMetaBuilder(name: String) : MetaBuilder(name) {
+class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(name) {
     operator fun Meta.unaryPlus() {
         putNode(this);
     }
