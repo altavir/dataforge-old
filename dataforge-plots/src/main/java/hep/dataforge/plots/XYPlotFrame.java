@@ -18,6 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 
@@ -93,7 +94,7 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
      * @param name
      * @return
      */
-    public Optional<Value> getActualColor(String name){
-        return opt(name).flatMap(plot -> plot.meta().optValue("color"));
+    public Optional<Value> getActualColor(Name name){
+        return getPlots().opt(name).flatMap(plot -> plot.meta().optValue("color"));
     }
 }

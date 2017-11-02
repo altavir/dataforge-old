@@ -62,32 +62,32 @@ public abstract class AbstractPlotFrame extends SimpleConfigurable implements Pl
      *
      * @param name
      */
-    protected abstract void updatePlotData(String name, @NotNull Plot plot);
+    protected abstract void updatePlotData(Name name, @NotNull Plot plot);
 
     /**
      * Reload an annotation for given plottable.
      *
      * @param name
      */
-    protected abstract void updatePlotConfig(String name, Laminate config);
+    protected abstract void updatePlotConfig(Name name, Laminate config);
 
 
     @Override
     public void dataChanged(Name name, Plot plot) {
-        updatePlotData(name.toString(), plot);
+        updatePlotData(name, plot);
     }
 
     @Override
     public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
         if (plottable instanceof Plot) {
-            updatePlotConfig(name.toString(), laminate);
+            updatePlotConfig(name, laminate);
         }
     }
 
     @Override
     public void plotAdded(Name name, Plottable plottable) {
-        if(plottable instanceof Plot){
-            updatePlotData(name.toString(),(Plot) plottable);
+        if (plottable instanceof Plot) {
+            updatePlotData(name, (Plot) plottable);
         }
     }
 

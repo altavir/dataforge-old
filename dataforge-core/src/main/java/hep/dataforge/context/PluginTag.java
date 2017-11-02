@@ -18,7 +18,6 @@ package hep.dataforge.context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.Name;
 import hep.dataforge.utils.SimpleMetaMorph;
 
 /**
@@ -41,9 +40,12 @@ public class PluginTag extends SimpleMetaMorph {
      * @return
      */
     public static PluginTag fromString(String tag) {
-        Name name = Name.of(tag);
-        return new PluginTag(name.nameSpace(), name.nameString());
-
+        int sepIndex = tag.indexOf(":");
+        if (sepIndex >= 0) {
+            return new PluginTag(tag.substring(0, sepIndex), tag.substring(sepIndex + 1));
+        } else {
+            return new PluginTag("", tag);
+        }
     }
 
     public PluginTag(Meta meta) {

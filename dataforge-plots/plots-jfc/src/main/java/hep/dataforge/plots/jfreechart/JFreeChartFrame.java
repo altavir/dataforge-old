@@ -71,12 +71,12 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     /**
      * Index mapping names to datasets
      */
-    private transient final Map<String, JFCDataWrapper> index = new HashMap<>();
+    private transient final Map<Name, JFCDataWrapper> index = new HashMap<>();
     /**
      * Caches for color and shape
      */
-    private transient final Map<String, Color> colorCache = new HashMap<>();
-    private transient final Map<String, Shape> shapeCache = new HashMap<>();
+    private transient final Map<Name, Color> colorCache = new HashMap<>();
+    private transient final Map<Name, Shape> shapeCache = new HashMap<>();
 
     public JFreeChartFrame() {
         this(Meta.empty());
@@ -267,16 +267,15 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
     @Override
     public void plotRemoved(Name name) {
-        String plotName = name.toString();
-        int num = Optional.ofNullable(index.get(plotName)).map(JFCDataWrapper::getIndex).orElse(-1);
+        int num = Optional.ofNullable(index.get(name)).map(JFCDataWrapper::getIndex).orElse(-1);
         if (num >= 0) {
             run(() -> xyPlot.setDataset(num, null));
         }
-        index.remove(plotName);
+        index.remove(name);
     }
 
     @Override
-    protected synchronized void updatePlotData(String name, @NotNull Plot plot) {
+    protected synchronized void updatePlotData(Name name, @NotNull Plot plot) {
         if (!index.containsKey(name)) {
             JFCDataWrapper wrapper = new JFCDataWrapper(plot);
             wrapper.setIndex(index.values().stream().mapToInt(JFCDataWrapper::getIndex).max().orElse(-1) + 1);
@@ -291,7 +290,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    protected synchronized void updatePlotConfig(String name, Laminate meta) {
+    protected synchronized void updatePlotConfig(Name name, Laminate meta) {
         XYLineAndShapeRenderer render;
         if (meta.getBoolean("showErrors", true)) {
             render = new XYErrorRenderer();
@@ -367,7 +366,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    public Optional<Value> getActualColor(String name) {
+    public Optional<Value> getActualColor(Name name) {
         return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.awtColorToString(color)));
     }
 

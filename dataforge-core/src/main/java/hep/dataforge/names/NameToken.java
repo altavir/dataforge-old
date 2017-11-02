@@ -15,6 +15,8 @@
  */
 package hep.dataforge.names;
 
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 /**
@@ -25,13 +27,14 @@ import java.util.Objects;
  */
 class NameToken implements Name {
 
-    private final String nameSpace;
 
     private final String theName;
 
     private final String theQuery;
 
-    public NameToken(String nameSpace, String singlet) {
+    public NameToken(String singlet) {
+        //unescape string
+        singlet = singlet.replace("\\.",".");
         if (singlet.matches(".*\\[.*\\]")) {
             int bracketIndex = singlet.indexOf("[");
             this.theName = singlet.substring(0, bracketIndex);
@@ -41,7 +44,6 @@ class NameToken implements Name {
             this.theQuery = null;
         }
 
-        this.nameSpace = nameSpace;
     }
 
     @Override
@@ -83,7 +85,7 @@ class NameToken implements Name {
         if (!hasQuery()) {
             return this;
         } else {
-            return new NameToken(nameSpace, theName);
+            return new NameToken(theName);
         }
     }
 
@@ -94,16 +96,7 @@ class NameToken implements Name {
 
     @Override
     public String toString() {
-        if (nameSpace().isEmpty()) {
-            return this.token();
-        } else {
-            return String.format("%s%s%s", nameSpace(), NAMESPACE_SEPARATOR, token());
-        }
-    }
-
-    @Override
-    public String nameString() {
-        return token();
+        return toUnescaped().replace(".", "\\.");
     }
 
     @Override
@@ -111,28 +104,18 @@ class NameToken implements Name {
         return theName;
     }
 
-    @Override
-    public String nameSpace() {
-        return nameSpace;
-    }
-
-    @Override
-    public Name toNameSpace(String nameSpace) {
-        return new NameToken(nameSpace, token());
-    }
 
     @Override
     public String[] asArray() {
         String[] res = new String[1];
-        res[0] = token();
+        res[0] = toUnescaped();
         return res;
     }
 
     @Override
     public int hashCode() {
         int hash = 7;
-        hash = 79 * hash + Objects.hashCode(this.nameSpace);
-        hash = 79 * hash + Objects.hashCode(this.token());
+        hash = 79 * hash + Objects.hashCode(this.toUnescaped());
         return hash;
     }
 
@@ -145,16 +128,13 @@ class NameToken implements Name {
             return false;
         }
         final NameToken other = (NameToken) obj;
-        if (!Objects.equals(this.nameSpace, other.nameSpace)) {
-            return false;
-        }
-        return Objects.equals(token(), other.token());
+        return Objects.equals(toUnescaped(), other.toUnescaped());
     }
 
     /**
-     * The full name including query
+     * The full name including query but without escaping
      */
-    private String token() {
+    public String toUnescaped() {
         if (theQuery != null) {
             return String.format("%s[%s]", theName, theQuery);
         } else {
@@ -162,4 +142,13 @@ class NameToken implements Name {
         }
     }
 
+    @Override
+    public List<NameToken> getTokens() {
+        return Collections.singletonList(this);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
 }

@@ -18,6 +18,9 @@ package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NamingException;
 
+import java.util.Collections;
+import java.util.List;
+
 /**
  * Created by darksnake on 26-Aug-16.
  */
@@ -63,19 +66,10 @@ class EmptyName implements Name {
     }
 
     @Override
-    public String nameSpace() {
-        return null;
-    }
-
-    @Override
     public String entry() {
         return "";
     }
 
-    @Override
-    public Name toNameSpace(String nameSpace) {
-        return this;
-    }
 
     @Override
     public String[] asArray() {
@@ -88,7 +82,17 @@ class EmptyName implements Name {
     }
 
     @Override
-    public String nameString() {
+    public List<NameToken> getTokens() {
+        return Collections.emptyList();
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return true;
+    }
+
+    @Override
+    public String toUnescaped() {
         return "";
     }
 }

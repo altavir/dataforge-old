@@ -32,19 +32,18 @@ import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
  */
 public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfigurable implements Plot {
 
-    public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
+    //public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
-    private final String name;
+    private final Name name;
     private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();
     private T adapter;
 
-//    public AbstractPlot(String name, @NotNull T adapter) {
-//        this(name);
-//        setAdapter(adapter);
-//    }
+    public AbstractPlot(Name name) {
+        this.name = name;
+    }
 
     public AbstractPlot(@NotNull String name) {
-        this.name = name.replace(".", "_");
+        this.name = Name.ofSingle(name);
     }
 
     @Override
@@ -53,7 +52,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     }
 
     @Override
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
@@ -80,7 +79,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      */
     @Override
     protected synchronized void applyConfig(Meta config) {
-        getListeners().forEach((l) -> l.metaChanged(Name.of(getName()), this, new Laminate(meta())));
+        getListeners().forEach((l) -> l.metaChanged(name, this, new Laminate(meta())));
 
         //invalidate adapter
         if (config.hasMeta(ADAPTER_KEY)) {
@@ -92,11 +91,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      * Notify all listeners that data changed
      */
     public synchronized void notifyDataChanged() {
-        getListeners().forEach((l) -> l.dataChanged(Name.of(getName()), this));
-    }
-
-    public String getTitle() {
-        return meta().getString("title", getName());
+        getListeners().forEach((l) -> l.dataChanged(name, this));
     }
 
     /**

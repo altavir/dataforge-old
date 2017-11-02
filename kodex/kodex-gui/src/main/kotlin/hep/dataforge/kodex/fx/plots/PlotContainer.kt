@@ -7,7 +7,6 @@ import hep.dataforge.fx.FXObject
 import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.kodex.fx.TableDisplay
 import hep.dataforge.kodex.fx.dfIcon
-import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
@@ -43,7 +42,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
 
 class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
 
-    private val configWindows = HashMap<Configuration, Stage>()
+    private val configWindows = HashMap<hep.dataforge.meta.Configurable, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()
 
 
@@ -107,7 +106,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                         minWidth = 0.0
                         maxWidth = Double.MAX_VALUE
                         action {
-                            displayConfigurator("Plot frame configuration", frame.config, DescriptorUtils.buildDescriptor(frame))
+                            displayConfigurator("Plot frame configuration", frame, DescriptorUtils.buildDescriptor(frame))
                         }
                     }
                     treeview<Plottable> {
@@ -117,10 +116,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
                         //cell format
                         cellFormat { item ->
-                            val cell = this
                             graphic = hbox {
                                 hgrow = Priority.ALWAYS
-                                checkbox(item.config.getString("title", item.name)) {
+                                checkbox(item.title) {
                                     minWidth = 0.0
                                     if (item == frame.plots) {
                                         text = "<<< All plots >>>"
@@ -132,7 +130,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
 
                                     if (frame is XYPlotFrame) {
-                                        frame.getActualColor(getFullName(cell.treeItem)).ifPresent {
+                                        frame.getActualColor(getFullName(this@cellFormat.treeItem)).ifPresent {
                                             textFill = Color.valueOf(it.stringValue())
                                         }
                                     } else if (item.config.hasValue("color")) {
@@ -142,7 +140,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                     item.config.addObserver { name, _, newItem ->
                                         when (name) {
                                             "title" -> text = if (newItem == null) {
-                                                item.name
+                                                item.title
                                             } else {
                                                 newItem.stringValue()
                                             }
@@ -170,9 +168,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                                 action { item.forEach { it.configureValue("visible", false) } }
                                             }
                                         }
-                                        if (!cell.treeItem.isLeaf) {
+                                        if (!this@cellFormat.treeItem.isLeaf) {
                                             item("Sort") {
-                                                action { cell.treeItem.children.sortBy { it.value.name } }
+                                                action { this@cellFormat.treeItem.children.sortBy { it.value.title } }
                                             }
                                         }
                                     }
@@ -185,7 +183,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 button("...") {
                                     minWidth = 0.0
                                     action {
-                                        displayConfigurator(item.name + " configuration", item.config, DescriptorUtils.buildDescriptor(item))
+                                        displayConfigurator(item.title + " configuration", item, DescriptorUtils.buildDescriptor(item))
                                     }
                                 }
 
@@ -200,10 +198,10 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                 dividers[0].position = 1.0
 
                 dividers[0].positionProperty().onChange {
-                    if (it.toDouble() < 0.9) {
-                        sideBarPositionProperty.set(it.toDouble())
+                    if (it < 0.9) {
+                        sideBarPositionProperty.set(it)
                     }
-                    sideBarExpanded = it.toDouble() < 0.99
+                    sideBarExpanded = it < 0.99
                 }
 
                 this@borderpane.widthProperty().onChange {
@@ -232,14 +230,14 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
      * @param config
      * @param desc
      */
-    private fun displayConfigurator(header: String, config: Configuration, desc: NodeDescriptor) {
-        configWindows.getOrPut(config) {
+    private fun displayConfigurator(header: String, obj: hep.dataforge.meta.Configurable, desc: NodeDescriptor) {
+        configWindows.getOrPut(obj) {
             Stage().apply {
-                scene = Scene(ConfigEditor.build(config, desc))
+                scene = Scene(ConfigEditor.build(obj.config, desc))
                 height = 400.0
                 width = 400.0
                 title = header
-                setOnCloseRequest { configWindows.remove(config) }
+                setOnCloseRequest { configWindows.remove(obj) }
                 initOwner(root.scene.window)
             }
         }.apply {
@@ -254,7 +252,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                 scene = Scene(TableDisplay(PlotUtils.extractData(plot, Meta.empty())).root)
                 height = 400.0
                 width = 400.0
-                title = "Data: ${plot.name}"
+                title = "Data: ${plot.title}"
                 setOnCloseRequest { dataWindows.remove(plot) }
                 initOwner(root.scene.window)
             }
@@ -279,7 +277,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
         override fun plotRemoved(name: Name) {
             if (name.length == 1) {
-                item.children.removeIf { it.value.name == name.toString() }
+                item.children.removeIf { it.value.name == name }
             }
         }
 
@@ -295,11 +293,11 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
         return item
     }
 
-    private fun getFullName(item: TreeItem<Plottable>): String {
+    private fun getFullName(item: TreeItem<Plottable>): Name {
         return if (item.parent == null || item.parent.value.name.isEmpty()) {
             item.value.name;
         } else {
-            Name.joinString(getFullName(item.parent), item.value.name)
+            Name.join(getFullName(item.parent), item.value.name)
         }
     }
 

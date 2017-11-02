@@ -7,7 +7,6 @@ include ':dataforge-plots:plots-fx'
 include ':dataforge-plots:plots-viewer' // Viewer application for exported plots
 include ':dataforge-plots:plots-jfc'
 include ':dataforge-plots:plots-gnuplot'
-include ':dataforge-plots:plots-demo'
 //include ':dataforge-plots:plots-jzy3d'
 
 include ':dataforge-maths' // mathematical tools
@@ -19,7 +18,8 @@ include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'
 
 include ':kodex' // KOtlin Dataforge EXtension
-include ':kodex:kodex-fx' // javafx based gui
+include ':kodex:kodex-gui' // javafx based gui
+include ':kodex:kodex-gui:demo' // javafx based gui
 include ':kodex:kmath' // kotlin mathematical extension
 //include ':kodex:dataforge-server' // server base
 

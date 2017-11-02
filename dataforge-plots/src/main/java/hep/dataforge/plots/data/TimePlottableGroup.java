@@ -15,11 +15,13 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 
 import java.time.Duration;
 import java.util.Iterator;
+import java.util.Optional;
 
 /**
  * @author darksnake
@@ -47,8 +49,8 @@ public class TimePlottableGroup extends PlottableGroup<TimePlot> {
     }
 
     public void put(Values point) {
-        map.keySet().stream().filter(point::hasValue).forEach(name -> {
-            map.get(name).put(point.getValue(name));
+        map.keySet().stream().filter(it -> point.hasValue(it.toString())).forEach(name -> {
+            map.get(name).put(point.getValue(name.toString()));
         });
     }
 
@@ -57,9 +59,7 @@ public class TimePlottableGroup extends PlottableGroup<TimePlot> {
     }
 
     public void put(String name, Value value) {
-        if (map.containsKey(name)) {
-            map.get(name).put(value);
-        }
+        Optional.ofNullable(map.get(Name.of(name))).ifPresent(it -> it.put(value));
     }
 
     /**

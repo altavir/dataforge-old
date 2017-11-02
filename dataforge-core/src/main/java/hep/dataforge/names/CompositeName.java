@@ -16,30 +16,33 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NamingException;
+import org.jetbrains.annotations.NotNull;
 
+import java.util.Collections;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
- *
  * The name path composed of tokens
  *
  * @author Alexander Nozik
  */
-class NamePath implements Name {
-
-    private final String nameSpace;
+class CompositeName implements Name {
     private final LinkedList<NameToken> names;
 
-    public NamePath(String nameSpace, LinkedList<NameToken> names) {
-        this.names = names;
-        this.nameSpace = nameSpace;
+    @NotNull
+    public static CompositeName of(List<Name> tokens){
+        LinkedList<NameToken> list = new LinkedList<>();
+        tokens.forEach(token -> {
+            list.addAll(token.getTokens());
+        });
+        return new CompositeName(list);
     }
 
-    public NamePath(LinkedList<NameToken> names) {
+    public CompositeName(LinkedList<NameToken> names) {
         this.names = names;
-        this.nameSpace = "";
     }
 
     @Override
@@ -52,7 +55,7 @@ class NamePath implements Name {
             default:
                 LinkedList<NameToken> tokens = new LinkedList<>(names);
                 tokens.removeFirst();
-                return new NamePath(tokens);
+                return new CompositeName(tokens);
         }
     }
 
@@ -66,7 +69,7 @@ class NamePath implements Name {
             default:
                 LinkedList<NameToken> tokens = new LinkedList<>(names);
                 tokens.removeLast();
-                return new NamePath(tokens);
+                return new CompositeName(tokens);
         }
     }
 
@@ -97,7 +100,7 @@ class NamePath implements Name {
             LinkedList<NameToken> tokens = new LinkedList<>(names);
             tokens.removeLast();
             tokens.addLast(names.getLast().ignoreQuery());
-            return new NamePath(tokens);
+            return new CompositeName(tokens);
         } else {
             return this;
         }
@@ -108,35 +111,23 @@ class NamePath implements Name {
         return names.size();
     }
 
+
     @Override
     public String toString() {
-        if (nameSpace().isEmpty()) {
-            return nameString();
-        } else {
-            return String.format("%s%s%s", nameSpace(), NAMESPACE_SEPARATOR, nameString());
-        }
-    }
-
-    @Override
-    public String nameString() {
-        Iterable<String> it = names.stream().map((NameToken token) -> token.toString())::iterator;
+        Iterable<String> it = names.stream().map(NameToken::toString)::iterator;
         return String.join(NAME_TOKEN_SEPARATOR, it);
-    }
-
-    @Override
-    public String nameSpace() {
-        return nameSpace;
-    }
-
-    @Override
-    public Name toNameSpace(String nameSpace) {
-        return new NamePath(nameSpace, names);
     }
 
     @Override
     public String[] asArray() {
         String[] res = new String[getLength()];
-        return names.stream().map((token) -> token.toString()).collect(Collectors.toList()).toArray(res);
+        return names.stream().map(NameToken::toString).collect(Collectors.toList()).toArray(res);
+    }
+
+    @Override
+    public String toUnescaped() {
+        Iterable<String> it = names.stream().map(NameToken::toUnescaped)::iterator;
+        return String.join(NAME_TOKEN_SEPARATOR, it);
     }
 
     @Override
@@ -147,7 +138,6 @@ class NamePath implements Name {
     @Override
     public int hashCode() {
         int hash = 3;
-        hash = 19 * hash + Objects.hashCode(this.nameSpace);
         hash = 19 * hash + Objects.hashCode(this.names);
         return hash;
     }
@@ -160,15 +150,18 @@ class NamePath implements Name {
         if (getClass() != obj.getClass()) {
             return false;
         }
-        final NamePath other = (NamePath) obj;
-        if (!Objects.equals(this.nameSpace, other.nameSpace)) {
-            return false;
-        }
+        final CompositeName other = (CompositeName) obj;
         return Objects.equals(this.names, other.names);
     }
 
-    LinkedList<NameToken> getNames() {
-        return names;
+    @Override
+    public boolean isEmpty() {
+        return false;
+    }
+
+    @Override
+    public List<NameToken> getTokens() {
+        return Collections.unmodifiableList(names);
     }
 
 }

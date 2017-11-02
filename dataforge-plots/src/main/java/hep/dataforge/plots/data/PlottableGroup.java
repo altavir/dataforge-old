@@ -8,6 +8,7 @@ package hep.dataforge.plots.data;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import org.jetbrains.annotations.NotNull;
 
@@ -22,7 +23,7 @@ import java.util.Map;
 public class PlottableGroup<T extends Plot> extends SimpleConfigurable implements Iterable<T>{
 
     //TODO replace by obsevable collection
-    protected final Map<String, T> map = new LinkedHashMap<>();
+    protected final Map<Name, T> map = new LinkedHashMap<>();
 
     public PlottableGroup() {
     }

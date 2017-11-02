@@ -30,29 +30,29 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     public static final Wrapper WRAPPER = new Wrapper();
 
-    private final String name;
+    private final Name name;
     private NodeDescriptor descriptor = new NodeDescriptor("group");
 
-    private Map<String, Plottable> plots = new HashMap<>();
+    private Map<Name, Plottable> plots = new HashMap<>();
     private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();
 
 
     public PlotGroup(String name) {
-        this.name = name;
+        this.name = Name.ofSingle(name);
     }
 
-    public PlotGroup(String name, NodeDescriptor descriptor) {
-        this.name = name;
-        this.descriptor = descriptor;
-    }
+//    public PlotGroup(String name, NodeDescriptor descriptor) {
+//        this.name = name;
+//        this.descriptor = descriptor;
+//    }
 
     @Override
-    public String getName() {
+    public Name getName() {
         return name;
     }
 
     private Name getNameForListener(Name arg) {
-        return Name.join(Name.of(this.getName()), arg);
+        return Name.join(name, arg);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     @Override
     public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
-        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withFirstLayer(getMeta())));
+        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(getMeta())));
     }
 
     @Override
@@ -81,9 +81,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * @param plot
      */
     private void notifyPlotAdded(Plottable plot) {
-        Name plotName = Name.of(plot.getName());
-        plotAdded(plotName, plot);
-        metaChanged(plotName, plot, new Laminate(plot.meta()));
+        plotAdded(plot.getName(), plot);
+        metaChanged(plot.getName(), plot, new Laminate(plot.meta()));
         if (plot instanceof PlotGroup) {
             ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotAdded);
         }
@@ -102,19 +101,22 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotRemoved);
         }
         //remove children first
-        plotRemoved(Name.of(getName()));
+        plotRemoved(plot.getName());
     }
 
     /**
      * Recursive remove a plot
      *
-     * @param path
+     * @param name
      * @return
      */
-    public synchronized PlotGroup remove(String path) {
-        Name name = Name.of(path);
+    public synchronized PlotGroup remove(String name) {
+        return remove(Name.of(name));
+    }
+
+    public synchronized PlotGroup remove(Name name) {
         if (name.getLength() == 1) {
-            Plottable removed = plots.remove(name.getLast().toString());
+            Plottable removed = plots.remove(name);
             if (removed != null) {
                 notifyPlotRemoved(removed);
                 removed.removeListener(this);
@@ -122,7 +124,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         } else {
             opt(name.cutLast()).ifPresent(group -> {
                 if (group instanceof PlotGroup) {
-                    ((PlotGroup) group).remove(name.getLast().toString());
+                    ((PlotGroup) group).remove(name.getLast());
                 }
             });
         }
@@ -135,7 +137,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     @ProvidesNames(PLOT_TARGET)
     public Stream<String> list() {
-        return stream().map(Pair::getKey);
+        return stream().map(Pair::getKey).map(Name::toString);
     }
 
     /**
@@ -143,10 +145,10 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      *
      * @return
      */
-    public Stream<Pair<String, Plottable>> stream() {
+    public Stream<Pair<Name, Plottable>> stream() {
         return plots.values().stream().flatMap(pl -> {
             if (pl instanceof PlotGroup) {
-                return ((PlotGroup) pl).stream().map(pair -> new Pair<>(Name.joinString(pl.getName(), pair.getKey()), pair.getValue()));
+                return ((PlotGroup) pl).stream().map(pair -> new Pair<>(Name.join(pl.getName(), pair.getKey()), pair.getValue()));
             } else {
                 return Stream.of(new Pair<>(pl.getName(), pl));
             }
@@ -166,7 +168,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         if (name.getLength() == 0) {
             throw new RuntimeException("Zero length names are not allowed");
         } else if (name.getLength() == 1) {
-            return Optional.ofNullable(plots.get(name.toString()));
+            return Optional.ofNullable(plots.get(name));
         } else {
             return opt(name.cutLast()).flatMap(plot -> {
                 if (plot instanceof PlotGroup) {
@@ -205,7 +207,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             if (pl instanceof PlotGroup) {
                 ((PlotGroup) pl).notifyConfigChanged();
             } else {
-                metaChanged(Name.of(pl.getName()), pl, new Laminate(pl.meta()));
+                metaChanged(pl.getName(), pl, new Laminate(pl.meta()));
             }
         });
     }

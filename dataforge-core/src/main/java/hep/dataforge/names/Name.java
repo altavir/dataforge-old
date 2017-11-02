@@ -15,11 +15,11 @@
  */
 package hep.dataforge.names;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.LinkedList;
+import org.jetbrains.annotations.NotNull;
+
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 /**
@@ -37,17 +37,19 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface Name {
+public interface Name extends Comparable<Name> {
 
     /**
      * Constant <code>NAME_TOKEN_SEPARATOR="."</code>
      */
     String NAME_TOKEN_SEPARATOR = ".";
 
-    @Deprecated
-    String NAMESPACE_SEPARATOR = ":";
 
     Name EMPTY = new EmptyName();
+
+    static Name empty() {
+        return EMPTY;
+    }
 
     /**
      * The number of segments of Name produced from given string
@@ -55,35 +57,33 @@ public interface Name {
      * @param name
      * @return
      */
-    static int sizeOf(String name) {
+    static int lengthOf(String name) {
         return Name.of(name).getLength();
     }
 
-    static Name of(String str) {
-        if ( str == null || str.isEmpty()) {
+    static Name of(String name) {
+        if (name == null || name.isEmpty()) {
             return EMPTY;
         }
-
-        String namespace;
-        String name;
-        int nsIndex = str.indexOf(NAMESPACE_SEPARATOR);
-        if (nsIndex >= 0) {
-            namespace = str.substring(0, nsIndex);
-            name = str.substring(nsIndex + 1);
-        } else {
-            namespace = "";
-            name = str;
-        }
-
-        String[] tokens = name.split("\\.");//TODO исправить возможность появления точки внутри запроса ([^\[\]\.]+(?:\[[^\]]*\])?)*
+        String[] tokens = name.split("(?<!\\\\)\\.");
         if (tokens.length == 1) {
-            return new NameToken(namespace, name);
+            return new NameToken(name);
         } else {
-            LinkedList<NameToken> list = new LinkedList<>();
-            for (String token : tokens) {
-                list.add(new NameToken(namespace, token));
-            }
-            return of(list);
+            return of(Stream.of(tokens).map(NameToken::new).collect(Collectors.toList()));
+        }
+    }
+
+    /**
+     * Build name from string ignoring name token separators and treating it as a single name token
+     *
+     * @param name
+     * @return
+     */
+    static Name ofSingle(String name) {
+        if (name.isEmpty()) {
+            return EMPTY;
+        } else {
+            return new NameToken(name);
         }
     }
 
@@ -97,21 +97,10 @@ public interface Name {
         if (segments.length == 0) {
             return EMPTY;
         } else if (segments.length == 1) {
-            return new NameToken("", segments[0]);
+            return of(segments[0]);
         }
 
-        List<NameToken> list = new ArrayList<>();
-        for (String segment : segments) {
-            if (!segment.isEmpty()) {
-                Name segmentName = of(segment);
-                if (segmentName instanceof NameToken) {
-                    list.add((NameToken) segmentName);
-                } else {
-                    list.addAll(((NamePath) segmentName).getNames());
-                }
-            }
-        }
-        return of(list);
+        return of(Stream.of(segments).filter(it -> !it.isEmpty()).map(Name::of).collect(Collectors.toList()));
     }
 
     static String joinString(String... segments) {
@@ -125,34 +114,22 @@ public interface Name {
             return segments[0];
         }
 
-        List<NameToken> list = new ArrayList<>();
-        for (Name segment : segments) {
-            if (segment != EMPTY) {
-                if (segment instanceof NameToken) {
-                    list.add((NameToken) segment);
-                } else {
-                    list.addAll(((NamePath) segment).getNames());
-                }
-            }
-        }
-        return of(list);
+        return of(Stream.of(segments).filter(it -> !it.isEmpty()).collect(Collectors.toList()));
     }
 
     static Name of(Iterable<String> tokens) {
         return of(StreamSupport.stream(tokens.spliterator(), false)
                 .filter(str -> !str.isEmpty())
-                .map(token -> new NameToken("", token)).collect(Collectors.toList()));
+                .map(NameToken::new).collect(Collectors.toList()));
     }
 
-    static Name of(Collection<NameToken> tokens) {
+    static Name of(List<Name> tokens) {
         if (tokens.size() == 0) {
             return EMPTY;
         } else if (tokens.size() == 1) {
-            return tokens.stream().findFirst().get();
+            return tokens.get(0);
         } else {
-            LinkedList<NameToken> list = new LinkedList<>();
-            list.addAll(tokens);
-            return new NamePath(list);
+            return CompositeName.of(tokens);
         }
     }
 
@@ -162,7 +139,7 @@ public interface Name {
      *
      * @return
      */
-    String nameString();
+    String toString();
 
     /**
      * if has query for the last element
@@ -221,32 +198,27 @@ public interface Name {
      */
     Name cutLast();
 
-    /**
-     * The nameSpace of this name. By default is empty
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    String nameSpace();
 
     /**
-     * Return the leading name without namespace prefix or query
+     * Return the leading name without query
      *
      * @return a {@link java.lang.String} object.
      */
     String entry();
 
     /**
-     * Convert this name to given namespace. Replace current namespace if
-     * exists.
+     * Get the list of contained tokens
      *
-     * @param nameSpace a {@link java.lang.String} object.
-     * @return a {@link hep.dataforge.names.Name} object.
+     * @return
      */
-    Name toNameSpace(String nameSpace);
+    List<NameToken> getTokens();
 
-    default Name removeNameSpace() {
-        return toNameSpace("");
-    }
+    /**
+     * Returns true only for EMPTY name
+     *
+     * @return
+     */
+    boolean isEmpty();
 
     /**
      * Create a new name with given name appended to the end of this one
@@ -264,7 +236,18 @@ public interface Name {
 
     String[] asArray();
 
-    default boolean equals(String name){
+    default boolean equals(String name) {
         return this.toString().equals(name);
     }
+
+    @Override
+    default int compareTo(@NotNull Name o) {
+        return this.toString().compareTo(o.toString());
+    }
+
+    /**
+     * Convert to string without escaping separators
+     * @return
+     */
+    String toUnescaped();
 }

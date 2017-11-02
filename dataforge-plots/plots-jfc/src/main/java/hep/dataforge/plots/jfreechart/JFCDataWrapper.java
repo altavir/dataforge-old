@@ -76,7 +76,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         if (getSeriesCount() == 1) {
             return plot.getName();
         } else {
-            return Name.joinString(plot.getName(), adapter.getYTitle(i));
+            return Name.join(plot.getName(), Name.ofSingle(adapter.getYTitle(i)));
         }
     }
 

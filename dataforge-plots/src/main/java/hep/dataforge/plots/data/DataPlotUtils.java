@@ -31,7 +31,7 @@ public class DataPlotUtils {
                 .forEach(pl -> {
                     XYAdapter adapter = XYAdapter.from(pl.getAdapter());
 
-                    names.add(pl.getName());
+                    names.add(pl.getTitle());
                     pl.getData().forEach(point -> {
                         Value x = adapter.getX(point);
                         ValueMap.Builder mdp;
@@ -42,7 +42,7 @@ public class DataPlotUtils {
                             mdp.putValue("x", x);
                             points.put(x, mdp);
                         }
-                        mdp.putValue(pl.getName(), adapter.getY(point));
+                        mdp.putValue(pl.getTitle(), adapter.getY(point));
                     });
                 });
 
