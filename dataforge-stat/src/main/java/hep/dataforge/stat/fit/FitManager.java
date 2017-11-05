@@ -53,7 +53,7 @@ public class FitManager extends BasicPlugin {
 
     @Override
     public Optional<?> provide(Path path) {
-        switch (path.target()) {
+        switch (path.getTarget()) {
             case FIT_ENGINE_TARGET:
                 return Optional.ofNullable(engineList.get(path.nameString()));
             case Action.ACTION_TARGET:

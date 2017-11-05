@@ -41,7 +41,7 @@ public class LoaderFactory {
             builder.putValue("index", indexField);
         }
 
-        builder.putValue(Loader.LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
+        builder.putValue(Loader.LOADER_TYPE_KEY, TableLoader.TABLE_LOADER_TYPE);
 
         if (format != null) {
             builder.putNode(format.toMeta());

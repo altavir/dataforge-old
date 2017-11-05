@@ -3,7 +3,6 @@ package hep.dataforge.server.storage;
 import freemarker.template.Template;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.names.Name;
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.server.ServletUtils;
 import hep.dataforge.storage.api.*;
@@ -58,7 +57,7 @@ public class StorageRatpackHandler implements Handler {
                 case EventLoader.EVENT_LOADER_TYPE:
                     renderEvents(ctx, (EventLoader) loader);
                     return;
-                case TableLoader.POINT_LOADER_TYPE:
+                case TableLoader.TABLE_LOADER_TYPE:
                     if ("pull".equals(ctx.getRequest().getQueryParams().get("action"))) {
                         new PointLoaderDataHandler((TableLoader) loader).handle(ctx);
                     } else {
@@ -87,7 +86,7 @@ public class StorageRatpackHandler implements Handler {
             Map<String, Object> data = buildStorageData(ctx);
             data.put("storageName", storage.getName());
             data.put("content", b.toString());
-            data.put("path", Name.of(storage.getFullPath()).asArray());
+            data.put("path", storage.getFullName().asArray());
 
             StringWriter writer = new StringWriter();
             template.process(data, writer);
@@ -187,7 +186,7 @@ public class StorageRatpackHandler implements Handler {
 
     private Map<String, Object> buildLoaderData(Context ctx, Loader loader) {
         Map<String, Object> data = buildStorageData(ctx);
-        data.put("path", Name.of(loader.getStorage().getFullPath()).asArray());
+        data.put("path", loader.getStorage().getFullName().asArray());
         data.put("loaderName", loader.getName());
         return data;
     }

@@ -16,6 +16,9 @@
 package hep.dataforge.providers;
 
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.Optional;
 
 /**
  * <p>
@@ -26,13 +29,14 @@ import hep.dataforge.names.Name;
  */
 public interface Path {
 
-    String TARGET_EMPTY = "";
+    String EMPTY_TARGET = "";
     String PATH_SEGMENT_SEPARATOR = "/";
     String TARGET_SEPARATOR = "::";
 
     static Path of(String path) {
-        SegmentedPath p = new SegmentedPath(path);
-        if (p.hasTail()) {
+        SegmentedPath p = SegmentedPath.of(path);
+
+        if (p.optTail().isPresent()) {
             return p;
         } else {
             return p.head();
@@ -41,6 +45,7 @@ public interface Path {
 
     /**
      * Create a path with given target override (even if it is provided by the path itself)
+     *
      * @param target
      * @param path
      * @return
@@ -49,37 +54,35 @@ public interface Path {
         return of(path).withTarget(target);
     }
 
-    /**
-     * Является ли этот путь односегментным(конечным)
-     *
-     * @return a boolean.
-     */
-    boolean hasTail();
+    @NotNull
+    static Path of(String target, Name name) {
+        return new PathSegment(target, name);
+    }
 
     /**
      * The Name of first segment
      *
      * @return a {@link hep.dataforge.names.Name} object.
      */
-    Name name();
+    Name getName();
 
     default String nameString() {
-        return name().toString();
+        return getName().toString();
     }
 
     /**
-     * The path without first segment. Null if this is single segment path.
+     * Returns non-empty optional containing the chain without first segment in case of chain path.
      *
      * @return
      */
-    Path tail();
+    Optional<Path> optTail();
 
     /**
      * The target of first segment
      *
      * @return a {@link java.lang.String} object.
      */
-    String target();
+    String getTarget();
 
     /**
      * Return new path with different target
@@ -87,5 +90,12 @@ public interface Path {
      * @return
      */
     Path withTarget(String target);
+
+    /**
+     * Create or append chain path
+     * @param segment
+     * @return
+     */
+    Path append(Path segment);
 
 }

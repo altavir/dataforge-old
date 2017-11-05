@@ -15,7 +15,7 @@ import java.util.stream.Stream;
 /**
  * Created by darksnake on 18-Apr-17.
  */
-public class ListOfPoints implements MetaMorph, NavigablePointSource {
+public class ListOfPoints implements MetaMorph, NavigableValuesSource {
 
     public static List<Values> buildFromMeta(Meta annotation) {
         List<Values> res = new ArrayList<>();

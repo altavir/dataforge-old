@@ -22,6 +22,7 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
@@ -34,7 +35,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.*;
@@ -370,8 +371,8 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         MetaBuilder id = new MetaBuilder("context");
         id.update(properties);
         pluginManager().stream(true).forEach(plugin -> {
-            if(plugin.getClass().isAnnotationPresent(PluginDef.class)){
-                if(!plugin.getClass().getAnnotation(PluginDef.class).support()) {
+            if (plugin.getClass().isAnnotationPresent(PluginDef.class)) {
+                if (!plugin.getClass().getAnnotation(PluginDef.class).support()) {
                     id.putNode(plugin.getIdentity());
                 }
 
@@ -428,13 +429,13 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             this.ctx.parent = parent;
         }
 
-        public Builder properties(Meta config) {
-            if (config != null) {
-                if (config.hasMeta("property")) {
-                    config.getMetaList("property").forEach((propertyNode) -> {
-                        ctx.putValue(propertyNode.getString("key"), propertyNode.getValue("value"));
-                    });
-                }
+        public Builder properties(@NotNull Meta config) {
+            if (config.hasMeta("property")) {
+                config.getMetaList("property").forEach((propertyNode) -> {
+                    ctx.putValue(propertyNode.getString("key"), propertyNode.getValue("value"));
+                });
+            } else if (Objects.equals(config.getName(), "properties")) {
+                MetaUtils.valueStream(config).forEach(pair -> ctx.putValue(pair.getKey(), pair.getValue()));
             }
             return this;
         }
@@ -448,6 +449,11 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
          */
         public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
             ctx.pluginManager().load(type, pl -> pl.configure(configuration));
+            return this;
+        }
+
+        public Builder plugin(String type, Meta configuration) {
+            ctx.pluginManager().load(type).configure(configuration);
             return this;
         }
 
@@ -477,19 +483,75 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
          * @param rootDir
          * @return
          */
-        public Builder setRootDir(File rootDir) {
+        public Builder setRootDir(String rootDir) {
             if (!ctx.pluginManager().opt(IOManager.class).isPresent()) {
                 ctx.pluginManager().load(new BasicIOManager(ctx.getParent().io().in(), ctx.getParent().io().out()));
             }
-            ctx.putValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir.getAbsoluteFile());
+            ctx.putValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir);
             return this;
         }
-
 
         public Context build() {
             return ctx;
         }
     }
 
+    /**
+     * Build a new context based on given meta
+     *
+     * @param name
+     * @param parent
+     * @param meta
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public static Context build(String name, Context parent, Meta meta) {
+        Context.Builder builder = builder(name, parent);
+
+        meta.optMeta("properties").ifPresent(builder::properties);
+
+        meta.optValue("classpath").ifPresent(clp -> {
+            builder.classPath(clp.listValue().stream()
+                    .map(it -> {
+                        try {
+                            return new URL(it.stringValue());
+                        } catch (MalformedURLException e) {
+                            throw new RuntimeException(e);
+                        }
+                    })
+                    .collect(Collectors.toList())
+            );
+        });
+
+        meta.optString("rootDir").ifPresent(builder::setRootDir);
+
+        meta.getMetaList("plugin").forEach(pl -> {
+            Meta plMeta = pl.getMetaOrEmpty(MetaBuilder.DEFAULT_META_NAME);
+            if (pl.hasValue("name")) {
+                builder.plugin(pl.getString("name"), plMeta);
+            } else if (pl.hasValue("class")) {
+                Class<? extends Plugin> type = null;
+                try {
+                    type = (Class<? extends Plugin>) Class.forName(pl.getString("class"));
+                } catch (ClassNotFoundException e) {
+                    throw new RuntimeException(e);
+                }
+                builder.plugin(type, plMeta);
+            } else {
+                throw new IllegalArgumentException("Malformed plugin definition");
+            }
+        });
+
+
+        return builder.build();
+    }
+
+    public static Context build(Context parent, Meta meta) {
+        return build(meta.getString("name"), parent, meta);
+    }
+
+    public static Context build(Meta meta) {
+        return build(Global.instance(), meta);
+    }
 
 }

@@ -31,7 +31,7 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends Markedup, NavigablePointSource, Serializable {
+public interface Table extends Markedup, NavigableValuesSource, Serializable {
 
     /**
      * Get an immutable column from this table

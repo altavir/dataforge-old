@@ -15,7 +15,7 @@
  */
 package hep.dataforge.stat.models;
 
-import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.values.Values;
 
 /**
@@ -33,7 +33,7 @@ public interface Generator {
      * @param config a {@link java.lang.Iterable} object.
      * @return a {@link hep.dataforge.tables.ListTable} object.
      */
-    NavigablePointSource generateData(Iterable<Values> config);
+    NavigableValuesSource generateData(Iterable<Values> config);
 
     Values generateDataPoint(Values configPoint);
 

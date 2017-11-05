@@ -37,7 +37,7 @@ public class ServletUtils {
         return "http://" + hostName + ":" + ctx.getServerConfig().getPort();
     }
 
-//    public static DataTable generateDataTable(PointSource source) {
+//    public static DataTable generateDataTable(ValuesSource source) {
 //        DataTable table = new DataTable();
 //        TableFormat format = source.getFormat();
 //        for (String name : format.names()) {

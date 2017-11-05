@@ -11,9 +11,9 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 import javafx.util.Pair;
 
-import java.util.Iterator;
 import java.util.NavigableSet;
 import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -24,7 +24,7 @@ import java.util.stream.StreamSupport;
  * @param <T>
  * @author Alexander Nozik
  */
-public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>> {
+public class DefaultIndex<T> implements ValueIndex<T> {
 
     private final Iterable<T> iterable;
 
@@ -32,51 +32,32 @@ public class DefaultIndex<T> implements ValueIndex<T>, Iterable<Pair<Integer, T>
         this.iterable = iterable;
     }
 
-    @Override
-    public Iterator<Pair<Integer, T>> iterator() {
-        Iterator<T> iterator = iterable.iterator();
-        return new Iterator<Pair<Integer, T>>() {
-            private int counter = 0;
-
-            @Override
-            public boolean hasNext() {
-                return iterator.hasNext();
-            }
-
-            @Override
-            public Pair<Integer, T> next() {
-                Pair<Integer, T> res = new Pair<>(counter, iterator.next());
-                counter++;
-                return res;
-            }
-        };
+    public Stream<Pair<Integer, T>> stream() {
+        AtomicInteger counter = new AtomicInteger(0);
+        return StreamSupport.stream(iterable.spliterator(), false).map(it -> new Pair<>(counter.getAndIncrement(), it));
     }
-
 
     @Override
     public Stream<T> pull(Value value) throws StorageException {
-        return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> value.intValue() == pair.getKey())
-                .map(pair -> pair.getValue());
+        return stream().filter(pair -> value.intValue() == pair.getKey())
+                .map(Pair::getValue);
     }
 
     @Override
     public Stream<T> pull(Value from, Value to) throws StorageException {
-        return StreamSupport.stream(spliterator(), true)
-                .filter(pair -> ValueUtils.isBetween(pair.getKey(), from, to))
-                .map(pair -> pair.getValue());
+        return stream().filter(pair -> ValueUtils.isBetween(pair.getKey(), from, to))
+                .map(Pair::getValue);
     }
 
     public Stream<T> pull(Predicate<Integer> predicate) {
-        return StreamSupport.stream(spliterator(), true)
-                .filter(t -> predicate.test(t.getKey()))
-                .map(pair -> pair.getValue());
+        return stream().filter(t -> predicate.test(t.getKey()))
+                .map(Pair::getValue);
     }
 
     @Override
     public NavigableSet<Value> keySet() {
         TreeSet<Value> res = new TreeSet<>();
-        StreamSupport.stream(spliterator(), false).forEach(it -> res.add(Value.of(it.getKey())));
+        stream().forEach(it -> res.add(Value.of(it.getKey())));
         return res;
     }
 }

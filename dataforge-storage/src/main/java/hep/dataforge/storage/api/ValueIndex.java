@@ -43,7 +43,7 @@ public interface ValueIndex<T> extends Index<T> {
 
     /**
      * Search for the index field value closest to provided one. Specific search
-     * mechanism could differ for different loaders.
+     * mechanism could differ for different indexes.
      *
      * @param value
      * @return

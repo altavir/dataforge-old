@@ -51,10 +51,10 @@ public class JSONMetaWriter implements MetaStreamWriter {
         }
         JsonWriterFactory writerFactory = Json.createWriterFactory(properties);
         writerFactory.createWriter(stream, charset)
-                .write(fromMeta(meta));
+                .write(metaToJson(meta));
     }
 
-    public JsonObject fromMeta(Meta meta) {
+    public static JsonObject metaToJson(Meta meta) {
         JsonObjectBuilder res = Json.createObjectBuilder();
         // записываем все значения
         meta.getValueNames(true).forEach(key ->{
@@ -73,11 +73,11 @@ public class JSONMetaWriter implements MetaStreamWriter {
         meta.getNodeNames(true).forEach(key ->{
             List<? extends Meta> item = meta.getMetaList(key);
             if (item.size() == 1) {
-                res.add(key, fromMeta(item.get(0)));
+                res.add(key, metaToJson(item.get(0)));
             } else {
                 JsonArrayBuilder array = Json.createArrayBuilder();
                 for (Meta anval : item) {
-                    array.add(fromMeta(anval));
+                    array.add(metaToJson(anval));
                 }
                 res.add(key, array);
             }

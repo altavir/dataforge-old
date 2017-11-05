@@ -230,10 +230,10 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
                     throw new NameNotFoundException(axisName, "No such axis in this plot");
             }
 
-            if (axisMeta.hasValue("axisTitle")) {
-                String label = axisMeta.getString("axisTitle");
-                if (axisMeta.hasValue("axisUnits")) {
-                    label += " (" + axisMeta.getString("axisUnits") + ")";
+            if (axisMeta.hasValue("title")) {
+                String label = axisMeta.getString("title");
+                if (axisMeta.hasValue("units")) {
+                    label += " (" + axisMeta.getString("units") + ")";
                 }
                 axis.setLabel(label);
             }

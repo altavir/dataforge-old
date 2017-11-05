@@ -18,6 +18,7 @@ package hep.dataforge.plots.fx;
 import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.data.XYPlot;
@@ -54,10 +55,10 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
         this.chart = new LineChart<>(new NumberAxis(), new NumberAxis());
     }
 
-    XYChart.Series<Number, Number> getSeries(String name) {
+    XYChart.Series<Number, Number> getSeries(Name name) {
         XYChart.Series<Number, Number> series = null;
         for (XYChart.Series ser : chart.getData()) {
-            if (ser != null && name.equals(ser.getName())) {
+            if (ser != null && name.toString().equals(ser.getName())) {
                 series = ser;
                 break;
             }
@@ -76,12 +77,12 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
     }
 
     @Override
-    protected void updatePlotData(String name, @NotNull Plot plot) {
+    protected void updatePlotData(Name name, @NotNull Plot plot) {
         XYChart.Series<Number, Number> series = getSeries(name);
 
         if (series == null) {
             series = new XYChart.Series<>();
-            series.setName(name);
+            series.setName(name.toString());
             chart.getData().add(series);
         } else {
             series.getData().clear();
@@ -105,7 +106,7 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
     }
 
     @Override
-    protected void updatePlotConfig(String name, Laminate laminate) {
+    protected void updatePlotConfig(Name name, Laminate laminate) {
 
     }
 
@@ -134,5 +135,10 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
                 return null;
             }
         }, null, null);
+    }
+
+    @Override
+    public void plotRemoved(Name name) {
+
     }
 }

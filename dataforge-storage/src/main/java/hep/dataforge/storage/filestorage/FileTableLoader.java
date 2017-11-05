@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 public class FileTableLoader extends AbstractTableLoader {
 
     public static FileTableLoader fromEnvelope(Storage storage, FileEnvelope envelope) throws Exception {
-        if (FileStorageEnvelopeType.validate(envelope, POINT_LOADER_TYPE)) {
+        if (FileStorageEnvelopeType.validate(envelope, TABLE_LOADER_TYPE)) {
             FileTableLoader res = new FileTableLoader(storage,
                     FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
                     envelope.meta(),

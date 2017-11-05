@@ -15,78 +15,60 @@
  */
 package hep.dataforge.providers;
 
-import hep.dataforge.exceptions.PathSyntaxException;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 
-import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 
 /**
  * Путь в формате target1::path1/target2::path2. Блоки между / называются
  * сегментами.
- *
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 class SegmentedPath implements Path {
 
-
-    private final LinkedList<PathSegment> segments;
-    /**
-     * Для наследования цели
-     */
-    private final String target;
-
-    SegmentedPath(List<PathSegment> segments, String target) {
-        this.segments = new LinkedList(segments);
-        String newTarget = this.segments.getFirst().target();
-
-        if (newTarget.isEmpty()) {
-            //Если новый заголовок без цели, то цель наследуется
-            this.target = target;
-        } else {
-            //Если цель задекларирована, то используется она
-            this.target = newTarget;
-        }
-
-    }
-
-    protected SegmentedPath(String pathStr) {
-        if (pathStr == null || pathStr.isEmpty()) {
+    @NotNull
+    static SegmentedPath of(@NotNull String pathStr) {
+        if (pathStr.isEmpty()) {
             throw new IllegalArgumentException("Empty argument in the path constructor");
         }
         String[] split = normalize(pathStr).split(PATH_SEGMENT_SEPARATOR);
-        segments = new LinkedList<>();
-
-        if (split.length == 0) {
-            throw new PathSyntaxException();
-        }
+        LinkedList<PathSegment> segments = new LinkedList<>();
 
         for (String segmentStr : split) {
             segments.add(new PathSegment(segmentStr));
         }
 
-        target = segments.get(0).target();
+        String target = segments.get(0).getTarget();
+        return new SegmentedPath(target, segments);
     }
 
+    private final LinkedList<PathSegment> segments;
+
     /**
-     * {@inheritDoc}
+     * for target inheritance
      */
-    public static SegmentedPath of(String pathStr) {
-        return new SegmentedPath(pathStr);
+    private final String defaultTarget;
+
+    SegmentedPath(String defaultTarget, Collection<PathSegment> segments) {
+        if (segments.isEmpty()) {
+            throw new IllegalArgumentException("Zero length paths are not allowed");
+        }
+        this.defaultTarget = defaultTarget;
+        this.segments = new LinkedList<>(segments);
     }
 
     /**
-     * Устраняет ведущиие и конечные "/"
+     * remove leading and trailing separators
      *
      * @param path
      * @return
      */
     private static String normalize(String path) {
         String res = path.trim();
-        // убираем ведущие сепараторы
+        // remove leading separators
         while (res.startsWith(PATH_SEGMENT_SEPARATOR)) {
             res = res.substring(1);
         }
@@ -97,85 +79,69 @@ class SegmentedPath implements Path {
 
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String target() {
-        if (target == null) {
-            return TARGET_EMPTY;
+    public String getTarget() {
+        String target = segments.getFirst().getTarget();
+        if(target.isEmpty()){
+            return defaultTarget;
+        } else {
+            return target;
         }
-        return target;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public Name name() {
-        return segments.getFirst().name();
     }
 
     /**
-     * <p>head.</p>
-     *
-     * @return a {@link hep.dataforge.providers.PathSegment} object.
+     * {@inheritDoc}
      */
+    @Override
+    public Name getName() {
+        return segments.getFirst().getName();
+    }
+
+
     public PathSegment head() {
         return this.segments.peekFirst();
     }
 
-    /**
-     * <p>size.</p>
-     *
-     * @return a int.
-     */
+
     public int size() {
         return this.segments.size();
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Возвращает путь за исключением первого сегмента
-     */
     @Override
-    public SegmentedPath tail() {
+    public Optional<Path> optTail() {
         if (segments.size() <= 1) {
-            return null;
+            return Optional.empty();
+        } else {
+            List<PathSegment> newSegments = segments.subList(1, segments.size());
+            return Optional.of(new SegmentedPath(defaultTarget, newSegments));
         }
-        List<PathSegment> newSegments = segments.subList(1, segments.size());
-        return new SegmentedPath(newSegments, target);
     }
 
-    /**
-     * {@inheritDoc}
-     *
-     * Является ли этот путь односегментным(конечным)
-     */
-    @Override
-    public boolean hasTail() {
-        return size() > 1;
-    }
 
-    /**
-     * Глобальная цель для последнего сегмента пути. Соответствует типу
-     * возвращаемого объекта
-     *
-     * @return a {@link java.lang.String} object.
-     */
-    public String getFinalTarget() {
-        // Идем по сегментам в обратном порядке и ищем первый раз, когда появляется объявленная цель
-        for (Iterator<PathSegment> it = segments.descendingIterator(); it.hasNext();) {
-            Path segment = it.next();
-            if (!segment.target().equals(TARGET_EMPTY)) {
-                return segment.target();
-            }
-        }
-        //Если цель не объявлена ни в одном из сегментов, возвращаем пустую цель
-        return TARGET_EMPTY;
-    }
+//    public String getFinalTarget() {
+//        // Идем по сегментам в обратном порядке и ищем первый раз, когда появляется объявленная цель
+//        for (Iterator<PathSegment> it = segments.descendingIterator(); it.hasNext(); ) {
+//            Path segment = it.next();
+//            if (!segment.target().equals(EMPTY_TARGET)) {
+//                return segment.target();
+//            }
+//        }
+//        //Если цель не объявлена ни в одном из сегментов, возвращаем пустую цель
+//        return EMPTY_TARGET;
+//    }
 
     @Override
     public Path withTarget(String target) {
-        return new SegmentedPath(segments, target);
+        return new SegmentedPath(target, segments);
     }
 
-    
+    @Override
+    public Path append(Path segment) {
+        List<PathSegment> list = new ArrayList<>(this.segments);
+        list.add(new PathSegment(segment.getTarget(), segment.getName()));
+        return new SegmentedPath(defaultTarget, list);
+    }
 }

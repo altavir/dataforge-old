@@ -148,7 +148,7 @@ public abstract class AbstractTableLoader extends AbstractLoader implements Tabl
 
     @Override
     public String getType() {
-        return POINT_LOADER_TYPE;
+        return TABLE_LOADER_TYPE;
     }
 
     @Override

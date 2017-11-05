@@ -18,8 +18,8 @@ package hep.dataforge.storage.api;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.tables.PointListener;
-import hep.dataforge.tables.PointSource;
 import hep.dataforge.tables.TableFormat;
+import hep.dataforge.tables.ValuesSource;
 import hep.dataforge.values.Values;
 
 import java.util.Collection;
@@ -33,12 +33,11 @@ import java.util.Collection;
  */
 @NodeDef(name = "format", required = true, info = "data point format for this loader")
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
-public interface TableLoader extends Loader, PointSource {
+public interface TableLoader extends Loader, ValuesSource {
 
-    String POINT_LOADER_TYPE = "point";
+    String TABLE_LOADER_TYPE = "table";
     String DEFAULT_INDEX_FIELD = "";
 
-    String LOADER_FORMAT_KEY = "format";
 
     /**
      * The minimal format for points in this loader. Is null for unformatted loader

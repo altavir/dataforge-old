@@ -22,7 +22,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.ListOfPoints;
-import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.utils.SimpleMetaMorph;
@@ -137,7 +137,7 @@ public class FitResult extends SimpleMetaMorph {
                 .opt();
     }
 
-    public NavigablePointSource getData() {
+    public NavigableValuesSource getData() {
         return optState().map(FitState::getData)
                 .orElseGet(() -> MetaMorph.morph(ListOfPoints.class, meta().getMeta("data")));
     }

@@ -69,7 +69,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
     @ValueDef(name = "err", info = "Axis error key")
     @ValueDef(name = "up", info = "Axis upper boundary key")
     @ValueDef(name = "lo", info = "Axis lower boundary key")
-    @ValueDef(name = "axisTitle", info = "The title of this axis. By default axis name is used.")
+    @ValueDef(name = "title", info = "The title of this axis. By default axis name is used.")
     public Meta getAxisMeta(String axis) {
         return this.meta().getMeta(axis, Meta.empty());
     }

@@ -1,11 +1,6 @@
 
 description = "A ktor based http server"
 
-repositories{
-    maven { url  "http://dl.bintray.com/kotlin/ktor" }
-    maven { url "https://dl.bintray.com/kotlin/kotlinx" }
-}
-
 dependencies {
     compile project(':kodex')
     compile project(":dataforge-storage")

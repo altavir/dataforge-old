@@ -104,9 +104,9 @@ public class DescriptorUtils {
 
     public static NodeDescriptor buildDescriptor(String string) {
         Path path = Path.of(string);
-        if (path.target().isEmpty() || "class".equals(path.target()) || "method".equals(path.target())) {
+        if (path.getTarget().isEmpty() || "class".equals(path.getTarget()) || "method".equals(path.getTarget())) {
             return buildDescriptor(findAnnotatedElement(path));
-        } else if ("resource".equals(path.target())) {
+        } else if ("resource".equals(path.getTarget())) {
             return new NodeDescriptor(buildMetaFromResource("node", path.nameString()));
         } else {
             throw new NameNotFoundException("Cant create descriptor from given target", string);
@@ -259,17 +259,17 @@ public class DescriptorUtils {
      * @return
      */
     public static AnnotatedElement findAnnotatedElement(Path path) {
-        if (path.target().isEmpty() || path.target().equals("class")) {
+        if (path.getTarget().isEmpty() || path.getTarget().equals("class")) {
             try {
-                return Class.forName(path.name().toString());
+                return Class.forName(path.getName().toString());
             } catch (ClassNotFoundException ex) {
                 LoggerFactory.getLogger(DescriptorUtils.class).error("Class not found by given path: " + path, ex);
                 return null;
             }
-        } else if (path.target().equals("method")) {
+        } else if (path.getTarget().equals("method")) {
             try {
-                String className = path.name().cutLast().toString();
-                String methodName = path.name().getLast().toString();
+                String className = path.getName().cutLast().toString();
+                String methodName = path.getName().getLast().toString();
 
                 Class dClass = Class.forName(className);
 
@@ -288,7 +288,7 @@ public class DescriptorUtils {
                 return null;
             }
         } else {
-            LoggerFactory.getLogger(DescriptorUtils.class).error("Unknown target for descriptor finder: " + path.target());
+            LoggerFactory.getLogger(DescriptorUtils.class).error("Unknown target for descriptor finder: " + path.getTarget());
             return null;
         }
     }

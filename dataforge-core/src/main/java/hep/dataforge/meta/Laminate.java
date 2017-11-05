@@ -111,9 +111,13 @@ public final class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate withFirstLayer(Meta layer) {
-        Laminate res = new Laminate(this);
-        res.addFirstLayer(layer);
-        return res;
+        if(layer.isEmpty()){
+            return this;
+        } else {
+            Laminate res = new Laminate(this);
+            res.addFirstLayer(layer);
+            return res;
+        }
     }
 
     /**

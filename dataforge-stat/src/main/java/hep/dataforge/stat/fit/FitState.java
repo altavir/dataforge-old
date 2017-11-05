@@ -20,7 +20,7 @@ import hep.dataforge.stat.likelihood.LogLikelihood;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.parametric.DerivativeCalculator;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.tables.Table;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.linear.DiagonalMatrix;
@@ -41,7 +41,7 @@ import static org.apache.commons.math3.util.MathArrays.ebeMultiply;
  */
 public class FitState {
 
-    private final NavigablePointSource points;
+    private final NavigableValuesSource points;
 
     private final Model model;
 
@@ -53,7 +53,7 @@ public class FitState {
 
     private final ParamSet pars;
 
-    public FitState(NavigablePointSource points, Model model, ParamSet pars) {
+    public FitState(NavigableValuesSource points, Model model, ParamSet pars) {
         this.points = points;
         this.model = model;
         this.prior = null;
@@ -62,7 +62,7 @@ public class FitState {
         this.interval = null;
     }
 
-    public FitState(NavigablePointSource points, Model model, ParamSet pars,
+    public FitState(NavigableValuesSource points, Model model, ParamSet pars,
                     NamedMatrix covariance, IntervalEstimate interval, ParametricValue prior) {
         this.points = points;
         this.model = model;
@@ -319,7 +319,7 @@ public class FitState {
         return model.getNames().size();
     }
 
-    public NavigablePointSource getData() {
+    public NavigableValuesSource getData() {
         return points;
     }
 
@@ -332,7 +332,7 @@ public class FitState {
      */
     public static class Builder {
 
-        private NavigablePointSource dataSet;
+        private NavigableValuesSource dataSet;
         private IntervalEstimate interval;
         private Model model;
         private ParamSet pars;

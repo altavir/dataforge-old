@@ -67,11 +67,6 @@ public abstract class AbstractLoader implements Loader {
     }
 
     @Override
-    public String getDescription() {
-        return meta().getString("description", "");
-    }
-
-    @Override
     public Storage getStorage() {
         return storage;
     }
@@ -100,7 +95,7 @@ public abstract class AbstractLoader implements Loader {
 
     @Override
     public String getType() {
-        return meta().getString(LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
+        return meta().getString(LOADER_TYPE_KEY, TableLoader.TABLE_LOADER_TYPE);
     }
 
     protected void tryPush() throws PushFailedException {

@@ -76,8 +76,8 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
      */
     @ValueDef(name = "type", allowed = "[number, log, time]", def = "number",
             info = "The type of axis. By default number axis is used")
-    @ValueDef(name = "axisTitle", info = "The title of the axis.")
-    @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
+    @ValueDef(name = "title", info = "The title of the axis.")
+    @ValueDef(name = "units", def = "", info = "The units of the axis.")
     @NodeDef(name = "range", info = "The definition of range for given axis")
     @ValueDef(name = "range.from", type = {NUMBER}, info = "Lower boundary for fixed range")
     @ValueDef(name = "range.to", type = {NUMBER}, info = "Upper boundary for fixed range")

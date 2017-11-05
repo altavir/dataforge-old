@@ -133,7 +133,7 @@ public class XYAdapter extends AxisValuesAdapter {
     }
 
     public String getYTitle(int i) {
-        return meta().getMetaList(Y_AXIS).get(i).getString("axisTitle", nameFor(VALUE_KEY));
+        return meta().getMetaList(Y_AXIS).get(i).getString("title", nameFor(VALUE_KEY));
     }
 
     public Value getX(Values point) {

@@ -19,7 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.RandomUtils;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
@@ -69,7 +69,7 @@ public class HistogramGenerator implements Generator {
 
     /** {@inheritDoc} */
     @Override
-    public NavigablePointSource generateData(Iterable<Values> config) {
+    public NavigableValuesSource generateData(Iterable<Values> config) {
         ListTable.Builder res = new ListTable.Builder(names);
         for (Iterator<Values> it = config.iterator(); it.hasNext();) {
             res.row(this.generateDataPoint(it.next()));
@@ -132,7 +132,7 @@ public class HistogramGenerator implements Generator {
      * @param binNumber a int.
      * @return
      */
-    public NavigablePointSource generateUniformHistogram(double begin, double end, int binNumber) {
+    public NavigableValuesSource generateUniformHistogram(double begin, double end, int binNumber) {
         assert end > begin;
         ListTable.Builder res = new ListTable.Builder(names);
         Values bin;

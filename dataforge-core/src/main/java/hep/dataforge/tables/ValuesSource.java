@@ -12,15 +12,13 @@ import java.util.stream.StreamSupport;
 
 /**
  * A finite or infinite source of DataPoints
+ *
  * @author Alexander Nozik
  */
-public interface PointSource extends Iterable<Values> {
-
-
-//    TableFormat getFormat();
+public interface ValuesSource extends Iterable<Values> {
 
     default Stream<Values> getRows() {
         return StreamSupport.stream(this.spliterator(), false);
     }
-    
+
 }

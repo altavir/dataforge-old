@@ -9,7 +9,7 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.XYModel;
-import hep.dataforge.tables.NavigablePointSource;
+import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.utils.Misc;
 import org.jetbrains.annotations.NotNull;
@@ -61,11 +61,11 @@ public class FitHelper {
      * @param meta
      * @return
      */
-    public FitBuilder fit(NavigablePointSource data, Meta meta) {
+    public FitBuilder fit(NavigableValuesSource data, Meta meta) {
         return new FitBuilder(data).update(meta);
     }
 
-    public FitBuilder fit(NavigablePointSource data) {
+    public FitBuilder fit(NavigableValuesSource data) {
         return new FitBuilder(data);
     }
 
@@ -96,14 +96,14 @@ public class FitHelper {
     }
 
     public class FitBuilder {
-        NavigablePointSource data;
+        NavigableValuesSource data;
         Model model;
         ParamSet startPars = new ParamSet();
         History log = new Chronicle("fit", null);
         List<FitStage> stages = new ArrayList<>();
         BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().io().out());
 
-        public FitBuilder(@NotNull NavigablePointSource data) {
+        public FitBuilder(@NotNull NavigableValuesSource data) {
             this.data = data;
         }
 

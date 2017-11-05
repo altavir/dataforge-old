@@ -77,16 +77,16 @@ public class PlotUtils {
 
     public static void setXAxis(PlotFrame frame, String title, String units, String type) {
         MetaBuilder builder = new MetaBuilder("xAxis")
-                .setValue("axisTitle", title)
-                .setValue("axisUnits", units)
+                .setValue("title", title)
+                .setValue("units", units)
                 .setValue("type", type);
         frame.getConfig().setNode(builder);
     }
 
     public static void setYAxis(PlotFrame frame, String title, String units, String type) {
         MetaBuilder builder = new MetaBuilder("yAxis")
-                .setValue("axisTitle", title)
-                .setValue("axisUnits", units)
+                .setValue("title", title)
+                .setValue("units", units)
                 .setValue("type", type);
         frame.getConfig().setNode(builder);
     }

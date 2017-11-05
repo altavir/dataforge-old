@@ -5,6 +5,7 @@ import com.panayotis.gnuplot.plot.DataSetPlot;
 import com.panayotis.gnuplot.terminal.GNUPlotTerminal;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.values.Value;
@@ -20,15 +21,15 @@ import java.util.Map;
 public class GnuPlotFrame extends XYPlotFrame {
 
     private JavaPlot javaPlot = new JavaPlot();
-    private Map<String, DataSetPlot> plots = new HashMap<>();
+    private Map<Name, DataSetPlot> plots = new HashMap<>();
     private GNUPlotTerminal terminal;
 
     @Override
-    protected void updatePlotData(String name, @NotNull Plot plot) {
+    protected void updatePlotData(Name name, @NotNull Plot plot) {
         plots.computeIfAbsent(name, str -> {
             DataSetPlot dpl = new DataSetPlot(new PlottableDataSet(plot));
             javaPlot.addPlot(dpl);
-            dpl.setTitle(plot.meta().getString("title", plot.getName()));
+            dpl.setTitle(plot.getTitle());
             return dpl;
         });
 
@@ -36,7 +37,7 @@ public class GnuPlotFrame extends XYPlotFrame {
     }
 
     @Override
-    protected void updatePlotConfig(String name, Laminate laminate) {
+    protected void updatePlotConfig(Name name, Laminate laminate) {
 
     }
 
@@ -77,5 +78,10 @@ public class GnuPlotFrame extends XYPlotFrame {
 
     public String getCommands() {
         return javaPlot.getCommands();
+    }
+
+    @Override
+    public void plotRemoved(Name name) {
+
     }
 }

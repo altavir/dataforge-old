@@ -18,6 +18,9 @@ package hep.dataforge.providers;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 /**
  * Сегмент пути. Представляет собой пару цель::имя. Если цель не указана или
  * пустая, используется цель по-умолчанию для данного провайдера
@@ -30,31 +33,12 @@ class PathSegment implements Path {
     private Name name;
     private String target;
 
-    /**
-     * <p>
-     * Constructor for PathSegment.</p>
-     *
-     * @param name a {@link java.lang.String} object.
-     * @param target a {@link java.lang.String} object.
-     */
-    public PathSegment(String name, String target) {
-        this.name = Name.of(name);
-        this.target = target;
-    }
 
-    public PathSegment(Name name, String target) {
+    public PathSegment(String target, Name name) {
         this.name = name;
         this.target = target;
     }
-    
-    
 
-    /**
-     * <p>
-     * Constructor for PathSegment.</p>
-     *
-     * @param path a {@link java.lang.String} object.
-     */
     public PathSegment(String path) {
         if (path == null || path.isEmpty()) {
             throw new NamingException("Empty path");
@@ -64,42 +48,26 @@ class PathSegment implements Path {
             this.target = split[0];
             this.name = Name.of(split[1]);
         } else {
-            this.target = TARGET_EMPTY;
+            this.target = EMPTY_TARGET;
             this.name = Name.of(path);
         }
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public boolean hasTail() {
-        return false;
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Name name() {
+    public Name getName() {
         return name;
     }
 
-    /**
-     * {@inheritDoc}
-     */
+
     @Override
-    public Path tail() {
-        return null;
+    public Optional<Path> optTail() {
+        return Optional.empty();
     }
 
-    /**
-     * {@inheritDoc}
-     */
     @Override
-    public String target() {
+    public String getTarget() {
         if (target == null) {
-            return TARGET_EMPTY;
+            return EMPTY_TARGET;
         } else {
             return target;
         }
@@ -107,8 +75,11 @@ class PathSegment implements Path {
 
     @Override
     public Path withTarget(String target) {
-        return new PathSegment(name, target);
+        return new PathSegment(target, name);
     }
-    
-    
+
+    @Override
+    public Path append(Path segment) {
+        return new SegmentedPath(getTarget(), Arrays.asList(this, new PathSegment(segment.getTarget(), segment.getName())));
+    }
 }

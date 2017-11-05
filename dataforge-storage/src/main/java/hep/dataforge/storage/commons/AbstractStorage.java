@@ -112,7 +112,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
      */
     @Override
     public void close() throws Exception {
-        getLogger().debug("Closing storage {}", getFullPath());
+        getLogger().debug("Closing storage {}", getFullName());
         for (Storage shelf : shelves()) {
             shelf.close();
         }

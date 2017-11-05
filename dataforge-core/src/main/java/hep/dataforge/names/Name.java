@@ -230,8 +230,14 @@ public interface Name extends Comparable<Name> {
         return join(this, name);
     }
 
+    /**
+     * Append a name to the end of this name treating new name as a single name segment
+     *
+     * @param name
+     * @return
+     */
     default Name append(String name) {
-        return join(this, of(name));
+        return join(this, ofSingle(name));
     }
 
     String[] asArray();
@@ -247,6 +253,7 @@ public interface Name extends Comparable<Name> {
 
     /**
      * Convert to string without escaping separators
+     *
      * @return
      */
     String toUnescaped();

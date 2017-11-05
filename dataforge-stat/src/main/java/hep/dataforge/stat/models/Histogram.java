@@ -16,7 +16,7 @@
 package hep.dataforge.stat.models;
 
 import hep.dataforge.exceptions.NamingException;
-import hep.dataforge.tables.SimplePointSource;
+import hep.dataforge.tables.SimpleValuesSource;
 
 import java.util.Arrays;
 
@@ -30,7 +30,7 @@ import static hep.dataforge.maths.GridCalculator.getUniformUnivariateGrid;
  * @version $Id: $Id
  */
 @Deprecated
-public class Histogram extends SimplePointSource {
+public class Histogram extends SimpleValuesSource {
 
     public static String[] names = {"binBegin", "binEnd", "count"};
     private double[] borders;

@@ -21,7 +21,7 @@ import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.stat.fit.Param;
 import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.PointSource;
+import hep.dataforge.tables.ValuesSource;
 import hep.dataforge.values.Values;
 
 /**
@@ -122,7 +122,7 @@ public interface Model extends NameSetContainer, Metoid {
      * @param data
      * @return
      */
-    default ParamSet getParametersGuess(PointSource data) {
+    default ParamSet getParametersGuess(ValuesSource data) {
         throw new NotDefinedException("Initial guess not defined");
     }
 

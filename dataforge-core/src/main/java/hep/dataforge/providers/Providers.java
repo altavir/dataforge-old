@@ -26,13 +26,14 @@ public class Providers {
      */
     public static Optional<?> provide(Path path, Function<String, Optional<?>> resolver) {
         Optional<?> opt = resolver.apply(path.nameString());
-        if (path.hasTail()) {
+        Optional<Path> tailOpt = path.optTail();
+        if (tailOpt.isPresent()) {
             return opt.flatMap(res -> {
                 if (res instanceof Provider) {
                     Provider p = Provider.class.cast(res);
                     //using default chain target if needed
-                    Path tail = path.tail();
-                    if (tail.target().isEmpty()) {
+                    Path tail = tailOpt.get();
+                    if (tail.getTarget().isEmpty()) {
                         tail = tail.withTarget(p.defaultChainTarget());
                     }
                     return p.provide(tail);
@@ -46,7 +47,7 @@ public class Providers {
     }
 
     public static Optional<?> provide(Object provider, Path path) {
-        return provide(path, str -> provideDirect(provider, path.target(), str));
+        return provide(path, str -> provideDirect(provider, path.getTarget(), str));
     }
 
 

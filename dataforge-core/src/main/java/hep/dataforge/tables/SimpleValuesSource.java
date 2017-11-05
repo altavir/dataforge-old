@@ -15,22 +15,22 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public class SimplePointSource implements PointSource {
+public class SimpleValuesSource implements ValuesSource {
 
     private final TableFormat format;
     private final List<Values> points;
 
-    public SimplePointSource(TableFormat format, List<Values> points) {
+    public SimpleValuesSource(TableFormat format, List<Values> points) {
         this.format = format;
         this.points = new ArrayList<>(points);
     }
 
-    public SimplePointSource(TableFormat format) {
+    public SimpleValuesSource(TableFormat format) {
         this.format = format;
         this.points = new ArrayList<>();
     }
 
-    public SimplePointSource(String... names) {
+    public SimpleValuesSource(String... names) {
         this.format = MetaTableFormat.forNames(names);
         this.points = new ArrayList<>();
     }

@@ -21,10 +21,12 @@ import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.AlphanumComparator;
 import hep.dataforge.names.AnonymousNotAlowed;
+import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.values.Value;
@@ -150,14 +152,6 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
     @Nullable
     Storage getParent();
 
-//    /**
-//     * Get the default event loader for this storage
-//     *
-//     * @return
-//     * @throws StorageException
-//     */
-//    EventLoader getDefaultEventLoader() throws StorageException;
-
     /**
      * Get validator for
      *
@@ -178,23 +172,35 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
     }
 
     /**
-     * Get the full path of this storage relative to root using '.' as a
-     * separator
+     * Get relative path of this storage to given root storage.
+     * If root is not ancestor of this storage or null, return full absolute path.
      *
      * @return
      */
-    default String getFullPath() {
-        if (getParent() == null) {
-            return getName();
+    default Name getFullName(@Nullable Storage root) {
+        if (getParent() == root || getParent() == null) {
+            return Name.ofSingle(getName());
         } else {
-            String parentPath = getParent().getFullPath();
-            if (parentPath.isEmpty()) {
-                return getName();
-            } else {
-                return parentPath + "." + getName();
-            }
+            return getParent().getFullName(root).append(getName());
         }
     }
+
+    default Name getFullName() {
+        return getFullName(null);
+    }
+
+    /**
+     * Full
+     * @return
+     */
+    default Laminate getLaminate() {
+        if (getParent() == null) {
+            return new Laminate(meta());
+        } else {
+            return getParent().getLaminate().withFirstLayer(meta());
+        }
+    }
+
 
     @Override
     default int compareTo(@NotNull Named o) {

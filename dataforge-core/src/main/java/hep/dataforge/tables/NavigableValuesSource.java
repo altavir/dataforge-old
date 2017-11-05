@@ -7,7 +7,7 @@ import hep.dataforge.values.Values;
 /**
  * Created by darksnake on 14-Apr-17.
  */
-public interface NavigablePointSource extends PointSource{
+public interface NavigableValuesSource extends ValuesSource {
     Values getRow(int i);
 
     default Value get(String name, int index) throws NameNotFoundException {
@@ -15,7 +15,7 @@ public interface NavigablePointSource extends PointSource{
     }
 
     default double getDouble(String name, int index){
-        return get(name,index).doubleValue();
+        return get(name, index).doubleValue();
     }
 
     /**

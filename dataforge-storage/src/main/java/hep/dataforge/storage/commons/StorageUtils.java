@@ -27,7 +27,6 @@ import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.api.ValueIndex;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
-import javafx.util.Pair;
 import org.slf4j.LoggerFactory;
 
 import java.util.stream.IntStream;
@@ -50,7 +49,7 @@ public class StorageUtils {
 //    }
 
     public static String loaderType(Meta loaderAnnotation) {
-        return loaderAnnotation.getString(LOADER_TYPE_KEY, TableLoader.POINT_LOADER_TYPE);
+        return loaderAnnotation.getString(LOADER_TYPE_KEY, TableLoader.TABLE_LOADER_TYPE);
     }
 
     public static String shelfName(Meta shelfAnnotation) {
@@ -92,26 +91,22 @@ public class StorageUtils {
      * @param storage
      * @return
      */
-    public static Stream<Pair<String, Loader>> loaderStream(Storage storage, boolean recursive) {
+    public static Stream<Loader> loaderStream(Storage storage, boolean recursive) {
         try {
-            if(recursive){
+            if (recursive) {
                 return Stream.concat(
-                        storage.shelves().stream().flatMap(entry ->
-                                loaderStream(entry)
-                                        .map(pair -> new Pair<>(Name.joinString(entry.getName(), pair.getKey()), pair.getValue()))
-                        ),
-                        storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry))
+                        storage.shelves().stream().flatMap(StorageUtils::loaderStream), storage.loaders().stream()
                 );
             } else {
-                return storage.loaders().stream().map(entry -> new Pair<>(entry.getName(), entry));
+                return storage.loaders().stream();
             }
         } catch (StorageException ex) {
             throw new RuntimeException(ex);
         }
     }
 
-    public static Stream<Pair<String, Loader>> loaderStream(Storage storage){
-        return loaderStream(storage,true);
+    public static Stream<Loader> loaderStream(Storage storage) {
+        return loaderStream(storage, true);
     }
 
     /**

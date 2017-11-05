@@ -20,8 +20,10 @@ import hep.dataforge.control.RoleDef;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
+import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.AlphanumComparator;
+import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Path;
 import org.jetbrains.annotations.NotNull;
@@ -45,7 +47,9 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
      *
      * @return
      */
-    String getDescription();
+    default String getDescription() {
+        return meta().getString("description", "");
+    }
 
     /**
      * Storage, которому соответствует этот загрузчик. В случае, если загрузчик
@@ -72,14 +76,22 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
      *
      * @return
      */
-    default String getPath() {
-        if (getStorage().isAnonimous()) {
-            return getName();
-        } else {
-            return getStorage().getFullPath() + Path.PATH_SEGMENT_SEPARATOR + getName();
-        }
+    default Path getPath() {
+        return Path.of("", getStorage().getFullName()).append(Path.of("", Name.ofSingle(getName())));
     }
-    //TODO add getRelativePath method
+
+    default Name getFullName() {
+        return getStorage().getFullName().append(getName());
+    }
+
+    /**
+     * Get full meta including storage layers
+     *
+     * @return
+     */
+    default Laminate getLaminate() {
+        return getStorage().getLaminate().withFirstLayer(meta());
+    }
 
 
     @Override
