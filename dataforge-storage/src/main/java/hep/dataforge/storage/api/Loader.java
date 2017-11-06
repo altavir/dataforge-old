@@ -15,6 +15,8 @@
  */
 package hep.dataforge.storage.api;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.events.EventHandler;
@@ -27,14 +29,19 @@ import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Path;
 import org.jetbrains.annotations.NotNull;
+import org.slf4j.Logger;
+
+import static hep.dataforge.control.Connection.EVENT_HANDLER_ROLE;
+import static hep.dataforge.control.Connection.LOGGER_ROLE;
 
 /**
  * A typed loader.
  *
  * @author Alexander Nozik
  */
-@RoleDef(name = "eventListener", objectType = EventHandler.class, info = "Handle events produced by this loader")
-public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoConnectible, Comparable<Named> {
+@RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "Handle events produced by this loader")
+@RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this loader")
+public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoConnectible, ContextAware, Comparable<Named> {
 
     String LOADER_NAME_KEY = "name";
     String LOADER_TYPE_KEY = "type";
@@ -93,9 +100,18 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
         return getStorage().getLaminate().withFirstLayer(meta());
     }
 
+    @Override
+    default Context getContext() {
+        return getStorage().getContext();
+    }
 
     @Override
     default int compareTo(@NotNull Named o) {
         return AlphanumComparator.INSTANCE.compare(this.getName(), o.getName());
+    }
+
+    @Override
+    default Logger getLogger() {
+        return connection(LOGGER_ROLE, Logger.class).orElse(getContext().getLogger());
     }
 }

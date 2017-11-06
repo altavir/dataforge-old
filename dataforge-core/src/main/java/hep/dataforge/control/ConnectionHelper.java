@@ -79,12 +79,30 @@ public class ConnectionHelper implements Connectible {
     }
 
 
+    /**
+     * Get a stream of all connections for a given role. Stream could be empty
+     * @param role
+     * @param type
+     * @param <T>
+     * @return
+     */
     @Override
     public <T> Stream<T> connections(String role, Class<T> type) {
         return connections.entrySet().stream()
                 .filter(entry -> type.isInstance(entry.getKey()))
                 .filter(entry -> entry.getValue().stream().anyMatch(r -> r.matches(role)))
                 .map(entry -> type.cast(entry.getKey()));
+    }
+
+    /**
+     * Return a unique connection or first connection satisfying condition
+     * @param role
+     * @param type
+     * @param <T>
+     * @return
+     */
+    public <T> Optional<T> connection(String role, Class<T> type) {
+        return connections(role,type).findFirst();
     }
 
     @Override

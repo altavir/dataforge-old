@@ -61,7 +61,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected AbstractStorage(@NotNull Storage parent, String name, Meta meta) {
         super(new Laminate(meta, parent.getMeta()));
-        this.name = name.replace(".","_");
+        this.name = name.replace(".", "_");
         this.parent = parent;
         context = parent.getContext();
         connectionHelper = new ConnectionHelper(this, context.getLogger());
@@ -69,7 +69,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected AbstractStorage(Context context, Meta meta) {
         super(meta);
-        this.name = meta.getString("name", "").replace(".","_");
+        this.name = meta.getString("name", "").replace(".", "_");
         this.context = context;
         this.parent = null;
         connectionHelper = new ConnectionHelper(this, context.getLogger());
@@ -212,7 +212,9 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @Provides(STORAGE_TARGET)
     public Optional<Storage> optShelf(String name) {
         Name shelfName = Name.of(name);
-        if (shelfName.getLength() == 1) {
+        if (shelfName.getLength() == 0) {
+            return Optional.of(this);
+        } else if (shelfName.getLength() == 1) {
             return Optional.ofNullable(shelves.get(name));
         } else {
             return optShelf(shelfName.getFirst().toString()).flatMap(child -> child.optShelf(shelfName.cutFirst().toString()));
@@ -346,9 +348,10 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     /**
      * Notify all connections which can handle events
+     *
      * @param event
      */
-    protected void dispatchEvent(Event event){
+    protected void dispatchEvent(Event event) {
         forEachConnection(EventHandler.class, eventHandler -> eventHandler.pushEvent(event));
     }
 

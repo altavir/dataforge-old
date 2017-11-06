@@ -12,6 +12,10 @@ package hep.dataforge.control;
  * @author Alexander Nozik
  */
 public interface Connection extends AutoCloseable {
+
+    String LOGGER_ROLE = "log";
+    String EVENT_HANDLER_ROLE = "eventHandler";
+
     default boolean isOpen(){
         return true;
     }

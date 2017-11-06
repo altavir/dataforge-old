@@ -95,7 +95,7 @@ public class VirtualDevice {
             }
 
             @Override
-            public String type() {
+            public String getType() {
                 return VIRTUAL_SENSOR_TYPE;
             }
         };

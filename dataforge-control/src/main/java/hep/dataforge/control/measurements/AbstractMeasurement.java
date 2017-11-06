@@ -86,11 +86,11 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         notifyListeners(it -> it.onMeasurementResult(this, result, time));
     }
 
-    protected void progressUpdate(double progress) {
+    protected void updateProgress(double progress) {
         notifyListeners(it -> it.onMeasurementProgress(this, progress));
     }
 
-    protected void progressUpdate(String message) {
+    protected void updateMessage(String message) {
         notifyListeners(it -> it.onMeasurementProgress(this, message));
     }
 

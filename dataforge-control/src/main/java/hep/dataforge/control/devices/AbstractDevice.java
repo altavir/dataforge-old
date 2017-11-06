@@ -107,7 +107,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
 
     @Override
     public String getName() {
-        return meta().getString("name", type());
+        return meta().getString("name", getType());
     }
 
     /**
@@ -221,7 +221,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     @Override
-    public String type() {
+    public String getType() {
         return meta().getString("type", "unknown");
     }
 }

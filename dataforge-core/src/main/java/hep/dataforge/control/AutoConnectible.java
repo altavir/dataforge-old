@@ -1,5 +1,6 @@
 package hep.dataforge.control;
 
+import java.util.Optional;
 import java.util.stream.Stream;
 
 public interface AutoConnectible extends Connectible {
@@ -14,6 +15,10 @@ public interface AutoConnectible extends Connectible {
     @Override
     default <T> Stream<T> connections(String role, Class<T> type) {
         return getConnectionHelper().connections(role, type);
+    }
+
+    default <T> Optional<T> connection(String role, Class<T> type) {
+        return getConnectionHelper().connection(role, type);
     }
 
     @Override

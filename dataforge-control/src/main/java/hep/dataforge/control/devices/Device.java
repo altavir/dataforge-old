@@ -27,14 +27,21 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
+import hep.dataforge.providers.Provider;
+import hep.dataforge.providers.Provides;
+import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.values.Value;
 import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Stream;
 
-import static hep.dataforge.control.connections.Roles.*;
+import static hep.dataforge.control.Connection.EVENT_HANDLER_ROLE;
+import static hep.dataforge.control.Connection.LOGGER_ROLE;
+import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
+import static hep.dataforge.control.connections.Roles.VIEW_ROLE;
 
 
 /**
@@ -67,19 +74,21 @@ import static hep.dataforge.control.connections.Roles.*;
  */
 @RoleDef(name = DEVICE_LISTENER_ROLE, objectType = DeviceListener.class, info = "A device listener")
 @RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this device")
-@RoleDef(name = VIEW_ROLE)
 @RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
+@RoleDef(name = VIEW_ROLE)
 @StateDef(@ValueDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized"))
-public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Responder {
+public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Responder, Provider {
 
     String INITIALIZED_STATE = "init";
+
+    String STATE_TARGET = "state";
 
     /**
      * Device type
      *
      * @return
      */
-    String type();
+    String getType();
 
     /**
      * Get the device state with given name. Null if such state not found or
@@ -92,6 +101,7 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
      */
     Value getState(String name);
 
+    @Provides(STATE_TARGET)
     default Optional<Value> optState(String stateName) {
         if (!hasState(stateName)) {
             return Optional.empty();
@@ -103,6 +113,11 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
                 return Optional.of(state);
             }
         }
+    }
+
+    @ProvidesNames(STATE_TARGET)
+    default Stream<String> listStates() {
+        return stateDefs().stream().map(it -> it.value().name());
     }
 
     default Optional<Boolean> optBooleanState(String name) {
@@ -170,5 +185,10 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
     @Override
     default Envelope respond(Envelope message) {
         return ControlUtils.getDefaultDeviceResponse(this, message);
+    }
+
+    @Override
+    default Logger getLogger() {
+        return connection(LOGGER_ROLE, Logger.class).orElse(getContext().getLogger());
     }
 }

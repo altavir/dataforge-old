@@ -17,6 +17,8 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
+import hep.dataforge.control.RoleDef;
+import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.MessageValidator;
@@ -32,9 +34,13 @@ import hep.dataforge.providers.Provider;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
 
 import java.util.Collection;
 import java.util.Optional;
+
+import static hep.dataforge.control.Connection.EVENT_HANDLER_ROLE;
+import static hep.dataforge.control.Connection.LOGGER_ROLE;
 
 /**
  * The general interface for storage facility. Storage has its own annotation
@@ -47,6 +53,8 @@ import java.util.Optional;
  * @author Darksnake
  */
 @AnonymousNotAlowed
+@RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "Handle events produced by this storage")
+@RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this storage")
 public interface Storage extends Metoid, Named, Provider, AutoCloseable, Responder, Dispatcher, ContextAware, AutoConnectible, Comparable<Named> {
     //TODO consider removing dispatcher to helper classes
 
@@ -205,5 +213,10 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
     @Override
     default int compareTo(@NotNull Named o) {
         return AlphanumComparator.INSTANCE.compare(this.getName(), o.getName());
+    }
+
+    @Override
+    default Logger getLogger() {
+        return connection(LOGGER_ROLE,Logger.class).orElse(getContext().getLogger());
     }
 }

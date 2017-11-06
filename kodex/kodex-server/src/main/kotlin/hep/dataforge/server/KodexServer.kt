@@ -18,12 +18,12 @@ import java.util.concurrent.TimeUnit
 
 class ServerInterceptor(val path: String, val builder: Route.() -> Unit)
 
-typealias InterceptorBuilder = ContextMetaFactory<ServerInterceptor>
+typealias InterceptorFactory = ContextMetaFactory<ServerInterceptor>
 
 class KodexServer(private val _context: Context, private val _meta: Meta) : Metoid, ContextAware {
 
     private var engine: NettyApplicationEngine? = null;
-    private val interceptors: MutableList<ServerInterceptor> = ArrayList();
+    private val interceptors: MutableList<InterceptorFactory> = ArrayList();
 
     override fun meta(): Meta {
         return _meta;
@@ -33,18 +33,20 @@ class KodexServer(private val _context: Context, private val _meta: Meta) : Meto
         return _context;
     }
 
-    fun intercept(path: String, builder: Route.() -> Unit){
-        interceptors.add(ServerInterceptor(path,builder));
+    fun intercept(path: String, builder: Route.(Context, Meta) -> Unit): KodexServer {
+        interceptors.add(InterceptorFactory { context, meta -> ServerInterceptor(path) { builder.invoke(this, context, meta) } })
+        return this;
     }
 
-    fun intercept(interceptor: ServerInterceptor){
-        interceptors.add(interceptor)
+    fun intercept(factory: InterceptorFactory): KodexServer {
+        interceptors.add(factory)
+        return this;
     }
 
     fun start() {
         engine = embeddedServer(factory = Netty, port = meta.getInt("port", 8336)) {
             install(Routing) {
-                interceptors.forEach { route(it.path, it.builder) }
+                interceptors.map { it.build(context, meta) }.forEach { route(it.path, it.builder) }
             }
         }.start()
     }
