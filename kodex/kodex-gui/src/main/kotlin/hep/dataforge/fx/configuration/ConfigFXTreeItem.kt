@@ -5,9 +5,7 @@ import hep.dataforge.meta.Configuration
 import javafx.event.Event
 import javafx.scene.Node
 import javafx.scene.control.TreeItem
-
 import java.util.function.Function
-import java.util.stream.Collectors
 
 /**
  * Created by darksnake on 01-May-17.
@@ -27,16 +25,15 @@ class ConfigFXTreeItem(value: ConfigFX, graphic: Node? = null) : TreeItem<Config
 
     init {
         fillChildren()
-        value.addObserver { o, arg -> invalidate() }
+        value.contentProperty.addListener { _ -> invalidate() }
     }
 
 
     private fun fillChildren() {
         children.setAll(
-                value.getChildren().stream()
+                value.getChildren()
                         .filter { cfg -> toShow(cfg) }
                         .map { ConfigFXTreeItem(it) }
-                        .collect(Collectors.toList())
         )
     }
 

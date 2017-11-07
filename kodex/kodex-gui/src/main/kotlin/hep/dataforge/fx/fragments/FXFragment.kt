@@ -1,6 +1,5 @@
 package hep.dataforge.fx.fragments
 
-import hep.dataforge.fx.FXObject
 import javafx.beans.binding.ObjectBinding
 import javafx.beans.property.*
 import javafx.beans.value.ObservableObjectValue
@@ -14,7 +13,7 @@ import java.util.function.Supplier
  * A container for
  * Created by darksnake on 09-Oct-16.
  */
-abstract class FXFragment : FXObject {
+abstract class FXFragment {
 
     private val title = SimpleStringProperty("")
     private val preferredWidth = SimpleDoubleProperty()
@@ -37,8 +36,8 @@ abstract class FXFragment : FXObject {
 
     protected constructor(title: String, width: Double, height: Double) {
         setTitle(title)
-        width = width
-        height = height
+        this.width = width
+        this.height = height
     }
 
     protected abstract fun buildRoot(): Parent
@@ -66,7 +65,7 @@ abstract class FXFragment : FXObject {
     fun rootProperty(): ObservableObjectValue<Parent> {
         return object : ObjectBinding<Parent>() {
             override fun computeValue(): Parent {
-                return fxNode
+                return getFxNode()
             }
         }
     }

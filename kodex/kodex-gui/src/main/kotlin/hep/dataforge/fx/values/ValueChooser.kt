@@ -62,8 +62,11 @@ interface ValueChooser {
     fun setCallback(callback:ValueCallback)
 }
 
-object valueChooserFactory{
-    private fun build(descriptor: ValueDescriptor): ValueChooser {
+object ValueChooserFactory{
+    private fun build(descriptor: ValueDescriptor?): ValueChooser {
+        if(descriptor == null){
+            return TextValueChooser();
+        }
         val types = descriptor.type()
         val chooser: ValueChooser = if (types.size != 1) {
             TextValueChooser()
@@ -78,17 +81,8 @@ object valueChooserFactory{
         return chooser
     }
 
-    fun build(descriptor: ValueDescriptor, initialValue: Value, callback: ValueCallback): ValueChooser {
+    fun build(initialValue: Value, descriptor: ValueDescriptor? = null, callback: ValueCallback): ValueChooser {
         val chooser = build(descriptor)
-        if (initialValue !== Value.NULL) {
-            chooser.value = initialValue
-        }
-        chooser.setCallback(callback)
-        return chooser
-    }
-
-    fun build(initialValue: Value, callback: ValueCallback): ValueChooser {
-        val chooser = TextValueChooser()
         if (initialValue !== Value.NULL) {
             chooser.value = initialValue
         }

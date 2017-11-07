@@ -1,43 +1,34 @@
 package hep.dataforge.fx.configuration
 
-import javafx.collections.ObservableList
+import javafx.beans.binding.ObjectBinding
+import javafx.beans.binding.StringBinding
 
 /**
  * A node, containing relative representation of configuration node and description
  * Created by darksnake on 01-May-17.
  */
 abstract class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
+    abstract fun getDescription(): String
+    abstract fun getChildren(): List<ConfigFX>
 
-//    val parentProperty: ObjectProperty<ConfigFXNode?> = SimpleObjectProperty(parent)
+    abstract val contentProperty: ObjectBinding<out Any?>;
 
-//    val parent: ConfigFXNode?
-//        get() = parentProperty.get()
+    //abstract val valueProperty: ObservableObjectValue<Value>
 
-//    val nameProperty: StringProperty = SimpleStringProperty(name)
-//
-//    val name: String?
-//        get() = nameProperty.get()
-
-    //    abstract val descriptor: ObjectBinding< out Desc>
-    //abstract val description: StringBinding;
-
-    abstract val description: String
-    abstract fun getChildren(): ObservableList<ConfigFX>
     /**
      * remove itself from parent
      */
     abstract fun remove()
 
-    open fun invalidate() {
-        TODO()
+    val nameProperty = object : StringBinding() {
+        override fun computeValue(): String {
+            return name
+        }
     }
 
-//    abstract fun descriptorPresent(): ObservableBooleanValue
-//    abstract fun valuePresent(): ObservableBooleanValue
-
-
-//    protected open fun invalidate() {
-//        setChanged()
-//        notifyObservers()
-//    }
+    val descriptionProperty = object : StringBinding() {
+        override fun computeValue(): String {
+            return getDescription()
+        }
+    }
 }

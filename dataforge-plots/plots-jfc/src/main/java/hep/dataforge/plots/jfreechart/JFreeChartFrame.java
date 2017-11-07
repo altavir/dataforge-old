@@ -16,13 +16,13 @@
 package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.XYPlotFrame;
+import hep.dataforge.utils.FXObject;
 import hep.dataforge.values.Value;
 import javafx.application.Platform;
 import javafx.scene.Node;
@@ -88,6 +88,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         configure(frameMeta);
     }
 
+    @NotNull
     @Override
     public Node getFXNode() {
         ChartViewer viewer = new ChartViewer(getChart());

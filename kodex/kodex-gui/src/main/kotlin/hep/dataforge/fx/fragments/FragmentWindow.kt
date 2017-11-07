@@ -79,7 +79,7 @@ class FragmentWindow : AutoCloseable {
 
     fun getStage(): Stage {
         if (stage == null) {
-            stage = buildStage(fragment.fxNode, fragment.title, fragment.width, fragment.height)
+            stage = buildStage(fragment.getFxNode(), fragment.title, fragment.width, fragment.height)
             stage!!.setOnShown { event: WindowEvent -> onShow() }
 
             fragment.heightProperty().bind(stage!!.heightProperty())

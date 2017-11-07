@@ -6,7 +6,10 @@ import hep.dataforge.kodex.Coal
 import javafx.application.Platform
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
+import javafx.scene.layout.Region
+import javafx.scene.paint.Color
 import kotlinx.coroutines.experimental.CommonPool
 import tornadofx.*
 import java.util.*
@@ -68,7 +71,37 @@ infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
 }
 
 
+/**
+ * Add a listener that performs some update action on any window size change
+ *
+ * @param component
+ * @param action
+ */
+fun addWindowResizeListener(component: Region, action: Runnable) {
+    component.widthProperty().addListener { observable: ObservableValue<out Number>, oldValue: Number, newValue: Number -> action.run() }
+    component.heightProperty().addListener { observable: ObservableValue<out Number>, oldValue: Number, newValue: Number -> action.run() }
+}
 
+fun colorToString(color: Color): String {
+    return String.format("#%02X%02X%02X",
+            (color.red * 255).toInt(),
+            (color.green * 255).toInt(),
+            (color.blue * 255).toInt())
+}
+
+/**
+ * Check if current thread is FX application thread to avoid runLater from
+ * UI thread.
+ *
+ * @param r
+ */
+fun runNow(r: Runnable) {
+    if (Platform.isFxApplicationThread()) {
+        r.run()
+    } else {
+        Platform.runLater(r)
+    }
+}
 
 //fun TableView<Values>.table(table: Table){
 //

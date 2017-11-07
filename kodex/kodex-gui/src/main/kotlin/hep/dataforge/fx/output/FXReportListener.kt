@@ -5,9 +5,8 @@
  */
 package hep.dataforge.fx.output
 
-import hep.dataforge.fx.FXUtils
 import hep.dataforge.io.history.Record
-
+import tornadofx.*
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.util.function.Consumer
@@ -19,7 +18,7 @@ import java.util.function.Consumer
 class FXReportListener(private val pane: FXOutputPane) : Consumer<Record> {
 
     @Synchronized override fun accept(t: Record) {
-        FXUtils.runNow {
+        runLater {
             pane.appendColored(FORMATTER.format(t.time) + " ", "grey")
             pane.appendColored(t.traceString + ": ", "blue")
             pane.appendColored(t.message, "black")

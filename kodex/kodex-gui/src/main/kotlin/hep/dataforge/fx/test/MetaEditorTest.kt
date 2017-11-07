@@ -63,7 +63,7 @@ class MetaEditorTest : Application() {
             }
         })
 
-        val scene = Scene(ConfigEditor.build(config, descriptor), 400.0, 400.0)
+        val scene = Scene(ConfigEditor(config, descriptor).root, 400.0, 400.0)
 
         stage.title = "Meta editor test"
         stage.scene = scene

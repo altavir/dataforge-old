@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots.fx;
 
-import hep.dataforge.fx.FXObject;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;

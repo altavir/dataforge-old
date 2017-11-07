@@ -20,7 +20,7 @@ class TabbedFXDisplay(private val fx: FXPlugin) : SimpleConfigurable(), FXDispla
     private val stages = HashMap<String, TabbedStage>()
 
     @Synchronized private fun getStage(stageName: String): TabbedStage {
-        return (stages as java.util.Map<String, TabbedStage>).computeIfAbsent(stageName, Function<String, TabbedStage> { TabbedStage(it) })
+        return (stages as java.util.Map<String, TabbedStage>).computeIfAbsent(stageName){ TabbedStage(it) }
     }
 
     private fun getStageConfig(name: String): Meta {
@@ -43,27 +43,26 @@ class TabbedFXDisplay(private val fx: FXPlugin) : SimpleConfigurable(), FXDispla
 
     override fun applyConfig(config: Meta) {
         super.applyConfig(config)
-        stages.values.forEach(Consumer<TabbedStage> { this.applyStageConfig(it) })
+        stages.values.forEach{ this.applyStageConfig(it) }
     }
 
     private inner class TabbedStage(internal var name: String) : Named {
         internal var stage: Stage
-        internal var tabPane: TabPane
+        internal var tabPane: TabPane = TabPane()
         internal var tabs: MutableMap<String, DisplayTab> = HashMap()
 
         init {
-            tabPane = TabPane()
-            stage = fx.show({ stage ->
+            stage = fx.show{ stage ->
                 val config = getStageConfig(name)
                 val width = config.getDouble("width", 800.0)!!
                 val height = config.getDouble("height", 600.0)!!
                 stage.setScene(Scene(tabPane, width, height))
-            })
+            }
             applyStageConfig(this)
         }
 
         fun getTab(tabName: String): DisplayTab {
-            return (tabs as java.util.Map<String, DisplayTab>).computeIfAbsent(tabName, Function<String, DisplayTab> { DisplayTab(it) })
+            return (tabs as java.util.Map<String, DisplayTab>).computeIfAbsent(tabName){ DisplayTab(it) }
         }
 
         override fun getName(): String {

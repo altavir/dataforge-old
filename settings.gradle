@@ -11,8 +11,6 @@ include ':dataforge-plots:plots-gnuplot'
 
 include ':dataforge-maths' // mathematical tools
 
-include ':dataforge-fx' // gui tools using JavaFx
-
 include ':grind' // GRoovy INteractive Dataforge
 include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'

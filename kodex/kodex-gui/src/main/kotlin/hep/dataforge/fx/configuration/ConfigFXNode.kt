@@ -5,9 +5,8 @@ import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
 import javafx.beans.binding.ObjectBinding
-import javafx.collections.FXCollections
-import javafx.collections.ObservableList
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Tree item for node
@@ -23,9 +22,9 @@ class ConfigFXNode(
 
     val descriptor: NodeDescriptor? = rootDescriptor ?: parent?.descriptor?.childDescriptor(name);
 
-    val configProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
+    override val contentProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
         init {
-            parent?.let { bind(it.configProperty) }
+            parent?.let { bind(it.contentProperty) }
         }
 
         override fun computeValue(): Configuration? {
@@ -34,13 +33,13 @@ class ConfigFXNode(
     }
 
     val configuration: Configuration?
-        get() = configProperty.get()
+        get() = contentProperty.get()
 
-    override val description = descriptor?.info() ?: ""
+    //override fun getDescription():String = {descriptor?.info() ?: ""}
 
-//    val configurationPresent = Bindings.isNotNull(configurationProperty)
-//
-//    val descriptorPresent = Bindings.isNotNull(descriptorProperty)
+    override fun getDescription(): String {
+        return descriptor?.info() ?: ""
+    }
 
 
     /**
@@ -62,8 +61,8 @@ class ConfigFXNode(
     /**
      * return children;
      */
-    override fun getChildren(): ObservableList<ConfigFX> {
-        val list = FXCollections.observableArrayList<ConfigFX>()
+    override fun getChildren(): List<ConfigFX> {
+        val list = ArrayList<ConfigFX>()
         val nodeNames = HashSet<String>()
         val valueNames = HashSet<String>()
         configuration?.let { config ->
@@ -100,8 +99,8 @@ class ConfigFXNode(
         return list
     }
 
-    fun addValue(name: String, value: Value) {
-        getOrBuildNode().putValue(name, value)
+    fun setValue(name: String, value: Value) {
+        getOrBuildNode().setValue(name, value)
         invalidate()
     }
 
@@ -117,8 +116,11 @@ class ConfigFXNode(
         }
     }
 
-    override fun invalidate() {
-        super.invalidate()
-        configProperty.invalidate()
+    fun removeValue(valueName: String) {
+        configuration?.removeValue(valueName)
+    }
+
+    private fun invalidate() {
+        contentProperty.invalidate()
     }
 }

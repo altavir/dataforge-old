@@ -3,7 +3,6 @@ package hep.dataforge.fx.plots
 import hep.dataforge.description.DescriptorUtils
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.ApplicationSurrogate
-import hep.dataforge.fx.FXObject
 import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.fx.dfIcon
 import hep.dataforge.fx.table.TableDisplay
@@ -12,6 +11,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.*
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.utils.FXObject
 import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
@@ -233,7 +233,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     private fun displayConfigurator(header: String, obj: hep.dataforge.meta.Configurable, desc: NodeDescriptor) {
         configWindows.getOrPut(obj) {
             Stage().apply {
-                scene = Scene(ConfigEditor.build(obj.config, desc))
+                scene = Scene(ConfigEditor(obj.config, desc).root)
                 height = 400.0
                 width = 400.0
                 title = header

@@ -9,6 +9,7 @@ import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
 import javafx.application.Platform
 import javafx.stage.Stage
+import tornadofx.*
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.function.Consumer
@@ -99,7 +100,7 @@ class FXPlugin : BasicPlugin() {
      */
     fun show(cons: Consumer<Stage>): Stage {
         val promise = CompletableFuture<Stage>()
-        FXUtils.runNow {
+        runLater {
             val stage = Stage()
             stage.initOwner(getParent()!!.owner)
             cons.accept(stage)
