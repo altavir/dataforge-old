@@ -3,7 +3,6 @@ description = "A tornadofx based kotlin library"
 
 dependencies {
     compile project(':kodex')
-    compile project(':dataforge-fx')
     compile project(':dataforge-plots')
     compile 'org.controlsfx:controlsfx:8.40.12'
     compile "no.tornado:tornadofx:1.7.12"

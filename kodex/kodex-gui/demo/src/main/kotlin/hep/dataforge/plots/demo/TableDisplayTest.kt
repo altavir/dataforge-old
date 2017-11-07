@@ -1,6 +1,6 @@
 package hep.dataforge.plots.demo
 
-import hep.dataforge.kodex.fx.TableDisplay
+import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.tables.ListTable
 import javafx.application.Application
 import tornadofx.*

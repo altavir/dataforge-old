@@ -1,6 +1,6 @@
 package hep.dataforge.plots.demo
 
-import hep.dataforge.kodex.fx.plots.PlotContainer
+import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
 import hep.dataforge.tables.ValueMap

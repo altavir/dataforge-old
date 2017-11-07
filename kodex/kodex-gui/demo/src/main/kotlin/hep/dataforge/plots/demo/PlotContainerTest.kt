@@ -15,9 +15,9 @@
  */
 package hep.dataforge.plots.demo
 
-import hep.dataforge.kodex.fx.plots.PlotManager
-import hep.dataforge.kodex.fx.plots.group
-import hep.dataforge.kodex.fx.plots.plot
+import hep.dataforge.fx.plots.PlotManager
+import hep.dataforge.fx.plots.group
+import hep.dataforge.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot

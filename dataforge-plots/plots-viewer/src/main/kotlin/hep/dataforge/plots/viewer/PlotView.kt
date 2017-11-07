@@ -5,8 +5,8 @@
  */
 package hep.dataforge.plots.viewer
 
+import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.io.envelopes.EnvelopeType
-import hep.dataforge.kodex.fx.plots.PlotContainer
 import hep.dataforge.plots.PlotFrame
 import javafx.scene.Parent
 import javafx.scene.control.Button

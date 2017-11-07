@@ -1,6 +1,6 @@
 package hep.dataforge.plots.demo
 
-import hep.dataforge.kodex.fx.plots.PlotManager
+import hep.dataforge.fx.plots.PlotManager
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot

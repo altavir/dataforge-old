@@ -1,1 +1,2 @@
-hep.dataforge.kodex.fx.plots.PlotManager
+hep.dataforge.fx.plots.PlotManager
+hep.dataforge.fx.FXPlugin

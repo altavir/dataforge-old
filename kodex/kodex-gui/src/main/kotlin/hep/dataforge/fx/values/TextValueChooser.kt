@@ -1,0 +1,84 @@
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package hep.dataforge.fx.values
+
+import hep.dataforge.values.Value
+import hep.dataforge.values.ValueType
+import javafx.beans.value.ObservableValue
+import javafx.scene.control.TextField
+import javafx.scene.input.KeyCode
+import javafx.scene.input.KeyEvent
+
+class TextValueChooser : ValueChooserBase<TextField>() {
+
+    override fun buildNode(): TextField {
+        val node = TextField()
+        val defaultValue = currentValue()
+        node.text = currentValue().stringValue()
+        node.style = String.format("-fx-text-fill: %s;", textColor(defaultValue))
+
+        // commit on enter
+        node.setOnKeyPressed { event: KeyEvent ->
+            if (event.code == KeyCode.ENTER) {
+                commit()
+            }
+        }
+        // restoring value on click outside
+        node.focusedProperty().addListener { observable: ObservableValue<out Boolean>, oldValue: Boolean, newValue: Boolean ->
+            if (oldValue && !newValue) {
+                node.text = currentValue().stringValue()
+            }
+        }
+
+        // changing text color while editing
+        node.textProperty().addListener { observable: ObservableValue<out String>, oldValue: String, newValue: String ->
+            val value = Value.of(newValue)
+            if (!validate(value)) {
+                node.style = String.format("-fx-text-fill: %s;", "red")
+            } else {
+                node.style = String.format("-fx-text-fill: %s;", textColor(value))
+            }
+        }
+
+        return node
+    }
+
+    protected fun commit() {
+        val newValue = Value.of(node.text)
+        if (validate(newValue)) {
+            value = newValue
+        } else {
+            resetValue()
+            displayError("Value not allowed")
+        }
+
+    }
+
+    protected fun textColor(item: Value): String {
+        when (item.type) {
+            ValueType.BOOLEAN -> return if (item.booleanValue()) {
+                "blue"
+            } else {
+                "salmon"
+            }
+            ValueType.STRING -> return "brown"
+            else -> return "black"
+        }
+    }
+
+    protected fun validate(value: Value): Boolean {
+        return descriptor?.isValueAllowed(value) ?: false
+    }
+
+    //    @Override
+    //    protected void displayError(String error) {
+    //        //TODO ControlsFX decorator here
+    //    }
+
+    override fun setDisplayValue(value: Value) {
+        node.text = value.stringValue()
+    }
+}
