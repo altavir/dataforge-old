@@ -14,7 +14,7 @@ import javafx.collections.ObservableList;
 import javafx.scene.Node;
 import javafx.scene.layout.AnchorPane;
 import org.fxmisc.richtext.InlineCssTextArea;
-import org.fxmisc.richtext.ReadOnlyStyledDocument;
+import org.fxmisc.richtext.model.ReadOnlyStyledDocument;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
