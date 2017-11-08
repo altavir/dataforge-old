@@ -8,7 +8,6 @@ package hep.dataforge.fx.configuration
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.meta.Configuration
 import hep.dataforge.values.Value
-import javafx.beans.Observable
 import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
@@ -41,7 +40,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
 
     override val root = borderpane {
         center = treetableview<ConfigFX> {
-            root = ConfigFXTreeItem(ConfigFXNode(configuration, descriptor))
+            root = ConfigFXTreeItem(ConfigFXRoot(configuration, descriptor))
             root.isExpanded = true
             sortMode = TreeSortMode.ALL_DESCENDANTS
             columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
@@ -51,8 +50,14 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                             override fun updateItem(item: String?, empty: Boolean) {
                                 super.updateItem(item, empty)
                                 if (!empty) {
-                                    setNameColor()
                                     if (treeTableRow.item != null) {
+                                        textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding{
+                                            if (it!!) {
+                                                Color.GRAY
+                                            } else {
+                                                Color.BLACK
+                                            }
+                                        })
                                         contextmenu {
                                             item("Remove") {
                                                 action {
@@ -60,20 +65,9 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                                 }
                                             }
                                         }
-                                        treeTableRow.item.isEmpty.addListener { _: Observable -> setNameColor() }
                                     }
                                 } else {
                                     contextMenu = null
-                                }
-                            }
-
-                            private fun setNameColor() {
-                                if (treeTableRow.item != null) {
-                                    textFill = if (!treeTableRow.item.isEmpty.get()) {
-                                        Color.BLACK
-                                    } else {
-                                        Color.GRAY
-                                    }
                                 }
                             }
                         }
@@ -167,16 +161,15 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
         init {
             (value as?ConfigFXNode)?.let { node ->
                 fillChildren(node)
-                node.children.onChange {
-                    fillChildren(node)
-                }
             }
         }
 
 
         private fun fillChildren(node: ConfigFXNode) {
-            children.setAll(node.children.filter(filter).map { ConfigFXTreeItem(it) })
+            children.bind(node.children.filtered(filter)){ConfigFXTreeItem(it)}
         }
+
+
 
         override fun isLeaf(): Boolean {
             return value is ConfigFXValue

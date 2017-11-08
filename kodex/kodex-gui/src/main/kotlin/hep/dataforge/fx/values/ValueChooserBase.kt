@@ -35,15 +35,15 @@ abstract class ValueChooserBase<out T : Node> : ValueChooser {
      */
     protected fun currentValue(): Value {
         val value = valueProperty.get()
-        if (value == null || value.type == ValueType.NULL) {
+        return if (value == null || value.type == ValueType.NULL) {
             val descriptor = descriptor
-            return if (descriptor != null) {
+            if (descriptor != null) {
                 descriptor.defaultValue()
             } else {
                 Value.NULL
             }
         } else {
-            return value
+            value
         }
     }
 

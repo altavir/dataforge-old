@@ -16,6 +16,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.data.AutoCastable;
+import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
@@ -82,6 +83,19 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
      * @return
      */
     public abstract List<? extends Meta> getMetaList(String path);
+
+    /**
+     * Return index of given meta node inside appropriate meta list if it present. Otherwise return -1
+     *
+     * @param node
+     * @return
+     */
+    public int indexOf(Meta node) {
+        if (node.isAnonimous()) {
+            throw new AnonymousNotAlowedException("Anonimous nodes are not allowed in 'indexOf'");
+        }
+        return getMetaList(node.getName()).indexOf(node);
+    }
 
     @Provides(META_TARGET)
     public Optional<Meta> optMeta(String path) {
@@ -184,6 +198,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
 
     /**
      * Automatically casts meta to MetaMorph
+     *
      * @param type
      * @param <T>
      * @return

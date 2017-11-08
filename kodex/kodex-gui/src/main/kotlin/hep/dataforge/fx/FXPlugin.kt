@@ -55,10 +55,10 @@ class FXPlugin : BasicPlugin() {
         super.detach()
     }
 
-    override fun applyValueChange(name: String, oldItem: Value, newItem: Value) {
+    override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
         super.applyValueChange(name, oldItem, newItem)
         if (name == "implicitExit") {
-            Platform.setImplicitExit(newItem.booleanValue())
+            Platform.setImplicitExit(newItem?.booleanValue() ?: true)
         }
     }
 
