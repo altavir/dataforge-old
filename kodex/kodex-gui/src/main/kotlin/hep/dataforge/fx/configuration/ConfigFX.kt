@@ -1,7 +1,7 @@
 package hep.dataforge.fx.configuration
 
-import javafx.beans.binding.ObjectBinding
 import javafx.beans.binding.StringBinding
+import javafx.beans.value.ObservableBooleanValue
 
 /**
  * A node, containing relative representation of configuration node and description
@@ -9,9 +9,9 @@ import javafx.beans.binding.StringBinding
  */
 abstract class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
     abstract fun getDescription(): String
-    abstract fun getChildren(): List<ConfigFX>
+//    abstract val children: ObservableList<ConfigFX>
 
-    abstract val contentProperty: ObjectBinding<out Any?>;
+    //abstract val valueProperty: ObjectBinding<out Any?>;
 
     //abstract val valueProperty: ObservableObjectValue<Value>
 
@@ -19,6 +19,8 @@ abstract class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
      * remove itself from parent
      */
     abstract fun remove()
+
+    abstract val isEmpty: ObservableBooleanValue
 
     val nameProperty = object : StringBinding() {
         override fun computeValue(): String {
@@ -31,4 +33,6 @@ abstract class ConfigFX(val name: String, val parent: ConfigFXNode? = null) {
             return getDescription()
         }
     }
+
+
 }

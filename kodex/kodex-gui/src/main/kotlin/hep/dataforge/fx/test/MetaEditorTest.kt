@@ -54,7 +54,7 @@ class MetaEditorTest : Application() {
                 .build()
 
         config.addObserver(object : ConfigChangeListener {
-            override fun notifyValueChanged(name: String, oldItem: Value, newItem: Value) {
+            override fun notifyValueChanged(name: String, oldItem: Value?, newItem: Value?) {
                 logger.info("The value {} changed from {} to {}", name, oldItem, newItem)
             }
 

@@ -24,6 +24,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -373,7 +374,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 }
             }
 
-            notifyNodeChanged(path, oldNode, null);
+            notifyNodeChanged(path, oldNode, Collections.emptyList());
         }
         return self();
     }

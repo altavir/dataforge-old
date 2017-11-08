@@ -8,6 +8,7 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
 import javafx.application.Platform
+import javafx.scene.Scene
 import javafx.stage.Stage
 import tornadofx.*
 import java.util.*
@@ -61,8 +62,7 @@ class FXPlugin : BasicPlugin() {
         }
     }
 
-    @Synchronized
-    fun getParent(): Stage? {
+    private fun getParent(): Stage? {
         if (context == null) {
             throw RuntimeException("Plugin not attached")
         }
@@ -109,6 +109,19 @@ class FXPlugin : BasicPlugin() {
             promise.complete(stage)
         }
         return promise.join()
+    }
+
+    fun show(component: UIComponent) {
+        val promise = CompletableFuture<Stage>()
+        runLater {
+            val stage = Stage()
+            stage.initOwner(getParent()!!.owner)
+            stage.scene = Scene(component.root)
+            addStage(stage)
+            stage.show()
+            promise.complete(stage)
+        }
+        promise.join()
     }
 
 }

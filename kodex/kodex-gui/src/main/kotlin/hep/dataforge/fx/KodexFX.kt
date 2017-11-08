@@ -4,6 +4,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.goals.Goal
 import hep.dataforge.kodex.Coal
 import javafx.application.Platform
+import javafx.beans.property.ReadOnlyBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
@@ -100,6 +101,17 @@ fun runNow(r: Runnable) {
         r.run()
     } else {
         Platform.runLater(r)
+    }
+}
+
+fun UIComponent.bindWindow(toggle: ReadOnlyBooleanProperty) {
+    toggle.onChange {
+        val stage = openWindow()
+        if (it) {
+            stage?.show()
+        } else {
+            stage?.hide()
+        }
     }
 }
 

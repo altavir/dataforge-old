@@ -2,9 +2,8 @@ package hep.dataforge.fx.plots
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.PluginDef
-import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.output.FXDisplay
-import hep.dataforge.fx.output.TabbedFXDisplay
+import hep.dataforge.fx.output.buildDisplay
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
@@ -31,7 +30,7 @@ class PlotManager : BasicPlugin(), PlotPlugin {
     };
 
     private val display: FXDisplay by lazy {
-        TabbedFXDisplay(context.loadFeature("fx", FXPlugin::class.java));
+        buildDisplay(context)
     };
 
     override fun getPlotFrame(stage: String, name: String): PlotFrame {

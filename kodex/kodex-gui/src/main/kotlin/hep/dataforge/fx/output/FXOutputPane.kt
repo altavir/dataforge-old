@@ -9,9 +9,9 @@ import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
 import javafx.collections.ObservableList
-import javafx.scene.Node
 import javafx.scene.layout.AnchorPane
 import org.fxmisc.richtext.InlineCssTextArea
+import tornadofx.*
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -21,14 +21,14 @@ import java.io.OutputStream
  *
  * @author Alexander Nozik
  */
-class FXOutputPane {
+class FXOutputPane: Fragment() {
 
     /**
      * The root Anchor pane
      *
      * @return
      */
-    val root: AnchorPane
+    override val root: AnchorPane
     private val textArea = InlineCssTextArea()
 
     private val maxLinesProperty = SimpleIntegerProperty(-1)
@@ -97,32 +97,32 @@ class FXOutputPane {
      */
     @Synchronized private fun append(text: String, style: String) {
         // Unifying newlines
-        val t = text.replace("\r\n", "\n")
+        val text = text.replace("\r\n", "\n")
 
-        FXUtils.runNow {
-            if (t.contains("\n")) {
-                val lines = t.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+        runLater{
+            if (text.contains("\n")) {
+                val lines = text.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 for (i in 0 until lines.size - 1) {
                     append(lines[i].trim { it <= ' ' }, style)
                     newline()
                 }
                 append(lines[lines.size - 1], style)
-                if (t.endsWith("\n")) {
+                if (text.endsWith("\n")) {
                     newline()
                 }
-            } else if (t.contains("\t")) {
-                val tabs = t.split("\t".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
+            } else if (text.contains("\t")) {
+                val tabs = text.split("\t".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 for (i in 0 until tabs.size - 1) {
                     append(tabs[i], style)
                     tab()
                 }
-                if (tabs.size > 0) {
+                if (tabs.isNotEmpty()) {
                     append(tabs[tabs.size - 1], style)
                 }
             } else if (style.isEmpty()) {
-                textArea.appendText(t)
+                textArea.appendText(text)
             } else {
-                textArea.append(ReadOnlyStyledDocument.fromString(t, style))
+                textArea.appendText(text)//(ReadOnlyStyledDocument.fromString(t, style))
             }
         }
     }
@@ -132,7 +132,7 @@ class FXOutputPane {
      */
     @Synchronized
     fun tab() {
-        FXUtils.runNow {
+        runLater {
             currentTab++
             //        textArea.appendText("\t");
             for (i in 0 until tabSize) {
@@ -142,7 +142,7 @@ class FXOutputPane {
     }
 
     private fun countLines(): Int {
-        return textArea.text.chars().filter { value: Int -> value == '\n' }.count().toInt()
+        return textArea.text.chars().filter { value: Int -> value == '\n'.toInt() }.count().toInt()
     }
 
     /**
@@ -150,7 +150,7 @@ class FXOutputPane {
      */
     @Synchronized
     fun newline() {
-        FXUtils.runNow {
+        runLater {
             while (maxLinesProperty.get() > 0 && countLines() >= maxLinesProperty.get()) {
                 //FIXME bad way to count and remove lines
                 textArea.replaceText(0, textArea.text.indexOf("\n") + 1, "")
@@ -189,11 +189,7 @@ class FXOutputPane {
     }
 
     fun clear() {
-        FXUtils.runNow { textArea.clear() }
-    }
-
-    override fun getFXNode(): Node {
-        return root
+        runLater { textArea.clear() }
     }
 
     companion object {

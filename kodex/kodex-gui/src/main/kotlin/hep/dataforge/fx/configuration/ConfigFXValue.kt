@@ -5,6 +5,8 @@ import hep.dataforge.fx.values.ValueCallbackResponse
 import hep.dataforge.fx.values.ValueChooserFactory
 import hep.dataforge.values.Value
 import javafx.beans.binding.ObjectBinding
+import javafx.beans.value.ObservableBooleanValue
+import tornadofx.*
 
 /**
  * Created by darksnake on 01-May-17.
@@ -17,18 +19,18 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
         return descriptor?.info() ?: ""
     }
 
-    override val contentProperty = object : ObjectBinding<Value?>() {
+    private val valueProperty = object : ObjectBinding<Value?>() {
         init {
-            bind(parent.contentProperty)
+            bind(parent.configProperty)
         }
 
         override fun computeValue(): Value? {
-            return parent.configuration?.getValue(name, null) ?: descriptor?.defaultValue()
+            return parent.configuration?.optValue(name)?.orElse(descriptor?.defaultValue())
         }
     }
 
+    override val isEmpty: ObservableBooleanValue = valueProperty.booleanBinding { it == null }
 
-    override fun getChildren(): List<ConfigFX> = ArrayList()
 
     fun setValue(value: Value) {
         parent?.setValue(name, value)
@@ -36,7 +38,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
     }
 
     fun getValue(): Value {
-        return contentProperty.get() ?: Value.NULL
+        return valueProperty.get() ?: Value.NULL
     }
 
     override fun remove() {
@@ -50,7 +52,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
     }
 
     private fun invalidate() {
-        contentProperty.invalidate()
+        parent?.invalidate()
     }
 
 }

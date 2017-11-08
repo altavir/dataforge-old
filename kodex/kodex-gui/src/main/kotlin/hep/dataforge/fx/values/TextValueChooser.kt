@@ -46,7 +46,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
         return node
     }
 
-    protected fun commit() {
+    private fun commit() {
         val newValue = Value.of(node.text)
         if (validate(newValue)) {
             value = newValue
@@ -57,20 +57,20 @@ class TextValueChooser : ValueChooserBase<TextField>() {
 
     }
 
-    protected fun textColor(item: Value): String {
-        when (item.type) {
-            ValueType.BOOLEAN -> return if (item.booleanValue()) {
+    private fun textColor(item: Value): String {
+        return when (item.type) {
+            ValueType.BOOLEAN -> if (item.booleanValue()) {
                 "blue"
             } else {
                 "salmon"
             }
-            ValueType.STRING -> return "brown"
-            else -> return "black"
+            ValueType.STRING -> "brown"
+            else -> "black"
         }
     }
 
-    protected fun validate(value: Value): Boolean {
-        return descriptor?.isValueAllowed(value) ?: false
+    private fun validate(value: Value): Boolean {
+        return descriptor?.isValueAllowed(value) ?: true
     }
 
     //    @Override

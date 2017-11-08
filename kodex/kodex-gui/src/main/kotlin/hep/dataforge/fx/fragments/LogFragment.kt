@@ -9,11 +9,9 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.AppenderBase
-import hep.dataforge.fx.FXUtils
 import hep.dataforge.fx.output.FXOutputPane
-import javafx.scene.Parent
 import org.slf4j.LoggerFactory
-
+import tornadofx.*
 import java.io.PrintStream
 import java.time.Instant
 import java.time.LocalDateTime
@@ -24,22 +22,20 @@ import java.util.function.BiConsumer
 /**
  * @author Alexander Nozik
  */
-class LogFragment : FXFragment("DataForge output log", 800, 200), AutoCloseable {
+class LogFragment : Fragment("DataForge output log") {
 
     private val timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
 
-    val outputPane: FXOutputPane
     private var formatter: BiConsumer<FXOutputPane, String>? = null
     private val loggerFormatter = { pane: FXOutputPane, eventObject: ILoggingEvent ->
-        val style: String
-        when (eventObject.level.toString()) {
-            "DEBUG" -> style = "-fx-fill: green"
-            "WARN" -> style = "-fx-fill: orange"
-            "ERROR" -> style = "-fx-fill: red"
-            else -> style = "-fx-fill: black"
+        val style = when (eventObject.level.toString()) {
+            "DEBUG" -> "-fx-fill: green"
+            "WARN" -> "-fx-fill: orange"
+            "ERROR" -> "-fx-fill: red"
+            else -> "-fx-fill: black"
         }
 
-        FXUtils.runNow {
+        runLater {
             val time = Instant.ofEpochMilli(eventObject.timeStamp)
             pane.append(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ")
 
@@ -50,24 +46,24 @@ class LogFragment : FXFragment("DataForge output log", 800, 200), AutoCloseable 
 
     }
 
-    private val logAppender: Appender<ILoggingEvent>
-    private var stdHooked = false
+    val outputPane = FXOutputPane().apply {
+        setMaxLines(2000)
+    }
 
-    init {
-        outputPane = FXOutputPane()
-
-        outputPane.setMaxLines(2000)
-        logAppender = object : AppenderBase<ILoggingEvent>() {
-            override fun append(eventObject: ILoggingEvent) {
-                synchronized(this@LogFragment) {
-                    loggerFormatter.accept(outputPane, eventObject)
-                }
+    private val logAppender: Appender<ILoggingEvent> = object : AppenderBase<ILoggingEvent>() {
+        override fun append(eventObject: ILoggingEvent) {
+            synchronized(this) {
+                loggerFormatter(outputPane, eventObject)
             }
         }
-        logAppender.setName(FX_LOG_APPENDER_NAME)
-        //        logAppender.setContext(Global.instance().getLogger().getLoggerContext());
-        logAppender.start()
+    }.apply {
+        name = FX_LOG_APPENDER_NAME
+        start()
     }
+
+    override val root = outputPane.root
+    private var stdHooked = false
+
 
     /**
      * Set custom formatter for text
@@ -133,12 +129,9 @@ class LogFragment : FXFragment("DataForge output log", 800, 200), AutoCloseable 
         }
     }
 
-    override fun close() {
+    override fun onDelete() {
+        super.onDelete()
         logAppender.stop()
-    }
-
-    public override fun buildRoot(): Parent {
-        return outputPane.root
     }
 
     companion object {

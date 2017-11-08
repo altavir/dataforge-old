@@ -22,6 +22,7 @@ import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.data.XYPlot;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.FXObject;
 import hep.dataforge.values.Values;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Node;

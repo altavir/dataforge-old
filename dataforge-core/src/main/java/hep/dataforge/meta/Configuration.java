@@ -94,8 +94,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      */
     @Override
     protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
-        observers.forEach((ConfigChangeListener obs)
-                -> obs.notifyValueChanged(name, oldItem, newItem));
+        observers.forEach((ConfigChangeListener obs) -> obs.notifyValueChanged(name, oldItem, newItem));
         super.notifyValueChanged(name, oldItem, newItem);
     }
 
