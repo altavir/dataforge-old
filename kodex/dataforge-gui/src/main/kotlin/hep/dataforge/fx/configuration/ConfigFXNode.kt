@@ -65,10 +65,14 @@ open class ConfigFXNode(
     override val isEmpty: ObservableBooleanValue
         get() = configProperty.booleanBinding { it == null }
 
-    val children: ObservableList<ConfigFX>  by lazy {
+    val children: ObservableList<ConfigFX> by lazy {
         FXCollections.observableArrayList<ConfigFX>().apply {
             setAll(buildChildren())
         }
+    }
+
+    private fun updateChildren(){
+        children.setAll(buildChildren())
     }
 
     private fun buildChildren(): List<ConfigFX> {
@@ -137,7 +141,7 @@ open class ConfigFXNode(
 
     override fun invalidate() {
         configProperty.invalidate()
-        children.setAll(buildChildren())
+        updateChildren()
     }
 
     override fun invalidateValue(path: Name) {

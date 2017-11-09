@@ -7,8 +7,6 @@ import hep.dataforge.fx.output.buildDisplay
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
-import javafx.stage.Stage
-import tornadofx.*
 
 const val DEFAULT_STAGE_NAME = "";
 const val DEFAULT_PLOT_NAME = "";
@@ -45,11 +43,11 @@ class PlotManager : BasicPlugin(), PlotPlugin {
     }
 
     private fun display(stage: String, name: String, container: PlotContainer) {
-        runLater {
-            val pane = display.getContainer(stage, name)
-            pane.center = container.root;
-            (pane.scene.window as? Stage)?.show()
+        display.display(stage, name) {
+            center = container.root;
         }
+//            (pane.scene.window as? Stage)?.show()
+
     }
 
     override fun hasPlotFrame(stage: String, name: String): Boolean {

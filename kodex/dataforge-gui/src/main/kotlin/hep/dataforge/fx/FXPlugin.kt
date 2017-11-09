@@ -112,16 +112,14 @@ class FXPlugin : BasicPlugin() {
     }
 
     fun show(component: UIComponent) {
-        val promise = CompletableFuture<Stage>()
         runLater {
             val stage = Stage()
             stage.initOwner(getParent()!!.owner)
-            stage.scene = Scene(component.root)
+            stage.scene = Scene(component.root,800.0,600.0)
+            stage.title = component.title
             addStage(stage)
             stage.show()
-            promise.complete(stage)
         }
-        promise.join()
     }
 
 }

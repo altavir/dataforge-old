@@ -1,4 +1,4 @@
 dependencies {
     compile project(':dataforge-plots')
-    compile project(':kodex:kodex-gui')
+    compile project(':kodex:dataforge-gui')
 }

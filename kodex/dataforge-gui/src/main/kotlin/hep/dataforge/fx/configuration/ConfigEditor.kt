@@ -39,7 +39,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
     private fun TreeItem<ConfigFX>.update(): TreeItem<ConfigFX> {
         (value as? ConfigFXNode)?.let {
             children.setAll(it.children.filter(filter).map { TreeItem(it).update() })
-            it.children.onChange { 
+            it.children.onChange {
                 update()
             }
         }

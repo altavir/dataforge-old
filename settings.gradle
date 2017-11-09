@@ -16,8 +16,8 @@ include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'
 
 include ':kodex' // KOtlin Dataforge EXtension
-include ':kodex:kodex-gui' // javafx based gui
-include ':kodex:kodex-gui:demo' // javafx based gui
+include ':kodex:dataforge-gui' // javafx based gui
+include ':kodex:dataforge-gui:gui-demo' // javafx based gui
 include ':kodex:kmath' // kotlin mathematical extension
 include ':kodex:kodex-server' // ktor based http server
 //include ':kodex:dataforge-server' // server base

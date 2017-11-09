@@ -256,7 +256,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             if (hasMeta(name)) {
                 oldNodeItem = new ArrayList<>(getMetaList(name));
             } else {
-                oldNodeItem = null;
+                oldNodeItem = Collections.emptyList();
             }
             setNodeItem(name, elements);
             if (notify) {
