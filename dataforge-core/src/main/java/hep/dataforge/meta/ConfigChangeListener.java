@@ -15,7 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -30,24 +33,24 @@ public interface ConfigChangeListener {
     /**
      * notify that value item is changed
      *
-     * @param name the full path of value that has been changed
+     * @param name    the full path of value that has been changed
      * @param oldItem the item of values before change. If null, than value
-     * has not been existing before change
+     *                has not been existing before change
      * @param newItem the item of values after change. If null, then value has
-     * been removed
+     *                been removed
      */
-    void notifyValueChanged(String name, Value oldItem, Value newItem);
+    void notifyValueChanged(Name name, @Nullable Value oldItem, @Nullable Value newItem);
 
     /**
      * notify that element item is changed
      *
-     * @param name the full path of element that has been changed
+     * @param name    the full path of element that has been changed
      * @param oldItem the item of elements before change. If null, than item
-     * has not been existing before change
+     *                has not been existing before change
      * @param newItem the item of elements after change. If null, then item has
-     * been removed
+     *                been removed
      */
-    default void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem){
+    default void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
         //do nothing by default
     }
 

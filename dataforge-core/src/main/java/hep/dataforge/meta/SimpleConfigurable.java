@@ -16,7 +16,9 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -136,13 +138,13 @@ public class SimpleConfigurable implements Configurable, Metoid {
         configuration.addObserver(new ConfigChangeListener() {
 
             @Override
-            public void notifyValueChanged(String name, Value oldItem, Value newItem) {
-                applyValueChange(name, oldItem, newItem);
+            public void notifyValueChanged(Name name, Value oldItem, Value newItem) {
+                applyValueChange(name.toUnescaped(), oldItem, newItem);
             }
 
             @Override
-            public void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
-                applyElementChange(name, oldItem, newItem);
+            public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
+                applyElementChange(name.toUnescaped(), oldItem, newItem);
             }
         });
     }

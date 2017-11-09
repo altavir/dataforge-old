@@ -43,7 +43,6 @@ class NameToken implements Name {
             this.theName = singlet;
             this.theQuery = null;
         }
-
     }
 
     @Override

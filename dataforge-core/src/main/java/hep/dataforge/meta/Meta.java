@@ -85,7 +85,8 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
     public abstract List<? extends Meta> getMetaList(String path);
 
     /**
-     * Return index of given meta node inside appropriate meta list if it present. Otherwise return -1
+     * Return index of given meta node inside appropriate meta list if it present and has multiple nodes under single name.
+     * Otherwise return -1.
      *
      * @param node
      * @return
@@ -94,7 +95,12 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         if (node.isAnonimous()) {
             throw new AnonymousNotAlowedException("Anonimous nodes are not allowed in 'indexOf'");
         }
-        return getMetaList(node.getName()).indexOf(node);
+        List<? extends Meta> list = getMetaList(node.getName());
+        if(list.size() <= 1){
+            return -1;
+        } else {
+            return getMetaList(node.getName()).indexOf(node);
+        }
     }
 
     @Provides(META_TARGET)

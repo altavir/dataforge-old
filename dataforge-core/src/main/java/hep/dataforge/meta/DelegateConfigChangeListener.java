@@ -15,7 +15,9 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Objects;
@@ -29,21 +31,21 @@ import java.util.Objects;
 public class DelegateConfigChangeListener implements ConfigChangeListener {
 
     private final ConfigChangeListener observer;
-    private final String prefix;
+    private final Name prefix;
 
-    public DelegateConfigChangeListener(ConfigChangeListener observer, String prefix) {
+    public DelegateConfigChangeListener(ConfigChangeListener observer, Name prefix) {
         this.observer = observer;
         this.prefix = prefix;
     }
 
     @Override
-    public void notifyValueChanged(String name, Value oldValues, Value newItems) {
-        observer.notifyValueChanged(prefix + name, oldValues, newItems);
+    public void notifyValueChanged(Name name, Value oldValues, Value newItems) {
+        observer.notifyValueChanged(prefix.append(name), oldValues, newItems);
     }
 
     @Override
-    public void notifyNodeChanged(String name, List<? extends Meta> oldValues, List<? extends Meta> newItems) {
-        observer.notifyNodeChanged(prefix+name, oldValues, newItems);
+    public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldValues, @NotNull List<? extends Meta> newItems) {
+        observer.notifyNodeChanged(prefix.append(name), oldValues, newItems);
     }
 
     @Override
@@ -63,10 +65,7 @@ public class DelegateConfigChangeListener implements ConfigChangeListener {
             return false;
         }
         final DelegateConfigChangeListener other = (DelegateConfigChangeListener) obj;
-        if (!Objects.equals(this.observer, other.observer)) {
-            return false;
-        }
-        return Objects.equals(this.prefix, other.prefix);
+        return Objects.equals(this.observer, other.observer) && Objects.equals(this.prefix, other.prefix);
     }
 
 

@@ -7,8 +7,6 @@ package hep.dataforge.fx.configuration
 
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.meta.Configuration
-import hep.dataforge.values.Value
-import javafx.scene.Node
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
 import javafx.scene.layout.Priority
@@ -38,9 +36,20 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
         }
     }
 
+    private fun TreeItem<ConfigFX>.update(): TreeItem<ConfigFX> {
+        (value as? ConfigFXNode)?.let {
+            children.setAll(it.children.filter(filter).map { TreeItem(it).update() })
+            it.children.onChange { 
+                update()
+            }
+        }
+        return this
+    }
+
     override val root = borderpane {
         center = treetableview<ConfigFX> {
-            root = ConfigFXTreeItem(ConfigFXRoot(configuration, descriptor))
+            root = TreeItem(ConfigFXRoot(configuration, descriptor))
+            root.update()
             root.isExpanded = true
             sortMode = TreeSortMode.ALL_DESCENDANTS
             columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
@@ -51,7 +60,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                 super.updateItem(item, empty)
                                 if (!empty) {
                                     if (treeTableRow.item != null) {
-                                        textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding{
+                                        textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding {
                                             if (it!!) {
                                                 Color.GRAY
                                             } else {
@@ -133,7 +142,9 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                 button("+Value") {
                                     hgrow = Priority.ALWAYS
                                     action {
-                                        showNameDialog(false)?.let { item.setValue(it, Value.NULL) }
+                                        showNameDialog(false)?.let {
+                                            item.addValue(it)
+                                        }
                                     }
                                 }
                             }
@@ -154,27 +165,32 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
 
     }
 
-    class ConfigFXTreeItem(value: ConfigFX, graphic: Node? = null, val filter: (ConfigFX) -> Boolean = { true }) : TreeItem<ConfigFX>(value, graphic) {
-
-        //private val descriptorProvider: Function<Configuration, NodeDescriptor>? = null
-
-        init {
-            (value as?ConfigFXNode)?.let { node ->
-                fillChildren(node)
-            }
-        }
-
-
-        private fun fillChildren(node: ConfigFXNode) {
-            children.bind(node.children.filtered(filter)){ConfigFXTreeItem(it)}
-        }
-
-
-
-        override fun isLeaf(): Boolean {
-            return value is ConfigFXValue
-        }
-    }
+//    class ConfigFXTreeItem(value: ConfigFX, graphic: Node? = null, val filter: (ConfigFX) -> Boolean = { true }) : TreeItem<ConfigFX>(value, graphic) {
+//
+//        //private val descriptorProvider: Function<Configuration, NodeDescriptor>? = null
+//
+//        init {
+//            (value as?ConfigFXNode)?.let { node ->
+//                fillChildren(node)
+//            }
+//        }
+//
+//
+//        private fun fillChildren(node: ConfigFXNode) {
+//            val filtered = node.children.filtered(filter)
+//            //children.bind(filtered){ConfigFXTreeItem(it)}
+//            children.setAll(filtered.map { ConfigFXTreeItem(it) })
+//            filtered.onChange {
+//                children.setAll(filtered.map { ConfigFXTreeItem(it) })
+//            }
+//        }
+//
+//
+//
+//        override fun isLeaf(): Boolean {
+//            return value is ConfigFXValue
+//        }
+//    }
 }
 
 

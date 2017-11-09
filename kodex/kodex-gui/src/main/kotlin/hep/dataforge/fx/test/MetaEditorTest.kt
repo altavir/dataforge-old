@@ -11,6 +11,7 @@ import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.names.Name
 import hep.dataforge.values.Value
 import javafx.application.Application
 import javafx.scene.Scene
@@ -54,11 +55,11 @@ class MetaEditorTest : Application() {
                 .build()
 
         config.addObserver(object : ConfigChangeListener {
-            override fun notifyValueChanged(name: String, oldItem: Value?, newItem: Value?) {
+            override fun notifyValueChanged(name: Name, oldItem: Value?, newItem: Value?) {
                 logger.info("The value {} changed from {} to {}", name, oldItem, newItem)
             }
 
-            override fun notifyNodeChanged(name: String, oldItem: List<Meta>, newItem: List<Meta>) {
+            override fun notifyNodeChanged(name: Name, oldItem: List<Meta>, newItem: List<Meta>) {
                 logger.info("The node {} changed", name)
             }
         })

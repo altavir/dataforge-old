@@ -1,6 +1,7 @@
 package hep.dataforge.fx.configuration
 
 import hep.dataforge.description.NodeDescriptor
+import hep.dataforge.kodex.isNull
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -14,6 +15,7 @@ import javafx.collections.FXCollections
 import javafx.collections.ObservableList
 import tornadofx.*
 import java.util.*
+import kotlin.collections.ArrayList
 
 /**
  * Tree item for node
@@ -65,11 +67,12 @@ open class ConfigFXNode(
 
     val children: ObservableList<ConfigFX>  by lazy {
         FXCollections.observableArrayList<ConfigFX>().apply {
-            updateChildren(this)
+            setAll(buildChildren())
         }
     }
 
-    private fun updateChildren(list: ObservableList<ConfigFX>) {
+    private fun buildChildren(): List<ConfigFX> {
+        val list: MutableList<ConfigFX> = ArrayList();
         val nodeNames = HashSet<String>()
         val valueNames = HashSet<String>()
         configuration?.let { config ->
@@ -103,8 +106,12 @@ open class ConfigFXNode(
                 }
             }
         }
+        return list;
     }
 
+    fun addValue(name: String) {
+        getOrBuildNode().setValue(name, "not defined")
+    }
 
     fun setValue(name: String, value: Value) {
         getOrBuildNode().setValue(name, value)
@@ -115,7 +122,7 @@ open class ConfigFXNode(
     }
 
     fun addNode(name: String) {
-        getOrBuildNode().putNode(name, Meta.empty())
+        getOrBuildNode().requestNode(name)
     }
 
     fun removeNode(name: String) {
@@ -130,22 +137,22 @@ open class ConfigFXNode(
 
     override fun invalidate() {
         configProperty.invalidate()
-        updateChildren(children)
+        children.setAll(buildChildren())
     }
 
     override fun invalidateValue(path: Name) {
         if (path.length == 1) {
             children.find { it is ConfigFXValue && it.name == path.first.toString() }?.invalidate()
-        } else if(path.length>1){
+        } else if (path.length > 1) {
             children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateValue(path.cutFirst())
         }
     }
 
     override fun invalidateNode(path: Name) {
-        if (path.isEmpty) {
-            invalidate()
-        } else {
-            children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateNode(path.cutFirst())
+        when {
+            path.isEmpty -> invalidate()
+            path.length == 1 -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidate()
+            else -> children.find { it is ConfigFXNode && it.name == path.first.toString() }?.invalidateNode(path.cutFirst())
         }
     }
 }
@@ -164,11 +171,19 @@ class ConfigFXRoot(rootConfig: Configuration, rootDescriptor: NodeDescriptor? = 
         rootConfig.addObserver(this)
     }
 
-    override fun notifyValueChanged(name: String, oldItem: Value?, newItem: Value?) {
-        invalidateValue(Name.of(name))
+    override fun notifyValueChanged(valueName: Name, oldItem: Value?, newItem: Value?) {
+        if (oldItem.isNull() || newItem.isNull()) {
+            invalidateNode(valueName.cutLast())
+        } else {
+            invalidateValue(valueName)
+        }
     }
 
-    override fun notifyNodeChanged(name: String, oldItem: MutableList<out Meta>?, newItem: MutableList<out Meta>?) {
-        invalidateNode(Name.of(name))
+    override fun notifyNodeChanged(nodeName: Name, oldItem: MutableList<out Meta>, newItem: MutableList<out Meta>) {
+        if (oldItem.isEmpty() || newItem.isEmpty()) {
+            invalidateNode(nodeName.cutLast())
+        } else {
+            invalidateNode(nodeName)
+        }
     }
 }

@@ -23,7 +23,7 @@ import javafx.beans.value.ObservableValue
 class ConfigValueProperty<T>(val config: Configuration, val valueName: String, val getter: (Value) -> T) : ObjectProperty<T>() {
 
     private val cfgListener = ConfigChangeListener { name, oldItem, newItem ->
-        if (valueName == name && oldItem != newItem) {
+        if (valueName == name.toUnescaped() && oldItem != newItem) {
             cachedValue.invalidate()
         }
     }

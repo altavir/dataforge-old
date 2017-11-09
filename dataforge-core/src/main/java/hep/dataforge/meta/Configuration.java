@@ -15,8 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.names.Name;
 import hep.dataforge.utils.ReferenceRegistry;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -80,7 +82,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      * @param newItem
      */
     @Override
-    protected void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+    protected void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
         observers.forEach((ConfigChangeListener obs) -> obs.notifyNodeChanged(name, oldItem, newItem));
         super.notifyNodeChanged(name, oldItem, newItem);
     }
@@ -93,7 +95,7 @@ public class Configuration extends MutableMetaNode<Configuration> {
      * @param newItem
      */
     @Override
-    protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
+    protected void notifyValueChanged(Name name, Value oldItem, Value newItem) {
         observers.forEach((ConfigChangeListener obs) -> obs.notifyValueChanged(name, oldItem, newItem));
         super.notifyValueChanged(name, oldItem, newItem);
     }
@@ -132,19 +134,17 @@ public class Configuration extends MutableMetaNode<Configuration> {
     /**
      * update this configuration replacing all old values and nodes
      *
-     * @param annotation
+     * @param meta
      */
-    public void update(Meta annotation) {
-        if (annotation != null) {
-            annotation.getValueNames(true).forEach((valueName) -> {
-                setValue(valueName, annotation.getValue(valueName));
+    public void update(Meta meta) {
+        if (meta != null) {
+            meta.getValueNames(true).forEach((valueName) -> {
+                setValue(valueName, meta.getValue(valueName));
             });
 
-            annotation.getNodeNames(true).forEach((elementName) -> {
+            meta.getNodeNames(true).forEach((elementName) -> {
                 setNode(elementName,
-                        annotation
-                                .getMetaList(elementName)
-                                .stream()
+                        meta.getMetaList(elementName).stream()
                                 .map(Configuration::new)
                                 .collect(Collectors.toList())
                 );

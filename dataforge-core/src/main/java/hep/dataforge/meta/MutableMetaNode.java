@@ -46,11 +46,34 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         this.parent = null;
     }
 
+    /**
+     * Parent aware name of this node including query string
+     *
+     * @return
+     */
+    public Name getQualifiedName() {
+        if (parent == null) {
+            return Name.ofSingle(getName());
+        } else {
+            int index = parent.indexOf(this);
+            if (index >= 0) {
+                return Name.ofSingle(String.format("%s[%d]", getName(), index));
+            } else {
+                return Name.ofSingle(getName());
+            }
+        }
+    }
+
+    /**
+     * Full name including all ncestors
+     *
+     * @return
+     */
     public Name getFullName() {
         if (parent == null) {
             return Name.of(getName());
         } else {
-            return Name.join(parent.getFullName(), Name.of(getName()));
+            return Name.join(parent.getFullName(), getQualifiedName());
         }
     }
 
@@ -61,9 +84,9 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param oldItem
      * @param newItem
      */
-    protected void notifyNodeChanged(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+    protected void notifyNodeChanged(Name name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
         if (parent != null) {
-            parent.notifyNodeChanged(getName() + "." + name, oldItem, newItem);
+            parent.notifyNodeChanged(getQualifiedName().append(name), oldItem, newItem);
         }
     }
 
@@ -74,9 +97,9 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param oldItem
      * @param newItem
      */
-    protected void notifyValueChanged(String name, Value oldItem, Value newItem) {
+    protected void notifyValueChanged(Name name, Value oldItem, Value newItem) {
         if (parent != null) {
-            parent.notifyValueChanged(getName() + "." + name, oldItem, newItem);
+            parent.notifyValueChanged(getQualifiedName().append(name), oldItem, newItem);
         }
     }
 
@@ -111,7 +134,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
         T newNode = transformNode(name, node);
         List<T> list = super.nodes.get(name);
-        List<T> oldList = list != null ? new ArrayList<>(list) : null;
+        List<T> oldList = list != null ? new ArrayList<>(list) : Collections.emptyList();
         if (list == null) {
             List<T> newList = new ArrayList<>();
             newList.add(newNode);
@@ -122,7 +145,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             list.add(newNode);
         }
         if (notify) {
-            notifyNodeChanged(node.getName(), oldList, new ArrayList<>(list));
+            notifyNodeChanged(Name.of(node.getName()), oldList, new ArrayList<>(list));
         }
         return self();
     }
@@ -180,7 +203,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 setValueItem(name, newValue);
 
                 if (notify) {
-                    notifyValueChanged(name, oldValue, newValue);
+                    notifyValueChanged(Name.of(name), oldValue, newValue);
                 }
             } else {
                 setValueItem(name, value);
@@ -237,7 +260,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             }
             setNodeItem(name, elements);
             if (notify) {
-                notifyNodeChanged(name, oldNodeItem, getMetaList(name));
+                notifyNodeChanged(Name.of(name), oldNodeItem, getMetaList(name));
             }
         } else {
             removeNode(name);
@@ -286,7 +309,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             }
             setValueItem(name, value);
             if (notify) {
-                notifyValueChanged(name, oldValueItem, value);
+                notifyValueChanged(Name.of(name), oldValueItem, value);
             }
         }
         return self();
@@ -374,7 +397,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 }
             }
 
-            notifyNodeChanged(path, oldNode, Collections.emptyList());
+            notifyNodeChanged(Name.of(path), oldNode, Collections.emptyList());
         }
         return self();
     }
@@ -395,7 +418,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             } else {
                 nodes.get(nodeName).set(index, transformNode(child.getName(), node));
             }
-            notifyNodeChanged(nodeName, oldNode, getMetaList(nodeName));
+            notifyNodeChanged(Name.ofSingle(nodeName), oldNode, getMetaList(nodeName));
         }
     }
 
@@ -415,7 +438,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                     getHead(namePath).removeValue(namePath.cutFirst().toString());
                 }
             }
-            notifyValueChanged(path, oldValue, null);
+            notifyValueChanged(Name.of(path), oldValue, null);
         }
     }
 
@@ -517,13 +540,13 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param nodes
      */
     public void attachNodeItem(String name, List<T> nodes) {
-        nodes.stream().forEach((T node) -> {
+        nodes.forEach((T node) -> {
             node.parent = this;
             node.name = name;
         });
         List<T> oldList = this.nodes.get(name);
         this.nodes.put(name, nodes);
-        notifyNodeChanged(name, oldList, nodes);
+        notifyNodeChanged(Name.ofSingle(name), oldList, nodes);
     }
 
     /**
@@ -547,7 +570,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         }
         List<T> oldList = new ArrayList<>(list);
         list.add(node);
-        notifyNodeChanged(nodeName, oldList, list);
+        notifyNodeChanged(Name.ofSingle(nodeName), oldList, list);
     }
 
     @Override
