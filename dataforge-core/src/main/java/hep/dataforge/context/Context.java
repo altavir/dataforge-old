@@ -35,9 +35,14 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
@@ -418,7 +423,9 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * A builder for context
      */
     public static class Builder {
-        Context ctx;
+        private Context ctx;
+
+        private List<URL> classPath = new ArrayList<>();
 
         public Builder(String name) {
             this.ctx = Global.getContext(name);
@@ -467,13 +474,63 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             return this;
         }
 
+        public Builder plugin(Meta meta) {
+            Meta plMeta = meta.getMetaOrEmpty(MetaBuilder.DEFAULT_META_NAME);
+            if (meta.hasValue("name")) {
+                return plugin(meta.getString("name"), plMeta);
+            } else if (meta.hasValue("class")) {
+                Class<? extends Plugin> type = null;
+                try {
+                    type = (Class<? extends Plugin>) Class.forName(meta.getString("class"));
+                } catch (Exception e) {
+                    throw new RuntimeException("Failed to initialize plugin from meta", e);
+                }
+                return plugin(type, plMeta);
+            } else {
+                throw new IllegalArgumentException("Malformed plugin definition");
+            }
+        }
+
         public Builder classPath(URL... path) {
-            ctx.classLoader = new URLClassLoader(path, ctx.getParent().getClassLoader());
+            classPath.addAll(Arrays.asList(path));
             return this;
         }
 
+        public Builder classPath(URI path) {
+            try {
+                classPath.add(path.toURL());
+            } catch (MalformedURLException e) {
+                throw new RuntimeException("Malformed classpath");
+            }
+            return this;
+        }
+
+        /**
+         * Create additional classpath from a list of strings
+         *
+         * @param pathStr
+         * @return
+         */
+        public Builder classPath(String pathStr) {
+            Path path = Paths.get(pathStr);
+            if (Files.isDirectory(path)) {
+                try {
+                    Files.find(path, -1, (subPath, basicFileAttributes) -> subPath.toString().endsWith(".jar"))
+                            .map(Path::toUri).forEach(this::classPath);
+                    return this;
+                } catch (IOException e) {
+                    throw new RuntimeException("Failed to load library", e);
+                }
+            } else if (Files.exists(path)) {
+                return classPath(path.toUri());
+            } else {
+                return this;
+            }
+
+        }
+
         public Builder classPath(Collection<URL> paths) {
-            ctx.classLoader = new URLClassLoader(paths.toArray(new URL[paths.size()]), ctx.getParent().getClassLoader());
+            classPath.addAll(paths);
             return this;
         }
 
@@ -492,6 +549,9 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         }
 
         public Context build() {
+            // automatically add lib directory
+            classPath(ctx.io().getFile("lib").toUri());
+            ctx.classLoader = new URLClassLoader(classPath.toArray(new URL[classPath.size()]), ctx.getParent().getClassLoader());
             return ctx;
         }
     }
@@ -504,44 +564,18 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @param meta
      * @return
      */
-    @SuppressWarnings("unchecked")
     public static Context build(String name, Context parent, Meta meta) {
         Context.Builder builder = builder(name, parent);
 
         meta.optMeta("properties").ifPresent(builder::properties);
 
-        meta.optValue("classpath").ifPresent(clp -> {
-            builder.classPath(clp.listValue().stream()
-                    .map(it -> {
-                        try {
-                            return new URL(it.stringValue());
-                        } catch (MalformedURLException e) {
-                            throw new RuntimeException(e);
-                        }
-                    })
-                    .collect(Collectors.toList())
-            );
-        });
-
         meta.optString("rootDir").ifPresent(builder::setRootDir);
 
-        meta.getMetaList("plugin").forEach(pl -> {
-            Meta plMeta = pl.getMetaOrEmpty(MetaBuilder.DEFAULT_META_NAME);
-            if (pl.hasValue("name")) {
-                builder.plugin(pl.getString("name"), plMeta);
-            } else if (pl.hasValue("class")) {
-                Class<? extends Plugin> type = null;
-                try {
-                    type = (Class<? extends Plugin>) Class.forName(pl.getString("class"));
-                } catch (ClassNotFoundException e) {
-                    throw new RuntimeException(e);
-                }
-                builder.plugin(type, plMeta);
-            } else {
-                throw new IllegalArgumentException("Malformed plugin definition");
-            }
-        });
+        meta.optValue("classpath").ifPresent(value ->
+                value.listValue().stream().map(Value::stringValue).forEach(builder::classPath)
+        );
 
+        meta.getMetaList("plugin").forEach(builder::plugin);
 
         return builder.build();
     }

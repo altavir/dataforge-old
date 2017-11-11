@@ -25,26 +25,29 @@ import hep.dataforge.values.Value;
 public interface DeviceListener {
 
     /**
-     * Notify that state of device is changed. either oldState or newState could
-     * be empty.
+     * Notify that state of device is changed.
      *
      * @param device
      * @param name   the name of the state
      * @param state
      */
-    default void notifyDeviceStateChanged(Device device, String name, Value state){
-        
-    }
+    void notifyDeviceStateChanged(Device device, String name, Value state);
+
+//    /**
+//     * Notify that device configuration has changed. By default is ignored.
+//     *
+//     * @param device
+//     */
+//    default void notifyDeviceConfigChanged(Device device) {
+//
+//    }
 
     /**
-     * Notify that device configuration has changed. By default is ignored.
      *
      * @param device
+     * @param message
+     * @param exception
      */
-    default void notifyDeviceConfigChanged(Device device) {
-
-    }
-
     default void evaluateDeviceException(Device device, String message, Throwable exception) {
 
     }
