@@ -112,6 +112,6 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
 
     @Override
     default Logger getLogger() {
-        return connection(LOGGER_ROLE, Logger.class).orElse(getContext().getLogger());
+        return optConnection(LOGGER_ROLE, Logger.class).orElse(getContext().getLogger());
     }
 }

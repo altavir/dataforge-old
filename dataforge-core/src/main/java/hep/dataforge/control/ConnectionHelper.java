@@ -1,5 +1,7 @@
 package hep.dataforge.control;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import org.slf4j.Logger;
 
@@ -63,6 +65,21 @@ public class ConnectionHelper implements Connectible {
         }
     }
 
+    /**
+     * Build connection (or connections if meta has multiple "connection" entries) and connect
+     *
+     * @param context
+     * @param meta
+     */
+    public void connect(Context context, Meta meta) {
+        if (meta.hasMeta("connection")) {
+            meta.getMetaList("connection").forEach(it -> connect(context, it));
+        } else {
+            String[] roles = meta.getStringArray("role", new String[]{});
+            Connection.buildConnection(caller, context, meta).ifPresent(connection -> connect(connection, roles));
+        }
+    }
+
     @Override
     public synchronized void disconnect(Connection connection) {
         if (connections.containsKey(connection)) {
@@ -81,6 +98,7 @@ public class ConnectionHelper implements Connectible {
 
     /**
      * Get a stream of all connections for a given role. Stream could be empty
+     *
      * @param role
      * @param type
      * @param <T>
@@ -96,13 +114,14 @@ public class ConnectionHelper implements Connectible {
 
     /**
      * Return a unique connection or first connection satisfying condition
+     *
      * @param role
      * @param type
      * @param <T>
      * @return
      */
-    public <T> Optional<T> connection(String role, Class<T> type) {
-        return connections(role,type).findFirst();
+    public <T> Optional<T> optConnection(String role, Class<T> type) {
+        return connections(role, type).findFirst();
     }
 
     @Override

@@ -1,5 +1,8 @@
 package hep.dataforge.control.devices;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.control.Connection;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
@@ -28,4 +31,12 @@ public interface DeviceHub extends Provider {
         return deviceNames().map(Name::toString);
     }
 
+    /**
+     * Add a connection to each of child devices
+     * @param connection
+     * @param roles
+     */
+    void connectAll(Connection connection, String... roles);
+
+    void connectAll(Context context, Meta meta);
 }

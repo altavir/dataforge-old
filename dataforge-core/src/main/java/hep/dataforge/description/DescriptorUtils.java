@@ -293,6 +293,7 @@ public class DescriptorUtils {
         }
     }
 
+    //TODO move to global utils
     public static <T extends Annotation> List<T> listAnnotations(AnnotatedElement source, Class<T> type, boolean searchSuper) {
         List<T> res = new ArrayList<>();
         if (source instanceof Class) {

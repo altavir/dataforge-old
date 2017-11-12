@@ -217,6 +217,6 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
 
     @Override
     default Logger getLogger() {
-        return connection(LOGGER_ROLE,Logger.class).orElse(getContext().getLogger());
+        return optConnection(LOGGER_ROLE,Logger.class).orElse(getContext().getLogger());
     }
 }

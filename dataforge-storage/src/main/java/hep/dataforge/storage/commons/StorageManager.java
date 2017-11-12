@@ -51,7 +51,10 @@ public class StorageManager extends BasicPlugin {
         return context.getFeature(StorageManager.class);
     }
 
-    private Map<Meta, Storage> storageCache = new HashMap<>();
+    /**
+     * Storage registry
+     */
+    private Map<Meta, Storage> shelves = new HashMap<>();
 
     /**
      * Return blank file storage in current working directory
@@ -68,17 +71,35 @@ public class StorageManager extends BasicPlugin {
 
     @Provides(STORAGE_TARGET)
     public Optional<Storage> optStorage(String name) {
-        return storageCache.values().stream().filter(it -> Objects.equals(it.getName(), name)).findAny();
+        return shelves.values().stream().filter(it -> Objects.equals(it.getName(), name)).findAny();
     }
 
     @ProvidesNames(STORAGE_TARGET)
     public Stream<String> storageNames() {
-        return storageCache.values().stream().map(Named::getName).distinct();
+        return shelves.values().stream().map(Named::getName).distinct();
     }
 
     public Storage buildStorage(Meta config) {
         //FIXME fix duplicate names
-        return storageCache.computeIfAbsent(config, cfg -> StorageFactory.buildStorage(getContext(), cfg));
+        return shelves.computeIfAbsent(config, cfg -> StorageFactory.buildStorage(getContext(), cfg));
     }
 
+    @Override
+    protected void applyConfig(Meta config) {
+        super.applyConfig(config);
+        config.getMetaList("storage").forEach(this::buildStorage);
+    }
+
+    @Override
+    public void detach() {
+        shelves.values().forEach(shelf -> {
+            try {
+                shelf.close();
+            } catch (Exception e) {
+                getLogger().error("Failed to close storage", e);
+            }
+        });
+        shelves.clear();
+        super.detach();
+    }
 }

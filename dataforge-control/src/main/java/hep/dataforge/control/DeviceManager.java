@@ -1,6 +1,7 @@
 package hep.dataforge.control;
 
 import hep.dataforge.context.BasicPlugin;
+import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.control.devices.DeviceFactory;
@@ -51,18 +52,23 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
     }
 
 
-    private Device buildDevice(Meta deviceMeta) {
-        DeviceFactory<?> factory = getContext()
+    public Device buildDevice(Meta deviceMeta) {
+        DeviceFactory factory = getContext()
                 .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
                 .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
         Device device = factory.build(getContext(), deviceMeta);
 
-//        deviceMeta.getMetaList("connect").forEach(connectionMeta -> {
-//
-//        });
+        deviceMeta.getMetaList("connection").forEach(connectionMeta -> {
+            device.getConnectionHelper().connect(getContext(), connectionMeta);
+        });
 
         add(device);
         return device;
+    }
+
+    public void applyConfig(Meta config) {
+        super.applyConfig(config);
+        config.getMetaList("device").forEach(this::buildDevice);
     }
 
     @Override
@@ -108,5 +114,15 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
             }
         });
         super.detach();
+    }
+
+    @Override
+    public void connectAll(Connection connection, String... roles) {
+        this.devices.values().forEach(device -> device.connect(connection, roles));
+    }
+
+    @Override
+    public void connectAll(Context context, Meta meta) {
+        this.devices.values().forEach(device -> device.getConnectionHelper().connect(context, meta));
     }
 }

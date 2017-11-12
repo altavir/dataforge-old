@@ -17,8 +17,8 @@ public interface AutoConnectible extends Connectible {
         return getConnectionHelper().connections(role, type);
     }
 
-    default <T> Optional<T> connection(String role, Class<T> type) {
-        return getConnectionHelper().connection(role, type);
+    default <T> Optional<T> optConnection(String role, Class<T> type) {
+        return getConnectionHelper().optConnection(role, type);
     }
 
     @Override

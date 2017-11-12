@@ -550,7 +550,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
         public Context build() {
             // automatically add lib directory
-            classPath(ctx.io().getFile("lib").toUri());
+            ctx.io().optFile("lib").ifPresent(file-> classPath(file.toUri()));
             ctx.classLoader = new URLClassLoader(classPath.toArray(new URL[classPath.size()]), ctx.getParent().getClassLoader());
             return ctx;
         }

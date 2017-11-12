@@ -5,11 +5,13 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.control.ports.PortHandler;
 import hep.dataforge.control.ports.SyncPortController;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 import java.time.Duration;
@@ -35,6 +37,14 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
 
     public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
+
+    public PortSensor() {
+    }
+
+    public PortSensor(Context context, Meta meta) {
+        setContext(context);
+        setMeta(meta);
+    }
 
     private PortHandler handler;
     private SyncPortController controller = new SyncPortController(this);
@@ -106,7 +116,7 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     protected final void send(String message) throws ControlException {
         getHandler().holdBy(controller);
         try {
-            getHandler().send(controller,message);
+            getHandler().send(controller, message);
         } finally {
             getHandler().unholdBy(controller);
         }
