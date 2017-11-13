@@ -161,8 +161,8 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      *
      * @return the io
      */
-    public IOManager io() {
-        return pluginManager().opt(IOManager.class).orElseGet(() -> Global.instance().io());
+    public IOManager getIo() {
+        return getPluginManager().opt(IOManager.class).orElseGet(() -> Global.instance().getIo());
     }
 
 
@@ -172,7 +172,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @return
      */
     @NotNull
-    public final PluginManager pluginManager() {
+    public final PluginManager getPluginManager() {
         return this.pm;
     }
 
@@ -205,12 +205,12 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
     @Provides(Plugin.PLUGIN_TARGET)
     public Optional<Plugin> optPlugin(String pluginName) {
-        return pluginManager().opt(PluginTag.fromString(pluginName));
+        return getPluginManager().opt(PluginTag.fromString(pluginName));
     }
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
     public Collection<String> listPlugins() {
-        return pluginManager().list().stream().map(Plugin::getName).collect(Collectors.toSet());
+        return getPluginManager().list().stream().map(Plugin::getName).collect(Collectors.toSet());
     }
 
     @ProvidesNames(VALUE_TARGET)
@@ -265,7 +265,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     @Override
     public void close() throws Exception {
         //detach all plugins
-        pluginManager().close();
+        getPluginManager().close();
 
         //stopping all works in this context
         if (parallelExecutor != null) {
@@ -325,7 +325,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     public <T> T loadFeature(String tag, Class<T> type) {
-        return type.cast(pluginManager().getOrLoad(tag));
+        return type.cast(getPluginManager().getOrLoad(tag));
     }
 
 
@@ -338,7 +338,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      */
     @NotNull
     public <T> Optional<T> optFeature(Class<T> type) {
-        return pluginManager()
+        return getPluginManager()
                 .stream(true)
                 .filter(type::isInstance)
                 .findFirst()
@@ -375,7 +375,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     public Meta getIdentity() {
         MetaBuilder id = new MetaBuilder("context");
         id.update(properties);
-        pluginManager().stream(true).forEach(plugin -> {
+        getPluginManager().stream(true).forEach(plugin -> {
             if (plugin.getClass().isAnnotationPresent(PluginDef.class)) {
                 if (!plugin.getClass().getAnnotation(PluginDef.class).support()) {
                     id.putNode(plugin.getIdentity());
@@ -455,22 +455,22 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
          * @return
          */
         public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
-            ctx.pluginManager().load(type, pl -> pl.configure(configuration));
+            ctx.getPluginManager().load(type, pl -> pl.configure(configuration));
             return this;
         }
 
         public Builder plugin(String type, Meta configuration) {
-            ctx.pluginManager().load(type).configure(configuration);
+            ctx.getPluginManager().load(type).configure(configuration);
             return this;
         }
 
         public <T extends Plugin> Builder plugin(Class<T> type, Consumer<T> initializer) {
-            ctx.pluginManager().load(type, initializer);
+            ctx.getPluginManager().load(type, initializer);
             return this;
         }
 
         public Builder plugin(Class<? extends Plugin> type) {
-            ctx.pluginManager().load(type);
+            ctx.getPluginManager().load(type);
             return this;
         }
 
@@ -541,8 +541,8 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
          * @return
          */
         public Builder setRootDir(String rootDir) {
-            if (!ctx.pluginManager().opt(IOManager.class).isPresent()) {
-                ctx.pluginManager().load(new BasicIOManager(ctx.getParent().io().in(), ctx.getParent().io().out()));
+            if (!ctx.getPluginManager().opt(IOManager.class).isPresent()) {
+                ctx.getPluginManager().load(new BasicIOManager(ctx.getParent().getIo().in(), ctx.getParent().getIo().out()));
             }
             ctx.putValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir);
             return this;
@@ -550,7 +550,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
         public Context build() {
             // automatically add lib directory
-            ctx.io().optFile("lib").ifPresent(file-> classPath(file.toUri()));
+            ctx.getIo().optFile("lib").ifPresent(file-> classPath(file.toUri()));
             ctx.classLoader = new URLClassLoader(classPath.toArray(new URL[classPath.size()]), ctx.getParent().getClassLoader());
             return ctx;
         }

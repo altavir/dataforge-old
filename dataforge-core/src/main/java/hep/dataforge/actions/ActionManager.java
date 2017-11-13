@@ -111,7 +111,7 @@ public class ActionManager extends BasicPlugin {
     public Stream<String> getAllActions() {
         return Stream.concat(
                 this.actionMap.keySet().stream(),
-                getContext().pluginManager().stream(true)
+                getContext().getPluginManager().stream(true)
                         .flatMap(plugin -> plugin.listContent(Action.ACTION_TARGET))
         ).distinct();
     }
@@ -125,7 +125,7 @@ public class ActionManager extends BasicPlugin {
     public Stream<String> getAllTasks() {
         return Stream.concat(
                 this.taskMap.keySet().stream(),
-                getContext().pluginManager().stream(true)
+                getContext().getPluginManager().stream(true)
                         .flatMap(plugin -> plugin.listContent(Task.TASK_TARGET))
         ).distinct();
     }

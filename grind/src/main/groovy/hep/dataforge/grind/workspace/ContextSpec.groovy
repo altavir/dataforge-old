@@ -25,7 +25,7 @@ class ContextSpec {
         Context res = Context.builder(name, parent).build()
         properties.each { key, value -> res.putValue(key.toString(), value) }
         pluginMap.forEach { String key, Meta meta ->
-            Plugin plugin = res.pluginManager().getOrLoad(key)
+            Plugin plugin = res.getPluginManager().getOrLoad(key)
             if (plugin instanceof Configurable) {
                 (plugin as Configurable).configure(meta)
             }

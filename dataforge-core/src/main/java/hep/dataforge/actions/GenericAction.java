@@ -232,7 +232,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      * @return a {@link java.io.OutputStream} object.
      */
     public void output(Context context, String name, Consumer<OutputStream> writer) {
-        try (OutputStream stream = context.io().out(getName(), name)) {
+        try (OutputStream stream = context.getIo().out(getName(), name)) {
             writer.accept(stream);
         } catch (IOException ex) {
             context.getLogger().error("Failed to write to default output. Dumping output to System.err", ex);

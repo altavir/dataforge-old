@@ -34,7 +34,7 @@ public class FitHelper {
     private FitManager manager;
 
     public FitHelper(Context context) {
-        this.manager = context.pluginManager().getOrLoad(FitManager.class);
+        this.manager = context.getPluginManager().getOrLoad(FitManager.class);
     }
 
     public FitHelper() {
@@ -101,7 +101,7 @@ public class FitHelper {
         ParamSet startPars = new ParamSet();
         History log = new Chronicle("fit", null);
         List<FitStage> stages = new ArrayList<>();
-        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().io().out());
+        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().getIo().out());
 
         public FitBuilder(@NotNull NavigableValuesSource data) {
             this.data = data;
@@ -166,7 +166,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder setListenerStream(String outputName) {
-            this.listener = buildDefaultListener(getManager().getContext().io().out("", outputName));
+            this.listener = buildDefaultListener(getManager().getContext().getIo().out("", outputName));
             return this;
         }
 

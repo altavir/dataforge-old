@@ -40,7 +40,7 @@ public abstract class AbstractWorkspace implements Workspace {
     public Optional<Task<Object>> optTask(String taskName) {
         if (!tasks.containsKey(taskName)) {
             getLogger().trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName);
-            List<Task> taskList = getContext().pluginManager().stream(true)
+            List<Task> taskList = getContext().getPluginManager().stream(true)
                     .map(plugin -> plugin.provide(Path.of(Task.TASK_TARGET, taskName), Task.class))
                     .filter(Optional::isPresent)
                     .map(Optional::get)

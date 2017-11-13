@@ -52,7 +52,7 @@ public class BasicWorkspace extends AbstractWorkspace {
         if (cache == null || cache.getContext() != this.getContext()) {
             cache = getContext().optFeature(CachePlugin.class).orElseGet(() -> {
                 CachePlugin pl = new CachePlugin();
-                getContext().pluginManager().load(pl);
+                getContext().getPluginManager().load(pl);
                 return pl;
             });
         }

@@ -134,7 +134,7 @@ class ExecSpec {
          */
         OutputStream getStream() {
             if (stream == null) {
-                outputStream = context.io().out(actionName, name)
+                outputStream = context.getIo().out(actionName, name)
             }
             return stream
         }
@@ -316,7 +316,7 @@ class ExecSpec {
 
             // Setting working directory
             if (meta.hasValue("workDir")) {
-                builder.directory(context.io().getFile(meta.getString("workDir")));
+                builder.directory(context.getIo().getFile(meta.getString("workDir")));
             }
 
 //            if (meta.getBoolean("inheritIO", true)) {

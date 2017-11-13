@@ -80,7 +80,7 @@ class GrindTerminal extends SimpleConfigurable {
     GrindTerminal(Context context, Terminal terminal = null) {
 
         //start fx plugin in global
-        Global.instance().pluginManager().load("hep.dataforge:fx");
+        Global.instance().getPluginManager().load("hep.dataforge:fx");
 
         //define terminal if it is not defined
         if (terminal == null) {
@@ -101,12 +101,12 @@ class GrindTerminal extends SimpleConfigurable {
         //builder shell context
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
-            context.pluginManager().load("hep.dataforge:plots")
+            context.getPluginManager().load("hep.dataforge:plots")
             (context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
 //            OutputStream outputStream = System.out
-//            context.pluginManager().load(new BasicIOManager(inputStream, outputStream));
+//            context.getPluginManager().load(new BasicIOManager(inputStream, outputStream));
         }
 
         //create the shell
@@ -205,7 +205,7 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof Path) {
             scriptPath = obj as Path
         } else {
-            scriptPath = shell.context.io().getFile(obj as String);
+            scriptPath = shell.context.getIo().getFile(obj as String);
         }
 
         Files.newBufferedReader(scriptPath).withCloseable {

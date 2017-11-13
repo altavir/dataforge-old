@@ -113,7 +113,7 @@ public class ActionUtils {
             return new SequenceAction();
         } else {
             Path path = Path.of(actionName, Action.ACTION_TARGET);
-            return context.pluginManager().stream(true)
+            return context.getPluginManager().stream(true)
                     .map(plugin -> plugin.provide(path))
                     .filter(opt -> opt.isPresent())
                     .map(opt -> opt.map(it -> Action.class.cast(it)).get())

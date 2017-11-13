@@ -42,12 +42,16 @@ public class ServerManager extends BasicPlugin implements ServerObject {
 
     private List<ServerObject> bindings = new ArrayList<>();
 
-    public BooleanBinding isStarted = new BooleanBinding() {
+    public BooleanBinding isStartedProperty = new BooleanBinding() {
         @Override
         protected boolean computeValue() {
             return ratpack != null;
         }
     };
+
+    public boolean isStarted() {
+        return isStartedProperty.get();
+    }
 
 
     @Override
@@ -75,7 +79,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
 
 
         ratpack = RatpackServer.start(this::update);
-        isStarted.invalidate();
+        isStartedProperty.invalidate();
     }
 
     private void update(RatpackServerSpec server) throws Exception {
@@ -131,7 +135,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
                 getLogger().error("Failed to stop ratpack server", ex);
             }
         }
-        isStarted.invalidate();
+        isStartedProperty.invalidate();
     }
 
     /**
@@ -149,7 +153,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
      * @return
      */
     public String getLink() {
-        if (isStarted.get()) {
+        if (ratpack != null) {
             return ratpack.getScheme() + "://"
                     + ratpack.getBindHost() + ":"
                     + ratpack.getBindPort();

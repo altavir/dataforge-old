@@ -22,7 +22,7 @@ public class WorkspaceTest {
 
     {
         Context context = Global.getContext("TEST");
-//        context.pluginManager().load(BasicIOManager.class);
+//        context.getPluginManager().load(BasicIOManager.class);
 
         CachePlugin cache = context.loadFeature("cache", CachePlugin.class);
         cache.configureValue("fileCache.enabled", false);

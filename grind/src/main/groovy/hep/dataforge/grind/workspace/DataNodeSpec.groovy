@@ -66,7 +66,7 @@ class DataNodeSpec {
 
 
     void file(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta = null) {
-        item(place, DataUtils.readFile(context.io().getFile(path), Grind.buildMeta(fileMeta)))
+        item(place, DataUtils.readFile(context.getIo().getFile(path), Grind.buildMeta(fileMeta)))
     }
 
     void item(NamedData data) {

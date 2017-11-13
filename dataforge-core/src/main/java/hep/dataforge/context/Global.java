@@ -99,11 +99,11 @@ public class Global extends Context {
     }
 
     public static Path getFile(String path) {
-        return instance.io().getFile(path);
+        return instance.getIo().getFile(path);
     }
 
     public static PrintWriter out() {
-        return new PrintWriter(instance.io().out());
+        return new PrintWriter(instance.getIo().out());
     }
 
     /**
@@ -124,10 +124,10 @@ public class Global extends Context {
     }
 
     @Override
-    public IOManager io() {
-        return pluginManager().opt(IOManager.class).orElseGet(() -> {
+    public IOManager getIo() {
+        return getPluginManager().opt(IOManager.class).orElseGet(() -> {
             getLogger().debug("No IO plugin found. Using default IO.");
-            return pluginManager().load(new BasicIOManager());
+            return getPluginManager().load(new BasicIOManager());
         });
     }
 

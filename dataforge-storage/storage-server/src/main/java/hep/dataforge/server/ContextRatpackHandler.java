@@ -32,7 +32,7 @@ public class ContextRatpackHandler implements Handler {
         binding.put("contextName", context.getName());
         binding.put("properties", context.getProperties().entrySet());
 
-        Map<String, String> plugins = context.pluginManager()
+        Map<String, String> plugins = context.getPluginManager()
                 .stream(true)
                 .collect(Collectors.toMap(plugin -> {
                     if (plugin.getContext() == context) {

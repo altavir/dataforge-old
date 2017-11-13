@@ -27,7 +27,7 @@ public class MathPlugin extends BasicPlugin {
     private final FunctionDispatcher<BivariateFunction> bivariateFactory = new FunctionDispatcher<>();
 
     public static MathPlugin buildFrom(Context context) {
-        return context.pluginManager().getOrLoad(MathPlugin.class);
+        return context.getPluginManager().getOrLoad(MathPlugin.class);
     }
 
     public UnivariateFunction buildUnivariateFunction(Meta meta) {

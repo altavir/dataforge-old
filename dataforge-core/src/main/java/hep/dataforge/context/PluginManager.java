@@ -64,7 +64,7 @@ public class PluginManager implements ContextAware, AutoCloseable {
         if (getContext().getParent() == null) {
             return null;
         } else {
-            return getContext().getParent().pluginManager();
+            return getContext().getParent().getPluginManager();
         }
     }
 

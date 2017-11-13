@@ -10,10 +10,10 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.StorageType;
 
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class StorageFactory {
@@ -21,17 +21,23 @@ public class StorageFactory {
     private static final ServiceLoader<StorageType> loader = ServiceLoader.load(StorageType.class);
     private static final String DEFAULT_STORAGE_TYPE = "file";
 
-    private static StorageType getStorageFactory(String type) {
+    private static Optional<StorageType> getStorageFactory(String type) {
         for (StorageType st : loader) {
             if (st.type().equalsIgnoreCase(type)) {
-                return st;
+                return Optional.of(st);
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     public static Storage buildStorage(Context context, Meta meta) {
         String type = meta.getString("type", DEFAULT_STORAGE_TYPE);
-        return getStorageFactory(type).build(context, meta);
+        Optional<StorageType> factory = getStorageFactory(type);
+        if (factory.isPresent()) {
+            return factory.get().build(context, meta);
+        } else {
+            throw new RuntimeException("Can't find Storage factory for type " + type);
+        }
+
     }
 }

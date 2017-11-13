@@ -50,11 +50,11 @@ public class FileDataFactory extends DataFactory<Binary> {
     protected void fill(DataTree.Builder<Binary> builder, Context context, Meta dataConfig) {
         Path parentFile;
         if (dataConfig.hasMeta(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(dataConfig.getString(DATA_DIR_KEY));
+            parentFile = context.getIo().getFile(dataConfig.getString(DATA_DIR_KEY));
         } else if (context.hasValue(DATA_DIR_KEY)) {
-            parentFile = context.io().getFile(context.getString(DATA_DIR_KEY));
+            parentFile = context.getIo().getFile(context.getString(DATA_DIR_KEY));
         } else {
-            parentFile = context.io().getRootDirectory();
+            parentFile = context.getIo().getRootDirectory();
         }
 
         /**
@@ -81,7 +81,7 @@ public class FileDataFactory extends DataFactory<Binary> {
     }
 
     public Data<Binary> buildFileData(Context context, String filePath, Meta meta) {
-        return buildFileData(context.io().getFile(filePath), meta);
+        return buildFileData(context.getIo().getFile(filePath), meta);
     }
 
     @NotNull

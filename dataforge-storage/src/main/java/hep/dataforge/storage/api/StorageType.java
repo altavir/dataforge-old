@@ -23,6 +23,7 @@ package hep.dataforge.storage.api;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The type of storage with meta builder
@@ -44,6 +45,6 @@ public interface StorageType {
      * @param meta
      * @return 
      */
+    @NotNull
     Storage build(Context context, Meta meta);
-    //TODO add StorageManager registration
 }

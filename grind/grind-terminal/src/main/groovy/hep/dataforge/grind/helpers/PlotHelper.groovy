@@ -45,7 +45,7 @@ class PlotHelper extends AbstractHelper {
 
     PlotHelper(Context context = Global.instance()) {
         super(context)
-        context.pluginManager().getOrLoad("plots")
+        context.getPluginManager().getOrLoad("plots")
         this.manager = context.getFeature(PlotPlugin)
     }
 

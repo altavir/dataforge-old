@@ -47,7 +47,7 @@ public class RunConfigAction extends GenericAction {
         String contextName = meta.getString("contextName", getName());
         Context ac = Context.builder(contextName,context).build();
         if (meta.hasValue("configFile")) {
-            Path cfgFile = context.io().getFile(meta.getString("configFile"));
+            Path cfgFile = context.getIo().getFile(meta.getString("configFile"));
             try {
                 cfg = MetaFileReader.instance().read(ac, cfgFile, null);
             } catch (IOException | ParseException ex) {

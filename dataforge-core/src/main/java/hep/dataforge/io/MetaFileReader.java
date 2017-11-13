@@ -74,11 +74,11 @@ public class MetaFileReader {
     }
 
     public Meta read(Context context, String path, Charset encoding) throws IOException, ParseException {
-        return read(context, context.io().getFile(path), encoding);
+        return read(context, context.getIo().getFile(path), encoding);
     }
 
     public Meta read(Context context, String path) throws IOException, ParseException {
-        return read(context, context.io().getFile(path), null);
+        return read(context, context.getIo().getFile(path), null);
     }
 
     public Meta read(Context context, Path file, Charset encoding) throws IOException, ParseException {

@@ -290,7 +290,7 @@ public interface Workspace extends ContextAware, Provider {
 //        }
 
         default Workspace.Builder fileData(String place, String filePath, Meta meta) {
-            return data(place, DataUtils.readFile(getContext().io().getFile(filePath), meta));
+            return data(place, DataUtils.readFile(getContext().getIo().getFile(filePath), meta));
         }
 
         default Workspace.Builder fileData(String dataName, String filePath) {

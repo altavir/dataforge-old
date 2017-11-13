@@ -24,9 +24,9 @@ public class TestServer {
      */
     public static void main(String[] args) throws Exception {
         Context context = Global.getContext("SERVER-TEST");
-        StorageManager storageManager = context.pluginManager().load(StorageManager.class);
+        StorageManager storageManager = context.getPluginManager().load(StorageManager.class);
 
-        ServerManager serverManager = context.pluginManager().load(ServerManager.class);
+        ServerManager serverManager = context.getPluginManager().load(ServerManager.class);
 
         String path = "D:/temp/test";
         System.out.println("Starting test numass storage servlet in " + path);
