@@ -83,11 +83,7 @@ public class VirtualDevice {
 //    }
 
     public static Sensor<Double> randomDoubleSensor(Context context, String name, Duration delay, double mean, double sigma) {
-        Sensor<Double> sensor = new Sensor<Double>() {
-            {
-                setContext(context);
-                setMeta(new MetaBuilder("device").setValue("name", name).build());
-            }
+        Sensor<Double> sensor = new Sensor<Double>(context, new MetaBuilder("device").setValue("name", name)) {
 
             @Override
             protected Measurement<Double> createMeasurement() {

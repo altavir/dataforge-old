@@ -76,8 +76,8 @@ operator fun Value.compareTo(other: Value): Int {
     }
 }
 
-fun Value?.isNull(): Boolean{
-    return this==null||this.isNull
+fun Value?.isNull(): Boolean {
+    return this == null || this.isNull
 }
 
 //Meta operations
@@ -110,6 +110,29 @@ operator fun Meta.plus(meta: Meta): Meta {
  */
 operator fun Meta.plus(value: NamedValue): Meta {
     return this.builder.putValue(value.name, value.anonymousValue);
+}
+
+/**
+ * Get a value if it is present and apply action to it
+ */
+fun Meta.useValue(valueName: String, action: (Value) -> Unit) {
+    optValue(valueName).ifPresent(action)
+}
+
+/**
+ * Get a meta node if it is present and apply action to it
+ */
+fun Meta.useMeta(metaName: String, action: (Meta) -> Unit) {
+    optMeta(metaName).ifPresent(action)
+}
+
+/**
+ * Get all meta nodes with the given name and apply action to them
+ */
+fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
+    if(hasMeta(metaName)){
+        action(getMetaList(metaName))
+    }
 }
 
 fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {

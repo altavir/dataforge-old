@@ -15,6 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.context.Context;
 import hep.dataforge.control.measurements.Measurement;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
@@ -33,6 +34,10 @@ import java.util.Map;
 public abstract class AbstractMultiMeasurementDevice extends AbstractDevice implements MultiMeasurementDevice {
 
     private final Map<String, Measurement> measurements = new HashMap<>();
+
+    public AbstractMultiMeasurementDevice(Context context, Meta meta) {
+        super(context, meta);
+    }
 
     @Override
     public Measurement createMeasurement(String name, Meta meta) throws ControlException {

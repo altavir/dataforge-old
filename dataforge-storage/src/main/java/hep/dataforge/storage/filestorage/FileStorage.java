@@ -33,7 +33,6 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
 import java.nio.channels.SeekableByteChannel;
@@ -79,13 +78,8 @@ public class FileStorage extends AbstractStorage {
      */
     public FileStorage(Context context, Meta config) throws StorageException {
         super(context, config);
-        try {
-            URI uri = config.optValue("path").map(Value::stringValue).map(URI::create)
-                    .orElse(context.getIo().getWorkDirectory().toUri());
-            this.dataDir = Paths.get(uri);
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Malformed URL", e);
-        }
+        this.dataDir = config.optValue("path").map(Value::stringValue).map(Paths::get)
+                .orElse(context.getIo().getWorkDirectory());
         startup();
     }
 

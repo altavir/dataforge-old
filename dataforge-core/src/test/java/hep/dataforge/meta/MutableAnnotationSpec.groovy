@@ -15,9 +15,9 @@
  */
 package hep.dataforge.meta
 
+import hep.dataforge.names.Name
 import hep.dataforge.values.Value
 import spock.lang.Specification
-
 
 /**
  *
@@ -25,48 +25,48 @@ import spock.lang.Specification
  */
 class MutableAnnotationSpec extends Specification {
     Configuration testAnnotation;
-    
-    def setup(){
+
+    def setup() {
         testAnnotation = new Configuration(new MetaBuilder("test")
-            .putNode(new MetaBuilder("child")
-                .putValue("child_value",88)
-            )
-            .putValue("my_value", 48)
-            .putValue("other_value","ёлка")
-            .putValue("path.to.my_value",true)
+                .putNode(new MetaBuilder("child")
+                .putValue("child_value", 88)
+        )
+                .putValue("my_value", 48)
+                .putValue("other_value", "ёлка")
+                .putValue("path.to.my_value", true)
         )
     }
-    
-    
-    
-    def "test MutableAnnotation Value observer"(){
+
+
+    def "test MutableAnnotation Value observer"() {
         when:
         testAnnotation.addObserver(new Observer());
-        testAnnotation.putValue("some_new_value",13.3)
+        testAnnotation.putValue("some_new_value", 13.3)
         then:
         testAnnotation.hasValue("some_new_value")
-        
+
     }
-    
-    def "test child Value observer"(){
+
+    def "test child Value observer"() {
         when:
         testAnnotation.addObserver(new Observer());
-        testAnnotation.getMeta("child").putValue("new_child_value",89);
+        testAnnotation.getMeta("child").putValue("new_child_value", 89);
         then:
         testAnnotation.hasValue("child.new_child_value")
     }
-    
-	
-    private class Observer implements ConfigChangeListener{
-        void notifyValueChanged(String name, Value oldItem, Value newItem){
+
+
+    private class Observer implements ConfigChangeListener {
+        void notifyValueChanged(Name name, Value oldItem, Value newItem) {
             println "the value with name ${name} changed from ${oldItem} to ${newItem}"
         }
 
-
-        void notifyElementChanged(String name, List<Meta> oldItem, List<Meta> newItem){
+        @Override
+        void notifyNodeChanged(Name name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
             println "the element with name ${name} changed from ${oldItem} to ${newItem}"
         }
-        
+
+
     }
 }
 

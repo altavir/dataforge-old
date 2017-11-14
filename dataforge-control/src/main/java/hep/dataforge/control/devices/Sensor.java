@@ -36,12 +36,8 @@ public abstract class Sensor<T> extends AbstractDevice {
 
     private Measurement<T> measurement;
 
-    public Sensor() {
-    }
-
     public Sensor(Context context, Meta meta) {
-        setContext(context);
-        setMeta(meta);
+        super(context, meta);
     }
 
     /**

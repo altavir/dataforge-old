@@ -38,12 +38,8 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
 
-    public PortSensor() {
-    }
-
     public PortSensor(Context context, Meta meta) {
-        setContext(context);
-        setMeta(meta);
+        super(context, meta);
     }
 
     private PortHandler handler;

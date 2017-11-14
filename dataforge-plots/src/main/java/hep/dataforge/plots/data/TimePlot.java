@@ -17,6 +17,7 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.DateTimeUtils;
@@ -41,6 +42,26 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = MAX_ITEMS_KEY, type = {NUMBER}, def = "1000", info = "The maximum number of items. Negative means no limit")
 @ValueDef(name = PREF_ITEMS_KEY, type = {NUMBER}, def = "400", info = "The preferred number of items to leave after cleanup.")
 public class TimePlot extends XYPlot {
+
+    public static void setMaxItems(Plottable plot, int maxItems) {
+        plot.configureValue(MAX_ITEMS_KEY, maxItems);
+    }
+
+    public static void setMaxAge(Plottable plot, Duration age) {
+        plot.configureValue(MAX_AGE_KEY, age.toMillis());
+    }
+
+    public static void setPrefItems(Plottable plot, int prefItems) {
+        plot.configureValue(PREF_ITEMS_KEY, prefItems);
+    }
+
+    public static void put(Plottable plot, Object value){
+        if(plot instanceof TimePlot){
+            ((TimePlot) plot).put(Value.of(value));
+        } else {
+            LoggerFactory.getLogger(TimePlot.class).warn("Trying to put value TimePlot value into different plot");
+        }
+    }
 
     public static final String MAX_AGE_KEY = "maxAge";
     public static final String MAX_ITEMS_KEY = "maxItems";
@@ -84,14 +105,6 @@ public class TimePlot extends XYPlot {
     public TimePlot(String yName) {
         this(yName, DEFAULT_TIMESTAMP_KEY, yName);
     }
-
-//    public static TimePlot builder(String name, String yName, String color, double thickness) {
-//        TimePlot res = new TimePlot(name, yName);
-//        res.getConfig()
-//                .setValue("color", color)
-//                .setValue("thickness", thickness);
-//        return res;
-//    }
 
     /**
      * Puts value with the same name as this y name from data point. If data

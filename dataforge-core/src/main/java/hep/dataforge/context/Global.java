@@ -114,7 +114,7 @@ public class Global extends Context {
         try {
             instance().close();
         } catch (Exception e) {
-            logger.error("Exception while terminating DataForge framework");
+            logger.error("Exception while terminating DataForge framework", e);
         }
     }
 

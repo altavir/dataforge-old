@@ -4,8 +4,12 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.PortException;
 
 import java.time.Duration;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Predicate;
 
 /**
@@ -35,7 +39,7 @@ public class SyncPortController implements PortHandler.PortController, AutoClose
 
     private final PortHandler.PortController delegate;
 
-    private Set<WaitTask> waiters = new ConcurrentSkipListSet<>();
+    private Set<WaitTask> waiters = new HashSet<>();
 
     public SyncPortController(PortHandler.PortController delegate) {
         this.delegate = delegate;
@@ -61,7 +65,7 @@ public class SyncPortController implements PortHandler.PortController, AutoClose
      * remove completed waiters
      */
     private void cleanup() {
-        waiters.removeIf(it -> it.isDone());
+        waiters.removeIf(CompletableFuture::isDone);
     }
 
     /**

@@ -22,6 +22,7 @@ import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Value;
@@ -37,7 +38,7 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 
 /**
  * <p>
- * State have two components: physical and logical. If logical state does not
+ * State has two components: physical and logical. If logical state does not
  * coincide with physical, it should be invalidated and automatically updated on
  * next request.
  * </p>
@@ -51,6 +52,11 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     private final Map<String, Value> states = new HashMap<>();
     private Context context;
     private ConnectionHelper connectionHelper;
+
+    public AbstractDevice(Context context, Meta meta) {
+        super(meta);
+        this.context = context;
+    }
 
     private Logger getDefaultLogger() {
         String loggerName = meta().getString("logger", () -> "device::" + getName());
@@ -101,9 +107,9 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         }
     }
 
-    protected void setContext(Context context) {
-        this.context = context;
-    }
+//    protected void setContext(Context context) {
+//        this.context = context;
+//    }
 
     @Override
     public String getName() {

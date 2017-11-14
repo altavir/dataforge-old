@@ -104,6 +104,14 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
         });
     }
 
+    /**
+     * Get the stream of top level devices
+     * @return
+     */
+    public Stream<Device> getDevices() {
+        return devices.values().stream();
+    }
+
     @Override
     public void detach() {
         devices.values().forEach(it -> {

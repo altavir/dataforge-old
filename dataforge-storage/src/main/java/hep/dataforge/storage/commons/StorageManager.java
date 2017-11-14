@@ -63,7 +63,10 @@ public class StorageManager extends BasicPlugin {
      */
     public Storage getDefaultStorage() {
         try {
-            return new FileStorage(getContext(), Meta.empty());
+            return shelves.values().stream().findFirst().orElseGet(()->{
+                return new FileStorage(getContext(), Meta.empty());
+            });
+
         } catch (StorageException ex) {
             throw new RuntimeException("Can't initialize default storage", ex);
         }
@@ -87,7 +90,11 @@ public class StorageManager extends BasicPlugin {
     @Override
     protected void applyConfig(Meta config) {
         super.applyConfig(config);
-        config.getMetaList("storage").forEach(this::buildStorage);
+        if (config.hasMeta("storage")) {
+            config.getMetaList("storage").forEach(this::buildStorage);
+        } else {
+            buildStorage(config);
+        }
     }
 
     @Override

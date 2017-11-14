@@ -125,6 +125,14 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
     }
 
     /**
+     * True if device is initialized and not shut down
+     * @return
+     */
+    default boolean isInitialized(){
+        return optBooleanState(INITIALIZED_STATE).orElse(false);
+    }
+
+    /**
      * Request asynchronous state change for state with given name and return the state value after change
      *
      * @param name
