@@ -48,7 +48,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
 
     @Override
     public void addListener(@NotNull PlotListener listener) {
-        getListeners().add(listener);
+        listeners.add(listener,true);
     }
 
     @Override
@@ -58,7 +58,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
 
     @Override
     public void removeListener(@NotNull PlotListener listener) {
-        this.getListeners().remove(listener);
+        this.listeners.remove(listener);
     }
 
     @Override
@@ -79,7 +79,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      */
     @Override
     protected synchronized void applyConfig(Meta config) {
-        getListeners().forEach((l) -> l.metaChanged(name, this, new Laminate(meta())));
+        listeners.forEach((l) -> l.metaChanged(name, this, new Laminate(meta())));
 
         //invalidate adapter
         if (config.hasMeta(ADAPTER_KEY)) {
@@ -91,15 +91,9 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
      * Notify all listeners that data changed
      */
     public synchronized void notifyDataChanged() {
-        getListeners().forEach((l) -> l.dataChanged(name, this));
+        listeners.forEach((l) -> l.dataChanged(name, this));
     }
 
-    /**
-     * @return the listeners
-     */
-    private ReferenceRegistry<PlotListener> getListeners() {
-        return listeners;
-    }
 
     public void setAdapter(T adapter) {
         this.adapter = adapter;

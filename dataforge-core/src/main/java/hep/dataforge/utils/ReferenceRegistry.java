@@ -40,18 +40,13 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
     }
 
     /**
-     * Add weak reference to registry
-     * <p>
-     * <strong>WARNING:</strong> registered listeners are stored as weak
-     * references meaning they will be cleaned if they are not declared
-     * somewhere else.
-     * </p>
+     * Add a strong reference to registry
      *
      * @param obj
      */
     @Override
     public boolean add(T obj) {
-        return add(obj, false);
+        return add(obj, true);
     }
 
     @Override
