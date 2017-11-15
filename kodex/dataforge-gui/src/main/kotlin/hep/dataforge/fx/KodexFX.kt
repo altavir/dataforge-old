@@ -9,6 +9,7 @@ import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
+import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import kotlinx.coroutines.experimental.CommonPool
@@ -20,6 +21,7 @@ import kotlin.collections.HashMap
 import kotlin.coroutines.experimental.CoroutineContext
 
 val dfIcon: Image = Image(Global::class.java.getResourceAsStream("/img/df.png"))
+val dfIconView = ImageView(dfIcon)
 
 val uiExecutor = Executor { command -> Platform.runLater(command) }
 

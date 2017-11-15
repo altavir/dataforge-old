@@ -75,6 +75,8 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     public void shutdown() throws ControlException {
         super.shutdown();
         try {
+            getHandler().unholdBy(controller);
+            controller.close();
             if (handler != null) {
                 handler.close();
             }
@@ -88,6 +90,7 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     public void acceptPortPhrase(String message) {
         //do nothing
     }
+
 
     protected final String sendAndWait(String request, Duration timeout) throws ControlException {
         getHandler().holdBy(controller);

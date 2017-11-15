@@ -41,6 +41,11 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         this.name = Name.ofSingle(name);
     }
 
+    public PlotGroup(String name, NodeDescriptor descriptor) {
+        this.name = Name.ofSingle(name);
+        this.descriptor = descriptor;
+    }
+
 //    public PlotGroup(String name, NodeDescriptor descriptor) {
 //        this.name = name;
 //        this.descriptor = descriptor;
@@ -62,7 +67,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     @Override
     public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
-        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(getMeta())));
+        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(getMeta()).cleanup()));
     }
 
     @Override
@@ -202,12 +207,12 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * Notify that config for this element and children is changed
      */
     private void notifyConfigChanged() {
-        metaChanged(Name.EMPTY, this, new Laminate(meta()));
+        metaChanged(Name.EMPTY, this, new Laminate(meta()).withDescriptor(descriptor));
         getChildren().forEach(pl -> {
             if (pl instanceof PlotGroup) {
                 ((PlotGroup) pl).notifyConfigChanged();
             } else {
-                metaChanged(pl.getName(), pl, new Laminate(pl.meta()));
+                metaChanged(pl.getName(), pl, new Laminate(pl.meta()).withDescriptor(pl.getDescriptor()));
             }
         });
     }
@@ -229,6 +234,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     public void setDescriptor(NodeDescriptor descriptor) {
         this.descriptor = descriptor;
+        notifyConfigChanged();
     }
 
     /**

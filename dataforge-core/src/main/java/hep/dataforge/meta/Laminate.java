@@ -22,6 +22,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
@@ -94,6 +95,11 @@ public final class Laminate extends Meta implements Described {
         descriptorLayer = DescriptorUtils.buildDefaultNode(descriptor);
     }
 
+    @Contract(pure = true)
+    public boolean hasDescriptor() {
+        return this.descriptor != null;
+    }
+
     /**
      * Attach descriptor to this laminate to use for default values and aliases
      * (ALIASES NOT IMPLEMENTED YET!).
@@ -111,7 +117,7 @@ public final class Laminate extends Meta implements Described {
      * @return
      */
     public Laminate withFirstLayer(Meta layer) {
-        if(layer.isEmpty()){
+        if (layer.isEmpty()) {
             return this;
         } else {
             Laminate res = new Laminate(this);
@@ -252,7 +258,12 @@ public final class Laminate extends Meta implements Described {
         if (descriptor != null) {
             return descriptor;
         } else {
-            return new NodeDescriptor(Meta.empty());
+            //TODO consider descriptor merging
+            return layers.stream()
+                    .filter(it -> it instanceof Laminate).map(Laminate.class::cast)
+                    .map(Laminate::getDescriptor)
+                    .findFirst().orElse(new NodeDescriptor(Meta.empty()));
+
         }
     }
 
@@ -376,11 +387,7 @@ public final class Laminate extends Meta implements Described {
 
         Laminate res = new Laminate(resLayers);
 
-        //TODO search for internal descriptors
-
-        if (descriptor != null) {
-            res.setDescriptor(descriptor);
-        }
+        res.setDescriptor(getDescriptor());
 
         return res;
     }

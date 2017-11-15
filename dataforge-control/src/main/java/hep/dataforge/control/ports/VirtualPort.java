@@ -113,7 +113,7 @@ public abstract class VirtualPort extends PortHandler implements Configurable {
     @Override
     public void close() throws Exception {
         futures.clear();
-        this.scheduler.shutdown();
+        this.scheduler.shutdownNow();
         isOpen = false;
     }
 
