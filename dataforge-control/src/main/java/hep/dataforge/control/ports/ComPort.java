@@ -32,7 +32,7 @@ import static jssc.SerialPort.*;
 /**
  * @author Alexander Nozik
  */
-public class ComPortHandler extends PortHandler implements SerialPortEventListener {
+public class ComPort extends Port implements SerialPortEventListener {
 
     //    private static final int CHAR_SIZE = 1;
 //    private static final int MAX_SIZE = 50;
@@ -40,7 +40,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
 
     private final ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-    public ComPortHandler(Meta meta) {
+    public ComPort(Meta meta) {
         super(meta);
     }
 
@@ -50,7 +50,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     }
 
 
-    public ComPortHandler(String portName, int baudRate, int dataBits, int stopBits, int parity) {
+    public ComPort(String portName, int baudRate, int dataBits, int stopBits, int parity) {
         this(new MetaBuilder("handler")
                 .setValue("type", "com")
                 .putValue("name", portName)
@@ -63,7 +63,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
     }
 
     /**
-     * Construct ComPortHandler with default parameters:
+     * Construct ComPort with default parameters:
      * <p>
      * Baud rate: 9600 </p>
      * <p>
@@ -75,7 +75,7 @@ public class ComPortHandler extends PortHandler implements SerialPortEventListen
      *
      * @param portName
      */
-    public ComPortHandler(String portName) {
+    public ComPort(String portName) {
         this(portName, BAUDRATE_9600, DATABITS_8, STOPBITS_1, PARITY_NONE);
     }
 

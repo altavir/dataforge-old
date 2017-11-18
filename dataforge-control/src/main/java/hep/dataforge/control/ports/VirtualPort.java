@@ -30,7 +30,7 @@ import java.util.function.Supplier;
 /**
  * @author Alexander Nozik
  */
-public abstract class VirtualPort extends PortHandler implements Configurable {
+public abstract class VirtualPort extends Port implements Configurable {
 
     private final Set<TaggedFuture> futures = new CopyOnWriteArraySet<>();
     private ScheduledExecutorService scheduler;

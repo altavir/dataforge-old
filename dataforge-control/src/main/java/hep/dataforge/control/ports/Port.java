@@ -32,7 +32,7 @@ import java.util.function.Predicate;
  *
  * @author Alexander Nozik
  */
-public abstract class PortHandler extends MetaHolder implements AutoCloseable, Metoid {
+public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     private final ReentrantLock portLock = new ReentrantLock(true);
     protected PortController controller;
@@ -41,14 +41,11 @@ public abstract class PortHandler extends MetaHolder implements AutoCloseable, M
      */
     private Predicate<String> phraseCondition = defaultPhraseCondition();
 
-    public PortHandler(Meta meta) {
+    protected Port(Meta meta) {
         super(meta);
     }
 
-    public PortHandler() {
-    }
-
-    Logger getLogger() {
+    protected Logger getLogger() {
         return LoggerFactory.getLogger(meta().getString("logger", getClass().getName()));
     }
 
@@ -131,7 +128,7 @@ public abstract class PortHandler extends MetaHolder implements AutoCloseable, M
         notify();
         getLogger().trace("RECEIVE: " + phrase);
         if (controller != null) {
-            controller.acceptPortPhrase(phrase);
+            controller.acceptPhrase(phrase);
         }
     }
 
@@ -164,7 +161,7 @@ public abstract class PortHandler extends MetaHolder implements AutoCloseable, M
      * @throws PortLockException in case given holder is not the one that holds
      *                           handler
      */
-    public synchronized void unholdBy(PortController controller) throws PortLockException {
+    public synchronized void releaseBy(PortController controller) throws PortLockException {
         if (isLocked()) {
             assert controller != null;
             if (controller.equals(this.controller)) {
@@ -190,7 +187,7 @@ public abstract class PortHandler extends MetaHolder implements AutoCloseable, M
      */
     public interface PortController {
 
-        void acceptPortPhrase(String message);
+        void acceptPhrase(String message);
 
         default void portError(String errorMessage, Throwable error){
             //do nothing

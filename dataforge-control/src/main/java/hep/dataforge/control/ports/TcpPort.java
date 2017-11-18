@@ -28,7 +28,7 @@ import java.net.Socket;
 /**
  * @author Alexander Nozik
  */
-public class TcpPortHandler extends PortHandler {
+public class TcpPort extends Port {
 
     private Socket socket;
 
@@ -36,7 +36,7 @@ public class TcpPortHandler extends PortHandler {
 
     private volatile boolean stopFlag = false;
 
-    public TcpPortHandler(String ip, int port) throws PortException {
+    public TcpPort(String ip, int port) throws PortException {
         super(new MetaBuilder("handler")
                 .setValue("type", "tcp")
                 .setValue("ip", ip)

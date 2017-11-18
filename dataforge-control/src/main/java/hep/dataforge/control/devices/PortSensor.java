@@ -6,9 +6,9 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.control.ports.GenericPortController;
+import hep.dataforge.control.ports.Port;
 import hep.dataforge.control.ports.PortFactory;
-import hep.dataforge.control.ports.PortHandler;
-import hep.dataforge.control.ports.SyncPortController;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
@@ -22,7 +22,7 @@ import static hep.dataforge.control.devices.PortSensor.CONNECTED_STATE;
 import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
- * A Sensor that uses a PortHandler to obtain data
+ * A Sensor that uses a Port to obtain data
  *
  * @param <T>
  * @author darksnake
@@ -33,7 +33,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 )
 @ValueDef(name = "port", info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = {NUMBER}, def = "400", info = "A timeout for port response")
-public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.PortController {
+public abstract class PortSensor<T> extends Sensor<T> {
 
     public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";
@@ -42,11 +42,12 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
         super(context, meta);
     }
 
-    private PortHandler handler;
-    private SyncPortController controller = new SyncPortController(this);
+    private Port port;
+    private GenericPortController controller;
 
-    protected final void setHandler(PortHandler handler) {
-        this.handler = handler;
+    protected final void setPort(Port port) {
+        this.port = port;
+        this.controller = new GenericPortController(port);
     }
 
     public boolean isConnected() {
@@ -57,7 +58,7 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
         return Duration.ofMillis(meta().getInt("timeout", 400));
     }
 
-    protected PortHandler buildHandler(String portName) throws ControlException {
+    protected Port buildHandler(String portName) throws ControlException {
         getLogger().info("Connecting to port {}", portName);
         return PortFactory.getPort(portName);
     }
@@ -65,7 +66,7 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     @Override
     protected Object computeState(String stateName) throws ControlException {
         if (CONNECTED_STATE.equals(stateName)) {
-            return handler != null && handler.isOpen();
+            return port != null && port.isOpen();
         } else {
             return super.computeState(stateName);
         }
@@ -75,10 +76,10 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     public void shutdown() throws ControlException {
         super.shutdown();
         try {
-            getHandler().unholdBy(controller);
+            getPort().releaseBy(controller);
             controller.close();
-            if (handler != null) {
-                handler.close();
+            if (port != null) {
+                port.close();
             }
             updateState(CONNECTED_STATE, false);
         } catch (Exception ex) {
@@ -86,47 +87,41 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
         }
     }
 
-    @Override
-    public void acceptPortPhrase(String message) {
-        //do nothing
-    }
-
-
     protected final String sendAndWait(String request, Duration timeout) throws ControlException {
-        getHandler().holdBy(controller);
+        getPort().holdBy(controller);
         try {
-            getHandler().send(controller, request);
+            getPort().send(controller, request);
             return controller.waitFor(timeout);
         } finally {
-            getHandler().unholdBy(controller);
+            getPort().releaseBy(controller);
         }
     }
 
     protected final String sendAndWait(String request, Duration timeout, Predicate<String> predicate) throws ControlException {
-        getHandler().holdBy(controller);
+        getPort().holdBy(controller);
         try {
-            getHandler().send(controller, request);
+            getPort().send(controller, request);
             return controller.waitFor(timeout, predicate);
         } finally {
-            getHandler().unholdBy(controller);
+            getPort().releaseBy(controller);
         }
     }
 
     protected final void send(String message) throws ControlException {
-        getHandler().holdBy(controller);
+        getPort().holdBy(controller);
         try {
-            getHandler().send(controller, message);
+            getPort().send(controller, message);
         } finally {
-            getHandler().unholdBy(controller);
+            getPort().releaseBy(controller);
         }
     }
 
     protected final String receive(Duration timeout) throws ControlException {
-        getHandler().holdBy(controller);
+        getPort().holdBy(controller);
         try {
             return controller.waitFor(timeout);
         } finally {
-            getHandler().unholdBy(controller);
+            getPort().releaseBy(controller);
         }
     }
 
@@ -135,12 +130,12 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     protected void requestStateChange(String stateName, Value value) throws ControlException {
         if (Objects.equals(stateName, CONNECTED_STATE)) {
             if (value.booleanValue()) {
-                if (!getHandler().isOpen()) {
-                    getHandler().open();
+                if (!getPort().isOpen()) {
+                    getPort().open();
                 }
             } else {
                 try {
-                    getHandler().close();
+                    getPort().close();
                 } catch (Exception e) {
                     throw new ControlException(e);
                 }
@@ -150,17 +145,17 @@ public abstract class PortSensor<T> extends Sensor<T> implements PortHandler.Por
     }
 
     /**
-     * @return the handler
+     * @return the port
      * @throws hep.dataforge.exceptions.ControlException
      */
-    protected PortHandler getHandler() throws ControlException {
-        if (handler == null) {
+    protected Port getPort() throws ControlException {
+        if (port == null) {
             String port = meta().getString(PORT_NAME_KEY);
-            this.handler = buildHandler(port);
-            handler.open();
+            setPort(buildHandler(port));
+            this.port.open();
             updateState(CONNECTED_STATE, true);
         }
-        return handler;
+        return port;
     }
 
 }

@@ -17,7 +17,7 @@ import java.util.Map;
 public class PortFactory {
     //PENDING convert to singleton?
 
-    private static Map<String, PortHandler> portMap = new HashMap<>();
+    private static Map<String, Port> portMap = new HashMap<>();
 
     /**
      * Create new port or reuse existing one if it is already created
@@ -25,7 +25,7 @@ public class PortFactory {
      * @return
      * @throws ControlException 
      */
-    public synchronized static PortHandler getPort(String portName) throws ControlException {
+    public synchronized static Port getPort(String portName) throws ControlException {
         String protocol;
         String addres;
         int port;
@@ -47,10 +47,10 @@ public class PortFactory {
             return portMap.get(canonPortName);
         } else {
 
-            PortHandler res;
+            Port res;
             switch (protocol) {
                 case "com":
-                    res = new ComPortHandler(addres);
+                    res = new ComPort(addres);
                     break;
                 case "tcp":
                     if (addres.contains(":")) {
@@ -60,7 +60,7 @@ public class PortFactory {
                     } else {
                         port = 8080;
                     }
-                    res = new TcpPortHandler(addres, port);
+                    res = new TcpPort(addres, port);
                     break;
                 default:
                     throw new ControlException("Unknown protocol");
@@ -74,7 +74,7 @@ public class PortFactory {
      * Register custom portHandler. Useful for virtual ports
      * @param handler 
      */
-    public static void registerPort(PortHandler handler){
+    public static void registerPort(Port handler){
         if(portMap.containsKey(handler.getPortId())){
             throw new RuntimeException("Port with given id already exists");
         } else {

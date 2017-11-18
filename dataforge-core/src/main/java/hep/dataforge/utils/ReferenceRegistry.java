@@ -28,15 +28,19 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
     private final Set<T> strongRegistry = new HashSet<>();
 
     /**
-     * Listeners could be added either as strong references or weak references.
+     * Listeners could be added either as strong references or weak references. Thread safe
      *
      * @param obj
      */
-    public synchronized boolean add(T obj, boolean isStrong) {
-        if (isStrong) {
-            strongRegistry.add(obj);
+    public boolean add(T obj, boolean isStrong) {
+        synchronized (strongRegistry) {
+            if (isStrong) {
+                strongRegistry.add(obj);
+            }
         }
-        return weakRegistry.add(new WeakReference<>(obj));
+        synchronized (weakRegistry) {
+            return weakRegistry.add(new WeakReference<>(obj));
+        }
     }
 
     /**
@@ -50,23 +54,29 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
     }
 
     @Override
-    public synchronized boolean remove(Object obj) {
-        strongRegistry.remove(obj);
-        Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
+    public boolean remove(Object obj) {
+        synchronized (strongRegistry) {
+            strongRegistry.remove(obj);
+        }
+        synchronized (weakRegistry) {
+            Reference<T> reference = weakRegistry.stream().filter(it -> obj.equals(it.get())).findFirst().orElse(null);
 
-        return reference != null && weakRegistry.remove(reference);
+            return reference != null && weakRegistry.remove(reference);
+        }
     }
 
     /**
      * Clean up all null entries from weak registry
      */
-    private synchronized void cleanUp() {
-        weakRegistry.removeIf(ref -> ref.get() == null);
+    private void cleanUp() {
+        synchronized (weakRegistry) {
+            weakRegistry.removeIf(ref -> ref.get() == null);
+        }
     }
 
     @NotNull
     @Override
-    public synchronized Iterator<T> iterator() {
+    public Iterator<T> iterator() {
         cleanUp();
         return weakRegistry.stream().map(Reference::get).filter(Objects::nonNull).iterator();
     }
