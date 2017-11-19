@@ -15,7 +15,7 @@
         function startUpdate() {
             var query = new google.visualization.Query("${dataSource}");
             query.setRefreshInterval(${updateInterval});
-            query.send(handleQueryResponse);
+            query.command(handleQueryResponse);
         }
 
         function handleQueryResponse(response) {

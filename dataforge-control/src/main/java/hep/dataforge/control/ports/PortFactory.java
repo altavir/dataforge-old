@@ -75,10 +75,10 @@ public class PortFactory {
      * @param handler 
      */
     public static void registerPort(Port handler){
-        if(portMap.containsKey(handler.getPortId())){
+        if(portMap.containsKey(handler.toString())){
             throw new RuntimeException("Port with given id already exists");
         } else {
-            portMap.put(handler.getPortId(), handler);
+            portMap.put(handler.toString(), handler);
         }
     }
 }

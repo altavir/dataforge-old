@@ -57,8 +57,8 @@ public abstract class AbstractMeasurement<T> implements Measurement<T> {
         notifyListeners(it -> it.onMeasurementFinished(this));
     }
 
-    protected synchronized void error(Throwable error) {
-        LoggerFactory.getLogger(getClass()).error("Measurement failed with error", error);
+    protected synchronized void onError(String message, Throwable error) {
+        LoggerFactory.getLogger(getClass()).error("Measurement failed with error: " + message, error);
         setMeasurementState(MeasurementState.FAILED);
         this.exception = error;
         notify();

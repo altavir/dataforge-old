@@ -32,6 +32,8 @@ public class GenericPortController implements Port.PortController, AutoCloseable
     public static String sendAndWait(Port port, String request, Duration timeout) throws ControlException {
         try (GenericPortController controller = new GenericPortController(port)) {
             return controller.sendAndWait(request, timeout, it -> true);
+        } catch (Exception e) {
+            throw new ControlException("Failed to close the port", e);
         }
     }
 
@@ -47,6 +49,16 @@ public class GenericPortController implements Port.PortController, AutoCloseable
             port.holdBy(this);
         } catch (PortException e) {
             throw new RuntimeException("Can't hold the port " + port + " by generic handler", e);
+        }
+    }
+
+    public void open() {
+        try {
+            if (!port.isOpen()) {
+                port.open();
+            }
+        } catch (PortException e) {
+            throw new RuntimeException(e);
         }
     }
 
@@ -76,7 +88,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
         //No need for synchronization since ReferenceRegistry is synchronized
         FuturePhrase res = new FuturePhrase(condition);
         waiters.add(res);
-        res.whenComplete((r, e) -> waiters.remove(res));
+        waiters.removeIf(CompletableFuture::isDone);
         return res;
     }
 
@@ -151,6 +163,14 @@ public class GenericPortController implements Port.PortController, AutoCloseable
         return listener;
     }
 
+    public PhraseListener weakOnPhrase(String pattern, Consumer<String> action) {
+        return weakOnPhrase(it -> it.matches(pattern), action);
+    }
+
+    public PhraseListener weakOnPhrase(Consumer<String> action) {
+        return weakOnPhrase(it -> true, action);
+    }
+
     /**
      * Remove a specific phrase listener
      *
@@ -219,6 +239,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
      */
     public void send(String message) {
         try {
+            open();
             port.send(this, message);
         } catch (PortException e) {
             throw new RuntimeException("Failed to send message to port " + port);
@@ -232,21 +253,26 @@ public class GenericPortController implements Port.PortController, AutoCloseable
      * @param condition
      */
     public CompletableFuture<String> sendAndGet(String message, Predicate<String> condition) {
+        CompletableFuture<String> res = next(condition); // in case of immediate reaction
         send(message);
-        return next(condition);
+        return res;
     }
 
     /**
      * Send and block thread until specific result is obtained. All listeners and reactions work as usual.
      *
      * @param message
-     * @param duration
+     * @param timeout
      * @param condition
      * @return
      */
-    public String sendAndWait(String message, Duration duration, Predicate<String> condition) {
-        send(message);
-        return waitFor(duration, condition);
+    public String sendAndWait(String message, Duration timeout, Predicate<String> condition) {
+        try {
+            return sendAndGet(message, condition)
+                    .get(timeout.toMillis(), TimeUnit.MILLISECONDS);
+        } catch (InterruptedException | ExecutionException | TimeoutException e) {
+            throw new RuntimeException(e);
+        }
     }
 
 
@@ -263,8 +289,17 @@ public class GenericPortController implements Port.PortController, AutoCloseable
      * Cancel all pending waiting actions and release the port. Does not close the port
      */
     @Override
-    public void close() {
-        waiters.forEach(it -> it.cancel(true));
+    public void close() throws Exception {
+        close(Duration.ofMillis(1000));
+    }
+
+    /**
+     * Blocking close operation. Waits at most for timeout to finish all operations and then closes.
+     *
+     * @param timeout
+     */
+    public void close(Duration timeout) throws Exception {
+        CompletableFuture.allOf(waiters.toArray(new FuturePhrase[0])).get(timeout.toMillis(), TimeUnit.MILLISECONDS);
         port.releaseBy(this);
     }
 

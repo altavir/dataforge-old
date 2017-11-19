@@ -11,6 +11,7 @@ import javafx.beans.value.ObservableValue
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
 import javafx.scene.input.KeyEvent
+import tornadofx.*
 
 class TextValueChooser : ValueChooserBase<TextField>() {
 
@@ -27,14 +28,14 @@ class TextValueChooser : ValueChooserBase<TextField>() {
             }
         }
         // restoring value on click outside
-        node.focusedProperty().addListener { observable: ObservableValue<out Boolean>, oldValue: Boolean, newValue: Boolean ->
+        node.focusedProperty().addListener { _: ObservableValue<out Boolean>, oldValue: Boolean, newValue: Boolean ->
             if (oldValue && !newValue) {
                 node.text = currentValue().stringValue()
             }
         }
 
         // changing text color while editing
-        node.textProperty().addListener { observable: ObservableValue<out String>, oldValue: String, newValue: String ->
+        node.textProperty().onChange { newValue ->
             val value = Value.of(newValue)
             if (!validate(value)) {
                 node.style = String.format("-fx-text-fill: %s;", "red")

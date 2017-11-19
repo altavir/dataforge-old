@@ -107,7 +107,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                     throw new MeasurementException("Empty result");
                 }
             } catch (Exception ex) {
-                error(ex);
+                onError("failed to start measurement task", ex);
             }
             clearTask();
             finishTask();
@@ -132,7 +132,7 @@ public abstract class SimpleMeasurement<T> extends AbstractMeasurement<T> {
                 Instant time = DateTimeUtils.now();
                 return new Pair<>(res, time);
             } catch (Exception ex) {
-                error(ex);
+                onError("failed to report measurement results", ex);
                 return null;
             }
         });

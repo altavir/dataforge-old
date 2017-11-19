@@ -45,7 +45,7 @@ public class TcpPort extends Port {
     }
 
     @Override
-    public String getPortId() {
+    public String toString() {
         return String.format("tcp::%s:%s", getString("ip"), getString("port"));
     }
 
@@ -69,7 +69,7 @@ public class TcpPort extends Port {
 //
 //    }
     @Override
-    public synchronized void close() throws PortException {
+    public synchronized void close() throws Exception {
         if (socket != null) {
             try {
                 stopFlag = true;
@@ -88,6 +88,7 @@ public class TcpPort extends Port {
                 }
             }
         }
+        super.close();
     }
 
     private Thread startListenerThread() throws IOException {
@@ -107,7 +108,7 @@ public class TcpPort extends Port {
                     }
                 } catch (IOException ex) {
                     if (!stopFlag) {
-                        LoggerFactory.getLogger(getClass()).error("TCP connection broken on {}. Reconnecting.", getPortId());
+                        LoggerFactory.getLogger(getClass()).error("TCP connection broken on {}. Reconnecting.", toString());
                         try {
                             if (socket != null) {
                                 socket.close();
@@ -124,7 +125,7 @@ public class TcpPort extends Port {
             }
 
         };
-        Thread thread = new Thread(task, "tcpPortListener");
+        Thread thread = new Thread(task, "port::" + toString() + "[listener]");
         thread.start();
 
         return thread;
@@ -132,15 +133,16 @@ public class TcpPort extends Port {
 
     @Override
     public void send(String message) throws PortException {
-        try {
-            OutputStream stream = getSocket().getOutputStream();
-            stream.write(message.getBytes());
-            stream.flush();
-            LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
-        } catch (IOException ex) {
-            throw new PortException(ex);
-        }
-
+        run(() -> {
+            try {
+                OutputStream stream = getSocket().getOutputStream();
+                stream.write(message.getBytes());
+                stream.flush();
+                LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     @Override
@@ -149,7 +151,7 @@ public class TcpPort extends Port {
     }
 
     public synchronized Socket getSocket() throws IOException {
-        if (socket == null) {
+        if (socket == null || socket.isClosed()) {
             socket = new Socket(getString("ip"), getInt("port"));
         }
         return socket;

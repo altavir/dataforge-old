@@ -106,6 +106,7 @@ public class RegularPointCollector implements ValueCollector {
 
     public void stop() {
         cancel();
+        clear();
         startTime = null;
     }
 

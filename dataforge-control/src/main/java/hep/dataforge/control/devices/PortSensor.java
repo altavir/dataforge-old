@@ -10,6 +10,7 @@ import hep.dataforge.control.ports.GenericPortController;
 import hep.dataforge.control.ports.Port;
 import hep.dataforge.control.ports.PortFactory;
 import hep.dataforge.description.ValueDef;
+import hep.dataforge.events.EventBuilder;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
@@ -42,23 +43,22 @@ public abstract class PortSensor<T> extends Sensor<T> {
         super(context, meta);
     }
 
-    private Port port;
-    private GenericPortController controller;
+    //private Port port;
+    private GenericPortController connection;
 
-    protected final void setPort(Port port) {
-        this.port = port;
-        this.controller = new GenericPortController(port);
-    }
+//    protected final void setPort(Port port) {
+//        this.connection = new GenericPortController(port);
+//    }
 
     public boolean isConnected() {
         return getState(CONNECTED_STATE).booleanValue();
     }
 
-    protected Duration timeout() {
+    protected Duration getTimeout() {
         return Duration.ofMillis(meta().getInt("timeout", 400));
     }
 
-    protected Port buildHandler(String portName) throws ControlException {
+    protected Port buildPort(String portName) throws ControlException {
         getLogger().info("Connecting to port {}", portName);
         return PortFactory.getPort(portName);
     }
@@ -66,78 +66,77 @@ public abstract class PortSensor<T> extends Sensor<T> {
     @Override
     protected Object computeState(String stateName) throws ControlException {
         if (CONNECTED_STATE.equals(stateName)) {
-            return port != null && port.isOpen();
+            return connection != null && connection.getPort().isOpen();
         } else {
             return super.computeState(stateName);
         }
     }
 
     @Override
-    public void shutdown() throws ControlException {
-        super.shutdown();
-        try {
-            getPort().releaseBy(controller);
-            controller.close();
-            if (port != null) {
-                port.close();
+    public void init() throws ControlException {
+        super.init();
+        if (connection == null) {
+            String port = meta().getString(PORT_NAME_KEY);
+            this.connection = new GenericPortController(buildPort(port));
+            //Add debug listener
+            if (meta().getBoolean("debugMode", false)) {
+                connection.weakOnPhrase(phrase -> getLogger().debug("Device {} received phrase: {}", getName(), phrase));
+                connection.weakOnError((message, error) -> getLogger().error("Device {} exception: {}", getName(), message, error));
             }
+
+            connection.open();
+            updateState(CONNECTED_STATE, true);
+        }
+    }
+
+    @Override
+    public void shutdown() throws ControlException {
+        try {
+            connection.close();
+            //PENDING do we need not to close the port sometimes. Should it be configurable?
+            connection.getPort().close();
             updateState(CONNECTED_STATE, false);
         } catch (Exception ex) {
             throw new ControlException(ex);
         }
+        super.shutdown();
     }
 
-    protected final String sendAndWait(String request, Duration timeout) throws ControlException {
-        getPort().holdBy(controller);
-        try {
-            getPort().send(controller, request);
-            return controller.waitFor(timeout);
-        } finally {
-            getPort().releaseBy(controller);
+    protected final String sendAndWait(String request) {
+        return connection.sendAndWait(request, getTimeout(), it -> true);
+    }
+
+    protected final String sendAndWait(String request, Predicate<String> predicate) {
+        return connection.sendAndWait(request, getTimeout(), predicate);
+    }
+
+    protected final void send(String message) {
+        connection.send(message);
+        dispatchEvent(
+                EventBuilder
+                        .make(getName())
+                        .setMetaValue("request", message)
+                        .build()
+        );
+    }
+
+    protected GenericPortController getConnection() {
+        if (connection == null) {
+            throw new RuntimeException("Requesting connection on not initialized device");
         }
+        return connection;
     }
-
-    protected final String sendAndWait(String request, Duration timeout, Predicate<String> predicate) throws ControlException {
-        getPort().holdBy(controller);
-        try {
-            getPort().send(controller, request);
-            return controller.waitFor(timeout, predicate);
-        } finally {
-            getPort().releaseBy(controller);
-        }
-    }
-
-    protected final void send(String message) throws ControlException {
-        getPort().holdBy(controller);
-        try {
-            getPort().send(controller, message);
-        } finally {
-            getPort().releaseBy(controller);
-        }
-    }
-
-    protected final String receive(Duration timeout) throws ControlException {
-        getPort().holdBy(controller);
-        try {
-            return controller.waitFor(timeout);
-        } finally {
-            getPort().releaseBy(controller);
-        }
-    }
-
 
     @Override
     protected void requestStateChange(String stateName, Value value) throws ControlException {
         if (Objects.equals(stateName, CONNECTED_STATE)) {
             if (value.booleanValue()) {
-                if (!getPort().isOpen()) {
-                    getPort().open();
-                }
+                connection.open();
             } else {
                 try {
-                    getPort().close();
+                    connection.close();
                 } catch (Exception e) {
-                    throw new ControlException(e);
+                    throw new ControlException("Failed to close the connection", e);
                 }
             }
         }
@@ -148,14 +147,14 @@ public abstract class PortSensor<T> extends Sensor<T> {
      * @return the port
      * @throws hep.dataforge.exceptions.ControlException
      */
-    protected Port getPort() throws ControlException {
-        if (port == null) {
-            String port = meta().getString(PORT_NAME_KEY);
-            setPort(buildHandler(port));
-            this.port.open();
-            updateState(CONNECTED_STATE, true);
-        }
-        return port;
-    }
+//    protected Port getPort() throws ControlException {
+//        if (port == null) {
+//            String port = meta().getString(PORT_NAME_KEY);
+//            setPort(buildPort(port));
+//            this.port.open();
+//            updateState(CONNECTED_STATE, true);
+//        }
+//        return port;
+//    }
 
 }

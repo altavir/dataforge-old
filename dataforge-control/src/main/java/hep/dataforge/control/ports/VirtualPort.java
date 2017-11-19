@@ -37,6 +37,11 @@ public abstract class VirtualPort extends Port implements Configurable {
     private boolean isOpen = false;
     private Configuration configuration = new Configuration("virtualPort");
 
+    protected VirtualPort(Meta meta) {
+        super(meta);
+        configuration = new Configuration(meta);
+    }
+
     @Override
     public void open() throws PortException {
         scheduler = Executors.newScheduledThreadPool(meta().getInt("numThreads", 4));
@@ -65,7 +70,7 @@ public abstract class VirtualPort extends Port implements Configurable {
     }
 
     @Override
-    public String getPortId() {
+    public String toString() {
         return meta().getString("id", getClass().getSimpleName());
     }
 
@@ -115,6 +120,7 @@ public abstract class VirtualPort extends Port implements Configurable {
         futures.clear();
         this.scheduler.shutdownNow();
         isOpen = false;
+        super.close();
     }
 
     private class TaggedFuture {

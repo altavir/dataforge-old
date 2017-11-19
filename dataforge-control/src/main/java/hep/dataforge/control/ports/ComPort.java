@@ -45,7 +45,7 @@ public class ComPort extends Port implements SerialPortEventListener {
     }
 
     @Override
-    public String getPortId() {
+    public String toString() {
         return String.format("com::%s", getString("name"));
     }
 
@@ -115,6 +115,7 @@ public class ComPort extends Port implements SerialPortEventListener {
             }
             port = null;
         }
+        super.close();
     }
 
     @Override
@@ -122,12 +123,14 @@ public class ComPort extends Port implements SerialPortEventListener {
         if (!isOpen()) {
             open();
         }
-        try {
-            LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
-            port.writeString(message);
-        } catch (SerialPortException ex) {
-            throw new PortException(ex);
-        }
+        run(() -> {
+            try {
+                LoggerFactory.getLogger(getClass()).debug("SEND: " + message);
+                port.writeString(message);
+            } catch (SerialPortException ex) {
+                throw new RuntimeException(ex);
+            }
+        });
     }
 
     @Override
@@ -135,16 +138,11 @@ public class ComPort extends Port implements SerialPortEventListener {
         if (serialPortEvent.isRXCHAR()) {
 
             int chars = serialPortEvent.getEventValue();
-            byte[] bytes = new byte[chars];
             try {
-                bytes = port.readBytes(chars);
-            } catch (SerialPortException ex) {
-                controller.portError("Internal JSSC error", ex);
-            }
-            try {
+                byte[] bytes = port.readBytes(chars);
                 buffer.write(bytes);
-            } catch (IOException ex) {
-                throw new Error(ex);
+            } catch (IOException | SerialPortException ex) {
+                throw new RuntimeException(ex);
             }
 
             String str = new String(buffer.toByteArray());

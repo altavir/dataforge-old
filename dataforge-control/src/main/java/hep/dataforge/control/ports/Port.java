@@ -24,6 +24,8 @@ import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Predicate;
 
@@ -33,13 +35,28 @@ import java.util.function.Predicate;
  * @author Alexander Nozik
  */
 public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
+    /**
+     * The definition of default phrase condition
+     *
+     * @return
+     */
+    private static Predicate<String> DEFAULT_PHRASE_CONDITION = (String str) -> str.endsWith("\n");
 
     private final ReentrantLock portLock = new ReentrantLock(true);
-    protected PortController controller;
+
+    private PortController controller;
+
     /**
      * The default end phrase condition
      */
-    private Predicate<String> phraseCondition = defaultPhraseCondition();
+    private Predicate<String> phraseCondition = DEFAULT_PHRASE_CONDITION;
+
+    private ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+        Thread res = new Thread(r);
+        res.setName("port::" + Port.this.toString());
+        res.setPriority(Thread.MAX_PRIORITY);
+        return res;
+    });
 
     protected Port(Meta meta) {
         super(meta);
@@ -47,15 +64,6 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     protected Logger getLogger() {
         return LoggerFactory.getLogger(meta().getString("logger", getClass().getName()));
-    }
-
-    /**
-     * The definition of default phrase condition
-     *
-     * @return
-     */
-    private static Predicate<String> defaultPhraseCondition() {
-        return (String str) -> str.endsWith("\n");
     }
 
     public void setPhraseCondition(Predicate<String> condition) {
@@ -70,12 +78,16 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     public abstract boolean isOpen();
 
+    protected void run(Runnable r) {
+        executor.submit(r);
+    }
+
     /**
      * Emergency hold break.
      */
     public synchronized void breakHold() {
-        controller = null;
-        portLock.unlock();
+//        controller = null;
+        run(portLock::unlock);
     }
 
     /**
@@ -83,7 +95,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
      *
      * @return
      */
-    public abstract String getPortId();
+    public abstract String toString();
 
     /**
      * Acquire lock on this instance of port handler with given controller
@@ -98,12 +110,14 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
             open();
         }
 
-        try {
-            portLock.lockInterruptibly();
-        } catch (InterruptedException ex) {
-            getLogger().error("Lock on port {} is broken", getPortId());
-            throw new PortException(ex);
-        }
+        run(() -> {
+            try {
+                portLock.lockInterruptibly();
+            } catch (InterruptedException ex) {
+                getLogger().error("Lock on port {} is broken", toString());
+                throw new RuntimeException(ex);
+            }
+        });
         getLogger().debug("Locked by {}", controller);
         this.controller = controller;
     }
@@ -142,12 +156,13 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     /**
      * Send the message if the controller is correct
+     *
      * @param controller
      * @param message
      * @throws PortException
      */
-    public final void send(@Nullable PortController controller, String message) throws PortException{
-        if(this.controller == null || controller == this.controller){
+    public final void send(@Nullable PortController controller, String message) throws PortException {
+        if (this.controller == null || controller == this.controller) {
             send(message);
         } else {
             throw new PortException("Port locked by another controller");
@@ -166,18 +181,26 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
             assert controller != null;
             if (controller.equals(this.controller)) {
                 this.controller = null;
-                portLock.unlock();
-                getLogger().debug("Unlocked by {}", controller);
+                run(() -> {
+                    portLock.unlock();
+                    getLogger().debug("Unlocked by {}", controller);
+                });
             } else {
                 throw new PortLockException("Can't unlock hold with wrong holder");
             }
         } else {
-            getLogger().warn("Attempting to unhold unlocked port");
+            getLogger().warn("Attempting to release unlocked port");
         }
     }
 
     public boolean isLocked() {
         return this.controller != null;
+    }
+
+
+    @Override
+    public void close() throws Exception {
+        executor.shutdown();
     }
 
     /**
@@ -189,7 +212,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
         void acceptPhrase(String message);
 
-        default void portError(String errorMessage, Throwable error){
+        default void portError(String errorMessage, Throwable error) {
             //do nothing
         }
     }

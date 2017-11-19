@@ -65,6 +65,28 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
         }
     }
 
+    @Override
+    public boolean removeIf(Predicate<? super T> filter) {
+        boolean res = true;
+        synchronized (strongRegistry) {
+            res = strongRegistry.removeIf(filter);
+        }
+        synchronized (weakRegistry) {
+            res = res && weakRegistry.removeIf(it -> filter.test(it.get()));
+        }
+        return res;
+    }
+
+    @Override
+    public void clear() {
+        synchronized (strongRegistry) {
+            strongRegistry.clear();
+        }
+        synchronized (weakRegistry) {
+            weakRegistry.clear();
+        }
+    }
+
     /**
      * Clean up all null entries from weak registry
      */
