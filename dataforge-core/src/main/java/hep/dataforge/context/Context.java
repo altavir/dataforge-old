@@ -130,6 +130,10 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         }
     }
 
+    public Logger getLogger(String sub) {
+        return LoggerFactory.getLogger(getName() + "[" + sub + "]");
+    }
+
     /**
      * {@inheritDoc} namespace does not work
      */
@@ -550,7 +554,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
 
         public Context build() {
             // automatically add lib directory
-            ctx.getIo().optFile("lib").ifPresent(file-> classPath(file.toUri()));
+            ctx.getIo().optFile("lib").ifPresent(file -> classPath(file.toUri()));
             ctx.classLoader = new URLClassLoader(classPath.toArray(new URL[classPath.size()]), ctx.getParent().getClassLoader());
             return ctx;
         }

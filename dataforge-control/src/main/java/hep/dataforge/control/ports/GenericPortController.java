@@ -1,10 +1,12 @@
 package hep.dataforge.control.ports;
 
+import hep.dataforge.context.Context;
+import hep.dataforge.context.ContextAware;
+import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.PortException;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.LoggerFactory;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
@@ -18,7 +20,7 @@ import java.util.function.Predicate;
 /**
  * A port controller helper that allows both synchronous and asynchronous operations on port
  */
-public class GenericPortController implements Port.PortController, AutoCloseable {
+public class GenericPortController implements Port.PortController, AutoCloseable, ContextAware {
 
     /**
      * Use temporary controller to safely send request and receive response
@@ -30,7 +32,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
      * @throws ControlException
      */
     public static String sendAndWait(Port port, String request, Duration timeout) throws ControlException {
-        try (GenericPortController controller = new GenericPortController(port)) {
+        try (GenericPortController controller = new GenericPortController(Global.instance(), port)) {
             return controller.sendAndWait(request, timeout, it -> true);
         } catch (Exception e) {
             throw new ControlException("Failed to close the port", e);
@@ -38,18 +40,26 @@ public class GenericPortController implements Port.PortController, AutoCloseable
     }
 
     private final Port port;
+    private final Context context;
 
     private final ReferenceRegistry<FuturePhrase> waiters = new ReferenceRegistry<>();
     private final ReferenceRegistry<PhraseListener> listeners = new ReferenceRegistry<>();
     private final ReferenceRegistry<BiConsumer<String, Throwable>> exceptionListeners = new ReferenceRegistry<>();
 
-    public GenericPortController(@NotNull Port port) {
+
+    public GenericPortController(Context context, @NotNull Port port) {
         this.port = port;
+        this.context = context;
         try {
             port.holdBy(this);
         } catch (PortException e) {
             throw new RuntimeException("Can't hold the port " + port + " by generic handler", e);
         }
+    }
+
+    @Override
+    public Context getContext() {
+        return context;
     }
 
     public void open() {
@@ -64,19 +74,23 @@ public class GenericPortController implements Port.PortController, AutoCloseable
 
     @Override
     public void acceptPhrase(String message) {
-        waiters.forEach(phrase -> phrase.acceptPhrase(message));
-        listeners.forEach(phrase -> {
-            try {
-                phrase.acceptPhrase(message);
-            } catch (Exception ex) {
-                LoggerFactory.getLogger(getClass()).error("Failed to execute hooked action");
-            }
+        waiters.forEach(waiter -> waiter.acceptPhrase(message));
+        listeners.forEach(listener -> {
+            listener.acceptPhrase(message);
         });
     }
 
     @Override
     public void portError(String errorMessage, Throwable error) {
-        exceptionListeners.forEach(it -> it.accept(errorMessage, error));
+        exceptionListeners.forEach(it -> {
+            context.parallelExecutor().submit(() -> {
+                try {
+                    it.accept(errorMessage, error);
+                } catch (Exception ex) {
+                    context.getLogger(port.toString()).error("Failed to execute error listener action", ex);
+                }
+            });
+        });
     }
 
     /**
@@ -328,7 +342,13 @@ public class GenericPortController implements Port.PortController, AutoCloseable
 
         void acceptPhrase(String phrase) {
             if (condition.test(phrase)) {
-                action.accept(phrase);
+                context.parallelExecutor().submit(() -> {
+                    try {
+                        action.accept(phrase);
+                    } catch (Exception ex) {
+                        context.getLogger(port.toString()).error("Failed to execute hooked action", ex);
+                    }
+                });
             }
         }
     }

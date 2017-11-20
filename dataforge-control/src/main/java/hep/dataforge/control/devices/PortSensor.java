@@ -77,7 +77,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
         super.init();
         if (connection == null) {
             String port = meta().getString(PORT_NAME_KEY);
-            this.connection = new GenericPortController(buildPort(port));
+            this.connection = new GenericPortController(getContext(), buildPort(port));
             //Add debug listener
             if (meta().getBoolean("debugMode", false)) {
                 connection.weakOnPhrase(phrase -> getLogger().debug("Device {} received phrase: {}", getName(), phrase));
