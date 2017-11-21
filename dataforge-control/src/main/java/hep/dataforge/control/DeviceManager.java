@@ -94,10 +94,10 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
     }
 
     @Override
-    public Stream<Name> deviceNames() {
+    public Stream<Name> getDeviceNames() {
         return devices.entrySet().stream().flatMap(entry -> {
             if (entry.getValue() instanceof DeviceHub) {
-                return ((DeviceHub) entry.getValue()).deviceNames().map(it -> entry.getKey().append(it));
+                return ((DeviceHub) entry.getValue()).getDeviceNames().map(it -> entry.getKey().append(it));
             } else {
                 return Stream.of(entry.getKey());
             }

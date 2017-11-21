@@ -134,14 +134,14 @@ operator fun Meta.plus(value: NamedValue): Meta = this.builder.putValue(value.na
 /**
  * Get a value if it is present and apply action to it
  */
-fun Meta.useValue(valueName: String, action: (Value) -> Unit) {
+fun ValueProvider.useValue(valueName: String, action: (Value) -> Unit) {
     optValue(valueName).ifPresent(action)
 }
 
 /**
  * Get a meta node if it is present and apply action to it
  */
-fun Meta.useMeta(metaName: String, action: (Meta) -> Unit) {
+fun MetaProvider.useMeta(metaName: String, action: (Meta) -> Unit) {
     optMeta(metaName).ifPresent(action)
 }
 
@@ -151,6 +151,15 @@ fun Meta.useMeta(metaName: String, action: (Meta) -> Unit) {
 fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
     if (hasMeta(metaName)) {
         action(getMetaList(metaName))
+    }
+}
+
+/**
+ * Perform action on each meta in a list
+ */
+fun Meta.useEachMeta(metaName: String, action: (Meta) -> Unit){
+    if (hasMeta(metaName)) {
+        getMetaList(metaName).forEach(action)
     }
 }
 

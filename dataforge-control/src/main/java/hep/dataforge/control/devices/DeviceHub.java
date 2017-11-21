@@ -19,7 +19,7 @@ public interface DeviceHub extends Provider {
 
     Optional<Device> optDevice(Name name);
 
-    Stream<Name> deviceNames();
+    Stream<Name> getDeviceNames();
 
     @Provides(DEVICE_TARGET)
     default Optional<Device> optDevice(String name) {
@@ -28,15 +28,28 @@ public interface DeviceHub extends Provider {
 
     @ProvidesNames(DEVICE_TARGET)
     default Stream<String> listDevices() {
-        return deviceNames().map(Name::toString);
+        return getDeviceNames().map(Name::toString);
+    }
+
+    default Stream<Device> getDevices(boolean recursive) {
+        if (recursive) {
+            return getDeviceNames().map(it -> optDevice(it).get());
+        } else {
+            return getDeviceNames().filter(it -> it.getLength() == 1).map(it -> optDevice(it).get());
+        }
     }
 
     /**
      * Add a connection to each of child devices
+     *
      * @param connection
      * @param roles
      */
-    void connectAll(Connection connection, String... roles);
+    default void connectAll(Connection connection, String... roles) {
+        getDevices(false).forEach(it -> it.connect(connection, roles));
+    }
 
-    void connectAll(Context context, Meta meta);
+    default void connectAll(Context context, Meta meta) {
+        getDevices(false).forEach(it -> it.getConnectionHelper().connect(context, meta));
+    }
 }
