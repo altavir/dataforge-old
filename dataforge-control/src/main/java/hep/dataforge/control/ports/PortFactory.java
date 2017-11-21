@@ -69,7 +69,8 @@ public class PortFactory {
             return res;
         }
     }
-    
+
+
     /**
      * Register custom portHandler. Useful for virtual ports
      * @param handler 
