@@ -46,10 +46,28 @@ public interface DeviceHub extends Provider {
      * @param roles
      */
     default void connectAll(Connection connection, String... roles) {
-        getDevices(false).forEach(it -> it.connect(connection, roles));
+        getDeviceNames().filter(it -> it.getLength() == 1)
+                .map(this::optDevice)
+                .map(Optional::get)
+                .forEach(it -> {
+                    if (it instanceof DeviceHub) {
+                        ((DeviceHub) it).connectAll(connection, roles);
+                    } else {
+                        it.connect(connection, roles);
+                    }
+                });
     }
 
     default void connectAll(Context context, Meta meta) {
-        getDevices(false).forEach(it -> it.getConnectionHelper().connect(context, meta));
+        getDeviceNames().filter(it -> it.getLength() == 1)
+                .map(this::optDevice)
+                .map(Optional::get)
+                .forEach(it -> {
+                    if (it instanceof DeviceHub) {
+                        ((DeviceHub) it).connectAll(context, meta);
+                    } else {
+                        it.getConnectionHelper().connect(context, meta);
+                    }
+                });
     }
 }

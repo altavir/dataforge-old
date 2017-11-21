@@ -47,14 +47,9 @@ public class GenericPortController implements Port.PortController, AutoCloseable
     private final ReferenceRegistry<BiConsumer<String, Throwable>> exceptionListeners = new ReferenceRegistry<>();
 
 
-    public GenericPortController(Context context, @NotNull Port port) {
+    public GenericPortController(@NotNull Context context, @NotNull Port port) {
         this.port = port;
         this.context = context;
-        try {
-            port.holdBy(this);
-        } catch (PortException e) {
-            throw new RuntimeException("Can't hold the port " + port + " by generic handler", e);
-        }
     }
 
     @Override
@@ -64,11 +59,12 @@ public class GenericPortController implements Port.PortController, AutoCloseable
 
     public void open() {
         try {
+            port.holdBy(this);
             if (!port.isOpen()) {
                 port.open();
             }
         } catch (PortException e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Can't hold the port " + port + " by generic handler", e);
         }
     }
 
@@ -81,7 +77,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
     }
 
     @Override
-    public void portError(String errorMessage, Throwable error) {
+    public void acceptError(String errorMessage, Throwable error) {
         exceptionListeners.forEach(it -> {
             context.parallelExecutor().submit(() -> {
                 try {

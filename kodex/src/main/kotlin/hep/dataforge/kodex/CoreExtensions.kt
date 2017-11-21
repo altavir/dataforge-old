@@ -146,6 +146,15 @@ fun MetaProvider.useMeta(metaName: String, action: (Meta) -> Unit) {
 }
 
 /**
+ * Perform some action on each meta element of the list if it is present
+ */
+fun Meta.useEachMeta(metaName: String, action: (Meta) -> Unit) {
+    if(hasMeta(metaName)){
+        getMetaList(metaName).forEach(action)
+    }
+}
+
+/**
  * Get all meta nodes with the given name and apply action to them
  */
 fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {

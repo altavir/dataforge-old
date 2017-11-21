@@ -35,6 +35,7 @@ import java.util.function.Predicate;
  * @author Alexander Nozik
  */
 public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
+    //TODO Redo concurrency avoiding lock
     /**
      * The definition of default phrase condition
      *
@@ -78,6 +79,10 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     public abstract boolean isOpen();
 
+    /**
+     * Run something on port thread
+     * @param r
+     */
     protected void run(Runnable r) {
         executor.submit(r);
     }
@@ -99,7 +104,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
     /**
      * Acquire lock on this instance of port handler with given controller
-     * object. Only the same controller can release the hold.
+     * object. Only the same controller  can release the port.
      *
      * @param controller
      * @throws hep.dataforge.exceptions.PortException
@@ -186,7 +191,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
                     getLogger().debug("Unlocked by {}", controller);
                 });
             } else {
-                throw new PortLockException("Can't unlock hold with wrong holder");
+                throw new PortLockException("Can't unlock port with wrong controller");
             }
         } else {
             getLogger().warn("Attempting to release unlocked port");
@@ -212,7 +217,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
 
         void acceptPhrase(String message);
 
-        default void portError(String errorMessage, Throwable error) {
+        default void acceptError(String errorMessage, Throwable error) {
             //do nothing
         }
     }
