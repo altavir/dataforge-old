@@ -27,16 +27,8 @@ public interface Metoid {
      * there is no meta-data, empty meta is returned. The name of returned meta
      * is currently not restricted.
      *
-     * @since 0.1.1
+     * @since 0.4.0
      * @return
      */
-    Meta meta();
-
-    /**
-     * Alias for {@code meta()} to be used in groovy/Kotlin properties
-     * @return
-     */
-    default Meta getMeta(){
-        return meta();
-    }
+    Meta getMeta();
 }

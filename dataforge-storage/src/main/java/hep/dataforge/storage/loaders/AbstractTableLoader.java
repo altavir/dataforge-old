@@ -91,7 +91,7 @@ public abstract class AbstractTableLoader extends AbstractLoader implements Tabl
             if (!getValidator().isValid(message)) {
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
-            Meta messageMeta = message.meta();
+            Meta messageMeta = message.getMeta();
             String operation = messageMeta.getString(ACTION_KEY);
             switch (operation) {
                 case PUSH_OPERATION:

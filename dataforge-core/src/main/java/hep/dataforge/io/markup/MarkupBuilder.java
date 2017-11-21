@@ -58,7 +58,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return builder.build();
     }
 
@@ -126,7 +126,7 @@ public class MarkupBuilder implements GenericBuilder<Markup, MarkupBuilder>, Met
     }
 
     public MarkupBuilder setContent(Stream<MarkupBuilder> content) {
-        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map(MarkupBuilder::meta).collect(Collectors.toList()));
+        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map(MarkupBuilder::getMeta).collect(Collectors.toList()));
         return self();
     }
 

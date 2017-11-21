@@ -60,7 +60,7 @@ public class DataSet<T> implements DataNode<T> {
     public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
         return dataMap.entrySet().stream()
                 .filter(it -> recursive || !it.getKey().contains("."))
-                .map(entry -> NamedData.wrap(entry.getKey(), entry.getValue(), meta()));
+                .map(entry -> NamedData.wrap(entry.getKey(), entry.getValue(), getMeta()));
     }
 
     /**
@@ -109,7 +109,7 @@ public class DataSet<T> implements DataNode<T> {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         if (meta == null) {
             return Meta.empty();
         } else {
@@ -126,7 +126,7 @@ public class DataSet<T> implements DataNode<T> {
     public Optional<DataNode<T>> optNode(String nodeName) {
         Builder<T> builder = new Builder<>(type)
                 .setName(nodeName)
-                .setMeta(meta());
+                .setMeta(getMeta());
         String prefix = nodeName + ".";
         dataStream()
                 .filter(data -> data.getName().startsWith(prefix))
@@ -192,7 +192,7 @@ public class DataSet<T> implements DataNode<T> {
 
         @Override
         public Builder<T> putNode(String as, DataNode<? extends T> node) {
-            if (!node.meta().isEmpty()) {
+            if (!node.getMeta().isEmpty()) {
                 LoggerFactory.getLogger(getClass()).warn("Trying to add node with meta to flat DataNode. "
                         + "Node meta could be lost. Consider using DataTree instead.");
             }
@@ -224,7 +224,7 @@ public class DataSet<T> implements DataNode<T> {
         }
 
         @Override
-        public Meta meta() {
+        public Meta getMeta() {
             return this.meta;
         }
     }

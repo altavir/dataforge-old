@@ -107,7 +107,7 @@ public class DataUtils {
                 return dataNode.dataStream().map(Data::getGoal);
             }
         };
-        return new Data<R>(combineGoal, type, dataNode.meta());
+        return new Data<R>(combineGoal, type, dataNode.getMeta());
     }
 
     /**
@@ -120,17 +120,17 @@ public class DataUtils {
      */
     public static <T, R> Data<R> transform(Data<T> data, Class<R> target, Function<T, R> transformation) {
         Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), transformation);
-        return new Data<R>(goal, target, data.meta());
+        return new Data<R>(goal, target, data.getMeta());
     }
 
     public static <T, R> NamedData<R> transform(NamedData<T> data, Class<R> target, Function<T, R> transformation) {
         Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), transformation);
-        return new NamedData<R>(data.getName(), goal, target, data.meta());
+        return new NamedData<R>(data.getName(), goal, target, data.getMeta());
     }
 
     public static <T, R> Data<R> transform(Data<T> data, Class<R> target, Executor executor, Function<T, R> transformation) {
         Goal<R> goal = new PipeGoal<T, R>(data.getGoal(), executor, transformation);
-        return new Data<R>(goal, target, data.meta());
+        return new Data<R>(goal, target, data.getMeta());
     }
 
     /**
@@ -224,7 +224,7 @@ public class DataUtils {
             Binary binary = envelope.getData();
             Path metaFileDirectory = filePath.resolveSibling(META_DIRECTORY);
             Meta fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.getFileName().toString()).orElse(Meta.empty());
-            Laminate meta = new Laminate(fileMeta, override, envelope.meta());
+            Laminate meta = new Laminate(fileMeta, override, envelope.getMeta());
             return Data.generate(type, meta, () -> reader.apply(binary, meta));
         } catch (IOException e) {
             throw new RuntimeException("Failed to read " + filePath.toString() + " as an envelope", e);

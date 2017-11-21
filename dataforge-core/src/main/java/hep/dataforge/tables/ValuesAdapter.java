@@ -34,7 +34,7 @@ public interface ValuesAdapter extends Metoid, MetaMorph {
      * @return 
      */
     @Override
-    Meta meta();
+    Meta getMeta();
 
     /**
      * Get a value with specific designation from given DataPoint

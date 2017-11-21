@@ -132,7 +132,7 @@ public interface PlotFrame extends Configurable, Serializable {
         }
 
         public PlotFrameEnvelope(Envelope envelope) {
-            super(envelope.meta(), envelope.getData());
+            super(envelope.getMeta(), envelope.getData());
         }
 
         private Object readResolve() throws ObjectStreamException {
@@ -161,7 +161,7 @@ public interface PlotFrame extends Configurable, Serializable {
             Envelope rootEnv = PlotGroup.WRAPPER.wrap(frame.getPlots());
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .setMeta(rootEnv.meta())
+                    .setMeta(rootEnv.getMeta())
                     .setData(rootEnv.getData())
                     .setContentType("wrapper")
                     .putMetaValue(WRAPPER_TYPE_KEY, PLOT_FRAME_WRAPPER_TYPE)
@@ -174,14 +174,14 @@ public interface PlotFrame extends Configurable, Serializable {
         public PlotFrame unWrap(Envelope envelope) {
             PlotGroup root = PlotGroup.WRAPPER.unWrap(envelope);
 
-            String plotFrameClassName = envelope.meta().getString(PLOT_FRAME_CLASS_KEY, "hep.dataforge.plots.JFreeChartFrame");
-            Meta plotMeta = envelope.meta().getMetaOrEmpty(PLOT_FRAME_META_KEY);
+            String plotFrameClassName = envelope.getMeta().getString(PLOT_FRAME_CLASS_KEY, "hep.dataforge.plots.JFreeChartFrame");
+            Meta plotMeta = envelope.getMeta().getMetaOrEmpty(PLOT_FRAME_META_KEY);
 
             try {
                 PlotFrame frame = (PlotFrame) Class.forName(plotFrameClassName).getConstructor().newInstance();
                 frame.configure(plotMeta);
                 frame.addAll(root);
-                frame.getPlots().configure(root.meta());
+                frame.getPlots().configure(root.getMeta());
 
                 return frame;
             } catch (Exception ex) {

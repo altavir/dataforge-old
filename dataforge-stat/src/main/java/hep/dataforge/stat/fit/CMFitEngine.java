@@ -89,8 +89,8 @@ public class CMFitEngine implements FitEngine {
     public FitResult makeRun(FitState state, FitStage task, History log) {
 
         log.report("Starting fit using provided Commons Math algorithms.");
-        int maxSteps = task.meta().getInt("iterations", DEFAULT_MAXITER);
-        double tolerance = task.meta().getDouble("tolerance", DEFAULT_TOLERANCE);
+        int maxSteps = task.getMeta().getInt("iterations", DEFAULT_MAXITER);
+        double tolerance = task.getMeta().getDouble("tolerance", DEFAULT_TOLERANCE);
         String[] fitPars = this.getFitPars(state, task);
         ParamSet pars = state.getParameters().copy();
 

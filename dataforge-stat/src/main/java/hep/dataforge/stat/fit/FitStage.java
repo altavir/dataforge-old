@@ -72,11 +72,11 @@ public class FitStage extends SimpleMetaMorph {
     }
 
     public String getEngineName() {
-        return meta().getString(ENGINE_NAME, QOWFitEngine.QOW_ENGINE_NAME);
+        return getMeta().getString(ENGINE_NAME, QOWFitEngine.QOW_ENGINE_NAME);
     }
 
     public String getMethodName() {
-        return meta().getString(METHOD_NAME, DEFAULT_METHOD_NAME);
+        return getMeta().getString(METHOD_NAME, DEFAULT_METHOD_NAME);
     }
 
     /**
@@ -87,15 +87,15 @@ public class FitStage extends SimpleMetaMorph {
      * @return an array of {@link java.lang.String} objects.
      */
     public String[] getFreePars() {
-        if (meta().hasValue(FREE_PARAMETERS)) {
-            return meta().getStringArray(FREE_PARAMETERS);
+        if (getMeta().hasValue(FREE_PARAMETERS)) {
+            return getMeta().getStringArray(FREE_PARAMETERS);
         } else {
             return new String[0];
         }
     }
 
     public String getType() {
-        return meta().getString(FIT_STAGE_TYPE, "fit");
+        return getMeta().getString(FIT_STAGE_TYPE, "fit");
     }
 
     @Override

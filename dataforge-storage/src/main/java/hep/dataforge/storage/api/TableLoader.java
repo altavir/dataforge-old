@@ -63,10 +63,10 @@ public interface TableLoader extends Loader, ValuesSource {
      * @return
      */
     default ValueIndex<Values> getIndex() {
-        if (meta().hasValue("index")) {
-            return getIndex(meta().getString("index"));
-        } else if (meta().hasValue("index.key")) {
-            return getIndex(meta().getString("index.key"));
+        if (getMeta().hasValue("index")) {
+            return getIndex(getMeta().getString("index"));
+        } else if (getMeta().hasValue("index.key")) {
+            return getIndex(getMeta().getString("index.key"));
         } else {
             return getIndex(DEFAULT_INDEX_FIELD);
         }

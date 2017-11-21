@@ -52,7 +52,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         List<DataNode<T>> groups = buildGroups(context, (DataNode<T>) set, actionMeta);
-        return wrap(getResultName(set.getName(), actionMeta), set.meta(), groups.stream().map(group->runGroup(context, group,actionMeta)));
+        return wrap(getResultName(set.getName(), actionMeta), set.getMeta(), groups.stream().map(group->runGroup(context, group,actionMeta)));
     }
 
     public ActionResult<R> runGroup(Context context, DataNode<T> data, Meta actionMeta) {
@@ -64,7 +64,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {
-        return GroupBuilder.byMeta(inputMeta(context, input.meta(), actionMeta)).group(input);
+        return GroupBuilder.byMeta(inputMeta(context, input.getMeta(), actionMeta)).group(input);
     }
 
     /**
@@ -155,7 +155,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
 
         @Override
         protected R compute() throws Exception {
-            Laminate meta = inputMeta(context, data.meta(), actionMeta);
+            Laminate meta = inputMeta(context, data.getMeta(), actionMeta);
             Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), data.getName()));
             beforeGroup(context, data);
             // In this moment, all the data is already calculated

@@ -22,10 +22,10 @@ public interface Wrapper<T> extends Named {
     @SuppressWarnings("unchecked")
     static <T> T unwrap(Context context, Envelope envelope) throws Exception {
         Wrapper<T> wrapper;
-        if (envelope.meta().hasValue(WRAPPER_CLASS_KEY)) {
-            wrapper = (Wrapper<T>) Class.forName(envelope.meta().getString(WRAPPER_CLASS_KEY)).getConstructor().newInstance();
-        } else if (envelope.meta().hasValue(WRAPPER_TYPE_KEY)) {
-            wrapper = (Wrapper<T>) context.findService(Wrapper.class, it -> it.getName().equals(envelope.meta().getString(WRAPPER_TYPE_KEY)))
+        if (envelope.getMeta().hasValue(WRAPPER_CLASS_KEY)) {
+            wrapper = (Wrapper<T>) Class.forName(envelope.getMeta().getString(WRAPPER_CLASS_KEY)).getConstructor().newInstance();
+        } else if (envelope.getMeta().hasValue(WRAPPER_TYPE_KEY)) {
+            wrapper = (Wrapper<T>) context.findService(Wrapper.class, it -> it.getName().equals(envelope.getMeta().getString(WRAPPER_TYPE_KEY)))
                     .orElseThrow(() -> new RuntimeException("Unwrapper not found"));
         } else {
             throw new IllegalArgumentException("Not a wrapper envelope");
@@ -52,7 +52,7 @@ public interface Wrapper<T> extends Named {
     T unWrap(Envelope envelope);
 
     default void checkValidEnvelope(Envelope env) {
-        if (!env.meta().getString(WRAPPER_TYPE_KEY, "").equals(getName())) {
+        if (!env.getMeta().getString(WRAPPER_TYPE_KEY, "").equals(getName())) {
             throw new RuntimeException("Can't unwrap envelope. Wrong content type.");
         }
     }

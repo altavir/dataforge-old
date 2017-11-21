@@ -71,13 +71,13 @@ public class DescriptorBuilder implements Metoid {
     }
 
     public DescriptorBuilder addNode(NodeDescriptor childDescriptor) {
-        DescriptorBuilder.this.addNode(childDescriptor.meta());
+        DescriptorBuilder.this.addNode(childDescriptor.getMeta());
         return this;
     }
 
 
     public DescriptorBuilder addNode(String node, NodeDescriptor childDescriptor) {
-        DescriptorBuilder.this.addNode(node, childDescriptor.meta());
+        DescriptorBuilder.this.addNode(node, childDescriptor.getMeta());
         return this;
     }
 
@@ -127,7 +127,7 @@ public class DescriptorBuilder implements Metoid {
     }
 
     @Override
-    public MetaBuilder meta() {
+    public MetaBuilder getMeta() {
         return builder;
     }
 

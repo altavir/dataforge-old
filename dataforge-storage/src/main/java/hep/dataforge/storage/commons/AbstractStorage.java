@@ -189,7 +189,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
      * @throws StorageException
      */
     protected Loader overrideLoader(Loader currentLoader, Meta newAnnotation) throws StorageException {
-        if (currentLoader.meta().equalsIgnoreName(newAnnotation)) {
+        if (currentLoader.getMeta().equalsIgnoreName(newAnnotation)) {
             return currentLoader;
         } else {
             throw new StorageException("Can't update loader with new annotation");

@@ -183,7 +183,7 @@ public class ServerManager extends BasicPlugin implements ServerObject {
         Map<String, Object> binding = new HashMap<>();
 
         String serverAddress;
-        if (meta().getBoolean("useRelativeAddress")) {
+        if (getMeta().getBoolean("useRelativeAddress")) {
             serverAddress = "";
         } else {
             serverAddress = ServletUtils.getServerURL(ctx);

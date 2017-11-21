@@ -56,8 +56,8 @@ public class QOWFitEngine implements FitEngine {
 //        super(report);
 //    }
     private ParamSet newtonianRun(FitState state, FitStage task, QOWeight weight, History log) {
-        int maxSteps = task.meta().getInt("iterations", 100);
-        double tolerance = task.meta().getDouble("tolerance", 0);
+        int maxSteps = task.getMeta().getInt("iterations", 100);
+        double tolerance = task.getMeta().getDouble("tolerance", 0);
 
         double dis, dis1; //норма невязки
         // Для удобства работаем всегда с полным набором параметров

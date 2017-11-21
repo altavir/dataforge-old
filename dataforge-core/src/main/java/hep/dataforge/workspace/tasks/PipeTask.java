@@ -22,7 +22,7 @@ public abstract class PipeTask<T, R> extends AbstractTask<R> {
 
     @Override
     protected final DataNode<R> run(TaskModel model, DataNode<?> data) {
-        return action.run(model.getContext(), data.checked(inputType), model.meta());
+        return action.run(model.getContext(), data.checked(inputType), model.getMeta());
     }
 
     @Override

@@ -46,7 +46,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 
@@ -71,7 +71,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
     @ValueDef(name = "lo", info = "Axis lower boundary key")
     @ValueDef(name = "title", info = "The title of this axis. By default axis name is used.")
     public Meta getAxisMeta(String axis) {
-        return this.meta().getMeta(axis, Meta.empty());
+        return this.getMeta().getMeta(axis, Meta.empty());
     }
 
     public Value getValue(Values point, String axis) {
@@ -113,7 +113,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
      */
     protected String nameFor(String component) {
         //caching name to avoid heavy meta request
-        return nameCache.computeIfAbsent(component, newComponent -> meta().getString(newComponent, () -> {
+        return nameCache.computeIfAbsent(component, newComponent -> getMeta().getString(newComponent, () -> {
                     if (newComponent.endsWith(".value")) {
                         return newComponent.replace(".value", "");
                     } else {
@@ -125,7 +125,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
 
     @Override
     public Meta toMeta() {
-        return this.meta();
+        return this.getMeta();
     }
 
     @Override

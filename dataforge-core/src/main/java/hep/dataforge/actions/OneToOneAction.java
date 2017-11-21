@@ -55,7 +55,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
         return wrap(
                 set.getName(),
-                set.meta(),
+                set.getMeta(),
                 set.dataStream(true).map(data -> runOne(context, data, actionMeta))
         );
     }
@@ -76,7 +76,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
 
         Pair<String, Meta> resultParamters = outputParameters(context, data, actionMeta);
 
-        Laminate meta = inputMeta(context, data.meta(), actionMeta);
+        Laminate meta = inputMeta(context, data.getMeta(), actionMeta);
         String resultName = resultParamters.getKey();
         Meta outputMeta = resultParamters.getValue();
 
@@ -131,7 +131,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     protected Pair<String, Meta> outputParameters(Context context, NamedData<? extends T> data, Meta actionMeta) {
-        return new Pair<>(getResultName(data.getName(), actionMeta), data.meta());
+        return new Pair<>(getResultName(data.getName(), actionMeta), data.getMeta());
     }
 
     protected void afterAction(Context context, String name, R res, Laminate meta) {

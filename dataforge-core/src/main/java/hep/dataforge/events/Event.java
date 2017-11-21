@@ -79,19 +79,19 @@ public class Event extends SimpleMetaMorph {
     }
 
     public int priority() {
-        return meta().getInt(EVENT_PRIORITY_KEY, 0);
+        return getMeta().getInt(EVENT_PRIORITY_KEY, 0);
     }
 
     public String type() {
-        return meta().getString(EVENT_TYPE_KEY);
+        return getMeta().getString(EVENT_TYPE_KEY);
     }
 
     public String sourceTag() {
-        return meta().getString(EVENT_SOURCE_KEY, "");
+        return getMeta().getString(EVENT_SOURCE_KEY, "");
     }
 
     public Instant time() {
-        return meta().getValue(EVENT_TIME_KEY).timeValue();
+        return getMeta().getValue(EVENT_TIME_KEY).timeValue();
     }
 
 //    /**

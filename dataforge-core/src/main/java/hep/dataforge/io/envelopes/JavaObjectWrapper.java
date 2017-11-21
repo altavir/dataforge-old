@@ -47,8 +47,8 @@ public class JavaObjectWrapper implements Wrapper<Object> {
 
     @Override
     public Object unWrap(Envelope envelope) {
-        if (!getName().equals(envelope.meta().getString(WRAPPER_TYPE_KEY, ""))) {
-            throw new Error("Wrong wrapped type: " + envelope.meta().getString(WRAPPER_TYPE_KEY, ""));
+        if (!getName().equals(envelope.getMeta().getString(WRAPPER_TYPE_KEY, ""))) {
+            throw new Error("Wrong wrapped type: " + envelope.getMeta().getString(WRAPPER_TYPE_KEY, ""));
         }
         try {
             ObjectInputStream stream = new ObjectInputStream(envelope.getData().getStream());

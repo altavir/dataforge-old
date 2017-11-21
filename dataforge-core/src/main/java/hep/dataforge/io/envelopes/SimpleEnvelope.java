@@ -45,7 +45,7 @@ public class SimpleEnvelope implements Envelope {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta == null ? Meta.empty() : meta;
     }
 
@@ -55,7 +55,7 @@ public class SimpleEnvelope implements Envelope {
 
     private void readObject(ObjectInputStream in) throws IOException, ClassNotFoundException {
         Envelope envelope = DefaultEnvelopeType.instance.getReader().read(in);
-        this.meta = envelope.meta();
+        this.meta = envelope.getMeta();
         this.data = envelope.getData();
     }
 

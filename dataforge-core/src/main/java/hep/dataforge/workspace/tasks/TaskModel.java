@@ -148,7 +148,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return taskMeta;
     }
 
@@ -157,7 +157,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
         MetaBuilder id = new MetaBuilder("task")
                 .setNode(getContext().getIdentity())
                 .setValue("name", getName())
-                .setNode(DEFAULT_META_NAME, meta());
+                .setNode(DEFAULT_META_NAME, getMeta());
 
         MetaBuilder depNode = new MetaBuilder("dependencies");
 
@@ -175,7 +175,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
      */
     @Override
     public Optional<Value> optValue(String path) {
-        return meta().optValue(path);
+        return getMeta().optValue(path);
     }
 
     /**
@@ -186,7 +186,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
      */
     @Override
     public boolean hasValue(String path) {
-        return meta().hasValue(path);
+        return getMeta().hasValue(path);
     }
 
     /**
@@ -313,9 +313,9 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
             this.taskModel = taskModel;
             if (as.isEmpty()) {
                 this.placementRule = (DataTree.Builder<Object> tree, DataNode<Object> result) -> {
-                    if (!result.meta().isEmpty()) {
-                        if (tree.meta().isEmpty()) {
-                            tree.setMeta(result.meta());
+                    if (!result.getMeta().isEmpty()) {
+                        if (tree.getMeta().isEmpty()) {
+                            tree.setMeta(result.getMeta());
                         } else {
                             LoggerFactory.getLogger(getClass()).error("Root node meta already exists.");
                         }
@@ -372,7 +372,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
 
         public Builder(TaskModel model) {
             this.model = model.copy();
-            this.taskMeta = model.meta().getBuilder();
+            this.taskMeta = model.getMeta().getBuilder();
         }
 
         @Override

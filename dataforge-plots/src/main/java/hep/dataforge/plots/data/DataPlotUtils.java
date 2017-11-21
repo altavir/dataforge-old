@@ -27,7 +27,7 @@ public class DataPlotUtils {
 
         frame.getPlots().list()
                 .map(frame::get)
-                .filter(pl -> !visibleOnly || pl.meta().getBoolean("visible", true))
+                .filter(pl -> !visibleOnly || pl.getMeta().getBoolean("visible", true))
                 .forEach(pl -> {
                     XYAdapter adapter = XYAdapter.from(pl.getAdapter());
 

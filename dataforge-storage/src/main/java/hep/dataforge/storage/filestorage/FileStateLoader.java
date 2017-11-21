@@ -42,7 +42,7 @@ public class FileStateLoader extends AbstractStateLoader {
         if (FileStorageEnvelopeType.validate(envelope, STATE_LOADER_TYPE)) {
             FileStateLoader res = new FileStateLoader(envelope.getFile(),
                     storage, FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
-                    envelope.meta());
+                    envelope.getMeta());
             res.setReadOnly(envelope.isReadOnly());
             return res;
         } else {
@@ -61,7 +61,7 @@ public class FileStateLoader extends AbstractStateLoader {
     @Override
     public void open() throws Exception {
         if (this.meta == null) {
-            this.meta = getFile().meta();
+            this.meta = getFile().getMeta();
         }
         if (!isOpen()) {
             file = FileEnvelope.open(path, isReadOnly());

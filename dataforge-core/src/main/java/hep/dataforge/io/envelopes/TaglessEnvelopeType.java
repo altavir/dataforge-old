@@ -86,7 +86,7 @@ public class TaglessEnvelopeType implements EnvelopeType {
                 MetaType metaType = MetaType.resolve(properties);
 
                 //writing meta
-                metaType.getWriter().write(stream, envelope.meta());
+                metaType.getWriter().write(stream, envelope.getMeta());
             }
 
             //Printing data

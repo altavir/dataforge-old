@@ -55,7 +55,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
     }
 
     protected Duration getTimeout() {
-        return Duration.ofMillis(meta().getInt("timeout", 400));
+        return Duration.ofMillis(getMeta().getInt("timeout", 400));
     }
 
     protected Port buildPort(String portName) throws ControlException {
@@ -76,10 +76,10 @@ public abstract class PortSensor<T> extends Sensor<T> {
     public void init() throws ControlException {
         super.init();
         if (connection == null) {
-            String port = meta().getString(PORT_NAME_KEY);
+            String port = getMeta().getString(PORT_NAME_KEY);
             this.connection = new GenericPortController(getContext(), buildPort(port));
             //Add debug listener
-            if (meta().getBoolean("debugMode", false)) {
+            if (getMeta().getBoolean("debugMode", false)) {
                 connection.weakOnPhrase(phrase -> getLogger().debug("Device {} received phrase: {}", getName(), phrase));
                 connection.weakOnError((message, error) -> getLogger().error("Device {} exception: {}", getName(), message, error));
             }

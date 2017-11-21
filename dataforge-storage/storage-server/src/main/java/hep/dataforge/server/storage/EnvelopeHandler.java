@@ -36,7 +36,7 @@ public class EnvelopeHandler implements Handler, Responder {
             builder.setData(data);
 
             Envelope response = respond(builder.build());
-            ctx.render(new JSONMetaWriter().writeString(response.meta()));
+            ctx.render(new JSONMetaWriter().writeString(response.getMeta()));
         });
     }
 

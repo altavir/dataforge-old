@@ -174,7 +174,7 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
      * @return
      */
     default boolean isReadOnly() {
-        return meta().optValue("readOnly")
+        return getMeta().optValue("readOnly")
                 .map(Value::booleanValue)
                 .orElseGet(() -> getParent() != null && getParent().isReadOnly());
     }
@@ -203,9 +203,9 @@ public interface Storage extends Metoid, Named, Provider, AutoCloseable, Respond
      */
     default Laminate getLaminate() {
         if (getParent() == null) {
-            return new Laminate(meta());
+            return new Laminate(getMeta());
         } else {
-            return getParent().getLaminate().withFirstLayer(meta());
+            return getParent().getLaminate().withFirstLayer(getMeta());
         }
     }
 

@@ -56,7 +56,7 @@ public class Data<T> implements Metoid {
 
         Meta meta = Meta.empty();
         if (content instanceof Metoid) {
-            meta = ((Metoid) content).meta();
+            meta = ((Metoid) content).getMeta();
         }
         return buildStatic(content, meta);
     }
@@ -88,7 +88,7 @@ public class Data<T> implements Metoid {
                 return Stream.empty();
             }
         };
-        return new Data<>(goal, type, envelope.meta());
+        return new Data<>(goal, type, envelope.getMeta());
     }
 
     public static <T> Data<T> generate(Class<T> type, Meta meta, Executor executor, Supplier<T> sup) {
@@ -156,7 +156,7 @@ public class Data<T> implements Metoid {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 

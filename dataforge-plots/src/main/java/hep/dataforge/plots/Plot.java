@@ -113,8 +113,8 @@ public interface Plot extends Plottable {
         @Override
         public Plot unWrap(Envelope envelope) {
             try {
-                Meta meta = envelope.meta().getMetaOrEmpty(DEFAULT_META_NAME);
-                String name = envelope.meta().getString("name");
+                Meta meta = envelope.getMeta().getMetaOrEmpty(DEFAULT_META_NAME);
+                String name = envelope.getMeta().getString("name");
 
                 ListOfPoints data = (ListOfPoints) new ObjectInputStream(envelope.getData().getStream()).readObject();
 

@@ -46,9 +46,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), meta());
+        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), getMeta());
 
-        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), meta());
+        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), getMeta());
 
         updateLegend(getLegendConfig());
 
@@ -57,15 +57,15 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
     protected abstract void updateFrame(Meta annotation);
 
     private Meta getXAxisConfig() {
-        return meta().getMetaOrEmpty("xAxis");
+        return getMeta().getMetaOrEmpty("xAxis");
     }
 
     private Meta getYAxisConfig() {
-        return meta().getMetaOrEmpty("yAxis");
+        return getMeta().getMetaOrEmpty("yAxis");
     }
 
     private Meta getLegendConfig() {
-        return meta().getMetaOrEmpty("legend");
+        return getMeta().getMetaOrEmpty("legend");
     }
 
     /**
@@ -95,6 +95,6 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
      * @return
      */
     public Optional<Value> getActualColor(Name name){
-        return getPlots().opt(name).flatMap(plot -> plot.meta().optValue("color"));
+        return getPlots().opt(name).flatMap(plot -> plot.getMeta().optValue("color"));
     }
 }

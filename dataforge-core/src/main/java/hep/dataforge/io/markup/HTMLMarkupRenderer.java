@@ -141,7 +141,7 @@ public class HTMLMarkupRenderer extends GenericMarkupRenderer {
     }
 
     private void applyHTMLStyle(Element html, Markup markup) {
-        MetaUtils.valueStream(markup.meta().getMeta("html")).forEach(pair -> html.setAttribute(pair.getKey(), pair.getValue().stringValue()));
+        MetaUtils.valueStream(markup.getMeta().getMeta("html")).forEach(pair -> html.setAttribute(pair.getKey(), pair.getValue().stringValue()));
     }
 
 //    @Override

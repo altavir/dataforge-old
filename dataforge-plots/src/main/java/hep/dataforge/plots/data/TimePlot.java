@@ -143,9 +143,9 @@ public class TimePlot extends XYPlot {
         this.map.put(time, new ValueMap(point));
 
         if (size() > 2) {
-            int maxItems = meta().getInt(MAX_ITEMS_KEY, -1);
-            int prefItems = meta().getInt(PREF_ITEMS_KEY, Math.min(400, maxItems));
-            int maxAge = meta().getInt(MAX_AGE_KEY, -1);
+            int maxItems = getMeta().getInt(MAX_ITEMS_KEY, -1);
+            int prefItems = getMeta().getInt(PREF_ITEMS_KEY, Math.min(400, maxItems));
+            int maxAge = getMeta().getInt(MAX_AGE_KEY, -1);
             cleanup(maxAge, maxItems, prefItems);
         }
 

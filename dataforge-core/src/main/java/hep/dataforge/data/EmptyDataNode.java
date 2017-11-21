@@ -58,7 +58,7 @@ public class EmptyDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return Meta.empty();
     }
 

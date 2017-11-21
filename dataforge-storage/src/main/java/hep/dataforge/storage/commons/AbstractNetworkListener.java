@@ -64,12 +64,12 @@ public abstract class AbstractNetworkListener implements Metoid, AutoCloseable, 
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return config;
     }
 
     private int getPort() {
-        return meta().getInt("port", 8335);
+        return getMeta().getInt("port", 8335);
     }
 
     @Override

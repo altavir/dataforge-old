@@ -40,7 +40,7 @@ public class FileTableLoader extends AbstractTableLoader {
         if (FileStorageEnvelopeType.validate(envelope, TABLE_LOADER_TYPE)) {
             FileTableLoader res = new FileTableLoader(storage,
                     FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
-                    envelope.meta(),
+                    envelope.getMeta(),
                     envelope.getFile());
             res.setReadOnly(envelope.isReadOnly());
             return res;
@@ -67,7 +67,7 @@ public class FileTableLoader extends AbstractTableLoader {
     @Override
     public void open() throws Exception {
         if (this.meta == null) {
-            this.meta = buildEnvelope(true).meta();
+            this.meta = buildEnvelope(true).getMeta();
         }
         // read format from first line if it is not defined in meta
         if (getFormat() == null) {
@@ -114,10 +114,10 @@ public class FileTableLoader extends AbstractTableLoader {
     @Override
     public TableFormat getFormat() {
         if (format == null) {
-            if (meta().hasMeta("format")) {
-                format = new MetaTableFormat(meta().getMeta("format"));
-            } else if (meta().hasValue("format")) {
-                format = MetaTableFormat.forNames(meta().getStringArray("format"));
+            if (getMeta().hasMeta("format")) {
+                format = new MetaTableFormat(getMeta().getMeta("format"));
+            } else if (getMeta().hasValue("format")) {
+                format = MetaTableFormat.forNames(getMeta().getStringArray("format"));
             } else {
                 format = null;
             }

@@ -191,8 +191,8 @@ public class MINUITFitEngine implements FitEngine {
 //        minuit.setUseAnalyticalDerivatives(true);
         FunctionMinimum minimum;
 
-        int maxSteps = task.meta().getInt("iterations", -1);
-        double tolerance = task.meta().getDouble("tolerance", -1);
+        int maxSteps = task.getMeta().getInt("iterations", -1);
+        double tolerance = task.getMeta().getDouble("tolerance", -1);
 
         if (maxSteps > 0) {
             if (tolerance > 0) {

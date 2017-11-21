@@ -25,7 +25,7 @@ class KodexServer(private val _context: Context, private val _meta: Meta) : Meto
     private var engine: NettyApplicationEngine? = null;
     private val interceptors: MutableList<InterceptorFactory> = ArrayList();
 
-    override fun meta(): Meta {
+    override fun getMeta(): Meta {
         return _meta;
     }
 

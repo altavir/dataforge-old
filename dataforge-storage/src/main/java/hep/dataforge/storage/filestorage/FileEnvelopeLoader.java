@@ -67,7 +67,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
     @Override
     public void open() throws Exception {
         if (this.meta == null) {
-            this.meta = getFile().meta();
+            this.meta = getFile().getMeta();
         }
         if (!isOpen()) {
             file = FileEnvelope.open(filePath, isReadOnly());

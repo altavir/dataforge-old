@@ -19,7 +19,7 @@ public class SimpleMetaMorph extends MetaHolder implements MetaMorph {
 
     @Override
     public Meta toMeta() {
-        return meta();
+        return getMeta();
     }
 
     @Override
@@ -29,11 +29,11 @@ public class SimpleMetaMorph extends MetaHolder implements MetaMorph {
 
     @Override
     public int hashCode() {
-        return meta().hashCode();
+        return getMeta().hashCode();
     }
 
     @Override
     public boolean equals(Object obj) {
-        return getClass().equals(obj.getClass()) && ((Metoid) obj).meta().equals(meta());
+        return getClass().equals(obj.getClass()) && ((Metoid) obj).getMeta().equals(getMeta());
     }
 }

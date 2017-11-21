@@ -100,7 +100,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
             if (!getValidator().isValid(message)) {
                 return StorageMessageUtils.exceptionResponse(message, new WrongTargetException());
             }
-            Meta envelopeMeta = message.meta();
+            Meta envelopeMeta = message.getMeta();
             String operation = envelopeMeta.getString(ACTION_KEY);
             EnvelopeBuilder res = new MessageFactory().responseBase(message);
             switch (operation) {

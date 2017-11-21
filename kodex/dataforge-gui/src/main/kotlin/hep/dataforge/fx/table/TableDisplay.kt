@@ -48,7 +48,7 @@ class TableDisplay(val table: Table, meta: Meta = Meta.empty())
         center = spreadsheet;
     }
 
-    override fun meta(): Meta {
+    override fun getMeta(): Meta {
         return meta
     }
 

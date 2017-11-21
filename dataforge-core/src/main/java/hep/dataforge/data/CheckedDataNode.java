@@ -24,8 +24,8 @@ public class CheckedDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Meta meta() {
-        return node.meta();
+    public Meta getMeta() {
+        return node.getMeta();
     }
 
     @Override

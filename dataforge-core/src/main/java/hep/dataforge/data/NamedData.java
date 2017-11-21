@@ -49,13 +49,13 @@ public class NamedData<T> extends Data<T> implements Named {
      */
     @NotNull
     public static <T> NamedData<T> wrap(String name, Data<T> data, Meta... externalMeta) {
-        Laminate newMeta = new Laminate(data.meta()).withLayer(externalMeta);
+        Laminate newMeta = new Laminate(data.getMeta()).withLayer(externalMeta);
         return new NamedData<T>(name, data.getGoal(), data.type(), newMeta);
     }
 
     @NotNull
     public static <T> NamedData<T> wrap(Name name, Data<T> data, Laminate externalMeta) {
-        Laminate newMeta = externalMeta.withFirstLayer(data.meta()).cleanup();
+        Laminate newMeta = externalMeta.withFirstLayer(data.getMeta()).cleanup();
         return new NamedData<T>(name.toString(), data.getGoal(), data.type(), newMeta);
     }
 
@@ -70,14 +70,14 @@ public class NamedData<T> extends Data<T> implements Named {
      * @return
      */
     public Data<T> anonymize() {
-        return new Data<T>(this.getGoal(), this.type(), this.meta());
+        return new Data<T>(this.getGoal(), this.type(), this.getMeta());
     }
 
     @Override
     @SuppressWarnings("unchecked")
     public <R> NamedData<R> cast(Class<R> type) {
         if (type.isAssignableFrom(type())) {
-            return new NamedData<R>(name, (Goal<R>) getGoal(), type, meta());
+            return new NamedData<R>(name, (Goal<R>) getGoal(), type, getMeta());
         } else {
             throw new IllegalArgumentException("Invalid type to upcast data");
         }

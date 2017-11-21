@@ -52,7 +52,7 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
     }
 
     public String getDescription() {
-        return meta().getString("description", "");
+        return getMeta().getString("description", "");
     }
 
     /**

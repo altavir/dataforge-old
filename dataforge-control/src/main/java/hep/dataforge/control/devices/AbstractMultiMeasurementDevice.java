@@ -61,7 +61,7 @@ public abstract class AbstractMultiMeasurementDevice extends AbstractDevice impl
     }
 
     protected Meta getMetaMeasurement(String name) {
-        return MetaUtils.findNodeByValue(meta(), "measurement", "name", name).orElse(Meta.empty());
+        return MetaUtils.findNodeByValue(getMeta(), "measurement", "name", name).orElse(Meta.empty());
     }
 
     /**

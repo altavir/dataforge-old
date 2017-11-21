@@ -40,7 +40,7 @@ public class EnvelopeBuilder implements Envelope {
     private Binary data = new BufferedBinary(new byte[0]);
 
     public EnvelopeBuilder(Envelope envelope) {
-        this.meta = envelope.meta().getBuilder();
+        this.meta = envelope.getMeta().getBuilder();
         this.data = envelope.getData();
     }
 
@@ -126,7 +126,7 @@ public class EnvelopeBuilder implements Envelope {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 
@@ -140,6 +140,6 @@ public class EnvelopeBuilder implements Envelope {
 
     @NotNull
     private Object writeReplace() throws ObjectStreamException {
-        return new SimpleEnvelope(meta(), getData());
+        return new SimpleEnvelope(this.getMeta(), getData());
     }
 }

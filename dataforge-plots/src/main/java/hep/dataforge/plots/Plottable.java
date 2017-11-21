@@ -23,6 +23,6 @@ public interface Plottable extends Metoid, Configurable, Described {
     Name getName();
 
     default String getTitle() {
-        return meta().getString("title", getName().toUnescaped());
+        return getMeta().getString("title", getName().toUnescaped());
     }
 }

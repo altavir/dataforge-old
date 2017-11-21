@@ -57,7 +57,7 @@ public abstract class AbstractLoader implements Loader {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 
@@ -73,7 +73,7 @@ public abstract class AbstractLoader implements Loader {
 
     @Override
     public boolean isReadOnly() {
-        return this.readOnly || meta().getBoolean("readonly", false);
+        return this.readOnly || getMeta().getBoolean("readonly", false);
     }
 
     /**
@@ -95,7 +95,7 @@ public abstract class AbstractLoader implements Loader {
 
     @Override
     public String getType() {
-        return meta().getString(LOADER_TYPE_KEY, TableLoader.TABLE_LOADER_TYPE);
+        return getMeta().getString(LOADER_TYPE_KEY, TableLoader.TABLE_LOADER_TYPE);
     }
 
     protected void tryPush() throws PushFailedException {

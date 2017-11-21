@@ -50,7 +50,7 @@ public class GroupBuilder {
                 Map<String, DataSet.Builder<T>> map = new HashMap<>();
 
                 input.forEach((NamedData<? extends T> data) -> {
-                    String tagValue = data.meta().getString(tag, defaultTagValue);
+                    String tagValue = data.getMeta().getString(tag, defaultTagValue);
                     if (!map.containsKey(tagValue)) {
                         DataSet.Builder<T> builder = DataSet.builder(input.type());
                         builder.setName(tagValue);

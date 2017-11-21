@@ -128,7 +128,7 @@ public class FileStorage extends AbstractStorage {
         }
 
         //starting directory monitoring
-        if (meta().getBoolean("monitor", false)) {
+        if (getMeta().getBoolean("monitor", false)) {
             startMonitor();
         }
     }
@@ -235,7 +235,7 @@ public class FileStorage extends AbstractStorage {
 
     protected Loader buildLoader(Path file) throws Exception {
         try (FileEnvelope envelope = FileEnvelope.open(file, isReadOnly())) {
-            switch (envelope.meta().getString("type", "")) {
+            switch (envelope.getMeta().getString("type", "")) {
                 case TableLoader.TABLE_LOADER_TYPE:
                     return FileTableLoader.fromEnvelope(this, envelope);
                 case EventLoader.EVENT_LOADER_TYPE:
@@ -246,7 +246,7 @@ public class FileStorage extends AbstractStorage {
                     return FileObjectLoader.fromEnvelope(this, envelope);
                 default:
                     throw new StorageException(
-                            "The loader type with type " + envelope.meta().getString("type", "") + " is not supported"
+                            "The loader type with type " + envelope.getMeta().getString("type", "") + " is not supported"
                     );
             }
         }

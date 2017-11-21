@@ -73,12 +73,12 @@ public class ColumnFormat extends SimpleMetaMorph implements Named {
 
     @Override
     public Meta toMeta() {
-        return meta();
+        return getMeta();
     }
 
     @Override
     public void fromMeta(Meta meta) {
-        if (!meta().isEmpty()) {
+        if (!getMeta().isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
         setMeta(meta);

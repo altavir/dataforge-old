@@ -181,7 +181,7 @@ class GrindTerminal extends SimpleConfigurable {
             renderer.render(MarkupUtils.markupDescriptor(obj as NodeDescriptor))
         } else if (obj instanceof String) {
             NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(obj);
-            if (descriptor.meta().isEmpty()) {
+            if (descriptor.getMeta().isEmpty()) {
                 renderer.render(new MarkupBuilder().text("The description for ")
                         .text("${obj}", "blue")
                         .text(" is empty")
@@ -270,7 +270,7 @@ class GrindTerminal extends SimpleConfigurable {
         def start = System.currentTimeMillis()
         def res = unwrap(shell.eval(expression))
         def now = System.currentTimeMillis()
-        if (meta().getBoolean("benchmark", true)) {
+        if (getMeta().getBoolean("benchmark", true)) {
             Duration duration = Duration.ofMillis(now - start);
             shell.context.logger.debug("Expression $expression evaluated in $duration")
         }

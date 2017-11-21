@@ -87,7 +87,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      */
     private void notifyPlotAdded(Plottable plot) {
         plotAdded(plot.getName(), plot);
-        metaChanged(plot.getName(), plot, new Laminate(plot.meta()));
+        metaChanged(plot.getName(), plot, new Laminate(plot.getMeta()));
         if (plot instanceof PlotGroup) {
             ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotAdded);
         }
@@ -207,12 +207,12 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * Notify that config for this element and children is changed
      */
     private void notifyConfigChanged() {
-        metaChanged(Name.EMPTY, this, new Laminate(meta()).withDescriptor(descriptor));
+        metaChanged(Name.EMPTY, this, new Laminate(getMeta()).withDescriptor(descriptor));
         getChildren().forEach(pl -> {
             if (pl instanceof PlotGroup) {
                 ((PlotGroup) pl).notifyConfigChanged();
             } else {
-                metaChanged(pl.getName(), pl, new Laminate(pl.meta()).withDescriptor(pl.getDescriptor()));
+                metaChanged(pl.getName(), pl, new Laminate(pl.getMeta()).withDescriptor(pl.getDescriptor()));
             }
         });
     }
@@ -299,12 +299,12 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         @Override
         public PlotGroup unWrap(Envelope envelope) {
             //checkValidEnvelope(envelope);
-            String groupName = envelope.meta().getString("name");
-            Meta groupMeta = envelope.meta().getMetaOrEmpty(DEFAULT_META_NAME);
+            String groupName = envelope.getMeta().getString("name");
+            Meta groupMeta = envelope.getMeta().getMetaOrEmpty(DEFAULT_META_NAME);
             PlotGroup group = new PlotGroup(groupName);
             group.configure(groupMeta);
 
-            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.meta().getString("@envelope.internalType", "default"));
+            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.getMeta().getString("@envelope.internalType", "default"));
 
             try {
                 InputStream dataStream = envelope.getData().getStream();

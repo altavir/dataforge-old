@@ -21,8 +21,8 @@ public class FilteredDataNode<T> implements DataNode<T> {
     }
 
     @Override
-    public Meta meta() {
-        return node.meta();
+    public Meta getMeta() {
+        return node.getMeta();
     }
 
     @Override

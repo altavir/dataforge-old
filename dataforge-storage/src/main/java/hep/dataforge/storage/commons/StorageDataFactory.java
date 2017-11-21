@@ -32,7 +32,7 @@ public class StorageDataFactory extends DataFactory<Loader> {
         //FIXME this process takes long time for large storages. Need to wrap it in process
         Storage storage = StorageManager.buildFrom(context).buildStorage(meta);
         StorageUtils.loaderStream(storage).forEach(loader -> {
-            builder.putData(loader.getFullName().toUnescaped(), Data.buildStatic(loader, loader.meta()));
+            builder.putData(loader.getFullName().toUnescaped(), Data.buildStatic(loader, loader.getMeta()));
         });
     }
 

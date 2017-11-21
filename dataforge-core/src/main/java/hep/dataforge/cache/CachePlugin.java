@@ -62,7 +62,7 @@ public class CachePlugin extends BasicPlugin {
             context.getLogger().info("Loaded cache manager" + manager.toString());
         } catch (CacheException ex) {
             context.getLogger().warn("Cache provider not found. Will use default cache implementation.");
-            manager = new DefaultCacheManager(getContext(), meta());
+            manager = new DefaultCacheManager(getContext(), getMeta());
         }
     }
 
@@ -153,7 +153,7 @@ public class CachePlugin extends BasicPlugin {
                     //do nothing
                 }
             };
-            return new Data<V>(cachedGoal, data.type(), data.meta());
+            return new Data<V>(cachedGoal, data.type(), data.getMeta());
         }
     }
 
@@ -173,7 +173,7 @@ public class CachePlugin extends BasicPlugin {
     private <V> Cache<Meta, V> getCache(String name, Class<V> type) {
         Cache<Meta, V> cache = getManager().getCache(name, Meta.class, type);
         if (cache == null) {
-            cache = getManager().createCache(name, new MetaCacheConfiguration<>(meta(), type));
+            cache = getManager().createCache(name, new MetaCacheConfiguration<>(getMeta(), type));
         }
         return cache;
     }

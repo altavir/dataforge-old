@@ -84,20 +84,20 @@ public class ActionDescriptor extends NodeDescriptor {
 
     @Override
     public String info() {
-        return meta().getString("actionDef.description", "");
+        return getMeta().getString("actionDef.description", "");
     }
 
     public String inputType() {
-        return meta().getString("actionDef.inputType", "");
+        return getMeta().getString("actionDef.inputType", "");
     }
 
     public String outputType() {
-        return meta().getString("actionDef.outputType", "");
+        return getMeta().getString("actionDef.outputType", "");
     }
 
     @Override
     public String getName() {
-        return meta().getString("actionDef.name", super.getName());
+        return getMeta().getString("actionDef.name", super.getName());
     }
 
 

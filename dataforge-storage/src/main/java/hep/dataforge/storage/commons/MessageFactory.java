@@ -45,7 +45,7 @@ public class MessageFactory {
      */
     public EnvelopeBuilder responseBase(Envelope request) {
         EnvelopeBuilder res = new EnvelopeBuilder();
-        String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
+        String type = request.getMeta().getString(MESSAGE_TYPE_KEY, "");
         if (!type.isEmpty()) {
             res.putMetaValue(MESSAGE_TYPE_KEY, type + RESPONSE_TYPE_SUFFIX);
         }
@@ -93,7 +93,7 @@ public class MessageFactory {
     }
 
     public static boolean isTerminator(Envelope envelope) {
-        return envelope.meta().getString(MESSAGE_META_KEY, "").equals(MESSAGE_TERMINATOR);
+        return envelope.getMeta().getString(MESSAGE_META_KEY, "").equals(MESSAGE_TERMINATOR);
     }
 
     /**
@@ -109,7 +109,7 @@ public class MessageFactory {
     public EnvelopeBuilder okResponseBase(Envelope request, boolean hasMeta, boolean hasData) {
         EnvelopeBuilder res = new EnvelopeBuilder()
                 .putMetaValue(MESSAGE_META_KEY, MESSAGE_OK);
-        String type = request.meta().getString(MESSAGE_TYPE_KEY, "");
+        String type = request.getMeta().getString(MESSAGE_TYPE_KEY, "");
         if (type != null && !type.isEmpty()) {
             if (!type.endsWith(RESPONSE_TYPE_SUFFIX)) {
                 type += RESPONSE_TYPE_SUFFIX;
@@ -170,7 +170,7 @@ public class MessageFactory {
     }
 
     public EnvelopeBuilder errorResponseBase(Envelope request, Throwable... errors) {
-        return errorResponseBase(request.meta().getString(MESSAGE_TYPE_KEY, ""), errors);
+        return errorResponseBase(request.getMeta().getString(MESSAGE_TYPE_KEY, ""), errors);
     }
 
 }

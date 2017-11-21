@@ -43,7 +43,7 @@ public class ActionTaskTemplate implements TaskTemplate {
         protected MultiStageTaskState transform(TaskModel model, MultiStageTaskState state) {
             DataNode res = state.getData();
             for (Action action : actions) {
-                Meta actionMeta = model.meta().getMetaOrEmpty(name);
+                Meta actionMeta = model.getMeta().getMetaOrEmpty(name);
                 res = action.run(model.getContext(), res, actionMeta);
                 state.setData(action.getName(), res);
             }

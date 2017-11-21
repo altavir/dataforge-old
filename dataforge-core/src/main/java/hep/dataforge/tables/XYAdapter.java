@@ -55,7 +55,7 @@ public class XYAdapter extends AxisValuesAdapter {
         if (adapter instanceof XYAdapter) {
             return (XYAdapter) adapter;
         } else {
-            return new XYAdapter(adapter.meta());
+            return new XYAdapter(adapter.getMeta());
         }
     }
 
@@ -97,12 +97,12 @@ public class XYAdapter extends AxisValuesAdapter {
     }
 
     private void updateCache() {
-        xValueName = meta().getString(X_VALUE_KEY, X_AXIS);
-        xErrorName = meta().getString(X_ERROR_KEY, X_ERROR_KEY);
-        if (meta().hasMeta(Y_AXIS)) {
-            yValuesNames = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, Y_AXIS))
+        xValueName = getMeta().getString(X_VALUE_KEY, X_AXIS);
+        xErrorName = getMeta().getString(X_ERROR_KEY, X_ERROR_KEY);
+        if (getMeta().hasMeta(Y_AXIS)) {
+            yValuesNames = getMeta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, Y_AXIS))
                     .toArray(String[]::new);
-            yErrorsNames = meta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
+            yErrorsNames = getMeta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
                     .toArray(String[]::new);
         } else {
             yValuesNames = new String[]{Y_AXIS};
@@ -133,7 +133,7 @@ public class XYAdapter extends AxisValuesAdapter {
     }
 
     public String getYTitle(int i) {
-        return meta().getMetaList(Y_AXIS).get(i).getString("title", nameFor(VALUE_KEY));
+        return getMeta().getMetaList(Y_AXIS).get(i).getString("title", nameFor(VALUE_KEY));
     }
 
     public Value getX(Values point) {
@@ -246,7 +246,7 @@ public class XYAdapter extends AxisValuesAdapter {
         TableFormatBuilder builder = new TableFormatBuilder()
                 .addNumber(xValueName, X_VALUE_KEY);
 
-        if (meta().hasValue(X_ERROR_KEY)) {
+        if (getMeta().hasValue(X_ERROR_KEY)) {
             builder.addNumber(xErrorName, X_ERROR_KEY);
         }
 
@@ -254,7 +254,7 @@ public class XYAdapter extends AxisValuesAdapter {
             builder.addNumber(yValueKey, Y_VALUE_KEY);
         }
 
-        if (meta().hasValue(Y_ERROR_KEY)) {
+        if (getMeta().hasValue(Y_ERROR_KEY)) {
             for (String yErrorKey : yErrorsNames) {
                 builder.addNumber(yErrorKey, Y_ERROR_KEY);
             }

@@ -25,7 +25,7 @@ class TestTask extends MultiStageTask {
         model.context.getProperties().forEach { key, value ->
             b.putStatic(key, value);
         }
-        MetaUtils.valueStream(model.meta()).forEach { pair ->
+        MetaUtils.valueStream(model.getMeta()).forEach { pair ->
             b.putStatic("meta." + pair.getKey(), pair.getValue())
         }
 

@@ -65,7 +65,7 @@ public abstract class SingleActionTask<T, R> extends AbstractTask<R> {
     protected abstract Action<T, R> getAction(TaskModel model);
 
     protected Meta transformMeta(TaskModel model) {
-        return model.meta();
+        return model.getMeta();
     }
 
     @Override

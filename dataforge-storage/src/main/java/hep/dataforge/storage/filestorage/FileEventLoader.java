@@ -42,7 +42,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
                     envelope.getFile(),
                     storage,
                     FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
-                    envelope.meta());
+                    envelope.getMeta());
             res.setReadOnly(envelope.isReadOnly());
             return res;
         } else {
@@ -63,7 +63,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
     @Override
     public void open() throws Exception {
         if (this.meta == null) {
-            this.meta = getFile().meta();
+            this.meta = getFile().getMeta();
         }
         if (!isOpen()) {
             file = FileEnvelope.open(path, isReadOnly());
@@ -101,7 +101,7 @@ public class FileEventLoader extends AbstractLoader implements EventLoader {
     public boolean pushEvent(Event event) throws StorageException {
         if (filter == null || filter.test(event)) {
             try {
-                String eventString = new JSONMetaWriter(false).writeString(event.meta());
+                String eventString = new JSONMetaWriter(false).writeString(event.getMeta());
                 getFile().append(eventString.getBytes(IOUtils.UTF8_CHARSET));
                 getFile().append(NEWLINE);
                 return true;

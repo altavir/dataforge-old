@@ -38,7 +38,7 @@ public class LazyEnvelope implements Envelope {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 
@@ -68,7 +68,7 @@ public class LazyEnvelope implements Envelope {
 
     @NotNull
     private Object writeReplace() throws ObjectStreamException {
-        return new SimpleEnvelope(meta(), getData());
+        return new SimpleEnvelope(getMeta(), getData());
     }
 
 }

@@ -184,8 +184,8 @@ public class StorageUtils {
         return new MessageValidator() {
             @Override
             public Meta validate(Envelope message) {
-                if (message.meta().hasMeta(MESSAGE_TARGET_NODE)) {
-                    Meta target = message.meta().getMeta(MESSAGE_TARGET_NODE);
+                if (message.getMeta().hasMeta(MESSAGE_TARGET_NODE)) {
+                    Meta target = message.getMeta().getMeta(MESSAGE_TARGET_NODE);
                     String targetName = target.getString(TARGET_NAME_KEY);
                     if (targetName.equals(name)) {
                         if (!target.hasValue(TARGET_TYPE_KEY) || target.getString(TARGET_TYPE_KEY).equals(type)) {

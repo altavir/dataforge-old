@@ -50,7 +50,7 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
      * @return
      */
     public String getType(Function<Markup, String> infer) {
-        return meta().getString(MARKUP_TYPE_KEY, () -> infer.apply(this));
+        return getMeta().getString(MARKUP_TYPE_KEY, () -> infer.apply(this));
     }
 
     /**
@@ -59,7 +59,7 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
      * @return
      */
     public String getType() {
-        return meta().getString(MARKUP_TYPE_KEY, MARKUP_GROUP_TYPE);
+        return getMeta().getString(MARKUP_TYPE_KEY, MARKUP_GROUP_TYPE);
     }
 
     /**
@@ -82,7 +82,7 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
      * @return
      */
     public Laminate getStyle() {
-        Laminate laminate = new Laminate(meta()
+        Laminate laminate = new Laminate(getMeta()
                 .getMetaOrEmpty(MARKUP_STYLE_NODE))
                 .withDescriptor(getDescriptor());
 
@@ -101,7 +101,7 @@ public class Markup extends SimpleConfigurable implements Described, ValueProvid
 
     @Override
     public Optional<Value> optValue(String path) {
-        return Optionals.either(meta().optValue(path)).or(()->getStyle().optValue(path)).opt();
+        return Optionals.either(getMeta().optValue(path)).or(()->getStyle().optValue(path)).opt();
     }
 
     /**

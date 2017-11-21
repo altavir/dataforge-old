@@ -40,7 +40,7 @@ class ReWrapper {
                 readType.getReader(readProperties).read(it);
             }
 
-            Envelope newEnvelope = new SimpleEnvelope(transformMeta(envelope.meta(), meta), transformData(envelope.data, meta))
+            Envelope newEnvelope = new SimpleEnvelope(transformMeta(envelope.getMeta(), meta), transformData(envelope.data, meta))
 
             Map writeProperties = resolveProperties(meta.getMetaOrEmpty("output.properties"))
             EnvelopeType writeType = getOutputType(envelope, meta);

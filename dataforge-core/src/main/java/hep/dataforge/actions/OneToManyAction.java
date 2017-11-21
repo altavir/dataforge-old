@@ -23,7 +23,7 @@ public abstract class OneToManyAction<T, R> extends GenericAction<T, R> {
         DataTree.Builder<R> builder = DataTree.builder(getOutputType());
         data.forEach(datum -> {
             String inputName = datum.getName();
-            Laminate inputMeta = new Laminate(datum.meta(), actionMeta);
+            Laminate inputMeta = new Laminate(datum.getMeta(), actionMeta);
             Map<String, Meta> metaMap = prepareMeta(context, inputName, inputMeta);
             metaMap.forEach((outputName, outputMeta) -> {
                 Goal<R> goal = new PipeGoal<>(datum.getGoal(), input -> execute(context, inputName, outputName, input, inputMeta));

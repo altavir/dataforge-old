@@ -85,7 +85,7 @@ public class ComPort extends Port implements SerialPortEventListener {
             if (port == null) {
                 port = new SerialPort(getString("name"));
                 port.openPort();
-                Meta an = meta();
+                Meta an = getMeta();
                 int baudRate = an.getInt("baudRate", BAUDRATE_9600);
                 int dataBits = an.getInt("dataBits", DATABITS_8);
                 int stopBits = an.getInt("stopBits", STOPBITS_1);

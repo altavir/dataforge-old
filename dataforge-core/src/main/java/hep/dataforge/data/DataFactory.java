@@ -56,7 +56,7 @@ public class DataFactory<T> implements DataLoader<T> {
 
         DataTree<T> tree = builder(context,meta).build();
         //Applying filter if needed
-        if (filter.meta().isEmpty()) {
+        if (filter.getMeta().isEmpty()) {
             return tree;
         } else {
             return filter.filter(tree);

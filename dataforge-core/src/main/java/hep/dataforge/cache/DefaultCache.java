@@ -45,7 +45,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
     private Path cacheDir;
 
     public DefaultCache(String name, DefaultCacheManager manager, Class<V> valueType) {
-        super(manager.meta());
+        super(manager.getMeta());
         this.name = name;
         this.manager = manager;
         this.valueType = valueType;
@@ -69,7 +69,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
                 Files.list(cacheDir).filter(it -> it.endsWith("df")).forEach(file -> {
                     try {
                         Envelope envelope = reader.read(file);
-                        hardCache.put(envelope.meta(), file);
+                        hardCache.put(envelope.getMeta(), file);
                     } catch (Exception e) {
                         getLogger().error("Failed to read cache file {}. Deleting corrupted file.", file.toString());
                         file.toFile().delete();
@@ -127,7 +127,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
     }
 
     protected boolean hardCacheEnabled() {
-        return meta().getBoolean("fileCache.enabled", true);
+        return getMeta().getBoolean("fileCache.enabled", true);
     }
 
     @Override
@@ -279,7 +279,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
 
     @Override
     public <C extends Configuration<Meta, V>> C getConfiguration(Class<C> clazz) {
-        return clazz.cast(new MetaCacheConfiguration<V>(meta(), valueType));
+        return clazz.cast(new MetaCacheConfiguration<V>(getMeta(), valueType));
     }
 
     @Override
@@ -300,7 +300,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
 
     private synchronized Map<Meta, V> getSoftCache() {
         if (softCache == null) {
-            softCache = Misc.getLRUCache(meta().getInt("softCache.size", 500));
+            softCache = Misc.getLRUCache(getMeta().getInt("softCache.size", 500));
         }
         return softCache;
     }

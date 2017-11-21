@@ -53,7 +53,7 @@ public class StateChangedEvent extends Event {
      * @return
      */
     public String stateName() {
-        return meta().getString(STATE_NAME_KEY);
+        return getMeta().getString(STATE_NAME_KEY);
     }
 
     /**
@@ -62,7 +62,7 @@ public class StateChangedEvent extends Event {
      * @return
      */
     public Value oldState() {
-        return meta().getValue(OLD_STATE_KEY);
+        return getMeta().getValue(OLD_STATE_KEY);
     }
 
     /**
@@ -71,7 +71,7 @@ public class StateChangedEvent extends Event {
      * @return
      */
     public Value newState() {
-        return meta().getValue(NEW_STATE_KEY);
+        return getMeta().getValue(NEW_STATE_KEY);
     }
 
     @Override

@@ -55,7 +55,7 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
      * @return
      */
     default String getDescription() {
-        return meta().getString("description", "");
+        return getMeta().getString("description", "");
     }
 
     /**
@@ -97,7 +97,7 @@ public interface Loader extends Metoid, AutoCloseable, Named, Responder, AutoCon
      * @return
      */
     default Laminate getLaminate() {
-        return getStorage().getLaminate().withFirstLayer(meta());
+        return getStorage().getLaminate().withFirstLayer(getMeta());
     }
 
     @Override

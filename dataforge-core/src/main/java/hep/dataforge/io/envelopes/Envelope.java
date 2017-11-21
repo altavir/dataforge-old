@@ -60,7 +60,7 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     @Override
-    Meta meta();
+    Meta getMeta();
 
     /**
      * Read data into buffer. This operation could take a lot of time so be
@@ -71,7 +71,7 @@ public interface Envelope extends Metoid, Serializable {
     Binary getData();
 
     default boolean hasMeta() {
-        return !meta().isEmpty();
+        return !getMeta().isEmpty();
     }
 
     default boolean hasData() {
@@ -89,7 +89,7 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     default Optional<String> getType() {
-        return meta().optValue("@envelope.type").map(Value::stringValue);
+        return getMeta().optValue("@envelope.type").map(Value::stringValue);
     }
 
     /**
@@ -98,7 +98,7 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     default Optional<String> getDataType() {
-        return meta().optValue("@envelope.dataType").map(Value::stringValue);
+        return getMeta().optValue("@envelope.dataType").map(Value::stringValue);
     }
 
     /**
@@ -107,7 +107,7 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     default String getDescription() {
-        return meta().getString("@envelope.description", "");
+        return getMeta().getString("@envelope.description", "");
     }
 
     /**
@@ -116,7 +116,7 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     default Optional<Instant> getTime() {
-        return meta().optValue("@envelope.time").map(Value::timeValue);
+        return getMeta().optValue("@envelope.time").map(Value::timeValue);
     }
 
     /**
@@ -129,6 +129,6 @@ public interface Envelope extends Metoid, Serializable {
      * @return
      */
     default <T> Data<T> map(Class<T> type, Function<Binary, T> transform) {
-        return Data.generate(type, meta(), () -> transform.apply(getData()));
+        return Data.generate(type, getMeta(), () -> transform.apply(getData()));
     }
 }

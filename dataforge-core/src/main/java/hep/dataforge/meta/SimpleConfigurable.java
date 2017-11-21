@@ -64,7 +64,7 @@ public class SimpleConfigurable implements Configurable, Metoid {
      * @return
      */
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return new Laminate(getConfig()).withDescriptor(DescriptorUtils.buildDescriptor(getClass()));
     }
 

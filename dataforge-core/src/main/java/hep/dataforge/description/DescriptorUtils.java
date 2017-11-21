@@ -154,7 +154,7 @@ public class DescriptorUtils {
                                 // If descriptor target is present, use it
                                 if (!nodeDef.from().isEmpty()) {
                                     NodeDescriptor descriptor = buildDescriptor(nodeDef.from());
-                                    nodeMeta = MergeRule.replace(nodeMeta, descriptor.meta());
+                                    nodeMeta = MergeRule.replace(nodeMeta, descriptor.getMeta());
                                 }
 //
 //                                if (!nodeDef.target().isEmpty()) {
@@ -182,7 +182,7 @@ public class DescriptorUtils {
                             if (exists) {
                                 LoggerFactory.getLogger(DescriptorUtils.class).trace("Ignoring duplicate value with name {} in descriptor", valueDef.name());
                             } else {
-                                putDescription(res, ValueDescriptor.build(valueDef).meta());
+                                putDescription(res, ValueDescriptor.build(valueDef).getMeta());
                             }
                         }
                 );
@@ -249,7 +249,7 @@ public class DescriptorUtils {
      * @return
      */
     public static Value extractValue(String name, Metoid obj) {
-        return extractValue(name, obj.meta(), buildDescriptor(obj));
+        return extractValue(name, obj.getMeta(), buildDescriptor(obj));
     }
 
     /**

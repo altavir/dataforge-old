@@ -62,7 +62,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public String info() {
-        return meta().getString("info", "");
+        return getMeta().getString("info", "");
     }
 
     /**
@@ -71,7 +71,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean isMultiple() {
-        return meta().getBoolean("multiple", true);
+        return getMeta().getBoolean("multiple", true);
     }
 
     /**
@@ -80,7 +80,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean isRequired() {
-        return meta().getBoolean("required", false);
+        return getMeta().getBoolean("required", false);
     }
 
     /**
@@ -90,7 +90,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      */
     @Override
     public String getName() {
-        return meta().getString("name", "");
+        return getMeta().getString("name", "");
     }
 
     /**
@@ -99,8 +99,8 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public List<ValueType> type() {
-        if (meta().hasValue("type")) {
-            return meta().getValue("type").listValue()
+        if (getMeta().hasValue("type")) {
+            return getMeta().getValue("type").listValue()
                     .stream()
                     .map((v) -> ValueType.valueOf(v.stringValue()))
                     .collect(Collectors.toList());
@@ -110,8 +110,8 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
     }
 
     public List<String> tags() {
-        if (meta().hasValue("tags")) {
-            return Arrays.asList(meta().getStringArray("tags"));
+        if (getMeta().hasValue("tags")) {
+            return Arrays.asList(getMeta().getStringArray("tags"));
         } else {
             return Collections.emptyList();
         }
@@ -135,7 +135,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean hasDefault() {
-        return meta().hasValue("default");
+        return getMeta().hasValue("default");
     }
 
     /**
@@ -144,7 +144,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public Value defaultValue() {
-        return meta().getValue("default", Value.NULL);
+        return getMeta().getValue("default", Value.NULL);
     }
 
     /**
@@ -155,12 +155,12 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      */
     public Map<Value, String> allowedValues() {
         Map<Value, String> map = new HashMap<>();
-        if (meta().hasMeta("allowedValue")) {
-            for (Meta allowed : meta().getMetaList("allowedValue")) {
+        if (getMeta().hasMeta("allowedValue")) {
+            for (Meta allowed : getMeta().getMetaList("allowedValue")) {
                 map.put(allowed.getValue("value"), allowed.getString("description", ""));
             }
-        } else if (meta().hasValue("allowedValues")) {
-            for (Value val : meta().getValue("allowedValues").listValue()) {
+        } else if (getMeta().hasValue("allowedValues")) {
+            for (Value val : getMeta().getValue("allowedValues").listValue()) {
                 map.put(val, "");
             }
         } else if (type().size() == 1 && type().get(0) == ValueType.BOOLEAN) {

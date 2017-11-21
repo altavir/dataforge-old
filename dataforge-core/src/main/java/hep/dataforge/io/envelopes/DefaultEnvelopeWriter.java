@@ -72,12 +72,12 @@ public class DefaultEnvelopeWriter implements EnvelopeWriter {
         MetaStreamWriter writer = tag.getMetaType().getWriter();
         byte[] meta;
         int metaSize;
-        if (envelope.meta().isEmpty()) {
+        if (envelope.getMeta().isEmpty()) {
             meta = new byte[0];
             metaSize = 0;
         } else {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            writer.write(baos, envelope.meta());
+            writer.write(baos, envelope.getMeta());
             meta = baos.toByteArray();
             metaSize = meta.length + 2;
         }

@@ -26,6 +26,6 @@ public interface Dispatcher {
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     
     default Responder getResponder(Envelope envelope){
-        return getResponder(envelope.meta().getMeta(MESSAGE_TARGET_NODE));
+        return getResponder(envelope.getMeta().getMeta(MESSAGE_TARGET_NODE));
     }
 }

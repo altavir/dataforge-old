@@ -121,7 +121,7 @@ public class TaskBuilder {
     public TaskBuilder doLast(Action action) {
         return doLast(
                 model -> action,
-                TaskModel::meta
+                TaskModel::getMeta
         );
     }
 

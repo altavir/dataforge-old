@@ -84,12 +84,12 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
 
     @Override
     public Meta toMeta() {
-        return meta();
+        return getMeta();
     }
 
     @Override
     public void fromMeta(Meta meta) {
-        if (!meta().isEmpty()) {
+        if (!getMeta().isEmpty()) {
             throw new NonEmptyMetaMorphException(getClass());
         }
         setMeta(meta);
@@ -101,7 +101,7 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
     }
 
     public Meta getColumnMeta(String column) {
-        return MetaUtils.findNodeByValue(meta(), "column", "name", column).orElseThrow(() -> new NameNotFoundException(column));
+        return MetaUtils.findNodeByValue(getMeta(), "column", "name", column).orElseThrow(() -> new NameNotFoundException(column));
     }
 
     @Override
@@ -111,11 +111,11 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
 
     @Override
     public Stream<ColumnFormat> getColumns() {
-        return meta().getMetaList("column").stream().map(ColumnFormat::new);
+        return getMeta().getMetaList("column").stream().map(ColumnFormat::new);
     }
 
     public boolean isEmpty() {
-        return !meta().hasMeta("column");
+        return !getMeta().hasMeta("column");
     }
 
 

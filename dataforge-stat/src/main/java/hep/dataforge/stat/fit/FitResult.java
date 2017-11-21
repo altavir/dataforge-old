@@ -82,14 +82,14 @@ public class FitResult extends SimpleMetaMorph {
 
     public ParamSet getParameters() {
         return optState().map(FitState::getParameters)
-                .orElseGet(() -> MetaMorph.morph(ParamSet.class, meta().getMeta("params")));
+                .orElseGet(() -> MetaMorph.morph(ParamSet.class, getMeta().getMeta("params")));
     }
 
     public Optional<NamedMatrix> optCovariance() {
         return Optionals.either(optState().map(FitState::getCovariance))
                 .or(() -> {
-                    if (meta().hasMeta("covariance")) {
-                        return Optional.of(MetaMorph.morph(NamedMatrix.class, meta().getMeta("covariance")));
+                    if (getMeta().hasMeta("covariance")) {
+                        return Optional.of(MetaMorph.morph(NamedMatrix.class, getMeta().getMeta("covariance")));
                     } else {
                         return Optional.empty();
                     }
@@ -98,11 +98,11 @@ public class FitResult extends SimpleMetaMorph {
 
 
     public String[] getFreePars() {
-        return meta().getStringArray("freePars");
+        return getMeta().getStringArray("freePars");
     }
 
     public boolean isValid() {
-        return meta().getBoolean("isValid", true);
+        return getMeta().getBoolean("isValid", true);
     }
 
 
@@ -111,7 +111,7 @@ public class FitResult extends SimpleMetaMorph {
     }
 
     private int getDataSize() {
-        return meta().getInt("dataSize");
+        return getMeta().getInt("dataSize");
     }
 
     public double normedChi2() {
@@ -119,7 +119,7 @@ public class FitResult extends SimpleMetaMorph {
     }
 
     public double getChi2() {
-        return meta().getDouble("chi2", Double.NaN);
+        return getMeta().getDouble("chi2", Double.NaN);
     }
 
     public Optional<FitState> optState() {
@@ -133,13 +133,13 @@ public class FitResult extends SimpleMetaMorph {
      */
     public Optional<Model> optModel(Context context) {
         return Optionals.either(optState().map(FitState::getModel))
-                .or(meta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
+                .or(getMeta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
                 .opt();
     }
 
     public NavigableValuesSource getData() {
         return optState().map(FitState::getData)
-                .orElseGet(() -> MetaMorph.morph(ListOfPoints.class, meta().getMeta("data")));
+                .orElseGet(() -> MetaMorph.morph(ListOfPoints.class, getMeta().getMeta("data")));
     }
 
     /**

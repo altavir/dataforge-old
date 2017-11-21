@@ -34,7 +34,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean isMultiple() {
-        return meta().getBoolean("multiple", true) || isAnonimous();
+        return getMeta().getBoolean("multiple", true) || isAnonimous();
     }
 
     /**
@@ -43,7 +43,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean isRequired() {
-        return meta().getBoolean("required", false);
+        return getMeta().getBoolean("required", false);
     }
 
     /**
@@ -52,7 +52,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public String info() {
-        return meta().getString("info", "");
+        return getMeta().getString("info", "");
     }
 
     /**
@@ -62,8 +62,8 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      */
     public Map<String, ValueDescriptor> valueDescriptors() {
         Map<String, ValueDescriptor> map = new HashMap<>();
-        if (meta().hasMeta("value")) {
-            for (Meta valueNode : meta().getMetaList("value")) {
+        if (getMeta().hasMeta("value")) {
+            for (Meta valueNode : getMeta().getMetaList("value")) {
                 ValueDescriptor vd = new ValueDescriptor(valueNode);
                 map.put(vd.getName(), vd);
             }
@@ -89,8 +89,8 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      */
     public Map<String, NodeDescriptor> childrenDescriptors() {
         Map<String, NodeDescriptor> map = new HashMap<>();
-        if (meta().hasMeta("node")) {
-            for (Meta node : meta().getMetaList("node")) {
+        if (getMeta().hasMeta("node")) {
+            for (Meta node : getMeta().getMetaList("node")) {
                 NodeDescriptor nd = new NodeDescriptor(node);
                 map.put(nd.getName(), nd);
             }
@@ -104,7 +104,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean hasDefault() {
-        return meta().hasMeta("default");
+        return getMeta().hasMeta("default");
     }
 
     /**
@@ -113,8 +113,8 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public List<String> tags() {
-        if (meta().hasValue("tags")) {
-            return Arrays.asList(meta().getStringArray("tags"));
+        if (getMeta().hasValue("tags")) {
+            return Arrays.asList(getMeta().getStringArray("tags"));
         } else {
             return Collections.emptyList();
         }
@@ -126,8 +126,8 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public List<? extends Meta> defaultNode() {
-        if (meta().hasMeta("default")) {
-            return meta().getMetaList("default");
+        if (getMeta().hasMeta("default")) {
+            return getMeta().getMetaList("default");
         } else {
             return null;
         }
@@ -150,7 +150,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      */
     @Override
     public String getName() {
-        return meta().getString("name", meta().getName());
+        return getMeta().getString("name", getMeta().getName());
     }
 
     /**
@@ -172,7 +172,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public String titleKey() {
-        return meta().getString("titleKey", "");
+        return getMeta().getString("titleKey", "");
     }
 
 }

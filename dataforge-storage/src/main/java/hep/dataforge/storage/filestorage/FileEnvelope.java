@@ -135,7 +135,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     @Override
-    public synchronized Meta meta() {
+    public synchronized Meta getMeta() {
         if (meta == null) {
             try {
                 SeekableByteChannel channel = getReadChannel();
@@ -289,7 +289,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
 
     @NotNull
     private Object writeReplace() throws ObjectStreamException {
-        return new SimpleEnvelope(meta(), getData());
+        return new SimpleEnvelope(getMeta(), getData());
     }
 
 }

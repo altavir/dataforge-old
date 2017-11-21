@@ -32,7 +32,7 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
         if (FileStorageEnvelopeType.validate(envelope, OBJECT_LOADER_TYPE)) {
             FileObjectLoader res = new FileObjectLoader(storage,
                     FilenameUtils.getBaseName(envelope.getFile().getFileName().toString()),
-                    envelope.meta(),
+                    envelope.getMeta(),
                     envelope.getFile());
             res.setReadOnly(envelope.isReadOnly());
             return res;
@@ -57,7 +57,7 @@ public class FileObjectLoader<T extends Serializable> extends AbstractBinaryLoad
     @Override
     public void open() throws Exception {
         if (this.meta == null) {
-            this.meta = getFile().meta();
+            this.meta = getFile().getMeta();
         }
         if (!isOpen()) {
             file = buildEnvelope(isReadOnly());

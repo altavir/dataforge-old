@@ -35,7 +35,7 @@ public class StorageConnection implements Connection, Responder, Metoid, Context
      */
     public StorageConnection(Storage storage) {
         this.storage = storage;
-        this.meta = storage.meta();
+        this.meta = storage.getMeta();
     }
 
     /**
@@ -83,7 +83,7 @@ public class StorageConnection implements Connection, Responder, Metoid, Context
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return meta;
     }
 

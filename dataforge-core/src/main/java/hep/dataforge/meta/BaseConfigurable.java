@@ -50,7 +50,7 @@ public abstract class BaseConfigurable extends SimpleConfigurable {
      * @return
      */
     @Override
-    public Laminate meta() {
+    public Laminate getMeta() {
         return laminate;
     }
 

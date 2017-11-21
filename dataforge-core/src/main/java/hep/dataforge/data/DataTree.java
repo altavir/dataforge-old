@@ -97,7 +97,7 @@ public class DataTree<T> implements DataNode<T> {
         } else {
             DataTree.Builder<T> builder = DataTree.builder(node.type());
             builder.setName(as);
-            builder.setMeta(node.meta());
+            builder.setMeta(node.getMeta());
             node.dataStream().forEach(d -> {
                 builder.putData(d);
                 //FIXME use internal node meta
@@ -212,7 +212,7 @@ public class DataTree<T> implements DataNode<T> {
     @Override
     public Stream<DataNode<? extends T>> nodeStream(boolean recursive) {
         if (recursive) {
-            return nodeStream(Name.EMPTY, new Laminate(meta()));
+            return nodeStream(Name.EMPTY, new Laminate(getMeta()));
         } else {
             return nodes.values().stream().map(it -> it);
         }
@@ -225,7 +225,7 @@ public class DataTree<T> implements DataNode<T> {
             );
 
             Name childName = parentName.append(nodeEntry.getKey());
-            Laminate childMeta = parentMeta.withFirstLayer(nodeEntry.getValue().meta());
+            Laminate childMeta = parentMeta.withFirstLayer(nodeEntry.getValue().getMeta());
             Stream<DataNode<? extends T>> childStream = nodeEntry.getValue().nodeStream(childName, childMeta);
 
             return Stream.concat(nodeItself, childStream);
@@ -235,7 +235,7 @@ public class DataTree<T> implements DataNode<T> {
 
     @Override
     public Stream<NamedData<? extends T>> dataStream(boolean recursive) {
-        return dataStream(null, new Laminate(meta()), recursive);
+        return dataStream(null, new Laminate(getMeta()), recursive);
     }
 
     private Stream<NamedData<? extends T>> dataStream(Name nodeName, Laminate nodeMeta, boolean recursive) {
@@ -257,7 +257,7 @@ public class DataTree<T> implements DataNode<T> {
                     .flatMap(nodeEntry -> {
                         Name subNodeName = nodeName == null ? Name.of(nodeEntry.getKey()) : nodeName.append(nodeEntry.getKey());
                         return nodeEntry.getValue()
-                                .dataStream(subNodeName, nodeMeta.withFirstLayer(nodeEntry.getValue().meta()), true);
+                                .dataStream(subNodeName, nodeMeta.withFirstLayer(nodeEntry.getValue().getMeta()), true);
                     });
             return Stream.concat(dataStream, subStream);
         }
@@ -296,11 +296,11 @@ public class DataTree<T> implements DataNode<T> {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         if (parent() == null) {
             return meta;
         } else {
-            return new Laminate(meta, parent().meta());
+            return new Laminate(meta, parent().getMeta());
         }
     }
 
@@ -402,8 +402,8 @@ public class DataTree<T> implements DataNode<T> {
         }
 
         @Override
-        public Meta meta() {
-            return this.tree.meta();
+        public Meta getMeta() {
+            return this.tree.getMeta();
         }
 
         public boolean isEmpty() {

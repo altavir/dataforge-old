@@ -57,7 +57,7 @@ public class Template implements Metoid, UnaryOperator<Meta> {
     }
 
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         return template;
     }
 
@@ -69,7 +69,7 @@ public class Template implements Metoid, UnaryOperator<Meta> {
      * @return
      */
     public MetaBuilder compile(ValueProvider valueProvider, MetaProvider metaProvider) {
-        MetaBuilder res = new MetaBuilder(meta());
+        MetaBuilder res = new MetaBuilder(getMeta());
         MetaUtils.nodeStream(res).forEach(pair -> {
             MetaBuilder node = (MetaBuilder) pair.getValue();
             if (node.hasValue("@include")) {

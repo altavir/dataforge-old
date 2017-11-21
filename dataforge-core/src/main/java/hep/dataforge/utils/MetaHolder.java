@@ -5,15 +5,10 @@
  */
 package hep.dataforge.utils;
 
-import hep.dataforge.description.Described;
 import hep.dataforge.description.NodeDescriptor;
+import hep.dataforge.meta.DescribedMetoid;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.Metoid;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
 import org.slf4j.LoggerFactory;
-
-import java.util.Optional;
 
 /**
  * The base class for {@code Meta} objects with immutable meta which also
@@ -21,7 +16,7 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
-public class MetaHolder implements Metoid, ValueProvider, Described {
+public class MetaHolder implements DescribedMetoid {
 
     private Meta meta;
     private transient NodeDescriptor descriptor;
@@ -41,7 +36,7 @@ public class MetaHolder implements Metoid, ValueProvider, Described {
      * @return
      */
     @Override
-    public Meta meta() {
+    public Meta getMeta() {
         if (meta == null) {
             return getDefaultMeta();
         }
@@ -78,7 +73,7 @@ public class MetaHolder implements Metoid, ValueProvider, Described {
     @Override
     public NodeDescriptor getDescriptor() {
         if (descriptor == null) {
-            descriptor = Described.super.getDescriptor();
+            descriptor = DescribedMetoid.super.getDescriptor();
         }
         return descriptor;
     }
@@ -90,35 +85,6 @@ public class MetaHolder implements Metoid, ValueProvider, Described {
      */
     protected final void setDescriptor(NodeDescriptor descriptor) {
         this.descriptor = descriptor;
-    }
-
-    /**
-     * If this object's meta provides given value, return it, otherwise, use
-     * descriptor
-     *
-     * @param name
-     * @return
-     */
-    @Override
-    public Optional<Value> optValue(String name) {
-        return Optionals.either(meta.optValue(name)).or(() -> {
-            if (getDescriptor().hasDefaultForValue(name)) {
-                return Optional.of(getDescriptor().valueDescriptor(name).defaultValue());
-            } else {
-                return Optional.empty();
-            }
-        }).opt();
-    }
-
-    /**
-     * true if this object's meta
-     *
-     * @param name
-     * @return
-     */
-    @Override
-    public boolean hasValue(String name) {
-        return meta().hasValue(name) || getDescriptor().hasDefaultForValue(name);
     }
 
 }

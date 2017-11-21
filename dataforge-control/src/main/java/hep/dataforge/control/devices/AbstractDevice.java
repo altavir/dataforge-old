@@ -59,7 +59,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     private Logger getDefaultLogger() {
-        String loggerName = meta().getString("logger", () -> "device::" + getName());
+        String loggerName = getMeta().getString("logger", () -> "device::" + getName());
         return LoggerFactory.getLogger(loggerName);
     }
 
@@ -113,7 +113,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
 
     @Override
     public String getName() {
-        return meta().getString("name", getType());
+        return getMeta().getString("name", getType());
     }
 
     /**
@@ -228,6 +228,6 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
 
     @Override
     public String getType() {
-        return meta().getString("type", "unknown");
+        return getMeta().getString("type", "unknown");
     }
 }

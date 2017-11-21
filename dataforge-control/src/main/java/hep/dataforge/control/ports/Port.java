@@ -63,7 +63,7 @@ public abstract class Port extends MetaHolder implements AutoCloseable, Metoid {
     }
 
     protected Logger getLogger() {
-        return LoggerFactory.getLogger(meta().getString("logger", getClass().getName()));
+        return LoggerFactory.getLogger(getMeta().getString("logger", getClass().getName()));
     }
 
     public void setPhraseCondition(Predicate<String> condition) {
