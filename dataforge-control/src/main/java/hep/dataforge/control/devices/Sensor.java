@@ -66,7 +66,7 @@ public abstract class Sensor<T> extends AbstractDevice {
     }
 
     @Override
-    protected void requestStateChange(String stateName, Value value) throws ControlException {
+    protected Object requestStateChange(String stateName, Value value) throws ControlException {
         if (Objects.equals(stateName, MEASURING_STATE)) {
             if (value.booleanValue()) {
                 startMeasurement();
@@ -74,7 +74,7 @@ public abstract class Sensor<T> extends AbstractDevice {
                 stopMeasurement(false);
             }
         }
-        super.requestStateChange(stateName, value);
+        return value;
     }
 
     public Measurement<T> getMeasurement() {
@@ -115,7 +115,7 @@ public abstract class Sensor<T> extends AbstractDevice {
         if (MEASURING_STATE.equals(stateName)) {
             return isMeasuring();
         } else {
-            return super.computeState(stateName);
+            return getDefaultState(stateName);
         }
     }
 

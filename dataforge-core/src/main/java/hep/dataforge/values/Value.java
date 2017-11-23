@@ -54,8 +54,8 @@ public interface Value extends Serializable {
         }
 
         //string constants
-        if(str.startsWith("\"") && str.endsWith("\"")){
-            return new StringValue(str.substring(1,str.length()-2));
+        if (str.startsWith("\"") && str.endsWith("\"")) {
+            return new StringValue(str.substring(1, str.length() - 2));
         }
 
         try {
@@ -184,7 +184,10 @@ public interface Value extends Serializable {
         if (obj == null) {
             return Value.NULL;
         }
-        if (obj instanceof Number) {
+        if (obj instanceof Value) {
+            //это можно делать так как Value неизменяемый
+            return (Value) obj;
+        } else if (obj instanceof Number) {
             return new NumberValue((Number) obj);
         } else if (obj instanceof Instant) {
             return of((Instant) obj);
@@ -192,9 +195,6 @@ public interface Value extends Serializable {
             return new TimeValue((LocalDateTime) obj);
         } else if (obj instanceof Boolean) {
             return BooleanValue.ofBoolean((boolean) obj);
-        } else if (obj instanceof Value) {
-            //это можно делать так как Value неизменяемый
-            return (Value) obj;
         } else if (obj instanceof String) {
             return of((String) obj);
         } else if (obj instanceof Collection) {

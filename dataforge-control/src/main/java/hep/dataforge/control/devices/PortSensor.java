@@ -128,7 +128,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
     }
 
     @Override
-    protected void requestStateChange(String stateName, Value value) throws ControlException {
+    protected Object requestStateChange(String stateName, Value value) throws ControlException {
         if (Objects.equals(stateName, CONNECTED_STATE)) {
             if (value.booleanValue()) {
                 connection.open();
@@ -140,10 +140,10 @@ public abstract class PortSensor<T> extends Sensor<T> {
                 }
             }
         }
-        super.requestStateChange(stateName, value);
+        return value;
     }
 
-    /**
+    /*
      * @return the port
      * @throws hep.dataforge.exceptions.ControlException
      */

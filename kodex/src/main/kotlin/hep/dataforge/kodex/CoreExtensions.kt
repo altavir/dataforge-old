@@ -16,6 +16,8 @@ import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.future.await
 import java.time.Instant
 import kotlin.coroutines.experimental.CoroutineContext
+import kotlin.properties.ReadOnlyProperty
+import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 /**
@@ -71,28 +73,28 @@ fun Value?.isNull(): Boolean = this == null || this.isNull
  * Delegate class for valueProvider
  */
 
-class ValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Value? =
+class ValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Value?> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Value? =
             thisRef.optValue(valueName ?: property.name).orElse(null)
 }
 
-class StringValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): String? =
+class StringValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, String?> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): String? =
             thisRef.optString(valueName ?: property.name).orElse(null)
 }
 
-class BooleanValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Boolean? =
+class BooleanValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Boolean?> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Boolean? =
             thisRef.optBoolean(valueName ?: property.name).orElse(null)
 }
 
-class TimeValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Instant? =
+class TimeValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Instant?> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Instant? =
             thisRef.optTime(valueName ?: property.name).orElse(null)
 }
 
-class NumberValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Number? =
+class NumberValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Number?> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Number? =
             thisRef.optNumber(valueName ?: property.name).orElse(null)
 }
 
@@ -149,7 +151,7 @@ fun MetaProvider.useMeta(metaName: String, action: (Meta) -> Unit) {
  * Perform some action on each meta element of the list if it is present
  */
 fun Meta.useEachMeta(metaName: String, action: (Meta) -> Unit) {
-    if(hasMeta(metaName)){
+    if (hasMeta(metaName)) {
         getMetaList(metaName).forEach(action)
     }
 }
@@ -163,19 +165,10 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
     }
 }
 
-/**
- * Perform action on each meta in a list
- */
-fun Meta.useEachMeta(metaName: String, action: (Meta) -> Unit){
-    if (hasMeta(metaName)) {
-        getMetaList(metaName).forEach(action)
-    }
-}
-
 //Meta provider delegate
 
-class MetaDelegate(private val metaName: String?) {
-    operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta? =
+class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta?> {
+    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta? =
             thisRef.optMeta(metaName ?: property.name).orElse(null);
 }
 
@@ -191,56 +184,56 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
     return this;
 }
 
-class MutableValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Value? =
+class MutableValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Value?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Value? =
             thisRef.optValue(valueName ?: property.name).orElse(null)
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Value?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Value?) {
         thisRef.setValue(valueName ?: property.name, value);
     }
 }
 
-class MutableStringValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): String? =
+class MutableStringValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,String?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): String? =
             thisRef.optString(valueName ?: property.name).orElse(null)
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: String?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: String?) {
         thisRef.setValue(valueName ?: property.name, value);
     }
 }
 
-class MutableBooleanValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Boolean? =
+class MutableBooleanValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Boolean?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Boolean? =
             thisRef.optBoolean(valueName ?: property.name).orElse(null)
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Boolean?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Boolean?) {
         thisRef.setValue(valueName ?: property.name, value);
     }
 }
 
-class MutableTimeValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Instant? =
+class MutableTimeValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Instant?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Instant? =
             thisRef.optTime(valueName ?: property.name).orElse(null)
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Instant?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Instant?) {
         thisRef.setValue(valueName ?: property.name, value);
     }
 }
 
-class MutableNumberValueDelegate(private val valueName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Number? =
+class MutableNumberValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Number?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Number? =
             thisRef.optNumber(valueName ?: property.name).orElse(null)
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Number?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Number?) {
         thisRef.setValue(valueName ?: property.name, value);
     }
 }
 
-class MutableMetaDelegate(private val metaName: String?) {
-    operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Meta? =
+class MutableMetaDelegate(private val metaName: String?): ReadWriteProperty<MutableMetaNode<*>,Meta?> {
+    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Meta? =
             thisRef.optMeta(metaName ?: property.name).orElse(null);
 
-    operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Meta?) {
+    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Meta?) {
         thisRef.setValue(metaName ?: property.name, value);
     }
 }

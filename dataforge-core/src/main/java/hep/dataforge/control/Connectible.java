@@ -25,7 +25,7 @@ public interface Connectible {
      * @param connection
      * @param roles
      */
-     void connect(Connection connection, String... roles);
+    void connect(Connection connection, String... roles);
 
     /**
      * Get a stream of all connections with given role and type. Role could be regexp

@@ -8,7 +8,6 @@ import hep.dataforge.values.Value;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 
@@ -60,7 +59,7 @@ public interface Stateful extends Provider {
      * @param value
      * @return the actual state after set
      */
-    CompletableFuture<Value> setState(String name, Object value);
+    void setState(String name, Object value);
 
     /**
      * A list of all available states
