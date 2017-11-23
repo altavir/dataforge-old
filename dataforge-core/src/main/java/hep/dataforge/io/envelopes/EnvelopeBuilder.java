@@ -121,10 +121,6 @@ public class EnvelopeBuilder implements Envelope {
         return this;
     }
 
-    public Meta getMeta() {
-        return meta;
-    }
-
     @Override
     public Meta getMeta() {
         return meta;
