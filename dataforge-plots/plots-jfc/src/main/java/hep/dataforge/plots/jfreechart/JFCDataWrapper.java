@@ -72,11 +72,11 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
     }
 
     @Override
-    public Comparable getSeriesKey(int i) {
+    public Comparable<?> getSeriesKey(int i) {
         if (getSeriesCount() == 1) {
-            return plot.getName();
+            return plot.getName().toUnescaped();
         } else {
-            return Name.join(plot.getName(), Name.ofSingle(adapter.getYTitle(i)));
+            return Name.join(plot.getName(), Name.ofSingle(adapter.getYTitle(i))).toUnescaped();
         }
     }
 
