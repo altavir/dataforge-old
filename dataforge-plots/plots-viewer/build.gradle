@@ -1,8 +1,9 @@
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.1.60"
     id 'com.github.johnrengelman.shadow' version '2.0.1'
     id 'application'
 }
+
+apply plugin: "kotlin"
 
 description = 'dataforge-plots-viewer'
 
@@ -16,6 +17,12 @@ compileKotlin {
     kotlinOptions {
         jvmTarget = "1.8"
         javaParameters = true
+    }
+}
+
+kotlin {
+    experimental {
+        coroutines "enable"
     }
 }
 

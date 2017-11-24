@@ -25,8 +25,8 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.utils.MetaHolder;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,7 +34,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 
@@ -54,15 +57,12 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     private final Map<String, Value> states = new HashMap<>();
     private Context context;
     private ConnectionHelper connectionHelper;
-    private ExecutorService executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-        @Override
-        public Thread newThread(@NotNull Runnable r) {
-            Thread res = new Thread(r);
-            res.setName("device::" + getName());
-            res.setPriority(Thread.MAX_PRIORITY);
-            res.setDaemon(true);
-            return res;
-        }
+    private ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+        Thread res = new Thread(r);
+        res.setName("device::" + getName());
+        res.setPriority(Thread.MAX_PRIORITY);
+        res.setDaemon(true);
+        return res;
     });
 
     public AbstractDevice(Context context, Meta meta) {
@@ -137,29 +137,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     /**
-     * Update logical state and notify listeners.
-     *
-     * @param stateName
-     * @param stateValue
-     */
-    private void notifyStateChanged(String stateName, Value stateValue) {
-        executor.submit(() -> {
-            this.states.put(stateName, stateValue);
-            if (stateValue.isNull()) {
-                getLogger().info("State {} is reset", stateName);
-            } else {
-                getLogger().info("State {} changed to {}", stateName, stateValue);
-            }
-            context.parallelExecutor().submit(() ->
-                    forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
-                            it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, stateValue))
-            );
-        });
-    }
-
-    /**
-     * Post a value to the state and notify state changed if needed. Does not
-     * change physical state
+     * Update logical state if it is changed
      *
      * @param stateName
      * @param stateValue
@@ -169,7 +147,10 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         Value newState = Value.of(stateValue);
         //Notify only if state really changed
         if (!newState.equals(oldState)) {
-            notifyStateChanged(stateName, newState);
+            //Update logical state and notify listeners.
+            executor.submit(() -> {
+                setLogicalState(stateName, newState);
+            });
         }
     }
 
@@ -191,7 +172,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      * @param stateName
      */
     protected final void invalidateState(String stateName) {
-        executor.submit(() -> this.states.remove(stateName));
+        executor.submit(() -> this.getState(stateName));
     }
 
     /**
@@ -207,37 +188,64 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         });
     }
 
-//    /**
-//     * Force invalidate and immediately recalculate state
-//     *
-//     * @param stateName
-//     */
-//    protected final void recalculateState(String stateName) {
-//        try {
-//            updateState(stateName, computeState(stateName));
-//        } catch (ControlException ex) {
-//            notifyError("Can't calculate state " + stateName, ex);
-//        }
-//    }
-
-    protected abstract Object computeState(String stateName) throws ControlException;
-
-    protected final Value getDefaultState(String stateName) {
-        return optStateDef(stateName).map(def -> def.value().def())
-                .map(Value::of)
+    /**
+     * Get logical state
+     *
+     * @param stateName
+     * @return
+     */
+    protected final Value getLogicalState(String stateName) {
+        return Optionals.either(Optional.ofNullable(states.get(stateName)))
+                .or(optStateDef(stateName).map(def -> def.value().def()).map(Value::of))
+                .opt()
                 .orElseThrow(() -> new RuntimeException("Can't calculate state " + stateName));
     }
 
     /**
-     * Perform state change and return a value after change
+     * Set logical state. This method should be used internally from device thread.
+     *
+     * @param stateName
+     * @param value
+     */
+    protected final void setLogicalState(String stateName, Value value) {
+        this.states.put(stateName, value);
+        if (value.isNull()) {
+            getLogger().info("State {} is reset", stateName);
+        } else {
+            getLogger().info("State {} changed to {}", stateName, value);
+        }
+        context.parallelExecutor().submit(() ->
+                forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                        it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, value))
+        );
+    }
+
+    protected final void setLogicalState(String stateName, Object value) {
+        setLogicalState(stateName, Value.of(value));
+    }
+
+    /**
+     * Request the change of physical and/or logical state.
+     *
      * @param stateName
      * @param value
      * @throws ControlException
      */
-    protected abstract Object requestStateChange(String stateName, Value value) throws ControlException;
+    protected abstract void requestStateChange(String stateName, Value value) throws ControlException;
+
+
+    /**
+     * Compute physical state
+     *
+     * @param stateName
+     * @return
+     * @throws ControlException
+     */
+    protected abstract Object computeState(String stateName) throws ControlException;
 
     /**
      * Request state change and update result
+     *
      * @param stateName
      * @param value
      */
@@ -245,8 +253,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     public void setState(String stateName, Object value) {
         executor.submit(() -> {
             try {
-                Value res = Value.of(requestStateChange(stateName, Value.of(value)));
-                updateState(stateName, res);
+                requestStateChange(stateName, Value.of(value));
             } catch (Exception e) {
                 getLogger().error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString());
             }
@@ -254,16 +261,17 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     public Future<Value> getStateInFuture(String stateName) {
-        return executor.submit(() -> this.states.computeIfAbsent(stateName, (String t) -> {
-            try {
-                Value newState = Value.of(computeState(stateName));
-                notifyStateChanged(stateName, newState);
-                return newState;
-            } catch (ControlException ex) {
-                notifyError("Can't calculate state " + stateName, ex);
-                return Value.NULL;
-            }
-        }));
+        return executor.submit(() -> this.states.computeIfAbsent(stateName, (String t) ->
+                        states.computeIfAbsent(stateName, state -> {
+                            try {
+                                return Value.of(computeState(stateName));
+                            } catch (ControlException ex) {
+                                notifyError("Can't calculate state " + stateName, ex);
+                                return Value.NULL;
+                            }
+                        })
+                )
+        );
     }
 
     @Override

@@ -128,19 +128,20 @@ public abstract class PortSensor<T> extends Sensor<T> {
     }
 
     @Override
-    protected Object requestStateChange(String stateName, Value value) throws ControlException {
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
         if (Objects.equals(stateName, CONNECTED_STATE)) {
             if (value.booleanValue()) {
                 connection.open();
+                updateState(CONNECTED_STATE, true);
             } else {
                 try {
                     connection.close();
+                    updateState(CONNECTED_STATE, false);
                 } catch (Exception e) {
                     throw new ControlException("Failed to close the connection", e);
                 }
             }
         }
-        return value;
     }
 
     /*
