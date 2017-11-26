@@ -6,12 +6,12 @@
 package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
-import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jfree.data.xy.AbstractIntervalXYDataset;
 
 import java.util.List;
@@ -44,7 +44,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         this.index = index;
     }
 
-    public Plottable getPlot() {
+    public Plot getPlot() {
         return plot;
     }
 
@@ -76,25 +76,29 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         if (getSeriesCount() == 1) {
             return plot.getName().toUnescaped();
         } else {
-            return Name.join(plot.getName(), Name.ofSingle(adapter.getYTitle(i))).toUnescaped();
+            return plot.getName().append(adapter.getYTitle(i)).toUnescaped();
         }
     }
 
+    @NotNull
     @Override
     public Number getStartX(int i, int i1) {
         return adapter.getXLower(getAt(i1));
     }
 
+    @NotNull
     @Override
     public Number getEndX(int i, int i1) {
         return adapter.getXUpper(getAt(i1));
     }
 
+    @NotNull
     @Override
     public Number getStartY(int i, int i1) {
         return adapter.getYLower(getAt(i1), i);
     }
 
+    @NotNull
     @Override
     public Number getEndY(int i, int i1) {
         return adapter.getYUpper(getAt(i1), i);
@@ -110,6 +114,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         return transform(adapter.getX(getAt(i1)));
     }
 
+    @Nullable
     private Number transform(Value value) {
         if (value.isNull()) {
             return null;

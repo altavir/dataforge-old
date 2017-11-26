@@ -169,6 +169,18 @@ public interface IOManager extends Plugin {
         }
     }
 
+    default Optional<Binary> optResource(String path) {
+        return Optional.ofNullable(getContext().getClassLoader().getResource(path))
+                .map(resource -> new StreamBinary(() -> {
+                            try {
+                                return resource.openStream();
+                            } catch (IOException e) {
+                                throw new RuntimeException("Failed to open resource stream", e);
+                            }
+                        })
+                );
+    }
+
     /**
      * Return the root directory for this IOManager. By convention, Context
      * should not have access outside root directory to prevent System damage.

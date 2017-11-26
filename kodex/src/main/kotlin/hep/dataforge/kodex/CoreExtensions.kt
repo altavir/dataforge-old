@@ -25,6 +25,8 @@ import kotlin.reflect.KProperty
  * Created by darksnake on 26-Apr-17.
  */
 
+val GLOBAL: Context = hep.dataforge.context.Global.instance()
+
 //Value operations
 
 operator fun Value.plus(other: Value): Value =
