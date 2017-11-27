@@ -95,14 +95,13 @@ public class FittingIOUtils {
             }
             values[i] = sc2.nextDouble();
         }
-        NamedVector set = new NamedVector(list, values);
-        return set;
+        return new NamedVector(list, values);
     }
 
     public static void printParamSet(PrintWriter out, ParamSet set){
         out.println();
        
-        set.getParams().stream().forEach((param) -> {
+        set.getParams().forEach((param) -> {
             out.println(param.toString());
         });
     }

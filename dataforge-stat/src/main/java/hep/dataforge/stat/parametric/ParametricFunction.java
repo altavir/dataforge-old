@@ -40,7 +40,11 @@ public interface ParametricFunction extends NameSetContainer {
             return new ParametricFunction() {
                 @Override
                 public double derivValue(String parName, double x, Values set) {
-                    throw new NotDefinedException();
+                    if (getNames().contains(parName)) {
+                        throw new NotDefinedException();
+                    } else {
+                        return 0;
+                    }
                 }
 
                 @Override

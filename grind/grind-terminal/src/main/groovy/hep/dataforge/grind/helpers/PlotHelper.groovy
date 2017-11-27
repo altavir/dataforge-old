@@ -23,12 +23,10 @@ import hep.dataforge.description.ValueDefs
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.io.markup.MarkupBuilder
-import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
-import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.XYAdapter
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
@@ -85,16 +83,15 @@ class PlotHelper extends AbstractHelper {
             @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for frame"),
             @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per frame")
     ])
-    XYPlot plot(Map parameters = [:], Closure<Double> function) {
-        String frameName = parameters.get("frame", DEFAULT_FRAME)
-        String pltName = parameters.get("name", "function_${function.hashCode()}");
-        double from = parameters.get("from", 0d) as Double;
-        double to = parameters.get("to", 1d) as Double;
-        int numPoints = parameters.get("numPoints", 100) as Integer;
+    XYPlot plot(double from, double to, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
+//        String frameName = parameters.get("frame", DEFAULT_FRAME)
+//        String pltName = parameters.get("name", "function_${function.hashCode()}");
+//        double from = parameters.get("from", 0d) as Double;
+//        double to = parameters.get("to", 1d) as Double;
+//        int numPoints = parameters.get("numPoints", 100) as Integer;
         Function<Double, Double> func = { Double x -> function.call(x) as Double } as Function
-        XYFunctionPlot res = XYFunctionPlot.plotFunction(pltName, func, from, to, numPoints);
-        res.configure(parameters)
-        manager.getPlotFrame(frameName).add(res)
+        XYFunctionPlot res = XYFunctionPlot.plotFunction(name, func, from, to, numPoints);
+        manager.getPlotFrame(frame).add(res)
         return res;
     }
 
@@ -113,41 +110,47 @@ class PlotHelper extends AbstractHelper {
     }
 
     @MethodDescription("Plot data using x-y map")
-    XYPlot plot(Map<Number, Number> dataMap, String name = "data", String frame = DEFAULT_FRAME) {
+    XYPlot plot(Map<Number, Number> data, String name = "data", String frame = DEFAULT_FRAME) {
         def x = [];
         def y = [];
-        dataMap.forEach { k, v ->
+        data.forEach { k, v ->
             x << (k as double)
             y << (v as double)
         }
         return plot(x, y, name, frame);
     }
 
-    @MethodDescription("Plot data using iterable point source and adapter")
-    XYPlot plot(Iterable<Values> source, ValuesAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = DataPlot.plot(name, XYAdapter.from(adapter), source);
-        manager.getPlotFrame(frame).add(res)
-        return res;
-    }
+//    @MethodDescription("Plot data using iterable point source and adapter")
+//    XYPlot plot(Iterable<Values> source, ValuesAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
+//        def res = DataPlot.plot(name, XYAdapter.from(adapter), source);
+//        manager.getPlotFrame(frame).add(res)
+//        return res;
+//    }
 
     /**
      * Build data frame using any point source and closure to configure adapter
-     * @param source
+     * @param data
      * @param parameters
      * @param cl
      * @return
      */
     @MethodDescription("Build data frame using any point source and closure to configure adapter")
-    XYPlot plot(Map parameters, Iterable<Values> source,
+    XYPlot plot(Iterable<Values> data,
+                String name = "data",
+                String frame = DEFAULT_FRAME,
+//                XYAdapter adapter = XYAdapter.DEFAULT_ADAPTER,
                 @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-        Meta configuration = Grind.buildMeta(parameters, cl);
-        String name = configuration.getString("name", "data_${source.hashCode()}")
-        String frameName = configuration.getString("frame", DEFAULT_FRAME)
-        def res = new DataPlot(name, configuration);
 
-        res.fillData(source);
+        def res = new DataPlot(name);
+        if(cl != null){
+            res.adapter = new XYAdapter(Grind.buildMeta(cl))
+        } else {
+            res.adapter = XYAdapter.DEFAULT_ADAPTER
+        }
 
-        manager.getPlotFrame(frameName).add(res)
+        res.fillData(data);
+
+        manager.getPlotFrame(frame).add(res)
         return res;
     }
 
