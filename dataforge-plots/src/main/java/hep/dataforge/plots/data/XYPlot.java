@@ -20,6 +20,7 @@ import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 import hep.dataforge.values.Values;
@@ -108,7 +109,17 @@ public abstract class XYPlot extends AbstractPlot<XYAdapter> {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     protected XYAdapter buildAdapter(Meta adapterMeta) {
-        return new XYAdapter(adapterMeta);
+        if (adapterMeta.hasValue("class")) {
+            try {
+                Class<? extends XYAdapter> type = (Class<? extends XYAdapter>) Class.forName(adapterMeta.getString("class"));
+                return MetaMorph.morph(type, adapterMeta);
+            } catch (ClassNotFoundException e) {
+                throw new RuntimeException("Can't create the instance of adapter");
+            }
+        } else {
+            return new XYAdapter(adapterMeta);
+        }
     }
 }

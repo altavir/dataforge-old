@@ -18,7 +18,6 @@ package hep.dataforge.meta;
 import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
@@ -186,10 +185,17 @@ public final class Laminate extends Meta implements Described {
      */
     @Override
     public List<? extends Meta> getMetaList(String path) {
-        return Stream.concat(layers.stream(), Stream.of(descriptorLayer))
-                .filter((m) -> (m.hasMeta(path)))
+        Stream<Meta> stream;
+        if (descriptorLayer == null) {
+            stream = layers.stream();
+        } else {
+            stream = Stream.concat(layers.stream(), Stream.of(descriptorLayer));
+        }
+
+        return stream
+                .filter(m -> m.hasMeta(path))
                 .map(m -> m.getMetaList(path)).findFirst()
-                .orElseThrow(() -> new NameNotFoundException(path));
+                .orElse(Collections.emptyList());
     }
 
     @Override

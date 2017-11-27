@@ -122,7 +122,7 @@ public class DataPlot extends XYPlot {
 
     public DataPlot fillData(@NotNull Stream<? extends Values> it) {
         this.data = new ArrayList<>();
-        it.forEach(dp-> data.add(dp));
+        it.forEach(dp -> data.add(dp));
         notifyDataChanged();
         return this;
     }
@@ -134,7 +134,7 @@ public class DataPlot extends XYPlot {
     }
 
     public DataPlot append(Number x, Number y) {
-        return append(ValueMap.of(new String[]{XYAdapter.X_VALUE_KEY, XYAdapter.Y_VALUE_KEY}, x, y));
+        return append(getAdapter().buildXYDataPoint(x.doubleValue(), y.doubleValue()));
     }
 
     @Override

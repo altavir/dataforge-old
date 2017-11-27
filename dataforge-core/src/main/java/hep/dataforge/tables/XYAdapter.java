@@ -30,7 +30,7 @@ import hep.dataforge.values.Values;
  * @version $Id: $Id
  */
 @NodeDef(name = "x", info = "x axis mapping", from = "method::hep.dataforge.tables.AxisValuesAdapter.getAxisMeta")
-@NodeDef(name = "y", info = "y axis mapping", from = "method::hep.dataforge.tables.AxisValuesAdapter.getAxisMeta")
+@NodeDef(name = "y", multiple = true, info = "y axis mapping", from = "method::hep.dataforge.tables.AxisValuesAdapter.getAxisMeta")
 public class XYAdapter extends AxisValuesAdapter {
 
     public static final String X_AXIS = "x";
@@ -67,19 +67,20 @@ public class XYAdapter extends AxisValuesAdapter {
                 .setValue(Y_ERROR_KEY, yErrName);
     }
 
-    private String xValueName;
-    private String[] yValuesNames;
-    private String xErrorName;
-    private String[] yErrorsNames;
-
-
     public XYAdapter() {
         this(Meta.buildEmpty(ADAPTER_KEY));
     }
 
     public XYAdapter(Meta meta) {
         super(meta);
-        updateCache();
+    }
+
+    private String getYAxisName(int num) {
+        if (num == 0) {
+            return Y_AXIS;
+        } else {
+            return Y_AXIS + "[" + num + "]";
+        }
     }
 
     public XYAdapter(String xName, String xErrName, String yName, String yErrName) {
@@ -96,23 +97,14 @@ public class XYAdapter extends AxisValuesAdapter {
                 .setValue(Y_VALUE_KEY, yName));
     }
 
-    private void updateCache() {
-        xValueName = getMeta().getString(X_VALUE_KEY, X_AXIS);
-        xErrorName = getMeta().getString(X_ERROR_KEY, X_ERROR_KEY);
-        if (getMeta().hasMeta(Y_AXIS)) {
-            yValuesNames = getMeta().getMetaList(Y_AXIS).stream().map(node -> node.getString(VALUE_KEY, Y_AXIS))
-                    .toArray(String[]::new);
-            yErrorsNames = getMeta().getMetaList(Y_AXIS).stream().map(node -> node.getString(ERROR_KEY, ERROR_KEY))
-                    .toArray(String[]::new);
-        } else {
-            yValuesNames = new String[]{Y_AXIS};
-            yErrorsNames = new String[]{Y_ERROR_KEY};
-        }
-    }
-
     public Values buildXYDataPoint(double x, double y, double yErr) {
         return ValueMap.of(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY), nameFor(Y_ERROR_KEY)},
                 x, y, yErr);
+    }
+
+    public Values buildXYDataPoint(double x, double y) {
+        return ValueMap.of(new String[]{nameFor(X_VALUE_KEY), nameFor(Y_VALUE_KEY)},
+                x, y);
     }
 
     private String yAxis(int index) {
@@ -129,19 +121,19 @@ public class XYAdapter extends AxisValuesAdapter {
      * @return
      */
     public int getYCount() {
-        return yValuesNames.length;
+        return Math.max(getMeta().getMetaList(Y_AXIS).size(), 1);
     }
 
     public String getYTitle(int i) {
         return getMeta().getMetaList(Y_AXIS).get(i).getString("title", nameFor(VALUE_KEY));
     }
 
-    public Value getX(Values point) {
-        return point.getValue(xValueName);
+    public final Value getX(Values point) {
+        return getValue(point, X_AXIS);
     }
 
-    public Value getXerr(Values point) {
-        return point.getValue(xErrorName, Value.NULL);
+    public final Value getXerr(Values point) {
+        return getError(point, X_AXIS);
     }
 
     /**
@@ -172,11 +164,11 @@ public class XYAdapter extends AxisValuesAdapter {
      * @return
      */
     public Value getY(Values point, int index) {
-        return point.getValue(yValuesNames[index]);
+        return getValue(point, getYAxisName(index));
     }
 
-    public Value getYerr(Values point, int index) {
-        return point.getValue(yErrorsNames[index]);
+    public final Value getYerr(Values point, int index) {
+        return getError(point, getYAxisName(index));
     }
 
     /**
@@ -185,7 +177,7 @@ public class XYAdapter extends AxisValuesAdapter {
      * @param point
      * @return
      */
-    public double getYUpper(Values point) {
+    public final double getYUpper(Values point) {
         return getUpperBound(point, Y_AXIS);
     }
 
@@ -195,7 +187,7 @@ public class XYAdapter extends AxisValuesAdapter {
      * @param point
      * @return
      */
-    public double getYLower(Values point) {
+    public final double getYLower(Values point) {
         return getLowerBound(point, Y_AXIS);
     }
 
@@ -205,7 +197,7 @@ public class XYAdapter extends AxisValuesAdapter {
      * @param point
      * @return
      */
-    public double getXUpper(Values point) {
+    public final double getXUpper(Values point) {
         return getUpperBound(point, X_AXIS);
     }
 
@@ -215,24 +207,24 @@ public class XYAdapter extends AxisValuesAdapter {
      * @param point
      * @return
      */
-    public double getXLower(Values point) {
+    public final double getXLower(Values point) {
         return getLowerBound(point, X_AXIS);
     }
 
-    public double getYUpper(Values point, int index) {
+    public final double getYUpper(Values point, int index) {
         return getUpperBound(point, yAxis(index));
     }
 
-    public double getYLower(Values point, int index) {
+    public final double getYLower(Values point, int index) {
         return getLowerBound(point, yAxis(index));
     }
 
     public boolean providesXError(Values point) {
-        return point.hasValue(xErrorName);
+        return point.hasValue(nameFor(X_ERROR_KEY));
     }
 
     public boolean providesYError(Values point) {
-        return point.hasValue(yErrorsNames[0]);
+        return point.hasValue(nameFor(Y_ERROR_KEY));
     }
 
     /**
@@ -242,31 +234,18 @@ public class XYAdapter extends AxisValuesAdapter {
      * @return
      */
     public TableFormat getFormat() {
-        updateCache();
         TableFormatBuilder builder = new TableFormatBuilder()
-                .addNumber(xValueName, X_VALUE_KEY);
+                .addNumber(nameFor(X_VALUE_KEY), X_VALUE_KEY);
 
         if (getMeta().hasValue(X_ERROR_KEY)) {
-            builder.addNumber(xErrorName, X_ERROR_KEY);
+            builder.addNumber(nameFor(X_ERROR_KEY), X_ERROR_KEY);
         }
 
-        for (String yValueKey : yValuesNames) {
-            builder.addNumber(yValueKey, Y_VALUE_KEY);
-        }
-
-        if (getMeta().hasValue(Y_ERROR_KEY)) {
-            for (String yErrorKey : yErrorsNames) {
-                builder.addNumber(yErrorKey, Y_ERROR_KEY);
-            }
-        }
+        getMeta().getMetaList(Y_AXIS).forEach(axisMeta -> {
+            builder.addNumber(axisMeta.getString(VALUE_KEY), Y_VALUE_KEY);
+            axisMeta.optString(ERROR_KEY).ifPresent(errKey -> builder.addNumber(errKey, Y_ERROR_KEY));
+        });
 
         return builder.build();
-    }
-
-
-    @Override
-    public void fromMeta(Meta meta) {
-        super.fromMeta(meta);
-        updateCache();
     }
 }

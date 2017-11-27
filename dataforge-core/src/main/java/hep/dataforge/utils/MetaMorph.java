@@ -91,17 +91,17 @@ public interface MetaMorph extends Externalizable, AutoCastable {
      */
     @Override
     @SuppressWarnings("unchecked")
-    default <T> T asType(Class<T> type) {
+    default <T> T cast(Class<T> type) {
         if (type == Meta.class) {
             return (T) toMeta();
         } else if (MetaMorph.class.isAssignableFrom(type)) {
             try {
-                return toMeta().asType(type);
+                return toMeta().cast(type);
             } catch (Exception ex) {
                 throw new AutoCastException("", getClass(), type, ex);
             }
         } else {
-            return AutoCastable.super.asType(type);
+            return AutoCastable.super.cast(type);
         }
     }
 }

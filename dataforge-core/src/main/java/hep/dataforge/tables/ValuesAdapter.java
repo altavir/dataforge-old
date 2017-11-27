@@ -30,7 +30,7 @@ public interface ValuesAdapter extends Metoid, MetaMorph {
     String ADAPTER_KEY = "@adapter";
 
     /**
-     * Аннотация, описывающая данный тип адаптера
+     * Meta declaration for this adapter
      * @return 
      */
     @Override

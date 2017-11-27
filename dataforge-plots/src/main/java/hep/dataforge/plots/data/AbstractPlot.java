@@ -81,10 +81,10 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     protected synchronized void applyConfig(Meta config) {
         listeners.forEach((l) -> l.metaChanged(name, this, new Laminate(getMeta())));
 
-        //invalidate adapter
-        if (config.hasMeta(ADAPTER_KEY)) {
-            adapter = null;
-        }
+//        //invalidate adapter
+//        if (config.hasMeta(ADAPTER_KEY)) {
+//            adapter = null;
+//        }
     }
 
     /**
@@ -96,8 +96,8 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
 
 
     public void setAdapter(T adapter) {
+        this.configureNode(ADAPTER_KEY, adapter.toMeta());
         this.adapter = adapter;
-        this.configureNode(ADAPTER_KEY, adapter.getMeta());
     }
 
 }

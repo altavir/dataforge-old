@@ -20,16 +20,14 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.grind.Grind
-import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.XYAdapter
 import hep.dataforge.values.ValueType
-import hep.dataforge.values.Values
 
 import java.util.function.Function
 
@@ -83,75 +81,46 @@ class PlotHelper extends AbstractHelper {
             @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for frame"),
             @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per frame")
     ])
-    XYPlot plot(double from, double to, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
-//        String frameName = parameters.get("frame", DEFAULT_FRAME)
-//        String pltName = parameters.get("name", "function_${function.hashCode()}");
-//        double from = parameters.get("from", 0d) as Double;
-//        double to = parameters.get("to", 1d) as Double;
-//        int numPoints = parameters.get("numPoints", 100) as Integer;
-        Function<Double, Double> func = { Double x -> function.call(x) as Double } as Function
+    XYPlot plotFunction(double from = 0d, double to = 1d, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
+        Function<Double, Double> func = { Double x -> function.call(x) as Double }
         XYFunctionPlot res = XYFunctionPlot.plotFunction(name, func, from, to, numPoints);
         manager.getPlotFrame(frame).add(res)
         return res;
     }
 
-
-    @MethodDescription("Plot data using x and y array")
-    XYPlot plot(double[] x, double[] y, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = DataPlot.plot(name, x, y);
-        manager.getPlotFrame(frame).add(res)
-        return res;
-    }
-
-    XYPlot plot(List x, List y, String name = "data", String frame = DEFAULT_FRAME) {
-        def res = DataPlot.plot(name, x as double[], y as double[]);
-        manager.getPlotFrame(frame).add(res)
-        return res;
-    }
-
-    @MethodDescription("Plot data using x-y map")
-    XYPlot plot(Map<Number, Number> data, String name = "data", String frame = DEFAULT_FRAME) {
-        def x = [];
-        def y = [];
-        data.forEach { k, v ->
-            x << (k as double)
-            y << (v as double)
-        }
-        return plot(x, y, name, frame);
-    }
-
-//    @MethodDescription("Plot data using iterable point source and adapter")
-//    XYPlot plot(Iterable<Values> source, ValuesAdapter adapter = XYAdapter.DEFAULT_ADAPTER, String name = "data", String frame = DEFAULT_FRAME) {
-//        def res = DataPlot.plot(name, XYAdapter.from(adapter), source);
-//        manager.getPlotFrame(frame).add(res)
-//        return res;
-//    }
-
-    /**
-     * Build data frame using any point source and closure to configure adapter
-     * @param data
-     * @param parameters
-     * @param cl
-     * @return
-     */
-    @MethodDescription("Build data frame using any point source and closure to configure adapter")
-    XYPlot plot(Iterable<Values> data,
-                String name = "data",
-                String frame = DEFAULT_FRAME,
-//                XYAdapter adapter = XYAdapter.DEFAULT_ADAPTER,
-                @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-
-        def res = new DataPlot(name);
-        if(cl != null){
-            res.adapter = new XYAdapter(Grind.buildMeta(cl))
+    private XYPlot buildDataPlot(Map map) {
+        DataPlot plot = new DataPlot(map.getOrDefault("name", "data") as String, map.getOrDefault("meta", Meta.empty()) as Meta)
+        if (map["adapter"]) {
+            plot.setAdapter(map["adapter"] as XYAdapter)
         } else {
-            res.adapter = XYAdapter.DEFAULT_ADAPTER
+            plot.setAdapter(XYAdapter.DEFAULT_ADAPTER)
         }
+        if (map["data"]) {
+            def data = map.data
+            if (data instanceof Map) {
+                data.forEach { k, v ->
+                    plot.append(k as Number, v as Number)
+                }
+            } else if (data instanceof Iterable) {
+                plot.fillData(data)
+            } else {
+                throw new RuntimeException("Unrecognized data type: ${data.class}")
+            }
+        } else if (map["x"] && map["y"]) {
+            def x = map["x"] as List
+            def y = map["y"] as List
+            [x, y].transpose().each { List it ->
+                plot.append(it[0] as Number, it[1] as Number)
+            }
+        }
+        return plot;
+    }
 
-        res.fillData(data);
-
-        manager.getPlotFrame(frame).add(res)
-        return res;
+    @MethodDescription("Plot data using supplied parameters")
+    XYPlot plot(Map parameters) {
+        def res = buildDataPlot(parameters)
+        manager.getPlotFrame(parameters.getOrDefault("frame", DEFAULT_FRAME) as String).add(res)
+        return res
     }
 
     @Override

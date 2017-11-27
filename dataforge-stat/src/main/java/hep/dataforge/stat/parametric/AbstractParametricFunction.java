@@ -31,7 +31,7 @@ public abstract class AbstractParametricFunction extends AbstractParametric impl
         super(names);
     }
 
-    public AbstractParametricFunction(String[] list) {
+    public AbstractParametricFunction(String... list) {
         super(list);
     }
 

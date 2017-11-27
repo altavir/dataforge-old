@@ -55,7 +55,7 @@ public class AxisValuesAdapter implements ValuesAdapter {
         return point.getValue(nameFor(component));
     }
 
-    public Value getFrom(Values point, String component, Object def) {
+    public Value getComponent(Values point, String component, Object def) {
         return point.getValue(nameFor(component), Value.of(def));
     }
 
@@ -75,11 +75,11 @@ public class AxisValuesAdapter implements ValuesAdapter {
     }
 
     public Value getValue(Values point, String axis) {
-        return getFrom(point, Name.joinString(axis, VALUE_KEY), Value.NULL);
+        return getComponent(point, Name.joinString(axis, VALUE_KEY), Value.NULL);
     }
 
     public Value getError(Values point, String axis) {
-        return getFrom(point, Name.joinString(axis, ERROR_KEY), 0);
+        return getComponent(point, Name.joinString(axis, ERROR_KEY), 0);
     }
 
     /**
@@ -89,8 +89,11 @@ public class AxisValuesAdapter implements ValuesAdapter {
      * @return
      */
     public double getUpperBound(Values point, String axis) {
-        return point.getDouble(nameFor(Name.joinString(axis, UP_KEY)),
-                getValue(point, axis).doubleValue() + getError(point, axis).doubleValue());
+        return getComponent(
+                point,
+                nameFor(Name.joinString(axis, UP_KEY)),
+                getValue(point, axis).doubleValue() + getError(point, axis).doubleValue()
+        ).doubleValue();
     }
 
     /**
@@ -100,8 +103,11 @@ public class AxisValuesAdapter implements ValuesAdapter {
      * @return
      */
     public double getLowerBound(Values point, String axis) {
-        return point.getDouble(nameFor(Name.joinString(axis, LO_KEY)),
-                getValue(point, axis).doubleValue() - getError(point, axis).doubleValue());
+        return getComponent(
+                point,
+                nameFor(Name.joinString(axis, LO_KEY)),
+                getValue(point, axis).doubleValue() - getError(point, axis).doubleValue()
+        ).doubleValue();
     }
 
     /**
@@ -113,13 +119,18 @@ public class AxisValuesAdapter implements ValuesAdapter {
      */
     protected String nameFor(String component) {
         //caching name to avoid heavy meta request
-        return nameCache.computeIfAbsent(component, newComponent -> getMeta().getString(newComponent, () -> {
-                    if (newComponent.endsWith(".value")) {
-                        return newComponent.replace(".value", "");
-                    } else {
-                        return newComponent;
-                    }
-                })
+        return nameCache.computeIfAbsent(
+                component,
+                newComponent -> getMeta().getString(
+                        newComponent,
+                        () -> {
+                            if (newComponent.endsWith(".value")) {
+                                return newComponent.replace(".value", "");
+                            } else {
+                                return newComponent;
+                            }
+                        }
+                )
         );
     }
 

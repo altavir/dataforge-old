@@ -211,11 +211,11 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
      */
     @Override
     @SuppressWarnings("unchecked")
-    public <T> T asType(Class<T> type) {
+    public <T> T cast(Class<T> type) {
         if (MetaMorph.class.isAssignableFrom(type)) {
             return type.cast(MetaMorph.morph((Class<? extends MetaMorph>) type, this));
         } else {
-            return AutoCastable.super.asType(type);
+            return AutoCastable.super.cast(type);
         }
     }
 
