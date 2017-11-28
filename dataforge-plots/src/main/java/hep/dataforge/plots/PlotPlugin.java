@@ -25,7 +25,7 @@ import hep.dataforge.meta.Meta;
  * @author Alexander Nozik
  */
 public interface PlotPlugin extends Plugin {
-    String DEFAULT_STAGE_NAME = "";
+    String DEFAULT_STAGE_NAME = "default";
 
     /**
      * Get or create a plot frame with default meta

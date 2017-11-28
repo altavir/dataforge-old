@@ -21,6 +21,7 @@ import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.plots.data.XYPlot;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.utils.FXObject;
 import hep.dataforge.values.Values;
 import javafx.embed.swing.SwingFXUtils;
@@ -91,10 +92,8 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
             LoggerFactory.getLogger(getClass()).warn("The provided Plot is not a subclass of XYPlot");
         }
 
-        XYAdapter adapter = XYAdapter.from(plot.getAdapter());
-
-        Function<Values, Number> xFunc = (Values point) -> adapter.getX(point).numberValue();
-        Function<Values, Number> yFunc = (Values point) -> adapter.getY(point).numberValue();
+        Function<Values, Number> xFunc = (Values point) -> Adapters.getXValue(plot.getAdapter(),point).numberValue();
+        Function<Values, Number> yFunc = (Values point) ->  Adapters.getYValue(plot.getAdapter(),point).numberValue();
 
         //TODO apply filtering here
 

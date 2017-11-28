@@ -128,12 +128,13 @@ public class FitResult extends SimpleMetaMorph {
 
     /**
      * Provide a model if possible
+     *
      * @param context
      * @return
      */
     public Optional<Model> optModel(Context context) {
         return Optionals.either(optState().map(FitState::getModel))
-                .or(getMeta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
+                .or(() -> getMeta().optMeta("model").flatMap(meta -> ModelManager.restoreModel(context, meta)))
                 .opt();
     }
 

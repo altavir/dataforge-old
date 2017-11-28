@@ -3,7 +3,7 @@ package hep.dataforge.plots.demo
 import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
-import hep.dataforge.tables.ValueMap
+import hep.dataforge.tables.Adapters
 import hep.dataforge.values.Values
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.collections.FXCollections
@@ -20,7 +20,6 @@ class DemoView : View("Plot demonstration") {
 
 
     class PlotData() {
-        private val names = arrayOf(XYAdapter.X_AXIS, XYAdapter.Y_AXIS, XYAdapter.Y_ERROR_KEY)
 
         val yErrProperty = SimpleDoubleProperty()
         var yErr: Double? by yErrProperty
@@ -32,13 +31,13 @@ class DemoView : View("Plot demonstration") {
         var x: Double? by xProperty
 
         fun toValues(): Values {
-            return ValueMap.of(names, x, y, yErr)
+            return Adapters.buildXYDataPoint(x ?: 0.0, y ?: 0.0, yErr ?: 0.0)
         }
     }
 
     //private val dataMap = FXCollections.observableHashMap<String, ObservableList<DataPlot>>()
     val dataMap = FXCollections.observableHashMap<String, ObservableList<PlotData>>().apply {
-        addListener{change: MapChangeListener.Change<out String, out ObservableList<PlotData>> ->
+        addListener { change: MapChangeListener.Change<out String, out ObservableList<PlotData>> ->
             dataChanged(change.key)
         }
     };
@@ -50,7 +49,7 @@ class DemoView : View("Plot demonstration") {
         top {
             toolbar {
                 val nameField = textfield()
-                button("+"){
+                button("+") {
                     action {
                         createDataSet(nameField.text)
                     }

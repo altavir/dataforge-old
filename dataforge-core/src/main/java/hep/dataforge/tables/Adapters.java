@@ -146,6 +146,16 @@ public class Adapters {
         );
     }
 
+    @NotNull
+    public static ValuesAdapter buildXYAdapter(String xName, String xErrName, String yName, String yErrName) {
+        return new BasicAdapter(new MetaBuilder()
+                .setValue(X_VALUE_KEY, xName)
+                .setValue(X_ERROR_KEY, xErrName)
+                .setValue(Y_VALUE_KEY, yName)
+                .setValue(Y_ERROR_KEY, yErrName)
+        );
+    }
+
 
     public static ValuesAdapter DEFAULT_XY_ADAPTER = buildXYAdapter(X_VALUE_KEY, Y_VALUE_KEY);
 

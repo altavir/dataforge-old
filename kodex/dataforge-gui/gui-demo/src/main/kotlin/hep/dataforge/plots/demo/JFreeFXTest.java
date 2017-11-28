@@ -19,6 +19,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.DataPlot;
 import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
@@ -65,7 +66,7 @@ public class JFreeFXTest extends Application {
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        DataPlot dataPlot = DataPlot.plot("dataPlot", new XYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        DataPlot dataPlot = DataPlot.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

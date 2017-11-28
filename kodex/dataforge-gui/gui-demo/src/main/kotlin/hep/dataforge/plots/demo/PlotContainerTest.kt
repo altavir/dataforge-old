@@ -21,6 +21,7 @@ import hep.dataforge.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
+import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.ValueMap
 import hep.dataforge.values.Values
@@ -46,7 +47,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
     val ds = ListTable(data)
 
-    val dataPlot = DataPlot.plot("data.Plot", XYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
+    val dataPlot = DataPlot.plot("data.Plot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
 
     val manager = PlotManager();

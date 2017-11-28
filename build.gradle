@@ -1,16 +1,5 @@
-//buildscript {
-//    repositories {
-//        jcenter()
-//
-//    }
-//    dependencies {
-//        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4+"
-//    }
-//}
-
 plugins {
-    id "org.jetbrains.kotlin.jvm" version "1.1.61" apply false
+    id "org.jetbrains.kotlin.jvm" version "1.2.0" apply false
 }
 
 apply plugin: 'idea'

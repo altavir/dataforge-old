@@ -26,6 +26,7 @@ import hep.dataforge.names.AbstractNamedSet;
 import hep.dataforge.stat.fit.*;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.values.Values;
@@ -88,7 +89,6 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
     }
 
     public Table sample(double pos, double w, double amp, double a, double b, int number) {
-        XYAdapter factory = XYAdapter.DEFAULT_ADAPTER;
         ListTable.Builder data = new ListTable.Builder();
         double[] v = new double[3];
         v[0] = w;
@@ -100,7 +100,7 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
             double value = this.value(d, vector);
             double error = Math.sqrt(value);
             double randValue = Math.max(0, rnd.nextGaussian() * error + value);
-            Values p = factory.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
+            Values p = Adapters.buildXYDataPoint(d, randValue, Math.max(Math.sqrt(randValue), 1d));
             data.row(p);
         }
         return data.build();
