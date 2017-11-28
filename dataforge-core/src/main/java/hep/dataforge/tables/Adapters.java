@@ -9,6 +9,7 @@ import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
  * Utility methods to work with adapters
@@ -151,25 +152,16 @@ public class Adapters {
     public static ValuesAdapter DEFAULT_XYERR_ADAPTER = buildXYAdapter(X_VALUE_KEY, Y_VALUE_KEY, Y_ERROR_KEY);
 
     /**
-     * Return a default TableFormat corresponding to adapter
+     * Return a default TableFormat corresponding to adapter. Fills all of components explicitly presented in adapter as well as given components.
      *
      * @return
      */
-    public static TableFormat getXYFormat(ValuesAdapter adapter) {
+    public static TableFormat getFormat(ValuesAdapter adapter, String... components) {
         TableFormatBuilder builder = new TableFormatBuilder();
 
-        builder.addNumber(adapter.getComponentName(X_VALUE_KEY), X_VALUE_KEY);
-
-        builder.addNumber(adapter.getComponentName(X_ERROR_KEY), X_ERROR_KEY);
-
-        builder.addNumber(adapter.getComponentName(Y_VALUE_KEY), Y_VALUE_KEY);
-
-        builder.addNumber(adapter.getComponentName(Y_ERROR_KEY), Y_ERROR_KEY);
-
-//        adapter.getMeta().getMetaList(Y_AXIS).forEach(axisMeta -> {
-//            builder.addNumber(axisMeta.getString(VALUE_KEY), Y_VALUE_KEY);
-//            axisMeta.optString(ERROR_KEY).ifPresent(errKey -> builder.addNumber(errKey, Y_ERROR_KEY));
-//        });
+        Stream.concat(adapter.listComponents(), Stream.of(components)).distinct().forEach(component ->
+                builder.addNumber(adapter.getComponentName(component), component)
+        );
 
         return builder.build();
     }

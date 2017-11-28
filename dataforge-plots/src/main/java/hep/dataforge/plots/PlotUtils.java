@@ -127,7 +127,7 @@ public class PlotUtils {
 
     @NotNull
     public static Table extractData(DataPlot plot, Meta query) {
-        return new ListTable(Adapters.getXYFormat(plot.getAdapter()), plot.getData(query));
+        return new ListTable(Adapters.getFormat(plot.getAdapter(), Adapters.X_VALUE_KEY, Adapters.Y_VALUE_KEY), plot.getData(query));
 
     }
 }
