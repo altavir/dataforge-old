@@ -17,7 +17,7 @@ package hep.dataforge.stat.models;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Values;
 
 import java.util.function.Function;
@@ -38,7 +38,7 @@ public class WeightedXYModel extends XYModel {
         this.weightFunction = weightFunction;
     }
 
-    public WeightedXYModel(Meta meta, XYAdapter format, ParametricFunction source, Function<Values, Double> weightFunction) {
+    public WeightedXYModel(Meta meta, ValuesAdapter format, ParametricFunction source, Function<Values, Double> weightFunction) {
         super(meta, format, source);
         this.weightFunction = weightFunction;
     }

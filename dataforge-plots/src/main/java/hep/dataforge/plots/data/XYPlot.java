@@ -19,8 +19,7 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.tables.XYAdapter;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueUtils;
 import hep.dataforge.values.Values;
@@ -49,7 +48,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 @ValueDef(name = "thickness", type = {NUMBER}, info = "The type of the line.")
 @NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset",
         from = "class::hep.dataforge.tables.XYAdapter", tags = {FINAL_TAG})
-public abstract class XYPlot extends AbstractPlot<XYAdapter> {
+public abstract class XYPlot extends AbstractPlot {
 
     public XYPlot(String name) {
         super(name);
@@ -88,11 +87,11 @@ public abstract class XYPlot extends AbstractPlot<XYAdapter> {
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);
         if (from != Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.isBetween(getAdapter().getX(point), from, to));
+            return data.filter(point -> ValueUtils.isBetween(Adapters.getXValue(getAdapter(),point), from, to));
         } else if (from == Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(getAdapter().getX(point), to) < 0);
+            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(),point), to) < 0);
         } else if (to == Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(getAdapter().getX(point), from) > 0);
+            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(),point), from) > 0);
         } else {
             return data;
         }
@@ -108,18 +107,4 @@ public abstract class XYPlot extends AbstractPlot<XYAdapter> {
         return data;
     }
 
-    @Override
-    @SuppressWarnings("unchecked")
-    protected XYAdapter buildAdapter(Meta adapterMeta) {
-        if (adapterMeta.hasValue("class")) {
-            try {
-                Class<? extends XYAdapter> type = (Class<? extends XYAdapter>) Class.forName(adapterMeta.getString("class"));
-                return MetaMorph.morph(type, adapterMeta);
-            } catch (ClassNotFoundException e) {
-                throw new RuntimeException("Can't create the instance of adapter");
-            }
-        } else {
-            return new XYAdapter(adapterMeta);
-        }
-    }
 }

@@ -6,7 +6,6 @@ import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Values;
 
 import java.util.ArrayList;

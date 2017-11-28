@@ -15,47 +15,45 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 
+import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Stream;
+
 /**
  * Specialized adapter for poissonian distributed values
+ *
  * @author darksnake
  */
-public class XYPoissonAdapter extends XYAdapter {
+public class XYPoissonAdapter extends BasicAdapter {
 
-    public XYPoissonAdapter(){
-        super();
-    }
-
-    public XYPoissonAdapter(Meta adapterAnnotation) {
-        super(adapterAnnotation);
-    }
-
-    public XYPoissonAdapter(String xName, String yName) {
-        super(xName, yName);
+    public XYPoissonAdapter(Meta meta) {
+        super(meta);
     }
 
     @Override
-    public boolean providesYError(Values point) {
-        return super.providesYError(point) || getY(point).doubleValue()>0;
-    }
-
-    @Override
-    public Value getYerr(Values point) throws NameNotFoundException {
-        if(super.providesYError(point)){
-            return super.getYerr(point);
+    public Optional<Value> optComponent(Values values, String component) {
+        if (Objects.equals(component, Adapters.Y_ERROR_KEY)) {
+            return Optionals.either(super.optComponent(values, Adapters.Y_ERROR_KEY)).or(() -> {
+                double y = Adapters.getYValue(this, values).doubleValue();
+                if (y > 0) {
+                    return Optional.of(Value.of(Math.sqrt(y)));
+                } else {
+                    return Optional.empty();
+                }
+            }).opt();
         } else {
-            double y = getY(point).doubleValue();
-            if(y>0){
-                return Value.of(Math.sqrt(y));
-            }
+            return super.optComponent(values, component);
         }
-        return super.getYerr(point);
     }
-    
-    
-    
+
+    @Override
+    public Stream<String> listComponents() {
+        return Stream.concat(super.listComponents(), Stream.of(Adapters.Y_ERROR_KEY)).distinct();
+    }
+
 }

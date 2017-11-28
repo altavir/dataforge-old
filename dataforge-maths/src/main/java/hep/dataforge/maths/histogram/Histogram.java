@@ -11,8 +11,8 @@ import java.util.Optional;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static hep.dataforge.tables.XYAdapter.X_VALUE_KEY;
-import static hep.dataforge.tables.XYAdapter.Y_VALUE_KEY;
+import static hep.dataforge.tables.Adapters.X_VALUE_KEY;
+import static hep.dataforge.tables.Adapters.Y_VALUE_KEY;
 
 /**
  * A thread safe histogram

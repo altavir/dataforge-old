@@ -27,10 +27,7 @@ import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.Table;
-import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.*;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
@@ -69,7 +66,7 @@ public class FittingIOUtils {
         return res.build();
     }
 
-    public static Values getValueSet(String names, String doubles){
+    public static Values getValueSet(String names, String doubles) {
         Logger.getAnonymousLogger().warning("Using obsolete input method.");
         setDefault(Locale.ENGLISH);
         int i;
@@ -98,15 +95,15 @@ public class FittingIOUtils {
         return new NamedVector(list, values);
     }
 
-    public static void printParamSet(PrintWriter out, ParamSet set){
+    public static void printParamSet(PrintWriter out, ParamSet set) {
         out.println();
-       
+
         set.getParams().forEach((param) -> {
             out.println(param.toString());
         });
     }
 
-    public static ParamSet scanParamSet(Iterator<String> reader){
+    public static ParamSet scanParamSet(Iterator<String> reader) {
         String line = reader.next();
         Scanner scan;
         String str;
@@ -150,8 +147,8 @@ public class FittingIOUtils {
                 }
                 par.setDomain(lowerBound, upperBound);
             }
-            
-            
+
+
             pars.add(par);
             line = reader.next();
         }
@@ -165,19 +162,19 @@ public class FittingIOUtils {
         return res;
 
     }
-    
+
     /**
      * Выводит на печать значения прадвоподобия (с автоматическим
      * масштабированием) по двум параметрам. Сначала идет перебор по параметру
      * {@code par1}, потом по {@code par2}.
      *
-     * @param out a {@link java.io.PrintWriter} object.
-     * @param head a {@link java.lang.String} object.
-     * @param res a {@link hep.dataforge.stat.fit.FitState} object.
-     * @param par1 a {@link java.lang.String} object.
-     * @param par2 a {@link java.lang.String} object.
-     * @param num1 a int.
-     * @param num2 a int.
+     * @param out   a {@link java.io.PrintWriter} object.
+     * @param head  a {@link java.lang.String} object.
+     * @param res   a {@link hep.dataforge.stat.fit.FitState} object.
+     * @param par1  a {@link java.lang.String} object.
+     * @param par2  a {@link java.lang.String} object.
+     * @param num1  a int.
+     * @param num2  a int.
      * @param scale - на сколько ошибоку нужно отступать от максимума
      */
     public static void printLike2D(OutputStream out, String head, FitState res, String par1, String par2, int num1, int num2, double scale) {
@@ -225,12 +222,12 @@ public class FittingIOUtils {
      * Использует информацию об ошибках для определения региона. И случайный
      * гауссовский генератор
      *
-     * @param out a {@link java.io.PrintWriter} object.
-     * @param head a {@link java.lang.String} object.
-     * @param res a {@link hep.dataforge.stat.fit.FitState} object.
+     * @param out       a {@link java.io.PrintWriter} object.
+     * @param head      a {@link java.lang.String} object.
+     * @param res       a {@link hep.dataforge.stat.fit.FitState} object.
      * @param numpoints a int.
-     * @param scale a double.
-     * @param names a {@link java.lang.String} object.
+     * @param scale     a double.
+     * @param names     a {@link java.lang.String} object.
      */
     public static void printLogProbRandom(OutputStream out, String head, FitState res, int numpoints, double scale, String... names) {
 
@@ -304,14 +301,14 @@ public class FittingIOUtils {
     }
 
     public static void printSpectrumResiduals(PrintWriter out, ParametricFunction spectrum,
-                                              Iterable<Values> data, XYAdapter adapter, Values pars) {
+                                              Iterable<Values> data, ValuesAdapter adapter, Values pars) {
         out.println();// можно тут вставить шапку
         out.printf("%8s\t%8s\t%8s\t%8s\t%8s%n", "x", "data", "error", "fit", "residual");
 
         for (Values dp : data) {
-            double x = adapter.getX(dp).doubleValue();
-            double y = adapter.getY(dp).doubleValue();
-            double sigma = adapter.getYerr(dp).doubleValue();
+            double x = Adapters.getXValue(adapter, dp).doubleValue();
+            double y = Adapters.getYValue(adapter, dp).doubleValue();
+            double sigma = Adapters.getError(adapter, Adapters.Y_AXIS, dp).doubleValue();
 
             double value = spectrum.value(x, pars);
             double dif = -(value - y) / sigma;
@@ -319,7 +316,7 @@ public class FittingIOUtils {
             out.printf("%8g\t%8g\t%8g\t%8g\t%8g%n", x, y, sigma, value, dif);
         }
         out.flush();
-    }    
+    }
 
-    
+
 }

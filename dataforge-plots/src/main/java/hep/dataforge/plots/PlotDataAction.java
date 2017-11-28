@@ -24,8 +24,9 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.DataPlot;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.Table;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 
 import java.util.HashMap;
 import java.util.List;
@@ -95,7 +96,7 @@ public class PlotDataAction extends OneToOneAction<Table, Table> {
         } else {
             frame = holder.getPlotFrame(frame_name, findFrameDescription(meta, frame_name));
         }
-        XYAdapter adapter = new XYAdapter(meta.getMeta("adapter", Meta.buildEmpty("adapter")));
+        ValuesAdapter adapter = Adapters.buildAdapter(meta.getMeta("adapter", Meta.empty()));
 
         DataPlot plottableData = DataPlot.plot(name, adapter, input);
         plottableData.configure(meta);

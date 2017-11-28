@@ -21,6 +21,7 @@ import hep.dataforge.meta.SimpleConfigurable;
 import hep.dataforge.names.Name;
 import hep.dataforge.plots.Plot;
 import hep.dataforge.plots.PlotListener;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.NotNull;
@@ -30,13 +31,13 @@ import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
 /**
  * @author darksnake
  */
-public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfigurable implements Plot {
+public abstract class AbstractPlot extends SimpleConfigurable implements Plot {
 
     //public static final String PLOTTABLE_WRAPPER_TYPE = "plottable";
 
     private final Name name;
     private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();
-    private T adapter;
+    private ValuesAdapter adapter;
 
     public AbstractPlot(Name name) {
         this.name = name;
@@ -62,15 +63,13 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     }
 
     @Override
-    public T getAdapter() {
+    public ValuesAdapter getAdapter() {
         //If adapter is not defined, creating new adapter.
         if (adapter == null) {
-            adapter = buildAdapter(getMeta().getMeta(ADAPTER_KEY, Meta.empty()));
+            adapter = Adapters.buildAdapter(getMeta().getMeta(ADAPTER_KEY, Meta.empty()));
         }
         return adapter;
     }
-
-    protected abstract T buildAdapter(Meta adapterMeta);
 
     /**
      * Notify all listeners that configuration changed
@@ -95,7 +94,7 @@ public abstract class AbstractPlot<T extends ValuesAdapter> extends SimpleConfig
     }
 
 
-    public void setAdapter(T adapter) {
+    public void setAdapter(ValuesAdapter adapter) {
         this.configureNode(ADAPTER_KEY, adapter.toMeta());
         this.adapter = adapter;
     }

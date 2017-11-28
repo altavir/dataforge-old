@@ -18,8 +18,8 @@ package hep.dataforge.plots.data;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
@@ -81,7 +81,7 @@ public class TimePlot extends XYPlot {
      */
     public TimePlot(String name, String timestamp, String yName) {
         super(name);
-        super.setAdapter(new XYAdapter(timestamp, yName));
+        super.setAdapter(Adapters.buildXYAdapter(timestamp, yName));
         this.timestamp = timestamp;
         this.yName = yName;
     }

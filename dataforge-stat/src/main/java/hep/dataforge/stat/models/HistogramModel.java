@@ -19,8 +19,10 @@ import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.maths.integration.GaussRuleIntegrator;
 import hep.dataforge.maths.integration.UnivariateIntegrator;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
+import hep.dataforge.tables.BasicAdapter;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 
@@ -38,7 +40,19 @@ import static java.lang.Math.log;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class HistogramModel extends AbstractModel<HistogramAdapter> {
+public class HistogramModel extends AbstractModel {
+    public static final String BIN_BEGIN_NAME = "binBegin";
+    public static final String BIN_END_NAME = "binEnd";
+    public static final String BIN_CENTER_NAME = "binCenter";
+    public static final String COUNT_NAME = "count";
+
+    public static BasicAdapter buildAdapter(String binBeginName, String binEndName, String countName) {
+        Meta adapterMeta = new MetaBuilder("adapter").
+                setValue(BIN_BEGIN_NAME, binBeginName)
+                .setValue(BIN_END_NAME, binEndName)
+                .setValue(COUNT_NAME, countName);
+        return new BasicAdapter(adapterMeta);
+    }
 
     private final UnivariateIntegrator integrator = new GaussRuleIntegrator(10);
     private final ParametricFunction source;
@@ -46,12 +60,12 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
     private boolean calculateCountInBin = false;
 
     public HistogramModel(Meta meta, ParametricFunction source) {
-        super(meta, source.getNames(), new HistogramAdapter());
+        super(meta, source.getNames(), new BasicAdapter(Meta.empty()));
         this.source = source;
     }
 
     public HistogramModel(Meta meta, ParametricFunction source, String binBeginName, String binEndName, String countName) {
-        super(meta, source.getNames(), new HistogramAdapter(binBeginName, binEndName, countName));
+        super(meta, source.getNames(), buildAdapter(binBeginName, binEndName, countName));
         this.source = source;
     }
 
@@ -61,7 +75,11 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
     @Override
     public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
-            return this.derivValue(parName, adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
+            return this.derivValue(parName,
+                    adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
+                    adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                    pars
+            );
         } else {
             throw new NotDefinedException(String.format("The derivative for parameter '%s' is not provided by model", parName));
         }
@@ -72,7 +90,11 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
      */
     @Override
     public double dispersion(Values point, Values pars) {
-        double res = this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars);
+        double res = this.value(
+                adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
+                adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                pars
+        );
         if (res < 1) {
             return 1;
         }
@@ -85,8 +107,12 @@ public class HistogramModel extends AbstractModel<HistogramAdapter> {
     @Override
     public double distance(Values point, Values pars) {
 //        double x = point.binCenter();
-        long y = adapter.getCount(point);
-        return this.value(adapter.getBinBegin(point), adapter.getBinEnd(point), pars) - y;
+        long y = adapter.getComponent(point, COUNT_NAME).longValue();
+        return this.value(
+                adapter.getComponent(point, BIN_BEGIN_NAME).doubleValue(),
+                adapter.getComponent(point, BIN_END_NAME).doubleValue(),
+                pars
+        ) - y;
     }
 
     public boolean isCalculateCountInBin() {

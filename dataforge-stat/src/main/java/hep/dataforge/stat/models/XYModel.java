@@ -18,7 +18,8 @@ package hep.dataforge.stat.models;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.parametric.ParametricFunction;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.Adapters;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Values;
 
 import static java.lang.Math.log;
@@ -32,7 +33,7 @@ import static java.lang.Math.sqrt;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class XYModel extends AbstractModel<XYAdapter> {
+public class XYModel extends AbstractModel {
 
     public static final String WEIGHT = "@weight";
 
@@ -40,13 +41,13 @@ public class XYModel extends AbstractModel<XYAdapter> {
 
 
     public XYModel(Meta meta, ParametricFunction source) {
-        super(meta, source.getNames(), new XYAdapter(meta));
+        super(meta, source.getNames(), Adapters.buildAdapter(meta));
         this.source = source;
     }
 
 
-    public XYModel(Meta meta, XYAdapter format, ParametricFunction source) {
-        super(meta, source.getNames(), format);
+    public XYModel(Meta meta, ValuesAdapter adapter, ParametricFunction source) {
+        super(meta, source.getNames(), adapter);
         this.source = source;
     }
 
@@ -57,7 +58,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
     public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             if (source.providesDeriv(parName)) {
-                return derivValue(parName, adapter.getX(point).doubleValue(), pars);
+                return derivValue(parName, Adapters.getXValue(adapter, point).doubleValue(), pars);
             } else {
                 throw new NotDefinedException();
             }
@@ -78,7 +79,8 @@ public class XYModel extends AbstractModel<XYAdapter> {
         if (point.getNames().contains(WEIGHT)) {
             return point.getDouble(WEIGHT);
         } else {
-            double r = adapter.getYerr(point).doubleValue();
+            //TODO add warning on missing error
+            double r = Adapters.optYError(adapter, point).orElse(1d);
             return 1d / (r * r);
         }
     }
@@ -88,8 +90,8 @@ public class XYModel extends AbstractModel<XYAdapter> {
      */
     @Override
     public double distance(Values point, Values pars) {
-        double x = adapter.getX(point).doubleValue();
-        double y = adapter.getY(point).doubleValue();
+        double x = Adapters.getXValue(adapter, point).doubleValue();
+        double y = Adapters.getYValue(adapter, point).doubleValue();
         return value(x, pars) - y;
     }
 
@@ -101,7 +103,7 @@ public class XYModel extends AbstractModel<XYAdapter> {
         double dist = this.distance(point, pars);
         double disp = this.dispersion(point, pars);
         double base; // нормировка
-        double xerr = adapter.getXerr(point).doubleValue();
+        double xerr = Adapters.optXError(adapter,point).orElse(0d);
         if (xerr > 0) {
             base = log(2d * Math.PI * sqrt(disp) * xerr);
         } else {

@@ -22,7 +22,6 @@ import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Values;
 import javafx.application.Application;
 import javafx.scene.Scene;

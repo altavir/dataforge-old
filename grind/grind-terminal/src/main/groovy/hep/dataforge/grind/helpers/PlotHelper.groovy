@@ -26,7 +26,8 @@ import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
-import hep.dataforge.tables.XYAdapter
+import hep.dataforge.tables.Adapters
+import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.values.ValueType
 
 import java.util.function.Function
@@ -91,9 +92,9 @@ class PlotHelper extends AbstractHelper {
     private XYPlot buildDataPlot(Map map) {
         DataPlot plot = new DataPlot(map.getOrDefault("name", "data") as String, map.getOrDefault("meta", Meta.empty()) as Meta)
         if (map["adapter"]) {
-            plot.setAdapter(map["adapter"] as XYAdapter)
+            plot.setAdapter(map["adapter"] as ValuesAdapter)
         } else {
-            plot.setAdapter(XYAdapter.DEFAULT_ADAPTER)
+            plot.setAdapter(Adapters.DEFAULT_XY_ADAPTER)
         }
         if (map["data"]) {
             def data = map.data

@@ -8,11 +8,12 @@ package hep.dataforge.plots.data;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.tables.*;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.Values;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * @author Alexander Nozik
@@ -29,11 +30,9 @@ public class DataPlotUtils {
                 .map(frame::get)
                 .filter(pl -> !visibleOnly || pl.getMeta().getBoolean("visible", true))
                 .forEach(pl -> {
-                    XYAdapter adapter = XYAdapter.from(pl.getAdapter());
-
                     names.add(pl.getTitle());
                     pl.getData().forEach(point -> {
-                        Value x = adapter.getX(point);
+                        Value x = Adapters.getXValue(pl.getAdapter(),point);
                         ValueMap.Builder mdp;
                         if (points.containsKey(x)) {
                             mdp = points.get(x);
@@ -42,7 +41,7 @@ public class DataPlotUtils {
                             mdp.putValue("x", x);
                             points.put(x, mdp);
                         }
-                        mdp.putValue(pl.getTitle(), adapter.getY(point));
+                        mdp.putValue(pl.getTitle(), Adapters.getYValue(pl.getAdapter(),point));
                     });
                 });
 
@@ -50,25 +49,4 @@ public class DataPlotUtils {
         res.rows(points.values().stream().map(ValueMap.Builder::build).collect(Collectors.toList()));
         return res.build();
     }
-
-    /**
-     * Build a group from single point stream but multiple y-s
-     *
-     * @param xName
-     * @param yNames
-     * @param source
-     * @return
-     */
-    public static PlottableGroup<DataPlot> buildGroup(String xName, Collection<String> yNames, Stream<Values> source) {
-        List<Values> points = source.collect(Collectors.toList());
-        List<DataPlot> plottables = yNames.stream().map(yName -> {
-            DataPlot pl = new DataPlot(yName);
-            pl.setAdapter(new XYAdapter(xName, yName));
-            return pl;
-        }).collect(Collectors.toList());
-        plottables.forEach(pl -> pl.setData(points));
-
-        return new PlottableGroup<DataPlot>(plottables);
-    }
-
 }

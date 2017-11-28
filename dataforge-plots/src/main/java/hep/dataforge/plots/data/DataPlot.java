@@ -18,8 +18,9 @@ package hep.dataforge.plots.data;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -27,6 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
+import static hep.dataforge.tables.Adapters.*;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
@@ -45,14 +47,14 @@ public class DataPlot extends XYPlot {
 
         List<Values> data = new ArrayList<>();
         for (int i = 0; i < y.length; i++) {
-            ValueMap.Builder point = ValueMap.of(new String[]{XYAdapter.X_AXIS, XYAdapter.Y_AXIS}, x[i], y[i]).builder();
+            ValueMap.Builder point = ValueMap.of(new String[]{X_AXIS, Y_AXIS}, x[i], y[i]).builder();
 
             if (xErrs != null) {
-                point.putValue(XYAdapter.X_ERROR_KEY, xErrs[i]);
+                point.putValue(X_ERROR_KEY, xErrs[i]);
             }
 
             if (yErrs != null) {
-                point.putValue(XYAdapter.Y_ERROR_KEY, yErrs[i]);
+                point.putValue(Y_ERROR_KEY, yErrs[i]);
             }
 
             data.add(point.build());
@@ -65,7 +67,7 @@ public class DataPlot extends XYPlot {
         return plot(name, x, y, null, null);
     }
 
-    public static DataPlot plot(String name, XYAdapter adapter, boolean showErrors) {
+    public static DataPlot plot(String name, ValuesAdapter adapter, boolean showErrors) {
         MetaBuilder builder = new MetaBuilder("dataPlot").setValue("showErrors", showErrors);
         DataPlot plot = new DataPlot(name);
         plot.setAdapter(adapter);
@@ -73,7 +75,7 @@ public class DataPlot extends XYPlot {
         return plot;
     }
 
-    public static DataPlot plot(String name, XYAdapter adapter, Iterable<Values> data) {
+    public static DataPlot plot(String name, ValuesAdapter adapter, Iterable<Values> data) {
         DataPlot plot = plot(name, adapter, true);
         plot.fillData(data);
         return plot;
@@ -134,7 +136,7 @@ public class DataPlot extends XYPlot {
     }
 
     public DataPlot append(Number x, Number y) {
-        return append(getAdapter().buildXYDataPoint(x.doubleValue(), y.doubleValue()));
+        return append(Adapters.buildXYDataPoint(getAdapter(), x.doubleValue(), y.doubleValue()));
     }
 
     @Override

@@ -19,11 +19,12 @@ import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Value;
 
 import java.util.Optional;
 
+import static hep.dataforge.tables.Adapters.X_AXIS;
+import static hep.dataforge.tables.Adapters.Y_AXIS;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 import static hep.dataforge.values.ValueType.NUMBER;
 
@@ -46,9 +47,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(XYAdapter.X_AXIS, getXAxisConfig(), getMeta());
+        updateAxis(X_AXIS, getXAxisConfig(), getMeta());
 
-        updateAxis(XYAdapter.Y_AXIS, getYAxisConfig(), getMeta());
+        updateAxis(Y_AXIS, getYAxisConfig(), getMeta());
 
         updateLegend(getLegendConfig());
 
@@ -91,10 +92,11 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
     /**
      * Get actual color value for displayed plot. Some color could be assigned even if it is missing from configuration
+     *
      * @param name
      * @return
      */
-    public Optional<Value> getActualColor(Name name){
+    public Optional<Value> getActualColor(Name name) {
         return getPlots().opt(name).flatMap(plot -> plot.getMeta().optValue("color"));
     }
 }

@@ -15,32 +15,64 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import javafx.util.Pair;
+
+import java.util.Optional;
+import java.util.stream.Stream;
 
 /**
- * An adapter to interpret datapoint
+ * An adapter to read specific components from Values
+ *
  * @author Alexander Nozik
  */
 public interface ValuesAdapter extends Metoid, MetaMorph {
-    
+
     String ADAPTER_KEY = "@adapter";
 
     /**
-     * Meta declaration for this adapter
-     * @return 
-     */
-    @Override
-    Meta getMeta();
-
-    /**
      * Get a value with specific designation from given DataPoint
+     *
      * @param point
      * @param component
-     * @return 
+     * @return
      */
-    Value getComponent(Values point, String component);
+    default Value getComponent(Values point, String component) {
+        return optComponent(point, component).orElseThrow(() -> new NameNotFoundException("Component with name " + component + " not found", component));
+    }
+
+    default public String getComponentName(String component) {
+        return getMeta().getString(component);
+    }
+
+    /**
+     * Opt a specific component
+     *
+     * @param values
+     * @param component
+     * @return
+     */
+    default Optional<Value> optComponent(Values values, String component) {
+        return values.optValue(getComponentName(component));
+    }
+
+    default Optional<Double> optDouble(Values values, String component) {
+        return optComponent(values, component).map(Value::doubleValue);
+    }
+
+    /**
+     * List all components declared in this adapter.
+     *
+     * @return
+     */
+    default Stream<String> listComponents() {
+        return MetaUtils.valueStream(getMeta()).map(Pair::getKey);
+    }
+
+
 }

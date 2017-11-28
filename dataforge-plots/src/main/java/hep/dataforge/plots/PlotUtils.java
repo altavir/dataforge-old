@@ -22,9 +22,9 @@ import hep.dataforge.io.envelopes.XMLMetaType;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.DataPlot;
+import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
-import hep.dataforge.tables.XYAdapter;
 import javafx.scene.control.MenuItem;
 import javafx.stage.FileChooser;
 import javafx.stage.Window;
@@ -127,8 +127,7 @@ public class PlotUtils {
 
     @NotNull
     public static Table extractData(DataPlot plot, Meta query) {
-        XYAdapter adapter = plot.getAdapter();
-        return new ListTable(adapter.getFormat(), plot.getData(query));
+        return new ListTable(Adapters.getXYFormat(plot.getAdapter()), plot.getData(query));
 
     }
 }

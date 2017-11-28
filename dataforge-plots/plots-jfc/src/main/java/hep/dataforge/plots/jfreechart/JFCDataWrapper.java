@@ -7,7 +7,8 @@ package hep.dataforge.plots.jfreechart;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plot;
-import hep.dataforge.tables.XYAdapter;
+import hep.dataforge.tables.Adapters;
+import hep.dataforge.tables.ValuesAdapter;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
@@ -25,7 +26,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     private Plot plot;
 
-    private XYAdapter adapter;
+    private ValuesAdapter adapter;
     private List<Values> data;
     private Meta query = Meta.empty();
     private Integer index = 0;
@@ -33,7 +34,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     public JFCDataWrapper(Plot plot) {
         this.plot = plot;
-        adapter = XYAdapter.from(plot.getAdapter());
+        adapter = plot.getAdapter();
     }
 
     public Integer getIndex() {
@@ -68,7 +69,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     @Override
     public int getSeriesCount() {
-        return adapter.getYCount();
+        return 1;
     }
 
     @Override
@@ -76,32 +77,32 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         if (getSeriesCount() == 1) {
             return plot.getName().toUnescaped();
         } else {
-            return plot.getName().append(adapter.getYTitle(i)).toUnescaped();
+            return plot.getName().append(Adapters.getTitle(adapter, Adapters.Y_AXIS)).toUnescaped();
         }
     }
 
     @NotNull
     @Override
     public Number getStartX(int i, int i1) {
-        return adapter.getXLower(getAt(i1));
+        return Adapters.getLowerBound(adapter, Adapters.X_AXIS, getAt(i1));
     }
 
     @NotNull
     @Override
     public Number getEndX(int i, int i1) {
-        return adapter.getXUpper(getAt(i1));
+        return Adapters.getUpperBound(adapter, Adapters.X_AXIS, getAt(i1));
     }
 
     @NotNull
     @Override
     public Number getStartY(int i, int i1) {
-        return adapter.getYLower(getAt(i1), i);
+        return Adapters.getLowerBound(adapter, Adapters.Y_AXIS, getAt(i1));
     }
 
     @NotNull
     @Override
     public Number getEndY(int i, int i1) {
-        return adapter.getYUpper(getAt(i1), i);
+        return Adapters.getUpperBound(adapter, Adapters.Y_AXIS, getAt(i1));
     }
 
     @Override
@@ -111,7 +112,13 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
 
     @Override
     public Number getX(int i, int i1) {
-        return transform(adapter.getX(getAt(i1)));
+        return transform(Adapters.getXValue(adapter, getAt(i1)));
+    }
+
+
+    @Override
+    public Number getY(int i, int i1) {
+        return transform(Adapters.getYValue(adapter, getAt(i1)));
     }
 
     @Nullable
@@ -123,10 +130,6 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         }
     }
 
-    @Override
-    public Number getY(int i, int i1) {
-        return transform(adapter.getY(getAt(i1), i));
-    }
 
     public void invalidateData() {
         this.data = null;

@@ -28,10 +28,9 @@ import hep.dataforge.values.Values;
 /**
  * Basic implementation for model
  *
- * @param <T>
  * @author Alexander Nozik
  */
-public abstract class AbstractModel<T extends ValuesAdapter> extends MetaHolder implements Model {
+public abstract class AbstractModel extends MetaHolder implements Model {
 //TODO add default parameters to model
 
     private final Names names;
@@ -39,9 +38,9 @@ public abstract class AbstractModel<T extends ValuesAdapter> extends MetaHolder 
     /**
      *
      */
-    protected T adapter;
+    protected ValuesAdapter adapter;
 
-    protected AbstractModel(Meta meta, Names names, T adapter) {
+    protected AbstractModel(Meta meta, Names names, ValuesAdapter adapter) {
         super(meta);
         this.adapter = adapter;
         this.names = names;
@@ -51,11 +50,11 @@ public abstract class AbstractModel<T extends ValuesAdapter> extends MetaHolder 
 //        this(meta, source.getNames(), adapter);
 //    }
 
-    public T getAdapter() {
+    public ValuesAdapter getAdapter() {
         return adapter;
     }
 
-    public final void setAdapter(T adapter) {
+    public final void setAdapter(ValuesAdapter adapter) {
         this.adapter = adapter;
     }
 

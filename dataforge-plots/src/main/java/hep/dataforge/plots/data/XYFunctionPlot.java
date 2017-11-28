@@ -17,8 +17,6 @@ package hep.dataforge.plots.data;
 
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.tables.ValueMap;
-import hep.dataforge.tables.XYAdapter;
 import hep.dataforge.values.Values;
 import javafx.beans.property.*;
 import javafx.beans.value.ObservableValue;
@@ -29,6 +27,8 @@ import java.util.TreeMap;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER;
+import static hep.dataforge.tables.Adapters.buildXYDataPoint;
 import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
@@ -188,7 +188,7 @@ public class XYFunctionPlot extends XYPlot {
         }
         validateCache();
         return cache.entrySet().stream()
-                .map(entry -> ValueMap.of(new String[]{XYAdapter.X_AXIS, XYAdapter.Y_AXIS}, entry.getKey(), entry.getValue()))
+                .map(entry -> buildXYDataPoint(DEFAULT_XY_ADAPTER, entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
     }
 
