@@ -16,6 +16,7 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.runBlocking
+import org.slf4j.Logger
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -28,6 +29,8 @@ class ActionEnv(val context: Context, val name: String, val meta: Meta, val log:
  */
 class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBuilder) {
     lateinit var result: suspend ActionEnv.(T) -> R;
+
+    var logger: Logger = context.getLogger(name)
 
     /**
      * Calculate the result of goal
@@ -54,30 +57,34 @@ class KPipe<T, R>(
             throw RuntimeException("Type mismatch in action $name. $inputType expected, but ${data.type()} received")
         }
         val builder = DataSet.builder(outputType)
-        runBlocking {
-            data.dataStream(true).forEach {
-                val laminate = Laminate(it.meta, meta)
+        data.dataStream(true).forEach {
+            val laminate = Laminate(it.meta, meta)
 
-                val pipe = PipeBuilder<T, R>(
-                        context,
-                        it.name,
-                        laminate.builder
-                ).apply(action)
+            val pipe = PipeBuilder<T, R>(
+                    context,
+                    it.name,
+                    laminate.builder
+            ).apply(action)
 
-                val env = ActionEnv(
-                        context,
-                        pipe.name,
-                        pipe.meta,
-                        context.getChronicle(Name.joinString(pipe.name, name))
-                )
+            val env = ActionEnv(
+                    context,
+                    pipe.name,
+                    pipe.meta,
+                    context.getChronicle(Name.joinString(pipe.name, name))
+            )
 
-                val dispatcher = buildExecutor(context, laminate).asCoroutineDispatcher()
+            val dispatcher = buildExecutor(context, laminate).asCoroutineDispatcher()
 
-                val goal = it.goal.pipe(dispatcher) { pipe.result.invoke(env, it) }
-                val res = NamedData(env.name, goal, outputType, env.meta)
-                builder.putData(res)
+            val goal = it.goal.pipe(dispatcher) {
+                pipe.logger.info("Starting task ${this.name} on ${pipe.name}")
+                pipe.result.invoke(env, it).also {
+                    pipe.logger.info("Finished task ${this.name} on ${pipe.name}")
+                }
             }
+            val res = NamedData(env.name, goal, outputType, env.meta)
+            builder.putData(res)
         }
+
         return builder.build();
     }
 

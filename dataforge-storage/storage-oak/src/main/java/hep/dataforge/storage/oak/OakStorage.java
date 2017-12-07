@@ -27,7 +27,7 @@ public class OakStorage extends AbstractStorage {
     }
 
     @Override
-    protected Storage createShelf(String name, Meta shelfConfiguration) throws StorageException {
+    protected Storage createShelf(Meta shelfConfiguration, String name) throws StorageException {
             throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
     }
 

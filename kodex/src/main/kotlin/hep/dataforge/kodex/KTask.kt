@@ -87,7 +87,7 @@ class KTaskBuilder(val name: String) {
                 outType = R::class.java,
                 action = action
         )
-        action<T, R>(pipe, from, to);
+        action(pipe, from, to);
     }
 
     inline fun <reified T, reified R> pipe(
@@ -103,7 +103,7 @@ class KTaskBuilder(val name: String) {
                     result(action)
                 }
         )
-        action<T, R>(pipe, from, to);
+        action(pipe, from, to);
     }
 
 
@@ -118,7 +118,7 @@ class KTaskBuilder(val name: String) {
                 outType = R::class.java,
                 action = action
         )
-        action<T, R>(join, from, to);
+        action(join, from, to);
     }
 
     inline fun <reified T, reified R> join(
@@ -134,7 +134,7 @@ class KTaskBuilder(val name: String) {
                     result(null, action)
                 }
         )
-        action<T, R>(join, from, to);
+        action(join, from, to);
     }
 
     internal fun build(): KTask {

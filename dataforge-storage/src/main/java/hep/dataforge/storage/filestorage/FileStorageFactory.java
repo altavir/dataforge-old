@@ -11,9 +11,12 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.StorageType;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 /**
  * @author Alexander Nozik
@@ -29,17 +32,22 @@ public class FileStorageFactory implements StorageType {
     }
 
     public static MetaBuilder buildStorageMeta(File file, boolean readOnly, boolean monitor) {
-        return buildStorageMeta(file.toURI(),readOnly,monitor);
+        return buildStorageMeta(file.toURI(), readOnly, monitor);
     }
 
     /**
      * Build local storage with Global context. Used for tests.
+     *
      * @param file
      * @return
      */
-    public static FileStorage buildLocal(File file) {
-        return new FileStorage(Global.instance(),
-                new MetaBuilder("storage").setValue("path", file.toURI()));
+    public static FileStorage buildLocal(File file, boolean monitor) {
+        Path path = file.toPath();
+        Meta meta = new MetaBuilder("storage")
+                .setValue("path", path)
+                .setValue("monitor", monitor);
+
+        return new FileStorage(Global.instance(), meta, path);
     }
 
     @Override
@@ -47,9 +55,11 @@ public class FileStorageFactory implements StorageType {
         return "file";
     }
 
+    @NotNull
     @Override
-    public Storage build(Context context, Meta annotation) {
-        return new FileStorage(context, annotation);
+    public Storage build(Context context, Meta meta) {
+        Path path = meta.optString("path").map(URI::create).map(Paths::get).orElse(context.getIo().getWorkDirectory());
+        return new FileStorage(context, meta, path);
     }
 
 }

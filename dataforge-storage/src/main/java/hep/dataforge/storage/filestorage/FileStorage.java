@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,6 @@
  */
 package hep.dataforge.storage.filestorage;
 
-import ch.qos.logback.classic.Level;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
@@ -25,9 +24,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.api.*;
 import hep.dataforge.storage.commons.AbstractStorage;
 import hep.dataforge.storage.commons.StorageUtils;
-import hep.dataforge.values.Value;
 import org.apache.commons.io.FilenameUtils;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
@@ -58,45 +55,35 @@ public class FileStorage extends AbstractStorage {
         return FilenameUtils.getBaseName(path.getFileName().toString());
     }
 
-    static {
-        //set up slf4j bridge and logging level
-        Logger logger = LoggerFactory.getLogger("org.apache.commons.vfs2");
-        if (logger instanceof ch.qos.logback.classic.Logger) {
-            ((ch.qos.logback.classic.Logger) logger).setLevel(Level.WARN);
-        }
-    }
-
     private final Path dataDir;
     private WatchService monitor;
 //    private Thread storageMonitorThread;
 
     /**
-     * Create a root storage in directory
+     * Create a child storage
      *
+     * @param parent
      * @param config
+     * @param shelf
      * @throws StorageException
      */
-    public FileStorage(Context context, Meta config) throws StorageException {
-        super(context, config);
-        this.dataDir = config.optValue("path").map(Value::stringValue).map(Paths::get)
-                .orElse(context.getIo().getWorkDirectory());
+    protected FileStorage(FileStorage parent, Meta config, String shelf) throws StorageException {
+        super(parent, shelf, config);
+        //replacing points with path separators we builder directory structure
+
+        dataDir = parent.getDataDir().resolve(shelf.replace(".", File.separator));
         startup();
     }
 
     /**
-     * Create a child storage
+     * Create a root storage in directory
      *
-     * @param parent
-     * @param dirName
-     * @param config
+     * @param meta
      * @throws StorageException
      */
-    protected FileStorage(FileStorage parent, String dirName, Meta config) throws StorageException {
-        super(parent, dirName, config);
-        //replacing points with path separators we builder directory structure
-
-        dataDir = parent.getDataDir().resolve(dirName.replace(".", File.separator));
-        startup();
+    public FileStorage(Context context, Meta meta, Path path) throws StorageException {
+        super(context, meta);
+        this.dataDir = path;
     }
 
     private boolean checkIfEnvelope(Path file) {
@@ -213,7 +200,7 @@ public class FileStorage extends AbstractStorage {
         if (Files.isDirectory(file)) {
             try {
                 String dirName = file.getFileName().toString();
-                FileStorage shelf = createShelf(dirName, buildDirectoryMeta(file));
+                FileStorage shelf = createShelf(buildDirectoryMeta(file), dirName);
                 shelves.putIfAbsent(dirName, shelf);
                 shelf.refresh();
             } catch (StorageException ex) {
@@ -305,8 +292,8 @@ public class FileStorage extends AbstractStorage {
     }
 
     @Override
-    public FileStorage createShelf(String path, Meta an) throws StorageException {
-        return new FileStorage(this, path, an);
+    public FileStorage createShelf(Meta meta, String path) throws StorageException {
+        return new FileStorage(this, meta, path);
     }
 
     @Override

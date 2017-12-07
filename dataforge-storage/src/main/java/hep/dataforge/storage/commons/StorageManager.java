@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -24,12 +24,9 @@ import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.filestorage.FileStorage;
+import hep.dataforge.storage.api.StorageType;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static hep.dataforge.storage.api.Storage.STORAGE_TARGET;
@@ -54,7 +51,21 @@ public class StorageManager extends BasicPlugin {
     /**
      * Storage registry
      */
-    private Map<Meta, Storage> shelves = new HashMap<>();
+    private Map<Meta, Storage> storages = new HashMap<>();
+
+
+    private static final ServiceLoader<StorageType> loader = ServiceLoader.load(StorageType.class);
+    private static final String DEFAULT_STORAGE_TYPE = "file";
+
+    private static Optional<StorageType> getStorageFactory(String type) {
+        for (StorageType st : loader) {
+            if (st.type().equalsIgnoreCase(type)) {
+                return Optional.of(st);
+            }
+        }
+        return Optional.empty();
+    }
+
 
     /**
      * Return blank file storage in current working directory
@@ -63,9 +74,7 @@ public class StorageManager extends BasicPlugin {
      */
     public Storage getDefaultStorage() {
         try {
-            return shelves.values().stream().findFirst().orElseGet(()->{
-                return new FileStorage(getContext(), Meta.empty());
-            });
+            return storages.values().stream().findFirst().orElseGet(() -> buildStorage(Meta.empty()));
 
         } catch (StorageException ex) {
             throw new RuntimeException("Can't initialize default storage", ex);
@@ -74,17 +83,25 @@ public class StorageManager extends BasicPlugin {
 
     @Provides(STORAGE_TARGET)
     public Optional<Storage> optStorage(String name) {
-        return shelves.values().stream().filter(it -> Objects.equals(it.getName(), name)).findAny();
+        return storages.values().stream().filter(it -> Objects.equals(it.getName(), name)).findAny();
     }
 
     @ProvidesNames(STORAGE_TARGET)
     public Stream<String> storageNames() {
-        return shelves.values().stream().map(Named::getName).distinct();
+        return storages.values().stream().map(Named::getName).distinct();
     }
 
     public Storage buildStorage(Meta config) {
         //FIXME fix duplicate names
-        return shelves.computeIfAbsent(config, cfg -> StorageFactory.buildStorage(getContext(), cfg));
+        return storages.computeIfAbsent(config, cfg -> {
+            String type = cfg.getString("type", DEFAULT_STORAGE_TYPE);
+            Optional<StorageType> factory = getStorageFactory(type);
+            if (factory.isPresent()) {
+                return factory.get().build(getContext(), cfg);
+            } else {
+                throw new RuntimeException("Can't find Storage factory for type " + type);
+            }
+        });
     }
 
     @Override
@@ -99,14 +116,14 @@ public class StorageManager extends BasicPlugin {
 
     @Override
     public void detach() {
-        shelves.values().forEach(shelf -> {
+        storages.values().forEach(shelf -> {
             try {
                 shelf.close();
             } catch (Exception e) {
                 getLogger().error("Failed to close storage", e);
             }
         });
-        shelves.clear();
+        storages.clear();
         super.detach();
     }
 }

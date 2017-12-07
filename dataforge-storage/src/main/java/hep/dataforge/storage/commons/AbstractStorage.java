@@ -161,7 +161,7 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     public final Storage buildShelf(String shelfName, Meta shelfConfiguration) throws StorageException {
         Name name = Name.of(shelfName);
         if (name.getLength() == 1) {
-            Storage shelf = createShelf(shelfName, shelfConfiguration);
+            Storage shelf = createShelf(shelfConfiguration, shelfName);
             this.shelves.put(shelfName, shelf);
             return shelf;
         } else {
@@ -173,12 +173,12 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     /**
      * Create a direct child shelf but do not add it to shelf list
      *
-     * @param name
      * @param shelfConfiguration
+     * @param name
      * @return
      * @throws StorageException
      */
-    protected abstract Storage createShelf(String name, Meta shelfConfiguration) throws StorageException;
+    protected abstract Storage createShelf(Meta shelfConfiguration, String name) throws StorageException;
 
     /**
      * update an annotation of loader using overriding annotation

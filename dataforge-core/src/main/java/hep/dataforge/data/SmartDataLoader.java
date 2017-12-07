@@ -14,8 +14,8 @@ public class SmartDataLoader implements DataLoader {
     public static DataLoader<?> getFactory(Context context, Meta meta) {
         if (meta.hasValue("dataLoaderClass")) {
             try {
-                return (DataLoader<Object>) Class.forName(meta.getString("dataLoaderClass")).newInstance();
-            } catch (ClassNotFoundException | IllegalAccessException | InstantiationException e) {
+                return (DataLoader<Object>) Class.forName(meta.getString("dataLoaderClass")).getConstructor().newInstance();
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
         } else {
