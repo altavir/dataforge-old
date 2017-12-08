@@ -126,8 +126,7 @@ public class Data<T> implements Metoid {
      * @return
      */
     public T get() {
-        goal.run();
-        return goal.result().join();
+        return goal.get();
     }
 
     /**

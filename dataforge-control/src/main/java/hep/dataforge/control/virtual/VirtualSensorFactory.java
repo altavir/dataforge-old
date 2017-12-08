@@ -134,7 +134,7 @@ public class VirtualSensorFactory<T> {
             }
 
             @Override
-            public List<StateDef> stateDefs() {
+            public List<StateDef> getStateDefs() {
                 return states;
             }
 

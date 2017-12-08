@@ -75,7 +75,7 @@ class WorkspaceSpecTest extends Specification {
                 }
             }
         }
-        def result = wsp.runTask("test").compute("data_5")
+        def result = wsp.runTask("test").get("data_5")
         def joinResult = wsp.runTask("testJoin").getData().get()
         then:
         result.endsWith("hurray!")

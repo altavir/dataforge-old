@@ -85,7 +85,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
             }
 
             connection.open();
-            updateState(CONNECTED_STATE, true);
+            updateLogicalState(CONNECTED_STATE, true);
         }
     }
 
@@ -95,7 +95,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
             connection.close();
             //PENDING do we need not to close the port sometimes. Should it be configurable?
             connection.getPort().close();
-            updateState(CONNECTED_STATE, false);
+            updateLogicalState(CONNECTED_STATE, false);
         } catch (Exception ex) {
             throw new ControlException(ex);
         }
@@ -132,11 +132,11 @@ public abstract class PortSensor<T> extends Sensor<T> {
         if (Objects.equals(stateName, CONNECTED_STATE)) {
             if (value.booleanValue()) {
                 connection.open();
-                updateState(CONNECTED_STATE, true);
+                updateLogicalState(CONNECTED_STATE, true);
             } else {
                 try {
                     connection.close();
-                    updateState(CONNECTED_STATE, false);
+                    updateLogicalState(CONNECTED_STATE, false);
                 } catch (Exception e) {
                     throw new ControlException("Failed to close the connection", e);
                 }
@@ -153,7 +153,7 @@ public abstract class PortSensor<T> extends Sensor<T> {
 //            String port = meta().getString(PORT_NAME_KEY);
 //            setPort(buildPort(port));
 //            this.port.open();
-//            updateState(CONNECTED_STATE, true);
+//            updateLogicalState(CONNECTED_STATE, true);
 //        }
 //        return port;
 //    }

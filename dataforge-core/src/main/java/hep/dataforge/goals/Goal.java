@@ -31,6 +31,10 @@ public interface Goal<T> extends RunnableFuture<T> {
      */
     void run();
 
+    /**
+     * She same as {@code run}, but using chain pattern
+     * @return
+     */
     default Goal<T> start() {
         run();
         return this;
@@ -48,9 +52,13 @@ public interface Goal<T> extends RunnableFuture<T> {
      *
      * @return
      */
-    default T get() throws ExecutionException, InterruptedException {
-        run();
-        return result().get();
+    default T get() {
+        try {
+            run();
+            return result().get();
+        } catch (Exception ex) {
+            throw new RuntimeException("Failed to reach the goal", ex);
+        }
     }
 
     @Override

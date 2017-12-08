@@ -33,7 +33,7 @@ public class PipeGoal<S, T> extends AbstractGoal<T> {
     }
 
     @Override
-    protected T compute() throws Exception {
+    protected T compute() {
         return transfromation.apply(source.get());
     }
 

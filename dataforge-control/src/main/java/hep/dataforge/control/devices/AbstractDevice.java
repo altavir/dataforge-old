@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -27,17 +27,13 @@ import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
 
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 
@@ -52,12 +48,13 @@ import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
  */
 @AnonymousNotAlowed
 public abstract class AbstractDevice extends MetaHolder implements Device {
-    //TODO set up logger as connection
 
     private final Map<String, Value> states = new HashMap<>();
+    private final Map<String, Meta> metastates = new HashMap<>();
+
     private Context context;
     private ConnectionHelper connectionHelper;
-    private ExecutorService executor = Executors.newSingleThreadExecutor(r -> {
+    private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor(r -> {
         Thread res = new Thread(r);
         res.setName("device::" + getName());
         res.setPriority(Thread.MAX_PRIORITY);
@@ -69,7 +66,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         super(meta);
         this.context = context;
         //initialize states
-        stateDefs().stream()
+        getStateDefs().stream()
                 .filter(it -> !it.value().def().isEmpty())
                 .forEach(it -> states.put(it.value().name(), Value.of(it.value().def())));
     }
@@ -79,13 +76,8 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      *
      * @return
      */
-    protected ExecutorService getExecutor() {
+    protected ScheduledExecutorService getExecutor() {
         return executor;
-    }
-
-    public Logger getLogger() {
-        String loggerName = getMeta().getString("logger", () -> "device::" + getName());
-        return LoggerFactory.getLogger(loggerName);
     }
 
     public ConnectionHelper getConnectionHelper() {
@@ -99,7 +91,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     @Override
     public void init() throws ControlException {
         getLogger().info("Initializing device '{}'...", getName());
-        updateState(INITIALIZED_STATE, true);
+        updateLogicalState(INITIALIZED_STATE, true);
     }
 
     @Override
@@ -112,8 +104,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
                 getLogger().error("Failed to close connection", e);
             }
         });
-        updateState(INITIALIZED_STATE, false);
-//        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class, it -> it.notifyDeviceShutdown(this));
+        updateLogicalState(INITIALIZED_STATE, false);
     }
 
 
@@ -127,13 +118,21 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         }
     }
 
-//    protected void setContext(Context context) {
-//        this.context = context;
-//    }
-
     @Override
     public String getName() {
         return getMeta().getString("name", getType());
+    }
+
+    protected void execute(Runnable runnable) {
+        executor.submit(runnable);
+    }
+
+    protected <T> Future<T> execute(Callable<T> runnable) {
+        return executor.submit(runnable);
+    }
+
+    protected ScheduledFuture<?> schedule(Duration delay, Runnable runnable) {
+        return executor.schedule(runnable, delay.toMillis(), TimeUnit.MILLISECONDS);
     }
 
     /**
@@ -142,23 +141,34 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      * @param stateName
      * @param stateValue
      */
-    protected void updateState(String stateName, Object stateValue) {
+    protected void updateLogicalState(String stateName, Object stateValue) {
         Value oldState = this.states.get(stateName);
         Value newState = Value.of(stateValue);
         //Notify only if state really changed
         if (!newState.equals(oldState)) {
             //Update logical state and notify listeners.
-            executor.submit(() -> {
-                setLogicalState(stateName, newState);
+            execute(() -> {
+                this.states.put(stateName, newState);
+                if (newState.isNull()) {
+                    getLogger().info("State {} is reset", stateName);
+                } else {
+                    getLogger().info("State {} changed to {}", stateName, newState);
+                }
+                context.parallelExecutor().submit(() -> {
+                            forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                                    it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, newState));
+                        }
+                );
             });
         }
     }
 
     protected final void notifyError(String message, Throwable error) {
         getLogger().error(message, error);
-        context.parallelExecutor().submit(() ->
-                forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
-                        it -> it.evaluateDeviceException(AbstractDevice.this, message, error))
+        context.parallelExecutor().submit(() -> {
+                    forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                            it -> it.evaluateDeviceException(AbstractDevice.this, message, error));
+                }
         );
     }
 
@@ -166,22 +176,23 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
         forEachConnection(EventHandler.class, it -> it.pushEvent(event));
     }
 
-    /**
-     * Invalidate a state and force recalculate on next request
-     *
-     * @param stateName
-     */
-    protected final void invalidateState(String stateName) {
-        executor.submit(() -> this.getState(stateName));
+    @Override
+    public Meta getMetaState(String name) {
+
+    }
+
+    @Override
+    public void setMetaState(String name, Meta value) {
+
     }
 
     /**
      * Reset state to its default value if it is present
      */
     public final void resetState(String stateName) {
-        executor.submit(() -> {
+        execute(() -> {
             this.states.remove(stateName);
-            stateDefs().stream()
+            getStateDefs().stream()
                     .filter(it -> Objects.equals(it.value().name(), stateName))
                     .findFirst()
                     .ifPresent(value -> states.put(stateName, Value.of(value)));
@@ -199,29 +210,6 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
                 .or(optStateDef(stateName).map(def -> def.value().def()).map(Value::of))
                 .opt()
                 .orElseThrow(() -> new RuntimeException("Can't calculate state " + stateName));
-    }
-
-    /**
-     * Set logical state. This method should be used internally from device thread.
-     *
-     * @param stateName
-     * @param value
-     */
-    protected final void setLogicalState(String stateName, Value value) {
-        this.states.put(stateName, value);
-        if (value.isNull()) {
-            getLogger().info("State {} is reset", stateName);
-        } else {
-            getLogger().info("State {} changed to {}", stateName, value);
-        }
-        context.parallelExecutor().submit(() ->
-                forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
-                        it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, value))
-        );
-    }
-
-    protected final void setLogicalState(String stateName, Object value) {
-        setLogicalState(stateName, Value.of(value));
     }
 
     /**
@@ -251,7 +239,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      */
     @Override
     public void setState(String stateName, Object value) {
-        executor.submit(() -> {
+        execute(() -> {
             try {
                 requestStateChange(stateName, Value.of(value));
             } catch (Exception e) {
@@ -261,7 +249,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     public Future<Value> getStateInFuture(String stateName) {
-        return executor.submit(() -> this.states.computeIfAbsent(stateName, (String t) ->
+        return execute(() -> this.states.computeIfAbsent(stateName, (String t) ->
                         states.computeIfAbsent(stateName, state -> {
                             try {
                                 return Value.of(computeState(stateName));

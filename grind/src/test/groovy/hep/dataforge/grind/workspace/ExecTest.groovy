@@ -71,7 +71,7 @@ class ExecTest extends Specification {
         def res = exec.build().run(Global.instance(), builder.build(), Meta.empty())
         then:
         res.computeAll()
-        res.dataSize() == 8
+        res.getSize() == 8
         res["test4"].get().trim().endsWith("OK4")
     }
 }

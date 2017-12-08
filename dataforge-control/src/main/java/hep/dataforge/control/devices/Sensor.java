@@ -61,7 +61,7 @@ public abstract class Sensor<T> extends AbstractDevice {
         }
 
         this.measurement.start();
-        updateState(MEASURING_STATE, true);
+        updateLogicalState(MEASURING_STATE, true);
         return this.measurement;
     }
 
@@ -90,7 +90,7 @@ public abstract class Sensor<T> extends AbstractDevice {
     public void stopMeasurement(boolean force) throws MeasurementException {
         if (this.measurement != null && !this.measurement.isFinished()) {
             this.measurement.stop(force);
-            updateState(MEASURING_STATE, false);
+            updateLogicalState(MEASURING_STATE, false);
         }
     }
 

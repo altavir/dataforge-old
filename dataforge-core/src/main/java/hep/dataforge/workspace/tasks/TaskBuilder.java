@@ -222,7 +222,7 @@ public class TaskBuilder {
                 Action<?, ?> action = ta.buildAction(model);
                 if (action instanceof GenericAction) {
                     data = data.getCheckedNode("", ((GenericAction) action).getInputType());
-                    model.getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.dataSize(true));
+                    model.getLogger().debug("Action {} uses type checked node reduction. Working on {} nodes", action.getName(), data.getSize(true));
                 }
                 data = action.run(model.getContext(), data, ta.buildMeta(model));
                 if (!action.getName().equals(ActionUtils.DEFAULT_ACTION_NAME)) {

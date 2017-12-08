@@ -7,6 +7,7 @@ import hep.dataforge.goals.GoalListener
 import hep.dataforge.utils.ReferenceRegistry
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.future.asCompletableFuture
+import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.TimeUnit
@@ -20,27 +21,48 @@ import kotlin.coroutines.experimental.CoroutineContext
  * @param dispatcher custom coroutine dispatcher. By default common pool
  * @param block execution block. Could be suspending
  */
-class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatcher: CoroutineContext = CommonPool, val id: String = "", block: suspend () -> R) : Goal<R> {
+class Coal<R>(
+        private val deps: Collection<Goal<*>> = Collections.emptyList(),
+        private val dispatcher: CoroutineContext = DefaultDispatcher,
+        val id: String = "",
+        private val block: suspend () -> R) : Goal<R> {
     //TODO add Context based CoroutineContext object
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
-    private val deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
+    private val starter = CompletableDeferred<Unit>()
+
+    private val deferred: Deferred<R> = async(dispatcher) {
+        //CoroutineStart.LAZY is bugged
+        //A waiter task which is completed when process should be started
+        starter.join()
         try {
-            //TODO add try-catch for listeners response
-            listeners.forEach { it.onGoalStart() }
+            deps.forEach { it.start() }
+            notifyListeners { onGoalStart() }
             if (!id.isEmpty()) {
                 Thread.currentThread().name = "Goal:$id"
             }
             val res = block.invoke()
-            listeners.forEach { it.onGoalComplete(res) }
+            notifyListeners { onGoalComplete(res) }
             return@async res
         } catch (ex: Throwable) {
-            listeners.forEach { it.onGoalFailed(ex) }
+            notifyListeners { onGoalFailed(ex) }
             //rethrow exception
             throw ex
         }
     }
+
+    private fun notifyListeners(action: GoalListener<R>.() -> Unit) {
+        listeners.forEach {
+            try {
+                //TODO use Global dispatch thread here
+                action.invoke(it)
+            } catch (ex: Exception) {
+                LoggerFactory.getLogger(javaClass).error("Failed to notify goal listener", ex)
+            }
+        }
+    }
+
 
     suspend fun await(): R {
         run()
@@ -48,8 +70,7 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
     }
 
     override fun run() {
-        deps.forEach { it.run() }
-        deferred.start();
+        starter.complete(Unit)
     }
 
     override fun start(): Coal<R> {
@@ -58,16 +79,12 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
     }
 
     override fun get(): R {
-        run()
-        return runBlocking { deferred.await() }
+        return runBlocking { await() }
     }
 
     override fun get(timeout: Long, unit: TimeUnit): R {
-        run()
         return runBlocking {
-            withTimeout(timeout, unit) {
-                deferred.await()
-            }
+            withTimeout(timeout, unit) { await() }
         }
     }
 
@@ -102,14 +119,14 @@ class Coal<R>(val deps: Collection<Goal<*>> = Collections.emptyList(), dispatche
 
 
 fun <R> Context.coal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal<R>(deps, coroutineContext, id, block);
+    return Coal(deps, coroutineContext, id, block);
 }
 
 /**
  * Join a uniform list of goals
  */
 fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (List<T>) -> R): Coal<R> {
-    return Coal<R>(this, dispatcher) {
+    return Coal(this, dispatcher) {
         block.invoke(this.map {
             it.await()
         })
@@ -120,7 +137,7 @@ fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, blo
  * Transform using map of goals as a dependency
  */
 fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (Map<String, T>) -> R): Coal<R> {
-    return Coal<R>(this.values, dispatcher) {
+    return Coal(this.values, dispatcher) {
         block.invoke(this.mapValues { it.value.await() })
     }
 }
@@ -129,14 +146,14 @@ fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext = CommonPo
  * Create a simple generator Coal (no dependencies)
  */
 fun <R> generate(dispatcher: CoroutineContext = CommonPool, block: suspend () -> R): Coal<R> {
-    return Coal<R>(Collections.emptyList(), dispatcher, "", block);
+    return Coal(Collections.emptyList(), dispatcher, "", block);
 }
 
 /**
  * Pipe goal
  */
 fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext = CommonPool, block: suspend (T) -> R): Coal<R> {
-    return Coal<R>(listOf(this), dispatcher) {
+    return Coal(listOf(this), dispatcher) {
         block.invoke(this.await())
     }
 }

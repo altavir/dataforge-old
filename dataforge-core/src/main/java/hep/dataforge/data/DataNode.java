@@ -88,7 +88,7 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      * @param name
      * @return
      */
-    default T compute(String name) {
+    default T get(String name) {
         return optData(name).orElseThrow(() -> new NameNotFoundException(name)).get();
     }
 
@@ -199,21 +199,21 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
      *
      * @return
      */
-    default long dataSize(boolean recursive) {
+    default long getSize(boolean recursive) {
         return dataStream(recursive).count();
     }
 
-    default long dataSize() {
-        return dataSize(true);
+    default long getSize() {
+        return getSize(true);
     }
 
-    default long nodesSize(boolean recursive) {
-        return nodeStream(recursive).count();
-    }
-
-    default long nodesSize() {
-        return nodesSize(true);
-    }
+//    default long nodesSize(boolean recursive) {
+//        return nodeStream(recursive).count();
+//    }
+//
+//    default long nodesSize() {
+//        return nodesSize(true);
+//    }
 
     /**
      * Force start data goals for all data and wait for completion

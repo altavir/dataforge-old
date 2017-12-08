@@ -10,10 +10,7 @@ import hep.dataforge.description.ValueDef;
 import java.lang.annotation.*;
 
 /**
- * The definition of state for device.
- * <p>
- * Consider extending it to any state holder
- * </p>
+ * The definition of state for a stateful object.
  *
  * @author Alexander Nozik
  */

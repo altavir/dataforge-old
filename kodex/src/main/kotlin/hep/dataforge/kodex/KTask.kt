@@ -13,8 +13,9 @@ class KTask(
         private val modelTransform: TaskModel.Builder.(Meta) -> Unit,
         private val dataTransform: TaskModel.(DataNode<Any>) -> DataNode<Any>
 ) : AbstractTask<Any>() {
+
     override fun run(model: TaskModel, data: DataNode<out Any>): DataNode<Any> {
-        model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta.toString()}")
+        model.context.logger.info("Starting task '$name' on data node ${data.name} with meta: \n${model.meta}")
         return dataTransform.invoke(model, data.checked(Any::class.java));
     }
 
@@ -142,6 +143,7 @@ class KTaskBuilder(val name: String) {
             val model = this;
             if (dataTransforms.isEmpty()) {
                 //return data node as is
+                logger.warn("No transformation present, returning input data")
                 data
             } else {
                 val builder: DataTree.Builder<Any> = DataTree.builder()

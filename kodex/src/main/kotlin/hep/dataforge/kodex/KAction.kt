@@ -76,9 +76,9 @@ class KPipe<T, R>(
             val dispatcher = buildExecutor(context, laminate).asCoroutineDispatcher()
 
             val goal = it.goal.pipe(dispatcher) {
-                pipe.logger.info("Starting task ${this.name} on ${pipe.name}")
+                pipe.logger.debug("Starting action ${this.name} on ${pipe.name}")
                 pipe.result.invoke(env, it).also {
-                    pipe.logger.info("Finished task ${this.name} on ${pipe.name}")
+                    pipe.logger.debug("Finished action ${this.name} on ${pipe.name}")
                 }
             }
             val res = NamedData(env.name, goal, outputType, env.meta)

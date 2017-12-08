@@ -57,6 +57,6 @@ class WorkspaceTest {
 
     @Test
     void testData() {
-        assertEquals(3, workspace.data.getNode("ys").dataSize())
+        assertEquals(3, workspace.data.getNode("ys").getSize())
     }
 }
