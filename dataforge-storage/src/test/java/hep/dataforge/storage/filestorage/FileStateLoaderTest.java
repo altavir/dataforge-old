@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import hep.dataforge.context.Global;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
@@ -28,7 +29,6 @@ import java.nio.file.Files;
 import static org.junit.Assert.assertEquals;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class FileStateLoaderTest {
@@ -60,7 +60,7 @@ public class FileStateLoaderTest {
 
     @Test
     public void testIO() throws Exception {
-        FileStorage storage = FileStorageFactory.buildLocal(dir);
+        FileStorage storage = FileStorageFactory.buildLocal(Global.instance(),dir,false,true);
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
 
         System.out.println("***starting write test***");
@@ -72,7 +72,7 @@ public class FileStateLoaderTest {
         System.out.println("***starting read test***");
         loader = (StateLoader) storage.optLoader("test_states").get();
         System.out.println(loader.getValue("giberish"));
-        assertEquals(Math.PI, loader.getValue("pi").doubleValue(),0.01);
+        assertEquals(Math.PI, loader.getValue("pi").doubleValue(), 0.01);
 
     }
 

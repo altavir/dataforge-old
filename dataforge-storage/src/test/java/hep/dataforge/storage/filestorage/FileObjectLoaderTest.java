@@ -5,6 +5,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.ObjectLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
@@ -53,7 +54,7 @@ public class FileObjectLoaderTest {
     @Test
     public void test() throws FileNotFoundException, StorageException {
 
-        FileStorage storage = FileStorageFactory.buildLocal(dir);
+        FileStorage storage = FileStorageFactory.buildLocal(Global.instance(),dir,false,true);
 
         ObjectLoader loader = LoaderFactory.buildObjectLoder(storage, "test", "");
 

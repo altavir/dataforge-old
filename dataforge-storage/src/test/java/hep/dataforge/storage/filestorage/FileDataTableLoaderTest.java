@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.filestorage;
 
+import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.storage.api.TableLoader;
 import hep.dataforge.storage.api.ValueIndex;
@@ -73,7 +74,7 @@ public class FileDataTableLoaderTest {
     public void testReadWrite() throws FileNotFoundException, StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
-        FileStorage storage = FileStorageFactory.buildLocal(dir);
+        FileStorage storage = FileStorageFactory.buildLocal(Global.instance(), dir, false, true);
 
         TableLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", MetaTableFormat.forNames(names));
 
@@ -117,7 +118,7 @@ public class FileDataTableLoaderTest {
         Values dp = index.pull(24, 26).findFirst().get();
         assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
 
-        ((MapIndex)index).invalidate();
+        ((MapIndex) index).invalidate();
     }
 
 }

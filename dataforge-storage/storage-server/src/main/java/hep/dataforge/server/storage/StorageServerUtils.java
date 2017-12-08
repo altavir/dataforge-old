@@ -2,10 +2,9 @@ package hep.dataforge.server.storage;
 
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.storage.filestorage.FileStorage;
 import hep.dataforge.storage.filestorage.FileStorageFactory;
 
-import java.net.URI;
+import java.io.File;
 
 public class StorageServerUtils {
 
@@ -17,7 +16,7 @@ public class StorageServerUtils {
     public static void addFileStorage(ServerManager manager, String uri, String path) {
         addStorage(
                 manager,
-                new FileStorage(manager.getContext(), FileStorageFactory.buildStorageMeta(URI.create(uri), true, true)),
+                FileStorageFactory.buildLocal(manager.getContext(), new File(uri), false, true),
                 path
         );
     }

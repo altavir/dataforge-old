@@ -1,7 +1,5 @@
 package hep.dataforge.grind.terminal
 
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
@@ -102,7 +100,7 @@ class GrindTerminal extends SimpleConfigurable {
         if (Global.instance() == context) {
             context = Global.getContext("GRIND");
             context.getPluginManager().load("hep.dataforge:plots")
-            (context.logger as Logger).setLevel(Level.INFO)
+            //(context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
 //            OutputStream outputStream = System.out

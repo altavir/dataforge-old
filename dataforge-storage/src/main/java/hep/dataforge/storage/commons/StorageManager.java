@@ -66,6 +66,10 @@ public class StorageManager extends BasicPlugin {
         return Optional.empty();
     }
 
+    public static Storage buildStorage(Context context, Meta meta) {
+        return context.loadFeature("hep.dataforge:storage", StorageManager.class).buildStorage(meta);
+    }
+
 
     /**
      * Return blank file storage in current working directory

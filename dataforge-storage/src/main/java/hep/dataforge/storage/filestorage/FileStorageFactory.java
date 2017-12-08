@@ -6,11 +6,11 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.context.Global;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.storage.api.Storage;
 import hep.dataforge.storage.api.StorageType;
+import hep.dataforge.storage.commons.StorageManager;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
@@ -41,13 +41,9 @@ public class FileStorageFactory implements StorageType {
      * @param file
      * @return
      */
-    public static FileStorage buildLocal(File file, boolean monitor) {
-        Path path = file.toPath();
-        Meta meta = new MetaBuilder("storage")
-                .setValue("path", path)
-                .setValue("monitor", monitor);
-
-        return new FileStorage(Global.instance(), meta, path);
+    public static FileStorage buildLocal(Context context, File file, boolean readOnly, boolean monitor) {
+        StorageManager manager = context.loadFeature("hep.dataforge:storage", StorageManager.class);
+        return (FileStorage) manager.buildStorage(buildStorageMeta(file.toURI(),readOnly,monitor));
     }
 
     @Override
