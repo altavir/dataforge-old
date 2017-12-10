@@ -116,7 +116,7 @@ fun <R> Context.goal(deps: Collection<Goal<*>> = Collections.emptyList(), id: St
  * Create a simple generator Coal (no dependencies)
  */
 fun <R> Context.generate(id: String = "", block: suspend () -> R): Coal<R> {
-    return Coal(Collections.emptyList(), coroutineContext, "", block);
+    return Coal(Collections.emptyList(), coroutineContext, id, block);
 }
 
 /**

@@ -42,7 +42,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
             builder.setValue("info", val.info());
         }
 
-        if (!val.allowed().isEmpty()) {
+        if (val.allowed().length >0) {
             builder.setValue("allowedValues", val.allowed());
         }
 

@@ -95,9 +95,9 @@ class FXOutputPane: Fragment() {
      * @param text
      * @param style
      */
-    @Synchronized private fun append(text: String, style: String) {
+    @Synchronized private fun append(str: String, style: String) {
         // Unifying newlines
-        val text = text.replace("\r\n", "\n")
+        val text = str.replace("\r\n", "\n")
 
         runLater{
             if (text.contains("\n")) {

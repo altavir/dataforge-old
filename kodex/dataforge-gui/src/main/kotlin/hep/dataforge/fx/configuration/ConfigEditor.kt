@@ -54,7 +54,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
             sortMode = TreeSortMode.ALL_DESCENDANTS
             columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
             column("Name") { param: TreeTableColumn.CellDataFeatures<ConfigFX, String> -> param.value.value.nameProperty }
-                    .setCellFactory { param: TreeTableColumn<ConfigFX, String> ->
+                    .setCellFactory {
                         object : TextFieldTreeTableCell<ConfigFX, String>() {
                             override fun updateItem(item: String?, empty: Boolean) {
                                 super.updateItem(item, empty)

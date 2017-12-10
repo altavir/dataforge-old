@@ -17,7 +17,17 @@ public class DummyDevice extends AbstractDevice {
     }
 
     @Override
+    protected void requestMetaStateChange(String stateName, Meta meta) throws ControlException {
+
+    }
+
+    @Override
     protected Object computeState(String stateName) throws ControlException {
+        return null;
+    }
+
+    @Override
+    protected Meta computeMetaState(String stateName) throws ControlException {
         return null;
     }
 }

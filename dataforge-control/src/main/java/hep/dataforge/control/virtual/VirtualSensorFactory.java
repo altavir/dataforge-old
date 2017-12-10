@@ -27,20 +27,20 @@ import java.util.function.Function;
  */
 public class VirtualSensorFactory<T> {
 
-    private Function<Sensor<T>, T> valueFactory = (Sensor<T> sensor) -> null;
-    private Function<Sensor<T>, Duration> delayFactory = (sensor) -> Duration.ZERO;
+    private Function<Sensor, T> valueFactory = (Sensor sensor) -> null;
+    private Function<Sensor, Duration> delayFactory = (sensor) -> Duration.ZERO;
     //    private String name = "device";
     private Context context = Global.instance();
     private Meta meta = Meta.buildEmpty("device");
     private List<StateDef> states = new ArrayList<>();
     private List<RoleDef> roles = new ArrayList<>();
 
-    public VirtualSensorFactory<T> setValueFactory(Function<Sensor<T>, T> valueFactory) {
+    public VirtualSensorFactory<T> setValueFactory(Function<Sensor, T> valueFactory) {
         this.valueFactory = valueFactory;
         return this;
     }
 
-    public VirtualSensorFactory<T> setDelayFactory(Function<Sensor<T>, Duration> delayFactory) {
+    public VirtualSensorFactory<T> setDelayFactory(Function<Sensor, Duration> delayFactory) {
         this.delayFactory = delayFactory;
         return this;
     }
@@ -121,8 +121,8 @@ public class VirtualSensorFactory<T> {
 //        return this;
 //    }
 
-    public Sensor<T> build() {
-        Sensor<T> sensor = new Sensor<T>(context, meta) {
+    public Sensor build() {
+        Sensor sensor = new Sensor(context, meta) {
             @Override
             protected Measurement<T> createMeasurement() throws MeasurementException {
                 return new VirtualMeasurement<>(this, delayFactory.apply(this), () -> valueFactory.apply(this));

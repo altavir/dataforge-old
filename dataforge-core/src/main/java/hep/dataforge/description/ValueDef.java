@@ -45,7 +45,7 @@ public @interface ValueDef {
 
     boolean required() default false;
 
-    String allowed() default "";
+    String[] allowed() default {};
 
     String[] tags() default {};
 }

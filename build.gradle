@@ -17,6 +17,7 @@ allprojects{
         maven { url  "http://dl.bintray.com/kotlin/ktor" }
         maven { url "https://dl.bintray.com/kotlin/kotlinx" }
     }
+
 }
 
 subprojects{
@@ -43,11 +44,33 @@ subprojects{
                 }
             }
         }
+
+        apply plugin: "kotlin"
+
+        compileKotlin {
+            kotlinOptions {
+                jvmTarget = "1.8"
+                javaParameters = true
+            }
+        }
+
+        compileTestKotlin{
+            kotlinOptions {
+                jvmTarget = "1.8"
+                javaParameters = true
+            }
+        }
+
+        kotlin {
+            experimental {
+                coroutines "enable"
+            }
+        }
     }
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.2'
+    gradleVersion = '4.4'
 }
 
 /*

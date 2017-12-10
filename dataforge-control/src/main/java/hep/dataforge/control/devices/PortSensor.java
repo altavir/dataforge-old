@@ -34,7 +34,7 @@ import static hep.dataforge.values.ValueType.NUMBER;
 )
 @ValueDef(name = "port", info = "The name of the port for this sensor")
 @ValueDef(name = "timeout", type = {NUMBER}, def = "400", info = "A timeout for port response")
-public abstract class PortSensor<T> extends Sensor<T> {
+public abstract class PortSensor<T> extends Sensor {
 
     public static final String CONNECTED_STATE = "connected";
     public static final String PORT_NAME_KEY = "port";

@@ -67,14 +67,4 @@ class KActionTest {
         assertEquals("this is my data 4: stage1", value)
 
     }
-
-//    val join = KJoin("testJoin",String::class.java, List::class.java){
-//        name = "result"
-//    }
-//
-//    @Test
-//    fun testJoin(){
-//        println("test join")
-//    }
-
 }

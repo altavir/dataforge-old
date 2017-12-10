@@ -22,6 +22,7 @@ import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
+import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.utils.MetaHolder;
@@ -234,15 +235,28 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      * @param value
      * @throws ControlException
      */
-    protected abstract void requestStateChange(String stateName, Value value) throws ControlException;
+    protected void requestStateChange(String stateName, Value value) throws ControlException {
+        if (stateName.equals(INITIALIZED_STATE)) {
+            if (value.booleanValue()) {
+                init();
+            } else {
+                shutdown();
+            }
+        } else {
+            throw new NameNotFoundException("State with given name not found", stateName);
+        }
+    }
 
     /**
      * Request the change of physical ano/or logical meta state.
+     *
      * @param stateName
      * @param meta
      * @throws ControlException
      */
-    protected abstract void requestMetaStateChange(String stateName, Meta meta) throws ControlException;
+    protected void requestMetaStateChange(String stateName, Meta meta) throws ControlException {
+        throw new NameNotFoundException("Meta state with given name not found", stateName);
+    }
 
 
     /**
@@ -255,7 +269,8 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     protected abstract Object computeState(String stateName) throws ControlException;
 
     /**
-     * Compute phisical meta state
+     * Compute physical meta state
+     *
      * @param stateName
      * @return
      * @throws ControlException
@@ -291,16 +306,14 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
     }
 
     public Future<Value> getStateInFuture(String stateName) {
-        return execute(() -> this.states.computeIfAbsent(stateName, (String t) ->
-                        states.computeIfAbsent(stateName, state -> {
-                            try {
-                                return Value.of(computeState(stateName));
-                            } catch (ControlException ex) {
-                                notifyError("Can't calculate state " + stateName, ex);
-                                return Value.NULL;
-                            }
-                        })
-                )
+        return execute(() -> states.computeIfAbsent(stateName, (String t) -> {
+                    try {
+                        return Value.of(computeState(t));
+                    } catch (ControlException ex) {
+                        notifyError("Can't calculate state " + stateName, ex);
+                        return Value.NULL;
+                    }
+                })
         );
     }
 
