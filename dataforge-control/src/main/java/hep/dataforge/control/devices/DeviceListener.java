@@ -15,6 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
 
 /**
@@ -32,6 +33,14 @@ public interface DeviceListener {
      * @param state
      */
     void notifyDeviceStateChanged(Device device, String name, Value state);
+
+    /**
+     * Notify meta state changed
+     * @param device
+     * @param name
+     * @param state
+     */
+    void notifyDeviceStateChanged(Device device, String name, Meta state);
 
 //    /**
 //     * Notify that device configuration has changed. By default is ignored.

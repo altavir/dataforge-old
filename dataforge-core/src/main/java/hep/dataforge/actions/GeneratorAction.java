@@ -27,7 +27,7 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
         Chronicle log = context.getChronicle(getName());
 
         Stream<ActionResult<R>> results = nameStream().map(name -> {
-            Goal<R> goal = new GeneratorGoal<>(buildExecutor(context, actionMeta), () -> generateData(name));
+            Goal<R> goal = new GeneratorGoal<>(getExecutorService(context, actionMeta), () -> generateData(name));
             return new ActionResult<>(name, getOutputType(), goal, generateMeta(name), log);
         });
 

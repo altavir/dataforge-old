@@ -32,15 +32,6 @@ public interface Goal<T> extends RunnableFuture<T> {
     void run();
 
     /**
-     * She same as {@code run}, but using chain pattern
-     * @return
-     */
-    default Goal<T> start() {
-        run();
-        return this;
-    }
-
-    /**
      * The encapsulated {@link CompletableFuture}. Used to builder goal chains.
      *
      * @return

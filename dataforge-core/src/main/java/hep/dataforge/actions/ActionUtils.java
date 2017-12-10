@@ -89,7 +89,7 @@ public class ActionUtils {
         if (element.hasMeta("property")) {
             List<? extends Meta> propertyNodes = element.getMetaList("property");
             propertyNodes.stream().forEach((option) -> {
-                context.putValue(option.getString("key"), option.getString("value"));
+                context.setValue(option.getString("key"), option.getString("value"));
             });
         }
     }

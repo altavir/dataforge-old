@@ -8,6 +8,13 @@ allprojects{
         }
     }
 
+    compileTestKotlin{
+        kotlinOptions {
+            jvmTarget = "1.8"
+            javaParameters = true
+        }
+    }
+
     kotlin {
         experimental {
             coroutines "enable"
@@ -19,8 +26,9 @@ description = "KOtlin Dataforge EXtension"
 
 dependencies{
     compile "org.jetbrains.kotlin:kotlin-stdlib-jre8:1.2.0"
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-core:0.19.3'
-    compile 'org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:0.19.3'
+    // https://mvnrepository.com/artifact/org.jetbrains.kotlinx/kotlinx-coroutines-jdk8
+    compile group: 'org.jetbrains.kotlinx', name: 'kotlinx-coroutines-jdk8', version: '0.20'
+
     compile project(':dataforge-core')
 }
 

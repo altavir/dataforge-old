@@ -196,7 +196,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @param name
      * @param value
      */
-    public void putValue(String name, Object value) {
+    public void setValue(String name, Object value) {
         lock.modify(() -> {
             properties.put(name, Value.of(value));
         });
@@ -443,10 +443,10 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
         public Builder properties(@NotNull Meta config) {
             if (config.hasMeta("property")) {
                 config.getMetaList("property").forEach((propertyNode) -> {
-                    ctx.putValue(propertyNode.getString("key"), propertyNode.getValue("value"));
+                    ctx.setValue(propertyNode.getString("key"), propertyNode.getValue("value"));
                 });
             } else if (Objects.equals(config.getName(), "properties")) {
-                MetaUtils.valueStream(config).forEach(pair -> ctx.putValue(pair.getKey(), pair.getValue()));
+                MetaUtils.valueStream(config).forEach(pair -> ctx.setValue(pair.getKey(), pair.getValue()));
             }
             return this;
         }
@@ -548,7 +548,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             if (!ctx.getPluginManager().opt(IOManager.class).isPresent()) {
                 ctx.getPluginManager().load(new BasicIOManager(ctx.getParent().getIo().in(), ctx.getParent().getIo().out()));
             }
-            ctx.putValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir);
+            ctx.setValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir);
             return this;
         }
 

@@ -147,7 +147,9 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (getConfig().getBoolean("evalData", true) && res instanceof Data) {
             res = (res as Data).get();
         } else if (res instanceof DataNode) {
-            (res as DataNode).dataStream().forEach { unwrap(it, cl) };
+            def node = res as DataNode
+            node.computeAll()// start computation of the whole node
+            node.dataStream().forEach { unwrap(it, cl) };
         }
 
         if (getConfig().getBoolean("unwrap", true)) {

@@ -1,12 +1,10 @@
 package hep.dataforge.kodex
 
-import hep.dataforge.context.Global
 import hep.dataforge.data.DataSet
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.BasicWorkspace
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
-import kotlinx.coroutines.experimental.runBlocking
 import kotlinx.coroutines.experimental.time.delay
 import org.junit.Test
 import java.time.Duration
@@ -24,23 +22,20 @@ class KActionTest {
             meta.putValue("odd", true);
         }
         result {
-            println("performing action on ${name}")
+            println("performing action on $name")
             delay(Duration.ofMillis(400));
             it + ": stage1";
         }
-    }
-    @Test
-    fun testGoal(){
-        println("test goal")
     }
 
     @Test
     fun testPipe() {
         println("test pipe")
-        val res = pipe.run(Global.instance(), data, Meta.empty());
+        val res = pipe.run(GLOBAL, data, Meta.empty());
         val datum = res.optData("newName_4").get()
+        val value = datum.goal.get()
         assertTrue(datum.meta["odd"].booleanValue())
-        assertEquals("this is my data 4: stage1", datum.get())
+        assertEquals("this is my data 4: stage1", value)
     }
 
     @Test
@@ -54,7 +49,9 @@ class KActionTest {
             action(pipe)
         }
 
-        GLOBAL.putValue("cache.enabled", false)
+
+
+        GLOBAL.setValue("cache.enabled", false)
         val workspace = BasicWorkspace.builder()
                 .data("test", data)
                 .task(testTask)
@@ -64,12 +61,11 @@ class KActionTest {
 
         val res = workspace.runTask("test")
 
-        runBlocking {
-            val datum = res.optData("newName_4").get()
-            val value = datum.goal.await()
-            assertTrue(datum.meta["odd"].booleanValue())
-            assertEquals("this is my data 4: stage1", value)
-        }
+        val datum = res.optData("newName_4").get()
+        val value = datum.goal.get()
+        assertTrue(datum.meta["odd"].booleanValue())
+        assertEquals("this is my data 4: stage1", value)
+
     }
 
 //    val join = KJoin("testJoin",String::class.java, List::class.java){

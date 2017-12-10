@@ -66,7 +66,7 @@ class GrindJoin<T, R> extends GenericAction<T, R> {
     }
 
     private NamedData<R> runOne(JoinGroup<T, R> group) {
-        def executor = buildExecutor(group.context, group.meta);
+        def executor = getExecutorService(group.context, group.meta);
         def goal = new GrindJoinGoal(executor, group)
         return new NamedData<R>(group.name, goal, outputType, group.meta)
     }

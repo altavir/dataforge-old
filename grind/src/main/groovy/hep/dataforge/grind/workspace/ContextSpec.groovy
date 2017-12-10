@@ -23,7 +23,7 @@ class ContextSpec {
     Context build() {
         //using current context as a parent for workspace context
         Context res = Context.builder(name, parent).build()
-        properties.each { key, value -> res.putValue(key.toString(), value) }
+        properties.each { key, value -> res.setValue(key.toString(), value) }
         pluginMap.forEach { String key, Meta meta ->
             Plugin plugin = res.getPluginManager().getOrLoad(key)
             if (plugin instanceof Configurable) {

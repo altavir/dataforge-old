@@ -73,7 +73,7 @@ class KPipe<T, R>(
                     context.getChronicle(Name.joinString(pipe.name, name))
             )
 
-            val dispatcher = buildExecutor(context, laminate).asCoroutineDispatcher()
+            val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
 
             val goal = it.goal.pipe(dispatcher) {
                 pipe.logger.debug("Starting action ${this.name} on ${pipe.name}")
@@ -177,35 +177,33 @@ class KJoin<T, R>(
 
         val builder = DataSet.builder(outputType)
 
-        runBlocking {
-            JoinGroupBuilder<T, R>(context, meta).apply(action).buildGroups(context, data).forEach { group ->
+        JoinGroupBuilder<T, R>(context, meta).apply(action).buildGroups(context, data).forEach { group ->
 
-                val laminate = Laminate(group.meta, meta)
+            val laminate = Laminate(group.meta, meta)
 
-                val goalMap: Map<String, Goal<out T>> = group.node
-                        .dataStream()
-                        .filter { it.isValid }
-                        .collect(Collectors.toMap({ it.name }, { it.goal }))
+            val goalMap: Map<String, Goal<out T>> = group.node
+                    .dataStream()
+                    .filter { it.isValid }
+                    .collect(Collectors.toMap({ it.name }, { it.goal }))
 
-                val groupName: String = group.name;
+            val groupName: String = group.name;
 
-                if (groupName.isEmpty()) {
-                    throw AnonymousNotAlowedException("Anonymous groups are not allowed");
-                }
-
-                val env = ActionEnv(
-                        context,
-                        groupName,
-                        laminate.builder,
-                        context.getChronicle(Name.joinString(groupName, name))
-                )
-
-                val dispatcher = buildExecutor(context, group.meta).asCoroutineDispatcher()
-
-                val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
-                val res = NamedData(env.name, goal, outputType, env.meta)
-                builder.putData(res)
+            if (groupName.isEmpty()) {
+                throw AnonymousNotAlowedException("Anonymous groups are not allowed");
             }
+
+            val env = ActionEnv(
+                    context,
+                    groupName,
+                    laminate.builder,
+                    context.getChronicle(Name.joinString(groupName, name))
+            )
+
+            val dispatcher = getExecutorService(context, group.meta).asCoroutineDispatcher()
+
+            val goal = goalMap.join(dispatcher) { group.result.invoke(env, it) }
+            val res = NamedData(env.name, goal, outputType, env.meta)
+            builder.putData(res)
         }
 
         return builder.build();
@@ -270,12 +268,12 @@ class KSplit<T, R>(
                         context.getChronicle(Name.joinString(it.name, name))
                 )
 
-                val dispatcher = buildExecutor(context, laminate).asCoroutineDispatcher()
+                val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
 
                 val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }
 
                 split.fragments.forEach { rule ->
-                    val goal = commonGoal.pipe {
+                    val goal = commonGoal.pipe(dispatcher) {
                         it[rule.first]!!
                     }
                     val (resName, resMeta) = rule.second.invoke(it.name, laminate)

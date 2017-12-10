@@ -105,6 +105,10 @@ public interface DataNode<T> extends Iterable<NamedData<T>>, Named, Metoid, Prov
                 );
     }
 
+    default Data<T> getData(String name) {
+        return optData(name).orElseThrow(()->  new NameNotFoundException(name));
+    }
+
     /**
      * Get descendant node in case of tree structure. In case of flat structure
      * returns node composed of all Data elements with names that begin with

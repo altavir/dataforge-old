@@ -7,7 +7,6 @@ import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
-import javafx.beans.value.ObservableValue
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
@@ -61,11 +60,11 @@ fun UIComponent.getMonitor(id: String): GoalMonitor {
 
 fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = CommonPool, block: suspend GoalMonitor.() -> R): Coal<R> {
     val monitor = getMonitor(id);
-    return Coal<R>(Collections.emptyList(), dispatcher, id) { block.invoke(monitor) }.start();
+    return Coal(Collections.emptyList(), dispatcher, id) { block.invoke(monitor) }.apply { run() }
 }
 
 infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
-    this.onComplete(uiExecutor, BiConsumer { res, err ->
+    this.onComplete(uiExecutor, BiConsumer { res, _ ->
         if (res != null) {
             func.invoke(res);
         }
@@ -81,8 +80,8 @@ infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
  * @param action
  */
 fun addWindowResizeListener(component: Region, action: Runnable) {
-    component.widthProperty().addListener { observable: ObservableValue<out Number>, oldValue: Number, newValue: Number -> action.run() }
-    component.heightProperty().addListener { observable: ObservableValue<out Number>, oldValue: Number, newValue: Number -> action.run() }
+    component.widthProperty().onChange { action.run() }
+    component.heightProperty().onChange { action.run() }
 }
 
 fun colorToString(color: Color): String {

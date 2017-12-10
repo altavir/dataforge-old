@@ -23,21 +23,15 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 class Coal<R>(
         private val deps: Collection<Goal<*>> = Collections.emptyList(),
-        private val dispatcher: CoroutineContext = DefaultDispatcher,
+        dispatcher: CoroutineContext,
         val id: String = "",
-        private val block: suspend () -> R) : Goal<R> {
+        block: suspend () -> R) : Goal<R> {
     //TODO add Context based CoroutineContext object
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
-    private val starter = CompletableDeferred<Unit>()
-
-    private val deferred: Deferred<R> = async(dispatcher) {
-        //CoroutineStart.LAZY is bugged
-        //A waiter task which is completed when process should be started
-        starter.join()
+    private val deferred: Deferred<R> = async(dispatcher, CoroutineStart.LAZY) {
         try {
-            deps.forEach { it.start() }
             notifyListeners { onGoalStart() }
             if (!id.isEmpty()) {
                 Thread.currentThread().name = "Goal:$id"
@@ -70,12 +64,8 @@ class Coal<R>(
     }
 
     override fun run() {
-        starter.complete(Unit)
-    }
-
-    override fun start(): Coal<R> {
-        run()
-        return this
+        deps.forEach { it.run() }
+        deferred.start()
     }
 
     override fun get(): R {
@@ -118,14 +108,21 @@ class Coal<R>(
 }
 
 
-fun <R> Context.coal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
+fun <R> Context.goal(deps: Collection<Goal<*>> = Collections.emptyList(), id: String = "", block: suspend () -> R): Coal<R> {
     return Coal(deps, coroutineContext, id, block);
+}
+
+/**
+ * Create a simple generator Coal (no dependencies)
+ */
+fun <R> Context.generate(id: String = "", block: suspend () -> R): Coal<R> {
+    return Coal(Collections.emptyList(), coroutineContext, "", block);
 }
 
 /**
  * Join a uniform list of goals
  */
-fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (List<T>) -> R): Coal<R> {
+fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (List<T>) -> R): Coal<R> {
     return Coal(this, dispatcher) {
         block.invoke(this.map {
             it.await()
@@ -136,23 +133,17 @@ fun <T, R> List<Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, blo
 /**
  * Transform using map of goals as a dependency
  */
-fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext = CommonPool, block: suspend (Map<String, T>) -> R): Coal<R> {
+fun <T, R> Map<String, Goal<out T>>.join(dispatcher: CoroutineContext, block: suspend (Map<String, T>) -> R): Coal<R> {
     return Coal(this.values, dispatcher) {
         block.invoke(this.mapValues { it.value.await() })
     }
 }
 
-/**
- * Create a simple generator Coal (no dependencies)
- */
-fun <R> generate(dispatcher: CoroutineContext = CommonPool, block: suspend () -> R): Coal<R> {
-    return Coal(Collections.emptyList(), dispatcher, "", block);
-}
 
 /**
  * Pipe goal
  */
-fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext = CommonPool, block: suspend (T) -> R): Coal<R> {
+fun <T, R> Goal<T>.pipe(dispatcher: CoroutineContext, block: suspend (T) -> R): Coal<R> {
     return Coal(listOf(this), dispatcher) {
         block.invoke(this.await())
     }

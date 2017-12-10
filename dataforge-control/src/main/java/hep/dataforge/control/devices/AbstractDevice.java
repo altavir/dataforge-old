@@ -142,21 +142,46 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      * @param stateValue
      */
     protected void updateLogicalState(String stateName, Object stateValue) {
-        Value oldState = this.states.get(stateName);
-        Value newState = Value.of(stateValue);
+        if (stateValue instanceof Meta) {
+            updateLogicalMetaState(stateName, (Meta) stateValue);
+        } else {
+            Value oldState = this.states.get(stateName);
+            Value newState = Value.of(stateValue);
+            //Notify only if state really changed
+            if (!newState.equals(oldState)) {
+                //Update logical state and notify listeners.
+                execute(() -> {
+                    this.states.put(stateName, newState);
+                    if (newState.isNull()) {
+                        getLogger().info("State {} is reset", stateName);
+                    } else {
+                        getLogger().info("State {} changed to {}", stateName, newState);
+                    }
+                    context.parallelExecutor().submit(() -> {
+                                forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
+                                        it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, newState));
+                            }
+                    );
+                });
+            }
+        }
+    }
+
+    protected void updateLogicalMetaState(String stateName, Meta metaStateValue) {
+        Meta oldState = this.metastates.get(stateName);
         //Notify only if state really changed
-        if (!newState.equals(oldState)) {
+        if (!metaStateValue.equals(oldState)) {
             //Update logical state and notify listeners.
             execute(() -> {
-                this.states.put(stateName, newState);
-                if (newState.isNull()) {
-                    getLogger().info("State {} is reset", stateName);
+                this.metastates.put(stateName, metaStateValue);
+                if (metaStateValue.isEmpty()) {
+                    getLogger().info("Metastate {} is reset", stateName);
                 } else {
-                    getLogger().info("State {} changed to {}", stateName, newState);
+                    getLogger().info("Metastate {} changed to {}", stateName, metaStateValue);
                 }
                 context.parallelExecutor().submit(() -> {
                             forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
-                                    it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, newState));
+                                    it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, metaStateValue));
                         }
                 );
             });
@@ -174,16 +199,6 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
 
     protected final void dispatchEvent(Event event) {
         forEachConnection(EventHandler.class, it -> it.pushEvent(event));
-    }
-
-    @Override
-    public Meta getMetaState(String name) {
-
-    }
-
-    @Override
-    public void setMetaState(String name, Meta value) {
-
     }
 
     /**
@@ -221,6 +236,14 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      */
     protected abstract void requestStateChange(String stateName, Value value) throws ControlException;
 
+    /**
+     * Request the change of physical ano/or logical meta state.
+     * @param stateName
+     * @param meta
+     * @throws ControlException
+     */
+    protected abstract void requestMetaStateChange(String stateName, Meta meta) throws ControlException;
+
 
     /**
      * Compute physical state
@@ -230,6 +253,14 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
      * @throws ControlException
      */
     protected abstract Object computeState(String stateName) throws ControlException;
+
+    /**
+     * Compute phisical meta state
+     * @param stateName
+     * @return
+     * @throws ControlException
+     */
+    protected abstract Meta computeMetaState(String stateName) throws ControlException;
 
     /**
      * Request state change and update result
@@ -244,6 +275,17 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
                 requestStateChange(stateName, Value.of(value));
             } catch (Exception e) {
                 getLogger().error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString());
+            }
+        });
+    }
+
+    @Override
+    public void setMetaState(String stateName, Meta meta) {
+        execute(() -> {
+            try {
+                requestMetaStateChange(stateName, meta);
+            } catch (Exception e) {
+                getLogger().error("Failed to set  metastate {} to {} with exception: {}", stateName, meta, e.toString());
             }
         });
     }
@@ -277,6 +319,38 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
             return Optional.of(states.get(stateName));
         } else {
             return Device.super.optState(stateName);
+        }
+    }
+
+    public Future<Meta> getMetaStateInFuture(String stateName) {
+        return execute(() -> this.metastates.computeIfAbsent(stateName, (String t) ->
+                        metastates.computeIfAbsent(stateName, state -> {
+                            try {
+                                return computeMetaState(stateName);
+                            } catch (ControlException ex) {
+                                notifyError("Can't calculate metastate " + stateName, ex);
+                                return Meta.empty();
+                            }
+                        })
+                )
+        );
+    }
+
+    @Override
+    public Optional<Meta> optMetaState(String stateName) {
+        if (states.containsKey(stateName)) {
+            return Optional.of(metastates.get(stateName));
+        } else {
+            return Device.super.optMetaState(stateName);
+        }
+    }
+
+    @Override
+    public Meta getMetaState(String stateName) {
+        try {
+            return getMetaStateInFuture(stateName).get();
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Failed to calculate metastate " + stateName);
         }
     }
 

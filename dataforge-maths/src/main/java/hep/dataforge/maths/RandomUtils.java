@@ -45,7 +45,7 @@ public class RandomUtils {
      * @param seed a int.
      */
     public static void setSeed(int seed) {
-        Global.instance().putValue("random.seed", Value.of(seed));
+        Global.instance().setValue("random.seed", Value.of(seed));
         defaultGenerator.setSeed(seed);
     }    
 }

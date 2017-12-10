@@ -167,7 +167,7 @@ public class TableFormatBuilder implements TableFormat {
 //            add(name);
 //        }
 //        for (String r : role) {
-//            columns.get(name).putValue("role", r);
+//            columns.get(name).setValue("role", r);
 //        }
 //        return this;
 //    }

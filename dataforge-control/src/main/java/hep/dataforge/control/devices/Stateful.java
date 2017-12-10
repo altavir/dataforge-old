@@ -1,6 +1,8 @@
 package hep.dataforge.control.devices;
 
 import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
@@ -143,5 +145,23 @@ public interface Stateful extends Provider {
      */
     default Optional<MetaStateDef> optMetaStateDef(String name) {
         return getMetaStateDefs().stream().filter((stateDef) -> stateDef.value().name().equals(name)).findFirst();
+    }
+
+    /**
+     * Get the descriptor for a given state
+     * @param stateName
+     * @return
+     */
+    default Optional<ValueDef> getStateDescriptor(String stateName){
+        return optStateDef(stateName).map(StateDef::value);
+    }
+
+    /**
+     * Get descriptor for a meta state. Could be overriden for a custom descriptor
+     * @param stateName
+     * @return
+     */
+    default Optional<NodeDef> getMetaStateDescriptor(String stateName){
+        return optMetaStateDef(stateName).map(MetaStateDef::value);
     }
 }

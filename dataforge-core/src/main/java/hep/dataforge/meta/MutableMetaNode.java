@@ -213,7 +213,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     }
 
     /**
-     * putValue(name, value, true)
+     * setValue(name, value, true)
      *
      * @param name
      * @param value

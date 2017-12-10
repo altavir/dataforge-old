@@ -34,7 +34,7 @@ public class LoaderFactory {
 //        if (name == null || name.isEmpty()) {
 //            throw new RuntimeException("The name can not be empty");
 //        } else {
-//            builder.putValue(Loader.LOADER_NAME_KEY, name);
+//            builder.setValue(Loader.LOADER_NAME_KEY, name);
 //        }
 
         if (indexField != null) {

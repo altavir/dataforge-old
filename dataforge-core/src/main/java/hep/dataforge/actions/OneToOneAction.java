@@ -80,7 +80,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         String resultName = resultParamters.getKey();
         Meta outputMeta = resultParamters.getValue();
 
-        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), buildExecutor(context, meta),
+        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), getExecutorService(context, meta),
                 input -> {
                     Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), resultName));
                     return transform(context, resultName, input, meta);

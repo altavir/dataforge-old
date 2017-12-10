@@ -4,6 +4,7 @@ import hep.dataforge.context.Context
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
+import hep.dataforge.goals.StaticGoal
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaProvider
@@ -12,7 +13,7 @@ import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.future.await
 import java.time.Instant
 import kotlin.coroutines.experimental.CoroutineContext
@@ -186,7 +187,7 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
     return this;
 }
 
-class MutableValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Value?> {
+class MutableValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Value?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Value? =
             thisRef.optValue(valueName ?: property.name).orElse(null)
 
@@ -195,7 +196,7 @@ class MutableValueDelegate(private val valueName: String?): ReadWriteProperty<Mu
     }
 }
 
-class MutableStringValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,String?> {
+class MutableStringValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, String?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): String? =
             thisRef.optString(valueName ?: property.name).orElse(null)
 
@@ -204,7 +205,7 @@ class MutableStringValueDelegate(private val valueName: String?): ReadWritePrope
     }
 }
 
-class MutableBooleanValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Boolean?> {
+class MutableBooleanValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Boolean?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Boolean? =
             thisRef.optBoolean(valueName ?: property.name).orElse(null)
 
@@ -213,7 +214,7 @@ class MutableBooleanValueDelegate(private val valueName: String?): ReadWriteProp
     }
 }
 
-class MutableTimeValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Instant?> {
+class MutableTimeValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Instant?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Instant? =
             thisRef.optTime(valueName ?: property.name).orElse(null)
 
@@ -222,7 +223,7 @@ class MutableTimeValueDelegate(private val valueName: String?): ReadWritePropert
     }
 }
 
-class MutableNumberValueDelegate(private val valueName: String?): ReadWriteProperty<MutableMetaNode<*>,Number?> {
+class MutableNumberValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Number?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Number? =
             thisRef.optNumber(valueName ?: property.name).orElse(null)
 
@@ -231,7 +232,7 @@ class MutableNumberValueDelegate(private val valueName: String?): ReadWritePrope
     }
 }
 
-class MutableMetaDelegate(private val metaName: String?): ReadWriteProperty<MutableMetaNode<*>,Meta?> {
+class MutableMetaDelegate(private val metaName: String?) : ReadWriteProperty<MutableMetaNode<*>, Meta?> {
     override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Meta? =
             thisRef.optMeta(metaName ?: property.name).orElse(null);
 
@@ -254,22 +255,21 @@ fun MutableMetaNode<*>.meta(metaName: String? = null) = MutableMetaDelegate(meta
 //suspending functions
 
 val Context.coroutineContext: CoroutineContext
-    get() = optFeature(KodexPlugin::class.java).map { it.dispatcher }.orElse(CommonPool)
+    get() = optFeature(KodexPlugin::class.java).map { it.dispatcher }.orElse(DefaultDispatcher)
 
 /**
  * Use goal as a suspending function
  */
 suspend fun <R> Goal<R>.await(): R {
-    return if (this is Coal<R>) {
-        //A special case for Coal
-        this.await();
-    } else {
-        this.result().await();
+    return when {
+        this is Coal<R> -> this.await()//A special case for Coal
+        this is StaticGoal<R> -> this.get()//optimization for static goals
+        else -> this.result().await()
     }
 }
 
-fun <T, R> Data<T>.pipe(type: Class<R>, dispatcher: CoroutineContext = CommonPool, transform: suspend (T) -> R): Data<R> =
-        Data(this.goal.pipe(dispatcher, transform), type, this.meta)
+inline fun <T, reified R> Data<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): Data<R> =
+        Data(this.goal.pipe(dispatcher, transform), R::class.java, this.meta)
 
-fun <T, R> NamedData<T>.pipe(type: Class<R>, dispatcher: CoroutineContext = CommonPool, transform: suspend (T) -> R): NamedData<R> =
-        NamedData(this.name, this.goal.pipe(dispatcher, transform), type, this.meta)
+inline fun <T, reified R> NamedData<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): NamedData<R> =
+        NamedData(this.name, this.goal.pipe(dispatcher, transform), R::class.java, this.meta)

@@ -136,7 +136,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         private final Meta outputMeta;
 
         public ManyToOneGoal(Context context, DataNode<T> data, Meta actionMeta, Meta outputMeta) {
-            super(buildExecutor(context, actionMeta));
+            super(getExecutorService(context, actionMeta));
             this.context = context;
             this.data = data;
             this.actionMeta = actionMeta;
