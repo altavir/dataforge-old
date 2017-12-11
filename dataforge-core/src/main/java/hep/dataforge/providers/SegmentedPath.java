@@ -19,6 +19,7 @@ import hep.dataforge.names.Name;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 /**
  * Путь в формате target1::path1/target2::path2. Блоки между / называются
@@ -143,5 +144,10 @@ class SegmentedPath implements Path {
         List<PathSegment> list = new ArrayList<>(this.segments);
         list.add(new PathSegment(segment.getTarget(), segment.getName()));
         return new SegmentedPath(defaultTarget, list);
+    }
+
+    @Override
+    public String toString() {
+        return String.join("/",segments.stream().map(PathSegment::toString).collect(Collectors.toList()));
     }
 }

@@ -116,7 +116,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * @return
      */
     public synchronized PlotGroup remove(String name) {
-        return remove(Name.of(name));
+        return remove(Name.ofSingle(name));
     }
 
     public synchronized PlotGroup remove(Name name) {

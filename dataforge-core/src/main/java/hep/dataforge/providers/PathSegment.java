@@ -82,4 +82,13 @@ class PathSegment implements Path {
     public Path append(Path segment) {
         return new SegmentedPath(getTarget(), Arrays.asList(this, new PathSegment(segment.getTarget(), segment.getName())));
     }
+
+    @Override
+    public String toString() {
+        if(target.isEmpty()){
+            return getName().toUnescaped();
+        } else {
+            return target + ":" + getName().toUnescaped();
+        }
+    }
 }
