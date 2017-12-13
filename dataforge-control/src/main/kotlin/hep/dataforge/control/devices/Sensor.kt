@@ -28,6 +28,7 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_META_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_RESULT_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
+import hep.dataforge.control.devices.Sensor.Companion.stateNames
 import hep.dataforge.control.measurements.MeasurementListener
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
@@ -43,7 +44,7 @@ import hep.dataforge.values.ValueType
  */
 @StateDefs(
         StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, allowed = Sensor.Companion.MeasurementState., info = "Shows if this sensor is actively measuring"))
+        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, allowed = stateNames, info = "Shows if this sensor is actively measuring"))
 )
 @MetaStateDefs(
         MetaStateDef(value = NodeDef(name = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
@@ -118,6 +119,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
             WAITING,
             STOPPED
         }
+        val stateNames = MeasurementState.values().map { it.name }.toTypedArray()
     }
 
     //    private Measurement<T> measurement;

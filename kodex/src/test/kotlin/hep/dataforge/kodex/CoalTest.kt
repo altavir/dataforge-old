@@ -7,7 +7,7 @@ import org.junit.Test
 
 class CoalTest {
     val firstLevel = (1..10).map { index ->
-        GLOBAL.generate {
+        global.generate {
             Thread.sleep(100)
             println("this is coal $index")
             "this is coal $index"

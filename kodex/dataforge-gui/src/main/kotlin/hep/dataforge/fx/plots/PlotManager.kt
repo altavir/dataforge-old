@@ -19,7 +19,7 @@ class PlotManager : BasicPlugin(), PlotPlugin {
     /**
      * Plot frame factory
      */
-    var frameFactory: () -> PlotFrame = {
+    private var frameFactory: () -> PlotFrame = {
         try {
             JFreeChartFrame()
         } catch (ex: Exception) {

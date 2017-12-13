@@ -1,6 +1,7 @@
 package hep.dataforge.kodex
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
 import hep.dataforge.goals.Goal
@@ -26,7 +27,24 @@ import kotlin.reflect.KProperty
  * Created by darksnake on 26-Apr-17.
  */
 
-val GLOBAL: Context = hep.dataforge.context.Global.instance()
+// Context extensions
+val global: Context = hep.dataforge.context.Global.instance()
+
+/**
+ * Build a child plugin using given name, plugins list and custom build script
+ */
+fun Context.buildContext(name: String, vararg plugins: Class<out Plugin>, init: Context.Builder.() -> Unit = {}): Context {
+    val builder = Context.Builder(this, name)
+    plugins.forEach {
+        builder.plugin(it)
+    }
+    builder.apply(init)
+    return builder.build()
+}
+
+fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: Context.Builder.() -> Unit = {}): Context {
+    return global.buildContext(name = name, plugins = *plugins, init = init)
+}
 
 //Value operations
 

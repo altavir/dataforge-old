@@ -31,7 +31,7 @@ class KActionTest {
     @Test
     fun testPipe() {
         println("test pipe")
-        val res = pipe.run(GLOBAL, data, Meta.empty());
+        val res = pipe.run(global, data, Meta.empty());
         val datum = res.optData("newName_4").get()
         val value = datum.goal.get()
         assertTrue(datum.meta["odd"].booleanValue())
@@ -51,12 +51,12 @@ class KActionTest {
 
 
 
-        GLOBAL.setValue("cache.enabled", false)
+        global.setValue("cache.enabled", false)
         val workspace = BasicWorkspace.builder()
                 .data("test", data)
                 .task(testTask)
                 .target("test", Meta.empty())
-                .setContext(GLOBAL)
+                .setContext(global)
                 .build()
 
         val res = workspace.runTask("test")

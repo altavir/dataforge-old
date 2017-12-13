@@ -78,7 +78,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     public static Builder builder(String name, Context parent) {
-        return new Builder(name, parent);
+        return new Builder(parent, name);
     }
 
     protected final Map<String, Value> properties = new ConcurrentHashMap<>();
@@ -435,7 +435,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             this.ctx = Global.getContext(name);
         }
 
-        public Builder(String name, Context parent) {
+        public Builder(Context parent, String name) {
             this.ctx = Global.getContext(Name.joinString(parent.getName(), name));
             this.ctx.parent = parent;
         }
