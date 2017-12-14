@@ -43,6 +43,14 @@ import java.util.stream.StreamSupport;
  */
 public class ListTable extends ListOfPoints implements Table, MetaMorph {
 
+    public static ListTable copy(@NotNull Table table) {
+        if (table instanceof ListTable) {
+            return (ListTable) table;
+        } else {
+            return new ListTable(table.getFormat(),table.getRows());
+        }
+    }
+
     /**
      * Формат описывает набор полей, которые ОБЯЗАТЕЛЬНО присутствуют в каждой
      * точке из набора данных. Набор полей каждой точки может быть шире, но не

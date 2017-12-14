@@ -19,7 +19,8 @@ import java.util.stream.Stream;
  */
 public class ColumnTable implements Table {
 
-    public static ColumnTable copy(Table table) {
+
+    public static ColumnTable copy(@NotNull Table table) {
         if (table instanceof ColumnTable) {
             return (ColumnTable) table;
         } else {
