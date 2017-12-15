@@ -158,7 +158,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
                     } else {
                         getLogger().info("State {} changed to {}", stateName, newState);
                     }
-                    context.parallelExecutor().submit(() -> {
+                    context.getParallelExecutor().submit(() -> {
                                 forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
                                         it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, newState));
                             }
@@ -180,7 +180,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
                 } else {
                     getLogger().info("Metastate {} changed to {}", stateName, metaStateValue);
                 }
-                context.parallelExecutor().submit(() -> {
+                context.getParallelExecutor().submit(() -> {
                             forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
                                     it -> it.notifyDeviceStateChanged(AbstractDevice.this, stateName, metaStateValue));
                         }
@@ -191,7 +191,7 @@ public abstract class AbstractDevice extends MetaHolder implements Device {
 
     protected final void notifyError(String message, Throwable error) {
         getLogger().error(message, error);
-        context.parallelExecutor().submit(() -> {
+        context.getParallelExecutor().submit(() -> {
                     forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener.class,
                             it -> it.evaluateDeviceException(AbstractDevice.this, message, error));
                 }

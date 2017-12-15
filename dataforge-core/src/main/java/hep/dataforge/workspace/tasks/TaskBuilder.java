@@ -229,7 +229,7 @@ public class TaskBuilder {
                     state.setData(action.getName(), data);
                     //handling individual stages result
                     if (listeners.containsKey(action.getName())) {
-                        data.handle(model.getContext().singleThreadExecutor(), listeners.get(action.getName()));
+                        data.handle(model.getContext().getDispatcher(), listeners.get(action.getName()));
                     }
                 }
             }

@@ -79,7 +79,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
     @Override
     public void acceptError(String errorMessage, Throwable error) {
         exceptionListeners.forEach(it -> {
-            context.parallelExecutor().submit(() -> {
+            context.getParallelExecutor().submit(() -> {
                 try {
                     it.accept(errorMessage, error);
                 } catch (Exception ex) {
@@ -338,7 +338,7 @@ public class GenericPortController implements Port.PortController, AutoCloseable
 
         void acceptPhrase(String phrase) {
             if (condition.test(phrase)) {
-                context.parallelExecutor().submit(() -> {
+                context.getParallelExecutor().submit(() -> {
                     try {
                         action.accept(phrase);
                     } catch (Exception ex) {

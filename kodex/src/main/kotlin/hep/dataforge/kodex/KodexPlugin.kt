@@ -11,13 +11,13 @@ class KodexPlugin : BasicPlugin() {
 
     val dispatcher: CoroutineContext
         get() {
-            return context.parallelExecutor().asCoroutineDispatcher()
+            return context.getParallelExecutor().asCoroutineDispatcher()
         }
 
     override fun attach(context: Context) {
         super.attach(context)
         context.logger.debug("Switching KODEX coroutine dispatcher to context executor")
-//        dispatcher = context.parallelExecutor().asCoroutineDispatcher()
+//        dispatcher = context.getParallelExecutor().asCoroutineDispatcher()
     }
 
     override fun detach() {

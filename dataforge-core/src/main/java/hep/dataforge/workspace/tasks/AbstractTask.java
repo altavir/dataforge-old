@@ -47,7 +47,7 @@ public abstract class AbstractTask<R> implements Task<R> {
         DataNode<R> output = run(model, input);
 
         //handle result
-        output.handle(model.getContext().singleThreadExecutor(), this::handle);
+        output.handle(model.getContext().getDispatcher(), this::handle);
 
         return output;
     }

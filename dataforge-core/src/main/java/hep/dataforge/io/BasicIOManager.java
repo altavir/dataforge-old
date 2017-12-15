@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -31,7 +31,6 @@ import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
 /**
  * <p>
@@ -130,23 +129,6 @@ public class BasicIOManager extends BasicPlugin implements IOManager {
             return System.out;
         } else {
             return out;
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    @Override
-    public Optional<Path> optFile(String path) {
-        Path file = Paths.get(path);
-        if (Files.exists(file)) {
-            if (file.isAbsolute()) {
-                return Optional.of(file);
-            } else {
-                return Optional.of(getRootDirectory().resolve(path));
-            }
-        } else {
-            return Optional.empty();
         }
     }
 

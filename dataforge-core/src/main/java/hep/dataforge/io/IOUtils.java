@@ -24,7 +24,10 @@ import hep.dataforge.values.Values;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.net.URI;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Optional;
@@ -89,6 +92,19 @@ public class IOUtils {
 
     public static String wrapANSI(String str, String ansiColor) {
         return ansiColor + str + ANSI_RESET;
+    }
+
+    /**
+     * Resolve a path either in URI or local file form
+     * @param path
+     * @return
+     */
+    public static Path resolvePath(String path){
+        if(path.matches("\\w:[\\\\\\/].*")){
+            return new File(path).toPath();
+        } else {
+            return Paths.get(URI.create(path));
+        }
     }
 
     public static String[] parse(String line) {

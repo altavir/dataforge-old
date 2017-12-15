@@ -51,7 +51,7 @@ public class ContextLock implements ContextAware {
     public synchronized <T> T modify(Callable<T> mod) {
         tryModify();
         try {
-            return context.singleThreadExecutor().submit(mod).get();
+            return context.getDispatcher().submit(mod).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }
@@ -60,7 +60,7 @@ public class ContextLock implements ContextAware {
     public synchronized void modify(Runnable mod) {
         tryModify();
         try {
-            context.singleThreadExecutor().submit(mod).get();
+            context.getDispatcher().submit(mod).get();
         } catch (InterruptedException | ExecutionException e) {
             throw new RuntimeException(e);
         }

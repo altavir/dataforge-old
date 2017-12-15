@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -33,6 +33,7 @@ import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -51,6 +52,7 @@ public interface IOManager extends Plugin {
 
     String ROOT_DIRECTORY_CONTEXT_KEY = "rootDir";
     String WORK_DIRECTORY_CONTEXT_KEY = "workDir";
+    String DATA_DIRECTORY_CONTEXT_KEY = "dataDir";
     String TEMP_DIRECTORY_CONTEXT_KEY = "tempDir";
 
     String DEFAULT_OUTPUT_TYPE = "dataforge/output";
@@ -125,6 +127,10 @@ public interface IOManager extends Plugin {
      */
     InputStream in(String path);
 
+    default Path getDataFile(String path) {
+        return optFile(getDataDirectory(), path).orElseThrow(() -> new RuntimeException("File " + path + " not found in data directory"));
+    }
+
     /**
      * Get a file where {@code path} is relative to root directory or absolute.
      *
@@ -141,7 +147,21 @@ public interface IOManager extends Plugin {
      * @param path
      * @return
      */
-    Optional<Path> optFile(String path);
+    default Optional<Path> optFile(Path parent, String path) {
+        Path file = Paths.get(path);
+        if (!file.isAbsolute()) {
+            file = parent.resolve(path);
+        }
+        if (Files.exists(file)) {
+            return Optional.of(file);
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    default Optional<Path> optFile(String path) {
+        return optFile(getRootDirectory(), path);
+    }
 
     /**
      * Provide file or resource as a binary. The path must be provided in DataForge notation (using ".").
@@ -203,6 +223,18 @@ public interface IOManager extends Plugin {
             throw new RuntimeException(getContext().getName() + ": Failed to create work directory " + work, e);
         }
         return work;
+    }
+
+    /**
+     * Get the default directory for file data. By default uses context root directory
+     * @return
+     */
+    default Path getDataDirectory() {
+        if (getContext().hasValue(DATA_DIRECTORY_CONTEXT_KEY)) {
+            return IOUtils.resolvePath(getContext().getString(DATA_DIRECTORY_CONTEXT_KEY));
+        } else {
+            return getRootDirectory();
+        }
     }
 
     /**

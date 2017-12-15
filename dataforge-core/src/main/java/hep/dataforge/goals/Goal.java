@@ -91,7 +91,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param r
      */
     default Goal<T> onStart(Runnable r) {
-        return onStart(Global.instance().singleThreadExecutor(), r);
+        return onStart(Global.instance().getDispatcher(), r);
     }
 
     /**
@@ -117,7 +117,7 @@ public interface Goal<T> extends RunnableFuture<T> {
      * @param consumer
      */
     default Goal<T> onComplete(BiConsumer<T, Throwable> consumer) {
-        return onComplete(Global.instance().singleThreadExecutor(), consumer);
+        return onComplete(Global.instance().getDispatcher(), consumer);
     }
 
     /**

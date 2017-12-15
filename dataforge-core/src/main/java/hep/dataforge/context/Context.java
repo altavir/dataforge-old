@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,9 +44,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -284,31 +282,39 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     /**
-     * Get parallelExecutor for given process name. By default uses one thread
-     * pool parallelExecutor for all processes
+     * Get parallel executor for given process name. By default uses one thread pool parallel executor for all processes
      *
      * @return
      */
-    public ExecutorService parallelExecutor() {
+    public ExecutorService getParallelExecutor() {
         if (this.parallelExecutor == null) {
             getLogger().info("Initializing parallel executor in {}", getName());
-            this.parallelExecutor = Executors.newWorkStealingPool();
+            ForkJoinPool.ForkJoinWorkerThreadFactory factory = pool -> {
+                final ForkJoinWorkerThread worker = ForkJoinPool.defaultForkJoinWorkerThreadFactory.newThread(pool);
+                worker.setName(getName() + "_worker-" + worker.getPoolIndex());
+                return worker;
+            };
+            this.parallelExecutor = new ForkJoinPool(
+                    Runtime.getRuntime().availableProcessors(),
+                    factory,
+                    null, false);
         }
         return parallelExecutor;
     }
 
     /**
-     * An executor for tasks that do not allow parallelization
+     * A dispatch thread executor for current context
      *
      * @return
      */
-    public ExecutorService singleThreadExecutor() {
+    public ExecutorService getDispatcher() {
         if (this.singleThreadExecutor == null) {
-            getLogger().info("Initializing single thread executor in {}", getName());
+            getLogger().info("Initializing dispatch thread executor in {}", getName());
             this.singleThreadExecutor = Executors.newSingleThreadExecutor(r -> {
                         Thread thread = new Thread(r);
-                        thread.setDaemon(false);
-                        thread.setName(getName() + "_single");
+                        thread.setPriority(8); // slightly higher priority
+                        thread.setDaemon(true);
+                        thread.setName(getName() + "_dispatch");
                         return thread;
                     }
             );
@@ -478,6 +484,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             return this;
         }
 
+        @SuppressWarnings("unchecked")
         public Builder plugin(Meta meta) {
             Meta plMeta = meta.getMetaOrEmpty(MetaBuilder.DEFAULT_META_NAME);
             if (meta.hasValue("name")) {
@@ -550,6 +557,22 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
             }
             ctx.setValue(IOManager.ROOT_DIRECTORY_CONTEXT_KEY, rootDir);
             return this;
+        }
+
+        public String getRootDir() {
+            return ctx.optString(IOManager.ROOT_DIRECTORY_CONTEXT_KEY).orElseGet(() -> ctx.getIo().getRootDirectory().toString());
+        }
+
+        public Builder setDataDir(String rootDir) {
+            if (!ctx.getPluginManager().opt(IOManager.class).isPresent()) {
+                ctx.getPluginManager().load(new BasicIOManager(ctx.getParent().getIo().in(), ctx.getParent().getIo().out()));
+            }
+            ctx.setValue(IOManager.DATA_DIRECTORY_CONTEXT_KEY, rootDir);
+            return this;
+        }
+
+        public String getDataDir() {
+            return ctx.optString(IOManager.DATA_DIRECTORY_CONTEXT_KEY).orElseGet(() -> ctx.getIo().getRootDirectory().toString());
         }
 
         public Context build() {
