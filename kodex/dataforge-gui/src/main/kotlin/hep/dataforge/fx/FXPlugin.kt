@@ -1,7 +1,6 @@
 package hep.dataforge.fx
 
 import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.context.PluginDef
 import hep.dataforge.description.ValueDef
@@ -23,21 +22,10 @@ import java.util.function.Consumer
 @ValueDef(name = "implicitExit", type = arrayOf(BOOLEAN), def = "false", info = "A Platform implicitExit parameter")
 class FXPlugin : BasicPlugin() {
 
-    /**
-     * the parent stage for all windows
-     */
-    private var parent: Stage? = null
-    private val windows = HashSet<Stage>()
 
-    override fun attach(context: Context) {
-        if (parent == null) {
-            configureValue("implicitExit", false)
-            context.logger.debug("FX application not found. Starting application surrogate.")
-            ApplicationSurrogate.start()
-            parent = ApplicationSurrogate.stage
-        }
-        super.attach(context)
-    }
+    private var parent: Stage? = null
+
+    private val windows = HashSet<Stage>()
 
     override fun detach() {
         if (context === Global.instance()) {
@@ -62,16 +50,26 @@ class FXPlugin : BasicPlugin() {
         }
     }
 
-    private fun getParent(): Stage? {
+
+    fun setParent(parent: Stage) {
+        synchronized(context) {
+            this.parent = parent
+        }
+    }
+
+    fun getParent(): Stage {
         if (context == null) {
             throw RuntimeException("Plugin not attached")
         }
-        return parent
-    }
-
-    @Synchronized
-    fun setParent(parent: Stage) {
-        this.parent = parent
+        synchronized(context) {
+            if (parent == null) {
+                configureValue("implicitExit", false)
+                context.logger.debug("FX application not found. Starting application surrogate.")
+                ApplicationSurrogate.start()
+                parent = ApplicationSurrogate.stage
+            }
+            return parent!!;
+        }
     }
 
     @Synchronized private fun addStage(stage: Stage) {
@@ -102,7 +100,7 @@ class FXPlugin : BasicPlugin() {
         val promise = CompletableFuture<Stage>()
         runLater {
             val stage = Stage()
-            stage.initOwner(getParent()!!.owner)
+            stage.initOwner(getParent().owner)
             cons.accept(stage)
             addStage(stage)
             stage.show()
@@ -114,8 +112,8 @@ class FXPlugin : BasicPlugin() {
     fun show(component: UIComponent) {
         runLater {
             val stage = Stage()
-            stage.initOwner(getParent()!!.owner)
-            stage.scene = Scene(component.root,800.0,600.0)
+            stage.initOwner(getParent().owner)
+            stage.scene = Scene(component.root, 800.0, 600.0)
             stage.title = component.title
             addStage(stage)
             stage.show()

@@ -12,7 +12,7 @@ const val DEFAULT_STAGE_NAME = "";
 const val DEFAULT_PLOT_NAME = "";
 
 
-@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = arrayOf("hep.dataforge:fx"), info = "Basic plottiong plugin")
+@PluginDef(name = "plots", group = "hep.dataforge", dependsOn = ["hep.dataforge:fx"], info = "Basic plottiong plugin")
 class PlotManager : BasicPlugin(), PlotPlugin {
     private val stages: MutableMap<String, MutableMap<String, PlotContainer>> = HashMap()
 
