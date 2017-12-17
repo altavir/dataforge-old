@@ -2,7 +2,6 @@ package hep.dataforge.fx.plots
 
 import hep.dataforge.description.DescriptorUtils
 import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.fx.ApplicationSurrogate
 import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.fx.dfIcon
 import hep.dataforge.fx.table.TableDisplay
@@ -12,7 +11,6 @@ import hep.dataforge.names.Name
 import hep.dataforge.plots.*
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.utils.FXObject
-import javafx.application.Platform
 import javafx.beans.property.SimpleBooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.geometry.Orientation
@@ -298,32 +296,6 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
             item.value.name;
         } else {
             Name.join(getFullName(item.parent), item.value.name)
-        }
-    }
-
-
-    companion object {
-
-        /**
-         * for testing
-         */
-        fun display(plot: PlotFrame, title: String = "", width: Double = 800.0, height: Double = 600.0) {
-            Platform.setImplicitExit(false)
-            ApplicationSurrogate.start()
-
-            val container = PlotContainer(plot)
-
-            Platform.runLater {
-                ApplicationSurrogate.stage.apply {
-                    this.width = width
-                    this.height = height
-                    this.title = title
-                    this.scene = Scene(container.root, width, height)
-                    this.show()
-                }
-            }
-
-            Platform.setImplicitExit(true)
         }
     }
 }

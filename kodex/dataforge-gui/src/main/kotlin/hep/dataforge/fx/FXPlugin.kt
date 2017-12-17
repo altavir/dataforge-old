@@ -1,123 +1,117 @@
 package hep.dataforge.fx
 
 import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.Global
 import hep.dataforge.context.PluginDef
 import hep.dataforge.description.ValueDef
-import hep.dataforge.values.Value
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.values.ValueType.BOOLEAN
+import javafx.application.Application
 import javafx.application.Platform
+import javafx.collections.FXCollections
+import javafx.collections.ObservableSet
+import javafx.collections.SetChangeListener
 import javafx.scene.Scene
 import javafx.stage.Stage
 import tornadofx.*
-import java.util.*
-import java.util.concurrent.CompletableFuture
-import java.util.function.Consumer
 
 /**
  * Plugin holding JavaFX application instance and its root stage
  * Created by darksnake on 28-Oct-16.
  */
 @PluginDef(name = "fx", group = "hep.dataforge", info = "JavaFX window manager")
-@ValueDef(name = "implicitExit", type = arrayOf(BOOLEAN), def = "false", info = "A Platform implicitExit parameter")
+@ValueDefs(
+        ValueDef(name = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
+)
 class FXPlugin : BasicPlugin() {
 
+    private val stages: ObservableSet<Stage> = FXCollections.observableSet()
 
-    private var parent: Stage? = null
+    val consoleMode: Boolean = meta.getBoolean("consoleMode", true)
 
-    private val windows = HashSet<Stage>()
-
-    override fun detach() {
-        if (context === Global.instance()) {
-            if (windows.isEmpty()) {
-                Platform.exit()
-            } else {
-                Platform.setImplicitExit(true)
-            }
-        }
-
-        //close all windows
-        Platform.runLater { windows.forEach(Consumer { it.close() }) }
-
-
-        super.detach()
-    }
-
-    override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
-        super.applyValueChange(name, oldItem, newItem)
-        if (name == "implicitExit") {
-            Platform.setImplicitExit(newItem?.booleanValue() ?: true)
+    init {
+        if(consoleMode) {
+            stages.addListener(SetChangeListener { change ->
+                if (change.set.isEmpty()) {
+                    Platform.setImplicitExit(true)
+                } else {
+                    Platform.setImplicitExit(false)
+                }
+            })
         }
     }
 
-
-    fun setParent(parent: Stage) {
-        synchronized(context) {
-            this.parent = parent
-        }
-    }
-
-    fun getParent(): Stage {
+    /**
+     * Wait for application and toolkit to start
+     */
+    fun checkApp() {
         if (context == null) {
-            throw RuntimeException("Plugin not attached")
+            throw IllegalStateException("Plugin not attached")
         }
-        synchronized(context) {
-            if (parent == null) {
-                configureValue("implicitExit", false)
-                context.logger.debug("FX application not found. Starting application surrogate.")
-                ApplicationSurrogate.start()
-                parent = ApplicationSurrogate.stage
+        if (FX.getApplication(DefaultScope) == null) {
+            if (consoleMode) {
+
+                Thread {
+                    launch<ApplicationSurrogate>()
+                }.apply {
+                    name = "${context.name} FX application thread"
+                    start()
+                }
+
+                while (!FX.initialized.get()) {
+                    if (Thread.interrupted()) {
+                        throw RuntimeException("Interrupted application start")
+                    }
+                }
+                Platform.setImplicitExit(false)
+            } else {
+                throw RuntimeException("Application not defined")
             }
-            return parent!!;
         }
     }
 
-    @Synchronized private fun addStage(stage: Stage) {
-        Platform.setImplicitExit(true)
-        this.windows.add(stage)
+    /**
+     * Define an application to use in this context
+     */
+    fun setApp(app: Application, stage: Stage) {
+        FX.registerApplication(DefaultScope, app, stage)
     }
 
-    //    /**
-    //     * Show new Stage in a separate window. Supplier should not show window, only construct stage.
-    //     *
-    //     * @param sup
-    //     */
-    //    public void show(Supplier<Stage> sup) {
-    //        Platform.runLater(() -> {
-    //            Stage newStage = sup.get();
-    //            newStage.initOwner(getStage().getOwner());
-    //            addStage(newStage);
-    //            newStage.show();
-    //        });
-    //    }
+    fun getStage(): Stage {
+        checkApp()
+        return FX.getPrimaryStage(DefaultScope)!!
+    }
 
     /**
      * Show something in a pre-constructed stage. Blocks thread until stage is created
      *
      * @param cons
      */
-    fun show(cons: Consumer<Stage>): Stage {
-        val promise = CompletableFuture<Stage>()
+    fun display(action: Stage.() -> Unit) {
         runLater {
             val stage = Stage()
-            stage.initOwner(getParent().owner)
-            cons.accept(stage)
-            addStage(stage)
+            stage.initOwner(FX.primaryStage)
+            stage.action()
             stage.show()
-            promise.complete(stage)
-        }
-        return promise.join()
-    }
-
-    fun show(component: UIComponent) {
-        runLater {
-            val stage = Stage()
-            stage.initOwner(getParent().owner)
-            stage.scene = Scene(component.root, 800.0, 600.0)
-            stage.title = component.title
-            addStage(stage)
-            stage.show()
+            stages.add(stage)
+            stage.setOnCloseRequest { stages.remove(stage) }
         }
     }
 
+    fun display(component: UIComponent, width: Double = 800.0, height: Double = 600.0) {
+        display {
+            scene = Scene(component.root, width, height)
+            title = component.title
+        }
+    }
+
+}
+
+/**
+ * An application surrogate without any visible primary stage
+ */
+class ApplicationSurrogate : Application() {
+    override fun start(primaryStage: Stage) {
+        FX.registerApplication(this, primaryStage)
+        FX.initialized.value = true
+    }
 }

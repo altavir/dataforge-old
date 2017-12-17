@@ -2,6 +2,7 @@ package hep.dataforge.fx.plots
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.PluginDef
+import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.output.FXDisplay
 import hep.dataforge.fx.output.buildDisplay
 import hep.dataforge.plots.PlotFrame
@@ -21,9 +22,11 @@ class PlotManager : BasicPlugin(), PlotPlugin {
      */
     private var frameFactory: () -> PlotFrame = {
         try {
+            //initializing fx surrigate if fx framework not started
+            context.getFeature(FXPlugin::class.java).checkApp()
             JFreeChartFrame()
         } catch (ex: Exception) {
-            throw RuntimeException("Plot frame factory not configured");
+            throw RuntimeException("Plot frame factory not configured",ex);
         }
     };
 
