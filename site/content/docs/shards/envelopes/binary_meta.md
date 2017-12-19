@@ -8,7 +8,11 @@ published: false
 ---
 Binary meta format is made to limit size and simplify parsing to automatic messages. The notation for the node looks the following way (all numeric values use BigEndian encoding):
 
-1. Meta name. Here and later, all strings are encoded as specified at Java [DataOutput::writeUTF](https://docs.oracle.com/javase/7/docs/api/java/io/DataOutput.html#writeUTF(java.lang.String))
+<br>
+All strings are encoded in a following way: 2 bytes for string length, byte array of given length representing UTF-8 encoded string.
+<br>
+
+1. Meta name as string.
 2. 2 bytes unsigned integer representing the number of values in the node. Could be zero.
 3. For each of values an encoded name of the value and then:
     * `0` for Null value.

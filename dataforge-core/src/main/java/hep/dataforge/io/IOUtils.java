@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -96,11 +96,12 @@ public class IOUtils {
 
     /**
      * Resolve a path either in URI or local file form
+     *
      * @param path
      * @return
      */
-    public static Path resolvePath(String path){
-        if(path.matches("\\w:[\\\\\\/].*")){
+    public static Path resolvePath(String path) {
+        if (path.matches("\\w:[\\\\\\/].*")) {
             return new File(path).toPath();
         } else {
             return Paths.get(URI.create(path));
@@ -318,7 +319,7 @@ public class IOUtils {
         while (true) {
             try {
                 int b = stream.read();
-                if(b == -1){
+                if (b == -1) {
                     return baos.toString(charset).trim();
                 }
                 if (b == '\n') {
@@ -344,6 +345,7 @@ public class IOUtils {
 
     /**
      * Return optional next line not fitting skip condition.
+     *
      * @param stream
      * @param charset
      * @param skipCondition
@@ -367,6 +369,19 @@ public class IOUtils {
                 return Optional.empty();
             }
         }
+    }
+
+    public static void writeString(ObjectOutput output, String string) throws IOException {
+        byte[] bytes = string.getBytes(UTF8_CHARSET);
+        output.writeShort(bytes.length);
+        output.write(bytes);
+    }
+
+    public static String readString(ObjectInput input) throws IOException {
+        int size = input.readShort();
+        byte[] bytes = new byte[size];
+        input.read(bytes);
+        return new String(bytes, UTF8_CHARSET);
     }
 
 }

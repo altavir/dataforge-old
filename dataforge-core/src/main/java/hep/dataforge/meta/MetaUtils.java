@@ -6,6 +6,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
+import hep.dataforge.io.IOUtils;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
@@ -150,19 +151,19 @@ public class MetaUtils {
         } catch (NumberFormatException ex) {
             List<Predicate<Meta>> predicates = new ArrayList<>();
             String[] tokens = query.split(",");
-            for(String token: tokens){
+            for (String token : tokens) {
                 predicates.add(buildQueryPredicate(token));
             }
             Predicate<Meta> predicate = meta -> {
                 AtomicBoolean res = new AtomicBoolean(true);
                 predicates.forEach(p -> {
-                    if(!p.test(meta)) {
+                    if (!p.test(meta)) {
                         res.set(false);
                     }
                 });
                 return res.get();
             };
-            return objects.stream().filter(obj->predicate.test(metaExtractor.apply(obj))).collect(Collectors.toList());
+            return objects.stream().filter(obj -> predicate.test(metaExtractor.apply(obj))).collect(Collectors.toList());
         }
 
 
@@ -170,6 +171,7 @@ public class MetaUtils {
 
     /**
      * Build a meta predicate for a given single token
+     *
      * @param token
      * @return
      */
@@ -264,13 +266,13 @@ public class MetaUtils {
         try {
             // write name if it is required
             if (includeName) {
-                out.writeUTF(meta.getName());
+                IOUtils.writeString(out, meta.getName());
             }
             out.writeShort((int) meta.getValueNames(true).count());
             //writing values in format [name length, name, value]
             meta.getValueNames(true).forEach(valName -> {
                 try {
-                    out.writeUTF(valName);
+                    IOUtils.writeString(out, valName);
                     ValueUtils.writeValue(out, meta.getValue(valName));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
@@ -280,7 +282,7 @@ public class MetaUtils {
             out.writeShort((int) meta.getNodeNames(true).count());
             meta.getNodeNames(true).forEach(nodeName -> {
                 try {
-                    out.writeUTF(nodeName);
+                    IOUtils.writeString(out, nodeName);
                     List<? extends Meta> metas = meta.getMetaList(nodeName);
                     out.writeShort(metas.size());
                     for (Meta m : metas) {
@@ -312,11 +314,11 @@ public class MetaUtils {
     public static MetaBuilder readMeta(ObjectInput in, String name) throws IOException {
         MetaBuilder res = new MetaBuilder(name);
         if (name == null) {
-            res.setName(in.readUTF());
+            res.setName(IOUtils.readString(in));
         }
         short valSize = in.readShort();
         for (int i = 0; i < valSize; i++) {
-            String valName = in.readUTF();
+            String valName = IOUtils.readString(in);
             Value val = null;
             try {
                 val = ValueUtils.readValue(in);
@@ -327,7 +329,7 @@ public class MetaUtils {
         }
         short nodeSize = in.readShort();
         for (int i = 0; i < nodeSize; i++) {
-            String nodeName = in.readUTF();
+            String nodeName = IOUtils.readString(in);
             short listSize = in.readShort();
             List<MetaBuilder> nodeList = new ArrayList<>();
             for (int j = 0; j < listSize; j++) {
@@ -345,15 +347,16 @@ public class MetaUtils {
 
     /**
      * Check each of given paths in the given node. Return first subnode that do actually exist
+     *
      * @param meta
      * @param paths
      * @return
      */
-    public static Optional<Meta> optEither(Meta meta, String... paths){
+    public static Optional<Meta> optEither(Meta meta, String... paths) {
         return Stream.of(paths).map(meta::optMeta).filter(Optional::isPresent).findFirst().map(Optional::get);
     }
 
-    public static Optional<Value> optEitherValue(Meta meta, String... paths){
+    public static Optional<Value> optEitherValue(Meta meta, String... paths) {
         return Stream.of(paths).map(meta::optValue).filter(Optional::isPresent).findFirst().map(Optional::get);
     }
 

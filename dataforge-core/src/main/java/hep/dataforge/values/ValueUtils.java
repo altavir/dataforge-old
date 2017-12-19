@@ -1,5 +1,7 @@
 package hep.dataforge.values;
 
+import hep.dataforge.io.IOUtils;
+
 import java.io.IOException;
 import java.io.ObjectInput;
 import java.io.ObjectOutput;
@@ -84,7 +86,7 @@ public class ValueUtils {
                 case STRING:
                     //TODO add encding specification
                     oos.writeChar('S');//String
-                    oos.writeUTF(value.stringValue());
+                    IOUtils.writeString(oos,value.stringValue());
                     break;
                 case NUMBER:
                     Number num = value.numberValue();
@@ -144,7 +146,7 @@ public class ValueUtils {
                 Instant time = Instant.ofEpochSecond(ois.readLong(), ois.readLong());
                 return Value.of(time);
             case 'S':
-                return Value.of(ois.readUTF());
+                return Value.of(IOUtils.readString(ois));
             case 'D':
                 return Value.of(ois.readDouble());
             case 'I':
