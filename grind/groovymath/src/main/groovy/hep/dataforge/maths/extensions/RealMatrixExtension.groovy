@@ -67,5 +67,5 @@ class RealMatrixExtension {
         return self.scalarMultiply(1d/num)
     }
 
-    //TODO add getAt and setAt
+    //TODO add get and setAt
 }

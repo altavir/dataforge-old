@@ -44,7 +44,7 @@ public interface Values extends NameSetContainer, ValueProvider {
      * @param num
      * @return
      */
-    default Value getAt(int num) {
+    default Value get(int num) {
         return getValue(this.getNames().get(num));
     }
 
