@@ -16,14 +16,16 @@
 
 package hep.dataforge.maths.chain
 
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.experimental.channels.sendBlocking
 
 /**
  * A not-necessary-Markov chain of some type
  * @param S - the state of the chain
  * @param R - the chain element type
  */
-interface Chain<R : Any> {
+interface Chain<out R> {
     /**
      * Last value of the chain
      */
@@ -37,10 +39,10 @@ interface Chain<R : Any> {
     /**
      * Transform chain to a lazy sequence
      */
-    fun asSequence(): Sequence<R> {
-        return generateSequence {
-            runBlocking {
-                next()
+    fun asChannel(): ReceiveChannel<R>{
+        return produce {
+            while(true) {
+                sendBlocking(next())
             }
         }
     }
