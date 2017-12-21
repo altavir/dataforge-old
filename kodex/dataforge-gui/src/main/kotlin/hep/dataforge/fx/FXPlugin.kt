@@ -29,7 +29,7 @@ class FXPlugin : BasicPlugin() {
     val consoleMode: Boolean = meta.getBoolean("consoleMode", true)
 
     init {
-        if(consoleMode) {
+        if (consoleMode) {
             stages.addListener(SetChangeListener { change ->
                 if (change.set.isEmpty()) {
                     Platform.setImplicitExit(true)
@@ -44,27 +44,29 @@ class FXPlugin : BasicPlugin() {
      * Wait for application and toolkit to start
      */
     fun checkApp() {
+
         if (context == null) {
             throw IllegalStateException("Plugin not attached")
         }
-        if (FX.getApplication(DefaultScope) == null) {
-            if (consoleMode) {
-
-                Thread {
-                    launch<ApplicationSurrogate>()
-                }.apply {
-                    name = "${context.name} FX application thread"
-                    start()
-                }
-
-                while (!FX.initialized.get()) {
-                    if (Thread.interrupted()) {
-                        throw RuntimeException("Interrupted application start")
+        synchronized(this) {
+            if (FX.getApplication(DefaultScope) == null) {
+                if (consoleMode) {
+                    Thread {
+                        launch<ApplicationSurrogate>()
+                    }.apply {
+                        name = "${context.name} FX application thread"
+                        start()
                     }
+
+                    while (!FX.initialized.get()) {
+                        if (Thread.interrupted()) {
+                            throw RuntimeException("Interrupted application start")
+                        }
+                    }
+                    Platform.setImplicitExit(false)
+                } else {
+                    throw RuntimeException("Application not defined")
                 }
-                Platform.setImplicitExit(false)
-            } else {
-                throw RuntimeException("Application not defined")
             }
         }
     }
