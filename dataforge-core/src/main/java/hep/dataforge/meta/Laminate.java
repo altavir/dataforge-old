@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -67,11 +66,21 @@ public final class Laminate extends Meta implements Described {
         this.descriptorLayer = laminate.descriptorLayer;
     }
 
+    private static void checkCycles(Laminate laminate, Meta layer) {
+        if (laminate == layer) {
+            throw new RuntimeException("Cyclic laminate reference");
+        }
+        if (layer instanceof Laminate) {
+            ((Laminate) layer).layers.forEach(it -> checkCycles(laminate, it));
+        }
+    }
+
     private void addLayer(Meta layer) {
         if (layer != null && !layer.isEmpty()) {
             if (layer instanceof MutableMetaNode) {
                 LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
+            checkCycles(this,layer);
             this.layers.add(layer);
         }
     }
@@ -244,19 +253,20 @@ public final class Laminate extends Meta implements Described {
 
     @Override
     public Optional<Value> optValue(String path) {
-        Optionals<Value> opts = Optionals.either();
-
         //searching layers for value
         for (Meta m : layers) {
-            opts = opts.or(() -> m.optValue(path));
+            Optional<Value> opt = m.optValue(path);
+            if (opt.isPresent()) {
+                return opt.map(it -> MetaUtils.transformValue(it));
+            }
         }
 
         // if descriptor layer is definded, searching it for value
         if (descriptorLayer != null) {
-            opts = opts.or(() -> descriptorLayer.optValue(path));
+            return descriptorLayer.optValue(path).map(it -> MetaUtils.transformValue(it));
         }
 
-        return opts.opt().map(it -> MetaUtils.transformValue(it));
+        return Optional.empty();
     }
 
     @Override

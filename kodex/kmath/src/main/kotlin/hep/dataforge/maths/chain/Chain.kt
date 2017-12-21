@@ -18,7 +18,6 @@ package hep.dataforge.maths.chain
 
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.produce
-import kotlinx.coroutines.experimental.channels.sendBlocking
 
 /**
  * A not-necessary-Markov chain of some type
@@ -42,7 +41,7 @@ interface Chain<out R> {
     fun asChannel(): ReceiveChannel<R>{
         return produce {
             while(true) {
-                sendBlocking(next())
+                send(next())
             }
         }
     }
