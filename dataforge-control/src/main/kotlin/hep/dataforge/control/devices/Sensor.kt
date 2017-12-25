@@ -28,7 +28,6 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_META_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_RESULT_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
-import hep.dataforge.control.devices.Sensor.Companion.stateNames
 import hep.dataforge.control.measurements.MeasurementListener
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
@@ -36,15 +35,19 @@ import hep.dataforge.exceptions.ControlException
 import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.Channel
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
 
 /**
  * A device with which could perform one type of one-time or regular measurements
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
 @StateDefs(
         StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, allowed = stateNames, info = "Shows if this sensor is actively measuring"))
+        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring"))
 )
 @MetaStateDefs(
         MetaStateDef(value = NodeDef(name = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
@@ -52,6 +55,10 @@ import hep.dataforge.values.ValueType
 )
 @RoleDef(name = Roles.MEASUREMENT_LISTENER_ROLE, objectType = MeasurementListener::class)
 abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, meta) {
+
+    private val channel = Channel<Meta>(meta.getInt("resultBuffer", 100))
+
+    val receiver: ReceiveChannel<Meta> = channel;
 
     /**
      * The result of last measurement
@@ -63,13 +70,47 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      */
     var measurement by metaState(MEASUREMENT_META_STATE)
 
+    /**
+     * true if measurement in pro
+     */
+    var measuring by booleanState(MEASURING_STATE)
+
+    /**
+     * Current state of the measurement
+     */
+    val measurementState by stringState(MEASUREMENT_STATE_STATE)
+
+    /**
+     * update result
+     */
+    protected fun notifyResult(result: Meta) {
+        updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
+        async {
+            channel.send(result)
+        }
+    }
+
+    /**
+     * Notify measurement state changed
+     */
+    protected fun notifyMeasurementState(state: MeasurementState) {
+        updateLogicalState(MEASUREMENT_STATE_STATE, state.name)
+        when (state) {
+            MeasurementState.STOPPED -> updateLogicalState(MEASURING_STATE, false)
+            MeasurementState.IN_PROGRESS -> updateLogicalState(MEASURING_STATE, true)
+            MeasurementState.WAITING -> updateLogicalState(MEASURING_STATE, true)
+            else -> {
+            }
+        }
+    }
+
     @Throws(ControlException::class)
     override fun requestStateChange(stateName: String, value: Value) {
         when (stateName) {
             MEASURING_STATE -> {
                 val meta = optMetaState(MEASUREMENT_META_STATE).orElse(Meta.empty())
                 if (value.booleanValue()) {
-                    startMeasurement(meta)
+                    startMeasurement(measurement, meta)
                 } else {
                     stopMeasurement(meta)
                 }
@@ -83,11 +124,12 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         when (stateName) {
             MEASUREMENT_META_STATE -> {
                 val oldMeta = optMetaState(MEASUREMENT_META_STATE).orElse(null)
-                setActiveMeasurement(oldMeta, meta)
+                startMeasurement(oldMeta, meta)
             }
             else -> super.requestMetaStateChange(stateName, meta)
         }
     }
+
 
     /**
      * Set active measurement using given meta
@@ -95,17 +137,18 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * @param newMeta Meta of new measurement. If null, then clear measurement
      * @return actual meta for new measurement
      */
-    protected abstract fun setActiveMeasurement(oldMeta: Meta?, newMeta: Meta): Meta
-
-    /**
-     * start measurement using given meta
-     */
-    protected abstract fun startMeasurement(meta: Meta)
+    protected abstract fun startMeasurement(oldMeta: Meta?, newMeta: Meta)
 
     /**
      * stop measurement with given meta
      */
     protected abstract fun stopMeasurement(meta: Meta)
+
+    /**
+     * Stop all active measurements
+     */
+    protected abstract fun stopMeasurement()
+
 
     companion object {
         const val MEASURING_STATE = "measurement.active"
@@ -113,13 +156,13 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         const val MEASUREMENT_META_STATE = "measurement.meta"
         const val MEASUREMENT_RESULT_STATE = "measurement.result"
 
-        enum class MeasurementState{
-            NOT_STARTED,
-            IN_PROGRESS,
-            WAITING,
-            STOPPED
+        enum class MeasurementState {
+            NOT_STARTED, // initial state, not started
+            IN_PROGRESS, // in progress
+            WAITING, // waiting on scheduler
+            STOPPED // stopped
         }
-        val stateNames = MeasurementState.values().map { it.name }.toTypedArray()
+
     }
 
     //    private Measurement<T> measurement;

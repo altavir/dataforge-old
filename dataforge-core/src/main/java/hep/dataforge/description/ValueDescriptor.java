@@ -15,6 +15,7 @@ import hep.dataforge.values.ValueType;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * A descriptor for meta value
@@ -42,9 +43,18 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
             builder.setValue("info", val.info());
         }
 
-        if (val.allowed().length >0) {
+        if (val.allowed().length > 0) {
             builder.setValue("allowedValues", val.allowed());
+        } else if(val.enumeration() != Object.class){
+            if(val.enumeration().isEnum()) {
+                Object[] values = val.enumeration().getEnumConstants();
+                builder.setValue("allowedValues", Stream.of(values).map(Object::toString));
+            } else {
+                throw new RuntimeException("Only enumeration classes are allowed in 'enumeration' annotation property");
+            }
         }
+
+
 
         if (!val.def().isEmpty()) {
             builder.setValue("default", val.def());

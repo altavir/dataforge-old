@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,6 +25,8 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  * An immutable wrapper class that can hold Numbers, Strings and Instant
@@ -199,6 +201,8 @@ public interface Value extends Serializable {
             return of((String) obj);
         } else if (obj instanceof Collection) {
             return of((Collection) obj);
+        } else if (obj instanceof Stream) {
+            return of(((Stream) obj).collect(Collectors.toList()));
         } else if (obj.getClass().isArray()) {
             return of((Object[]) obj);
         } else {

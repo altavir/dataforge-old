@@ -47,5 +47,7 @@ public @interface ValueDef {
 
     String[] allowed() default {};
 
+    Class enumeration() default Object.class;
+
     String[] tags() default {};
 }
