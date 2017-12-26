@@ -296,3 +296,7 @@ class KSplit<T, R>(
         return outType ?: super.getOutputType()
     }
 }
+
+inline fun <reified T, reified R> DataNode<T>.pipe(context: Context, meta: Meta, name: String = "pipe", noinline action: PipeBuilder<T, R>.() -> Unit): DataNode<R> {
+    return KPipe(name, T::class.java, R::class.java, action).run(context, this, meta);
+}

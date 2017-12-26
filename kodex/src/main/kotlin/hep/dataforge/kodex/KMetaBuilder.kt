@@ -32,8 +32,11 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     /**
      * Attach new node
      */
-    fun node(name: String, transform: (KMetaBuilder.() -> Unit)? = null) {
+    fun node(name: String, vararg values: Pair<String, Any>, transform: (KMetaBuilder.() -> Unit)? = null) {
         val node = KMetaBuilder(name);
+        values.forEach {
+            node.putValue(it.first,it.second)
+        }
         transform?.invoke(node)
         attachNode(node)
     }
@@ -45,6 +48,15 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
 
 fun buildMeta(name: String = DEFAULT_META_NAME, transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
     val node = KMetaBuilder(name);
+    transform?.invoke(node)
+    return node
+}
+
+fun buildMeta(name: String, vararg values: Pair<String, Any>, transform: (KMetaBuilder.() -> Unit)? = null): KMetaBuilder {
+    val node = KMetaBuilder(name);
+    values.forEach {
+        node.putValue(it.first,it.second)
+    }
     transform?.invoke(node)
     return node
 }

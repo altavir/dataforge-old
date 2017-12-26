@@ -57,7 +57,6 @@ public class FileStorage extends AbstractStorage {
 
     private final Path dataDir;
     private WatchService monitor;
-//    private Thread storageMonitorThread;
 
     /**
      * Create a child storage
@@ -120,6 +119,19 @@ public class FileStorage extends AbstractStorage {
         }
     }
 
+//    private WatchService getWatchService() throws IOException {
+//        Storage parent = getParent();
+//        if (monitor != null) {
+//            return monitor;
+//        } else if (parent == null||  !(parent instanceof FileStorage)) {
+//            this.monitor = dataDir.getFileSystem().newWatchService();
+//            return monitor;
+//        } else {
+//            return ((FileStorage) parent).getWatchService();
+//        }
+//    }
+
+    //FIXME not working properly. Should use single monitor from root storage
     private void startMonitor() {
         try {
             if (monitor == null) {
