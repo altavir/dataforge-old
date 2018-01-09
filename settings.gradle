@@ -15,12 +15,11 @@ include ':grind' // GRoovy INteractive Dataforge
 include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'
 
-include ':kodex' // KOtlin Dataforge EXtension
-include ':kodex:dataforge-gui' // javafx based gui
-include ':kodex:dataforge-gui:gui-demo' // javafx based gui
-include ':kodex:kmath' // kotlin mathematical extension
-include ':kodex:kodex-server' // ktor based http server
+include 'kodex-server' // ktor based http server
 //include ':kodex:dataforge-server' // server base
+
+include ':dataforge-gui' // javafx based gui
+include ':dataforge-gui:gui-demo' // javafx based gui
 
 include ':dataforge-stat' // fitting tools
 include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting

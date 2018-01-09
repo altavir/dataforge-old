@@ -127,7 +127,7 @@ public class CMFitEngine implements FitEngine {
                 log.report("Using CMAESO optimizer (no derivs).");
                 SimpleBounds sb = new SimpleBounds(loBounds, upBounds);
                 MultivariateOptimizer CMAESOoptimizer = new CMAESOptimizer(100, Double.NEGATIVE_INFINITY,
-                        true, 4, 4, getDefaultRandomGenerator(), false, checker);
+                        true, 4, 4, INSTANCE.getDefaultRandomGenerator(), false, checker);
 
                 CMAESOptimizer.Sigma sigmas = new CMAESOptimizer.Sigma(pars.getParErrors(fitPars).getArray());
                 CMAESOptimizer.PopulationSize popSize

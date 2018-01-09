@@ -38,7 +38,7 @@ public interface ParameterGenerator {
      * @return 
      */
     default List<Values> generate(int number){
-        return Stream.generate(()-> generate())
+        return Stream.generate(this::generate)
                 .limit(number)
                 .parallel()
                 .collect(Collectors.toList());

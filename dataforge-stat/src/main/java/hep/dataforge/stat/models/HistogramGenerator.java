@@ -62,7 +62,7 @@ public class HistogramGenerator implements Generator {
         if (rnd != null) {
             this.generator = new RandomDataGenerator(rnd);
         } else {
-            this.generator = new RandomDataGenerator(RandomUtils.getDefaultRandomGenerator());
+            this.generator = new RandomDataGenerator(RandomUtils.INSTANCE.getDefaultRandomGenerator());
         }
 
     }

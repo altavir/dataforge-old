@@ -19,7 +19,6 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.control.Connection
 import hep.dataforge.control.ConnectionHelper
-import hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
@@ -111,7 +110,7 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
         return meta.getString("name", type)
     }
 
-    protected fun run(runnable: Runnable): Future<*> {
+    protected fun execute(runnable: ()->Unit): Future<*> {
         return executor.submit(runnable)
     }
 
@@ -138,16 +137,15 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
             //Notify only if state really changed
             if (newState != oldState) {
                 //Update logical state and notify listeners.
-                run {
+                execute {
                     this.states.put(stateName, newState)
                     if (newState.isNull) {
                         logger.info("State {} is reset", stateName)
                     } else {
                         logger.info("State {} changed to {}", stateName, newState)
                     }
-                    context!!.parallelExecutor.submit {
-                        forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener::class.java
-                        ) { it -> it.notifyDeviceStateChanged(this, stateName, newState) }
+                    forEachConnection(DeviceListener::class.java) {
+                        it.notifyDeviceStateChanged(this, stateName, newState)
                     }
                 }
             }
@@ -159,16 +157,15 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
         //Notify only if state really changed
         if (metaStateValue != oldState) {
             //Update logical state and notify listeners.
-            run {
+            execute {
                 this.metastates.put(stateName, metaStateValue)
                 if (metaStateValue.isEmpty) {
                     logger.info("Metastate {} is reset", stateName)
                 } else {
                     logger.info("Metastate {} changed to {}", stateName, metaStateValue)
                 }
-                context!!.parallelExecutor.submit {
-                    forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener::class.java
-                    ) { it -> it.notifyDeviceStateChanged(this, stateName, metaStateValue) }
+                forEachConnection(DeviceListener::class.java) {
+                    it.notifyDeviceStateChanged(this, stateName, metaStateValue)
                 }
             }
         }
@@ -176,10 +173,8 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
 
     protected fun notifyError(message: String, error: Throwable) {
         logger.error(message, error)
-        context!!.parallelExecutor.submit {
-            forEachConnection(DEVICE_LISTENER_ROLE, DeviceListener::class.java) {
-                it.evaluateDeviceException(this, message, error)
-            }
+        forEachConnection(DeviceListener::class.java) {
+            it.evaluateDeviceException(this, message, error)
         }
     }
 
@@ -194,7 +189,7 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
         run {
             this.states.remove(stateName)
             stateDefs.stream()
-                    .filter { it -> it.value.name == stateName }
+                    .filter { it.value.name == stateName }
                     .findFirst()
                     .ifPresent { value -> states.put(stateName, Value.of(value)) }
         }
@@ -208,7 +203,7 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
      */
     protected fun getLogicalState(stateName: String): Value {
         return Optionals.either(Optional.ofNullable(states[stateName]))
-                .or(optStateDef(stateName).map<String> { def -> def.value.def }.map { Value.of(it) })
+                .or(optStateDef(stateName).map<String> { it.value.def }.map { Value.of(it) })
                 .opt()
                 .orElseThrow { RuntimeException("Can't calculate state " + stateName) }
     }
@@ -253,8 +248,9 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
      * @return
      * @throws ControlException
      */
-    @Throws(ControlException::class)
-    protected abstract fun computeState(stateName: String): Any
+    open fun computeState(stateName: String): Any {
+        throw RuntimeException("Physical state with name $stateName not found")
+    }
 
     /**
      * Compute physical meta state
@@ -263,8 +259,9 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
      * @return
      * @throws ControlException
      */
-    @Throws(ControlException::class)
-    protected abstract fun computeMetaState(stateName: String): Meta
+    open fun computeMetaState(stateName: String): Meta {
+        throw RuntimeException("Physical metastate with name $stateName not found")
+    }
 
     /**
      * Request state change and update result
@@ -293,7 +290,7 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
     }
 
     fun getStateInFuture(stateName: String): Future<Value> {
-        return call<Value> {
+        return call {
             states.computeIfAbsent(stateName) { t: String ->
                 try {
                     states.computeIfAbsent(t) { Value.of(computeState(it)) }
@@ -326,7 +323,7 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
 
     fun getMetaStateInFuture(stateName: String): Future<Meta> {
         return call {
-            this.metastates.computeIfAbsent(stateName) { t: String ->
+            this.metastates.computeIfAbsent(stateName) {
                 metastates.computeIfAbsent(stateName) { state ->
                     try {
                         metastates.computeIfAbsent(state) { computeMetaState(stateName) }

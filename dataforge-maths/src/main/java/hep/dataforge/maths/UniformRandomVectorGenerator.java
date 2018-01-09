@@ -38,7 +38,7 @@ public class UniformRandomVectorGenerator implements RandomVectorGenerator {
     }
 
     public UniformRandomVectorGenerator(Domain domain) {
-        this.generator = getDefaultRandomGenerator();
+        this.generator = INSTANCE.getDefaultRandomGenerator();
         this.domain = domain;
     }
 

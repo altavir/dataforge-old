@@ -26,12 +26,12 @@ public abstract class DeviceConnection implements Connection {
     }
 
     @Override
-    public void open(Object device) throws Exception {
+    public void open(Object device) {
         this.device = Device.class.cast(device);
     }
 
     @Override
-    public void close() throws Exception {
+    public void close() {
         this.device = null;
     }
 

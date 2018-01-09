@@ -20,6 +20,5 @@ dependencies {
     compile project(':dataforge-core')
     //TODO consider removing storage dependency
     compile project(':dataforge-storage')
-    compile project(":kodex")
     compile 'org.scream3r:jssc:2.8.0'
 }

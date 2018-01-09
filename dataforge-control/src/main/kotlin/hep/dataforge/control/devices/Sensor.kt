@@ -22,22 +22,19 @@
 package hep.dataforge.control.devices
 
 import hep.dataforge.context.Context
-import hep.dataforge.control.RoleDef
-import hep.dataforge.control.connections.Roles
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_META_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_RESULT_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
-import hep.dataforge.control.measurements.MeasurementListener
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.async
-import kotlinx.coroutines.experimental.channels.Channel
-import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import java.time.Duration
+import java.util.concurrent.Future
+import java.util.concurrent.TimeUnit
 
 /**
  * A device with which could perform one type of one-time or regular measurements
@@ -53,12 +50,9 @@ import kotlinx.coroutines.experimental.channels.ReceiveChannel
         MetaStateDef(value = NodeDef(name = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
         MetaStateDef(NodeDef(name = MEASUREMENT_RESULT_STATE, info = "The result of the last measurement in Meta form"))
 )
-@RoleDef(name = Roles.MEASUREMENT_LISTENER_ROLE, objectType = MeasurementListener::class)
 abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, meta) {
 
-    private val channel = Channel<Meta>(meta.getInt("resultBuffer", 100))
-
-    val receiver: ReceiveChannel<Meta> = channel;
+    private val measurements: MutableMap<Meta, Future<*>> = HashMap()
 
     /**
      * The result of last measurement
@@ -66,7 +60,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     val result: Meta by metaState(MEASUREMENT_RESULT_STATE)
 
     /**
-     * Measurement configuration
+     * Current measurement configuration
      */
     var measurement by metaState(MEASUREMENT_META_STATE)
 
@@ -80,14 +74,16 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      */
     val measurementState by stringState(MEASUREMENT_STATE_STATE)
 
+    override fun shutdown() {
+        stopAllMeasurements()
+        super.shutdown()
+    }
+
     /**
      * update result
      */
     protected fun notifyResult(result: Meta) {
         updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
-        async {
-            channel.send(result)
-        }
     }
 
     /**
@@ -137,24 +133,77 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * @param newMeta Meta of new measurement. If null, then clear measurement
      * @return actual meta for new measurement
      */
-    protected abstract fun startMeasurement(oldMeta: Meta?, newMeta: Meta)
+    protected abstract fun startMeasurement(oldMeta: Meta, newMeta: Meta)
 
     /**
      * stop measurement with given meta
      */
-    protected abstract fun stopMeasurement(meta: Meta)
+    protected open fun stopMeasurement(meta: Meta) {
+        measurements[meta]?.cancel(false)
+    }
+
+    protected fun stopCurrentMeasurement(){
+        stopMeasurement(measurement)
+    }
 
     /**
      * Stop all active measurements
      */
-    protected abstract fun stopMeasurement()
+    protected open fun stopAllMeasurements() {
+        measurements.values.forEach {
+            if (!it.isDone) {
+                it.cancel(false)
+            }
+        }
+    }
 
+
+    protected fun startMeasurement(action: () -> Meta) {
+        synchronized(measurement) {
+            val future = executor.submit {
+                notifyMeasurementState(MeasurementState.IN_PROGRESS)
+                val res = action.invoke()
+                notifyResult(res)
+                notifyMeasurementState(MeasurementState.STOPPED)
+            }
+            measurements.put(measurement, future)
+        }
+    }
+
+    protected fun scheduleMeasurement(delay: Duration, action: () -> Meta) {
+        synchronized(measurement) {
+            notifyMeasurementState(MeasurementState.WAITING)
+            val future = executor.schedule({
+                notifyMeasurementState(MeasurementState.IN_PROGRESS)
+                val res = action.invoke()
+                notifyResult(res)
+                notifyMeasurementState(MeasurementState.STOPPED)
+            }, delay.toMillis(), TimeUnit.MILLISECONDS)
+            measurements.put(measurement, future)
+        }
+    }
+
+    protected fun startRegularMeasurement(interval: Duration, action: () -> Meta) {
+        synchronized(measurement) {
+            notifyMeasurementState(MeasurementState.WAITING)
+            val future = executor.scheduleWithFixedDelay({
+                notifyMeasurementState(MeasurementState.IN_PROGRESS)
+                val res = action.invoke()
+                notifyResult(res)
+                notifyMeasurementState(MeasurementState.STOPPED)
+            }, 0, interval.toMillis(), TimeUnit.MILLISECONDS)
+            measurements.put(measurement, future)
+        }
+    }
 
     companion object {
         const val MEASURING_STATE = "measurement.active"
         const val MEASUREMENT_STATE_STATE = "measurement.state"
         const val MEASUREMENT_META_STATE = "measurement.meta"
         const val MEASUREMENT_RESULT_STATE = "measurement.result"
+        const val MEASUREMENT_ERROR_STATE = "measurement.error"
+        const val MEASUREMENT_MESSAGE_STATE = "measurement.message"
+        const val MEASUREMENT_PROGRESS_STATE = "measurement.progress"
 
         enum class MeasurementState {
             NOT_STARTED, // initial state, not started
@@ -164,91 +213,5 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         }
 
     }
-
-    //    private Measurement<T> measurement;
-    //
-    //    public Sensor(Context context, Meta meta) {
-    //        super(context, meta);
-    //    }
-    //
-    //    /**
-    //     * Read sensor data synchronously
-    //     *
-    //     * @return
-    //     * @throws hep.dataforge.exceptions.MeasurementException
-    //     */
-    //    public synchronized T read() throws MeasurementException {
-    //        return startMeasurement().getResult();
-    //    }
-    //
-    //    public Measurement<T> startMeasurement() throws MeasurementException {
-    //        if (!getState(INITIALIZED_STATE).booleanValue()) {
-    //            throw new RuntimeException("Device not initialized");
-    //        }
-    //        if (this.measurement == null || this.measurement.isFinished()) {
-    //            this.measurement = createMeasurement();
-    //        } else if (measurement.isStarted()) {
-    //            getLogger().warn("Trying to start next measurement on sensor while previous measurement is active. Ignoring.");
-    //        }
-    //
-    //        this.measurement.start();
-    //        updateLogicalState(MEASURING_STATE, true);
-    //        return this.measurement;
-    //    }
-    //
-    //    @Override
-    //    protected void requestStateChange(String stateName, Value value) throws ControlException {
-    //        if (Objects.equals(stateName, MEASURING_STATE)) {
-    //            if (value.booleanValue()) {
-    //                startMeasurement();
-    //            } else {
-    //                stopMeasurement(false);
-    //            }
-    //        }
-    //    }
-    //
-    //    public Measurement<T> getMeasurement() {
-    //        return measurement;
-    //    }
-    //
-    //    /**
-    //     * Stop current measurement
-    //     *
-    //     * @param force if true than current measurement will be interrupted even if
-    //     *              running
-    //     * @throws hep.dataforge.exceptions.MeasurementException
-    //     */
-    //    public void stopMeasurement(boolean force) throws MeasurementException {
-    //        if (this.measurement != null && !this.measurement.isFinished()) {
-    //            this.measurement.stop(force);
-    //            updateLogicalState(MEASURING_STATE, false);
-    //        }
-    //    }
-    //
-    //    @Override
-    //    public void shutdown() throws ControlException {
-    //        stopMeasurement(true);
-    //        super.shutdown();
-    //    }
-    //
-    //    /**
-    //     * Shows if there is ongoing measurement
-    //     *
-    //     * @return
-    //     */
-    //    public boolean isMeasuring() {
-    //        return measurement != null && !measurement.isFinished();
-    //    }
-    //
-    //    @Override
-    //    protected Object computeState(String stateName) throws ControlException {
-    //        if (MEASURING_STATE.equals(stateName)) {
-    //            return isMeasuring();
-    //        } else {
-    //            return getLogicalState(stateName);
-    //        }
-    //    }
-    //
-    //    protected abstract Measurement<T> createMeasurement() throws MeasurementException;
 
 }

@@ -112,7 +112,7 @@ public interface Goal<T> extends RunnableFuture<T> {
     }
 
     /**
-     * Handle results using goal executor.
+     * Handle results using global dispatch thread
      *
      * @param consumer
      */
