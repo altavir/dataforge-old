@@ -25,7 +25,7 @@ public interface Described {
     }
 
     /**
-     * Header markup. Null corresponds to no
+     * Header markup. Null corresponds to no header
      *
      * @return
      */

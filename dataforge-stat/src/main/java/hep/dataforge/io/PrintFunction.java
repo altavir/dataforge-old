@@ -15,7 +15,7 @@
  */
 package hep.dataforge.io;
 
-import hep.dataforge.maths.Domain;
+import hep.dataforge.maths.domains.Domain;
 import hep.dataforge.maths.functions.MultiFunction;
 import hep.dataforge.stat.UniformRandomVectorGenerator;
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -97,7 +97,7 @@ public class PrintFunction {
      *
      * @param out a {@link java.io.PrintWriter} object.
      * @param func a {@link MultiFunction} object.
-     * @param dom a {@link hep.dataforge.maths.Domain} object.
+     * @param dom a {@link Domain} object.
      * @param numpoints - Количество вызовов функции
      */
     public static void printMultiFunction(PrintWriter out, MultiFunction func, Domain dom, int numpoints) {

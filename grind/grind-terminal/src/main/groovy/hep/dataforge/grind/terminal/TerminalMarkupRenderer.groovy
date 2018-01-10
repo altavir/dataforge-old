@@ -20,7 +20,7 @@ class TerminalMarkupRenderer extends StreamMarkupRenderer {
     }
 
     @Override
-    protected synchronized void renderText(String text, String color = null, Markup element = new Markup(Meta.empty())) {
+    protected synchronized void text(String text, String color = null, Markup element = new Markup(Meta.empty())) {
         AttributedStyle style;
         if (element.getBoolean("bold", false)) {
             style = AttributedStyle.BOLD;

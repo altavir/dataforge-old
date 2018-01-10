@@ -43,7 +43,7 @@ public class XYFunctionPlot extends XYPlot {
 
     private static final int DEFAULT_DENSITY = 200;
 
-    public static XYFunctionPlot plotFunction(String name, Function<Double, Double> function, double from, double to, int numPoints) {
+    public static XYFunctionPlot plotFunction(String name, double from, double to, int numPoints, Function<Double, Double> function) {
         XYFunctionPlot p = new XYFunctionPlot(name);
         p.setFunction(function);
         p.setXRange(from, to, false);

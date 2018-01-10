@@ -150,3 +150,17 @@ class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, priva
         throw RuntimeException("Fork not supported for stateful chain")
     }
 }
+
+/**
+ * A chain that repeats the same value
+ */
+class ConstantChain<out T>(override val value: T) : Chain<T> {
+    suspend override fun next(): T {
+        return value
+    }
+
+    override fun fork(): Chain<T> {
+        return this
+    }
+
+}

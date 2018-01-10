@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.maths;
+package hep.dataforge.maths.domains;
 
 import hep.dataforge.exceptions.NotDefinedException;
 import org.apache.commons.math3.linear.RealVector;

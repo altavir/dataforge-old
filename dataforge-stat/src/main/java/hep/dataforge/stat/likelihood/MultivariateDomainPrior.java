@@ -16,8 +16,8 @@
 package hep.dataforge.stat.likelihood;
 
 import hep.dataforge.exceptions.NotDefinedException;
-import hep.dataforge.maths.Domain;
 import hep.dataforge.maths.NamedVector;
+import hep.dataforge.maths.domains.Domain;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.values.Values;
@@ -36,7 +36,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
     /**
      * <p>Constructor for MultivariateDomainPrior.</p>
      *
-     * @param dom a {@link hep.dataforge.maths.Domain} object.
+     * @param dom a {@link Domain} object.
      * @param list an array of {@link java.lang.String} objects.
      */
     public MultivariateDomainPrior(Domain dom, String[] list) {
@@ -50,7 +50,7 @@ public class MultivariateDomainPrior extends AbstractParametricValue{
     /**
      * <p>Constructor for MultivariateDomainPrior.</p>
      *
-     * @param dom a {@link hep.dataforge.maths.Domain} object.
+     * @param dom a {@link Domain} object.
      * @param named a {@link hep.dataforge.names.Names} object.
      */
     public MultivariateDomainPrior(Domain dom, Names named) {

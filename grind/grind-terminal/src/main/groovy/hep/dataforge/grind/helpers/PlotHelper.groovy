@@ -84,7 +84,7 @@ class PlotHelper extends AbstractHelper {
     ])
     XYPlot plotFunction(double from = 0d, double to = 1d, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
         Function<Double, Double> func = { Double x -> function.call(x) as Double }
-        XYFunctionPlot res = XYFunctionPlot.plotFunction(name, func, from, to, numPoints);
+        XYFunctionPlot res = XYFunctionPlot.plotFunction(name, from, to, numPoints, func);
         manager.getPlotFrame(frame).add(res)
         return res;
     }

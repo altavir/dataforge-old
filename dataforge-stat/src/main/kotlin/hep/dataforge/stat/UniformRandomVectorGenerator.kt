@@ -15,9 +15,9 @@
  */
 package hep.dataforge.stat
 
-import hep.dataforge.maths.Domain
 import hep.dataforge.maths.chain.Chain
 import hep.dataforge.maths.chain.SimpleChain
+import hep.dataforge.maths.domains.Domain
 import org.apache.commons.math3.exception.TooManyEvaluationsException
 import org.apache.commons.math3.random.RandomGenerator
 import org.apache.commons.math3.random.RandomVectorGenerator

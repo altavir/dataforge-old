@@ -10,7 +10,7 @@ import hep.dataforge.io.markup.Markup
 class FXMarkupRenderer(private val out: FXOutputPane) : GenericMarkupRenderer() {
 
 
-    override fun renderText(text: String, color: String, element: Markup) {
+    override fun text(text: String, color: String, element: Markup) {
         out.appendColored(text, color)
     }
 

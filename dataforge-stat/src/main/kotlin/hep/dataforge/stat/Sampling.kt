@@ -46,6 +46,7 @@ fun <T : Any> rejectingChain(
         generator: RandomGenerator = defaultGenerator,
         targetDensity: (T) -> Double): Chain<T> {
     return SimpleChain {
+        //TODO check if target density higher than proposal density?
         proposal.channel.dropWhile { generator.nextDouble() < targetDensity(it) / proposalDensity(it) / factor }.receive()
     }
 }

@@ -20,6 +20,7 @@ import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.Serializable;
 import java.util.stream.Stream;
@@ -55,8 +56,9 @@ public interface Table extends Markedup, NavigableValuesSource, Serializable {
      */
     Value get(String columnName, int rowNumber);
 
+    @NotNull
     @Override
-    default Markup markup(Meta configuration) {
+    default Markup markup(@NotNull Meta configuration) {
         MarkupBuilder builder = new MarkupBuilder().setType(TABLE_TYPE);
         //render header
         builder.content(new MarkupBuilder()

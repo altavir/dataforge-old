@@ -1,6 +1,6 @@
 package hep.dataforge.maths.histogram;
 
-import hep.dataforge.maths.Domain;
+import hep.dataforge.maths.domains.Domain;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;

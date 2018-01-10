@@ -15,6 +15,8 @@
  */
 package hep.dataforge.maths;
 
+import hep.dataforge.maths.domains.Domain;
+import hep.dataforge.maths.domains.HyperSquareDomain;
 import javafx.util.Pair;
 import org.apache.commons.math3.distribution.AbstractMultivariateRealDistribution;
 import org.apache.commons.math3.random.RandomGenerator;

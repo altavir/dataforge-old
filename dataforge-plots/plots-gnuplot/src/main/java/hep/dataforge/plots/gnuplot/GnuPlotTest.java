@@ -23,7 +23,7 @@ public class GnuPlotTest {
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 
-        XYFunctionPlot funcPlot = XYFunctionPlot.plotFunction("func", func, 0.1, 4, 200);
+        XYFunctionPlot funcPlot = XYFunctionPlot.plotFunction("func", 0.1, 4, 200, func);
 
         frame.add(funcPlot);
 

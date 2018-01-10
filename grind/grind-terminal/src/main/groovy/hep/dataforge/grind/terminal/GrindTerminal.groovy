@@ -164,10 +164,10 @@ class GrindTerminal extends SimpleConfigurable {
 
     def show(Object obj) {
         if (obj instanceof Markedup) {
-            renderer.ln()
+            renderer.render{it.ln()}
             if (obj instanceof Named) {
-                renderer.render(new MarkupBuilder().text((obj as Named).name, "red").build())
-                renderer.ln()
+                renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
+                renderer.render{it.ln()}
             }
             renderer.render((obj as Markedup).markup(markupConfig))
         }
@@ -191,10 +191,9 @@ class GrindTerminal extends SimpleConfigurable {
                 renderer.render(MarkupUtils.markupDescriptor(descriptor))
             }
         } else {
-            MarkupBuilder builder = new MarkupBuilder().text("No description found for ").text("${obj}", "blue")
-            renderer.render(builder.build());
+            renderer.render{it.text("No description found for ").text("${obj}", "blue")}
         }
-        renderer.ln()
+        renderer.render { it.ln() }
         return null;
     }
 
