@@ -134,7 +134,7 @@ fun ValueProvider.numberValue(valueName: String? = null) = NumberValueDelegate(v
 
 operator fun Meta.get(path: String): Value = this.getValue(path)
 
-operator fun <T : MutableMetaNode<*>> MutableMetaNode<T>.set(path: String, value: Value): T = this.setValue(path, value)
+operator fun <T : MutableMetaNode<*>> MutableMetaNode<T>.set(path: String, value: Any): T = this.setValue(path, value)
 
 operator fun <T : MutableMetaNode<*>> T.plusAssign(value: NamedValue) {
     this.setValue(value.name, value.anonymousValue);

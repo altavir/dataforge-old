@@ -16,9 +16,9 @@ compileKotlin.kotlinOptions.jvmTarget = "1.8"
 
 dependencies {
     compile project(':dataforge-plots:plots-jfc')
-    compile project(':kodex:dataforge-gui')
+    compile project(':dataforge-gui')
 }
-
+hg
 
 
 
