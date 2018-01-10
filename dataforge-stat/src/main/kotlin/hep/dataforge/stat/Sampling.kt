@@ -21,11 +21,8 @@ import hep.dataforge.maths.chain.SimpleChain
 import kotlinx.coroutines.experimental.channels.dropWhile
 import org.apache.commons.math3.distribution.MultivariateRealDistribution
 import org.apache.commons.math3.distribution.RealDistribution
-import org.apache.commons.math3.random.JDKRandomGenerator
 import org.apache.commons.math3.random.RandomGenerator
 
-
-internal var defaultGenerator = JDKRandomGenerator()
 
 val RealDistribution.chain: Chain<Double>
     get() {

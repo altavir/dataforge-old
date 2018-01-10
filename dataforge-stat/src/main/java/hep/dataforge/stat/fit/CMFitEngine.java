@@ -19,6 +19,7 @@ import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.maths.functions.MultiFunction;
+import hep.dataforge.stat.RandomKt;
 import hep.dataforge.stat.parametric.ParametricMultiFunctionWrapper;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
@@ -32,7 +33,6 @@ import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.CMAESOptimizer;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.NelderMeadSimplex;
 import org.apache.commons.math3.optim.nonlinear.scalar.noderiv.SimplexOptimizer;
 
-import static hep.dataforge.maths.RandomUtils.getDefaultRandomGenerator;
 import static hep.dataforge.stat.fit.FitStage.TASK_RUN;
 import static hep.dataforge.stat.fit.FitStage.TASK_SINGLE;
 import static java.lang.Math.log;
@@ -127,7 +127,7 @@ public class CMFitEngine implements FitEngine {
                 log.report("Using CMAESO optimizer (no derivs).");
                 SimpleBounds sb = new SimpleBounds(loBounds, upBounds);
                 MultivariateOptimizer CMAESOoptimizer = new CMAESOptimizer(100, Double.NEGATIVE_INFINITY,
-                        true, 4, 4, INSTANCE.getDefaultRandomGenerator(), false, checker);
+                        true, 4, 4, RandomKt.getDefaultGenerator(), false, checker);
 
                 CMAESOptimizer.Sigma sigmas = new CMAESOptimizer.Sigma(pars.getParErrors(fitPars).getArray());
                 CMAESOptimizer.PopulationSize popSize

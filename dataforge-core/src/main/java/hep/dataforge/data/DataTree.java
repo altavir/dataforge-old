@@ -62,6 +62,10 @@ public class DataTree<T> implements DataNode<T> {
         return new Builder<>(Object.class);
     }
 
+    public static <T> Builder<T> builder(DataNode<T> node) {
+        return new Builder<T>(node);
+    }
+
     /**
      * Create an empty typed DataTree with given Name. If name is composite,
      * than the whole tree structure is created

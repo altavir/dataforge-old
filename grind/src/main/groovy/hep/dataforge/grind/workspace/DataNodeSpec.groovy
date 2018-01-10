@@ -27,7 +27,8 @@ class DataNodeSpec {
 //    }
 //
 
-    static DataNode buildNode(Context context, @DelegatesTo(value = DataNodeSpec, strategy = Closure.DELEGATE_ONLY) Closure cl){
+    static DataNode buildNode(Context context,
+                              @DelegatesTo(value = DataNodeSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
         def spec = new DataNodeSpec(context, "data", Object.class)
         def code = cl.rehydrate(spec, null, null)
         code.resolveStrategy = Closure.DELEGATE_ONLY
@@ -57,7 +58,8 @@ class DataNodeSpec {
             throw new RuntimeException("Trying to load data into non-empty tree. Load should be called first.")
         }
         //def newRoot = node("", DataLoader.SMART.build(context, meta))
-        tree = new DataTree.Builder(DataLoader.SMART.build(context, meta))
+        DataNode<?> node = DataLoader.SMART.build(context, meta)
+        tree = DataTree.builder(node)
     }
 
     void load(Map values = [:], String nodeName = "", @DelegatesTo(GrindMetaBuilder) Closure cl = null) {

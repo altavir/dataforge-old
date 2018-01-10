@@ -16,8 +16,8 @@
 package hep.dataforge.io;
 
 import hep.dataforge.maths.Domain;
-import hep.dataforge.maths.UniformRandomVectorGenerator;
 import hep.dataforge.maths.functions.MultiFunction;
+import hep.dataforge.stat.UniformRandomVectorGenerator;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.exception.NullArgumentException;
@@ -107,10 +107,10 @@ public class PrintFunction {
         for (int i = 0; i < numpoints; i++) {
             double[] vector = generator.nextVector();
             double value = func.value(vector);
-            
-            for (int j = 0; j < vector.length; j++) {
-                out.printf("%g\t", vector[j]);
-                
+
+            for (double aVector : vector) {
+                out.printf("%g\t", aVector);
+
             }
             out.printf("%g%n", value);
             

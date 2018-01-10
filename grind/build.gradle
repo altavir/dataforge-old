@@ -4,5 +4,5 @@ description = 'The GRIND (GRoovy INteractive Dataforge) environment'
 
 dependencies {
     compile project(":dataforge-core")
-    compile 'org.codehaus.groovy:groovy-all:3.0.+'
+    compile 'org.codehaus.groovy:groovy-all:2.6.+'
 }
