@@ -18,7 +18,6 @@ dependencies {
     compile project(':dataforge-plots:plots-jfc')
     compile project(':dataforge-gui')
 }
-hg
 
 
 
