@@ -1,6 +1,6 @@
 package hep.dataforge.fx.plots
 
-import hep.dataforge.description.DescriptorUtils
+import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.fx.dfIcon
@@ -104,7 +104,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                         minWidth = 0.0
                         maxWidth = Double.MAX_VALUE
                         action {
-                            displayConfigurator("Plot frame configuration", frame, DescriptorUtils.buildDescriptor(frame))
+                            displayConfigurator("Plot frame configuration", frame, Descriptors.buildDescriptor(frame))
                         }
                     }
                     treeview<Plottable> {
@@ -181,7 +181,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 button("...") {
                                     minWidth = 0.0
                                     action {
-                                        displayConfigurator(item.title + " configuration", item, DescriptorUtils.buildDescriptor(item))
+                                        displayConfigurator(item.title + " configuration", item, Descriptors.buildDescriptor(item))
                                     }
                                 }
 

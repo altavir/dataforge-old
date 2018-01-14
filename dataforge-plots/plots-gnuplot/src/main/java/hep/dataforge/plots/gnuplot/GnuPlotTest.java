@@ -1,8 +1,8 @@
 package hep.dataforge.plots.gnuplot;
 
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.plots.XYFunctionPlot;
 import hep.dataforge.plots.data.DataPlot;
-import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
@@ -23,7 +23,7 @@ public class GnuPlotTest {
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 
-        XYFunctionPlot funcPlot = XYFunctionPlot.plotFunction("func", 0.1, 4, 200, func);
+        XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", 0.1, 4, 200, func);
 
         frame.add(funcPlot);
 

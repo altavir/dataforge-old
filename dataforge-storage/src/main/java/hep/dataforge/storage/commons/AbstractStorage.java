@@ -18,7 +18,6 @@ package hep.dataforge.storage.commons;
 import hep.dataforge.context.Context;
 import hep.dataforge.control.ConnectionHelper;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.events.Event;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
@@ -39,7 +38,6 @@ import java.util.*;
 
 import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 import static hep.dataforge.storage.commons.StorageUtils.buildPath;
-import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
  * Конфигурации загрузчиков хранятся в оперативной памяти. Те, что поставляются
@@ -49,7 +47,6 @@ import static hep.dataforge.values.ValueType.BOOLEAN;
  *
  * @author Darksnake
  */
-@ValueDef(name = "readOnly", type = {BOOLEAN}, info = "Define if push operations are allowed in this storage")
 public abstract class AbstractStorage extends MetaHolder implements Storage {
 
     protected final Map<String, Loader> loaders = new HashMap<>();
@@ -305,10 +302,6 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
 //    }
 
     @Override
-    @ValueDef(name = "name", info = "The name of storage or loader.")
-    @ValueDef(name = "type", allowed = "[loader,storage]", def = "loader", info = "The type of target.")
-    @ValueDef(name = "allowCreate", type = {BOOLEAN}, def = "true",
-            info = "Allow to create new loader or storage if it is not found.")
     @NodeDef(name = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     public Responder getResponder(Meta targetInfo) {
         String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET);

@@ -51,9 +51,9 @@ public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
         return Plugin.resolveTag(getClass());
     }
 
-    public String getDescription() {
-        return getMeta().getString("description", "");
-    }
+//    public String getDescription() {
+//        return getConfig().getString("description", "");
+//    }
 
     /**
      * Load this plugin to the Global without annotation

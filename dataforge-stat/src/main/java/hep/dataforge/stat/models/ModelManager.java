@@ -18,7 +18,6 @@ package hep.dataforge.stat.models;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provides;
@@ -72,7 +71,6 @@ public class ModelManager extends BasicPlugin {
         return factories.stream().filter(it -> Objects.equals(it.getName(), name)).findFirst();
     }
 
-    @ValueDef(name = "modelName", info = "The name of the pre-loaded model to use.")
     public Optional<Model> getModel(Meta a) {
         String modelName = a.getString(MODEL_NAME);
         return findFactory(modelName.toLowerCase()).map(factory -> factory.build(getContext(), a));

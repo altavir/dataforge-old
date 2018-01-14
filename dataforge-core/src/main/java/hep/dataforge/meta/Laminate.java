@@ -16,7 +16,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.description.Described;
-import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.description.Descriptors;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
@@ -80,7 +80,7 @@ public final class Laminate extends Meta implements Described {
             if (layer instanceof MutableMetaNode) {
                 LoggerFactory.getLogger(getClass()).trace("Using mutable meta in the laminate");
             }
-            checkCycles(this,layer);
+            checkCycles(this, layer);
             this.layers.add(layer);
         }
     }
@@ -100,7 +100,7 @@ public final class Laminate extends Meta implements Described {
          * Add node descriptor as a separate laminate layer to avoid including it in
          * hasMeta and hasValue
          */
-        descriptorLayer = DescriptorUtils.buildDefaultNode(descriptor);
+        descriptorLayer = Descriptors.buildDefaultNode(descriptor);
     }
 
     @Contract(pure = true)
@@ -173,9 +173,10 @@ public final class Laminate extends Meta implements Described {
         if (!childLayers.isEmpty()) {
             Laminate laminate = new Laminate(childLayers);
             //adding child node descriptor to the child laminate
-            if (descriptor != null && descriptor.childrenDescriptors().containsKey(path)) {
-                laminate.setDescriptor(descriptor.childDescriptor(path));
-            }
+            Optional.ofNullable(descriptor)
+                    .flatMap(it -> Optional.ofNullable(it.childrenDescriptors().get(path)))
+                    .ifPresent(laminate::setDescriptor);
+
             return Optional.of(laminate);
         } else //if node not found, using descriptor layer if it is defined
             if (descriptorLayer != null) {
@@ -327,7 +328,7 @@ public final class Laminate extends Meta implements Described {
      * @param <K>        classifier key type
      * @return
      */
-    public <A, K> Collection<Meta> collectNodes(String nodeName, Function<? super Meta, ? extends K> classifier, Collector<Meta, A, Meta> collector) {
+    public <A, K> Collection<Meta> collectNodes(String nodeName, Function<Meta, ? extends K> classifier, Collector<Meta, A, Meta> collector) {
         return layers().stream()
                 .filter(layer -> layer.hasMeta(nodeName))
                 .flatMap(layer -> layer.getMetaList(nodeName).stream())
@@ -343,7 +344,7 @@ public final class Laminate extends Meta implements Described {
      * @param <K>
      * @return
      */
-    public <K> Collection<Meta> collectNodes(String nodeName, Function<? super Meta, ? extends K> classifier) {
+    public <K> Collection<Meta> collectNodes(String nodeName, Function<Meta, ? extends K> classifier) {
         return collectNodes(nodeName, classifier, MergeRule.replace());
     }
 

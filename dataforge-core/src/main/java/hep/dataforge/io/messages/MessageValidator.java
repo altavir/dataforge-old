@@ -1,11 +1,8 @@
 package hep.dataforge.io.messages;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-
-import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
  * A validator checking incoming messages. It colud be used for security or bug checks
@@ -15,8 +12,6 @@ public interface MessageValidator {
     String IS_VALID_KEY = "isValid";
     String MESSAGE_KEY = "message";
 
-    @ValueDef(name = IS_VALID_KEY, required = true, type = {BOOLEAN}, info = "Shows if envelope could be accepted")
-    @ValueDef(name = MESSAGE_KEY, multiple = true, info = "The message or set of messages that is returned in case message is invalid")
     Meta validate(Envelope message);
 
     default boolean isValid(Envelope message) {

@@ -8,11 +8,9 @@ package hep.dataforge.data;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -128,8 +126,6 @@ public class FileDataFactory extends DataFactory<Binary> {
         }
     }
 
-    @ValueDef(name = "path", info = "The relative path of directory to be added")
-    @ValueDef(name = "recursive", type = ValueType.BOOLEAN, def = "true", info = "Flag to add subnodes recursively")
     private void addDir(Context context, final DataTree.Builder<Binary> builder, Path parentFile, Meta dirNode) {
         DataTree.Builder<Binary> dirBuilder = DataTree.builder(Binary.class);
         Path dir = parentFile.resolve(dirNode.getString("path"));

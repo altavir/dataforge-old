@@ -5,6 +5,7 @@ import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -50,6 +51,7 @@ public class BasicAdapter extends MetaHolder implements ValuesAdapter {
         return mappings.keySet().stream();
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         if (getClass() == BasicAdapter.class) {
@@ -60,9 +62,4 @@ public class BasicAdapter extends MetaHolder implements ValuesAdapter {
         }
     }
 
-    @Override
-    public void fromMeta(Meta meta) {
-        setMeta(meta);
-        updateMapping();
-    }
 }

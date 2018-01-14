@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.providers.Path;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.util.List;
@@ -51,8 +52,9 @@ public interface ValueProvider {
     }
 
     @Provides(VALUE_TARGET)
-    Optional<Value> optValue(String path);
+    Optional<Value> optValue(@NotNull String path);
 
+    @NotNull
     default Value getValue(String path) {
         return optValue(path).orElseThrow(() -> new NameNotFoundException(path));
     }
@@ -62,15 +64,17 @@ public interface ValueProvider {
         return optValue(name).map(Value::booleanValue);
     }
 
-
+    @NotNull
     default Boolean getBoolean(String name, boolean def) {
         return optValue(name).map(Value::booleanValue).orElse(def);
     }
 
+    @NotNull
     default Boolean getBoolean(String name, Supplier<Boolean> def) {
         return optValue(name).map(Value::booleanValue).orElseGet(def);
     }
 
+    @NotNull
     default Boolean getBoolean(String name) {
         return getValue(name).booleanValue();
     }
@@ -80,27 +84,33 @@ public interface ValueProvider {
         return optValue(name).map(Value::numberValue);
     }
 
+    @NotNull
     default Double getDouble(String name, double def) {
         return optValue(name).map(Value::doubleValue).orElse(def);
     }
 
+    @NotNull
     default Double getDouble(String name, Supplier<Double> def) {
         return optValue(name).map(Value::doubleValue).orElseGet(def);
     }
 
+    @NotNull
     default Double getDouble(String name) {
         return getValue(name).doubleValue();
     }
 
+    @NotNull
     default Integer getInt(String name, int def) {
         return optValue(name).map(Value::intValue).orElse(def);
     }
 
+    @NotNull
     default Integer getInt(String name, Supplier<Integer> def) {
         return optValue(name).map(Value::intValue).orElseGet(def);
 
     }
 
+    @NotNull
     default Integer getInt(String name) {
         return getValue(name).intValue();
     }
@@ -110,22 +120,27 @@ public interface ValueProvider {
         return optValue(name).map(Value::stringValue);
     }
 
+    @NotNull
     default String getString(String name, String def) {
         return optString(name).orElse(def);
     }
 
+    @NotNull
     default String getString(String name, Supplier<String> def) {
         return optString(name).orElseGet(def);
     }
 
+    @NotNull
     default String getString(String name) {
         return getValue(name).stringValue();
     }
 
+    @NotNull
     default Value getValue(String name, Object def) {
         return optValue(name).orElse(Value.of(def));
     }
 
+    @NotNull
     default Value getValue(String name, Supplier<Value> def) {
         return optValue(name).orElseGet(def);
     }

@@ -20,12 +20,12 @@ import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Names;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.exception.DimensionMismatchException;
 import org.apache.commons.math3.linear.ArrayRealVector;
 import org.apache.commons.math3.linear.RealVector;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -101,6 +101,7 @@ public class NamedVector implements Values, MetaMorph {
      *
      * @param name
      */
+    @NotNull
     @Override
     public Double getDouble(String name) {
         int n = this.getNumberByName(name);

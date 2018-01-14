@@ -6,8 +6,9 @@
 package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.SimpleMetaMorph;
+import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.*;
 
@@ -72,14 +73,39 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
     }
 
     /**
-     * The value descriptor for given value name. Null if there is no such value
-     * descriptor
+     * The child node descriptor for given name. Name syntax is supported.
      *
      * @param name
      * @return
      */
-    public ValueDescriptor valueDescriptor(String name) {
-        return valueDescriptors().get(name);
+    public Optional<NodeDescriptor> optChildDescriptor(String name) {
+        return optChildDescriptor(Name.of(name));
+    }
+
+    public Optional<NodeDescriptor> optChildDescriptor(Name name) {
+        if (name.getLength() == 1) {
+            return Optional.ofNullable(childrenDescriptors().get(name.toUnescaped()));
+        } else {
+            return optChildDescriptor(name.cutLast()).flatMap(it -> it.optChildDescriptor(name.getLast()));
+        }
+    }
+
+    /**
+     * The value descriptor for given value name. Name syntax is supported.
+     *
+     * @param name
+     * @return
+     */
+    public Optional<ValueDescriptor> optValueDescriptor(String name) {
+        return optValueDescriptor(Name.of(name));
+    }
+
+    public Optional<ValueDescriptor> optValueDescriptor(Name name) {
+        if (name.getLength() == 1) {
+            return Optional.ofNullable(valueDescriptors().get(name.toUnescaped()));
+        } else {
+            return optChildDescriptor(name.cutLast()).flatMap(it -> it.optValueDescriptor(name.getLast()));
+        }
     }
 
     /**
@@ -134,16 +160,6 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
     }
 
     /**
-     * The child node descriptor for given name
-     *
-     * @param name
-     * @return
-     */
-    public NodeDescriptor childDescriptor(String name) {
-        return childrenDescriptors().get(name);
-    }
-
-    /**
      * The name of this node
      *
      * @return
@@ -160,8 +176,7 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public boolean hasDefaultForValue(String name) {
-        ValueDescriptor desc = valueDescriptor(name);
-        return desc != null && desc.hasDefault();
+        return optValueDescriptor(name).map(ValueDescriptor::hasDefault).orElse(false);
     }
 
     /**

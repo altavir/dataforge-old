@@ -18,17 +18,14 @@ package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
+import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
-import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
-import hep.dataforge.values.ValueType
 
 import java.util.function.Function
 
@@ -75,13 +72,7 @@ class PlotHelper extends AbstractHelper {
      * @param function
      */
     @MethodDescription("Plot a function defined by a closure.")
-    @ValueDefs([
-            @ValueDef(name = "frame", info = "Frame name"),
-            @ValueDef(name = "name", info = "Plot name"),
-            @ValueDef(name = "from", type = ValueType.NUMBER, def = "0", info = "Lower x boundary for frame"),
-            @ValueDef(name = "to", type = ValueType.NUMBER, def = "1", info = "Upper x boundary for frame"),
-            @ValueDef(name = "numPoints", type = ValueType.NUMBER, def = "100", info = "Number of points per frame")
-    ])
+
     XYPlot plotFunction(double from = 0d, double to = 1d, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
         Function<Double, Double> func = { Double x -> function.call(x) as Double }
         XYFunctionPlot res = XYFunctionPlot.plotFunction(name, from, to, numPoints, func);

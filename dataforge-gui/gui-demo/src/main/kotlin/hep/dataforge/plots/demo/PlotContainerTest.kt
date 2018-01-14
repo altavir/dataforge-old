@@ -19,8 +19,8 @@ import hep.dataforge.fx.plots.PlotManager
 import hep.dataforge.fx.plots.group
 import hep.dataforge.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
-import hep.dataforge.plots.data.XYFunctionPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.ValueMap
@@ -36,7 +36,7 @@ fun main(args: Array<String>) {
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
-    val funcPlot = XYFunctionPlot.plotFunction("func", func, 0.1, 4.0, 200)
+    val funcPlot = XYFunctionPlot.plot("func", func, 0.1, 4.0, 200)
 
 
     val names = arrayOf("myX", "myY", "myXErr", "myYErr")

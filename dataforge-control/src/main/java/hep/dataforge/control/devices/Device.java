@@ -19,7 +19,6 @@ import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.ControlUtils;
 import hep.dataforge.control.RoleDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
@@ -66,7 +65,7 @@ import static hep.dataforge.control.connections.Roles.VIEW_ROLE;
 @RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this device")
 @RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
 @RoleDef(name = VIEW_ROLE)
-@StateDef(@ValueDef(name = Device.INITIALIZED_STATE, info = "State showing if device is initialized"))
+@StateDef()
 public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Responder, Stateful {
 
     String INITIALIZED_STATE = "init";

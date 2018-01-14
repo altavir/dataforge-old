@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
@@ -29,14 +28,11 @@ import java.io.Serializable;
 import java.util.Collection;
 import java.util.Optional;
 
-import static hep.dataforge.values.ValueType.NUMBER;
-
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
 public interface PlotFrame extends Configurable, Serializable {
 
     Wrapper wrapper = new Wrapper();
@@ -113,8 +109,6 @@ public interface PlotFrame extends Configurable, Serializable {
      * @param stream
      * @param config
      */
-    @ValueDef(name = "width", type = {NUMBER}, def = "800", info = "The width of the snapshot in pixels")
-    @ValueDef(name = "height", type = {NUMBER}, def = "600", info = "The height of the snapshot in pixels")
     default void asImage(OutputStream stream, Meta config) {
         throw new UnsupportedOperationException();
     }
@@ -181,7 +175,7 @@ public interface PlotFrame extends Configurable, Serializable {
                 PlotFrame frame = (PlotFrame) Class.forName(plotFrameClassName).getConstructor().newInstance();
                 frame.configure(plotMeta);
                 frame.addAll(root);
-                frame.getPlots().configure(root.getMeta());
+                frame.getPlots().configure(root.getConfig());
 
                 return frame;
             } catch (Exception ex) {

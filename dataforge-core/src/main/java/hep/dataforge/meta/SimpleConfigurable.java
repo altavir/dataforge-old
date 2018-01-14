@@ -15,7 +15,6 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.description.DescriptorUtils;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +27,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
-public class SimpleConfigurable implements Configurable, Metoid {
+public class SimpleConfigurable implements Configurable {
 
     private Configuration configuration = null;
 
@@ -58,15 +57,15 @@ public class SimpleConfigurable implements Configurable, Metoid {
         return configuration;
     }
 
-    /**
-     * Get configuration as an immutable annotation underplayed by defaults from class description
-     *
-     * @return
-     */
-    @Override
-    public Meta getMeta() {
-        return new Laminate(getConfig()).withDescriptor(DescriptorUtils.buildDescriptor(getClass()));
-    }
+//    /**
+//     * Get configuration as an immutable annotation underplayed by defaults from class description
+//     *
+//     * @return
+//     */
+//    @Override
+//    public Meta getMeta() {
+//        return new Laminate(getConfig()).withDescriptor(Descriptors.buildDescriptor(getClass()));
+//    }
 
     /**
      * Apply the whole new configuration. It does not change configuration,

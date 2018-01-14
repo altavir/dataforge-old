@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,14 +16,14 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -39,23 +39,19 @@ import java.util.stream.Collectors;
 public class ValueMap implements Values, MetaMorph {
 
     public static ValueMap ofMap(Map<String, ?> map) {
-        ValueMap res = new ValueMap();
-        res.valueMap.putAll(map.entrySet().stream()
-                .collect(Collectors.toMap(Map.Entry::getKey, entry-> Value.of(entry.getValue()))));
-        return res;
+        return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
     }
 
     public static ValueMap of(String[] list, Object... values) {
         if (list.length != values.length) {
             throw new IllegalArgumentException();
         }
-        ValueMap res = new ValueMap();
+        LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
         for (int i = 0; i < values.length; i++) {
             Value val = Value.of(values[i]);
-
-            res.valueMap.put(list[i], val);
+            valueMap.put(list[i], val);
         }
-        return res;
+        return new ValueMap(valueMap);
     }
 
 
@@ -64,11 +60,13 @@ public class ValueMap implements Values, MetaMorph {
     /**
      * Serialization constructor
      */
-    public ValueMap() {
-
+    public ValueMap(Meta meta) {
+        meta.getValueNames().forEach(valName -> {
+            valueMap.put(valName, meta.getValue(valName));
+        });
     }
 
-    public ValueMap(Map<String, Value> map){
+    public ValueMap(Map<String, Value> map) {
         this.valueMap.putAll(map);
     }
 
@@ -92,7 +90,7 @@ public class ValueMap implements Values, MetaMorph {
      * {@inheritDoc}
      */
     @Override
-    public Optional<Value> optValue(String name) throws NameNotFoundException {
+    public Optional<Value> optValue(@NotNull String name) throws NameNotFoundException {
         return Optional.ofNullable(valueMap.get(name));
     }
 
@@ -119,16 +117,6 @@ public class ValueMap implements Values, MetaMorph {
     }
 
     @Override
-    public void fromMeta(Meta meta) {
-        if (!this.valueMap.isEmpty()) {
-            throw new NonEmptyMetaMorphException(getClass());
-        }
-        meta.getValueNames().forEach(valName -> {
-            valueMap.put(valName, meta.getValue(valName));
-        });
-    }
-
-    @Override
     public Meta toMeta() {
         MetaBuilder builder = new MetaBuilder("point");
         for (String name : namesAsArray()) {
@@ -144,22 +132,21 @@ public class ValueMap implements Values, MetaMorph {
 
     public static class Builder implements GenericBuilder<ValueMap, Builder> {
 
-        private final ValueMap p;
+        private final LinkedHashMap<String, Value> valueMap = new LinkedHashMap<>();
 
         public Builder(Values dp) {
-            p = new ValueMap();
             for (String name : dp.getNames()) {
-                p.valueMap.put(name, dp.getValue(name));
+                valueMap.put(name, dp.getValue(name));
             }
 
         }
 
         public Builder(Map<String, Value> map) {
-            p = new ValueMap(map);
+            map.putAll(map);
         }
 
         public Builder() {
-            p = new ValueMap();
+
         }
 
         /**
@@ -173,12 +160,12 @@ public class ValueMap implements Values, MetaMorph {
             if (value == null) {
                 value = Value.NULL;
             }
-            p.valueMap.put(name, value);
+            valueMap.put(name, value);
             return this;
         }
 
         public Builder putValue(String name, Object value) {
-            p.valueMap.put(name, Value.of(value));
+            valueMap.put(name, Value.of(value));
             return this;
         }
 
@@ -190,12 +177,12 @@ public class ValueMap implements Values, MetaMorph {
          * @return
          */
         public Builder putFirstValue(String name, Object value) {
-            synchronized (p) {
+            synchronized (valueMap) {
                 LinkedHashMap<String, Value> newMap = new LinkedHashMap<>();
                 newMap.put(name, Value.of(value));
-                newMap.putAll(p.valueMap);
-                p.valueMap.clear();
-                p.valueMap.putAll(newMap);
+                newMap.putAll(valueMap);
+                valueMap.clear();
+                valueMap.putAll(newMap);
                 return this;
             }
         }
@@ -206,7 +193,7 @@ public class ValueMap implements Values, MetaMorph {
 
         @Override
         public ValueMap build() {
-            return p;
+            return new ValueMap(valueMap);
         }
 
         @Override

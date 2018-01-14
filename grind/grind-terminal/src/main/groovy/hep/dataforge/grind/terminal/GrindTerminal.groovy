@@ -5,7 +5,9 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.description.*
+import hep.dataforge.description.Described
+import hep.dataforge.description.Descriptors
+import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
@@ -15,7 +17,6 @@ import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
-import hep.dataforge.values.ValueType
 import hep.dataforge.workspace.FileBasedWorkspace
 import org.jline.reader.EndOfFileException
 import org.jline.reader.LineReader
@@ -38,11 +39,7 @@ import java.util.stream.Stream
  * Created by darksnake on 29-Aug-16.
  */
 @CompileStatic
-@ValueDefs([
-        @ValueDef(name = "evalClosures", type = ValueType.BOOLEAN, def = "true", info = "Automatically replace closures by their results"),
-        @ValueDef(name = "evalData", type = ValueType.BOOLEAN, def = "false", info = "Automatically replace data by its value"),
-        @ValueDef(name = "unwrap", type = ValueType.BOOLEAN, def = "false", info = "Apply result hooks for each element of collection or stream")
-])
+
 class GrindTerminal extends SimpleConfigurable {
     private static final AttributedStyle RES = AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);
     private static final AttributedStyle PROMPT = AttributedStyle.BOLD.foreground(AttributedStyle.CYAN);
@@ -180,7 +177,7 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof NodeDescriptor) {
             renderer.render(MarkupUtils.markupDescriptor(obj as NodeDescriptor))
         } else if (obj instanceof String) {
-            NodeDescriptor descriptor = DescriptorUtils.buildDescriptor(obj);
+            NodeDescriptor descriptor = Descriptors.buildDescriptor(obj);
             if (descriptor.getMeta().isEmpty()) {
                 renderer.render(new MarkupBuilder().text("The description for ")
                         .text("${obj}", "blue")

@@ -22,9 +22,9 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
@@ -266,6 +266,7 @@ public class ParamSet implements Values, MetaMorph {
      *
      * @param str
      */
+    @NotNull
     @Override
     public Double getDouble(String str) throws NameNotFoundException {
         Param p;

@@ -5,7 +5,6 @@ import hep.dataforge.context.Global
 import hep.dataforge.grind.extensions.ExtensionInitializer
 import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.utils.MetaMorph
 import hep.dataforge.workspace.FileBasedWorkspace
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration

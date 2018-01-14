@@ -5,7 +5,6 @@
  */
 package hep.dataforge.io.messages;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.meta.Meta;
@@ -21,8 +20,6 @@ public interface Dispatcher {
     String TARGET_TYPE_KEY = "type";
     String TARGET_NAME_KEY = "name";
 
-    @ValueDef(name = TARGET_TYPE_KEY, info = "The type of the message target")
-    @ValueDef(name = TARGET_NAME_KEY, info = "The name of the message target")
     Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException;
     
     default Responder getResponder(Envelope envelope){

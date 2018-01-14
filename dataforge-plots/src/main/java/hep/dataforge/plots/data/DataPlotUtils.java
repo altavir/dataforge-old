@@ -28,7 +28,7 @@ public class DataPlotUtils {
 
         frame.getPlots().list()
                 .map(frame::get)
-                .filter(pl -> !visibleOnly || pl.getMeta().getBoolean("visible", true))
+                .filter(pl -> !visibleOnly || pl.getConfig().getBoolean("visible", true))
                 .forEach(pl -> {
                     names.add(pl.getTitle());
                     pl.getData().forEach(point -> {

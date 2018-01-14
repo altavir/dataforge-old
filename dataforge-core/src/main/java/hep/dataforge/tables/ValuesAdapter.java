@@ -16,9 +16,9 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import javafx.util.Pair;

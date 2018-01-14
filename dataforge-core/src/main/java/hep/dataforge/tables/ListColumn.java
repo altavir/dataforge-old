@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,7 +17,7 @@ package hep.dataforge.tables;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.NotNull;
 
@@ -74,6 +74,11 @@ public final class ListColumn implements Column, MetaMorph {
     public ListColumn() {
     }
 
+    ListColumn(Meta meta) {
+        this.format = MetaMorph.Companion.morph(ColumnFormat.class, meta.getMeta("format"));
+        this.values = meta.getValue("data").listValue();
+    }
+
     public ListColumn(ColumnFormat format, Stream<Value> values) {
         this.format = format;
         this.values = values.collect(Collectors.toList());
@@ -115,16 +120,11 @@ public final class ListColumn implements Column, MetaMorph {
         return values.size();
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         return new MetaBuilder("column")
                 .putNode("format", format.toMeta())
                 .putValue("data", values);
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        this.format = MetaMorph.morph(ColumnFormat.class, meta.getMeta("format"));
-        this.values = meta.getValue("data").listValue();
     }
 }

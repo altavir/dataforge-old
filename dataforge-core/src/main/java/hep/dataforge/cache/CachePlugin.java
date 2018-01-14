@@ -12,7 +12,6 @@ import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
 import hep.dataforge.data.NamedData;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.GoalListener;
 import hep.dataforge.meta.Meta;
@@ -31,7 +30,6 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  */
 @PluginDef(name = "cache", group = "hep.dataforge", info = "Data caching plugin")
-@ValueDef(name = "cacheManager", info = "The fully qualified name of cache manager class")
 public class CachePlugin extends BasicPlugin {
 
     private Predicate<Data> bypass = data -> false;
@@ -62,7 +60,7 @@ public class CachePlugin extends BasicPlugin {
             context.getLogger().info("Loaded cache manager" + manager.toString());
         } catch (CacheException ex) {
             context.getLogger().warn("Cache provider not found. Will use default cache implementation.");
-            manager = new DefaultCacheManager(getContext(), getMeta());
+            manager = new DefaultCacheManager(getContext(), getConfig());
         }
     }
 
@@ -173,7 +171,7 @@ public class CachePlugin extends BasicPlugin {
     private <V> Cache<Meta, V> getCache(String name, Class<V> type) {
         Cache<Meta, V> cache = getManager().getCache(name, Meta.class, type);
         if (cache == null) {
-            cache = getManager().createCache(name, new MetaCacheConfiguration<>(getMeta(), type));
+            cache = getManager().createCache(name, new MetaCacheConfiguration<>(getConfig(), type));
         }
         return cache;
     }

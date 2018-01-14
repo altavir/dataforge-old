@@ -18,7 +18,6 @@ package hep.dataforge.actions;
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
@@ -28,8 +27,6 @@ import java.nio.file.Path;
 import java.text.ParseException;
 
 @TypedActionDef(name = "run", info = "Run action with given configuration")
-@ValueDef(name = "configFile", info = "The configuration file name and path")
-@ValueDef(name = "contextName", info = "The name of the context in which the action will be run")
 public class RunConfigAction extends GenericAction {
 
     /**

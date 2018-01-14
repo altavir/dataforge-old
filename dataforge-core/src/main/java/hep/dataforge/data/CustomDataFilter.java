@@ -6,10 +6,8 @@
 package hep.dataforge.data;
 
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.SimpleMetaMorph;
-import hep.dataforge.values.ValueType;
+import hep.dataforge.meta.SimpleMetaMorph;
 
 import java.util.function.BiPredicate;
 
@@ -128,10 +126,6 @@ public class CustomDataFilter extends SimpleMetaMorph implements DataFilter {
         }
     }
 
-    @ValueDef(name = "mask", info = "Add rule using glob mask")
-    @ValueDef(name = "pattern", info = "Add rule rule using regex pattern")
-    @ValueDef(name = "forData", type = ValueType.BOOLEAN, def = "true", info = "Apply this rule to individual data")
-    @ValueDef(name = "forNodes", type = ValueType.BOOLEAN, def = "true", info = "Apply this rule to data nodes")
     private void applyMeta(Meta meta) {
         if (meta.hasMeta("include")) {
             meta.getMetaList("include").forEach(include -> {
@@ -165,11 +159,5 @@ public class CustomDataFilter extends SimpleMetaMorph implements DataFilter {
                 }
             });
         }
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        super.fromMeta(meta);
-        applyMeta(meta);
     }
 }

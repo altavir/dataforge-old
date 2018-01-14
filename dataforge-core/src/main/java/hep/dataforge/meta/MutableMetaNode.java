@@ -32,6 +32,7 @@ import java.util.List;
  *
  * @author Alexander Nozik
  */
+@MorphTarget(target = SealedNode.class)
 public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNode<T>
         implements Serializable {
 
@@ -44,6 +45,12 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
     protected MutableMetaNode(String name) {
         super(name);
         this.parent = null;
+    }
+
+    protected MutableMetaNode(Meta meta){
+        this.name = meta.getName();
+        meta.getValueNames().forEach(valName -> setValue(valName, meta.getValue(valName), false));
+        meta.getNodeNames().forEach(nodeName -> setNode(nodeName, meta.getMetaList(nodeName), false));
     }
 
     /**
@@ -571,15 +578,5 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         List<T> oldList = new ArrayList<>(list);
         list.add(node);
         notifyNodeChanged(Name.ofSingle(nodeName), oldList, list);
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        if (!isEmpty()) {
-            throw new IllegalStateException("Trying to reconstruct non-empty MetaMorph from Meta");
-        }
-        this.name = meta.getName();
-        meta.getValueNames().forEach(valName -> setValue(valName, meta.getValue(valName), false));
-        meta.getNodeNames().forEach(nodeName -> setNode(nodeName, meta.getMetaList(nodeName), false));
     }
 }

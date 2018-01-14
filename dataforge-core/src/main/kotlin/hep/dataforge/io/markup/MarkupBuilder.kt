@@ -21,7 +21,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
     }
 
     override fun build(): Markup {
-        return Markup(builder)
+        return Markup.morph(builder)
     }
 
     override fun getMeta(): Meta {

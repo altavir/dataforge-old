@@ -69,7 +69,7 @@ public interface Task<R> extends Named, Described {
 
 //    @Override
 //    default NodeDescriptor getDescriptor() {
-//        return DescriptorUtils.buildDescriptor(getName(), getClass());
+//        return Descriptors.buildDescriptor(getName(), getClass());
 //    }
 
     @Override

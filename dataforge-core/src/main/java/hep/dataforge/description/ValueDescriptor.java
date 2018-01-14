@@ -7,9 +7,9 @@ package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.SimpleMetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 

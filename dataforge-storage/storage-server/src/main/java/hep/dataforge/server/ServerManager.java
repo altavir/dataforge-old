@@ -3,7 +3,6 @@ package hep.dataforge.server;
 import hep.dataforge.context.BasicPlugin;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.PluginDef;
-import hep.dataforge.description.ValueDef;
 import javafx.beans.binding.BooleanBinding;
 import javafx.util.Pair;
 import org.jetbrains.annotations.Nullable;
@@ -18,16 +17,11 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import static hep.dataforge.values.ValueType.BOOLEAN;
-import static hep.dataforge.values.ValueType.NUMBER;
-
 /**
  * A web server manager. Only one servlet is allowed per context
  * Created by darksnake on 12-May-17.
  */
 @PluginDef(name = "server", group = "hep.dataforge", dependsOn = {"hep.dataforge:storage"}, info = "Storage servlet context plugin")
-@ValueDef(name = "useRelativeAddress", type = {BOOLEAN}, def = "true")
-@ValueDef(name = "port", type = {NUMBER}, def = "8337", info = "The port for the servlet")
 public class ServerManager extends BasicPlugin implements ServerObject {
 
     /**

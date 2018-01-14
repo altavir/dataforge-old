@@ -4,19 +4,19 @@ import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
+import hep.dataforge.description.Descriptors
 import hep.dataforge.goals.Goal
 import hep.dataforge.goals.StaticGoal
-import hep.dataforge.meta.Configurable
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaProvider
-import hep.dataforge.meta.MutableMetaNode
+import hep.dataforge.meta.*
 import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueType
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.future.await
+import java.lang.reflect.AnnotatedElement
 import java.time.Instant
+import java.util.*
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -94,40 +94,23 @@ fun Value?.isNull(): Boolean = this == null || this.isNull
  * Delegate class for valueProvider
  */
 
-class ValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Value?> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Value? =
-            thisRef.optValue(valueName ?: property.name).orElse(null)
-}
 
-class StringValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, String?> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): String? =
-            thisRef.optString(valueName ?: property.name).orElse(null)
-}
-
-class BooleanValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Boolean?> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Boolean? =
-            thisRef.optBoolean(valueName ?: property.name).orElse(null)
-}
-
-class TimeValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Instant?> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Instant? =
-            thisRef.optTime(valueName ?: property.name).orElse(null)
-}
-
-class NumberValueDelegate(private val valueName: String?) : ReadOnlyProperty<ValueProvider, Number?> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): Number? =
-            thisRef.optNumber(valueName ?: property.name).orElse(null)
+private class ValueProviderDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<ValueProvider, T> {
+    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): T =
+            conv(thisRef.getValue(valueName ?: property.name))
 }
 
 /**
  * Delegate ValueProvider element to read only property
  */
-fun ValueProvider.value(valueName: String? = null) = ValueDelegate(valueName)
+fun ValueProvider.valueDelegate(valueName: String? = null): ReadOnlyProperty<ValueProvider, Value> = ValueProviderDelegate(valueName) { it }
 
-fun ValueProvider.stringValue(valueName: String? = null) = StringValueDelegate(valueName)
-fun ValueProvider.booleanValue(valueName: String? = null) = BooleanValueDelegate(valueName)
-fun ValueProvider.timeValue(valueName: String? = null) = TimeValueDelegate(valueName)
-fun ValueProvider.numberValue(valueName: String? = null) = NumberValueDelegate(valueName)
+//
+//fun ValueProvider.stringValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, String> = ValueProviderDelegate(valueName) { it.stringValue() }
+//fun ValueProvider.booleanValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Boolean> = ValueProviderDelegate(valueName) { it.booleanValue() }
+//fun ValueProvider.timeValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Instant> = ValueProviderDelegate(valueName) { it.timeValue() }
+//fun ValueProvider.numberValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Number> = ValueProviderDelegate(valueName) { it.numberValue() }
+//fun <T> ValueProvider.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<ValueProvider, T> = ValueProviderDelegate(valueName, conv)
 
 
 //Meta operations
@@ -193,9 +176,117 @@ class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvide
             thisRef.optMeta(metaName ?: property.name).orElse(null);
 }
 
-fun MetaProvider.meta(metaName: String? = null): MetaDelegate = MetaDelegate(metaName)
+fun MetaProvider.metaNode(metaName: String? = null): MetaDelegate = MetaDelegate(metaName)
+
+//Metoid values
+
+
+class MetoidValueDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<Metoid, T> {
+    //TODO add caching
+    override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T =
+            conv(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+}
+
+class MetoidNodeDelegate<T>(private val nodeName: String?, val conv: (Meta) -> T) : ReadOnlyProperty<Metoid, T> {
+    override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T =
+            conv(Descriptors.getDelegatedMeta(thisRef.meta, nodeName, thisRef, property))
+}
+
+/**
+ * Delegate MutableMetaNode element to read/write property
+ */
+fun Metoid.value(valueName: String? = null): ReadOnlyProperty<Metoid, Value> = MetoidValueDelegate(valueName) { it }
+
+fun Metoid.stringValue(valueName: String? = null): ReadOnlyProperty<Metoid, String> = MetoidValueDelegate(valueName) { it.stringValue() }
+fun Metoid.booleanValue(valueName: String? = null): ReadOnlyProperty<Metoid, Boolean> = MetoidValueDelegate(valueName) { it.booleanValue() }
+fun Metoid.timeValue(valueName: String? = null): ReadOnlyProperty<Metoid, Instant> = MetoidValueDelegate(valueName) { it.timeValue() }
+fun Metoid.numberValue(valueName: String? = null): ReadOnlyProperty<Metoid, Number> = MetoidValueDelegate(valueName) { it.numberValue() }
+fun Metoid.doubleValue(valueName: String? = null): ReadOnlyProperty<Metoid, Double> = MetoidValueDelegate(valueName) { it.doubleValue() }
+fun Metoid.intValue(valueName: String? = null): ReadOnlyProperty<Metoid, Int> = MetoidValueDelegate(valueName) { it.intValue() }
+fun <T> Metoid.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<Metoid, T> = MetoidValueDelegate(valueName, conv)
+fun Metoid.node(nodeName: String? = null): ReadOnlyProperty<Metoid, Meta> = MetoidNodeDelegate(nodeName) { it }
+fun <T> Metoid.customNode(nodeName: String? = null, conv: (Meta) -> T): ReadOnlyProperty<Metoid, T> = MetoidNodeDelegate(nodeName, conv)
+
+inline fun <reified T : MetaMorph> Metoid.morph(nodeName: String? = null): ReadOnlyProperty<Metoid, T> =
+        MetoidNodeDelegate(nodeName) { MetaMorph.morph(T::class, it) }
+
+//Annotations
+
+fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean): List<T> {
+    if (source is Class<*>) {
+        val res = ArrayList<T>()
+        val array = source.getDeclaredAnnotationsByType(type)
+        res.addAll(Arrays.asList(*array))
+        if (searchSuper) {
+            val superClass = source.superclass
+            if (superClass != null) {
+                res.addAll(listAnnotations(superClass, type, true))
+            }
+            for (cl in source.interfaces) {
+                res.addAll(listAnnotations(cl, type, true))
+            }
+        }
+        return res;
+    } else {
+        val array = source.getAnnotationsByType(type)
+        return Arrays.asList(*array)
+    }
+}
 
 //Configuration extension
+
+class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Value) : ReadWriteProperty<Configurable, T> {
+    //TODO add caching
+    override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T =
+            toT(Descriptors.getDelegatedValue(thisRef.config, valueName, thisRef, property))
+
+    override fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
+        Descriptors.setDelegatedValue(thisRef.config, valueName, toValue(value), thisRef, property)
+    }
+}
+
+class ConfigurableMetaDelegate<T>(private val metaName: String?, val toT: (Meta) -> T, val toMeta: (T) -> Meta) : ReadWriteProperty<Configurable, T> {
+    override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T {
+        return toT(Descriptors.getDelegatedMeta(thisRef.config, metaName, thisRef, property))
+    }
+
+    override operator fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
+        thisRef.config.setNode(metaName ?: property.name, toMeta(value))
+    }
+}
+
+fun Configurable.value(valueName: String? = null): ReadWriteProperty<Configurable, Value> =
+        ConfigurableValueDelegate(valueName, { it }, { it })
+
+fun Configurable.stringValue(valueName: String? = null): ReadWriteProperty<Configurable, String> =
+        ConfigurableValueDelegate(valueName, { it.stringValue() }, { Value.of(it) })
+
+fun Configurable.booleanValue(valueName: String? = null): ReadWriteProperty<Configurable, Boolean> =
+        ConfigurableValueDelegate(valueName, { it.booleanValue() }, { Value.of(it) })
+
+fun Configurable.timeValue(valueName: String? = null): ReadWriteProperty<Configurable, Instant> =
+        ConfigurableValueDelegate(valueName, { it.timeValue() }, { Value.of(it) })
+
+fun Configurable.numberValue(valueName: String? = null): ReadWriteProperty<Configurable, Number> =
+        ConfigurableValueDelegate(valueName, { it.numberValue() }, { Value.of(it) })
+
+fun Configurable.doubleValue(valueName: String? = null): ReadWriteProperty<Configurable, Double> =
+        ConfigurableValueDelegate(valueName, { it.doubleValue() }, { Value.of(it) })
+
+fun Configurable.intValue(valueName: String? = null): ReadWriteProperty<Configurable, Int> =
+        ConfigurableValueDelegate(valueName, { it.intValue() }, { Value.of(it) })
+
+fun <T> Configurable.customValue(valueName: String? = null, toT: (Value) -> T, toValue: (T) -> Value): ReadWriteProperty<Configurable, T> =
+        ConfigurableValueDelegate(valueName, toT, toValue)
+
+fun Configurable.node(metaName: String? = null): ReadWriteProperty<Configurable, Meta> =
+        ConfigurableMetaDelegate(metaName, { it }, { it })
+
+/**
+ * Create a property that is delegate for configurable
+ */
+inline fun <reified T : MetaMorph> Configurable.morph(metaName: String? = null): ReadWriteProperty<Configurable, T> =
+        ConfigurableMetaDelegate(metaName, { MetaMorph.morph(T::class, it) }, { it.toMeta() })
 
 /**
  * Configure a configurable using in-place build meta
@@ -204,71 +295,6 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
     this.configure(hep.dataforge.kodex.buildMeta(this.config.name, transform));
     return this;
 }
-
-class MutableValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Value?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Value? =
-            thisRef.optValue(valueName ?: property.name).orElse(null)
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Value?) {
-        thisRef.setValue(valueName ?: property.name, value);
-    }
-}
-
-class MutableStringValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, String?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): String? =
-            thisRef.optString(valueName ?: property.name).orElse(null)
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: String?) {
-        thisRef.setValue(valueName ?: property.name, value);
-    }
-}
-
-class MutableBooleanValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Boolean?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Boolean? =
-            thisRef.optBoolean(valueName ?: property.name).orElse(null)
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Boolean?) {
-        thisRef.setValue(valueName ?: property.name, value);
-    }
-}
-
-class MutableTimeValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Instant?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Instant? =
-            thisRef.optTime(valueName ?: property.name).orElse(null)
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Instant?) {
-        thisRef.setValue(valueName ?: property.name, value);
-    }
-}
-
-class MutableNumberValueDelegate(private val valueName: String?) : ReadWriteProperty<MutableMetaNode<*>, Number?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Number? =
-            thisRef.optNumber(valueName ?: property.name).orElse(null)
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Number?) {
-        thisRef.setValue(valueName ?: property.name, value);
-    }
-}
-
-class MutableMetaDelegate(private val metaName: String?) : ReadWriteProperty<MutableMetaNode<*>, Meta?> {
-    override operator fun getValue(thisRef: MutableMetaNode<*>, property: KProperty<*>): Meta? =
-            thisRef.optMeta(metaName ?: property.name).orElse(null);
-
-    override operator fun setValue(thisRef: MutableMetaNode<*>, property: KProperty<*>, value: Meta?) {
-        thisRef.setValue(metaName ?: property.name, value);
-    }
-}
-
-/**
- * Delegate MutableMetaNode element to read/write property
- */
-fun MutableMetaNode<*>.value(valueName: String? = null) = MutableValueDelegate(valueName)
-
-fun MutableMetaNode<*>.stringValue(valueName: String? = null) = MutableStringValueDelegate(valueName)
-fun MutableMetaNode<*>.booleanValue(valueName: String? = null) = MutableBooleanValueDelegate(valueName)
-fun MutableMetaNode<*>.timeValue(valueName: String? = null) = MutableTimeValueDelegate(valueName)
-fun MutableMetaNode<*>.numberValue(valueName: String? = null) = MutableNumberValueDelegate(valueName)
-fun MutableMetaNode<*>.meta(metaName: String? = null) = MutableMetaDelegate(metaName)
 
 //suspending functions
 

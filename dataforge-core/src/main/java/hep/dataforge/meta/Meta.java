@@ -15,18 +15,16 @@
  */
 package hep.dataforge.meta;
 
-import hep.dataforge.data.AutoCastable;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.io.XMLMetaWriter;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -43,7 +41,8 @@ import java.util.stream.Stream;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public abstract class Meta implements Provider, Named, ValueProvider, Serializable, MetaProvider, AutoCastable {
+@MorphTarget(target = SealedNode.class)
+public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph, MetaProvider {
 
     private static final Meta EMPTY = new EmptyMeta();
 
@@ -202,21 +201,10 @@ public abstract class Meta implements Provider, Named, ValueProvider, Serializab
         return VALUE_TARGET;
     }
 
-    /**
-     * Automatically casts meta to MetaMorph
-     *
-     * @param type
-     * @param <T>
-     * @return
-     */
+    @NotNull
     @Override
-    @SuppressWarnings("unchecked")
-    public <T> T cast(Class<T> type) {
-        if (MetaMorph.class.isAssignableFrom(type)) {
-            return type.cast(MetaMorph.morph((Class<? extends MetaMorph>) type, this));
-        } else {
-            return AutoCastable.super.cast(type);
-        }
+    public Meta toMeta() {
+        return this;
     }
 
     private static class EmptyMeta extends Meta {

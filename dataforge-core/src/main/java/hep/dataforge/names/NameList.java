@@ -18,7 +18,6 @@ package hep.dataforge.names;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -31,7 +30,7 @@ import java.util.stream.Stream;
  */
 public class NameList implements Names {
 
-    private ArrayList<String> nameList = new ArrayList<>();
+    private final ArrayList<String> nameList = new ArrayList<>();
 
     /**
      * An index cache to make calls of {@code getNumberByName} faster
@@ -56,6 +55,14 @@ public class NameList implements Names {
 
     public NameList(Iterable<String> list) throws NamingException {
         addNames(list);
+    }
+
+    public NameList(Meta meta){
+        if (!this.nameList.isEmpty()) {
+            throw new NonEmptyMetaMorphException(getClass());
+        } else {
+            this.nameList.addAll(Arrays.asList(meta.getStringArray("names")));
+        }
     }
 
     /**
@@ -156,20 +163,6 @@ public class NameList implements Names {
     @Override
     public Stream<String> stream() {
         return this.nameList.stream();
-    }
-
-    @Override
-    public Meta toMeta() {
-        return new MetaBuilder("names").putValue("names", this.asList());
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        if (!this.nameList.isEmpty()) {
-            throw new NonEmptyMetaMorphException(getClass());
-        } else {
-            this.nameList.addAll(Arrays.asList(meta.getStringArray("names")));
-        }
     }
 
 }

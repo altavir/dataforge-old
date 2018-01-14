@@ -16,10 +16,8 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provides;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.values.Value;
 
 import java.util.*;
@@ -34,14 +32,15 @@ import java.util.stream.Stream;
  *
  * @author Alexander Nozik
  */
+@MorphTarget(target = SealedNode.class)
 public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaMorph {
     public static final String DEFAULT_META_NAME = "meta";
 
     private static final long serialVersionUID = 1L;
 
     protected String name;
-    protected final Map<String, List<T>> nodes;
-    protected final Map<String, Value> values;
+    protected final Map<String, List<T>> nodes = new LinkedHashMap<>();
+    protected final Map<String, Value> values = new LinkedHashMap<>();
 
 
     protected MetaNode() {
@@ -54,8 +53,18 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
         } else {
             this.name = name;
         }
-        values = new LinkedHashMap<>();
-        nodes = new LinkedHashMap<>();
+    }
+
+    protected MetaNode(Meta meta){
+        this.name = meta.getName();
+
+        meta.getValueNames(true).forEach(valueName -> {
+            this.values.put(valueName, meta.getValue(valueName));
+        });
+
+        meta.getNodeNames(true).forEach(nodeName -> {
+            this.nodes.put(nodeName, meta.getMetaList(nodeName).stream().map(this::cloneNode).collect(Collectors.toList()));
+        });
     }
 
     /**
@@ -221,26 +230,6 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      */
     protected abstract T cloneNode(Meta node);
 
-    @Override
-    public Meta toMeta() {
-        return this;
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        if (!isEmpty()) {
-            throw new NonEmptyMetaMorphException(getClass());
-        }
-        this.name = meta.getName();
-
-        meta.getValueNames(true).forEach(valueName -> {
-            this.values.put(valueName, meta.getValue(valueName));
-        });
-
-        meta.getNodeNames(true).forEach(nodeName -> {
-            this.nodes.put(nodeName, meta.getMetaList(nodeName).stream().map(this::cloneNode).collect(Collectors.toList()));
-        });
-    }
 
     @Override
     public boolean isEmpty() {

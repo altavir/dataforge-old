@@ -4,9 +4,10 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,6 +47,10 @@ public class ListOfPoints implements MetaMorph, NavigableValuesSource {
         }
     }
 
+    public ListOfPoints(Meta meta){
+        data.addAll(buildFromMeta(meta));
+    }
+
     /**
      * Если formatter == null, то могут быть любые точки
      *
@@ -82,6 +87,7 @@ public class ListOfPoints implements MetaMorph, NavigableValuesSource {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     public Iterator<Values> iterator() {
         return data.iterator();
     }
@@ -100,15 +106,11 @@ public class ListOfPoints implements MetaMorph, NavigableValuesSource {
         this.data.clear();
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         MetaBuilder dataNode = new MetaBuilder("data");
         forEach(dp -> dataNode.putNode("point", dp.toMeta()));
         return dataNode;
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        data.addAll(buildFromMeta(meta));
     }
 }

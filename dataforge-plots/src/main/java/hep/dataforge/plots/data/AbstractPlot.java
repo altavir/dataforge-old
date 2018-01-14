@@ -66,7 +66,7 @@ public abstract class AbstractPlot extends SimpleConfigurable implements Plot {
     public ValuesAdapter getAdapter() {
         //If adapter is not defined, creating new adapter.
         if (adapter == null) {
-            adapter = Adapters.buildAdapter(getMeta().getMeta(ADAPTER_KEY, Meta.empty()));
+            adapter = Adapters.buildAdapter(getConfig().getMeta(ADAPTER_KEY, Meta.empty()));
         }
         return adapter;
     }
@@ -78,7 +78,7 @@ public abstract class AbstractPlot extends SimpleConfigurable implements Plot {
      */
     @Override
     protected synchronized void applyConfig(Meta config) {
-        listeners.forEach((l) -> l.metaChanged(name, this, new Laminate(getMeta())));
+        listeners.forEach((l) -> l.metaChanged(name, this, new Laminate(getConfig())));
 
 //        //invalidate adapter
 //        if (config.hasMeta(ADAPTER_KEY)) {

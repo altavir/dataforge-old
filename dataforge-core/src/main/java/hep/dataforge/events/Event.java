@@ -15,26 +15,18 @@
  */
 package hep.dataforge.events;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.utils.DateTimeUtils;
-import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.time.Instant;
-
-import static hep.dataforge.events.Event.*;
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * A metamorph representing framework event
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = EVENT_TYPE_KEY, required = true, info = "The type of the ivent in standard dot notation")
-@ValueDef(name = EVENT_PRIORITY_KEY, type = {NUMBER}, def = "0", info = "Priority of the event. 0 is default priority")
-@ValueDef(name = EVENT_SOURCE_KEY, def = "", info = "The source or the tag of the event. By default is empty")
-@ValueDef(name = EVENT_TIME_KEY, required = true, info = "Time of the event")
 public class Event extends SimpleMetaMorph {
     public static final String EVENT_PRIORITY_KEY = "priority";
     public static final String EVENT_TYPE_KEY = "type";

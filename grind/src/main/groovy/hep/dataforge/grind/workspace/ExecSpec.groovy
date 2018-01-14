@@ -5,15 +5,12 @@ import hep.dataforge.actions.Action
 import hep.dataforge.actions.OneToOneAction
 import hep.dataforge.context.Context
 import hep.dataforge.description.NodeDef
-import hep.dataforge.description.ValueDef
-import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.SimpleMarkupRenderer
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaUtils
-import hep.dataforge.values.ValueType
 import org.slf4j.Logger
 
 import java.nio.ByteBuffer
@@ -242,10 +239,7 @@ class ExecSpec {
     }
 
 //    @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
-    @ValueDefs([
-            @ValueDef(name = "timeout", type = ValueType.NUMBER, info = "The delay in milliseconds between end of output consumption and process force termination"),
-            @ValueDef(name = "workDir", info = "The working directory for the process as defined by IOManager::getFile")
-    ])
+    
     @NodeDef(name = "env", info = "Environment variables as a key-value pairs")
 //    @NodeDef(name = "parameter", info = "The definition for command parameter")
     private class GrindExecAction extends OneToOneAction<Object, Object> {

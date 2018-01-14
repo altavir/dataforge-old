@@ -18,11 +18,9 @@ package hep.dataforge.io.envelopes;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.binary.Binary;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
@@ -41,10 +39,6 @@ import java.util.function.Function;
  * @author Alexander Nozik
  */
 @NodeDef(name = "@envelope", info = "An optional envelope service info node")
-@ValueDef(name = "@envelope.type", info = "Type of the envelope content")
-@ValueDef(name = "@envelope.dataType", info = "Type of the envelope data encoding")
-@ValueDef(name = "@envelope.description", info = "Description of the envelope content")
-@ValueDef(name = "@envelope.time", type = ValueType.TIME, info = "Time of envelope creation")
 public interface Envelope extends Metoid, Serializable {
     /**
      * Property keys

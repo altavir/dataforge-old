@@ -1,7 +1,6 @@
 package hep.dataforge.maths
 
 import hep.dataforge.names.Names
-import hep.dataforge.utils.MetaMorph
 import org.apache.commons.math3.linear.ArrayRealVector
 import spock.lang.Specification
 

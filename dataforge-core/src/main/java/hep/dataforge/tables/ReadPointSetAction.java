@@ -18,7 +18,6 @@ package hep.dataforge.tables;
 import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.DataPointStringIterator;
 import hep.dataforge.io.LineIterator;
 import hep.dataforge.meta.Laminate;
@@ -26,13 +25,7 @@ import hep.dataforge.meta.Laminate;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static hep.dataforge.values.ValueType.NUMBER;
-
 @TypedActionDef(name = "readdataset", inputType = InputStream.class, outputType = Table.class, info = "Read DataSet from text file")
-@ValueDef(name = "columnNames", multiple = true, info = "The names of columns. By default the first raw is supposed to be name raw")
-@ValueDef(name = "encoding", def = "UTF8", info = "file encoding")
-@ValueDef(name = "headerLength", type = {NUMBER}, info = "The number of header lines to be ignored")
-@ValueDef(name = "dataSetName", info = "The name of resulting DataSet. By default the input content name is taken.")
 public class ReadPointSetAction extends OneToOneAction<InputStream, Table> {
 
     public static final String READ_DATA_SET_ACTION_NAME = "readdataset";

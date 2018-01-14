@@ -16,7 +16,10 @@
 package hep.dataforge.names;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -132,4 +135,11 @@ public interface Names extends Iterable<String>, MetaMorph {
         newNames.addAll(Arrays.asList(plusNames));
         return Names.of(newNames);
     }
+
+    @NotNull
+    @Override
+    default Meta toMeta() {
+        return new MetaBuilder("names").putValue("names", this.asList());
+    }
+
 }

@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.meta.Meta;
@@ -33,17 +32,14 @@ import java.io.ObjectOutputStream;
 import java.util.List;
 
 import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
-import static hep.dataforge.values.ValueType.BOOLEAN;
 
 /**
  * Единичный набор данных для отрисовки
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name.")
 //@ValueDef(name = "preferedPlotter", def = "jFreeChart",
 //        info = "A prefered plotting library. It is used if supported by destination PlotFrame.", tags = {NO_CONFIGURATOR_TAG})
-@ValueDef(name = "visible", def = "true", type = {BOOLEAN}, info = "The current visibility of this plottable")
 @AnonymousNotAlowed
 public interface Plot extends Plottable {
 

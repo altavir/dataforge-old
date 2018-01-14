@@ -21,7 +21,7 @@ public interface Described {
      * @return
      */
     default NodeDescriptor getDescriptor() {
-        return DescriptorUtils.buildDescriptor(getClass());
+        return Descriptors.buildDescriptor(getClass());
     }
 
     /**

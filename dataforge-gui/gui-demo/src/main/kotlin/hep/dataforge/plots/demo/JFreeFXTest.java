@@ -16,8 +16,8 @@
 package hep.dataforge.plots.demo;
 
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.plots.XYFunctionPlot;
 import hep.dataforge.plots.data.DataPlot;
-import hep.dataforge.plots.data.XYFunctionPlot;
 import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
@@ -54,7 +54,7 @@ public class JFreeFXTest extends Application {
 
         Function<Double, Double> func = (x1) -> x1 * x1;
 
-        XYFunctionPlot funcPlot = XYFunctionPlot.plotFunction("func", func, 0.1, 4, 200);
+        XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", func, 0.1, 4, 200);
 
         frame.add(funcPlot);
 

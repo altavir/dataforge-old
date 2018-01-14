@@ -39,7 +39,7 @@ public class ActionDescriptor extends NodeDescriptor {
     }
 
     public static ActionDescriptor build(Action action) {
-        MetaBuilder builder = DescriptorUtils.buildDescriptorMeta(action.getClass());
+        MetaBuilder builder = Descriptors.buildDescriptorMeta(action.getClass());
 
         MetaBuilder actionDef = new MetaBuilder("actionDef")
                 .putValue("name", action.getName());
@@ -62,7 +62,7 @@ public class ActionDescriptor extends NodeDescriptor {
     }
 
     public static ActionDescriptor build(Class<? extends Action> actionClass) {
-        MetaBuilder builder = DescriptorUtils.buildDescriptorMeta(actionClass);
+        MetaBuilder builder = Descriptors.buildDescriptorMeta(actionClass);
 
         TypedActionDef def = actionClass.getAnnotation(TypedActionDef.class);
         if (def != null) {

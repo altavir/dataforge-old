@@ -23,9 +23,7 @@ import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.NavigableValuesSource;
-import hep.dataforge.utils.MetaMorph;
 import hep.dataforge.utils.Optionals;
-import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.io.PrintWriter;
 import java.util.Optional;

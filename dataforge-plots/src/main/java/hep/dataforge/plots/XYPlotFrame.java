@@ -16,7 +16,6 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
@@ -25,8 +24,6 @@ import java.util.Optional;
 
 import static hep.dataforge.tables.Adapters.X_AXIS;
 import static hep.dataforge.tables.Adapters.Y_AXIS;
-import static hep.dataforge.values.ValueType.BOOLEAN;
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * Two-axis plot frame
@@ -47,9 +44,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
 
         updateFrame(config);
         //Вызываем эти методы, чтобы не делать двойного обновления аннотаций
-        updateAxis(X_AXIS, getXAxisConfig(), getMeta());
+        updateAxis(X_AXIS, getXAxisConfig(), getConfig());
 
-        updateAxis(Y_AXIS, getYAxisConfig(), getMeta());
+        updateAxis(Y_AXIS, getYAxisConfig(), getConfig());
 
         updateLegend(getLegendConfig());
 
@@ -58,15 +55,15 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
     protected abstract void updateFrame(Meta annotation);
 
     private Meta getXAxisConfig() {
-        return getMeta().getMetaOrEmpty("xAxis");
+        return getConfig().getMetaOrEmpty("xAxis");
     }
 
     private Meta getYAxisConfig() {
-        return getMeta().getMetaOrEmpty("yAxis");
+        return getConfig().getMetaOrEmpty("yAxis");
     }
 
     private Meta getLegendConfig() {
-        return getMeta().getMetaOrEmpty("legend");
+        return getConfig().getMetaOrEmpty("legend");
     }
 
     /**
@@ -75,19 +72,9 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
      * @param axisName
      * @param axisMeta
      */
-    @ValueDef(name = "type", allowed = "[number, log, time]", def = "number",
-            info = "The type of axis. By default number axis is used")
-    @ValueDef(name = "title", info = "The title of the axis.")
-    @ValueDef(name = "units", def = "", info = "The units of the axis.")
     @NodeDef(name = "range", info = "The definition of range for given axis")
-    @ValueDef(name = "range.from", type = {NUMBER}, info = "Lower boundary for fixed range")
-    @ValueDef(name = "range.to", type = {NUMBER}, info = "Upper boundary for fixed range")
-    @ValueDef(name = "crosshair", def = "none",
-            allowed = "[none, free, data]",
-            info = "Appearance and type of the crosshair")
     protected abstract void updateAxis(String axisName, Meta axisMeta, Meta plotMeta);
 
-    @ValueDef(name = "show", type = {BOOLEAN}, def = "true", info = "Display or hide the legend")
     protected abstract void updateLegend(Meta legendMeta);
 
     /**
@@ -97,6 +84,6 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
      * @return
      */
     public Optional<Value> getActualColor(Name name) {
-        return getPlots().opt(name).flatMap(plot -> plot.getMeta().optValue("color"));
+        return getPlots().opt(name).flatMap(plot -> plot.getConfig().optValue("color"));
     }
 }

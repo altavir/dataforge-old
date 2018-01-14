@@ -19,7 +19,6 @@ import hep.dataforge.actions.OneToOneAction;
 import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -42,12 +41,6 @@ import java.util.Map;
  */
 @TypedActionDef(name = "plotData",
         info = "Scatter plot of given DataSet", inputType = Table.class, outputType = Table.class)
-@ValueDef(name = "plotFrameName", def = "default",
-        info = "The name of plot frame which should be used for a plot. To be declared in the action input content rather in the action annotation.")
-@ValueDef(name = "plotTitle", def = "",
-        info = "The default title of plot which should be used if no frame definition found.")
-@ValueDef(name = "groupBy", def = "plot_frame_name",
-        info = "Defines the parameter which should be used as a frame name for this plot. The value is supposed to be a String, but in practice could be any type which could be converted to a String.")
 @NodeDef(name = "plotFrame", multiple = true,
         info = "The description of plot frame", from = "class::hep.dataforge.plots.XYPlotFrame")
 //@NodeDef(name = "snapshot", info = "Save plot shapshots to file",

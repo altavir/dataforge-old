@@ -17,7 +17,6 @@ package hep.dataforge.data;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 
 import static hep.dataforge.data.DataFactory.*;
@@ -32,8 +31,6 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 @NodeDef(name = NODE_KEY, info = "Recursively add node to the builder")
 @NodeDef(name = FILTER_KEY, from = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished")
 @NodeDef(name = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
-@ValueDef(name = NODE_NAME_KEY, info = "Node or data name")
-@ValueDef(name = NODE_TYPE_KEY, info = "Node or data type")
 public class DataFactory<T> implements DataLoader<T> {
 
     public static final String NODE_META_KEY = DEFAULT_META_NAME;
@@ -102,8 +99,6 @@ public class DataFactory<T> implements DataLoader<T> {
         return builder;
     }
 
-    @ValueDef(name = NODE_NAME_KEY, required = true, info = "The name for this data item")
-    @ValueDef(name = "path", info = "The context path for the object to be included as data. Chain path is supported")
     @NodeDef(name = NODE_META_KEY, info = "Meta for this item")
     protected NamedData<? extends T> buildData(Context context, Meta itemMeta) {
         String name = itemMeta.getString(NODE_NAME_KEY);

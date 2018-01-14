@@ -1,6 +1,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.description.Described;
+import hep.dataforge.description.ValueDescriptor;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
@@ -21,13 +22,10 @@ public interface DescribedMetoid extends Metoid, ValueProvider, Described {
      */
     @Override
     default Optional<Value> optValue(String name) {
-        return Optionals.either(getMeta().optValue(name)).or(() -> {
-            if (getDescriptor().hasDefaultForValue(name)) {
-                return Optional.of(getDescriptor().valueDescriptor(name).defaultValue());
-            } else {
-                return Optional.empty();
-            }
-        }).opt();
+        return Optionals
+                .either(getMeta().optValue(name))
+                .or(() -> getDescriptor().optValueDescriptor(name).map(ValueDescriptor::defaultValue))
+                .opt();
     }
 
     /**

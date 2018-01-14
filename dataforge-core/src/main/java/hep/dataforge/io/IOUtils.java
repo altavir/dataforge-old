@@ -232,7 +232,11 @@ public class IOUtils {
     }
 
     public static String formatWidth(String val, int width) {
-        return String.format("%" + width + "s", val);
+        if (width > 0) {
+            return String.format("%" + width + "s", val);
+        } else {
+            return val;
+        }
     }
 
     private static DecimalFormat getExpFormat(int width) {

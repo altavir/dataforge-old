@@ -16,7 +16,6 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.Adapters;
@@ -30,22 +29,15 @@ import java.util.stream.Stream;
 
 import static hep.dataforge.meta.Configuration.FINAL_TAG;
 import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
-import static hep.dataforge.values.ValueType.BOOLEAN;
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * Plot with x and y axis. It is possible to have multiple y axis
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "color", info = "The color of line or symbol.", tags = {"color"})
-@ValueDef(name = "showLine", type = {BOOLEAN}, def = "true", info = "Show the connecting line.")
-@ValueDef(name = "showSymbol", type = {BOOLEAN}, def = "true", info = "Show symbols for data point.")
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
-@ValueDef(name = "connectionType", allowed = "[default, step, spline]", def = "default", info = "The type of conncetion between points.")
-@ValueDef(name = "thickness", type = {NUMBER}, info = "The type of the line.")
 @NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset",
         from = "class::hep.dataforge.tables.XYAdapter", tags = {FINAL_TAG})
 public abstract class XYPlot extends AbstractPlot {
@@ -69,9 +61,6 @@ public abstract class XYPlot extends AbstractPlot {
      * @return
      */
     @NodeDef(name = "xRange", info = "X filter")
-    @ValueDef(name = "xRange.from", type = {NUMBER}, info = "X range from")
-    @ValueDef(name = "xRange.to", type = {NUMBER}, info = "X range to")
-    @ValueDef(name = "numPoints", type = {NUMBER}, info = "A required number of visible points. The real number could differ from requested one.")
     @Override
     public List<Values> getData(Meta query) {
         if (query.isEmpty()) {

@@ -106,13 +106,13 @@ object MarkupUtils {
     private fun descriptorElement(elementDef: Meta): MarkupBuilder {
         val builder = MarkupBuilder()
 
-        if (elementDef.getBoolean("required", false)!!) {
+        if (elementDef.getBoolean("required", false)) {
             builder.text("(*) ", "cyan")
         }
 
         builder.text(elementDef.getString("name"), "magenta")
 
-        if (elementDef.getBoolean("multiple", false)!!) {
+        if (elementDef.getBoolean("multiple", false)) {
             builder.text(" (mult)", "cyan")
         }
 

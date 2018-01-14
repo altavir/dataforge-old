@@ -4,7 +4,6 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.io.markup.Markup.Companion.MARKUP_GROUP_TYPE
 import hep.dataforge.values.ValueType.BOOLEAN
 import org.slf4j.LoggerFactory
-import java.util.function.Function
 
 /**
  * A basic renderer framework allowing to render basic markup elements: text, list and table
@@ -27,7 +26,7 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param element
      */
     protected fun doRender(element: Markup) {
-        when (element.getType(Function { this@GenericMarkupRenderer.inferType(it) })) {
+        when (inferType(element)) {
             MARKUP_GROUP_TYPE //render container
             -> element.content.forEach { this.doRender(it) }
             TEXT_TYPE -> text(element)

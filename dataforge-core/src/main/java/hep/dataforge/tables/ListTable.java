@@ -18,10 +18,9 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
-import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.MetaMorph;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Values;
@@ -56,16 +55,10 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
      * точке из набора данных. Набор полей каждой точки может быть шире, но не
      * уже.
      */
-    private TableFormat format;
+    private final TableFormat format;
 
     private ListTable(TableFormat format) {
         this.format = format;
-    }
-
-    /**
-     * constructor for deserialization
-     */
-    public ListTable() {
     }
 
     /**
@@ -99,6 +92,11 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         }
         this.format = MetaTableFormat.forPoint(points.get(0));
         addRows(points);
+    }
+
+    public ListTable(Meta meta){
+        format = new MetaTableFormat(meta.getMeta("format"));
+        data.addAll(ListOfPoints.buildFromMeta(meta.getMeta("data")));
     }
 
 
@@ -177,6 +175,7 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         return getRow(rowNumber).getValue(columnName);
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         MetaBuilder res = new MetaBuilder("table");
@@ -185,15 +184,6 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         forEach(dp -> dataNode.putNode("point", dp.toMeta()));
         res.putNode(dataNode);
         return res;
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        if (this.format != null || !data.isEmpty()) {
-            throw new NonEmptyMetaMorphException(getClass());
-        }
-        format = new MetaTableFormat(meta.getMeta("format"));
-        data.addAll(ListOfPoints.buildFromMeta(meta.getMeta("data")));
     }
 
     public static class Builder {

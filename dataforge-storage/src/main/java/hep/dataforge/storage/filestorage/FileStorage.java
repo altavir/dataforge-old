@@ -16,7 +16,6 @@
 package hep.dataforge.storage.filestorage;
 
 import hep.dataforge.context.Context;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
@@ -36,7 +35,6 @@ import java.nio.channels.SeekableByteChannel;
 import java.nio.file.*;
 
 import static hep.dataforge.storage.filestorage.FileStorageEnvelopeType.FILE_STORAGE_ENVELOPE_TYPE;
-import static hep.dataforge.values.ValueType.BOOLEAN;
 import static java.nio.file.StandardOpenOption.*;
 import static java.nio.file.StandardWatchEventKinds.*;
 
@@ -45,10 +43,6 @@ import static java.nio.file.StandardWatchEventKinds.*;
  *
  * @author Darksnake
  */
-@ValueDef(name = "path", info = "Path to storage root")
-@ValueDef(name = "monitor", type = {BOOLEAN}, def = "false",
-        info = "Enable file system monitoring for synchronous acess to single storage from different instances")
-@ValueDef(name = "type", def = "file", info = "The type of the storage")
 public class FileStorage extends AbstractStorage {
 
     public static String entryName(Path path) {

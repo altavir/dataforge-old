@@ -5,7 +5,7 @@
  */
 package hep.dataforge.control;
 
-import hep.dataforge.description.DescriptorUtils;
+import hep.dataforge.kodex.CoreExtensionsKt;
 
 import java.util.List;
 import java.util.Optional;
@@ -69,7 +69,7 @@ public interface Connectible {
      * @return
      */
     default List<RoleDef> roleDefs() {
-        return DescriptorUtils.listAnnotations(this.getClass(), RoleDef.class, true);
+        return CoreExtensionsKt.listAnnotations(this.getClass(), RoleDef.class, true);
     }
 
     /**

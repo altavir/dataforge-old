@@ -17,12 +17,11 @@ package hep.dataforge.tables;
 
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.exceptions.NonEmptyMetaMorphException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaUtils;
+import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.names.Names;
-import hep.dataforge.utils.SimpleMetaMorph;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -80,19 +79,6 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
     public MetaTableFormat(Meta meta) {
         //TODO add transformation to use short column description
         super(meta);
-    }
-
-    @Override
-    public Meta toMeta() {
-        return getMeta();
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        if (!getMeta().isEmpty()) {
-            throw new NonEmptyMetaMorphException(getClass());
-        }
-        setMeta(meta);
     }
 
     @Override

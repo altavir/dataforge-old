@@ -48,11 +48,7 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
      * @return
      */
     protected fun format(string: String, element: Markup): String {
-        return if (element.hasValue("textWidth")) {
-            IOUtils.formatWidth(string, element.getInt("textWidth")!!)
-        } else {
-            string
-        }
+        return IOUtils.formatWidth(string, element.style.getInt("textWidth"))
     }
 
     @Synchronized override fun text(text: String, color: String, element: Markup) {
@@ -79,7 +75,7 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
             print("\t")
         }
 
-        if (element.getBoolean("header", false)!!) {
+        if (element.getBoolean("header", false)) {
             ln(false)
         }
 

@@ -17,7 +17,6 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.SimpleMetaMorph;
 
 import java.util.Arrays;
 

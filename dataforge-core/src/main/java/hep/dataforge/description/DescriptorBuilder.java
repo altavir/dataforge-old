@@ -82,11 +82,11 @@ public class DescriptorBuilder implements Metoid {
     }
 
     public DescriptorBuilder addNode(AnnotatedElement childType) {
-        return addNode(DescriptorUtils.buildDescriptor(childType));
+        return addNode(Descriptors.buildDescriptor(childType));
     }
 
     public DescriptorBuilder addNode(String node, AnnotatedElement childType) {
-        return addNode(node, DescriptorUtils.buildDescriptor(childType));
+        return addNode(node, Descriptors.buildDescriptor(childType));
     }
 
     public DescriptorBuilder addValue(String name, String type, String info) {

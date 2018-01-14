@@ -67,7 +67,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
 
     @Override
     public void metaChanged(Name name, Plottable plottable, Laminate laminate) {
-        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(getMeta()).cleanup()));
+        listeners.forEach(l -> l.metaChanged(getNameForListener(name), plottable, laminate.withLayer(getConfig()).cleanup()));
     }
 
     @Override
@@ -87,7 +87,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      */
     private void notifyPlotAdded(Plottable plot) {
         plotAdded(plot.getName(), plot);
-        metaChanged(plot.getName(), plot, new Laminate(plot.getMeta()));
+        metaChanged(plot.getName(), plot, new Laminate(plot.getConfig()));
         if (plot instanceof PlotGroup) {
             ((PlotGroup) plot).getChildren().forEach(((PlotGroup) plot)::notifyPlotAdded);
         }
@@ -207,12 +207,12 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
      * Notify that config for this element and children is changed
      */
     private void notifyConfigChanged() {
-        metaChanged(Name.EMPTY, this, new Laminate(getMeta()).withDescriptor(descriptor));
+        metaChanged(Name.EMPTY, this, new Laminate(getConfig()).withDescriptor(descriptor));
         getChildren().forEach(pl -> {
             if (pl instanceof PlotGroup) {
                 ((PlotGroup) pl).notifyConfigChanged();
             } else {
-                metaChanged(pl.getName(), pl, new Laminate(pl.getMeta()).withDescriptor(pl.getDescriptor()));
+                metaChanged(pl.getName(), pl, new Laminate(pl.getConfig()).withDescriptor(pl.getDescriptor()));
             }
         });
     }

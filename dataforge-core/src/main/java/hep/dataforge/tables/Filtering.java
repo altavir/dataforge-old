@@ -16,7 +16,6 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.description.NodeDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
@@ -25,8 +24,6 @@ import hep.dataforge.values.Values;
 
 import java.util.List;
 import java.util.function.Predicate;
-
-import static hep.dataforge.values.ValueType.NUMBER;
 
 /**
  * <p>
@@ -137,11 +134,6 @@ public class Filtering {
      * @param an a {@link hep.dataforge.meta.Meta} object.
      * @return a {@link java.util.function.Predicate} object.
      */
-    @ValueDef(name = "tag", info = "The DataPoint tag to filter")
-    @ValueDef(name = "value", info = "The value name to filter")
-    @ValueDef(name = "equals", info = "The equality condition value")
-    @ValueDef(name = "from", type = {NUMBER}, info = "The lower bound for value. The 'value' parameter should be present")
-    @ValueDef(name = "to", type = {NUMBER}, info = "The upper bound for value. The 'value' parameter should be present")
     public static Predicate<Values> buildCondition(Meta an) {
         Predicate<Values> res = null;
         if (an.hasValue("tag")) {

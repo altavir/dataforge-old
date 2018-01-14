@@ -21,7 +21,6 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -35,8 +34,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
 
-import static hep.dataforge.actions.GenericAction.RESULT_GROUP_KEY;
-
 /**
  * A basic implementation of Action interface
  *
@@ -44,7 +41,6 @@ import static hep.dataforge.actions.GenericAction.RESULT_GROUP_KEY;
  * @param <R>
  * @author Alexander Nozik
  */
-@ValueDef(name = RESULT_GROUP_KEY, info = "The name of the data group appended before the path. By default is empty.")
 //@ValueDef(name = ALLOW_PARALLEL_KEY, type = "BOOLEAN", info = "A flag to allow or forbid parallel execution of this action")
 public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     public static final String RESULT_GROUP_KEY = "@action.resultGroup";

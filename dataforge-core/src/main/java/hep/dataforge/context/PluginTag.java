@@ -15,10 +15,9 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
-import hep.dataforge.utils.SimpleMetaMorph;
+import hep.dataforge.meta.SimpleMetaMorph;
 
 /**
  * The tag which contains information about name, group and version of some
@@ -26,9 +25,6 @@ import hep.dataforge.utils.SimpleMetaMorph;
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "name", info = "The name of plugin")
-@ValueDef(name = "group", info = "The namespace of plugin")
-@ValueDef(name = "dependsOn", info = "The list of plugins tha given plugin requires to run")
 //@ValueDef(name = "role", multiple = true,info = "The list of roles this plugin implements")
 //@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 public class PluginTag extends SimpleMetaMorph {
@@ -50,9 +46,6 @@ public class PluginTag extends SimpleMetaMorph {
 
     public PluginTag(Meta meta) {
         super(meta);
-    }
-
-    public PluginTag() {
     }
 
     public PluginTag(String group, String name) {
