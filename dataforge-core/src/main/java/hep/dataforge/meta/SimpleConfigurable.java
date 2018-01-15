@@ -84,7 +84,7 @@ public class SimpleConfigurable implements Configurable {
      * @param oldItem
      * @param newItem
      */
-    protected void applyValueChange(String name, Value oldItem, Value newItem) {
+    protected void applyValueChange(@NotNull String name, Value oldItem, Value newItem) {
         applyConfig(getConfig());
     }
 

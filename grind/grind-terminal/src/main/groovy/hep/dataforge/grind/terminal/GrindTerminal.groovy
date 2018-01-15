@@ -1,6 +1,5 @@
 package hep.dataforge.grind.terminal
 
-import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
@@ -38,7 +37,6 @@ import java.util.stream.Stream
  * A REPL Groovy shell with embedded DataForge features
  * Created by darksnake on 29-Aug-16.
  */
-@CompileStatic
 
 class GrindTerminal extends SimpleConfigurable {
     private static final AttributedStyle RES = AttributedStyle.BOLD.foreground(AttributedStyle.YELLOW);
@@ -161,7 +159,7 @@ class GrindTerminal extends SimpleConfigurable {
 
     def show(Object obj) {
         if (obj instanceof Markedup) {
-            renderer.render{ MarkupBuilder it ->it.ln()}
+            renderer.render{ it.ln()}
             if (obj instanceof Named) {
                 renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
                 renderer.render{it.ln()}

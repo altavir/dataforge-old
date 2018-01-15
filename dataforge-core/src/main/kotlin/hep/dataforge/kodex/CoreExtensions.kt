@@ -235,23 +235,23 @@ fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, s
 
 //Configuration extension
 
-class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Value) : ReadWriteProperty<Configurable, T> {
+class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Any) : ReadWriteProperty<Configurable, T> {
     //TODO add caching
     override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T =
             toT(Descriptors.getDelegatedValue(thisRef.config, valueName, thisRef, property))
 
     override fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
-        Descriptors.setDelegatedValue(thisRef.config, valueName, toValue(value), thisRef, property)
+        Descriptors.setDelegatedValue(thisRef.config, valueName, Value.of(toValue(value)), thisRef, property)
     }
 }
 
-class ConfigurableMetaDelegate<T>(private val metaName: String?, val toT: (Meta) -> T, val toMeta: (T) -> Meta) : ReadWriteProperty<Configurable, T> {
+class ConfigurableMetaDelegate<T>(private val metaName: String?, val read: (Meta) -> T, val write: (T) -> Meta) : ReadWriteProperty<Configurable, T> {
     override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T {
-        return toT(Descriptors.getDelegatedMeta(thisRef.config, metaName, thisRef, property))
+        return read(Descriptors.getDelegatedMeta(thisRef.config, metaName, thisRef, property))
     }
 
     override operator fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
-        thisRef.config.setNode(metaName ?: property.name, toMeta(value))
+        thisRef.config.setNode(metaName ?: property.name, write(value))
     }
 }
 
@@ -276,11 +276,14 @@ fun Configurable.doubleValue(valueName: String? = null): ReadWriteProperty<Confi
 fun Configurable.intValue(valueName: String? = null): ReadWriteProperty<Configurable, Int> =
         ConfigurableValueDelegate(valueName, { it.intValue() }, { Value.of(it) })
 
-fun <T> Configurable.customValue(valueName: String? = null, toT: (Value) -> T, toValue: (T) -> Value): ReadWriteProperty<Configurable, T> =
-        ConfigurableValueDelegate(valueName, toT, toValue)
+fun <T> Configurable.customValue(valueName: String? = null, read: (Value) -> T, write: (T) -> Any): ReadWriteProperty<Configurable, T> =
+        ConfigurableValueDelegate(valueName, read, write)
 
 fun Configurable.node(metaName: String? = null): ReadWriteProperty<Configurable, Meta> =
         ConfigurableMetaDelegate(metaName, { it }, { it })
+
+fun <T> Configurable.customNode(metaName: String? = null, read: (Meta) -> T, write: (T) -> Meta): ReadWriteProperty<Configurable, T> =
+        ConfigurableMetaDelegate(metaName, read, write)
 
 /**
  * Create a property that is delegate for configurable

@@ -160,6 +160,7 @@ object Descriptors {
         }
     }
 
+    @JvmStatic
     fun buildDescriptor(string: String): NodeDescriptor {
         val path = Path.of(string)
         return if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {

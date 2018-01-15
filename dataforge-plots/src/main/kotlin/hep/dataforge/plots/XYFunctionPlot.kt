@@ -17,18 +17,16 @@ package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.intValue
-import hep.dataforge.kodex.toList
+import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
 import hep.dataforge.tables.Adapters.buildXYDataPoint
+import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
+import hep.dataforge.values.ValueType.NUMBER
 import hep.dataforge.values.Values
-import javafx.beans.property.SimpleDoubleProperty
-import javafx.beans.property.SimpleObjectProperty
 import java.util.*
-import java.util.function.Function
 
 /**
  * A class for dynamic function values calculation for plot
@@ -38,72 +36,46 @@ import java.util.function.Function
 @ValueDefs(
         ValueDef(name = "showLine", type = arrayOf(BOOLEAN), def = "true", info = "Show the connecting line."),
         ValueDef(name = "showSymbol", type = arrayOf(BOOLEAN), def = "false", info = "Show symbols for data point."),
-        ValueDef(name = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points.")
+        ValueDef(name = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
+        ValueDef(name = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
+        ValueDef(name = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
+        ValueDef(name = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
+        ValueDef(name = "connectionType", def = "spline")
 )
-class XYFunctionPlot(name: String) : XYPlot(name) {
+class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(name) {
 
     private val cache = TreeMap<Double, Double>()
-    private val function = SimpleObjectProperty<Function<Double, Double>>()
-    private val lo = SimpleDoubleProperty()
-    private val hi = SimpleDoubleProperty()
-
-    var density by intValue()
-
 
     /**
      * The minimal number of points per range
      */
-    //private val density = SimpleIntegerProperty(DEFAULT_DENSITY)
 
-    init {
-        //        getConfig().setValue("showLine", true);
-        //        getConfig().setValue("showSymbol", false);
-        function.addListener { _, _, _ ->
-            invalidateCache()
-        }
-    }
-
-
-    fun setFunction(function: Function<Double, Double>) {
-        this.function.set(function)
-    }
+    var density by intValue()
+    var from by doubleValue("range.from")
+    var to by doubleValue("range.to")
 
     /**
      * Turns line smoothing on or off
      *
      * @param smoothing
      */
-    fun setSmoothing(smoothing: Boolean) {
-        if (smoothing) {
-            config.setValue("connectionType", "spline")
+    var smoothing by customValue("connectionType", read = { it.stringValue() == "spline" }) {
+        if (it) {
+            "spline"
         } else {
-            config.setValue("connectionType", "default")
+            "default"
         }
     }
 
-    /**
-     * @param from   lower range boundary
-     * @param to     upper range boundary
-     * @param notify notify listeners
-     */
-    fun setXRange(from: Double, to: Double, notify: Boolean) {
-        lo.set(from)
-        hi.set(to)
-        if (notify) {
-            super.notifyDataChanged()
-        }
+    var range by customNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
+        invalidateCache()
+        buildMeta("range", "from" to it.first, "to" to it.second)
     }
 
-    /**
-     * Set minimum number of nodes per range
-     *
-     * @param density
-     * @param notify
-     */
-    fun setDensity(density: Int, notify: Boolean) {
-        this.density = density
-        if (notify) {
-            super.notifyDataChanged()
+    override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
+        super.applyValueChange(name, oldItem, newItem)
+        if(name == "density"){
+            invalidateCache()
         }
     }
 
@@ -116,13 +88,7 @@ class XYFunctionPlot(name: String) : XYPlot(name) {
      * If function is not set or desired density not positive does nothing.
      */
     private fun validateCache() {
-        if (function.get() == null && density > 0) {
-            //do nothing if there is no function
-            return
-        }
         // recalculate cache if boundaries are finite, otherwise use existing cache
-        val from = lo.get()
-        val to = hi.get()
         val nodes = this.density.toInt()
         if (java.lang.Double.isFinite(from) && java.lang.Double.isFinite(to)) {
             for (i in 0 until nodes) {
@@ -144,8 +110,8 @@ class XYFunctionPlot(name: String) : XYPlot(name) {
      *
      * @param x
      */
-    @Synchronized protected fun eval(x: Double): Double {
-        val y = function.get().apply(x)
+    @Synchronized private fun eval(x: Double): Double {
+        val y = function(x)
         this.cache.put(x, y)
         return y
     }
@@ -156,11 +122,11 @@ class XYFunctionPlot(name: String) : XYPlot(name) {
      * @param x
      */
     fun calculateIn(x: Double): Double {
-        if (this.lo.value == null || this.lo.get() > x) {
-            this.lo.set(x)
+        if (this.from > x) {
+            this.from = x
         }
-        if (this.hi.value == null || this.hi.get() < x) {
-            this.hi.set(x)
+        if (this.to < x) {
+            this.to = x
         }
         return eval(x)
     }
@@ -168,10 +134,10 @@ class XYFunctionPlot(name: String) : XYPlot(name) {
     override fun getRawData(query: Meta): List<Values> {
         //recalculate cache with default values
         if (query.hasValue("xRange.from")) {
-            this.lo.set(query.getDouble("xRange.from"))
+            this.from = query.getDouble("xRange.from")
         }
         if (query.hasValue("xRange.to")) {
-            this.hi.set(query.getDouble("xRange.to"))
+            this.to = query.getDouble("xRange.to")
         }
         if (query.hasValue("density")) {
             this.density = query.getInt("density")
@@ -186,11 +152,10 @@ class XYFunctionPlot(name: String) : XYPlot(name) {
 
         private val DEFAULT_DENSITY = 200
 
-        fun plot(name: String, from: Double, to: Double, numPoints: Int = 200, function: (Double)-> Double): XYFunctionPlot {
-            val p = XYFunctionPlot(name)
-            p.setFunction(Function(function))
-            p.setXRange(from, to, false)
-            p.setDensity(numPoints, false)
+        fun plot(name: String, from: Double, to: Double, numPoints: Int = 200, function: (Double) -> Double): XYFunctionPlot {
+            val p = XYFunctionPlot(name, function)
+            p.range = Pair(from, to)
+            p.density = numPoints
             return p
         }
     }

@@ -15,10 +15,9 @@
  */
 package hep.dataforge.stat.fit;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.meta.Meta;
 import org.slf4j.LoggerFactory;
 
 /**
@@ -74,6 +73,19 @@ public class MINUITPlugin extends BasicPlugin {
     public void detach() {
         clearStaticLog();
         super.detach();
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(MINUITPlugin.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new MINUITPlugin();
+        }
     }
 
 }
