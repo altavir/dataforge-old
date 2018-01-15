@@ -17,7 +17,9 @@ package hep.dataforge.stat.fit;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.Named;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -54,16 +56,15 @@ public class Param implements MetaMorph, Named {
 
     }
 
-
-
-    public void fromMeta(Meta cfg) {
-        name = cfg.getString("name", cfg.getName());
-        setErr(cfg.getDouble("err", Double.NaN));
-        setDomain(cfg.getDouble("lower", Double.NEGATIVE_INFINITY),
-                cfg.getDouble("upper", Double.POSITIVE_INFINITY));
-        setValue(cfg.getDouble("value", Double.NaN));
+    public Param(Meta meta){
+        name = meta.getString("name", meta.getName());
+        setErr(meta.getDouble("err", Double.NaN));
+        setDomain(meta.getDouble("lower", Double.NEGATIVE_INFINITY),
+                meta.getDouble("upper", Double.POSITIVE_INFINITY));
+        setValue(meta.getDouble("value", Double.NaN));
     }
 
+    @NotNull
     @Override
     public Meta toMeta() {
         return new MetaBuilder(getName())

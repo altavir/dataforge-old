@@ -15,16 +15,24 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.meta.SimpleConfigurable;
+import hep.dataforge.meta.Meta;
+import hep.dataforge.utils.MetaHolder;
 
 /**
  * A base for plugin implementation
  *
  * @author Alexander Nozik
  */
-public abstract class BasicPlugin extends SimpleConfigurable implements Plugin {
+public abstract class BasicPlugin extends MetaHolder implements Plugin {
 
     private Context context;
+
+    public BasicPlugin(Meta meta) {
+        super(meta);
+    }
+
+    public BasicPlugin() {
+    }
 
     @Override
     public PluginTag[] dependsOn() {

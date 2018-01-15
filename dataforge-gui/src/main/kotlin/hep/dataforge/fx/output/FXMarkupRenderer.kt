@@ -29,7 +29,7 @@ class FXMarkupRenderer(private val out: FXOutputPane) : GenericMarkupRenderer() 
             out.tab()
         }
 
-        if (element.getBoolean("header", false)!!) {
+        if (element.getBoolean("header", false)) {
             out.newline()
         }
 

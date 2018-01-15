@@ -93,14 +93,14 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      */
     private fun getListLevel(element: Markup): Int {
         if (element.hasValue("level")) {
-            return element.getInt("level")!!
+            return element.getInt("level")
         } else {
             var level = 1
             var parent = element.parent
             while (parent != null) {
                 if (parent.type == LIST_TYPE) {
                     if (parent.hasValue("level")) {
-                        return parent.getInt("level")!! + level
+                        return parent.getInt("level") + level
                     } else {
                         level++
                     }

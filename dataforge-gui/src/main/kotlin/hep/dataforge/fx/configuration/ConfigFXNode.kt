@@ -2,6 +2,7 @@ package hep.dataforge.fx.configuration
 
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.kodex.isNull
+import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -25,7 +26,7 @@ open class ConfigFXNode(
         name: String,
         parent: ConfigFXNode? = null) : ConfigFX(name, parent) {
 
-    open val descriptor: NodeDescriptor? = parent?.descriptor?.childDescriptor(name);
+    open val descriptor: NodeDescriptor? = parent?.descriptor?.optChildDescriptor(name).nullable;
 
     open val configProperty: ObjectBinding<Configuration?> = object : ObjectBinding<Configuration?>() {
         init {

@@ -16,9 +16,7 @@
 package hep.dataforge.stat.fit;
 
 import hep.dataforge.actions.Action;
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.history.History;
 import hep.dataforge.meta.Meta;
@@ -147,5 +145,18 @@ public class FitManager extends BasicPlugin {
             log.reportError("The result of the task is not a valid state");
         }
         return newState;
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(FitManager.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new FitManager();
+        }
     }
 }

@@ -52,13 +52,13 @@ object MarkupUtils {
     private fun descriptorValue(valueDef: Meta): MarkupBuilder {
         val builder = MarkupBuilder()
 
-        if (valueDef.getBoolean("required", false)!!) {
+        if (valueDef.getBoolean("required", false)) {
             builder.text("(*) ", "cyan")
         }
 
         builder.text(valueDef.getString("name"), "red")
 
-        if (valueDef.getBoolean("multiple", false)!!) {
+        if (valueDef.getBoolean("multiple", false)) {
             builder.text(" (mult)", "cyan")
         }
 

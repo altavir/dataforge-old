@@ -3,6 +3,7 @@ package hep.dataforge.fx.configuration
 import hep.dataforge.description.ValueDescriptor
 import hep.dataforge.fx.values.ValueCallbackResponse
 import hep.dataforge.fx.values.ValueChooserFactory
+import hep.dataforge.kodex.nullable
 import hep.dataforge.names.Name
 import hep.dataforge.values.Value
 import javafx.beans.binding.ObjectBinding
@@ -16,7 +17,7 @@ import tornadofx.*
  */
 class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent) {
 
-    val descriptor: ValueDescriptor? = parent.descriptor?.valueDescriptor(name);
+    val descriptor: ValueDescriptor? = parent.descriptor?.optValueDescriptor(name).nullable;
 
     override val descriptionProperty: ObservableStringValue = object : StringBinding() {
         override fun computeValue(): String {

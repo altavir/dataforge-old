@@ -5,6 +5,8 @@
  */
 package hep.dataforge.context;
 
+import hep.dataforge.meta.Meta;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -13,7 +15,7 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
-public interface PluginRepository {
+public interface PluginLoader {
 
     /**
      * Load the most suitable plugin of all provided by its tag
@@ -21,10 +23,10 @@ public interface PluginRepository {
      * @param tag
      * @return
      */
-    Optional<Plugin> opt(PluginTag tag);
+    Optional<Plugin> opt(PluginTag tag, Meta meta);
 
-    default Plugin get(PluginTag tag) {
-        return opt(tag).orElseThrow(() -> new RuntimeException("No plugin matching " + tag.toString()));
+    default Plugin get(PluginTag tag, Meta meta) {
+        return opt(tag, meta).orElseThrow(() -> new RuntimeException("No plugin matching " + tag.toString()));
     }
 
     /**

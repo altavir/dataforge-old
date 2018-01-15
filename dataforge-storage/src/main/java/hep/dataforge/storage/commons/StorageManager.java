@@ -15,9 +15,7 @@
  */
 package hep.dataforge.storage.commons;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
@@ -71,6 +69,18 @@ public class StorageManager extends BasicPlugin {
     }
 
 
+    public StorageManager(Meta meta) {
+        super(meta);
+        if (meta.hasMeta("storage")) {
+            meta.getMetaList("storage").forEach(this::buildStorage);
+        } else if(!meta.isEmpty()) {
+            buildStorage(meta);
+        }
+    }
+
+    public StorageManager() {
+    }
+
     /**
      * Return blank file storage in current working directory
      *
@@ -109,16 +119,6 @@ public class StorageManager extends BasicPlugin {
     }
 
     @Override
-    protected void applyConfig(Meta config) {
-        super.applyConfig(config);
-        if (config.hasMeta("storage")) {
-            config.getMetaList("storage").forEach(this::buildStorage);
-        } else {
-            buildStorage(config);
-        }
-    }
-
-    @Override
     public void detach() {
         storages.values().forEach(shelf -> {
             try {
@@ -129,5 +129,18 @@ public class StorageManager extends BasicPlugin {
         });
         storages.clear();
         super.detach();
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(StorageManager.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new StorageManager(meta);
+        }
     }
 }

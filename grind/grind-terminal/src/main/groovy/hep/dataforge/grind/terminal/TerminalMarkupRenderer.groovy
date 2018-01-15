@@ -1,5 +1,6 @@
 package hep.dataforge.grind.terminal
 
+import hep.dataforge.io.markup.GenericMarkup
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.StreamMarkupRenderer
 import hep.dataforge.meta.Meta
@@ -20,7 +21,8 @@ class TerminalMarkupRenderer extends StreamMarkupRenderer {
     }
 
     @Override
-    protected synchronized void text(String text, String color = null, Markup element = new Markup(Meta.empty())) {
+    protected
+    synchronized void text(String text, String color = null, Markup element = new GenericMarkup(Meta.empty(), null)) {
         AttributedStyle style;
         if (element.getBoolean("bold", false)) {
             style = AttributedStyle.BOLD;

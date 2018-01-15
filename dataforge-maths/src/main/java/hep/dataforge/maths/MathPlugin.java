@@ -5,9 +5,7 @@
  */
 package hep.dataforge.maths;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.maths.functions.FunctionDispatcher;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
@@ -52,6 +50,19 @@ public class MathPlugin extends BasicPlugin {
 
     public void registerBivariate(String type, BivariateFunction function) {
         this.bivariateFactory.addFactory(type, meta -> function);
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(MathPlugin.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new MathPlugin();
+        }
     }
 
 }

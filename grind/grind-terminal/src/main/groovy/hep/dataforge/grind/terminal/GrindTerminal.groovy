@@ -161,7 +161,7 @@ class GrindTerminal extends SimpleConfigurable {
 
     def show(Object obj) {
         if (obj instanceof Markedup) {
-            renderer.render{it.ln()}
+            renderer.render{ MarkupBuilder it ->it.ln()}
             if (obj instanceof Named) {
                 renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
                 renderer.render{it.ln()}
@@ -266,7 +266,7 @@ class GrindTerminal extends SimpleConfigurable {
         def start = System.currentTimeMillis()
         def res = unwrap(shell.eval(expression))
         def now = System.currentTimeMillis()
-        if (getMeta().getBoolean("benchmark", true)) {
+        if (getConfig().getBoolean("benchmark", true)) {
             Duration duration = Duration.ofMillis(now - start);
             shell.context.logger.debug("Expression $expression evaluated in $duration")
         }

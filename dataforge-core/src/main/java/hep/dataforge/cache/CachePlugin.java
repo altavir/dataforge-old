@@ -5,9 +5,7 @@
  */
 package hep.dataforge.cache;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.data.Data;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataTree;
@@ -52,6 +50,8 @@ public class CachePlugin extends BasicPlugin {
 //        this.manager = manager;
 //    }
 
+
+
     @Override
     public void attach(Context context) {
         super.attach(context);
@@ -60,7 +60,7 @@ public class CachePlugin extends BasicPlugin {
             context.getLogger().info("Loaded cache manager" + manager.toString());
         } catch (CacheException ex) {
             context.getLogger().warn("Cache provider not found. Will use default cache implementation.");
-            manager = new DefaultCacheManager(getContext(), getConfig());
+            manager = new DefaultCacheManager(getContext(), getMeta());
         }
     }
 
@@ -171,7 +171,7 @@ public class CachePlugin extends BasicPlugin {
     private <V> Cache<Meta, V> getCache(String name, Class<V> type) {
         Cache<Meta, V> cache = getManager().getCache(name, Meta.class, type);
         if (cache == null) {
-            cache = getManager().createCache(name, new MetaCacheConfiguration<>(getConfig(), type));
+            cache = getManager().createCache(name, new MetaCacheConfiguration<>(getMeta(), type));
         }
         return cache;
     }
@@ -192,5 +192,18 @@ public class CachePlugin extends BasicPlugin {
 
     public void invalidate() {
         getManager().getCacheNames().forEach(this::invalidate);
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(CachePlugin.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new CachePlugin();
+        }
     }
 }

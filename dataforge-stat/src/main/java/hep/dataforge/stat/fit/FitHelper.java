@@ -190,12 +190,12 @@ public class FitHelper {
                 Laminate laminate = (Laminate) meta;
                 laminate.layersInverse().forEach(layer -> {
                     layer.optMeta("params").ifPresent(params -> {
-                        set.updateFrom(MetaMorph.morph(ParamSet.class, layer.getMeta("params")));
+                        set.updateFrom(new ParamSet(layer.getMeta("params")));
                     });
                 });
                 return params(set);
             } else {
-                return params(MetaMorph.morph(ParamSet.class, meta));
+                return params(new ParamSet(meta));
             }
         }
 

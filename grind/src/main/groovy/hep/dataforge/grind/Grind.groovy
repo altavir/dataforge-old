@@ -145,18 +145,18 @@ class Grind {
         return spec.builder.build();
     }
 
-    /**
-     * Build MetaMorph using convenient meta builder
-     * @param type
-     * @param args
-     * @return
-     */
-    static <T extends MetaMorph> T morph(Class<T> type,
-                                         Map values = [:],
-                                         String nodeName = "",
-                                         @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
-        MetaMorph.morph(type, buildMeta(nodeName, values, cl))
-    }
+//    /**
+//     * Build MetaMorph using convenient meta builder
+//     * @param type
+//     * @param args
+//     * @return
+//     */
+//    static <T extends MetaMorph> T morph(Class<T> type,
+//                                         Map values = [:],
+//                                         String nodeName = "",
+//                                         @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
+//        MetaMorph.Companion.morph(type, buildMeta(nodeName, values, cl))
+//    }
 
 //    /**
 //     * Build a simple pipe action

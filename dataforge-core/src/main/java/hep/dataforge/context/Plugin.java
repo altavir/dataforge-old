@@ -16,9 +16,9 @@
 package hep.dataforge.context;
 
 import hep.dataforge.cache.Identifiable;
-import hep.dataforge.meta.Configurable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 
@@ -37,7 +37,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Configurable, Named, ContextAware, Provider, Identifiable {
+public interface Plugin extends Named, Metoid, ContextAware, Provider, Identifiable {
 
     String PLUGIN_TARGET = "plugin";
 
@@ -118,7 +118,7 @@ public interface Plugin extends Configurable, Named, ContextAware, Provider, Ide
         id.putValue("name", this.getName());
         id.putValue("type", this.getClass().getName());
         id.putValue("context", getContext().getName());
-        id.putNode(DEFAULT_META_NAME, getConfig());
+        id.putNode(DEFAULT_META_NAME, getMeta());
         return id;
     }
 }

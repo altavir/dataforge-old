@@ -16,29 +16,11 @@
 
 package hep.dataforge.context;
 
+import hep.dataforge.utils.MetaFactory;
+
 /**
  * Created by darksnake on 08-Sep-16.
  */
-public interface PluginFactory {
-    static PluginFactory fromClass(final Class<? extends Plugin> cl){
-        return new PluginFactory() {
-            @Override
-            public PluginTag tag() {
-                return Plugin.resolveTag(cl);
-            }
-
-            @Override
-            public Plugin build() {
-                try {
-                    return cl.newInstance();
-                } catch (InstantiationException | IllegalAccessException e) {
-                    throw new RuntimeException("Can't create plugin instance. Must have blank constructor");
-                }
-            }
-        };
-    }
-
-    PluginTag tag();
-
-    Plugin build();
+public interface PluginFactory extends MetaFactory<Plugin> {
+    PluginTag getTag();
 }

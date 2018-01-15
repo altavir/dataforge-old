@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,9 +17,9 @@ package hep.dataforge.context;
 
 import hep.dataforge.exceptions.ContextLockException;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.Meta;
 
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,11 +45,11 @@ public class PluginManager implements ContextAware, AutoCloseable {
     /**
      * A class path resolver
      */
-    private PluginRepository pluginRepository;
+    private PluginLoader pluginLoader;
 
     public PluginManager(Context context) {
         this.context = context;
-        pluginRepository = new ClassPathPluginRepository(context);
+        pluginLoader = new ClassPathPluginLoader(context);
     }
 
     @Override
@@ -76,12 +76,12 @@ public class PluginManager implements ContextAware, AutoCloseable {
         }
     }
 
-    public PluginRepository getPluginRepository() {
-        return pluginRepository;
+    public PluginLoader getPluginLoader() {
+        return pluginLoader;
     }
 
-    public void setPluginRepository(PluginRepository pluginRepository) {
-        this.pluginRepository = pluginRepository;
+    public void setPluginLoader(PluginLoader pluginLoader) {
+        this.pluginLoader = pluginLoader;
     }
 
     public boolean has(String name) {
@@ -140,7 +140,7 @@ public class PluginManager implements ContextAware, AutoCloseable {
     }
 
     public <T extends Plugin> Optional<T> opt(Class<T> type) {
-        return opt(type::isInstance,true).map(type::cast);
+        return opt(type::isInstance, true).map(type::cast);
     }
 
     /**
@@ -182,17 +182,21 @@ public class PluginManager implements ContextAware, AutoCloseable {
      * @param tag
      * @return
      */
-    public Plugin load(PluginTag tag) {
-        return load(pluginRepository.opt(tag)
+    public Plugin load(PluginTag tag, Meta meta) {
+        return load(pluginLoader.opt(tag, meta)
                 .orElseThrow(() -> new NameNotFoundException(tag.toString(), "Plugin not found"))
         );
     }
 
-    public <T extends Plugin> T load(Class<T> type, Consumer<T> initializer) {
+    public Plugin load(PluginTag tag) {
+        return load(tag, Meta.empty());
+    }
+
+    public <T extends Plugin> T load(Class<T> type, Meta meta) {
         PluginTag tag = Plugin.resolveTag(type);
         T plugin;
         try {
-            plugin = type.cast(getPluginRepository().get(tag));
+            plugin = type.cast(getPluginLoader().get(tag, meta));
         } catch (Exception ex) {
             getLogger().debug("The plugin with tag {} not found in the repository. Trying to create instance directly.", tag);
             try {
@@ -201,19 +205,19 @@ public class PluginManager implements ContextAware, AutoCloseable {
                 throw new RuntimeException("Can't builder an instance of the plugin " + type.getName());
             }
         }
-        initializer.accept(plugin);
         return load(plugin);
     }
 
     public <T extends Plugin> T load(Class<T> type) {
-        return load(type,
-                t -> {
-                }
-        );
+        return load(type, Meta.empty());
+    }
+
+    public Plugin load(String name, Meta meta) {
+        return load(PluginTag.fromString(name), meta);
     }
 
     public Plugin load(String name) {
-        return load(PluginTag.fromString(name));
+        return load(name,Meta.empty());
     }
 
     /**
@@ -222,12 +226,12 @@ public class PluginManager implements ContextAware, AutoCloseable {
      * @param tag
      * @return
      */
-    public Plugin getOrLoad(PluginTag tag) {
-        return opt(tag).orElseGet(() -> load(pluginRepository.get(tag)));
+    public Plugin getOrLoad(PluginTag tag, Meta meta) {
+        return opt(tag).orElseGet(() -> load(pluginLoader.get(tag, meta)));
     }
 
-    public Plugin getOrLoad(String tag) {
-        return getOrLoad(PluginTag.fromString(tag));
+    public Plugin getOrLoad(String tag, Meta meta) {
+        return getOrLoad(PluginTag.fromString(tag), meta);
     }
 
     public <T extends Plugin> T getOrLoad(Class<T> type) {

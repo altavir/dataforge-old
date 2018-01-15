@@ -17,6 +17,7 @@ package hep.dataforge.maths;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Values;
@@ -63,6 +64,18 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
             throw new DimensionMismatchException(values.length, names.length);
         }
         this.mat = new Array2DRowRealMatrix(values, true);
+    }
+
+    public NamedMatrix(Meta meta){
+        Map<String, NamedVector> vectors = new HashMap<>();
+        meta.getNodeNames().forEach(name -> {
+            vectors.put(name, new NamedVector(meta.getMeta(name)));
+        });
+        this.names = Names.of(vectors.keySet());
+        this.mat = new Array2DRowRealMatrix(names.size(), names.size());
+        for (int i = 0; i < names.size(); i++) {
+            mat.setRowVector(i, vectors.get(names.get(i)).getVector());
+        }
     }
 
     /**
@@ -171,16 +184,4 @@ public class NamedMatrix implements NameSetContainer, MetaMorph {
         return res;
     }
 
-    @Override
-    public void fromMeta(Meta meta) {
-        Map<String, NamedVector> vectors = new HashMap<>();
-        meta.getNodeNames().forEach(name -> {
-            vectors.put(name, MetaMorph.morph(NamedVector.class, meta.getMeta(name)));
-        });
-        this.names = Names.of(vectors.keySet());
-        this.mat = new Array2DRowRealMatrix(names.size(), names.size());
-        for (int i = 0; i < names.size(); i++) {
-            mat.setRowVector(i, vectors.get(names.get(i)).getVector());
-        }
-    }
 }

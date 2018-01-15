@@ -137,6 +137,7 @@ object Descriptors {
         return MetaFileReader.read(file).builder.rename(name)
     }
 
+    @JvmStatic
     fun buildDescriptor(obj: Any): NodeDescriptor {
         return if (obj is Described) {
             obj.descriptor

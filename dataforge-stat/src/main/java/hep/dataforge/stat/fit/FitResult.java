@@ -18,12 +18,16 @@ package hep.dataforge.stat.fit;
 import hep.dataforge.context.Context;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.NamedMatrix;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
+import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.stat.models.Model;
 import hep.dataforge.stat.models.ModelManager;
 import hep.dataforge.tables.ListOfPoints;
 import hep.dataforge.tables.NavigableValuesSource;
 import hep.dataforge.utils.Optionals;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.PrintWriter;
 import java.util.Optional;
@@ -41,8 +45,7 @@ public class FitResult extends SimpleMetaMorph {
     private transient FitState state = null;
 
     public static FitResult build(FitState state, boolean valid, String... freeParameters) {
-        FitResult res = new FitResult();
-        res.state = state;
+
         MetaBuilder builder = new MetaBuilder("fitResult")
                 .setNode("data", new ListOfPoints(state.getData()).toMeta())//setting data
                 .setValue("dataSize", state.getDataSize())
@@ -70,7 +73,8 @@ public class FitResult extends SimpleMetaMorph {
         //setting model if possible
         builder.setNode("model", state.getModel().getMeta());
 
-        res.setMeta(builder.build());
+        FitResult res = new FitResult(builder.build());
+        res.state = state;
         return res;
     }
 
@@ -78,16 +82,20 @@ public class FitResult extends SimpleMetaMorph {
         return build(state, false, freeParameters);
     }
 
+    public FitResult(@NotNull Meta meta) {
+        super(meta);
+    }
+
     public ParamSet getParameters() {
         return optState().map(FitState::getParameters)
-                .orElseGet(() -> MetaMorph.morph(ParamSet.class, getMeta().getMeta("params")));
+                .orElseGet(() -> MetaMorph.Companion.morph(ParamSet.class, getMeta().getMeta("params")));
     }
 
     public Optional<NamedMatrix> optCovariance() {
         return Optionals.either(optState().map(FitState::getCovariance))
                 .or(() -> {
                     if (getMeta().hasMeta("covariance")) {
-                        return Optional.of(MetaMorph.morph(NamedMatrix.class, getMeta().getMeta("covariance")));
+                        return Optional.of(MetaMorph.Companion.morph(NamedMatrix.class, getMeta().getMeta("covariance")));
                     } else {
                         return Optional.empty();
                     }
@@ -138,7 +146,7 @@ public class FitResult extends SimpleMetaMorph {
 
     public NavigableValuesSource getData() {
         return optState().map(FitState::getData)
-                .orElseGet(() -> MetaMorph.morph(ListOfPoints.class, getMeta().getMeta("data")));
+                .orElseGet(() -> MetaMorph.Companion.morph(ListOfPoints.class, getMeta().getMeta("data")));
     }
 
     /**

@@ -5,8 +5,8 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
+import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.tables.ReadPointSetAction;
@@ -128,6 +128,19 @@ public class ActionManager extends BasicPlugin {
                 getContext().getPluginManager().stream(true)
                         .flatMap(plugin -> plugin.listContent(Task.TASK_TARGET))
         ).distinct();
+    }
+
+    public static class Factory implements PluginFactory{
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(ActionManager.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new ActionManager();
+        }
     }
 
 }

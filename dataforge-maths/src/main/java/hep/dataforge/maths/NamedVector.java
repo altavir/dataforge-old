@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
@@ -79,6 +80,15 @@ public class NamedVector implements Values, MetaMorph {
     public NamedVector(Values set) {
         vector = new ArrayRealVector(MathUtils.getDoubleArray(set));
         this.nameList = Names.of(set.getNames());
+    }
+
+    public NamedVector(Meta meta){
+        nameList = Names.of(meta.getValueNames());
+        double[] values = new double[nameList.size()];
+        for (int i = 0; i < nameList.size(); i++) {
+            values[i] = meta.getDouble(nameList.get(i));
+        }
+        this.vector = new ArrayRealVector(values);
     }
 
     @Override
@@ -169,15 +179,5 @@ public class NamedVector implements Values, MetaMorph {
             builder.setValue(nameList.get(i), vector.getEntry(i));
         }
         return builder;
-    }
-
-    @Override
-    public void fromMeta(Meta meta) {
-        nameList = Names.of(meta.getValueNames());
-        double[] values = new double[nameList.size()];
-        for (int i = 0; i < nameList.size(); i++) {
-            values[i] = meta.getDouble(nameList.get(i));
-        }
-        this.vector = new ArrayRealVector(values);
     }
 }

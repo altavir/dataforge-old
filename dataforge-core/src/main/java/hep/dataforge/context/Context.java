@@ -45,7 +45,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -335,7 +334,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
     }
 
     public <T> T loadFeature(String tag, Class<T> type) {
-        return type.cast(getPluginManager().getOrLoad(tag));
+        return type.cast(getPluginManager().getOrLoad(tag, Meta.empty()));
     }
 
 
@@ -465,17 +464,12 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
          * @return
          */
         public Builder plugin(Class<? extends Plugin> type, Meta configuration) {
-            ctx.getPluginManager().load(type, pl -> pl.configure(configuration));
+            ctx.getPluginManager().load(type, configuration);
             return this;
         }
 
         public Builder plugin(String type, Meta configuration) {
-            ctx.getPluginManager().load(type).configure(configuration);
-            return this;
-        }
-
-        public <T extends Plugin> Builder plugin(Class<T> type, Consumer<T> initializer) {
-            ctx.getPluginManager().load(type, initializer);
+            ctx.getPluginManager().load(type, configuration);
             return this;
         }
 

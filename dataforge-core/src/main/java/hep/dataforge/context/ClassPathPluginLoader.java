@@ -15,18 +15,18 @@ import java.util.stream.StreamSupport;
  *
  * @author Alexander Nozik
  */
-public class ClassPathPluginRepository extends AbstractPluginRepository {
+public class ClassPathPluginLoader extends AbstractPluginLoader {
 
-    private final ServiceLoader<Plugin> loader;
+    private final ServiceLoader<PluginFactory> loader;
 
 
-    public ClassPathPluginRepository(Context context) {
+    public ClassPathPluginLoader(Context context) {
         ClassLoader cl = context.getClassLoader();
-        loader = ServiceLoader.load(Plugin.class, cl);
+        loader = ServiceLoader.load(PluginFactory.class, cl);
     }
 
     @Override
-    protected Stream<Plugin> stream() {
+    protected Stream<PluginFactory> factories() {
         return StreamSupport.stream(loader.spliterator(), false);
     }
 }

@@ -1,8 +1,6 @@
 package hep.dataforge.control;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.control.devices.DeviceFactory;
 import hep.dataforge.control.devices.DeviceHub;
@@ -66,11 +64,6 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
         return device;
     }
 
-    public void applyConfig(Meta config) {
-        super.applyConfig(config);
-        config.getMetaList("device").forEach(this::buildDevice);
-    }
-
     @Override
     public Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException {
         throw new UnsupportedOperationException();
@@ -132,5 +125,18 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
     @Override
     public void connectAll(Context context, Meta meta) {
         this.devices.values().forEach(device -> device.getConnectionHelper().connect(context, meta));
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(DeviceManager.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new DeviceManager();
+        }
     }
 }

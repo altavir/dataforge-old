@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
@@ -43,7 +44,7 @@ import java.util.function.Consumer;
  */
 public class ParamSet implements Values, MetaMorph {
 
-    private final HashMap<String, Param> params;
+    private final HashMap<String, Param> params = new LinkedHashMap<>();
 
     /**
      * Generates set of parameters with predefined names.
@@ -53,7 +54,6 @@ public class ParamSet implements Values, MetaMorph {
      */
     public ParamSet(String[] names) throws NameNotFoundException {
         int num = names.length;
-        this.params = new LinkedHashMap<>();
         int i, j;
 
         for (i = 0; i < num - 1; i++) { //Проверяем, нет ли совпадающих имен
@@ -70,38 +70,34 @@ public class ParamSet implements Values, MetaMorph {
     }
 
     public ParamSet(ParamSet other) {
-        this.params = new LinkedHashMap<>();
         for (Param par : other.getParams()) {
             params.put(par.getName(), par.copy());
         }
     }
 
     public ParamSet() {
-        this.params = new LinkedHashMap<>();
     }
 
     public ParamSet(Values values) {
-        this.params = new LinkedHashMap<>(values.getNames().size());
         for (String name : values.getNames()) {
             this.params.put(name, new Param(name, values.getDouble(name)));
         }
     }
 
-    //    @NodeDef(name = "param", multiple = true, info = "The fit prameter", target = "method::hep.dataforge.stat.fit.Param.fromMeta")
     @NodeDef(name = "params", info = "Used as a wrapper for 'param' elements.")
-    public void fromMeta(Meta cfg) {
+    public ParamSet(Meta meta){
 
         Meta params;
-        if (cfg.hasMeta("params")) {
-            params = cfg.getMeta("params");
-        } else if ("params".equals(cfg.getName())) {
-            params = cfg;
+        if (meta.hasMeta("params")) {
+            params = meta.getMeta("params");
+        } else if ("params".equals(meta.getName())) {
+            params = meta;
         } else {
             return;
         }
 
         MetaUtils.nodeStream(params).forEach(entry -> {
-            setPar(MetaMorph.morph(Param.class, entry.getValue()));
+            setPar(new Param(entry.getValue()));
         });
     }
 
@@ -388,9 +384,7 @@ public class ParamSet implements Values, MetaMorph {
      * @param set a {@link hep.dataforge.stat.fit.ParamSet} object.
      */
     public void updateFrom(ParamSet set) {
-        set.getParams().stream().forEach((p) -> {
-            setPar(p);
-        });
+        set.getParams().forEach(this::setPar);
     }
 
 }

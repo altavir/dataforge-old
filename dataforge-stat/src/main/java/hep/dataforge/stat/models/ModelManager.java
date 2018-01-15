@@ -15,9 +15,7 @@
  */
 package hep.dataforge.stat.models;
 
-import hep.dataforge.context.BasicPlugin;
-import hep.dataforge.context.Context;
-import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provides;
@@ -89,5 +87,18 @@ public class ModelManager extends BasicPlugin {
     @Override
     public String defaultTarget() {
         return MODEL_TARGET;
+    }
+
+    public static class Factory implements PluginFactory {
+
+        @Override
+        public PluginTag getTag() {
+            return Plugin.resolveTag(ModelManager.class);
+        }
+
+        @Override
+        public Plugin build(Meta meta) {
+            return new ModelManager();
+        }
     }
 }
