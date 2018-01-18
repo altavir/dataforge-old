@@ -31,7 +31,6 @@ abstract class Markup(val parent: Markup? = null) : MetaMorph, Metoid, ValueProv
 
     val type: String by stringValue(MARKUP_TYPE_KEY)
 
-
     /**
      * The style declared in this specific node
      */
@@ -57,19 +56,6 @@ abstract class Markup(val parent: Markup? = null) : MetaMorph, Metoid, ValueProv
     override fun optValue(path: String): Optional<Value> {
         return meta.optValue(path)
     }
-
-    //    /**
-//     * Ignores parent
-//     */
-//    override fun toMeta(): Meta {
-//        return buildMeta("markup") {
-//            MARKUP_TYPE_KEY to type
-//            if (!selfStyle.isEmpty) node(MARKUP_STYLE_NODE, selfStyle)
-//            content.forEach {
-//                node(MARKUP_CONTENT_NODE, it.toMeta())
-//            }
-//        }
-//    }
 
     companion object : MorphProvider<Markup> {
         /**

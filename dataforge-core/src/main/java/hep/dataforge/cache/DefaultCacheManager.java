@@ -35,7 +35,7 @@ public class DefaultCacheManager extends MetaHolder implements CacheManager, Con
     }
 
     public Path getRootCacheDir() {
-        return context.getIo().getTmpDirectory().resolve("cache");
+        return context.getIo().getTmpDirectory().resolve("immutable");
     }
 
     @Override

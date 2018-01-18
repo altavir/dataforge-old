@@ -20,6 +20,7 @@ import java.util.*
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
+import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
 /**
@@ -171,44 +172,55 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
 
 //Meta provider delegate
 
-class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta?> {
-    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta? =
+private class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta> {
+    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta =
             thisRef.optMeta(metaName ?: property.name).orElse(null);
 }
 
-fun MetaProvider.metaNode(metaName: String? = null): MetaDelegate = MetaDelegate(metaName)
+fun MetaProvider.metaNode(metaName: String? = null): ReadOnlyProperty<MetaProvider, Meta> = MetaDelegate(metaName)
 
 //Metoid values
 
 
-class MetoidValueDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<Metoid, T> {
-    //TODO add caching
-    override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T =
-            conv(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+private class MetoidValueDelegate<T>(val valueName: String?, val immutable: Boolean = true, val converter: (Value) -> T) : ReadOnlyProperty<Metoid, T> {
+    private var cached: T? = null
+
+    override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T {
+        if (immutable && cached == null) {
+            cached = converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+        }
+        return cached ?: converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+    }
 }
 
-class MetoidNodeDelegate<T>(private val nodeName: String?, val conv: (Meta) -> T) : ReadOnlyProperty<Metoid, T> {
+private class MetoidNodeDelegate<T>(private val nodeName: String?, val immutable: Boolean = true, val converter: (Meta) -> T) : ReadOnlyProperty<Metoid, T> {
     override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T =
-            conv(Descriptors.getDelegatedMeta(thisRef.meta, nodeName, thisRef, property))
+            converter(Descriptors.getDelegatedMeta(thisRef.meta, nodeName, thisRef, property))
 }
 
 /**
  * Delegate MutableMetaNode element to read/write property
  */
-fun Metoid.value(valueName: String? = null): ReadOnlyProperty<Metoid, Value> = MetoidValueDelegate(valueName) { it }
+/**
+ * Create a metoid value delegate using the key of the value in meta
+ */
+fun Metoid.value(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Value> = MetoidValueDelegate(valueName, immutable) { it }
 
-fun Metoid.stringValue(valueName: String? = null): ReadOnlyProperty<Metoid, String> = MetoidValueDelegate(valueName) { it.stringValue() }
-fun Metoid.booleanValue(valueName: String? = null): ReadOnlyProperty<Metoid, Boolean> = MetoidValueDelegate(valueName) { it.booleanValue() }
-fun Metoid.timeValue(valueName: String? = null): ReadOnlyProperty<Metoid, Instant> = MetoidValueDelegate(valueName) { it.timeValue() }
-fun Metoid.numberValue(valueName: String? = null): ReadOnlyProperty<Metoid, Number> = MetoidValueDelegate(valueName) { it.numberValue() }
-fun Metoid.doubleValue(valueName: String? = null): ReadOnlyProperty<Metoid, Double> = MetoidValueDelegate(valueName) { it.doubleValue() }
-fun Metoid.intValue(valueName: String? = null): ReadOnlyProperty<Metoid, Int> = MetoidValueDelegate(valueName) { it.intValue() }
-fun <T> Metoid.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<Metoid, T> = MetoidValueDelegate(valueName, conv)
-fun Metoid.node(nodeName: String? = null): ReadOnlyProperty<Metoid, Meta> = MetoidNodeDelegate(nodeName) { it }
-fun <T> Metoid.customNode(nodeName: String? = null, conv: (Meta) -> T): ReadOnlyProperty<Metoid, T> = MetoidNodeDelegate(nodeName, conv)
+fun Metoid.stringValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, String> = MetoidValueDelegate(valueName, immutable) { it.stringValue() }
+fun Metoid.booleanValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Boolean> = MetoidValueDelegate(valueName, immutable) { it.booleanValue() }
+fun Metoid.timeValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Instant> = MetoidValueDelegate(valueName, immutable) { it.timeValue() }
+fun Metoid.numberValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Number> = MetoidValueDelegate(valueName, immutable) { it.numberValue() }
+fun Metoid.doubleValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Double> = MetoidValueDelegate(valueName, immutable) { it.doubleValue() }
+fun Metoid.intValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Int> = MetoidValueDelegate(valueName, immutable) { it.intValue() }
+fun <T> Metoid.customValue(valueName: String? = null, immutable: Boolean = true, conv: (Value) -> T): ReadOnlyProperty<Metoid, T> = MetoidValueDelegate(valueName, immutable, conv)
+fun Metoid.node(nodeName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Meta> = MetoidNodeDelegate(nodeName, immutable) { it }
+fun <T> Metoid.customNode(nodeName: String? = null, immutable: Boolean = true, conv: (Meta) -> T): ReadOnlyProperty<Metoid, T> = MetoidNodeDelegate(nodeName, immutable, conv)
 
-inline fun <reified T : MetaMorph> Metoid.morph(nodeName: String? = null): ReadOnlyProperty<Metoid, T> =
-        MetoidNodeDelegate(nodeName) { MetaMorph.morph(T::class, it) }
+fun <T : MetaMorph> Metoid.morphNode(type: KClass<T>, nodeName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, T> =
+        MetoidNodeDelegate(nodeName, immutable) { MetaMorph.morph(type, it) }
+
+inline fun <reified T : MetaMorph> Metoid.morphNode(nodeName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, T> =
+        morphNode(T::class, nodeName, immutable)
 
 //Annotations
 
@@ -235,8 +247,7 @@ fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, s
 
 //Configuration extension
 
-class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Any) : ReadWriteProperty<Configurable, T> {
-    //TODO add caching
+private class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Any) : ReadWriteProperty<Configurable, T> {
     override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T =
             toT(Descriptors.getDelegatedValue(thisRef.config, valueName, thisRef, property))
 
@@ -245,13 +256,13 @@ class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Val
     }
 }
 
-class ConfigurableMetaDelegate<T>(private val metaName: String?, val read: (Meta) -> T, val write: (T) -> Meta) : ReadWriteProperty<Configurable, T> {
+private class ConfigurableMetaDelegate<T>(private val metaName: String?, val read: (Meta) -> T, val write: (T) -> Meta) : ReadWriteProperty<Configurable, T> {
     override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T {
         return read(Descriptors.getDelegatedMeta(thisRef.config, metaName, thisRef, property))
     }
 
     override operator fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
-        thisRef.config.setNode(metaName ?: property.name, write(value))
+        Descriptors.setDelegatedMeta(thisRef.config, metaName, write(value), thisRef, property)
     }
 }
 
@@ -288,8 +299,12 @@ fun <T> Configurable.customNode(metaName: String? = null, read: (Meta) -> T, wri
 /**
  * Create a property that is delegate for configurable
  */
+fun <T : MetaMorph> Configurable.morph(type: KClass<T>, metaName: String? = null): ReadWriteProperty<Configurable, T> {
+    return ConfigurableMetaDelegate(metaName, { MetaMorph.morph(type, it) }, { it.toMeta() })
+}
+
 inline fun <reified T : MetaMorph> Configurable.morph(metaName: String? = null): ReadWriteProperty<Configurable, T> =
-        ConfigurableMetaDelegate(metaName, { MetaMorph.morph(T::class, it) }, { it.toMeta() })
+        morph(T::class, metaName)
 
 /**
  * Configure a configurable using in-place build meta

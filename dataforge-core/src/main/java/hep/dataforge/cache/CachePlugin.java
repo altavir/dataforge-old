@@ -27,14 +27,14 @@ import java.util.stream.Stream;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(name = "cache", group = "hep.dataforge", info = "Data caching plugin")
+@PluginDef(name = "immutable", group = "hep.dataforge", info = "Data caching plugin")
 public class CachePlugin extends BasicPlugin {
 
     private Predicate<Data> bypass = data -> false;
     private CacheManager manager;
 
     /**
-     * Set cache bypass condition for data
+     * Set immutable bypass condition for data
      *
      * @param bypass
      */
@@ -57,9 +57,9 @@ public class CachePlugin extends BasicPlugin {
         super.attach(context);
         try {
             manager = Caching.getCachingProvider(context.getClassLoader()).getCacheManager();
-            context.getLogger().info("Loaded cache manager" + manager.toString());
+            context.getLogger().info("Loaded immutable manager" + manager.toString());
         } catch (CacheException ex) {
-            context.getLogger().warn("Cache provider not found. Will use default cache implementation.");
+            context.getLogger().warn("Cache provider not found. Will use default immutable implementation.");
             manager = new DefaultCacheManager(getContext(), getMeta());
         }
     }
@@ -103,7 +103,7 @@ public class CachePlugin extends BasicPlugin {
                     if (data.getGoal().isDone()) {
                         data.getInFuture().thenAccept(val -> result.complete(val));
                     } else if (cache.containsKey(id)) {
-                        getLogger().info("Cached result found. Restoring data from cache for id {}", id.hashCode());
+                        getLogger().info("Cached result found. Restoring data from immutable for id {}", id.hashCode());
                         CompletableFuture.supplyAsync(() -> cache.get(id)).whenComplete((res, err) -> {
                             if (res != null) {
                                 result.complete(res);
@@ -112,7 +112,7 @@ public class CachePlugin extends BasicPlugin {
                             }
 
                             if (err != null) {
-                                getLogger().error("Failed to load data from cache", err);
+                                getLogger().error("Failed to load data from immutable", err);
                             }
                         });
                     } else {
@@ -130,7 +130,7 @@ public class CachePlugin extends BasicPlugin {
                             try {
                                 cache.put(id, res);
                             } catch (Exception ex) {
-                                getContext().getLogger().error("Failed to put result into the cache", ex);
+                                getContext().getLogger().error("Failed to put result into the immutable", ex);
                             }
                         }
                     });

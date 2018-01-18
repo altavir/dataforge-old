@@ -35,7 +35,7 @@ interface MorphProvider<T> {
  * An exception to be thrown when automatic class cast is failed
  */
 class MorphException(val from: Class<*>, val to: Class<*>, message: String? = null, cause: Throwable? = null) : RuntimeException(message, cause) {
-    override val message: String = String.format("Meta morph from %s to %s failed", from, to) + super.message
+    override val message: String = String.format("Meta morphNode from %s to %s failed", from, to) + super.message
 }
 
 private class MetaMorphProxy(val type: KClass<*>, val meta: Meta) : Serializable {

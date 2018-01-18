@@ -50,7 +50,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
         try {
             Files.createDirectories(cacheDir);
         } catch (IOException e) {
-            throw new RuntimeException("Failed to create cache directory");
+            throw new RuntimeException("Failed to create immutable directory");
         }
         scanDirectory();
     }
@@ -68,7 +68,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
                         Envelope envelope = reader.read(file);
                         hardCache.put(envelope.getMeta(), file);
                     } catch (Exception e) {
-                        getLogger().error("Failed to read cache file {}. Deleting corrupted file.", file.toString());
+                        getLogger().error("Failed to read immutable file {}. Deleting corrupted file.", file.toString());
                         file.toFile().delete();
                     }
                 });
@@ -216,7 +216,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
         try {
             Files.deleteIfExists(cacheDir);
         } catch (IOException e) {
-            getLogger().error("Failed to delete cache directory {}", cacheDir, e);
+            getLogger().error("Failed to delete immutable directory {}", cacheDir, e);
         }
     }
 
@@ -287,7 +287,7 @@ public class DefaultCache<V> extends MetaHolder implements Cache<Meta, V>, Conte
 //    @Override
 //    protected void applyValueChange(String name, Value oldItem, Value newItem) {
 //        super.applyValueChange(name, oldItem, newItem);
-//        //update cache size preserving all of the elements
+//        //update immutable size preserving all of the elements
 //        if (Objects.equals(name, "softCache.size") && softCache != null) {
 //            Map<Meta, V> lru = Misc.getLRUCache(newItem.intValue());
 //            lru.putAll(softCache);

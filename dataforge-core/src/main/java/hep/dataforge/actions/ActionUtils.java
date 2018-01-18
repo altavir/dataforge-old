@@ -180,7 +180,7 @@ public class ActionUtils {
         public DataNode run(Context context, DataNode data, Meta sequenceMeta) {
             DataNode res = data;
             CachePlugin cache = null;
-            //Set data cache if it is defined in context
+            //Set data immutable if it is defined in context
             if (context.getBoolean("enableCache", false)) {
                 cache = context.getFeature(CachePlugin.class);
             }

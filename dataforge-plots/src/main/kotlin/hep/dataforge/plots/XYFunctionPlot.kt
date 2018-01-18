@@ -88,7 +88,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      * If function is not set or desired density not positive does nothing.
      */
     private fun validateCache() {
-        // recalculate cache if boundaries are finite, otherwise use existing cache
+        // recalculate immutable if boundaries are finite, otherwise use existing immutable
         val nodes = this.density.toInt()
         if (java.lang.Double.isFinite(from) && java.lang.Double.isFinite(to)) {
             for (i in 0 until nodes) {
@@ -106,7 +106,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
     }
 
     /**
-     * Calculate function cache for the given point and return calculated value
+     * Calculate function immutable for the given point and return calculated value
      *
      * @param x
      */
@@ -132,7 +132,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
     }
 
     override fun getRawData(query: Meta): List<Values> {
-        //recalculate cache with default values
+        //recalculate immutable with default values
         if (query.hasValue("xRange.from")) {
             this.from = query.getDouble("xRange.from")
         }

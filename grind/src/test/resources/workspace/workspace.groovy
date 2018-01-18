@@ -2,7 +2,7 @@
 // define context
 context{
     name = "TEST"
-    plugin "cache"
+    plugin "immutable"
     plugin "plots"
     properties{
         a = 4

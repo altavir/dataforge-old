@@ -24,7 +24,7 @@ public class WorkspaceTest {
         Context context = Global.getContext("TEST");
 //        context.getPluginManager().load(BasicIOManager.class);
 
-        CachePlugin cache = context.loadFeature("cache", CachePlugin.class);
+        CachePlugin cache = context.loadFeature("immutable", CachePlugin.class);
         cache.configureValue("fileCache.enabled", false);
 
         Task<Integer> task1 = new PipeTask<Integer, Integer>("test1", Integer.class, Integer.class) {

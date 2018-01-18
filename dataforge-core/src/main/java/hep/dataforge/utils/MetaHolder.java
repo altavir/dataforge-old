@@ -66,7 +66,7 @@ public class MetaHolder implements DescribedMetoid {
     }
 
     /**
-     * Get descriptor and cache it in case we will need it again
+     * Get descriptor and immutable it in case we will need it again
      *
      * @return
      */

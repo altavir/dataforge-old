@@ -1,7 +1,7 @@
 package hep.dataforge.control.devices;
 
-import hep.dataforge.description.Descriptors;
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
@@ -11,6 +11,8 @@ import hep.dataforge.values.Value;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import static hep.dataforge.kodex.CoreExtensionsKt.listAnnotations;
 
 
 /**
@@ -93,7 +95,7 @@ public interface Stateful extends Provider {
      * @return
      */
     default List<StateDef> getStateDefs() {
-        return Descriptors.listAnnotations(this.getClass(), StateDef.class, true);
+        return listAnnotations(this.getClass(), StateDef.class, true);
     }
 
     /**
@@ -123,7 +125,7 @@ public interface Stateful extends Provider {
      * @return
      */
     default List<MetaStateDef> getMetaStateDefs() {
-        return Descriptors.listAnnotations(this.getClass(), MetaStateDef.class, true);
+        return listAnnotations(this.getClass(), MetaStateDef.class, true);
     }
 
     /**

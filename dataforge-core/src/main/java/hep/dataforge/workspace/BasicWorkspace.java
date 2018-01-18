@@ -36,12 +36,12 @@ public class BasicWorkspace extends AbstractWorkspace {
     }
 
     protected boolean cacheEnabled() {
-        return getContext().getBoolean("cache.enabled", true);
+        return getContext().getBoolean("immutable.enabled", true);
     }
 
     public DataNode<Object> runTask(TaskModel model) {
-        //Cache result if cache is available and caching is not blocked
-        if (cacheEnabled() && model.getMeta().getBoolean("cache.enabled", true)) {
+        //Cache result if immutable is available and caching is not blocked
+        if (cacheEnabled() && model.getMeta().getBoolean("immutable.enabled", true)) {
             return getCache().cacheNode(model.getName(), model.getIdentity(), super.runTask(model));
         } else {
             return super.runTask(model);
@@ -61,7 +61,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
     @Override
     public void clean() {
-        getLogger().info("Cleaning up cache...");
+        getLogger().info("Cleaning up immutable...");
         invalidateCache();
     }
 

@@ -89,6 +89,10 @@ object Descriptors {
         }
     }
 
+    fun setDelegatedMeta(delegate: MutableMetaNode<*>, valueName: String?, node: Meta, thisRef: Any, property: KProperty<*>) {
+        delegate.setNode(valueName ?: property.name, node)
+    }
+
     /**
      * Build Meta that contains all the default nodes and values from given node
      * descriptor

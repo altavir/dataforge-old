@@ -65,7 +65,6 @@ import static hep.dataforge.control.connections.Roles.VIEW_ROLE;
 @RoleDef(name = LOGGER_ROLE, objectType = Logger.class, unique = true, info = "The logger for this device")
 @RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler.class, info = "The listener for device events")
 @RoleDef(name = VIEW_ROLE)
-@StateDef()
 public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Responder, Stateful {
 
     String INITIALIZED_STATE = "init";

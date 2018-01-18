@@ -96,9 +96,9 @@ public class BayesianConfidenceLimit {
 
     private ConfidenceLimitCalculator getCalculator(String parname, FitState state, String[] freePars, int numCalls) {
         log.report(format(
-                "Calculating marginal likelihood cache for parameter \'%s\'.", parname));
+                "Calculating marginal likelihood immutable for parameter \'%s\'.", parname));
         if ((previousCalc != null) && parname.equals(previousPar) && state.equals(previousResult)) {
-            log.report("Using previously stored marginal likelihood cache.");
+            log.report("Using previously stored marginal likelihood immutable.");
             return previousCalc;
         } else {
             UnivariateFunction function = this.calculateLikelihood(parname, state, freePars, numCalls);
@@ -110,7 +110,7 @@ public class BayesianConfidenceLimit {
             previousCalc = calculator;
             previousPar = parname;
             previousResult = state;
-            log.report("Likelihood cache calculation completed.");
+            log.report("Likelihood immutable calculation completed.");
             return calculator;
         }
     }
