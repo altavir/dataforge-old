@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -175,8 +175,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         run(() -> {
             ValueAxis axis = getAxis(axisMeta);
 
-            String crosshair = axisMeta.getString("crosshair",
-                    () -> plotMeta.getString("crosshair"));
+            String crosshair = axisMeta.getString("crosshair", () -> plotMeta.getString("crosshair", "none"));
 
 
             double from = axisMeta.getDouble("range.from", Double.NEGATIVE_INFINITY);

@@ -22,7 +22,7 @@ fun main(args: Array<String>) {
 
     val func = { x: Double -> Math.pow(x, 2.0) }
 
-    val funcPlot = XYFunctionPlot.plot("func", func, 0.1, 4.0, 200)
+    val funcPlot = XYFunctionPlot.plot("func", 0.1, 4.0, 200, func)
 
 
     val names = arrayOf("myX", "myY", "myXErr", "myYErr")
