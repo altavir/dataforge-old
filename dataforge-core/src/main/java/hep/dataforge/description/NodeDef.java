@@ -24,7 +24,7 @@ import java.lang.annotation.*;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.CONSTRUCTOR})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.CONSTRUCTOR,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited

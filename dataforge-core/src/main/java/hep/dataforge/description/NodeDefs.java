@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,12 +15,7 @@
  */
 package hep.dataforge.description;
 
-import java.lang.annotation.Documented;
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.*;
 
 /**
  * <p>NodeDefs class.</p>
@@ -28,7 +23,7 @@ import java.lang.annotation.Target;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER})
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.PARAMETER, ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
