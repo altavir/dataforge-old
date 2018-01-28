@@ -163,7 +163,7 @@ public class Context implements Provider, ValueProvider, History, Named, AutoClo
      * @return the io
      */
     public IOManager getIo() {
-        return getPluginManager().opt(IOManager.class).orElseGet(() -> Global.instance().getIo());
+        return getPluginManager().opt(IOManager.class).orElseGet(() -> getParent().getIo());
     }
 
 

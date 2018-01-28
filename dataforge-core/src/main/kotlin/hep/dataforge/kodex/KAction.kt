@@ -219,24 +219,25 @@ class KJoin<T, R>(
 }
 
 
-class SplitBuilder<T, R>(val context: Context) {
-    val fragments: MutableList<Pair<String, (String, Meta) -> Pair<String, Meta>>> = ArrayList()
-    lateinit var result: suspend ActionEnv.(T) -> Map<String, R>
+class FragmentEnv<T, R>(val context: Context, val name: String, var meta: MetaBuilder, val log: Chronicle) {
+    lateinit var result: suspend (T) -> R
 
-    /**
-     * Calculate the result of goal
-     */
-    fun result(f: suspend ActionEnv.(T) -> Map<String, R>) {
+    fun result(f: suspend (T) -> R) {
         result = f;
     }
+}
+
+
+class SplitBuilder<T, R>(val context: Context, val name: String, val meta: Meta) {
+    internal val fragments: MutableMap<String, FragmentEnv<T, R>.() -> Unit> = HashMap()
 
     /**
-     * Add new fragment building rule
+     * Add new fragment building rule. If the framgent not defined, result won't be available even if it is present in the map
      * @param name the name of a fragment
      * @param rule the rule to transform fragment name and meta using
      */
-    fun fragment(name: String, rule: (String, Meta) -> Pair<String, Meta>) {
-        fragments += Pair(name, rule);
+    fun fragment(name: String, rule: FragmentEnv<T, R>.() -> Unit) {
+        fragments[name] = rule
     }
 }
 
@@ -259,29 +260,30 @@ class KSplit<T, R>(
 
                 val laminate = Laminate(it.meta, meta)
 
-                val split = SplitBuilder<T, R>(context).apply(action)
+                val split = SplitBuilder<T, R>(context, it.name, it.meta).apply(action)
 
-                val env = ActionEnv(
-                        context,
-                        it.name,
-                        laminate.builder,
-                        context.getChronicle(Name.joinString(it.name, name))
-                )
 
                 val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
 
-                val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }
+                // Create a map of results in a single goal
+                //val commonGoal = it.goal.pipe(dispatcher) { split.result.invoke(env, it) }
 
-                split.fragments.forEach { rule ->
-                    val goal = commonGoal.pipe(dispatcher) {
-                        it[rule.first]!!
-                    }
-                    val (resName, resMeta) = rule.second.invoke(it.name, laminate)
-                    val res = NamedData(resName, goal, outputType, resMeta)
+                // apply individual fragment rules to result
+                split.fragments.forEach { name, rule ->
+                    val env = FragmentEnv<T, R>(
+                            context,
+                            it.name,
+                            laminate.builder,
+                            context.getChronicle(Name.joinString(it.name, name))
+                    )
+
+                    rule.invoke(env)
+
+                    val goal = it.goal.pipe(dispatcher, env.result)
+
+                    val res = NamedData(env.name, goal, outputType, env.meta)
                     builder.putData(res)
                 }
-
-
             }
         }
 

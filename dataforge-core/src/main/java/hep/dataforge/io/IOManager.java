@@ -133,7 +133,7 @@ public interface IOManager extends Plugin {
 
     /**
      * Get a file where {@code path} is relative to root directory or absolute.
-     *
+     * TODO deprecate and replace by FileReference
      * @param path a {@link java.lang.String} object.
      * @return a {@link java.io.File} object.
      */

@@ -142,7 +142,7 @@ class NameToken implements Name {
     }
 
     @Override
-    public List<NameToken> getTokens() {
+    public List<Name> getTokens() {
         return Collections.singletonList(this);
     }
 

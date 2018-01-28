@@ -138,6 +138,37 @@ class KTaskBuilder(val name: String) {
         action(join, from, to);
     }
 
+    inline fun <reified T, reified R> splitAction(
+            actionName: String = "split",
+            from: String = "",
+            to: String = "",
+            noinline action: SplitBuilder<T, R>.() -> Unit) {
+        val split: Action<T, R> = KSplit(
+                name = Name.joinString(name, actionName),
+                inType = T::class.java,
+                outType = R::class.java,
+                action = action
+        )
+        action(split, from, to);
+    }
+
+//    inline fun <reified T, reified R> split(
+//            actionName: String = "split",
+//            from: String = "",
+//            to: String = "",
+//            noinline action: suspend ActionEnv.(T) -> Map<String, R>) {
+//        val split: Action<T, R> = KSplit(
+//                name = Name.joinString(name, actionName),
+//                inType = T::class.java,
+//                outType = R::class.java,
+//                action = {
+//                    result(action)
+//                }
+//        )
+//        action(split, from, to);
+//    }
+
+
     internal fun build(): KTask {
         val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
             val model = this;

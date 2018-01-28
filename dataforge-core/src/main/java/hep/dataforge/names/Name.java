@@ -211,7 +211,7 @@ public interface Name extends Comparable<Name> {
      *
      * @return
      */
-    List<NameToken> getTokens();
+    List<Name> getTokens();
 
     /**
      * Returns true only for EMPTY name

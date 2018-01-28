@@ -34,10 +34,9 @@ class CompositeName implements Name {
 
     @NotNull
     public static CompositeName of(List<Name> tokens){
-        LinkedList<NameToken> list = new LinkedList<>();
-        tokens.forEach(token -> {
-            list.addAll(token.getTokens());
-        });
+        LinkedList<NameToken> list = tokens.stream()
+                .flatMap(it -> it.getTokens().stream())
+                .map(NameToken.class::cast).collect(Collectors.toCollection(LinkedList::new));
         return new CompositeName(list);
     }
 
@@ -160,7 +159,7 @@ class CompositeName implements Name {
     }
 
     @Override
-    public List<NameToken> getTokens() {
+    public List<Name> getTokens() {
         return Collections.unmodifiableList(names);
     }
 
