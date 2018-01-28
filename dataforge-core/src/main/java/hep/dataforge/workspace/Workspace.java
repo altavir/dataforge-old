@@ -215,8 +215,8 @@ public interface Workspace extends ContextAware, Provider {
                     data(as, factory.build(getContext(), dataMeta));
                 });
             }
-            if (meta.hasMeta("config")) {
-                meta.getMetaList("config").forEach((Meta configMeta) -> {
+            if (meta.hasMeta("target")) {
+                meta.getMetaList("target").forEach((Meta configMeta) -> {
                     target(configMeta.getString("name"), configMeta.getMeta(DEFAULT_META_NAME));
                 });
             }

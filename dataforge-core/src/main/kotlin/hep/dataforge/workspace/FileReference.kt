@@ -23,6 +23,7 @@ import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.names.Name
 import hep.dataforge.workspace.FileReference.FileReferenceScope.*
 import java.io.File
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -58,24 +59,40 @@ class FileReference private constructor(private val _context: Context, val path:
     val mutable: Boolean = scope == WORK || scope == TMP
 
 
+    private fun prepareWrite() {
+        if (!mutable) {
+            throw RuntimeException("Trying to write to immutable file reference")
+        }
+        absolutePath.parent.apply {
+            if (!Files.exists(this)) {
+                Files.createDirectories(this)
+            }
+        }
+    }
+
     /**
      * Write and replace content of the file
      */
     fun write(content: ByteArray) {
-        if (mutable) {
-            Files.write(absolutePath, content, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
-        } else {
-            throw RuntimeException("Trying to write to immutable file reference")
-        }
+        prepareWrite()
+        Files.write(absolutePath, content, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
     }
 
     fun append(content: ByteArray) {
-        if (mutable) {
-            Files.write(absolutePath, content, StandardOpenOption.WRITE, StandardOpenOption.APPEND)
-        } else {
-            throw RuntimeException("Trying to write to immutable file reference")
-        }
+        prepareWrite()
+        Files.write(absolutePath, content, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
     }
+
+
+    /**
+     * Output stream for this file reference
+     */
+    val output: OutputStream
+        get() {
+            prepareWrite()
+            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+        }
+
 
 //    /**
 //     * Checksum of the file
