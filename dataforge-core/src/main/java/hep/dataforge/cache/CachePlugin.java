@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 /**
  * @author Alexander Nozik
  */
-@PluginDef(name = "immutable", group = "hep.dataforge", info = "Data caching plugin")
+@PluginDef(name = "cache", group = "hep.dataforge", info = "Data caching plugin")
 public class CachePlugin extends BasicPlugin {
 
     private Predicate<Data> bypass = data -> false;

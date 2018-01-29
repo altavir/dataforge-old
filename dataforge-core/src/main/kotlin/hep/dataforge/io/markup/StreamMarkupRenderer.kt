@@ -48,7 +48,7 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
      * @return
      */
     protected fun format(string: String, element: Markup): String {
-        return IOUtils.formatWidth(string, element.style.getInt("textWidth"))
+        return IOUtils.formatWidth(string, element.style.getInt("textWidth", -1))
     }
 
     @Synchronized override fun text(text: String, color: String, element: Markup) {

@@ -82,9 +82,9 @@ object Descriptors {
                     } else {
                         null
                     }
-                }.orElse(null)
+                }.orElse(Meta.empty())
             } else {
-                null
+                Meta.empty()
             }
         }
     }
@@ -166,16 +166,20 @@ object Descriptors {
 
     @JvmStatic
     fun buildDescriptor(string: String): NodeDescriptor {
-        val path = Path.of(string)
-        return if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {
-            val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element not found")
-            buildDescriptor(target)
-        } else if ("resource" == path.target) {
-            NodeDescriptor(buildMetaFromResource("node", path.nameString()))
-        } else {
-            throw NameNotFoundException("Cant create descriptor from given target", string)
+        try {
+            val path = Path.of(string)
+            return if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {
+                val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element not found")
+                buildDescriptor(target)
+            } else if ("resource" == path.target) {
+                NodeDescriptor(buildMetaFromResource("node", path.nameString()))
+            } else {
+                throw NameNotFoundException("Cant create descriptor from given target", string)
+            }
+        } catch (ex: Exception) {
+            LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
+            return NodeDescriptor(Meta.empty());
         }
-
     }
 
     fun buildDescriptor(name: String?, element: AnnotatedElement): NodeDescriptor {

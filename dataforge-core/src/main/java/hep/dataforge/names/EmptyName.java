@@ -82,7 +82,7 @@ class EmptyName implements Name {
     }
 
     @Override
-    public List<NameToken> getTokens() {
+    public List<Name> getTokens() {
         return Collections.emptyList();
     }
 

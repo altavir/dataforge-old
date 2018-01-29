@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
@@ -33,6 +34,7 @@ import java.util.Optional;
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
 public interface PlotFrame extends Configurable, Serializable {
 
     Wrapper wrapper = new Wrapper();

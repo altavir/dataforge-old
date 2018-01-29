@@ -67,7 +67,7 @@ public class MetaTableFormat extends SimpleMetaMorph implements TableFormat {
      * @param dataPoint
      * @return
      */
-    public static TableFormat forPoint(Values dataPoint) {
+    public static TableFormat forValues(Values dataPoint) {
         MetaBuilder builder = new MetaBuilder("format");
         for (String n : dataPoint.getNames()) {
             builder.putNode(new MetaBuilder("column").setValue("name", n).setValue("type", dataPoint.getValue(n).getType().name()));

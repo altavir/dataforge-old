@@ -1,9 +1,9 @@
 package hep.dataforge.fx
 
-import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.PluginDef
+import hep.dataforge.context.*
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
+import hep.dataforge.meta.Meta
 import hep.dataforge.values.ValueType.BOOLEAN
 import javafx.application.Application
 import javafx.application.Platform
@@ -22,7 +22,7 @@ import tornadofx.*
 @ValueDefs(
         ValueDef(name = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
 )
-class FXPlugin : BasicPlugin() {
+class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
 
     private val stages: ObservableSet<Stage> = FXCollections.observableSet()
 
@@ -103,6 +103,17 @@ class FXPlugin : BasicPlugin() {
         display {
             scene = Scene(component.root, width, height)
             title = component.title
+        }
+    }
+
+    class Factory : PluginFactory {
+
+        override fun getTag(): PluginTag {
+            return Plugin.resolveTag(FXPlugin::class.java)
+        }
+
+        override fun build(meta: Meta): Plugin {
+            return FXPlugin(meta)
         }
     }
 

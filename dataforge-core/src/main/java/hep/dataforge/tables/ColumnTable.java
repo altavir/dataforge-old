@@ -1,6 +1,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.MorphTarget;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
 import hep.dataforge.values.Values;
@@ -17,6 +18,7 @@ import java.util.stream.Stream;
  * Column table is immutable all operations create new tables.
  * Created by darksnake on 12.07.2017.
  */
+@MorphTarget(target = ListTable.class)
 public class ColumnTable implements Table {
 
 

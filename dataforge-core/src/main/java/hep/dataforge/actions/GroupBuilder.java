@@ -18,6 +18,7 @@ package hep.dataforge.actions;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 
 import java.util.Collections;
@@ -65,6 +66,8 @@ public class GroupBuilder {
         };
     }
 
+    @ValueDef(name = "byValue", required = true, info = "The name of annotation value by which grouping should be made")
+    @ValueDef(name = "defaultValue", def = "default", info = "Default value which should be used for content in which the grouping value is not presented")
     public static GroupRule byMeta(Meta config) {
         //TODO expand grouping options
         if (config.hasValue("byValue")) {

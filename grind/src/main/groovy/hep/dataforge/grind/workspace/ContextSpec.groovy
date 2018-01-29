@@ -1,9 +1,7 @@
 package hep.dataforge.grind.workspace
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.Plugin
 import hep.dataforge.grind.Grind
-import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 
 /**
@@ -25,11 +23,7 @@ class ContextSpec {
         Context res = Context.builder(name, parent).build()
         properties.each { key, value -> res.setValue(key.toString(), value) }
         pluginMap.forEach { String key, Meta meta ->
-            Plugin plugin = res.getPluginManager().getOrLoad(key)
-            if (plugin instanceof Configurable) {
-                (plugin as Configurable).configure(meta)
-            }
-
+            res.getPluginManager().load(key, meta)
         }
         return res
     }

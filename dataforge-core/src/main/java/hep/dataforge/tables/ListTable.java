@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,7 +19,6 @@ import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
@@ -46,7 +45,7 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         if (table instanceof ListTable) {
             return (ListTable) table;
         } else {
-            return new ListTable(table.getFormat(),table.getRows());
+            return new ListTable(table.getFormat(), table.getRows());
         }
     }
 
@@ -90,11 +89,11 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         if (points.isEmpty()) {
             throw new IllegalArgumentException("Can't create ListTable from the empty list. Format required.");
         }
-        this.format = MetaTableFormat.forPoint(points.get(0));
+        this.format = MetaTableFormat.forValues(points.get(0));
         addRows(points);
     }
 
-    public ListTable(Meta meta){
+    public ListTable(Meta meta) {
         format = new MetaTableFormat(meta.getMeta("format"));
         data.addAll(ListOfPoints.buildFromMeta(meta.getMeta("data")));
     }
@@ -175,16 +174,16 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         return getRow(rowNumber).getValue(columnName);
     }
 
-    @NotNull
-    @Override
-    public Meta toMeta() {
-        MetaBuilder res = new MetaBuilder("table");
-        res.putNode("format", getFormat().toMeta());
-        MetaBuilder dataNode = new MetaBuilder("data");
-        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
-        res.putNode(dataNode);
-        return res;
-    }
+//    @NotNull
+//    @Override
+//    public Meta toMeta() {
+//        MetaBuilder res = new MetaBuilder("table");
+//        res.putNode("format", getFormat().toMeta());
+//        MetaBuilder dataNode = new MetaBuilder("data");
+//        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+//        res.putNode(dataNode);
+//        return res;
+//    }
 
     public static class Builder {
 
@@ -199,11 +198,16 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
         }
 
         public Builder(String... format) {
-            table = new ListTable(MetaTableFormat.forNames(format));
+            if (format.length > 0) {
+                table = new ListTable(MetaTableFormat.forNames(format));
+            }
         }
 
+        /**
+         * Infer table format from the first point
+         */
         public Builder() {
-            table = new ListTable(new MetaTableFormat(Meta.empty()));
+            //table = new ListTable(new MetaTableFormat(Meta.empty()));
         }
 
 //        public Builder format(Consumer<TableFormatBuilder> consumer){
@@ -220,6 +224,10 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
          * @throws hep.dataforge.exceptions.NamingException if any.
          */
         public Builder row(Values e) throws NamingException {
+            if (table == null) {
+                //infer table format if it is missing
+                table = new ListTable(MetaTableFormat.forValues(e));
+            }
             table.addRow(e);
             return this;
         }
@@ -232,29 +240,32 @@ public class ListTable extends ListOfPoints implements Table, MetaMorph {
          * @throws NamingException
          */
         public Builder row(Object... values) throws NamingException {
-            table.addRow(ValueMap.of(table.format.namesAsArray(), values));
-            return this;
+            return row(ValueMap.of(table.format.namesAsArray(), values));
         }
 
         public Builder row(ValueProvider values) {
             String[] names = table.format.namesAsArray();
             Map<String, Value> map = Stream.of(names).collect(Collectors.toMap(name -> name, values::getValue));
-            table.addRow(new ValueMap(map));
-            return this;
+            return row(new ValueMap(map));
         }
 
         public Builder rows(Iterable<? extends Values> points) {
-            table.addRows(points);
+            for (Values point : points) {
+                row(point);
+            }
             return this;
         }
 
         public Builder rows(Stream<? extends Values> stream) {
-            stream.forEach(it -> table.addRow(it));
+            stream.forEach(this::row);
             return this;
         }
         //TODO make methods to add virtual columns
 
         public Table build() {
+            if(table == null){
+                throw new RuntimeException("Table is empty and format not defined");
+            }
             return table;
         }
     }

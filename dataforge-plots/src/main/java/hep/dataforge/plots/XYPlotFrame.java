@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,9 +16,11 @@
 package hep.dataforge.plots;
 
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 
 import java.util.Optional;
 
@@ -67,14 +69,24 @@ public abstract class XYPlotFrame extends AbstractPlotFrame {
     }
 
     /**
-     * перерисовка осей
+     * Configure axis
      *
      * @param axisName
      * @param axisMeta
      */
+    @ValueDef(name = "type", allowed = "[number, log, time]", def = "number",
+            info = "The type of axis. By default number axis is used")
+    @ValueDef(name = "axisTitle", info = "The title of the axis.")
+    @ValueDef(name = "axisUnits", def = "", info = "The units of the axis.")
     @NodeDef(name = "range", info = "The definition of range for given axis")
+    @ValueDef(name = "range.from", type = ValueType.NUMBER, info = "Lower boundary for fixed range")
+    @ValueDef(name = "range.to", type = ValueType.NUMBER, info = "Upper boundary for fixed range")
+    @ValueDef(name = "crosshair", def = "data",
+            allowed = "[none, free, data]",
+            info = "Appearance and type of the crosshair")
     protected abstract void updateAxis(String axisName, Meta axisMeta, Meta plotMeta);
 
+    @ValueDef(name = "show", type = ValueType.BOOLEAN, def = "true", info = "Display or hide the legend")
     protected abstract void updateLegend(Meta legendMeta);
 
     /**

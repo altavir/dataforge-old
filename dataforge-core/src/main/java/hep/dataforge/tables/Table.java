@@ -19,10 +19,11 @@ import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.NotNull;
 
-import java.io.Serializable;
 import java.util.stream.Stream;
 
 import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
@@ -32,7 +33,7 @@ import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
  *
  * @author Alexander Nozik
  */
-public interface Table extends Markedup, NavigableValuesSource, Serializable {
+public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
 
     /**
      * Get an immutable column from this table
@@ -81,6 +82,17 @@ public interface Table extends Markedup, NavigableValuesSource, Serializable {
      * @return
      */
     TableFormat getFormat();
+
+    @NotNull
+    @Override
+    default Meta toMeta() {
+        MetaBuilder res = new MetaBuilder("table");
+        res.putNode("format", getFormat().toMeta());
+        MetaBuilder dataNode = new MetaBuilder("data");
+        forEach(dp -> dataNode.putNode("point", dp.toMeta()));
+        res.putNode(dataNode);
+        return res;
+    }
 
 //    default Meta toMeta() {
 //        MetaBuilder res = new MetaBuilder("table");

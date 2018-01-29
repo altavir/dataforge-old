@@ -15,11 +15,13 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.ValuesAdapter;
+import hep.dataforge.values.ValueType;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -32,6 +34,9 @@ import static hep.dataforge.tables.Adapters.*;
 /**
  * @author Alexander Nozik
  */
+@ValueDef(name = "showLine", type = ValueType.BOOLEAN, def = "false", info = "Show the connecting line.")
+@ValueDef(name = "showSymbol", type = ValueType.BOOLEAN, def = "true", info = "Show symbols for data point.")
+@ValueDef(name = "showErrors", type = ValueType.BOOLEAN, def = "true", info = "Show errors for points.")
 public class DataPlot extends XYPlot {
     public static DataPlot plot(String name, double[] x, double[] y, double[] xErrs, double[] yErrs) {
         DataPlot plot = new DataPlot(name);

@@ -15,12 +15,14 @@
  */
 package hep.dataforge.plots.data;
 
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.plots.Plottable;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueType;
 import hep.dataforge.values.Values;
 import org.slf4j.LoggerFactory;
 
@@ -28,12 +30,17 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.*;
 
+import static hep.dataforge.plots.data.TimePlot.*;
+
 /**
  * A plottable to display dynamic series with limited number of elements (x axis is always considered to be time). Both
  * criteria are used to eviction of old elements
  *
  * @author Alexander Nozik
  */
+@ValueDef(name = MAX_AGE_KEY, type = ValueType.NUMBER, def = "-1", info = "The maximum age of items in milliseconds. Negative means no limit")
+@ValueDef(name = MAX_ITEMS_KEY, type = ValueType.NUMBER, def = "1000", info = "The maximum number of items. Negative means no limit")
+@ValueDef(name = PREF_ITEMS_KEY, type = ValueType.NUMBER, def = "400", info = "The preferred number of items to leave after cleanup.")
 public class TimePlot extends XYPlot {
 
     public static void setMaxItems(Plottable plot, int maxItems) {

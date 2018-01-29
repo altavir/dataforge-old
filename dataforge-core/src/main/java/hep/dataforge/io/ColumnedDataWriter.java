@@ -118,7 +118,7 @@ public class ColumnedDataWriter implements AutoCloseable {
         TableFormat format;
         if (data.getFormat().getNames().size() == 0) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
-            format = MetaTableFormat.forPoint(data.iterator().next());
+            format = MetaTableFormat.forValues(data.iterator().next());
             LoggerFactory.getLogger(ColumnedDataWriter.class)
                     .debug("No DataSet format defined. Constucting default based on the first data point");
         } else {

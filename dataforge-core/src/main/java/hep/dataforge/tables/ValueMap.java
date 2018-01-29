@@ -23,6 +23,7 @@ import hep.dataforge.names.Names;
 import hep.dataforge.utils.GenericBuilder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import kotlin.Pair;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.LinkedHashMap;
@@ -40,6 +41,14 @@ public class ValueMap implements Values, MetaMorph {
 
     public static ValueMap ofMap(Map<String, ?> map) {
         return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
+    }
+
+    public static ValueMap ofPairs(Pair<String, ?>... pairs) {
+        Builder builder = new Builder();
+        for(Pair<String, ?> pair: pairs){
+            builder.putValue(pair.getFirst(),Value.of(pair.getSecond()));
+        }
+        return builder.build();
     }
 
     public static ValueMap of(String[] list, Object... values) {
@@ -142,7 +151,7 @@ public class ValueMap implements Values, MetaMorph {
         }
 
         public Builder(Map<String, Value> map) {
-            map.putAll(map);
+            valueMap.putAll(map);
         }
 
         public Builder() {

@@ -1,10 +1,10 @@
 package hep.dataforge.fx.plots
 
-import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.PluginDef
+import hep.dataforge.context.*
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.output.FXDisplay
 import hep.dataforge.fx.output.buildDisplay
+import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.jfreechart.JFreeChartFrame
@@ -14,7 +14,7 @@ const val DEFAULT_PLOT_NAME = "";
 
 
 @PluginDef(name = "plots", group = "hep.dataforge", dependsOn = ["hep.dataforge:fx"], info = "Basic plottiong plugin")
-class PlotManager : BasicPlugin(), PlotPlugin {
+class PlotManager(meta: Meta = Meta.empty()) : BasicPlugin(meta), PlotPlugin {
     private val stages: MutableMap<String, MutableMap<String, PlotContainer>> = HashMap()
 
     /**
@@ -26,7 +26,7 @@ class PlotManager : BasicPlugin(), PlotPlugin {
             context.getFeature(FXPlugin::class.java).checkApp()
             JFreeChartFrame()
         } catch (ex: Exception) {
-            throw RuntimeException("Plot frame factory not configured",ex);
+            throw RuntimeException("Plot frame factory not configured", ex);
         }
     };
 
@@ -69,6 +69,17 @@ class PlotManager : BasicPlugin(), PlotPlugin {
                         display(stage, name, this)
                     }
                 }.frame
+    }
+
+    class Factory : PluginFactory {
+
+        override fun getTag(): PluginTag {
+            return Plugin.resolveTag(PlotManager::class.java)
+        }
+
+        override fun build(meta: Meta): Plugin {
+            return PlotManager(meta)
+        }
     }
 
 }
