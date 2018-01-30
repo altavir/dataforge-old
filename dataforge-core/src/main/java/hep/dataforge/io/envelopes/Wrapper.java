@@ -34,7 +34,7 @@ public interface Wrapper<T> extends Named {
     }
 
     static <T> T unwrap(Envelope envelope) throws Exception {
-        return unwrap(Global.instance(), envelope);
+        return unwrap(Global.Companion.instance(), envelope);
     }
 
     @SuppressWarnings("unchecked")

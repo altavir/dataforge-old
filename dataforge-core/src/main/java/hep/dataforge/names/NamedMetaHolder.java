@@ -7,7 +7,7 @@ package hep.dataforge.names;
 
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaHolder;
+import hep.dataforge.meta.MetaHolder;
 
 
 public class NamedMetaHolder extends MetaHolder implements Named {

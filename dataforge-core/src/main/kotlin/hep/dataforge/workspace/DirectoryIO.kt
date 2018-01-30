@@ -5,8 +5,8 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
-import hep.dataforge.io.BasicIOManager
-import hep.dataforge.io.IOManager
+import hep.dataforge.context.DefaultIOManager
+import hep.dataforge.context.IOManager
 import hep.dataforge.names.Name
 import hep.dataforge.utils.ReferenceRegistry
 import org.slf4j.LoggerFactory
@@ -17,7 +17,7 @@ import java.io.OutputStream
 /**
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
  */
-class DirectoryIO : BasicIOManager() {
+class DirectoryIO : DefaultIOManager() {
 
     internal var registry = ReferenceRegistry<OutputStream>()
     //    FileAppender<ILoggingEvent> appender;
@@ -31,7 +31,7 @@ class DirectoryIO : BasicIOManager() {
         ple.context = lc
         ple.start()
         val appender = FileAppender<ILoggingEvent>()
-        appender.file = File(workDirectory.toFile(), meta.getString("logFileName", "${context.name}.log")).toString()
+        appender.file = File(workDir.toFile(), meta.getString("logFileName", "${context.name}.log")).toString()
         appender.encoder = ple
         return appender
     }

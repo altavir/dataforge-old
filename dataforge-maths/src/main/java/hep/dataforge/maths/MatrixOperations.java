@@ -51,7 +51,7 @@ public class MatrixOperations {
             return false;
         }
         double det1 = determinant(inverse(matrix));
-        return abs(det * det1 - 1) < Global.instance().getDouble("CONDITIONALITY", 1e-4);
+        return abs(det * det1 - 1) < Global.Companion.instance().getDouble("CONDITIONALITY", 1e-4);
     }
 
     /**
@@ -78,7 +78,7 @@ public class MatrixOperations {
         assert matrix.getColumnDimension() == matrix.getRowDimension();
         RealMatrix res;
         try {
-            double singularityThreshold = Global.instance().getDouble(MATRIX_SINGULARITY_THRESHOLD, 1e-11);
+            double singularityThreshold = Global.Companion.instance().getDouble(MATRIX_SINGULARITY_THRESHOLD, 1e-11);
             DecompositionSolver solver = new LUDecomposition(matrix, singularityThreshold).getSolver();
             res = solver.getInverse();
         } catch (SingularMatrixException ex) {

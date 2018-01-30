@@ -21,8 +21,8 @@ public class WorkspaceTest {
     private AtomicInteger counter = new AtomicInteger();
 
     {
-        Context context = Global.getContext("TEST");
-//        context.getPluginManager().load(BasicIOManager.class);
+        Context context = Global.Companion.getContext("TEST");
+//        context.getPluginManager().load(DefaultIOManager.class);
 
         CachePlugin cache = context.loadFeature("immutable", CachePlugin.class);
         cache.configureValue("fileCache.enabled", false);

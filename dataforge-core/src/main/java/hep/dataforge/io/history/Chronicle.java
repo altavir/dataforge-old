@@ -50,7 +50,7 @@ public class Chronicle implements History, Named {
     }
 
     public Chronicle(String name) {
-        this(name, Global.instance());
+        this(name, Global.INSTANCE);
     }
 
     public void setParent(History parent) {

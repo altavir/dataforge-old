@@ -125,7 +125,7 @@ public abstract class FileMapIndex<T> extends MapIndex<T, Integer> implements Se
     }
 
     private Path getIndexFileDirectory() {
-        return context.getIo().getTmpDirectory().resolve("storage/fileindex");
+        return context.getIo().getTmpDir().resolve("storage/fileindex");
     }
 
     private Path getIndexFile() throws StorageException {

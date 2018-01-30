@@ -99,7 +99,7 @@ class GrindTerminal extends SimpleConfigurable {
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
 //            OutputStream outputStream = System.out
-//            context.getPluginManager().load(new BasicIOManager(inputStream, outputStream));
+//            context.getPluginManager().load(new DefaultIOManager(inputStream, outputStream));
         }
 
         //create the shell

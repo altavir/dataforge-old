@@ -7,7 +7,7 @@ import hep.dataforge.io.IOUtils
  */
 abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
 
-    internal var lineStack = false
+    private var lineStack = false
 
     protected abstract fun printText(string: String)
 

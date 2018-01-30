@@ -1,6 +1,8 @@
 package hep.dataforge.kodex
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.ContextBuilder
+import hep.dataforge.context.Global
 import hep.dataforge.context.Plugin
 import hep.dataforge.data.Data
 import hep.dataforge.data.NamedData
@@ -12,7 +14,6 @@ import hep.dataforge.values.NamedValue
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueType
-import kotlinx.coroutines.experimental.DefaultDispatcher
 import kotlinx.coroutines.experimental.future.await
 import java.lang.reflect.AnnotatedElement
 import java.time.Instant
@@ -29,13 +30,12 @@ import kotlin.reflect.KProperty
  */
 
 // Context extensions
-val global: Context = hep.dataforge.context.Global.instance()
 
 /**
  * Build a child plugin using given name, plugins list and custom build script
  */
-fun Context.buildContext(name: String, vararg plugins: Class<out Plugin>, init: Context.Builder.() -> Unit = {}): Context {
-    val builder = Context.Builder(this, name)
+fun Context.buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextBuilder.() -> Unit = {}): Context {
+    val builder = ContextBuilder(name, this)
     plugins.forEach {
         builder.plugin(it)
     }
@@ -43,8 +43,8 @@ fun Context.buildContext(name: String, vararg plugins: Class<out Plugin>, init: 
     return builder.build()
 }
 
-fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: Context.Builder.() -> Unit = {}): Context {
-    return global.buildContext(name = name, plugins = *plugins, init = init)
+fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextBuilder.() -> Unit = {}): Context {
+    return Global.buildContext(name = name, plugins = *plugins, init = init)
 }
 
 //Value operations
@@ -317,7 +317,7 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 //suspending functions
 
 val Context.coroutineContext: CoroutineContext
-    get() = optFeature(KodexPlugin::class.java).map { it.dispatcher }.orElse(DefaultDispatcher)
+    get() = this.executor.kDispatcher
 
 /**
  * Use goal as a suspending function

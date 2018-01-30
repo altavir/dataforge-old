@@ -63,13 +63,13 @@ public class TestFitting {
         }
 
 //        r.print(Out.onComplete);
-        out().println();
+        Companion.out().println();
         double meanerr = 0;
         double meanval = 0;
         double meanval2 = 0;
         
         for (int i = 0; i < errs.length; i++) {
-            out().printf("%g\t%g%n", res[i], errs[i]);
+            Companion.out().printf("%g\t%g%n", res[i], errs[i]);
             meanval += res[i];
             meanval2 += res[i] * res[i];
             meanerr += errs[i];
@@ -79,9 +79,9 @@ public class TestFitting {
         meanval2 /= runs;
         meanerr /= runs;
         
-        out().printf("The mean value is %g%n", meanval);
-        out().printf("The mean error is %g%n", meanerr);
-        out().printf("The sigma is %g%n", Math.sqrt(meanval2 - meanval * meanval));
+        Companion.out().printf("The mean value is %g%n", meanval);
+        Companion.out().printf("The mean error is %g%n", meanerr);
+        Companion.out().printf("The sigma is %g%n", Math.sqrt(meanval2 - meanval * meanval));
         
     }
     

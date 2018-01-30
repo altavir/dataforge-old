@@ -115,7 +115,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public R simpleRun(T input, Meta... metaLayers) {
-        Context context = Global.instance();
+        Context context = Global.Companion.instance();
         return transform(context, "simpleRun", input, inputMeta(context, metaLayers));
     }
 

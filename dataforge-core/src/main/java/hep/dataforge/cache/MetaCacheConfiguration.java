@@ -1,7 +1,7 @@
 package hep.dataforge.cache;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaHolder;
+import hep.dataforge.meta.MetaHolder;
 
 import javax.cache.configuration.Configuration;
 

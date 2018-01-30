@@ -16,7 +16,6 @@
 
 package hep.dataforge.meta
 
-import hep.dataforge.utils.MetaHolder
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance

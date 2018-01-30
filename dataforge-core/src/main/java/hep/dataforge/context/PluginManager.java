@@ -54,9 +54,6 @@ public class PluginManager implements ContextAware, AutoCloseable {
 
     @Override
     public Context getContext() {
-        if (context == null) {
-            return Global.getDefaultContext();
-        }
         return this.context;
     }
 

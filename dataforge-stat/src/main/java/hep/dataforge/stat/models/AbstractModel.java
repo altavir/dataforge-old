@@ -18,11 +18,11 @@ package hep.dataforge.stat.models;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaHolder;
 import hep.dataforge.names.Names;
 import hep.dataforge.stat.parametric.AbstractParametricValue;
 import hep.dataforge.stat.parametric.ParametricValue;
 import hep.dataforge.tables.ValuesAdapter;
-import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Values;
 
 /**

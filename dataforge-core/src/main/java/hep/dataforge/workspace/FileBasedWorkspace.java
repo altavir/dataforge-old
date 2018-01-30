@@ -39,7 +39,7 @@ public class FileBasedWorkspace extends DynamicWorkspace {
     }
 
     public static Workspace build(Path path) {
-        return build(Global.instance(), path, GenericBuilder::build);
+        return build(Global.Companion.instance(), path, GenericBuilder::build);
     }
 
 

@@ -17,6 +17,7 @@ import hep.dataforge.names.Name
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.runBlocking
 import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.util.stream.Collectors
 import java.util.stream.Stream
 
@@ -30,7 +31,7 @@ class ActionEnv(val context: Context, val name: String, val meta: Meta, val log:
 class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBuilder) {
     lateinit var result: suspend ActionEnv.(T) -> R;
 
-    var logger: Logger = context.getLogger(name)
+    var logger: Logger = LoggerFactory.getLogger("${context.name}[name]")
 
     /**
      * Calculate the result of goal
@@ -70,7 +71,7 @@ class KPipe<T, R>(
                     context,
                     pipe.name,
                     pipe.meta,
-                    context.getChronicle(Name.joinString(pipe.name, name))
+                    context.history.getChronicle(Name.joinString(pipe.name, name))
             )
 
             val dispatcher = getExecutorService(context, laminate).asCoroutineDispatcher()
@@ -196,7 +197,7 @@ class KJoin<T, R>(
                     context,
                     groupName,
                     laminate.builder,
-                    context.getChronicle(Name.joinString(groupName, name))
+                    context.history.getChronicle(Name.joinString(groupName, name))
             )
 
             val dispatcher = getExecutorService(context, group.meta).asCoroutineDispatcher()
@@ -274,7 +275,7 @@ class KSplit<T, R>(
                             context,
                             it.name,
                             laminate.builder,
-                            context.getChronicle(Name.joinString(it.name, name))
+                            context.history.getChronicle(Name.joinString(it.name, name))
                     )
 
                     rule.invoke(env)

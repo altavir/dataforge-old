@@ -42,21 +42,29 @@ class FileReference private constructor(private val _context: Context, val path:
      */
     val absolutePath: Path = when (scope) {
         SYS -> path
-        DATA -> context.io.dataDirectory.resolve(path)
-        WORK -> context.io.workDirectory.resolve(path)
-        TMP -> context.io.tmpDirectory.resolve(path)
+        DATA -> context.io.dataDir.resolve(path)
+        WORK -> context.io.workDir.resolve(path)
+        TMP -> context.io.tmpDir.resolve(path)
     }.toAbsolutePath()
 
     /**
      * Get binary references by this file reference
      */
-    val binary: Binary
-        get() = FileBinary(absolutePath)
+    val binary: Binary?
+        get() {
+            return if(exists) {
+                FileBinary(absolutePath)
+            } else{
+                null
+            }
+        }
 
     /**
      * A flag showing that internal modification of reference content is allowed
      */
     val mutable: Boolean = scope == WORK || scope == TMP
+
+    val exists: Boolean = Files.exists(absolutePath)
 
 
     private fun prepareWrite() {
@@ -113,7 +121,7 @@ class FileReference private constructor(private val _context: Context, val path:
          * Provide a reference to a new file in tmp directory with unique ID.
          */
         fun newTmpFile(context: Context, prefix: String, suffix: String): FileReference {
-            val path = Files.createTempFile(context.io.tmpDirectory, prefix, suffix)
+            val path = Files.createTempFile(context.io.tmpDir, prefix, suffix)
             return FileReference(context, path, TMP)
         }
 
@@ -122,10 +130,10 @@ class FileReference private constructor(private val _context: Context, val path:
          */
         fun newWorkFile(context: Context, fileName: String, extension: String, path: Name = Name.EMPTY): FileReference {
             val dir = if (path.isEmpty) {
-                context.io.workDirectory
+                context.io.workDir
             } else {
                 val relativeDir = path.tokens.joinToString(File.pathSeparator) { it.toString() }
-                context.io.workDirectory.resolve(relativeDir)
+                context.io.workDir.resolve(relativeDir)
             }
 
             val file = dir.resolve("$fileName.$extension")
@@ -136,6 +144,11 @@ class FileReference private constructor(private val _context: Context, val path:
          * Create a reference using data scope file using path
          */
         fun openDataFile(context: Context, path: Path): FileReference {
+            return FileReference(context, path, DATA)
+        }
+
+        fun openDataFile(context: Context, name: String): FileReference {
+            val path = context.io.dataDir.resolve(name)
             return FileReference(context, path, DATA)
         }
 

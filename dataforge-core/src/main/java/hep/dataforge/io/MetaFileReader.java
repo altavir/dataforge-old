@@ -52,7 +52,7 @@ public class MetaFileReader {
 
     public static Meta read(Path file) {
         try {
-            return instance().read(Global.instance(), file, null);
+            return instance().read(Global.Companion.instance(), file, null);
         } catch (IOException | ParseException e) {
             throw new RuntimeException("Failed to read meta file " + file.toString(), e);
         }

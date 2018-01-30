@@ -1,8 +1,8 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaHolder;
 import hep.dataforge.meta.MetaUtils;
-import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;

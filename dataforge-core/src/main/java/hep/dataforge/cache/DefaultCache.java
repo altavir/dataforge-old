@@ -4,8 +4,8 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.ContextAware;
 import hep.dataforge.io.envelopes.*;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaHolder;
 import hep.dataforge.names.Named;
-import hep.dataforge.utils.MetaHolder;
 import hep.dataforge.utils.Misc;
 import org.jetbrains.annotations.NotNull;
 

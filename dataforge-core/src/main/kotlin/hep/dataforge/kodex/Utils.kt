@@ -6,6 +6,9 @@ import java.util.*
 val <T> Optional<T>?.nullable: T?
     get() = this?.orElse(null)
 
+val <T> T?.optional: Optional<T>
+    get() = Optional.ofNullable(this)
+
 
 object IO {
     /**

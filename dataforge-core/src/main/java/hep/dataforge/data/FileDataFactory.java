@@ -52,7 +52,7 @@ public class FileDataFactory extends DataFactory<Binary> {
         } else if (context.hasValue(DATA_DIR_KEY)) {
             parentFile = context.getIo().getFile(context.getString(DATA_DIR_KEY));
         } else {
-            parentFile = context.getIo().getRootDirectory();
+            parentFile = context.getIo().getRootDir();
         }
 
         /**

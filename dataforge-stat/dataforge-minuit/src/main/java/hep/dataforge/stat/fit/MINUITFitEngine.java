@@ -95,7 +95,7 @@ public class MINUITFitEngine implements FitEngine {
      */
     public FitResult runHesse(FitState state, FitStage task, History log) {
         int strategy;
-        strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
+        strategy = Global.Companion.instance().getInt("MINUIT_STRATEGY", 2);
 
         log.report("Generating errors using MnHesse 2-nd order gradient calculator.");
 
@@ -150,9 +150,9 @@ public class MINUITFitEngine implements FitEngine {
         log.report("Starting fit using Minuit.");
 
         int strategy;
-        strategy = Global.instance().getInt("MINUIT_STRATEGY", 2);
+        strategy = Global.Companion.instance().getInt("MINUIT_STRATEGY", 2);
         boolean force;
-        force = Global.instance().getBoolean("FORCE_DERIVS", false);
+        force = Global.Companion.instance().getBoolean("FORCE_DERIVS", false);
 
         String[] fitPars = getFitPars(state, task);
 

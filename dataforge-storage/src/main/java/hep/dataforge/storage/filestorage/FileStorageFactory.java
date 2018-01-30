@@ -54,7 +54,7 @@ public class FileStorageFactory implements StorageType {
     @NotNull
     @Override
     public Storage build(Context context, Meta meta) {
-        Path path = meta.optString("path").map(URI::create).map(Paths::get).orElse(context.getIo().getWorkDirectory());
+        Path path = meta.optString("path").map(URI::create).map(Paths::get).orElse(context.getIo().getWorkDir());
         return new FileStorage(context, meta, path);
     }
 

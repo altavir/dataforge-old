@@ -27,11 +27,11 @@ import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaHolder;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
-import hep.dataforge.utils.MetaHolder;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;

@@ -4,7 +4,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.ContextAware;
 import hep.dataforge.context.Global;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.utils.MetaHolder;
+import hep.dataforge.meta.MetaHolder;
 
 import javax.cache.Cache;
 import javax.cache.CacheManager;
@@ -31,11 +31,11 @@ public class DefaultCacheManager extends MetaHolder implements CacheManager, Con
     }
 
     public DefaultCacheManager() {
-        this.context = Global.instance();
+        this.context = Global.Companion.instance();
     }
 
     public Path getRootCacheDir() {
-        return context.getIo().getTmpDirectory().resolve("immutable");
+        return context.getIo().getTmpDir().resolve("immutable");
     }
 
     @Override

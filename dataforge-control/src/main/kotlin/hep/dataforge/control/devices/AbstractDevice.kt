@@ -24,8 +24,8 @@ import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaHolder
 import hep.dataforge.names.AnonymousNotAlowed
-import hep.dataforge.utils.MetaHolder
 import hep.dataforge.utils.Optionals
 import hep.dataforge.values.Value
 import java.time.Duration

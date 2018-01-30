@@ -42,7 +42,7 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(context, input.getMeta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = Context.builder(contextName,context).build();
+        Context ac = Context.Companion.builder(contextName,context).build();
         if (meta.hasValue("configFile")) {
             Path cfgFile = context.getIo().getFile(meta.getString("configFile"));
             try {
