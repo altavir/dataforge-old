@@ -24,6 +24,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.workspace.FileReference.FileReferenceScope.*
 import java.io.File
 import java.io.OutputStream
+import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -94,13 +95,27 @@ class FileReference private constructor(private val _context: Context, val path:
 
     /**
      * Output stream for this file reference
+     *
+     * TODO cahce stream?
      */
-    val output: OutputStream
+    val outputStream: OutputStream
         get() {
             prepareWrite()
             return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         }
 
+    val channel: SeekableByteChannel
+        get() {
+            prepareWrite()
+            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+        }
+
+    /**
+     *
+     */
+    fun delete(){
+
+    }
 
 //    /**
 //     * Checksum of the file

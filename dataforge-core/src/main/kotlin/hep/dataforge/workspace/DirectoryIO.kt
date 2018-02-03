@@ -7,19 +7,18 @@ import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
 import hep.dataforge.context.DefaultIOManager
 import hep.dataforge.context.IOManager
-import hep.dataforge.names.Name
-import hep.dataforge.utils.ReferenceRegistry
+import hep.dataforge.io.display.Output
+import hep.dataforge.meta.Meta
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
-import java.io.OutputStream
 
 /**
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
  */
 class DirectoryIO : DefaultIOManager() {
 
-    internal var registry = ReferenceRegistry<OutputStream>()
+    //internal var registry = ReferenceRegistry<OutputStream>()
     //    FileAppender<ILoggingEvent> appender;
 
 
@@ -57,10 +56,14 @@ class DirectoryIO : DefaultIOManager() {
         }
     }
 
-    override fun out(stage: Name?, name: Name, type: String): OutputStream {
-        val fileReference = FileReference.newWorkFile(context,name.toUnescaped(), getExtension(type), stage?: Name.EMPTY)
-        val out = fileReference.output
-        registry.add(out)
-        return out
+    override fun output(meta: Meta): Output {
+        return super.output(meta)
     }
+
+    //    override fun out(stage: Name?, name: Name, type: String): OutputStream {
+//        val fileReference = FileReference.newWorkFile(context,name.toUnescaped(), getExtension(type), stage?: Name.EMPTY)
+//        val out = fileReference.output
+//        registry.add(out)
+//        return out
+//    }
 }

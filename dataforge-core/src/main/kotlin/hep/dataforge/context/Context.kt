@@ -202,7 +202,7 @@ open class Context(
      * @param serviceClass
      * @param <T>
      * @return
-    </T> */
+    */
     @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
         return StreamSupport.stream(ServiceLoader.load(serviceClass, classLoader).spliterator(), false)
@@ -213,7 +213,7 @@ open class Context(
      * @param predicate
      * @param <T>
      * @return
-    </T> */
+    */
     fun <T> findService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
         return serviceStream(serviceClass).filter(predicate).findFirst()
     }

@@ -25,7 +25,7 @@ interface Output {
     fun clear()
 
     companion object {
-        fun splitDisplay(vararg outputs: Output): Output {
+        fun splitOutput(vararg outputs: Output): Output {
             return object : Output {
                 override fun push(obj: Any, meta: Meta) {
                     outputs.forEach { it.push(obj, meta) }
@@ -38,8 +38,8 @@ interface Output {
             }
         }
 
-        fun fileDisplay(ref: FileReference): Output {
-            return StreamOutput(ref.output)
+        fun fileOutput(ref: FileReference): Output {
+            return StreamOutput(ref.outputStream)
         }
     }
 }
@@ -75,4 +75,19 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
     override fun close() {
         stream.close()
     }
+}
+
+class FileOutput(val file: FileReference): Output, AutoCloseable{
+    override fun push(obj: Any, meta: Meta) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun clear() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun close() {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }
