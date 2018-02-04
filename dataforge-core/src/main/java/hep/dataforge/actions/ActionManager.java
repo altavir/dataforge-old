@@ -5,7 +5,10 @@
  */
 package hep.dataforge.actions;
 
-import hep.dataforge.context.*;
+import hep.dataforge.context.BasicPlugin;
+import hep.dataforge.context.Plugin;
+import hep.dataforge.context.PluginDef;
+import hep.dataforge.context.PluginFactory;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
@@ -13,6 +16,7 @@ import hep.dataforge.tables.ReadPointSetAction;
 import hep.dataforge.tables.TransformTableAction;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.workspace.tasks.Task;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
@@ -130,16 +134,18 @@ public class ActionManager extends BasicPlugin {
         ).distinct();
     }
 
-    public static class Factory implements PluginFactory{
+    public static class Factory extends PluginFactory {
 
+        @NotNull
         @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(ActionManager.class);
+        public ActionManager build(@NotNull Meta meta) {
+            return new ActionManager();
         }
 
+        @NotNull
         @Override
-        public Plugin build(Meta meta) {
-            return new ActionManager();
+        public Class<? extends Plugin> getType() {
+            return ActionManager.class;
         }
     }
 

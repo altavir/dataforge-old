@@ -15,6 +15,7 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.kodex.orElse
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
 import java.io.File
@@ -28,6 +29,10 @@ import java.util.concurrent.Executors
  * @author Alexander Nozik
  */
 object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoader) {
+
+    init {
+        Locale.setDefault(Locale.US)
+    }
 
     /**
      * The global context independent temporary user directory. This directory
@@ -45,19 +50,16 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             return dfUserDir
         }
 
-    init {
-        Locale.setDefault(Locale.US)
-    }
-
+    override val history: Chronicler by lazy { Chronicler().apply { startGlobal() } }
 
     override val io: IOManager
-        get() = pluginManager.opt(IOManager::class.java).orElseGet {
+        get() = pluginManager.get(IOManager::class).orElse {
             logger.debug("No IO plugin found. Using default IO.")
             pluginManager.load(DefaultIOManager())
         }
 
     override val executor: ExecutorPlugin
-        get() = pluginManager.opt(ExecutorPlugin::class.java).orElseGet {
+        get() = pluginManager.get(ExecutorPlugin::class).orElse {
             logger.debug("No executor plugin found. Using default executor.")
             pluginManager.load(DefaultExecutorPlugin())
         }
@@ -110,6 +112,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
      *
      * @return
      */
+    @JvmStatic
     var defaultContext: Context? = null
         get() {
             if (field == null) {

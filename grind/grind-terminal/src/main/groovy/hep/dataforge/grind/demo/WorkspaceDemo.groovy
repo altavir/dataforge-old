@@ -74,7 +74,7 @@ def workspace = new WorkspaceSpec(Global.instance()).with {
 
 new GrindShell().eval {
     //loading plot feature
-    PlotPlugin pm = context.getFeature(PlotPlugin)
+    PlotPlugin pm = context.get(PlotPlugin)
     PlotFrame frame = pm.getPlotFrame("demo");
 
     frame.configure("yAxis.type": "log")

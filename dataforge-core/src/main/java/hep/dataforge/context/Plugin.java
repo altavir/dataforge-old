@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,35 +40,6 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
 public interface Plugin extends Named, Metoid, ContextAware, Provider, Identifiable {
 
     String PLUGIN_TARGET = "plugin";
-
-    /**
-     * Resolve plugin tag either from {@link PluginDef} annotation or Plugin instance.
-     *
-     * @param type
-     * @return
-     */
-    static PluginTag resolveTag(Class<? extends Plugin> type) {
-        //if definition is present
-        if (type.isAnnotationPresent(PluginDef.class)) {
-            MetaBuilder builder = new MetaBuilder("plugin");
-            PluginDef def = type.getAnnotation(PluginDef.class);
-            builder.putValue("group", def.group());
-            builder.putValue("name", def.name());
-            builder.putValue("description", def.info());
-            builder.putValue("version", def.version());
-            for (String dep : def.dependsOn()) {
-                builder.putValue("dependsOn", dep);
-            }
-            return new PluginTag(builder);
-        } else { //getting plugin instance to find tag
-            try {
-                return type.newInstance().getTag();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to builder plugin instance to resolve its tag", e);
-            }
-        }
-    }
-
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin

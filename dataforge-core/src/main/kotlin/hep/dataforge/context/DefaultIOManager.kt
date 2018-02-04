@@ -48,12 +48,11 @@ open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
      * @return
      */
     open fun createLoggerAppender(): Appender<ILoggingEvent> {
-        val appender =  object : UnsynchronizedAppenderBase<ILoggingEvent>() {
+        return object : UnsynchronizedAppenderBase<ILoggingEvent>() {
             override fun append(eventObject: ILoggingEvent) {
                 output.push(eventObject)
             }
         }
-        return appender
     }
 
     private fun addLoggerAppender(logger: Logger) {

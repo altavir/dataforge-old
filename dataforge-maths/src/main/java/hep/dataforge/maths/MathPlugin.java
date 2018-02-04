@@ -53,15 +53,14 @@ public class MathPlugin extends BasicPlugin {
     }
 
     public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(MathPlugin.class);
-        }
-
         @Override
         public Plugin build(Meta meta) {
             return new MathPlugin();
+        }
+
+        @Override
+        public Class<? extends Plugin> type() {
+            return MathPlugin.class;
         }
     }
 

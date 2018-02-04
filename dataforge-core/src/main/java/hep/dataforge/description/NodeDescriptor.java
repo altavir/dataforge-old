@@ -6,9 +6,11 @@
 package hep.dataforge.description;
 
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.SimpleMetaMorph;
+import hep.dataforge.meta.MetaMorph;
+import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Name;
 import hep.dataforge.names.Named;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 
@@ -18,14 +20,16 @@ import java.util.*;
  *
  * @author Alexander Nozik
  */
-public class NodeDescriptor extends SimpleMetaMorph implements Named {
+public class NodeDescriptor implements Named, MetaMorph, Metoid {
+
+    private final Meta meta;
 
     public NodeDescriptor(String name) {
-        super(Meta.buildEmpty(name));
+        this.meta = Meta.buildEmpty(name);
     }
 
     public NodeDescriptor(Meta meta) {
-        super(meta);
+        this.meta = meta;
     }
 
     /**
@@ -190,4 +194,14 @@ public class NodeDescriptor extends SimpleMetaMorph implements Named {
         return getMeta().getString("titleKey", "");
     }
 
+    @NotNull
+    @Override
+    public Meta toMeta() {
+        return meta;
+    }
+
+    @Override
+    public Meta getMeta() {
+        return meta;
+    }
 }

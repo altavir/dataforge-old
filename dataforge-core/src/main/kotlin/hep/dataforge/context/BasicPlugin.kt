@@ -32,7 +32,6 @@ abstract class BasicPlugin : MetaHolder, Plugin {
     constructor() : super(Meta.empty()) {}
 
     override fun dependsOn(): Array<PluginTag> {
-        val tag = tag
         return if (tag.hasValue("dependsOn")) {
             tag.getStringArray("dependsOn").map { PluginTag.fromString(it) }.toTypedArray()
         } else {
@@ -46,7 +45,7 @@ abstract class BasicPlugin : MetaHolder, Plugin {
      * @return
      */
     override fun getTag(): PluginTag {
-        return Plugin.resolveTag(javaClass)
+        return PluginTag.resolve(javaClass)
     }
 
     //    public String getDescription() {

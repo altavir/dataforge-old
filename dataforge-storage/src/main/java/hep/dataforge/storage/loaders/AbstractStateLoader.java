@@ -31,6 +31,7 @@ import hep.dataforge.storage.commons.MessageFactory;
 import hep.dataforge.storage.commons.StorageMessageUtils;
 import hep.dataforge.utils.Optionals;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
@@ -70,7 +71,7 @@ public abstract class AbstractStateLoader extends AbstractLoader implements Stat
     }
 
     @Override
-    public Optional<Value> optValue(String name) {
+    public Optional<Value> optValue(@NotNull String name) {
         check();
         return Optionals.either(Optional.ofNullable(states.get(name)))
                 .or(() -> Optional.ofNullable(defaults.get(name)))

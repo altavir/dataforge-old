@@ -96,7 +96,7 @@ public class PlotUtils {
     }
 
     public static PlotPlugin getPlotManager(Context context) {
-        return context.getFeature(PlotPlugin.class);
+        return context.get(PlotPlugin.class);
     }
 
     /**

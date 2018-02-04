@@ -181,15 +181,25 @@ fun MetaProvider.metaNode(metaName: String? = null): ReadOnlyProperty<MetaProvid
 
 //Metoid values
 
+/**
+ * TODO add owner reference instead of reflections
+ * @property valueName name of the property. If null, use property name
+ * @property
+ */
+private class MetoidValueDelegate<T>(
+        val valueName: String? = null,
+        val def: Any? = null,
+        val immutable: Boolean = true,
+        val converter: (Value) -> T
+) : ReadOnlyProperty<Metoid, T> {
 
-private class MetoidValueDelegate<T>(val valueName: String?, val immutable: Boolean = true, val converter: (Value) -> T) : ReadOnlyProperty<Metoid, T> {
     private var cached: T? = null
 
     override operator fun getValue(thisRef: Metoid, property: KProperty<*>): T {
         if (immutable && cached == null) {
-            cached = converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+            cached = converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property, def))
         }
-        return cached ?: converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property))
+        return cached ?: converter(Descriptors.getDelegatedValue(thisRef.meta, valueName, thisRef, property, def))
     }
 }
 
@@ -201,18 +211,33 @@ private class MetoidNodeDelegate<T>(private val nodeName: String?, val immutable
 /**
  * Delegate MutableMetaNode element to read/write property
  */
+
 /**
  * Create a metoid value delegate using the key of the value in meta
  */
-fun Metoid.value(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Value> = MetoidValueDelegate(valueName, immutable) { it }
+fun Metoid.value(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Value> = MetoidValueDelegate(valueName, def, immutable) { it }
 
-fun Metoid.stringValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, String> = MetoidValueDelegate(valueName, immutable) { it.stringValue() }
-fun Metoid.booleanValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Boolean> = MetoidValueDelegate(valueName, immutable) { it.booleanValue() }
-fun Metoid.timeValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Instant> = MetoidValueDelegate(valueName, immutable) { it.timeValue() }
-fun Metoid.numberValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Number> = MetoidValueDelegate(valueName, immutable) { it.numberValue() }
-fun Metoid.doubleValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Double> = MetoidValueDelegate(valueName, immutable) { it.doubleValue() }
-fun Metoid.intValue(valueName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Int> = MetoidValueDelegate(valueName, immutable) { it.intValue() }
-fun <T> Metoid.customValue(valueName: String? = null, immutable: Boolean = true, conv: (Value) -> T): ReadOnlyProperty<Metoid, T> = MetoidValueDelegate(valueName, immutable, conv)
+fun Metoid.stringValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, String> =
+        MetoidValueDelegate(valueName, def, immutable) { it.stringValue() }
+
+fun Metoid.booleanValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Boolean> =
+        MetoidValueDelegate(valueName, def, immutable) { it.booleanValue() }
+
+fun Metoid.timeValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Instant> =
+        MetoidValueDelegate(valueName, def, immutable) { it.timeValue() }
+
+fun Metoid.numberValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Number> =
+        MetoidValueDelegate(valueName, def, immutable) { it.numberValue() }
+
+fun Metoid.doubleValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Double> =
+        MetoidValueDelegate(valueName, def, immutable) { it.doubleValue() }
+
+fun Metoid.intValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Int> =
+        MetoidValueDelegate(valueName, def, immutable) { it.intValue() }
+
+fun <T> Metoid.customValue(valueName: String? = null, def: Any? = null, immutable: Boolean = true, conv: (Value) -> T): ReadOnlyProperty<Metoid, T> =
+        MetoidValueDelegate(valueName, def, immutable, conv)
+
 fun Metoid.node(nodeName: String? = null, immutable: Boolean = true): ReadOnlyProperty<Metoid, Meta> = MetoidNodeDelegate(nodeName, immutable) { it }
 fun <T> Metoid.customNode(nodeName: String? = null, immutable: Boolean = true, conv: (Meta) -> T): ReadOnlyProperty<Metoid, T> = MetoidNodeDelegate(nodeName, immutable, conv)
 
@@ -249,7 +274,7 @@ fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, s
 
 private class ConfigurableValueDelegate<T>(private val valueName: String?, val toT: (Value) -> T, val toValue: (T) -> Any) : ReadWriteProperty<Configurable, T> {
     override operator fun getValue(thisRef: Configurable, property: KProperty<*>): T =
-            toT(Descriptors.getDelegatedValue(thisRef.config, valueName, thisRef, property))
+            toT(Descriptors.getDelegatedValue(thisRef.config, valueName, thisRef, property, null))
 
     override fun setValue(thisRef: Configurable, property: KProperty<*>, value: T) {
         Descriptors.setDelegatedValue(thisRef.config, valueName, Value.of(toValue(value)), thisRef, property)

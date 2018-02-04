@@ -18,7 +18,7 @@ package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.fx.plots.PlotManager
+import hep.dataforge.fx.plots.FXPlotManager
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
@@ -40,8 +40,8 @@ class PlotHelper extends AbstractHelper {
 
     PlotHelper(Context context = Global.instance()) {
         super(context)
-        context.getPluginManager().getOrLoad(PlotManager)
-        this.manager = context.getFeature(PlotPlugin)
+        context.getPluginManager().getOrLoad(FXPlotManager)
+        this.manager = context.get(PlotPlugin)
     }
 
     PlotPlugin getManager() {

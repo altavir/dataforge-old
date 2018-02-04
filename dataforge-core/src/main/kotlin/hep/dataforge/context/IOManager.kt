@@ -17,6 +17,8 @@ package hep.dataforge.context
 
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.display.Output
 import hep.dataforge.kodex.buildMeta
@@ -55,6 +57,11 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
      * @param name
      * @return
      */
+    @ValueDefs(
+            ValueDef(name = "stage", def = "", info = "Fully qualified name of the output stage"),
+            ValueDef(name = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
+            ValueDef(name = "type", def = DEFAULT_OUTPUT_TYPE, info = "Type of the output container")
+    )
     abstract fun output(meta: Meta): Output
 
 
@@ -139,7 +146,6 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
 
             return tmp
         }
-
 
 
     fun getDataFile(path: String): FileReference {

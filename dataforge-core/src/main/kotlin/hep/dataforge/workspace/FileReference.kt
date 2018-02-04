@@ -32,7 +32,7 @@ import java.nio.file.StandardOpenOption
 
 
 /**
- * A reference to file with content not managed by DataForge
+ * A context aware reference to file with content not managed by DataForge
  */
 class FileReference private constructor(private val _context: Context, val path: Path, val scope: FileReferenceScope = WORK) : ContextAware {
 
@@ -49,13 +49,18 @@ class FileReference private constructor(private val _context: Context, val path:
     }.toAbsolutePath()
 
     /**
+     * The name of the file excluding path
+     */
+    val name: String = path.fileName.toString()
+
+    /**
      * Get binary references by this file reference
      */
     val binary: Binary?
         get() {
-            return if(exists) {
+            return if (exists) {
                 FileBinary(absolutePath)
-            } else{
+            } else {
                 null
             }
         }
@@ -111,10 +116,10 @@ class FileReference private constructor(private val _context: Context, val path:
         }
 
     /**
-     *
+     * Delete refenrenced file on exit
      */
-    fun delete(){
-
+    fun delete() {
+        Files.deleteIfExists(absolutePath)
     }
 
 //    /**

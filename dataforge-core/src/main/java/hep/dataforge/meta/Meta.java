@@ -235,7 +235,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
         }
 
         @Override
-        public Optional<Value> optValue(String path) {
+        public Optional<Value> optValue(@NotNull String path) {
             return Optional.empty();
         }
     }

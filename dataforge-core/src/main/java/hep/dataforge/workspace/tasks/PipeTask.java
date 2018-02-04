@@ -5,6 +5,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import org.jetbrains.annotations.NotNull;
 
 public abstract class PipeTask<T, R> extends AbstractTask<R> {
     private final String name;
@@ -28,7 +29,8 @@ public abstract class PipeTask<T, R> extends AbstractTask<R> {
     @Override
     protected abstract void buildModel(TaskModel.Builder model, Meta meta);
 
-    protected abstract R result(Context context, String name, T input, Laminate meta);
+    @NotNull
+    protected abstract R result(@NotNull Context context, @NotNull String name, @NotNull T input, @NotNull Laminate meta);
 
     @Override
     public final String getName() {

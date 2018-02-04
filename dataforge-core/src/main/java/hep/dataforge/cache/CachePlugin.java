@@ -14,6 +14,7 @@ import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.GoalListener;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 
 import javax.cache.Cache;
 import javax.cache.CacheException;
@@ -33,6 +34,10 @@ public class CachePlugin extends BasicPlugin {
     private Predicate<Data> bypass = data -> false;
     private CacheManager manager;
 
+    public CachePlugin(@NotNull Meta meta) {
+        super(meta);
+    }
+
     /**
      * Set immutable bypass condition for data
      *
@@ -49,7 +54,6 @@ public class CachePlugin extends BasicPlugin {
 //    public void setManager(CacheManager manager) {
 //        this.manager = manager;
 //    }
-
 
 
     @Override
@@ -194,16 +198,17 @@ public class CachePlugin extends BasicPlugin {
         getManager().getCacheNames().forEach(this::invalidate);
     }
 
-    public static class Factory implements PluginFactory {
-
+    public static class Factory extends PluginFactory {
+        @NotNull
         @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(CachePlugin.class);
+        public Class<? extends Plugin> getType() {
+            return CachePlugin.class;
         }
 
+        @NotNull
         @Override
-        public Plugin build(Meta meta) {
-            return new CachePlugin();
+        public Plugin build(@NotNull Meta meta) {
+            return new CachePlugin(meta);
         }
     }
 }

@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 import java.util.Optional;
@@ -61,7 +62,7 @@ public class MaskPoint implements Values {
      * {@inheritDoc}
      */
     @Override
-    public Optional<Value> optValue(String name) throws NameNotFoundException {
+    public Optional<Value> optValue(@NotNull String name) throws NameNotFoundException {
         return source.optValue(nameMap.get(name));
     }
 

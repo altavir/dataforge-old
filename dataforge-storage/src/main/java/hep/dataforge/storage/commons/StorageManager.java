@@ -43,7 +43,7 @@ public class StorageManager extends BasicPlugin {
      * @return
      */
     public static StorageManager buildFrom(Context context) {
-        return context.getFeature(StorageManager.class);
+        return context.get(StorageManager.class);
     }
 
     /**
@@ -132,15 +132,14 @@ public class StorageManager extends BasicPlugin {
     }
 
     public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(StorageManager.class);
-        }
-
         @Override
         public Plugin build(Meta meta) {
             return new StorageManager(meta);
+        }
+
+        @Override
+        public Class<? extends Plugin> type() {
+            return StorageManager.class;
         }
     }
 }

@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -152,7 +153,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
     }
 
     @Override
-    public Optional<Value> optValue(String name) {
+    public Optional<Value> optValue(@NotNull String name) {
         return optValue(Name.of(name));
     }
 

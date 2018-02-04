@@ -60,7 +60,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
         Goal<R> goal = new ManyToOneGoal(context, data, actionMeta, outputMeta);
         String resultName = data.getName() == null ? getName() : data.getName();
 
-        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getChronicle(resultName));
+        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getHistory().getChronicle(resultName));
     }
 
     protected List<DataNode<T>> buildGroups(Context context, DataNode<T> input, Meta actionMeta) {

@@ -65,7 +65,7 @@ public class MINUITPlugin extends BasicPlugin {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        context.getFeature(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
+        context.get(FitManager.class).addEngine(MINUITFitEngine.MINUIT_ENGINE_NAME, new MINUITFitEngine());
         clearStaticLog();
     }
 
@@ -76,15 +76,14 @@ public class MINUITPlugin extends BasicPlugin {
     }
 
     public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(MINUITPlugin.class);
-        }
-
         @Override
         public Plugin build(Meta meta) {
             return new MINUITPlugin();
+        }
+
+        @Override
+        public Class<? extends Plugin> type() {
+            return MINUITPlugin.class;
         }
     }
 

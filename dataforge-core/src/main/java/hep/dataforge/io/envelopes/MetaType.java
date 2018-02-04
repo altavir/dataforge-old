@@ -32,7 +32,7 @@ public interface MetaType {
      */
     static MetaType resolve(short code){
         //TODO add caching here?
-        synchronized (Global.Companion.instance()) {
+        synchronized (Global.INSTANCE) {
             return StreamSupport.stream(loader.spliterator(), false)
                     .filter(it -> it.getCodes().contains(code)).findFirst().orElse(null);
         }
@@ -44,7 +44,7 @@ public interface MetaType {
      * @return
      */
     static MetaType resolve(String name){
-        synchronized (Global.Companion.instance()) {
+        synchronized (Global.INSTANCE) {
             return StreamSupport.stream(loader.spliterator(), false)
                     .filter(it -> it.getName().equalsIgnoreCase(name)).findFirst().orElse(null);
         }

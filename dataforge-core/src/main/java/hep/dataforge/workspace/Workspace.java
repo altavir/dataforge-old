@@ -197,7 +197,7 @@ public interface Workspace extends ContextAware, Provider {
 
         default Workspace.Builder loadFrom(Meta meta) {
             if (meta.hasValue("context")) {
-                setContext(Global.Companion.getContext(meta.getString("context")));
+                setContext(Global.INSTANCE.getContext(meta.getString("context")));
             }
             if (meta.hasMeta("data")) {
                 meta.getMetaList("data").forEach((Meta dataMeta) -> {

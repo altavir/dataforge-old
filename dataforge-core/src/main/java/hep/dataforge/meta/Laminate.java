@@ -253,7 +253,7 @@ public final class Laminate extends Meta implements Described {
     }
 
     @Override
-    public Optional<Value> optValue(String path) {
+    public Optional<Value> optValue(@NotNull String path) {
         //searching layers for value
         for (Meta m : layers) {
             Optional<Value> opt = m.optValue(path);

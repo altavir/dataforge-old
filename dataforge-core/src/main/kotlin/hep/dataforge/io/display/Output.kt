@@ -1,12 +1,17 @@
 package hep.dataforge.io.display
 
+import ch.qos.logback.classic.LoggerContext
+import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
+import ch.qos.logback.core.encoder.Encoder
+import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.SimpleMarkupRenderer
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.FileReference
+import org.slf4j.LoggerFactory
 import java.io.OutputStream
 import java.io.PrintWriter
 
@@ -39,7 +44,11 @@ interface Output {
         }
 
         fun fileOutput(ref: FileReference): Output {
-            return StreamOutput(ref.outputStream)
+            return FileOutput(ref)
+        }
+
+        fun streamOutput(stream: OutputStream): Output {
+            return StreamOutput(stream)
         }
     }
 }
@@ -51,6 +60,14 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
     private val printer = PrintWriter(stream)
     private val renderer = SimpleMarkupRenderer(stream)
 
+    private val logEncoder: Encoder<ILoggingEvent> by lazy {
+        PatternLayoutEncoder().apply {
+            pattern = "%date %level [%thread] %logger{10} [%file:%line] %msg%n"
+            context = LoggerFactory.getILoggerFactory() as LoggerContext
+            start()
+        }
+    }
+
     override fun push(obj: Any, meta: Meta) {
         //TODO use context dispatch stream or something like that
         synchronized(printer) {
@@ -58,8 +75,12 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
                 is Markup -> renderer.render(obj)
                 is MarkupBuilder -> renderer.render(obj)
                 is Markedup -> renderer.render(obj.markup(meta))
+                is Envelope ->{
+
+                }
                 is ILoggingEvent -> {
-                    printer.println("${obj.loggerName} [${obj.level}] : ${obj.formattedMessage}")
+                    printer.println(String(logEncoder.encode(obj)))
+                    //printer.println("${obj.loggerName} [${obj.level}] : ${obj.formattedMessage}")
                 }
                 is CharSequence -> printer.println(obj)
             //TODO add record formatter
@@ -77,7 +98,7 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
     }
 }
 
-class FileOutput(val file: FileReference): Output, AutoCloseable{
+class FileOutput(val file: FileReference) : Output, AutoCloseable {
     override fun push(obj: Any, meta: Meta) {
         TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }

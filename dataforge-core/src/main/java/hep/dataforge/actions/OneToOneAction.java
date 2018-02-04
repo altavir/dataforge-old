@@ -50,7 +50,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         if (set.isEmpty()) {
-            throw new RuntimeException("Running 1 to 1 action on empty data node");
+            throw new RuntimeException(getName() + ": Running 1 to 1 action on empty data node");
         }
 
         return wrap(
@@ -86,11 +86,11 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
                     return transform(context, resultName, input, meta);
                 }
         );
-        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getChronicle(resultName));
+        return new ActionResult<>(resultName, getOutputType(), goal, outputMeta, context.getHistory().getChronicle(resultName));
     }
 
     protected Chronicle getLog(Context context, String dataName) {
-        return context.getChronicle(Name.joinString(dataName, getName()));
+        return context.getHistory().getChronicle(Name.joinString(dataName, getName()));
     }
 
     /**
@@ -115,8 +115,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     public R simpleRun(T input, Meta... metaLayers) {
-        Context context = Global.Companion.instance();
-        return transform(context, "simpleRun", input, inputMeta(context, metaLayers));
+        return transform(Global.INSTANCE, "simpleRun", input, inputMeta(Global.INSTANCE, metaLayers));
     }
 
     protected abstract R execute(Context context, String name, T input, Laminate meta);

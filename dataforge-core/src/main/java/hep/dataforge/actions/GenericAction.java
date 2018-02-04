@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -28,10 +28,7 @@ import hep.dataforge.names.Name;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.OutputStream;
 import java.util.concurrent.ExecutorService;
-import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 /**
@@ -107,7 +104,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     protected ExecutorService getExecutorService(Context context, Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return context.getParallelExecutor();
+            return context.getExecutor().getDefaultExecutor();
         } else {
             return context.getDispatcher();
         }
@@ -221,22 +218,38 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
         return new Laminate(meta).withDescriptor(getDescriptor());
     }
 
+//    /**
+//     * Auto closeable output stream. If error occurs, the output is dumped to system err.
+//     *
+//     * @param name a {@link java.lang.String} object.
+//     * @return a {@link java.io.OutputStream} object.
+//     */
+//    public void output(Context context, String name, Consumer<OutputStream> writer) {
+//        try (OutputStream stream = context.getIo().out(getName(), name)) {
+//            writer.accept(stream);
+//        } catch (IOException ex) {
+//            context.getLogger().error("Failed to write to default output. Dumping output to System.err", ex);
+//            writer.accept(System.err);
+//        }
+//    }
+
     /**
-     * Auto closeable output stream. If error occurs, the output is dumped to system err.
+     * Push given object to output
      *
-     * @param name a {@link java.lang.String} object.
-     * @return a {@link java.io.OutputStream} object.
+     * @param context
+     * @param name
+     * @param obj
+     * @param meta
      */
-    public void output(Context context, String name, Consumer<OutputStream> writer) {
-        try (OutputStream stream = context.getIo().out(getName(), name)) {
-            writer.accept(stream);
-        } catch (IOException ex) {
-            context.getLogger().error("Failed to write to default output. Dumping output to System.err", ex);
-            writer.accept(System.err);
-        }
+    protected void push(Context context, String name, Object obj, Meta meta) {
+        context.getIo().output(Name.of(getName()), Name.of(name)).push(obj, meta);
+    }
+
+    protected void push(Context context, String name, Object obj) {
+        push(context, name, obj, Meta.empty());
     }
 
     protected final void report(Context context, String reportName, String entry, Object... params) {
-        context.getChronicle(reportName).report(entry, params);
+        context.getHistory().getChronicle(reportName).report(entry, params);
     }
 }

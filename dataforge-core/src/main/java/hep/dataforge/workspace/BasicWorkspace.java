@@ -51,7 +51,7 @@ public class BasicWorkspace extends AbstractWorkspace {
     protected synchronized CachePlugin getCache() {
         if (cache == null || cache.getContext() != this.getContext()) {
             cache = getContext().optFeature(CachePlugin.class).orElseGet(() -> {
-                CachePlugin pl = new CachePlugin();
+                CachePlugin pl = new CachePlugin(Meta.empty());
                 getContext().getPluginManager().load(pl);
                 return pl;
             });

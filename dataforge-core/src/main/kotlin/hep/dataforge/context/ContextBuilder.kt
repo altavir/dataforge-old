@@ -51,7 +51,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
             val path = parent.io.rootDir.resolve(value)
             //Add libraries to classpath
             val libPath = path.resolve("lib")
-            if(Files.isDirectory(libPath)){
+            if (Files.isDirectory(libPath)) {
                 classPath(libPath.toUri())
             }
             properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY] = Value.of(path.toString())
@@ -100,8 +100,8 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
      * @return
      */
     @JvmOverloads
-    fun plugin(type: Class<out Plugin>?, meta: Meta = Meta.empty()): ContextBuilder {
-        val tag = Plugin.resolveTag(type)
+    fun plugin(type: Class<out Plugin>, meta: Meta = Meta.empty()): ContextBuilder {
+        val tag = PluginTag.resolve(type)
         return plugin(parent.pluginManager.pluginLoader.get(tag, meta))
     }
 
@@ -111,18 +111,14 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     }
 
 
+    @Suppress("UNCHECKED_CAST")
     fun plugin(meta: Meta): ContextBuilder {
         val plMeta = meta.getMetaOrEmpty(MetaBuilder.DEFAULT_META_NAME)
         return when {
             meta.hasValue("name") -> plugin(meta.getString("name"), plMeta)
             meta.hasValue("class") -> {
-                var type: Class<out Plugin>? = null
-                try {
-                    type = Class.forName(meta.getString("class")) as Class<out Plugin>
-                } catch (e: Exception) {
-                    throw RuntimeException("Failed to initialize plugin from meta", e)
-                }
-
+                val type: Class<out Plugin> = Class.forName(meta.getString("class")) as? Class<out Plugin>
+                        ?: throw RuntimeException("Failed to initialize plugin from meta")
                 plugin(type, plMeta)
             }
             else -> throw IllegalArgumentException("Malformed plugin definition")
@@ -154,7 +150,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         val path = Paths.get(pathStr)
         return when {
             Files.isDirectory(path) -> try {
-                Files.find(path, -1, BiPredicate{ subPath, _ -> subPath.toString().endsWith(".jar") })
+                Files.find(path, -1, BiPredicate { subPath, _ -> subPath.toString().endsWith(".jar") })
                         .map<URI> { it.toUri() }.forEach { this.classPath(it) }
                 this
             } catch (e: IOException) {
@@ -194,7 +190,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
             URLClassLoader(classPath.toTypedArray(), parent.classLoader)
         }
         return Context(name, parent, classLoader).apply {
-            plugins.forEach{
+            plugins.forEach {
                 pluginManager.load(it)
             }
         }

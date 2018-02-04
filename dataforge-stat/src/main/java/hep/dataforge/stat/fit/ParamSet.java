@@ -125,7 +125,7 @@ public class ParamSet implements Values, MetaMorph {
     }
 
     @Override
-    public Optional<Value> optValue(String path) {
+    public Optional<Value> optValue(@NotNull String path) {
         return optByName(path).map(par -> Value.of(par.getValue()));
     }
 

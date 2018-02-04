@@ -63,14 +63,14 @@ public interface EnvelopeType {
     }
 
     static EnvelopeType resolve(int code) {
-        synchronized (Global.Companion.instance()) {
+        synchronized (Global.INSTANCE) {
             return StreamSupport.stream(loader.spliterator(), false)
                     .filter(it -> it.getCode() == code).findFirst().orElse(null);
         }
     }
 
     static EnvelopeType resolve(String name) {
-        synchronized (Global.Companion.instance()) {
+        synchronized (Global.INSTANCE) {
             return StreamSupport.stream(loader.spliterator(), false)
                     .filter(it -> Objects.equals(it.getName(), name)).findFirst().orElse(null);
         }

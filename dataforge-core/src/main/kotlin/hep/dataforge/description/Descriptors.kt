@@ -57,12 +57,13 @@ object Descriptors {
 
     private val descriptorCache = Misc.getLRUCache<AnnotatedElement, NodeDescriptor>(500)
 
-    fun getDelegatedValue(delegate: Meta, valueName: String?, thisRef: Any, property: KProperty<*>): Value {
+    fun getDelegatedValue(delegate: Meta, valueName: String?, thisRef: Any, property: KProperty<*>, def: Any?): Value {
         val name = valueName ?: property.name
         val propertyAnnotation = property.findAnnotation<PropertyDef>()
         return when {
             delegate.hasValue(name) -> delegate.getValue(name)
             propertyAnnotation != null -> Value.of(propertyAnnotation.def)
+            def != null -> Value.of(def)
             else -> Descriptors.extractValue(name, delegate, Descriptors.buildDescriptor(thisRef))
         }
     }

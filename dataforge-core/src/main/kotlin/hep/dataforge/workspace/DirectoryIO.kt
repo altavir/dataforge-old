@@ -7,11 +7,12 @@ import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
 import hep.dataforge.context.DefaultIOManager
 import hep.dataforge.context.IOManager
+import hep.dataforge.io.display.FileOutput
 import hep.dataforge.io.display.Output
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 import org.slf4j.LoggerFactory
 import java.io.File
-import java.io.IOException
 
 /**
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
@@ -20,6 +21,8 @@ class DirectoryIO : DefaultIOManager() {
 
     //internal var registry = ReferenceRegistry<OutputStream>()
     //    FileAppender<ILoggingEvent> appender;
+
+    private val map = HashMap<Meta, FileOutput>()
 
 
     override fun createLoggerAppender(): Appender<ILoggingEvent> {
@@ -37,12 +40,9 @@ class DirectoryIO : DefaultIOManager() {
 
     override fun detach() {
         super.detach()
-        registry.forEach { it ->
-            try {
-                it.close()
-            } catch (e: IOException) {
-                LoggerFactory.getLogger(javaClass).error("Failed to close output", e)
-            }
+        map.values.forEach {
+            //TODO add catch
+            it.close()
         }
     }
 
@@ -57,13 +57,14 @@ class DirectoryIO : DefaultIOManager() {
     }
 
     override fun output(meta: Meta): Output {
-        return super.output(meta)
+        return map.getOrPut(meta) {
+            val name = Name.of(meta.getString("name"))
+            val stage = Name.of(meta.getString("stage", ""))
+            val type = meta.getString("type", DEFAULT_OUTPUT_TYPE)
+            //TODO make scope customizable?
+            val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(type), stage)
+            FileOutput(reference)
+        }
     }
 
-    //    override fun out(stage: Name?, name: Name, type: String): OutputStream {
-//        val fileReference = FileReference.newWorkFile(context,name.toUnescaped(), getExtension(type), stage?: Name.EMPTY)
-//        val out = fileReference.output
-//        registry.add(out)
-//        return out
-//    }
 }

@@ -174,7 +174,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
      * @return
      */
     @Override
-    public Optional<Value> optValue(String path) {
+    public Optional<Value> optValue(@NotNull String path) {
         return getMeta().optValue(path);
     }
 

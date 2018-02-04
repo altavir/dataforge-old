@@ -8,6 +8,7 @@ package hep.dataforge.tables;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.BiFunction;
@@ -31,7 +32,7 @@ public class VirtualDataPoint<S> implements Values {
     }
 
     @Override
-    public Optional<Value> optValue(String name) {
+    public Optional<Value> optValue(@NotNull String name) {
         if (hasValue(name)) {
             return Optional.ofNullable(transformation.apply(name, source));
         } else {

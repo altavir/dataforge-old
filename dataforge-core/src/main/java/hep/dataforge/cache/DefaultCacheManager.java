@@ -30,10 +30,6 @@ public class DefaultCacheManager extends MetaHolder implements CacheManager, Con
         this.context = context;
     }
 
-    public DefaultCacheManager() {
-        this.context = Global.Companion.instance();
-    }
-
     public Path getRootCacheDir() {
         return context.getIo().getTmpDir().resolve("immutable");
     }
@@ -117,7 +113,7 @@ public class DefaultCacheManager extends MetaHolder implements CacheManager, Con
     @SuppressWarnings("unchecked")
     public <T> T unwrap(Class<T> clazz) {
         if (clazz == DefaultCacheManager.class) {
-            return (T) new DefaultCacheManager();
+            return (T) new DefaultCacheManager(Global.INSTANCE,Meta.empty());
         } else {
             throw new IllegalArgumentException("Wrong wrapped class");
         }

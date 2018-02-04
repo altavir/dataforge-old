@@ -45,8 +45,18 @@ subprojects {
         }
 
         publishing {
+            repositories {
+                maven {
+                    // change to point to your repo, e.g. http://my.org/repo
+                    url "http://npm.mipt.ru/var/www/maven"
+                    credentials{
+                        username npm_user
+                        password npm_pass
+                    }
+                }
+            }
             publications {
-                mavenJava(MavenPublication) {
+                miptNPM(MavenPublication) {
                     from components.java
                 }
             }
@@ -76,7 +86,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+    gradleVersion = '4.5'
 }
 
 /*
