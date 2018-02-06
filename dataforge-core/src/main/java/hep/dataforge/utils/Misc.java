@@ -12,32 +12,33 @@ import java.util.Map;
 import java.util.concurrent.CancellationException;
 
 /**
- *
  * @author Alexander Nozik
  */
 public class Misc {
     public static final Charset UTF = Charset.forName("UTF-8");
+
     /**
      * A synchronized lru cache
+     *
      * @param <K>
      * @param <V>
      * @param maxItems
-     * @return 
+     * @return
      */
-    public static <K,V> Map<K,V> getLRUCache(int maxItems){
-        return Collections.synchronizedMap(new LinkedHashMap<K,V>(){
+    public static <K, V> Map<K, V> getLRUCache(int maxItems) {
+        return Collections.synchronizedMap(new LinkedHashMap<K, V>() {
             @Override
             protected boolean removeEldestEntry(Map.Entry<K, V> eldest) {
                 return super.size() > maxItems;
             }
         });
     }
-    
+
     /**
      * Check if current thread is interrupted and throw exception if it is
      */
-    public static void checkThread(){
-        if(Thread.currentThread().isInterrupted()){
+    public static void checkThread() {
+        if (Thread.currentThread().isInterrupted()) {
             throw new CancellationException();
         }
     }

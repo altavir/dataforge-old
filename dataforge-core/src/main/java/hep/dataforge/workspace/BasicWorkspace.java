@@ -42,7 +42,7 @@ public class BasicWorkspace extends AbstractWorkspace {
     public DataNode<Object> runTask(TaskModel model) {
         //Cache result if immutable is available and caching is not blocked
         if (cacheEnabled() && model.getMeta().getBoolean("immutable.enabled", true)) {
-            return getCache().cacheNode(model.getName(), model.getIdentity(), super.runTask(model));
+            return getCache().cacheNode(model.getName(), model.toMeta(), super.runTask(model));
         } else {
             return super.runTask(model);
         }

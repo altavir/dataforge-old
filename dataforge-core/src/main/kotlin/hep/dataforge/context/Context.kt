@@ -15,14 +15,14 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.cache.Identifiable
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.io.history.History
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.MetaID
 import hep.dataforge.names.Named
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
@@ -53,7 +53,7 @@ import kotlin.reflect.KClass
 open class Context(
         private val name: String,
         val parent: Context? = Global,
-        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, Identifiable {
+        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, MetaID {
 
     /**
      * A class loader for this context. Parent class loader is used by default
@@ -230,18 +230,18 @@ open class Context(
      *
      * @return
      */
-    override fun getIdentity(): Meta {
-        val id = MetaBuilder("context")
-        id.update(properties)
-        pluginManager.stream(true).forEach { plugin ->
-            if (plugin.javaClass.isAnnotationPresent(PluginDef::class.java)) {
-                if (!plugin.javaClass.getAnnotation(PluginDef::class.java).support) {
-                    id.putNode(plugin.identity)
-                }
+    override fun toMeta(): Meta {
+        return buildMeta("context") {
+            update(properties)
+            pluginManager.stream(true).forEach { plugin ->
+                if (plugin.javaClass.isAnnotationPresent(PluginDef::class.java)) {
+                    if (!plugin.javaClass.getAnnotation(PluginDef::class.java).support) {
+                        putNode(plugin.toMeta())
+                    }
 
+                }
             }
         }
-        return id
     }
 
     /**

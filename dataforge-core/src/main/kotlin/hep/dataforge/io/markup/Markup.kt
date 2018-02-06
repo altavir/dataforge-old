@@ -81,9 +81,9 @@ class GenericMarkup(private val _meta: Meta, parent: Markup? = null) : Markup(pa
     constructor(type: String, style: Meta, parent: Markup? = null, vararg content: Markup) : this(
             buildMeta("markup") {
                 MARKUP_TYPE_KEY to type
-                if (!style.isEmpty) node(MARKUP_STYLE_NODE, style)
+                if (!style.isEmpty) putNode(MARKUP_STYLE_NODE, style)
                 content.forEach {
-                    node(MARKUP_CONTENT_NODE, it.toMeta())
+                    putNode(MARKUP_CONTENT_NODE, it.toMeta())
                 }
             }, parent
     )

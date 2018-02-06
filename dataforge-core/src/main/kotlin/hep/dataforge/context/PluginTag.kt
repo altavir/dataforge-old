@@ -41,7 +41,7 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
     val group by stringValue(def = "")
 
     constructor(group: String, name: String) : this(
-            MetaBuilder("plugin")
+            MetaBuilder("tag")
                     .setValue("group", group)
                     .setValue("name", name)
     )
@@ -106,7 +106,7 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
         fun resolve(type: Class<out Plugin>): PluginTag {
             //if definition is present
             return if (type.isAnnotationPresent(PluginDef::class.java)) {
-                val builder = MetaBuilder("plugin")
+                val builder = MetaBuilder("tag")
                 val def = type.getAnnotation(PluginDef::class.java)
                 builder.putValue("group", def.group)
                 builder.putValue("name", def.name)

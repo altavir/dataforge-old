@@ -23,6 +23,15 @@ import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
 
+
+/**
+ * An object that could be identified by its meta. The contract is that two MetaID are equal if their {@code toMeta()} methods produce equal meta
+ * Created by darksnake on 17.06.2017.
+ */
+interface MetaID {
+    fun toMeta(): Meta
+}
+
 @MustBeDocumented
 annotation class MorphTarget(val target: KClass<*>)
 
@@ -47,14 +56,14 @@ private class MetaMorphProxy(val type: KClass<*>, val meta: Meta) : Serializable
  * Ab object that could be represented as meta. Serialized via meta serializer and deserialized back
  * Created by darksnake on 12-Nov-16.
  */
-interface MetaMorph : Serializable {
+interface MetaMorph : Serializable, MetaID {
 
     /**
      * Convert this object to Meta
      *
      * @return
      */
-    fun toMeta(): Meta
+    override fun toMeta(): Meta
 
     private fun writeReplace(): Any {
         return MetaMorphProxy(this::class, toMeta())

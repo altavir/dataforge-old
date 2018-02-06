@@ -5,7 +5,6 @@
  */
 package hep.dataforge.workspace.tasks;
 
-import hep.dataforge.cache.Identifiable;
 import hep.dataforge.context.Context;
 import hep.dataforge.context.ContextAware;
 import hep.dataforge.data.DataNode;
@@ -15,6 +14,7 @@ import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaID;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.GenericBuilder;
@@ -42,7 +42,7 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  *
  * @author Alexander Nozik
  */
-public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, ContextAware {
+public class TaskModel implements Named, Metoid, ValueProvider, MetaID, ContextAware {
 
     /**
      * Create an empty model builder
@@ -152,16 +152,17 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
         return taskMeta;
     }
 
+    @NotNull
     @Override
-    public Meta getIdentity() {
+    public Meta toMeta() {
         MetaBuilder id = new MetaBuilder("task")
-                .setNode(getContext().getIdentity())
+                .setNode(getContext().toMeta())
                 .setValue("name", getName())
                 .setNode(DEFAULT_META_NAME, getMeta());
 
         MetaBuilder depNode = new MetaBuilder("dependencies");
 
-        dependencies().forEach(dependency -> depNode.putNode(dependency.getIdentity()));
+        dependencies().forEach(dependency -> depNode.putNode(dependency.toMeta()));
         id.putNode(depNode);
 
         return id;
@@ -192,7 +193,7 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
     /**
      * A rule to add calculate dependency data from workspace
      */
-    public interface Dependency extends Identifiable {
+    public interface Dependency extends MetaID {
 
         /**
          * Apply data to data dree. Could throw exceptions caused by either
@@ -257,8 +258,9 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
                     .forEach(data -> tree.putData(pathTransformationRule.apply(data.getName()), data));
         }
 
+        @NotNull
         @Override
-        public Meta getIdentity() {
+        public Meta toMeta() {
             return id;
         }
     }
@@ -279,8 +281,9 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
             tree.putNode(targetNodeName, workspace.getData().getCheckedNode(sourceNodeName, type));
         }
 
+        @NotNull
         @Override
-        public Meta getIdentity() {
+        public Meta toMeta() {
             return new MetaBuilder("dataNode")
                     .putValue("source", sourceNodeName)
                     .putValue("target", targetNodeName)
@@ -347,9 +350,10 @@ public class TaskModel implements Named, Metoid, ValueProvider, Identifiable, Co
             placementRule.accept(tree, workspace.runTask(taskModel));
         }
 
+        @NotNull
         @Override
-        public Meta getIdentity() {
-            return taskModel.getIdentity();
+        public Meta toMeta() {
+            return taskModel.toMeta();
         }
     }
 
