@@ -19,7 +19,7 @@ interface FXDisplay {
 
 fun buildDisplay(context: Context): FXDisplay {
     return TabbedFXDisplay().also {
-        context.load("fx", FXPlugin::class.java).display(it)
+        context.load(FXPlugin::class.java).display(it)
     }
 }
 

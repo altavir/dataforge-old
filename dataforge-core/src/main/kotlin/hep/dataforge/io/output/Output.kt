@@ -1,14 +1,17 @@
-package hep.dataforge.io.display
+package hep.dataforge.io.output
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.encoder.Encoder
 import hep.dataforge.io.envelopes.Envelope
+import hep.dataforge.io.envelopes.EnvelopeType
+import hep.dataforge.io.envelopes.TaglessEnvelopeType.TAGLESS_ENVELOPE_TYPE
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.SimpleMarkupRenderer
+import hep.dataforge.kodex.asMap
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.FileReference
 import org.slf4j.LoggerFactory
@@ -75,8 +78,10 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
                 is Markup -> renderer.render(obj)
                 is MarkupBuilder -> renderer.render(obj)
                 is Markedup -> renderer.render(obj.markup(meta))
-                is Envelope ->{
-
+                is Envelope -> {
+                    val envelopeType = EnvelopeType.resolve(meta.getString("envelope.type", TAGLESS_ENVELOPE_TYPE))
+                    val envelopeProperties = meta.getMeta("envelope.properties", Meta.empty()).asMap { it.stringValue() }
+                    envelopeType.getWriter(envelopeProperties).write(stream, obj)
                 }
                 is ILoggingEvent -> {
                     printer.println(String(logEncoder.encode(obj)))
@@ -99,16 +104,24 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
 }
 
 class FileOutput(val file: FileReference) : Output, AutoCloseable {
-    override fun push(obj: Any, meta: Meta) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private val streamOutput by lazy {
+        StreamOutput(file.outputStream)
     }
 
+    override fun push(obj: Any, meta: Meta) {
+        streamOutput.push(obj, meta)
+    }
+
+    /**
+     * Delete the output file
+     */
     override fun clear() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        close()
+        file.delete()
     }
 
     override fun close() {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+        streamOutput.close()
     }
 
 }

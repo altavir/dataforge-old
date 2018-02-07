@@ -44,20 +44,23 @@ subprojects {
             testCompile "org.spockframework:spock-core:1.0-groovy-2.+"
         }
 
-        publishing {
-            repositories {
-                maven {
-                    // change to point to your repo, e.g. http://my.org/repo
-                    url "http://npm.mipt.ru/var/www/maven"
-                    credentials{
-                        username npm_user
-                        password npm_pass
+
+        if (project.hasProperty('npm_user')) {
+            publishing {
+                repositories {
+                    maven {
+                        // change to point to your repo, e.g. http://my.org/repo
+                        url "http://npm.mipt.ru/var/www/maven"
+                        credentials {
+                            username npm_user
+                            password npm_pass
+                        }
                     }
                 }
-            }
-            publications {
-                miptNPM(MavenPublication) {
-                    from components.java
+                publications {
+                    miptNPM(MavenPublication) {
+                        from components.java
+                    }
                 }
             }
         }

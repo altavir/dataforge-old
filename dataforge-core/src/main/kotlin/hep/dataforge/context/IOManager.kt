@@ -20,15 +20,15 @@ import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.display.Output
+import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.StreamConsumer
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.optional
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.providers.Provides
 import hep.dataforge.workspace.FileReference
-import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -68,13 +68,51 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     /**
      * Helper method to access output
      */
-    fun output(name: Name, stage: Name = Name.empty()): Output {
+    @JvmOverloads
+    fun output(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): Output {
         val meta = buildMeta("output") {
             "stage" to stage.toUnescaped()
             "name" to name.toUnescaped()
-            "type" to DEFAULT_OUTPUT_TYPE
+            "type" to type
         }
         return output(meta)
+    }
+
+    @JvmOverloads
+    fun output(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): Output {
+        val meta = buildMeta("output") {
+            "stage" to stage
+            "name" to name
+            "type" to type
+        }
+        return output(meta)
+    }
+
+    val stream: OutputStream by lazy { StreamConsumer(output) }
+
+    /**
+     * An outputstream wrapper for backward compatibility.
+     */
+    fun stream(meta: Meta): OutputStream {
+        return StreamConsumer(output(meta))
+    }
+
+    /**
+     * An outputstream wrapper for backward compatibility.
+     */
+    @JvmOverloads
+    fun stream(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+        return StreamConsumer(output(name, stage, type))
+    }
+
+    @JvmOverloads
+    fun stream(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+        val meta = buildMeta("output") {
+            "stage" to stage
+            "name" to name
+            "type" to type
+        }
+        return StreamConsumer(output(meta))
     }
 
     /**
@@ -190,16 +228,16 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     /**
      * Get the context based classpath resource
      */
-    @Provides(RESOURCE_TARGET)
+    //@Provides(RESOURCE_TARGET)
     fun optResource(name: String): Optional<Binary> {
-        val path = name.replace(".", File.pathSeparator)
-        val resource = context.classLoader.getResource(path)
+        //val path = name.replace(".", File.separator)
+        val resource = context.classLoader.getResource(name)
         return resource?.let { StreamBinary { it.openStream() } }.optional
     }
 
     companion object {
         //const val BINARY_TARGET = "bin"
-        const val RESOURCE_TARGET = "resource"
+        //const val RESOURCE_TARGET = "resource"
         //const val FILE_TARGET = "file"
         //    String RESOURCE_TARGET = "resource";
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -75,14 +75,14 @@ public class MINUITPlugin extends BasicPlugin {
         super.detach();
     }
 
-    public static class Factory implements PluginFactory {
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new MINUITPlugin();
         }
 
         @Override
-        public Class<? extends Plugin> type() {
+        public Class<? extends Plugin> getType() {
             return MINUITPlugin.class;
         }
     }

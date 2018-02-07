@@ -18,6 +18,7 @@ import kotlinx.coroutines.experimental.future.await
 import java.lang.reflect.AnnotatedElement
 import java.time.Instant
 import java.util.*
+import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -168,6 +169,10 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
     if (hasMeta(metaName)) {
         action(getMetaList(metaName))
     }
+}
+
+fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
+    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.key }, { transform(it.value) }))
 }
 
 //Meta provider delegate

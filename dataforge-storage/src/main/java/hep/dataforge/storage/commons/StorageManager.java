@@ -65,7 +65,7 @@ public class StorageManager extends BasicPlugin {
     }
 
     public static Storage buildStorage(Context context, Meta meta) {
-        return context.loadFeature("hep.dataforge:storage", StorageManager.class).buildStorage(meta);
+        return context.load(StorageManager.class, Meta.empty()).buildStorage(meta);
     }
 
 
@@ -131,14 +131,14 @@ public class StorageManager extends BasicPlugin {
         super.detach();
     }
 
-    public static class Factory implements PluginFactory {
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new StorageManager(meta);
         }
 
         @Override
-        public Class<? extends Plugin> type() {
+        public Class<? extends Plugin> getType() {
             return StorageManager.class;
         }
     }

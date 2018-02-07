@@ -27,8 +27,7 @@ import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
-
-import java.util.function.Function
+import kotlin.jvm.functions.Function1
 
 /**
  * Created by darksnake on 30-Aug-16.
@@ -38,9 +37,9 @@ class PlotHelper extends AbstractHelper {
 
     PlotPlugin manager;
 
-    PlotHelper(Context context = Global.instance()) {
+    PlotHelper(Context context = Global.INSTANCE) {
         super(context)
-        context.getPluginManager().getOrLoad(FXPlotManager)
+        context.getPluginManager().load(FXPlotManager)
         this.manager = context.get(PlotPlugin)
     }
 
@@ -75,8 +74,30 @@ class PlotHelper extends AbstractHelper {
     @MethodDescription("Plot a function defined by a closure.")
 
     XYPlot plotFunction(double from = 0d, double to = 1d, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
-        Function<Double, Double> func = { Double x -> function.call(x) as Double }
-        XYFunctionPlot res = XYFunctionPlot.plotFunction(name, from, to, numPoints, func);
+        Function1<Double, Double> func = new Function1<Double, Double>(){
+            @Override
+            Double invoke(Double x) {
+                return function.call(x) as Double
+            }
+        }
+        XYFunctionPlot res = XYFunctionPlot.Companion.plot(name, from, to, numPoints, func);
+        manager.getPlotFrame(frame).add(res)
+        return res;
+    }
+
+    XYPlot plotFunction(Map<String, ?> parameters, Closure<Double> function) {
+        double from = (parameters.from ?: 0d) as Double
+        double to = (parameters.to ?: 1d) as Double
+        int numPoints = (parameters.to ?: 200) as Integer
+        String name = (parameters.name ?: "data") as String
+        String frame = (parameters.name ?: "frame") as String
+        Function1<Double, Double> func = new Function1<Double, Double>(){
+            @Override
+            Double invoke(Double x) {
+                return function.call(x) as Double
+            }
+        }
+        XYFunctionPlot res = XYFunctionPlot.Companion.plot(name, from, to, numPoints, func)
         manager.getPlotFrame(frame).add(res)
         return res;
     }

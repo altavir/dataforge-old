@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -147,14 +147,14 @@ public class FitManager extends BasicPlugin {
         return newState;
     }
 
-    public static class Factory implements PluginFactory {
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new FitManager();
         }
 
         @Override
-        public Class<? extends Plugin> type() {
+        public Class<? extends Plugin> getType() {
             return FitManager.class;
         }
     }

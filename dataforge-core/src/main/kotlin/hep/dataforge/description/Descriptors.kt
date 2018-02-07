@@ -170,7 +170,7 @@ object Descriptors {
         try {
             val path = Path.of(string)
             return if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {
-                val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element not found")
+                val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element $path not found")
                 buildDescriptor(target)
             } else if ("resource" == path.target) {
                 NodeDescriptor(buildMetaFromResource("node", path.nameString()))

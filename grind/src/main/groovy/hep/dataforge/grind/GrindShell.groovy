@@ -28,7 +28,7 @@ class GrindShell implements ContextAware {
     private ShellBinding binding = new ShellBinding();
     private final GroovyShell shell;
 
-    GrindShell(Context context = Global.instance(), Meta meta = Meta.empty()) {
+    GrindShell(Context context = Global.INSTANCE, Meta meta = Meta.empty()) {
         this.context = context
         ImportCustomizer importCustomizer = new ImportCustomizer();
 

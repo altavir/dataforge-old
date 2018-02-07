@@ -64,7 +64,7 @@ class GrindPipe<T, R> extends OneToOneAction<T, R> {
         action.setResolveStrategy(Closure.DELEGATE_ONLY);
         action.call()
 
-        Chronicle chronicle = context.getChronicle(Name.joinString(getName(), builder.name))
+        Chronicle chronicle = context.history.getChronicle(Name.joinString(getName(), builder.name))
         return new ActionEnv(context, builder.name, builder.meta, chronicle)
                 .execute(input, builder.result);
     }

@@ -81,6 +81,11 @@ open class Context(
 
 
     /**
+     * A property showing that dispatch thread is started in the context
+     */
+    private var started = false
+
+    /**
      * A dispatch thread executor for current context
      *
      * @return
@@ -92,7 +97,7 @@ open class Context(
                 priority = 8 // slightly higher priority
                 isDaemon = true
                 name = this@Context.name + "_dispatch"
-            }
+            }.also { started = true }
         }
     }
 
@@ -275,7 +280,7 @@ open class Context(
         //detach all plugins
         pluginManager.close()
 
-        if ((this::dispatcher.getDelegate() as? Lazy<*>)?.isInitialized() == true) {
+        if (started) {
             dispatcher.shutdown()
         }
     }

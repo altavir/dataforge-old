@@ -15,6 +15,9 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.exceptions.ContextLockException
+import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.StreamOutput
 import hep.dataforge.kodex.orElse
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
@@ -33,6 +36,18 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     init {
         Locale.setDefault(Locale.US)
     }
+
+    /**
+     * System console output
+     */
+    var console: Output = StreamOutput(System.out)
+        set(value) {
+            if (isLocked) {
+                throw ContextLockException("Can't change console output because Global is locked")
+            } else {
+                field = value
+            }
+        }
 
     /**
      * The global context independent temporary user directory. This directory

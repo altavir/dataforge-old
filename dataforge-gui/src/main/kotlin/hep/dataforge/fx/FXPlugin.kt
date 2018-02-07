@@ -47,10 +47,6 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
      * Wait for application and toolkit to start
      */
     fun checkApp() {
-
-        if (context == null) {
-            throw IllegalStateException("Plugin not attached")
-        }
         synchronized(this) {
             if (FX.getApplication(DefaultScope) == null) {
                 if (consoleMode) {
@@ -109,10 +105,8 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
         }
     }
 
-    class Factory : PluginFactory {
-        override fun type(): Class<out Plugin> {
-            return FXPlugin::class.java
-        }
+    class Factory : PluginFactory() {
+        override val type: Class<out Plugin> = FXPlugin::class.java
 
         override fun build(meta: Meta): Plugin {
             return FXPlugin(meta)

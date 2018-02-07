@@ -19,9 +19,8 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.UnsynchronizedAppenderBase
-import hep.dataforge.io.display.Output
-import hep.dataforge.io.display.StreamOutput
 import hep.dataforge.io.history.Record
+import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 
 /**
@@ -35,7 +34,8 @@ import hep.dataforge.meta.Meta
 @PluginDef(name = "io", group = "hep.dataforge", info = "Basic input and output plugin")
 open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
 
-    override val output: Output = StreamOutput(System.out)
+    override val output: Output
+        get() = Global.console
 
 
     override fun output(meta: Meta): Output {

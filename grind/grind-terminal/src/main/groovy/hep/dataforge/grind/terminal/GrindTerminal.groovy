@@ -54,7 +54,7 @@ class GrindTerminal extends SimpleConfigurable {
      * Build default jline console based on operating system. Do not use for preview inside IDE
      * @return
      */
-    static GrindTerminal system(Context context = Global.instance()) {
+    static GrindTerminal system(Context context = Global.INSTANCE) {
         context.logger.debug("Starting grind terminal using system shell")
         return new GrindTerminal(context,
                 TerminalBuilder.builder()
@@ -65,7 +65,7 @@ class GrindTerminal extends SimpleConfigurable {
         )
     }
 
-    static GrindTerminal dumb(Context context = Global.instance()) {
+    static GrindTerminal dumb(Context context = Global.INSTANCE) {
         context.logger.debug("Starting grind terminal using dumb shell")
         return new GrindTerminal(context);
     }
@@ -73,7 +73,7 @@ class GrindTerminal extends SimpleConfigurable {
     GrindTerminal(Context context, Terminal terminal = null) {
 
         //start fx plugin in global
-        Global.instance().getPluginManager().load("hep.dataforge:fx");
+        Global.INSTANCE.getPluginManager().load("hep.dataforge:fx");
 
         //define terminal if it is not defined
         if (terminal == null) {
@@ -92,9 +92,9 @@ class GrindTerminal extends SimpleConfigurable {
         context.logger.debug("Using ${terminal.class} terminal")
 
         //builder shell context
-        if (Global.instance() == context) {
-            context = Global.getContext("GRIND");
-            context.getPluginManager().load("hep.dataforge:plots")
+        if (Global.INSTANCE == context) {
+            context = Global.INSTANCE.getContext("GRIND");
+            context.getPluginManager().load("hep.dataforge:plots-fx")
             //(context.logger as Logger).setLevel(Level.INFO)
             //FIXME There is some bug in the groovy compilation here
 //            InputStream inputStream = System.in;
@@ -248,10 +248,9 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     def println(String str) {
-        getTerminal().writer().with {
-            println(str);
-            flush();
-        }
+        def writer = getTerminal().writer()
+        writer.println(str)
+        writer.flush()
     }
 
     def print(String str) {

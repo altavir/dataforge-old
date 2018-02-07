@@ -50,9 +50,4 @@ public class WeightedXYModel extends XYModel {
     public double dispersion(Values point, Values pars) {
         return super.dispersion(point, pars) * weightFunction.apply(point);
     }
-
-    @Override
-    public void setMeta(Meta meta) {
-        super.setMeta(meta);
-    }
 }

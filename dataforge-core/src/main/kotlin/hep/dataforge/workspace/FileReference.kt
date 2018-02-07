@@ -152,7 +152,7 @@ class FileReference private constructor(private val _context: Context, val path:
             val dir = if (path.isEmpty) {
                 context.io.workDir
             } else {
-                val relativeDir = path.tokens.joinToString(File.pathSeparator) { it.toString() }
+                val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }
                 context.io.workDir.resolve(relativeDir)
             }
 

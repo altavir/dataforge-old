@@ -42,7 +42,7 @@ public class FileStorageFactory implements StorageType {
      * @return
      */
     public static FileStorage buildLocal(Context context, File file, boolean readOnly, boolean monitor) {
-        StorageManager manager = context.loadFeature("hep.dataforge:storage", StorageManager.class);
+        StorageManager manager = context.load(StorageManager.class, Meta.empty());
         return (FileStorage) manager.buildStorage(buildStorageMeta(file.toURI(),readOnly,monitor));
     }
 

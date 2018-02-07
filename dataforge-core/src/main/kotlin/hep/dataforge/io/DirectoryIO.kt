@@ -1,22 +1,23 @@
-package hep.dataforge.workspace
+package hep.dataforge.io
 
 import ch.qos.logback.classic.LoggerContext
 import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
-import hep.dataforge.context.DefaultIOManager
-import hep.dataforge.context.IOManager
-import hep.dataforge.io.display.FileOutput
-import hep.dataforge.io.display.Output
+import hep.dataforge.context.*
+import hep.dataforge.io.output.FileOutput
+import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.workspace.FileReference
 import org.slf4j.LoggerFactory
 import java.io.File
 
 /**
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
  */
+@PluginDef(name = "io.dir", group = "hep.dataforge", info = "Directory based output plugin")
 class DirectoryIO : DefaultIOManager() {
 
     //internal var registry = ReferenceRegistry<OutputStream>()
@@ -64,6 +65,16 @@ class DirectoryIO : DefaultIOManager() {
             //TODO make scope customizable?
             val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(type), stage)
             FileOutput(reference)
+        }
+    }
+
+
+
+    class Factory: PluginFactory() {
+        override val type: Class<out Plugin> = DirectoryIO::class.java
+
+        override fun build(meta: Meta): Plugin {
+            return DirectoryIO()
         }
     }
 

@@ -72,9 +72,9 @@ public class Chronicle implements History, Named {
             listener.accept(entry);
         });
 
-        if (getParent() != null) {
+        if (parent != null && parent!= Global.INSTANCE) {
             Record newEntry = pushTrace(entry, getName());
-            getParent().report(newEntry);
+            parent.report(newEntry);
         }
     }
 

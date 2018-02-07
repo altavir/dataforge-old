@@ -16,7 +16,6 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
-import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import java.util.*
@@ -124,7 +123,12 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      */
     @JvmOverloads
     fun load(tag: PluginTag, meta: Meta = Meta.empty()): Plugin {
-        return load(pluginLoader.opt(tag, meta) ?: throw  NameNotFoundException(tag.toString(), "Plugin not found"))
+        val loaded = get(tag)
+        return when {
+            loaded == null -> load(pluginLoader[tag, meta])
+            loaded.meta == meta -> loaded // if meta is the same, return existing plugin
+            else -> throw RuntimeException("Can't load plugin with tag $tag. Plugin with this tag and different configuration already exists in context.")
+        }
     }
 
     /**
