@@ -12,9 +12,10 @@ class StreamConsumer(val output: Output, val meta: Meta = Meta.empty()) : Output
 
     override fun write(b: Int) {
         synchronized(buffer) {
-            buffer.write(b)
             if (b.toChar() == '\n') {
                 flush()
+            } else {
+                buffer.write(b)
             }
         }
     }

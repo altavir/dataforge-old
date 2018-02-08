@@ -132,7 +132,7 @@ object MarkupUtils {
      * @return
      */
     fun markupTable(table: Table): MarkupBuilder {
-        val builder = MarkupBuilder().setType(GenericMarkupRenderer.TABLE_TYPE)
+        val builder = MarkupBuilder().setType(Markup.TABLE_TYPE)
 
         val header = MarkupBuilder().setValue("header", true)
         table.format.columns.forEach { c -> header.column(c.title, getDefaultTextWidth(c.primaryType)) }

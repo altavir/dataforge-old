@@ -26,7 +26,6 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.stream.Stream;
 
-import static hep.dataforge.io.markup.GenericMarkupRenderer.TABLE_TYPE;
 
 /**
  * An immutable table of values
@@ -60,7 +59,7 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
     @NotNull
     @Override
     default Markup markup(@NotNull Meta configuration) {
-        MarkupBuilder builder = new MarkupBuilder().setType(TABLE_TYPE);
+        MarkupBuilder builder = new MarkupBuilder().setType(Markup.TABLE_TYPE);
         //render header
         builder.content(new MarkupBuilder()
                 .setValue("header", true)

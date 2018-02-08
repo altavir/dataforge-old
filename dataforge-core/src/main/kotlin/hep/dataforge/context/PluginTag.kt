@@ -36,9 +36,9 @@ import hep.dataforge.meta.SimpleMetaMorph
 )
 class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
-    val name by stringValue()
+    val name by meta.stringValue()
 
-    val group by stringValue(def = "")
+    val group by meta.stringValue(def = "")
 
     constructor(group: String, name: String) : this(
             MetaBuilder("tag")

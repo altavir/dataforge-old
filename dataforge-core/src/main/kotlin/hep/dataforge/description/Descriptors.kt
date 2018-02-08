@@ -19,12 +19,13 @@ package hep.dataforge.description
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.io.MetaFileReader
 import hep.dataforge.kodex.listAnnotations
-import hep.dataforge.meta.*
+import hep.dataforge.meta.MergeRule
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.providers.Path
 import hep.dataforge.utils.Misc
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.ValueType
 import org.slf4j.LoggerFactory
 import java.io.IOException
@@ -33,8 +34,6 @@ import java.net.URISyntaxException
 import java.nio.file.Paths
 import java.text.ParseException
 import kotlin.reflect.KClass
-import kotlin.reflect.KProperty
-import kotlin.reflect.full.findAnnotation
 
 /**
  * A variation of ValueDef for value properties
@@ -56,43 +55,6 @@ annotation class PropertyDef(
 object Descriptors {
 
     private val descriptorCache = Misc.getLRUCache<AnnotatedElement, NodeDescriptor>(500)
-
-    fun getDelegatedValue(delegate: Meta, valueName: String?, thisRef: Any, property: KProperty<*>, def: Any?): Value {
-        val name = valueName ?: property.name
-        val propertyAnnotation = property.findAnnotation<PropertyDef>()
-        return when {
-            delegate.hasValue(name) -> delegate.getValue(name)
-            propertyAnnotation != null -> Value.of(propertyAnnotation.def)
-            def != null -> Value.of(def)
-            else -> Descriptors.extractValue(name, delegate, Descriptors.buildDescriptor(thisRef))
-        }
-    }
-
-    fun setDelegatedValue(delegate: MutableMetaNode<*>, valueName: String?, value: Value, thisRef: Any, property: KProperty<*>) {
-        //TODO add check for allowed values
-        delegate.setValue(valueName ?: property.name, value)
-    }
-
-    fun getDelegatedMeta(delegate: Meta, valueName: String?, thisRef: Any, property: KProperty<*>): Meta {
-        val name = valueName ?: property.name
-        return delegate.optMeta(name).orElseGet {
-            if (thisRef is Described) {
-                thisRef.descriptor.optChildDescriptor(name).map {
-                    if (it.hasDefault()) {
-                        it.defaultNode().first()
-                    } else {
-                        null
-                    }
-                }.orElse(Meta.empty())
-            } else {
-                Meta.empty()
-            }
-        }
-    }
-
-    fun setDelegatedMeta(delegate: MutableMetaNode<*>, valueName: String?, node: Meta, thisRef: Any, property: KProperty<*>) {
-        delegate.setNode(valueName ?: property.name, node)
-    }
 
     /**
      * Build Meta that contains all the default nodes and values from given node
@@ -290,19 +252,8 @@ object Descriptors {
      * @param descriptor
      * @return
      */
-    fun extractValue(name: String, provider: ValueProvider, descriptor: NodeDescriptor): Value {
-        return provider.optValue(name).orElseGet { buildDefaultNode(descriptor).getValue(name) }
-    }
-
-    /**
-     * Extract value using class descriptor
-     *
-     * @param name
-     * @param obj
-     * @return
-     */
-    fun extractValue(name: String, obj: Metoid): Value {
-        return extractValue(name, obj.meta, buildDescriptor(obj))
+    fun extractValue(name: String, descriptor: NodeDescriptor): Value {
+        return buildDefaultNode(descriptor).getValue(name)
     }
 
     /**

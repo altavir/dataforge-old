@@ -26,7 +26,9 @@ import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.optional
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
+import hep.dataforge.providers.Provides
 import hep.dataforge.workspace.FileReference
+import java.io.File
 import java.io.IOException
 import java.io.OutputStream
 import java.nio.file.Files
@@ -228,16 +230,16 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     /**
      * Get the context based classpath resource
      */
-    //@Provides(RESOURCE_TARGET)
+    @Provides(RESOURCE_TARGET)
     fun optResource(name: String): Optional<Binary> {
-        //val path = name.replace(".", File.separator)
-        val resource = context.classLoader.getResource(name)
+        val path = name.replace(".", File.pathSeparator)
+        val resource = context.classLoader.getResource(path)
         return resource?.let { StreamBinary { it.openStream() } }.optional
     }
 
     companion object {
         //const val BINARY_TARGET = "bin"
-        //const val RESOURCE_TARGET = "resource"
+        const val RESOURCE_TARGET = "resource"
         //const val FILE_TARGET = "file"
         //    String RESOURCE_TARGET = "resource";
 
