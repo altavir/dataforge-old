@@ -1,3 +1,7 @@
+buildscript{
+    ext.kotlin_version = "1.2.21"
+}
+
 plugins {
     id "org.jetbrains.kotlin.jvm" version "1.2.21" apply false
 }
@@ -40,10 +44,23 @@ subprojects {
             testCompile "org.spockframework:spock-core:1.0-groovy-2.+"
         }
 
-        publishing {
-            publications {
-                mavenJava(MavenPublication) {
-                    from components.java
+
+        if (project.hasProperty('npm_user')) {
+            publishing {
+                repositories {
+                    maven {
+                        // change to point to your repo, e.g. http://my.org/repo
+                        url "http://npm.mipt.ru/var/www/maven"
+                        credentials {
+                            username npm_user
+                            password npm_pass
+                        }
+                    }
+                }
+                publications {
+                    miptNPM(MavenPublication) {
+                        from components.java
+                    }
                 }
             }
         }
@@ -72,7 +89,7 @@ subprojects {
 }
 
 task wrapper(type: Wrapper) {
-    gradleVersion = '4.4'
+    gradleVersion = '4.5'
 }
 
 /*

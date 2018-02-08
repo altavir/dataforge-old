@@ -24,6 +24,7 @@ import hep.dataforge.names.Name
 import hep.dataforge.workspace.FileReference.FileReferenceScope.*
 import java.io.File
 import java.io.OutputStream
+import java.nio.channels.SeekableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -31,7 +32,7 @@ import java.nio.file.StandardOpenOption
 
 
 /**
- * A reference to file with content not managed by DataForge
+ * A context aware reference to file with content not managed by DataForge
  */
 class FileReference private constructor(private val _context: Context, val path: Path, val scope: FileReferenceScope = WORK) : ContextAware {
 
@@ -48,13 +49,18 @@ class FileReference private constructor(private val _context: Context, val path:
     }.toAbsolutePath()
 
     /**
+     * The name of the file excluding path
+     */
+    val name: String = path.fileName.toString()
+
+    /**
      * Get binary references by this file reference
      */
     val binary: Binary?
         get() {
-            return if(exists) {
+            return if (exists) {
                 FileBinary(absolutePath)
-            } else{
+            } else {
                 null
             }
         }
@@ -94,13 +100,27 @@ class FileReference private constructor(private val _context: Context, val path:
 
     /**
      * Output stream for this file reference
+     *
+     * TODO cahce stream?
      */
-    val output: OutputStream
+    val outputStream: OutputStream
         get() {
             prepareWrite()
             return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
         }
 
+    val channel: SeekableByteChannel
+        get() {
+            prepareWrite()
+            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+        }
+
+    /**
+     * Delete refenrenced file on exit
+     */
+    fun delete() {
+        Files.deleteIfExists(absolutePath)
+    }
 
 //    /**
 //     * Checksum of the file
@@ -132,7 +152,7 @@ class FileReference private constructor(private val _context: Context, val path:
             val dir = if (path.isEmpty) {
                 context.io.workDir
             } else {
-                val relativeDir = path.tokens.joinToString(File.pathSeparator) { it.toString() }
+                val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }
                 context.io.workDir.resolve(relativeDir)
             }
 

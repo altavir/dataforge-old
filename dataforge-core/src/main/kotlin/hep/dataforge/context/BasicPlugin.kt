@@ -23,16 +23,11 @@ import hep.dataforge.meta.MetaHolder
  *
  * @author Alexander Nozik
  */
-abstract class BasicPlugin : MetaHolder, Plugin {
+abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta), Plugin {
 
     private var context: Context? = null
 
-    constructor(meta: Meta) : super(meta) {}
-
-    constructor() : super(Meta.empty()) {}
-
     override fun dependsOn(): Array<PluginTag> {
-        val tag = tag
         return if (tag.hasValue("dependsOn")) {
             tag.getStringArray("dependsOn").map { PluginTag.fromString(it) }.toTypedArray()
         } else {
@@ -46,12 +41,8 @@ abstract class BasicPlugin : MetaHolder, Plugin {
      * @return
      */
     override fun getTag(): PluginTag {
-        return Plugin.resolveTag(javaClass)
+        return PluginTag.resolve(javaClass)
     }
-
-    //    public String getDescription() {
-    //        return getConfig().getString("description", "");
-    //    }
 
     /**
      * Load this plugin to the Global without annotation

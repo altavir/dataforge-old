@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,14 +15,13 @@
  */
 package hep.dataforge.context;
 
-import hep.dataforge.cache.Identifiable;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaID;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
-
-import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * The interface to define a Context plugin. A plugin stores all runtime features of a context.
@@ -37,38 +36,9 @@ import static hep.dataforge.meta.MetaNode.DEFAULT_META_NAME;
  *
  * @author Alexander Nozik
  */
-public interface Plugin extends Named, Metoid, ContextAware, Provider, Identifiable {
+public interface Plugin extends Named, Metoid, ContextAware, Provider, MetaID {
 
     String PLUGIN_TARGET = "plugin";
-
-    /**
-     * Resolve plugin tag either from {@link PluginDef} annotation or Plugin instance.
-     *
-     * @param type
-     * @return
-     */
-    static PluginTag resolveTag(Class<? extends Plugin> type) {
-        //if definition is present
-        if (type.isAnnotationPresent(PluginDef.class)) {
-            MetaBuilder builder = new MetaBuilder("plugin");
-            PluginDef def = type.getAnnotation(PluginDef.class);
-            builder.putValue("group", def.group());
-            builder.putValue("name", def.name());
-            builder.putValue("description", def.info());
-            builder.putValue("version", def.version());
-            for (String dep : def.dependsOn()) {
-                builder.putValue("dependsOn", dep);
-            }
-            return new PluginTag(builder);
-        } else { //getting plugin instance to find tag
-            try {
-                return type.newInstance().getTag();
-            } catch (Exception e) {
-                throw new RuntimeException("Failed to builder plugin instance to resolve its tag", e);
-            }
-        }
-    }
-
 
     /**
      * Plugin dependencies which are required to attach this plugin. Plugin
@@ -112,13 +82,24 @@ public interface Plugin extends Named, Metoid, ContextAware, Provider, Identifia
     }
 
 
+    @NotNull
     @Override
-    default Meta getIdentity() {
-        MetaBuilder id = new MetaBuilder("id");
-        id.putValue("name", this.getName());
-        id.putValue("type", this.getClass().getName());
-        id.putValue("context", getContext().getName());
-        id.putNode(DEFAULT_META_NAME, getMeta());
-        return id;
+    default Meta toMeta() {
+        return new MetaBuilder("plugin")
+                .putValue("context", getContext().getName())
+                .putValue("type", this.getClass().getName())
+                .putNode("tag", getTag().toMeta())
+                .putNode("meta",getMeta())
+                .build();
     }
+
+//    @Override
+//    default Meta getId() {
+//        MetaBuilder id = new MetaBuilder("id");
+//        id.putValue("name", this.getName());
+//        id.putValue("type", this.getClass().getName());
+//        id.putValue("context", getContext().getName());
+//        id.putNode(DEFAULT_META_NAME, getMeta());
+//        return id;
+//    }
 }

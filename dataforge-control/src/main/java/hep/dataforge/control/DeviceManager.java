@@ -99,6 +99,7 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
 
     /**
      * Get the stream of top level devices
+     *
      * @return
      */
     public Stream<Device> getDevices() {
@@ -128,15 +129,14 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
     }
 
     public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(DeviceManager.class);
-        }
-
         @Override
         public Plugin build(Meta meta) {
             return new DeviceManager();
+        }
+
+        @Override
+        public Class<? extends Plugin> type() {
+            return DeviceManager.class;
         }
     }
 }

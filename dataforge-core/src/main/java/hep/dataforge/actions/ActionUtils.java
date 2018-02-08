@@ -182,7 +182,7 @@ public class ActionUtils {
             CachePlugin cache = null;
             //Set data immutable if it is defined in context
             if (context.getBoolean("enableCache", false)) {
-                cache = context.getFeature(CachePlugin.class);
+                cache = context.get(CachePlugin.class);
             }
 
             MetaBuilder id = new MetaBuilder("action").setValue("context", context.getName());

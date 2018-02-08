@@ -15,14 +15,14 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.cache.Identifiable
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.io.history.History
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
+import hep.dataforge.meta.MetaID
 import hep.dataforge.names.Named
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
@@ -38,6 +38,7 @@ import java.util.concurrent.Executors
 import java.util.function.Predicate
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
+import kotlin.reflect.KClass
 
 /**
  *
@@ -52,7 +53,7 @@ import java.util.stream.StreamSupport
 open class Context(
         private val name: String,
         val parent: Context? = Global,
-        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, Identifiable {
+        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, MetaID {
 
     /**
      * A class loader for this context. Parent class loader is used by default
@@ -76,8 +77,13 @@ open class Context(
      * @return the io
      */
     open val io: IOManager
-        get() = pluginManager.opt(IOManager::class.java).nullable ?: parent?.io ?: Global.io
+        get() = pluginManager.get(IOManager::class) ?: parent?.io ?: Global.io
 
+
+    /**
+     * A property showing that dispatch thread is started in the context
+     */
+    private var started = false
 
     /**
      * A dispatch thread executor for current context
@@ -91,12 +97,12 @@ open class Context(
                 priority = 8 // slightly higher priority
                 isDaemon = true
                 name = this@Context.name + "_dispatch"
-            }
+            }.also { started = true }
         }
     }
 
     open val executor: ExecutorPlugin
-        get() = pluginManager.opt(ExecutorPlugin::class.java).nullable ?: parent?.executor ?: Global.executor
+        get() = pluginManager.get(ExecutorPlugin::class) ?: parent?.executor ?: Global.executor
 
     /**
      * Find out if context is locked
@@ -106,8 +112,8 @@ open class Context(
     val isLocked: Boolean
         get() = lock.isLocked
 
-    val history: Chronicler
-        get() = pluginManager.opt(Chronicler::class.java).nullable ?: parent?.history ?: Global.history
+    open val history: Chronicler
+        get() = pluginManager.get(Chronicler::class) ?: parent?.history ?: Global.history
 
     override fun getChronicle(): Chronicle {
         return history.chronicle
@@ -145,7 +151,7 @@ open class Context(
 
     @Provides(Plugin.PLUGIN_TARGET)
     fun optPlugin(pluginName: String): Optional<Plugin> {
-        return pluginManager.opt(PluginTag.fromString(pluginName))
+        return pluginManager.get(PluginTag.fromString(pluginName)).optional
     }
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
@@ -171,13 +177,17 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> getFeature(type: Class<T>): T {
+    operator fun <T> get(type: Class<T>): T {
         return optFeature(type)
                 .orElseThrow { RuntimeException("Feature could not be loaded by type: " + type.name) }
     }
 
-    fun <T> loadFeature(tag: String, type: Class<T>): T? {
-        return type.cast(pluginManager.getOrLoad(tag, Meta.empty()))
+    fun <T : Plugin> load(type: Class<T>, meta: Meta = Meta.empty()): T {
+        return pluginManager.load(type, meta)
+    }
+
+    fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
+        return pluginManager.load(type, meta)
     }
 
 
@@ -187,7 +197,7 @@ open class Context(
      * @param type
      * @param <T>
      * @return
-    </T> */
+     */
     fun <T> optFeature(type: Class<T>): Optional<T> {
         return pluginManager
                 .stream(true)
@@ -202,18 +212,20 @@ open class Context(
      * @param serviceClass
      * @param <T>
      * @return
-    </T> */
+     */
     @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
         return StreamSupport.stream(ServiceLoader.load(serviceClass, classLoader).spliterator(), false)
     }
 
     /**
+     * Find specific service provided by java SPI
+     *
      * @param serviceClass
      * @param predicate
      * @param <T>
      * @return
-    </T> */
+     */
     fun <T> findService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
         return serviceStream(serviceClass).filter(predicate).findFirst()
     }
@@ -223,18 +235,18 @@ open class Context(
      *
      * @return
      */
-    override fun getIdentity(): Meta {
-        val id = MetaBuilder("context")
-        id.update(properties)
-        pluginManager.stream(true).forEach { plugin ->
-            if (plugin.javaClass.isAnnotationPresent(PluginDef::class.java)) {
-                if (!plugin.javaClass.getAnnotation(PluginDef::class.java).support) {
-                    id.putNode(plugin.identity)
-                }
+    override fun toMeta(): Meta {
+        return buildMeta("context") {
+            update(properties)
+            pluginManager.stream(true).forEach { plugin ->
+                if (plugin.javaClass.isAnnotationPresent(PluginDef::class.java)) {
+                    if (!plugin.javaClass.getAnnotation(PluginDef::class.java).support) {
+                        putNode(plugin.toMeta())
+                    }
 
+                }
             }
         }
-        return id
     }
 
     /**
@@ -268,7 +280,7 @@ open class Context(
         //detach all plugins
         pluginManager.close()
 
-        if ((this::dispatcher.getDelegate() as? Lazy<*>)?.isInitialized() == true) {
+        if (started) {
             dispatcher.shutdown()
         }
     }

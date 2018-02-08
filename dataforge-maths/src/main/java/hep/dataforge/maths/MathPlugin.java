@@ -12,6 +12,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.utils.MetaFactory;
 import org.apache.commons.math3.analysis.BivariateFunction;
 import org.apache.commons.math3.analysis.UnivariateFunction;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * Mathematical plugin. Stores function library and other useful things.
@@ -25,7 +26,7 @@ public class MathPlugin extends BasicPlugin {
     private final FunctionDispatcher<BivariateFunction> bivariateFactory = new FunctionDispatcher<>();
 
     public static MathPlugin buildFrom(Context context) {
-        return context.getPluginManager().getOrLoad(MathPlugin.class);
+        return context.getPluginManager().load(MathPlugin.class);
     }
 
     public UnivariateFunction buildUnivariateFunction(Meta meta) {
@@ -52,16 +53,16 @@ public class MathPlugin extends BasicPlugin {
         this.bivariateFactory.addFactory(type, meta -> function);
     }
 
-    public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(MathPlugin.class);
-        }
-
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new MathPlugin();
+        }
+
+        @NotNull
+        @Override
+        public Class<? extends Plugin> getType() {
+            return MathPlugin.class;
         }
     }
 

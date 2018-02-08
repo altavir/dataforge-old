@@ -17,8 +17,11 @@ package hep.dataforge.context
 
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
+import hep.dataforge.description.ValueDef
+import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.display.Output
+import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.StreamConsumer
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.optional
 import hep.dataforge.meta.Meta
@@ -27,6 +30,7 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.workspace.FileReference
 import java.io.File
 import java.io.IOException
+import java.io.OutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.Paths
@@ -55,19 +59,62 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
      * @param name
      * @return
      */
+    @ValueDefs(
+            ValueDef(name = "stage", def = "", info = "Fully qualified name of the output stage"),
+            ValueDef(name = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
+            ValueDef(name = "type", def = DEFAULT_OUTPUT_TYPE, info = "Type of the output container")
+    )
     abstract fun output(meta: Meta): Output
 
 
     /**
      * Helper method to access output
      */
-    fun output(name: Name, stage: Name = Name.empty()): Output {
+    @JvmOverloads
+    fun output(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): Output {
         val meta = buildMeta("output") {
             "stage" to stage.toUnescaped()
             "name" to name.toUnescaped()
-            "type" to DEFAULT_OUTPUT_TYPE
+            "type" to type
         }
         return output(meta)
+    }
+
+    @JvmOverloads
+    fun output(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): Output {
+        val meta = buildMeta("output") {
+            "stage" to stage
+            "name" to name
+            "type" to type
+        }
+        return output(meta)
+    }
+
+    val stream: OutputStream by lazy { StreamConsumer(output) }
+
+    /**
+     * An outputstream wrapper for backward compatibility.
+     */
+    fun stream(meta: Meta): OutputStream {
+        return StreamConsumer(output(meta))
+    }
+
+    /**
+     * An outputstream wrapper for backward compatibility.
+     */
+    @JvmOverloads
+    fun stream(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+        return StreamConsumer(output(name, stage, type))
+    }
+
+    @JvmOverloads
+    fun stream(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+        val meta = buildMeta("output") {
+            "stage" to stage
+            "name" to name
+            "type" to type
+        }
+        return StreamConsumer(output(meta))
     }
 
     /**
@@ -139,7 +186,6 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
 
             return tmp
         }
-
 
 
     fun getDataFile(path: String): FileReference {

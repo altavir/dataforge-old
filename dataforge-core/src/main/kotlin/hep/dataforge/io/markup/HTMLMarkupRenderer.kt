@@ -128,7 +128,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
     }
 
     private fun applyHTMLStyle(html: Element, markup: Markup) {
-        MetaUtils.valueStream(markup.meta.getMeta("html")).forEach { pair -> html.setAttribute(pair.key, pair.value.stringValue()) }
+        MetaUtils.valueStream(markup.toMeta().getMeta("html")).forEach { pair -> html.setAttribute(pair.key, pair.value.stringValue()) }
     }
 
     //    @Override

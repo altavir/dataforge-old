@@ -17,7 +17,6 @@
 package hep.dataforge.data;
 
 import hep.dataforge.data.binary.Binary;
-import hep.dataforge.data.binary.FileBinary;
 import hep.dataforge.goals.AbstractGoal;
 import hep.dataforge.goals.Goal;
 import hep.dataforge.goals.PipeGoal;
@@ -26,6 +25,7 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeReader;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
+import hep.dataforge.workspace.FileReference;
 import org.jetbrains.annotations.NotNull;
 
 import java.io.IOException;
@@ -152,7 +152,7 @@ public class DataUtils {
     /**
      * Read an object from a file using given transformation. Capture a file meta from default directory. Override meta is placed above file meta.
      *
-     * @param filePath
+     * @param file
      * @param override
      * @param type
      * @param reader
@@ -160,11 +160,12 @@ public class DataUtils {
      * @return
      */
     @NotNull
-    public static <T> Data<T> readFile(Path filePath, Meta override, Class<T> type, Function<Binary, T> reader) {
+    public static <T> Data<T> readFile(FileReference file, Meta override, Class<T> type, Function<Binary, T> reader) {
+        Path filePath = file.getAbsolutePath();
         if (!Files.isRegularFile(filePath)) {
             throw new IllegalArgumentException(filePath.toString() + " is not existing file");
         }
-        Binary binary = new FileBinary(filePath);
+        Binary binary = file.getBinary();
         Path metaFileDirectory = filePath.resolveSibling(META_DIRECTORY);
         Meta fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.getFileName().toString()).orElse(Meta.empty());
         Laminate meta = new Laminate(fileMeta, override);
@@ -174,34 +175,34 @@ public class DataUtils {
     /**
      * Read file as Binary Data.
      *
-     * @param filePath
+     * @param file
      * @param override
      * @return
      */
     @NotNull
-    public static Data<Binary> readFile(Path filePath, Meta override) {
-        return readFile(filePath, override, Binary.class, it -> it);
+    public static Data<Binary> readFile(FileReference file, Meta override) {
+        return readFile(file, override, Binary.class, it -> it);
     }
 
-    public static <T> DataNode<T> readDirectory(Path directoryPath, Meta override, Class<T> type, Function<Binary, T> reader) {
-        if (!Files.isDirectory(directoryPath)) {
-            throw new IllegalArgumentException(directoryPath.toString() + " is not existing directory");
-        }
-        Meta nodeMeta = MetaFileReader.resolve(directoryPath, META_DIRECTORY).orElse(Meta.empty());
-        DataTree.Builder<T> builder = DataTree.builder(type).setMeta(nodeMeta).setName(directoryPath.getFileName().toString());
-        try {
-            Files.list(directoryPath).filter(it -> !it.getFileName().toString().startsWith("@")).forEach(file -> {
-                if (Files.isRegularFile(file)) {
-                    builder.putData(file.getFileName().toString(), readFile(file, Meta.empty(), type, reader));
-                } else {
-                    builder.putNode(readDirectory(file, Meta.empty(), type, reader));
-                }
-            });
-        } catch (IOException e) {
-            throw new RuntimeException("Can't list files in " + directoryPath.toString());
-        }
-        return builder.build();
-    }
+//    public static <T> DataNode<T> readDirectory(Path directoryPath, Meta override, Class<T> type, Function<Binary, T> reader) {
+//        if (!Files.isDirectory(directoryPath)) {
+//            throw new IllegalArgumentException(directoryPath.toString() + " is not existing directory");
+//        }
+//        Meta nodeMeta = MetaFileReader.resolve(directoryPath, META_DIRECTORY).orElse(Meta.empty());
+//        DataTree.Builder<T> builder = DataTree.builder(type).setMeta(nodeMeta).setName(directoryPath.getFileName().toString());
+//        try {
+//            Files.list(directoryPath).filter(it -> !it.getFileName().toString().startsWith("@")).forEach(file -> {
+//                if (Files.isRegularFile(file)) {
+//                    builder.putData(file.getFileName().toString(), readFile(file, Meta.empty(), type, reader));
+//                } else {
+//                    builder.putNode(readDirectory(file, Meta.empty(), type, reader));
+//                }
+//            });
+//        } catch (IOException e) {
+//            throw new RuntimeException("Can't list files in " + directoryPath.toString());
+//        }
+//        return builder.build();
+//    }
 
     /**
      * Transform envelope file into data using given transformation. The meta of the data consists of 3 layers:

@@ -4,10 +4,8 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.Global;
 import hep.dataforge.utils.GenericBuilder;
 
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.Arrays;
 import java.util.function.Function;
@@ -39,7 +37,7 @@ public class FileBasedWorkspace extends DynamicWorkspace {
     }
 
     public static Workspace build(Path path) {
-        return build(Global.Companion.instance(), path, GenericBuilder::build);
+        return build(Global.INSTANCE, path, GenericBuilder::build);
     }
 
 
@@ -69,10 +67,9 @@ public class FileBasedWorkspace extends DynamicWorkspace {
 
 
     private byte[] getCheckSum() {
-        try (InputStream is = Files.newInputStream(path)) {
+        try {
             MessageDigest md = MessageDigest.getInstance("MD5");
-
-            DigestInputStream dis = new DigestInputStream(is, md);
+            md.update(Files.readAllBytes(path));
             return md.digest();
         } catch (Exception ex) {
             throw new RuntimeException("Failed to generate file checksum", ex);

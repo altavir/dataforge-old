@@ -15,6 +15,10 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.exceptions.ContextLockException
+import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.StreamOutput
+import hep.dataforge.kodex.orElse
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
 import java.io.File
@@ -28,6 +32,22 @@ import java.util.concurrent.Executors
  * @author Alexander Nozik
  */
 object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoader) {
+
+    init {
+        Locale.setDefault(Locale.US)
+    }
+
+    /**
+     * System console output
+     */
+    var console: Output = StreamOutput(System.out)
+        set(value) {
+            if (isLocked) {
+                throw ContextLockException("Can't change console output because Global is locked")
+            } else {
+                field = value
+            }
+        }
 
     /**
      * The global context independent temporary user directory. This directory
@@ -45,19 +65,16 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             return dfUserDir
         }
 
-    init {
-        Locale.setDefault(Locale.US)
-    }
-
+    override val history: Chronicler by lazy { Chronicler().apply { startGlobal() } }
 
     override val io: IOManager
-        get() = pluginManager.opt(IOManager::class.java).orElseGet {
+        get() = pluginManager.get(IOManager::class).orElse {
             logger.debug("No IO plugin found. Using default IO.")
             pluginManager.load(DefaultIOManager())
         }
 
     override val executor: ExecutorPlugin
-        get() = pluginManager.opt(ExecutorPlugin::class.java).orElseGet {
+        get() = pluginManager.get(ExecutorPlugin::class).orElse {
             logger.debug("No executor plugin found. Using default executor.")
             pluginManager.load(DefaultExecutorPlugin())
         }
@@ -110,6 +127,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
      *
      * @return
      */
+    @JvmStatic
     var defaultContext: Context? = null
         get() {
             if (field == null) {

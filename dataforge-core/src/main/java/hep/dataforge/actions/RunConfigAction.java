@@ -16,6 +16,7 @@
 package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
+import hep.dataforge.context.ContextBuilder;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.exceptions.ContentException;
@@ -42,9 +43,9 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(context, input.getMeta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = Context.Companion.builder(contextName,context).build();
+        Context ac = new ContextBuilder(contextName,context).build();
         if (meta.hasValue("configFile")) {
-            Path cfgFile = context.getIo().getFile(meta.getString("configFile"));
+            Path cfgFile = context.getIo().getRootDir().resolve(meta.getString("configFile"));
             try {
                 cfg = MetaFileReader.instance().read(ac, cfgFile, null);
             } catch (IOException | ParseException ex) {

@@ -52,7 +52,7 @@ public class MetaFileReader {
 
     public static Meta read(Path file) {
         try {
-            return instance().read(Global.Companion.instance(), file, null);
+            return instance().read(Global.INSTANCE, file, null);
         } catch (IOException | ParseException e) {
             throw new RuntimeException("Failed to read meta file " + file.toString(), e);
         }
@@ -74,11 +74,11 @@ public class MetaFileReader {
     }
 
     public Meta read(Context context, String path, Charset encoding) throws IOException, ParseException {
-        return read(context, context.getIo().getFile(path), encoding);
+        return read(context, context.getIo().getRootDir().resolve(path), encoding);
     }
 
     public Meta read(Context context, String path) throws IOException, ParseException {
-        return read(context, context.getIo().getFile(path), null);
+        return read(context, context.getIo().getRootDir().resolve(path), null);
     }
 
     public Meta read(Context context, Path file, Charset encoding) throws IOException, ParseException {

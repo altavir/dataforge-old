@@ -17,7 +17,8 @@ package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.kodex.*
+import hep.dataforge.kodex.buildMeta
+import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
@@ -74,7 +75,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
 
     override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
         super.applyValueChange(name, oldItem, newItem)
-        if(name == "density"){
+        if (name == "density") {
             invalidateCache()
         }
     }
@@ -101,7 +102,8 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
         }
     }
 
-    @Synchronized private fun invalidateCache() {
+    @Synchronized
+    private fun invalidateCache() {
         this.cache.clear()
     }
 
@@ -110,7 +112,8 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      *
      * @param x
      */
-    @Synchronized private fun eval(x: Double): Double {
+    @Synchronized
+    private fun eval(x: Double): Double {
         val y = function(x)
         this.cache.put(x, y)
         return y
@@ -150,9 +153,10 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
 
     companion object {
 
-        private val DEFAULT_DENSITY = 200
+        private const val DEFAULT_DENSITY = 200
 
-        fun plot(name: String, from: Double, to: Double, numPoints: Int = 200, function: (Double) -> Double): XYFunctionPlot {
+        @JvmOverloads
+        fun plot(name: String, from: Double, to: Double, numPoints: Int = DEFAULT_DENSITY, function: (Double) -> Double): XYFunctionPlot {
             val p = XYFunctionPlot(name, function)
             p.range = Pair(from, to)
             p.density = numPoints

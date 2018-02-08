@@ -36,6 +36,7 @@ import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
 import org.apache.commons.math3.linear.RealMatrix;
 import org.apache.commons.math3.linear.RealVector;
 import org.apache.commons.math3.random.RandomGenerator;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Optional;
@@ -244,7 +245,7 @@ public class MarginalFunctionBuilder implements GenericBuilder<ParametricValue, 
             }
 
             @Override
-            public Optional<Value> optValue(String path) {
+            public Optional<Value> optValue(@NotNull String path) {
                 return Optionals.either(vector.optValue(path)).or(startingPoint.optValue(path)).opt();
             }
         }

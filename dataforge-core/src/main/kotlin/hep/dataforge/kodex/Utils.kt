@@ -3,11 +3,15 @@ package hep.dataforge.kodex
 import java.io.OutputStream
 import java.util.*
 
-val <T> Optional<T>?.nullable: T?
+inline val <T> Optional<T>?.nullable: T?
     get() = this?.orElse(null)
 
-val <T> T?.optional: Optional<T>
+inline val <T> T?.optional: Optional<T>
     get() = Optional.ofNullable(this)
+
+inline fun <T> T?.orElse(sup: () -> T): T {
+    return this?: sup.invoke()
+}
 
 
 object IO {

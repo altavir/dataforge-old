@@ -31,6 +31,6 @@ public interface ContextMetaFactory<T> {
     T build(Context context, Meta meta);
 
     default T build(){
-        return build(Global.Companion.instance(), MetaBuilder.buildEmpty(null));
+        return build(Global.INSTANCE, MetaBuilder.buildEmpty(null));
     }
 }

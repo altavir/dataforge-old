@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -46,7 +46,7 @@ public class FitManager extends BasicPlugin {
     @Override
     public void attach(Context context) {
         super.attach(context);
-        modelManager = context.getFeature(ModelManager.class);
+        modelManager = context.get(ModelManager.class);
     }
 
     @Override
@@ -147,16 +147,15 @@ public class FitManager extends BasicPlugin {
         return newState;
     }
 
-    public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(FitManager.class);
-        }
-
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new FitManager();
+        }
+
+        @Override
+        public Class<? extends Plugin> getType() {
+            return FitManager.class;
         }
     }
 }

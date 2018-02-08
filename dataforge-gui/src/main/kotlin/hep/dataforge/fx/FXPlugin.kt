@@ -1,6 +1,9 @@
 package hep.dataforge.fx
 
-import hep.dataforge.context.*
+import hep.dataforge.context.BasicPlugin
+import hep.dataforge.context.Plugin
+import hep.dataforge.context.PluginDef
+import hep.dataforge.context.PluginFactory
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Meta
@@ -44,10 +47,6 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
      * Wait for application and toolkit to start
      */
     fun checkApp() {
-
-        if (context == null) {
-            throw IllegalStateException("Plugin not attached")
-        }
         synchronized(this) {
             if (FX.getApplication(DefaultScope) == null) {
                 if (consoleMode) {
@@ -106,11 +105,8 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
         }
     }
 
-    class Factory : PluginFactory {
-
-        override fun getTag(): PluginTag {
-            return Plugin.resolveTag(FXPlugin::class.java)
-        }
+    class Factory : PluginFactory() {
+        override val type: Class<out Plugin> = FXPlugin::class.java
 
         override fun build(meta: Meta): Plugin {
             return FXPlugin(meta)

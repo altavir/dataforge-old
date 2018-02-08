@@ -1,2 +1,3 @@
 hep.dataforge.actions.ActionManager$Factory
 hep.dataforge.cache.CachePlugin$Factory
+hep.dataforge.io.DirectoryIO$Factory

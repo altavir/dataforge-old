@@ -138,7 +138,7 @@ class Grind {
     }
 
     static Workspace buildWorkspace(@DelegatesTo(value = WorkspaceSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
-        WorkspaceSpec spec = new WorkspaceSpec(Global.instance());
+        WorkspaceSpec spec = new WorkspaceSpec(Global.INSTANCE);
         def script = cl.rehydrate(spec, null, null);
         script.setResolveStrategy(Closure.DELEGATE_ONLY)
         script.call()

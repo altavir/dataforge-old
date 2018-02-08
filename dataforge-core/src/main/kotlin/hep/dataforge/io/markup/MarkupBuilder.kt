@@ -1,6 +1,5 @@
 package hep.dataforge.io.markup
 
-import hep.dataforge.io.markup.GenericMarkupRenderer.Companion.LIST_TYPE
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -12,6 +11,7 @@ import java.util.stream.Stream
 /**
  * Created by darksnake on 03-Jan-17.
  */
+@Deprecated("to be replaced by KMarkup")
 class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     private val builder = MetaBuilder("markup")
@@ -111,7 +111,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
     }
 
     fun content(content: Markup): MarkupBuilder {
-        builder.putNode(Markup.MARKUP_CONTENT_NODE, content.meta)
+        builder.putNode(Markup.MARKUP_CONTENT_NODE, content.toMeta())
         return self()
     }
 
@@ -172,7 +172,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      */
     fun list(vararg items: MarkupBuilder): MarkupBuilder {
         return content(MarkupBuilder()
-                .setType(GenericMarkupRenderer.LIST_TYPE)
+                .setType(Markup.LIST_TYPE)
                 .setContent(*items)
         )
     }
@@ -184,7 +184,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     fun table(vararg rows: MarkupBuilder): MarkupBuilder {
         return content(MarkupBuilder()
-                .setType(GenericMarkupRenderer.TABLE_TYPE)
+                .setType(Markup.TABLE_TYPE)
                 .setContent(*rows)
         )
     }
@@ -211,7 +211,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
          * @return
          */
         fun list(level: Int, bullet: String?): MarkupBuilder {
-            val res = MarkupBuilder().setType(LIST_TYPE)
+            val res = MarkupBuilder().setType(Markup.LIST_TYPE)
             if (level > 0) {
                 res.setValue("level", level)
             }

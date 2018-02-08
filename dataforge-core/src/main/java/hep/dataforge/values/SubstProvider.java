@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,6 +32,7 @@ public abstract class SubstProvider implements ValueProvider {
      *
      * @param name
      */
+    @NotNull
     @Override
     public Value getValue(String name) {
         Value val = getValueForName(name);

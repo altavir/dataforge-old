@@ -1,12 +1,15 @@
 package hep.dataforge.grind.workspace
 
+import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
+import hep.dataforge.context.ContextBuilder
 import hep.dataforge.grind.Grind
 import hep.dataforge.meta.Meta
 
 /**
  * A specification to builder context via grind workspace definition
  */
+@CompileStatic
 class ContextSpec {
     private final Context parent;
 
@@ -20,7 +23,7 @@ class ContextSpec {
 
     Context build() {
         //using current context as a parent for workspace context
-        Context res = Context.builder(name, parent).build()
+        Context res = new ContextBuilder(name, parent).build()
         properties.each { key, value -> res.setValue(key.toString(), value) }
         pluginMap.forEach { String key, Meta meta ->
             res.getPluginManager().load(key, meta)

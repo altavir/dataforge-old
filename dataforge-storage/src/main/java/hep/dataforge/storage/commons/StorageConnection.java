@@ -43,7 +43,7 @@ public class StorageConnection implements Connection, Responder, Metoid, Context
      */
     public StorageConnection(Context context, Meta meta) {
         this.meta = meta;
-        StorageManager storageManager = context.getPluginManager().getOrLoad(StorageManager.class);
+        StorageManager storageManager = context.getPluginManager().load(StorageManager.class);
         this.storage = storageManager.buildStorage(meta);
     }
 

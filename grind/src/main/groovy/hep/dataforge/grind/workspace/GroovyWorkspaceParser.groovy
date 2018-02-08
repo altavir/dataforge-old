@@ -17,7 +17,7 @@ class GroovyWorkspaceParser implements WorkspaceParser {
     }
 
     @Override
-    Workspace.Builder parse(Context parentContext = Global.instance(), Reader reader) {
+    Workspace.Builder parse(Context parentContext = Global.INSTANCE, Reader reader) {
 //        String scriptText = new String(reader.Files.readAllBytes(path), IOUtils.UTF8_CHARSET);
 
         def compilerConfiguration = new CompilerConfiguration()

@@ -16,6 +16,8 @@
 
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -38,7 +40,7 @@ public class MapValueProvider implements ValueProvider {
     }
 
     @Override
-    public Optional<Value> optValue(String path) {
+    public Optional<Value> optValue(@NotNull String path) {
         return Optional.ofNullable(map.get(path));
     }
 }

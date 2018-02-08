@@ -92,7 +92,7 @@ public class NamedVector implements Values, MetaMorph {
     }
 
     @Override
-    public Optional<Value> optValue(String path) {
+    public Optional<Value> optValue(@NotNull String path) {
         int n = this.getNumberByName(path);
         if (n < 0) {
             return Optional.empty();

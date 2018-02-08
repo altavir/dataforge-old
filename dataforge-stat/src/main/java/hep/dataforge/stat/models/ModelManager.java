@@ -89,16 +89,15 @@ public class ModelManager extends BasicPlugin {
         return MODEL_TARGET;
     }
 
-    public static class Factory implements PluginFactory {
-
-        @Override
-        public PluginTag getTag() {
-            return Plugin.resolveTag(ModelManager.class);
-        }
-
+    public static class Factory extends PluginFactory {
         @Override
         public Plugin build(Meta meta) {
             return new ModelManager();
+        }
+
+        @Override
+        public Class<? extends Plugin> getType() {
+            return ModelManager.class;
         }
     }
 }

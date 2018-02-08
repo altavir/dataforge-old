@@ -1,7 +1,10 @@
 package hep.dataforge.io.markup
 
 import hep.dataforge.description.ValueDef
+import hep.dataforge.io.markup.Markup.Companion.LIST_TYPE
 import hep.dataforge.io.markup.Markup.Companion.MARKUP_GROUP_TYPE
+import hep.dataforge.io.markup.Markup.Companion.TABLE_TYPE
+import hep.dataforge.io.markup.Markup.Companion.TEXT_TYPE
 import hep.dataforge.values.ValueType.BOOLEAN
 import org.slf4j.LoggerFactory
 
@@ -26,9 +29,8 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param element
      */
     protected fun doRender(element: Markup) {
-        when (inferType(element)) {
-            MARKUP_GROUP_TYPE //render container
-            -> element.content.forEach { this.doRender(it) }
+        when (element.type) {
+            MARKUP_GROUP_TYPE -> element.content.forEach { this.doRender(it) }//render container
             TEXT_TYPE -> text(element)
             LIST_TYPE -> list(element)
             TABLE_TYPE -> table(element)
@@ -43,14 +45,6 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      */
     protected fun doRenderOther(markup: Markup) {
         LoggerFactory.getLogger(javaClass).error("Unknown markup type: " + markup.type)
-    }
-
-    protected fun inferType(element: Markup): String {
-        return if (element.hasValue("text")) {
-            TEXT_TYPE
-        } else {
-            Markup.MARKUP_GROUP_TYPE
-        }
     }
 
     /**
@@ -134,12 +128,6 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
     @ValueDef(name = "header", type = arrayOf(BOOLEAN), info = "If true the row is considered to be a header")
     protected abstract fun tableRow(element: Markup)
 
-    companion object {
-        const val TEXT_TYPE = "text"
-        const val HEADER_TYPE = "head"
-        const val LIST_TYPE = "list"
-        const val TABLE_TYPE = "table"
-    }
 
     //    /**
     //     * Header

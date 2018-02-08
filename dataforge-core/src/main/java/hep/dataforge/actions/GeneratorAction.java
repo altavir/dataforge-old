@@ -24,7 +24,7 @@ public abstract class GeneratorAction<R> extends GenericAction<Void, R> {
 
     @Override
     public DataNode<R> run(Context context, DataNode<? extends Void> data, Meta actionMeta) {
-        Chronicle log = context.getChronicle(getName());
+        Chronicle log = context.getHistory().getChronicle(getName());
 
         Stream<ActionResult<R>> results = nameStream().map(name -> {
             Goal<R> goal = new GeneratorGoal<>(getExecutorService(context, actionMeta), () -> generateData(name));

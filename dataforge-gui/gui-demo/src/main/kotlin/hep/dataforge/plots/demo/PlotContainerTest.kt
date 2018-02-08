@@ -15,7 +15,7 @@
  */
 package hep.dataforge.plots.demo
 
-import hep.dataforge.fx.plots.PlotManager
+import hep.dataforge.fx.plots.FXPlotManager
 import hep.dataforge.fx.plots.group
 import hep.dataforge.fx.plots.plot
 import hep.dataforge.meta.MetaBuilder
@@ -50,7 +50,7 @@ fun main(args: Array<String>) {
     val dataPlot = DataPlot.plot("data.Plot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 
 
-    val manager = PlotManager();
+    val manager = FXPlotManager();
     manager.startGlobal();
 
     manager.display("test", "testLog") {
