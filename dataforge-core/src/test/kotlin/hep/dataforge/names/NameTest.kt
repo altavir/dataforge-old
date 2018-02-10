@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.names
+package hep.dataforge.names
 
-import hep.dataforge.names.Name
 import org.junit.Assert
 import org.junit.Assert.assertEquals
 import org.junit.Test

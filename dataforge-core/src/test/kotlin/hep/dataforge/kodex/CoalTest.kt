@@ -14,12 +14,9 @@
  *  limitations under the License.
  */
 
-package dataforge.kodex
+package hep.dataforge.kodex
 
 import hep.dataforge.context.Global
-import hep.dataforge.kodex.generate
-import hep.dataforge.kodex.join
-import hep.dataforge.kodex.pipe
 import kotlinx.coroutines.experimental.DefaultDispatcher
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue

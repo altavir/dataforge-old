@@ -35,7 +35,7 @@ public interface ContextAware {
 
     default Logger getLogger() {
         if (this instanceof Named) {
-            return LoggerFactory.getLogger(getContext().getLogger().getName() + "." + ((Named) this).getName());
+            return LoggerFactory.getLogger(getContext().getName() + "." + ((Named) this).getName());
         } else {
             return getContext().getLogger();
         }

@@ -14,10 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.values
+package hep.dataforge.values
 
-import hep.dataforge.values.Value
-import hep.dataforge.values.ValueUtils
 import spock.lang.Specification
 
 import java.time.Instant

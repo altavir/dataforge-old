@@ -14,10 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.io.envelopes
+package hep.dataforge.io.envelopes
 
-import hep.dataforge.io.envelopes.EnvelopeBuilder
-import hep.dataforge.io.envelopes.TaglessEnvelopeType
 import hep.dataforge.meta.MetaBuilder
 import org.junit.Assert.assertEquals
 import org.junit.Test

@@ -14,10 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.io.markup
+package hep.dataforge.io.markup
 
-import hep.dataforge.io.markup.SimpleMarkupRenderer
-import hep.dataforge.io.markup.markup
 import org.junit.Test
 
 class MarkupTest {

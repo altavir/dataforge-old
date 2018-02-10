@@ -104,7 +104,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     protected ExecutorService getExecutorService(Context context, Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return context.getExecutor().getDefaultExecutor();
+            return context.getExecutors().getDefaultExecutor();
         } else {
             return context.getDispatcher();
         }

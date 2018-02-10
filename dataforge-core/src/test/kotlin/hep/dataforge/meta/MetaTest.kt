@@ -13,10 +13,9 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dataforge.meta
+package hep.dataforge.meta
 
 import hep.dataforge.exceptions.NamingException
-import hep.dataforge.meta.MetaBuilder
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Before

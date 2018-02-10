@@ -14,11 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.meta
+package hep.dataforge.meta
 
-import hep.dataforge.meta.Laminate
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import org.junit.Assert.assertEquals
 import org.junit.Test
 

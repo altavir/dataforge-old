@@ -10,6 +10,7 @@ import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -128,14 +129,16 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
         this.devices.values().forEach(device -> device.getConnectionHelper().connect(context, meta));
     }
 
-    public static class Factory implements PluginFactory {
+    public static class Factory extends PluginFactory {
+        @NotNull
         @Override
-        public Plugin build(Meta meta) {
+        public Plugin build(@NotNull Meta meta) {
             return new DeviceManager();
         }
 
+        @NotNull
         @Override
-        public Class<? extends Plugin> type() {
+        public Class<? extends Plugin> getType() {
             return DeviceManager.class;
         }
     }

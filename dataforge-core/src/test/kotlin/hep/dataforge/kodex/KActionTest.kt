@@ -14,13 +14,10 @@
  *  limitations under the License.
  */
 
-package dataforge.kodex
+package hep.dataforge.kodex
 
 import hep.dataforge.context.Global
 import hep.dataforge.data.DataSet
-import hep.dataforge.kodex.KPipe
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.task
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.BasicWorkspace
 import junit.framework.TestCase.assertEquals

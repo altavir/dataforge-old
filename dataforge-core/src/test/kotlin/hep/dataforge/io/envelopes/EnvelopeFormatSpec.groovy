@@ -14,12 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.io.envelopes
+package hep.dataforge.io.envelopes
 
-import hep.dataforge.io.envelopes.DefaultEnvelopeReader
-import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import spock.lang.Specification

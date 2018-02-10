@@ -14,10 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.io
+package hep.dataforge.io
 
-import hep.dataforge.io.XMLMetaReader
-import hep.dataforge.io.XMLMetaWriter
 import hep.dataforge.meta.MetaBuilder
 import spock.lang.Specification
 

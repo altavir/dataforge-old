@@ -73,7 +73,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             pluginManager.load(DefaultIOManager())
         }
 
-    override val executor: ExecutorPlugin
+    override val executors: ExecutorPlugin
         get() = pluginManager.get(ExecutorPlugin::class).orElse {
             logger.debug("No executor plugin found. Using default executor.")
             pluginManager.load(DefaultExecutorPlugin())

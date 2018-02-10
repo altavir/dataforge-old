@@ -14,14 +14,11 @@
  *  limitations under the License.
  */
 
-package dataforge.meta
+package hep.dataforge.meta
 
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.XMLMetaReader
 import hep.dataforge.io.XMLMetaWriter
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.meta.MetaUtils
 import spock.lang.Specification
 
 /**

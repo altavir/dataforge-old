@@ -19,7 +19,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package dataforge.meta
+package hep.dataforge.meta
 
 import hep.dataforge.io.XMLMetaReader
 import hep.dataforge.meta.Template

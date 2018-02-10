@@ -19,7 +19,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package dataforge.goals
+package hep.dataforge.goals
 
 import org.junit.Test
 

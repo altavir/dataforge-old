@@ -217,7 +217,7 @@ fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, s
 //suspending functions
 
 val Context.coroutineContext: CoroutineContext
-    get() = this.executor.kDispatcher
+    get() = this.executors.kDispatcher
 
 /**
  * Use goal as a suspending function

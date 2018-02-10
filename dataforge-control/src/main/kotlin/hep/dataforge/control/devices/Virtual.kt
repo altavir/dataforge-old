@@ -33,8 +33,8 @@ class VirtualSensor(context: Context) : Sensor(context, Meta.empty()) {
         if (oldMeta !== newMeta) {
             stopMeasurement(oldMeta)
             val delay = Duration.parse(newMeta.getString("duration", "PT0.2S"))
-            val mean = newMeta.getDouble("mean", 1.0)!!
-            val sigma = newMeta.getDouble("sigma", 0.1)!!
+            val mean = newMeta.getDouble("mean", 1.0)
+            val sigma = newMeta.getDouble("sigma", 0.1)
 
             startMeasurement {
                 Thread.sleep(delay.toMillis())

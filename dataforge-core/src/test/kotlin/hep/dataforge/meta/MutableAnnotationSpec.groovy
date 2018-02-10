@@ -13,12 +13,8 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package dataforge.meta
+package hep.dataforge.meta
 
-import hep.dataforge.meta.ConfigChangeListener
-import hep.dataforge.meta.Configuration
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.values.Value
 import spock.lang.Specification

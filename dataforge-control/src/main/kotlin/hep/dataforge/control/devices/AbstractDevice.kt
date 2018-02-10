@@ -98,11 +98,11 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
 
 
     override fun getContext(): Context {
-        if (context == null) {
+        return if (context == null) {
             logger.warn("Context for device not defined. Using GLOBAL context.")
-            return Global.instance()
+            Global
         } else {
-            return this.context
+            this.context
         }
     }
 

@@ -14,9 +14,8 @@
  *  limitations under the License.
  */
 
-package dataforge.io.markup
+package hep.dataforge.io.markup
 
-import hep.dataforge.io.markup.*
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
 import spock.lang.Specification
