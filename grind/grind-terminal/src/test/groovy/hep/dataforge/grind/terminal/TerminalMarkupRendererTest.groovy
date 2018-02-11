@@ -41,7 +41,7 @@ class TerminalMarkupRendererTest extends Specification {
                 .text("text end")
         Markup markup = builder.build();
         then:
-        println(markup.meta.toString())
+        println(markup.toMeta().toString())
         r.render(markup);
         println()
     }

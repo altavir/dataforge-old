@@ -16,13 +16,13 @@
 
 package hep.dataforge.io.markup
 
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.mutableIntValue
-import hep.dataforge.kodex.mutableNode
 import hep.dataforge.kodex.mutableStringValue
-import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.values.Value
 import java.util.*
+import kotlin.collections.ArrayList
 
 @DslMarker
 annotation class MarkupDSL
@@ -31,37 +31,19 @@ annotation class MarkupDSL
  * User level DSL to build markup
  */
 @MarkupDSL
-open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = MetaBuilder("markup")) : Markup {
-    override var style: MetaBuilder by meta.mutableNode(Markup.MARKUP_STYLE_NODE)
-    override var type
-        get() = meta.getString("type") { Markup.inferType(this) }
-        set(value) {
-            meta.setValue("type", value)
-        }
+open class KMarkup(override val parent: Markup? = null) : Markup {
 
-    override var content: List<KMarkup>
-        get() = meta.getMetaList(Markup.MARKUP_CONTENT_NODE).map { KMarkup(parent = this, meta = it.builder) }
-        set(value) {
-            meta.setNode(Markup.MARKUP_CONTENT_NODE, value.map { it.meta })
-        }
+    override val type: String = Markup.MARKUP_GROUP_TYPE
 
-    /**
-     * Create a sealed markup from this builder
-     */
-    fun build(): Markup {
-        return GenericMarkup(meta.build())
-    }
-
-    protected fun addContent(content: Meta) {
-        meta.putNode(Markup.MARKUP_CONTENT_NODE, content)
-    }
+    override var style: MetaBuilder = MetaBuilder(Markup.MARKUP_STYLE_NODE)
+    override var content: MutableList<Markup> = ArrayList()
 
     /**
      * Add given markup as a child
      */
-    fun addContent(markup: KMarkup): KMarkup {
+    fun add(markup: Markup): Markup {
         return markup.also {
-            this.meta.attachNode(markup.meta.rename(Markup.MARKUP_CONTENT_NODE))
+            content.add(it)
         }
     }
 
@@ -73,19 +55,12 @@ open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = 
 
     }
 
-//    /**
-//     * Add given markup as a child
-//     */
-//    operator fun Markup.unaryPlus() {
-//        return addContent(this.toMeta())
-//    }
-
     @JvmOverloads
     fun text(text: String = "", color: String = "", action: KTextMarkup.() -> Unit = {}): KTextMarkup {
         return KTextMarkup(parent = this).apply {
             this.text = text
             this.color = color;
-        }.apply(action).also { addContent(it) }
+        }.apply(action).also { add(it) }
     }
 
     @JvmOverloads
@@ -97,37 +72,45 @@ open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = 
                 }
                 .apply(action)
                 .also {
-                    addContent(it)
+                    add(it)
                 }
     }
 
-    fun ln() {
-        +"\n"
-    }
+//    fun ln() {
+//        +"\n"
+//    }
 
-    override fun toMeta(): Meta {
-        return meta
+    override fun toMeta(): MetaBuilder {
+        return buildMeta("markup") {
+            setNode("style", style)
+            "type" to type
+            content.forEach {
+                putNode(Markup.MARKUP_CONTENT_NODE, it.toMeta())
+            }
+        }
     }
 
     override fun optValue(path: String): Optional<Value> {
-        return meta.optValue(path)
+        return styleStack.optValue(path)
     }
 
 }
 
-class KTextMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("text")) : KMarkup(parent, meta) {
-    init {
-        type = Markup.TEXT_TYPE
-    }
+class KTextMarkup(parent: Markup?) : KMarkup(parent) {
 
-    var text: String by meta.mutableStringValue()
+    var text: String = ""
     var color by style.mutableStringValue()
+    override val type = Markup.TEXT_TYPE
 
     //var textWidth by meta.mutableIntValue(def = -1)
 
+    override fun toMeta(): MetaBuilder {
+        return super.toMeta().setValue("text", text)
+    }
+
     companion object {
         @JvmOverloads
-        fun create(text: String, parent: Markup? = null): KTextMarkup{
+        fun create(text: String, parent: Markup? = null): KTextMarkup {
             return KTextMarkup(parent).apply {
                 this.text = text
             }
@@ -135,39 +118,31 @@ class KTextMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("text")) : KM
     }
 }
 
-class KHeaderMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("header")) : KMarkup(parent, meta) {
-    init {
-        type = Markup.HEADER_TYPE
-    }
-
-    var level by meta.mutableIntValue(def = 1)
+class KHeaderMarkup(parent: Markup?) : KMarkup(parent) {
+    override val type = Markup.HEADER_TYPE
+    var level by style.mutableIntValue(def = 1)
 }
 
-class KListMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("list")) : KMarkup(parent, meta) {
-    init {
-        type = Markup.LIST_TYPE
-    }
+class KListMarkup(parent: Markup?) : KMarkup(parent) {
 
-    var level by meta.mutableIntValue()
-    var bullet by meta.mutableStringValue(def = "*")
+    override val type = Markup.LIST_TYPE
+    var level by style.mutableIntValue()
+    var bullet by style.mutableStringValue(def = "*")
 
     fun item(action: KMarkup.() -> Unit) {
-        addContent(KMarkup(parent = this).apply(action))
+        add(KMarkup(parent = this).apply(action))
     }
 }
 
-class KTableMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("table")) : KMarkup(parent, meta) {
-    init {
-        type = Markup.TABLE_TYPE
-    }
+class KTableMarkup(parent: Markup?) : KMarkup(parent) {
 
-
+    override val type = Markup.TABLE_TYPE
     fun row(action: KMarkup.() -> Unit) {
-        addContent(KMarkup(this).apply(action))
+        add(KMarkup(this).apply(action))
     }
 
 }
 
-fun markup(dsl: KMarkup.() -> Unit): Markup {
-    return KMarkup().apply(dsl).build()
+fun markup(dsl: KMarkup.() -> Unit): KMarkup {
+    return KMarkup().apply(dsl)
 }

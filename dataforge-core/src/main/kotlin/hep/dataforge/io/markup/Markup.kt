@@ -43,9 +43,9 @@ interface Markup : MetaMorph, ValueProvider {
      * Set of styles including all ancestors
      * //TODO better name
      */
-    val styleSet: Laminate
+    val styleStack: Laminate
         get() {
-            return parent?.styleSet?.withFirstLayer(style) ?: Laminate(style)
+            return parent?.styleStack?.withFirstLayer(style) ?: Laminate(style)
         }
 
     companion object : MorphProvider<Markup> {
