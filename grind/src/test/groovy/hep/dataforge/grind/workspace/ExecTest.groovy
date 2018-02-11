@@ -68,7 +68,7 @@ class ExecTest extends Specification {
         (1..8).each {
             builder.putData("test$it","test$it",Grind.buildMeta(result: "OK$it"))
         }
-        def res = exec.build().run(Global.instance(), builder.build(), Meta.empty())
+        def res = exec.build().run(Global.INSTANCE, builder.build(), Meta.empty())
         then:
         res.computeAll()
         res.getSize() == 8

@@ -4,6 +4,7 @@ import hep.dataforge.grind.GrindMarkupBuilder
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 import hep.dataforge.io.markup.MarkupUtils
+import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotDataAction
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
@@ -61,9 +62,9 @@ class TerminalMarkupRendererTest extends Specification {
                 .row(4.5, 5.678, -2)
                 .row(0, 0, 0)
                 .build()
-        Markup markup = MarkupUtils.markupTable(table).build();
+        Markup markup = table.markup(Meta.empty())
         then:
-        println(markup.meta.toString())
+        //println(markup.toMeta())
         r.render(markup)
         println()
     }

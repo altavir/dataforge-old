@@ -30,10 +30,14 @@ annotation class MarkupDSL
 /**
  * User level DSL to build markup
  */
-//@MarkupDSL
+@MarkupDSL
 open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = MetaBuilder("markup")) : Markup {
     override var style: MetaBuilder by meta.mutableNode(Markup.MARKUP_STYLE_NODE)
-    override var type: String by meta.mutableStringValue(Markup.MARKUP_TYPE_KEY, "")
+    override var type
+        get() = meta.getString("type") { Markup.inferType(this) }
+        set(value) {
+            meta.setValue("type", value)
+        }
 
     override var content: List<KMarkup>
         get() = meta.getMetaList(Markup.MARKUP_CONTENT_NODE).map { KMarkup(parent = this, meta = it.builder) }
@@ -76,6 +80,7 @@ open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = 
 //        return addContent(this.toMeta())
 //    }
 
+    @JvmOverloads
     fun text(text: String = "", color: String = "", action: KTextMarkup.() -> Unit = {}): KTextMarkup {
         return KTextMarkup(parent = this).apply {
             this.text = text
@@ -83,6 +88,7 @@ open class KMarkup(override val parent: Markup? = null, val meta: MetaBuilder = 
         }.apply(action).also { addContent(it) }
     }
 
+    @JvmOverloads
     fun list(level: Int? = null, bullet: String? = null, action: KListMarkup.() -> Unit = {}): KListMarkup {
         return KListMarkup(parent = this)
                 .apply {
@@ -115,9 +121,18 @@ class KTextMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("text")) : KM
     }
 
     var text: String by meta.mutableStringValue()
-    var color by meta.mutableStringValue()
+    var color by style.mutableStringValue()
 
-    var textWidth by meta.mutableIntValue(def = -1)
+    //var textWidth by meta.mutableIntValue(def = -1)
+
+    companion object {
+        @JvmOverloads
+        fun create(text: String, parent: Markup? = null): KTextMarkup{
+            return KTextMarkup(parent).apply {
+                this.text = text
+            }
+        }
+    }
 }
 
 class KHeaderMarkup(parent: Markup?, meta: MetaBuilder = MetaBuilder("header")) : KMarkup(parent, meta) {

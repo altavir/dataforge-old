@@ -70,6 +70,9 @@ class KTaskBuilder(val name: String) {
 //        }
 //    }
 
+    /**
+     * Perform given action on data elements in `from` node in input and put the result to `to` node
+     */
     inline fun <reified T, reified R> action(action: Action<T, R>, from: String = "", to: String = "") {
         val transform: TaskModel.(DataNode<T>) -> DataNode<R> = { data ->
             action.run(context, data, meta)
@@ -169,7 +172,7 @@ class KTaskBuilder(val name: String) {
 //    }
 
 
-    internal fun build(): KTask {
+    fun build(): KTask {
         val transform: TaskModel.(DataNode<Any>) -> DataNode<Any> = { data ->
             val model = this;
             if (dataTransforms.isEmpty()) {

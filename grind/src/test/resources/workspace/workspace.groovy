@@ -3,7 +3,7 @@
 context{
     name = "TEST"
     plugin "cache"
-    plugin "plots"
+    plugin "plots-fx"
     properties{
         a = 4
         b = false

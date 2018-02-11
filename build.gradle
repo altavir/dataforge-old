@@ -1,4 +1,4 @@
-buildscript{
+buildscript {
     ext.kotlin_version = "1.2.21"
 }
 
@@ -45,25 +45,29 @@ subprojects {
         }
 
 
-        if (project.hasProperty('npm_user')) {
-            publishing {
-                repositories {
-                    maven {
+
+        publishing {
+            repositories {
+                maven {
+                    if (project.hasProperty('npm_user')) {
                         // change to point to your repo, e.g. http://my.org/repo
-                        url "http://npm.mipt.ru/var/www/maven"
+                        url = "sftp://npm.mipt.ru:22/var/www/maven"
                         credentials {
                             username npm_user
                             password npm_pass
                         }
-                    }
-                }
-                publications {
-                    miptNPM(MavenPublication) {
-                        from components.java
+                    } else {
+                        url "file:" + projectDir.path + "/build/maven"
                     }
                 }
             }
+            publications {
+                miptNPM(MavenPublication) {
+                    from components.java
+                }
+            }
         }
+
 
 
         compileKotlin {

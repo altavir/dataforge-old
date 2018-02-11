@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,6 +15,7 @@
  */
 package hep.dataforge.tables;
 
+import hep.dataforge.io.markup.KTextMarkup;
 import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
@@ -44,14 +45,16 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
 
     /**
      * Get columns as a stream
+     *
      * @return
      */
     Stream<Column> getColumns();
 
     /**
      * Get a specific value
+     *
      * @param columnName the name of the column
-     * @param rowNumber the number of the row
+     * @param rowNumber  the number of the row
      * @return
      */
     Value get(String columnName, int rowNumber);
@@ -60,17 +63,18 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
     @Override
     default Markup markup(@NotNull Meta configuration) {
         MarkupBuilder builder = new MarkupBuilder().setType(Markup.TABLE_TYPE);
+
         //render header
         builder.content(new MarkupBuilder()
                 .setValue("header", true)
-                .setType("tr") //optional
-                .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(col.getTitle())))
+                .setType(Markup.ROW_TYPE) //optional
+                .setContent(getFormat().getColumns().map(col -> KTextMarkup.Companion.create(col.getTitle())))
         );
         //render table itself
         forEach(dp -> {
             builder.content(new MarkupBuilder()
-                    .setType("td") // optional
-                    .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(dp.getString(col.getName())))));
+                    .setType(Markup.ROW_TYPE) // optional
+                    .setContent(getFormat().getColumns().map(col -> KTextMarkup.Companion.create(dp.getString(col.getName())))));
         });
         return builder.build();
     }

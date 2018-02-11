@@ -7,7 +7,6 @@ import hep.dataforge.io.markup.Markup.Companion.MARKUP_CONTENT_NODE
 import hep.dataforge.io.markup.Markup.Companion.MARKUP_STYLE_NODE
 import hep.dataforge.io.markup.Markup.Companion.MARKUP_TYPE_KEY
 import hep.dataforge.kodex.node
-import hep.dataforge.kodex.stringValue
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaMorph
@@ -62,6 +61,7 @@ interface Markup : MetaMorph, ValueProvider {
         const val HEADER_TYPE = "head"
         const val LIST_TYPE = "list"
         const val TABLE_TYPE = "table"
+        const val ROW_TYPE = "tr"
 
         override fun morph(meta: Meta): Markup {
             return morph(meta, null)
@@ -69,6 +69,17 @@ interface Markup : MetaMorph, ValueProvider {
 
         fun morph(meta: Meta, parent: Markup? = null): Markup {
             return GenericMarkup(meta, parent)
+        }
+
+        fun inferType(element: Markup): String {
+            return if (element.hasValue("text")) {
+                TEXT_TYPE
+            } else {
+                when (element.parent?.type) {
+                    TABLE_TYPE -> ROW_TYPE
+                    else -> throw RuntimeException("Can't infer markup element type")
+                }
+            }
         }
     }
 }
@@ -79,7 +90,7 @@ class GenericMarkup(val meta: Meta, override val parent: Markup? = null) : Marku
         return meta.optValue(path)
     }
 
-    override val type by meta.stringValue(def = Markup.MARKUP_GROUP_TYPE)
+    override val type = meta.getString("type") { Markup.inferType(this) }
 
     override val content: List<Markup>
         get() = meta.getMetaList(MARKUP_CONTENT_NODE).map { Markup.morph(it, this) }

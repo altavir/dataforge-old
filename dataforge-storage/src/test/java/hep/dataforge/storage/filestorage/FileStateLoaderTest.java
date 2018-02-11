@@ -46,7 +46,7 @@ public class FileStateLoaderTest {
 
     @Before
     public void setUp() throws IOException {
-        new StorageManager().startGlobal();
+        Global.INSTANCE.load(StorageManager.class);
         dir = Files.createTempDirectory("df_storage").toFile();
     }
 
@@ -60,7 +60,7 @@ public class FileStateLoaderTest {
 
     @Test
     public void testIO() throws Exception {
-        FileStorage storage = FileStorageFactory.buildLocal(Global.Companion.instance(),dir,false,true);
+        FileStorage storage = FileStorageFactory.buildLocal(Global.INSTANCE, dir, false, true);
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
 
         System.out.println("***starting write test***");

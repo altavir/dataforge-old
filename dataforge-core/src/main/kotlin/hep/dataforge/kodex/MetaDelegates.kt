@@ -19,10 +19,7 @@ package hep.dataforge.kodex
 import hep.dataforge.description.Described
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.PropertyDef
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaMorph
-import hep.dataforge.meta.MutableMetaNode
-import hep.dataforge.meta.SealedNode
+import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import java.time.Instant
 import kotlin.properties.ReadOnlyProperty
@@ -224,8 +221,10 @@ fun <T> MutableMetaNode<*>.mutableCustomValue(valueName: String? = null, def: T?
 /**
  * Returns a child node of given meta that could be edited in-place
  */
-inline fun <reified M : MutableMetaNode<out MutableMetaNode<*>>> MutableMetaNode<M>.mutableNode(metaName: String? = null, def: M? = null): ReadWriteProperty<Any, M> =
-        MutableMetaDelegate<M>(this, metaName, def, { it as M }, { it })
+fun MetaBuilder.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, MetaBuilder> =
+        MutableMetaDelegate(this, metaName, MetaBuilder(def ?: Meta.empty()), {
+            it as? MetaBuilder ?: it.builder
+        }, { it })
 
 fun <T> MutableMetaNode<*>.mutableCustomNode(metaName: String? = null, def: T? = null, read: (Meta) -> T, write: (T) -> Meta): ReadWriteProperty<Any, T> =
         MutableMetaDelegate(this, metaName, def, read, write)

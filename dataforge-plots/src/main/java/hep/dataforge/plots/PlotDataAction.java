@@ -51,7 +51,7 @@ import java.util.Map;
 //        info = "Save plot shapshots to file with default parameters")
 //@ValueDef(name = "serialize", type = "BOOLEAN", def = "false",
 //        info = "Serialize plot to file with default parameters")
-@NodeDef(name = "adapter", info = "Adapter for data", from = "class::hep.dataforge.tables.XYAdapter")
+@NodeDef(name = "adapter", info = "Adapter for data")
 
 public class PlotDataAction extends OneToOneAction<Table, Table> {
 

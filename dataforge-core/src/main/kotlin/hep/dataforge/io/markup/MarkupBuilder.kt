@@ -9,9 +9,9 @@ import java.util.stream.Stream
 
 
 /**
+ * Java-based Markup builder for Java and groovy. For kotlin use {@link KMarkup}.
  * Created by darksnake on 03-Jan-17.
  */
-@Deprecated("to be replaced by KMarkup")
 class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     private val builder = MetaBuilder("markup")
@@ -78,8 +78,6 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
         return self()
     }
 
-    //TODO apply style
-
     /**
      * Add content nodes to this markup
      *
@@ -91,13 +89,18 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
         return self()
     }
 
-    fun setContent(content: Stream<MarkupBuilder>): MarkupBuilder {
-        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map<Meta>{ it.meta }.toList())
+//    fun setContent(content: Stream<MarkupBuilder>): MarkupBuilder {
+//        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map<Meta>{ it.meta }.toList())
+//        return self()
+//    }
+
+    fun setContent(content: Stream<Markup>): MarkupBuilder {
+        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map<Meta> { it.toMeta() }.toList())
         return self()
     }
 
     fun setContent(vararg content: MarkupBuilder): MarkupBuilder {
-        return setContent(Stream.of(*content))
+        return setContent(Stream.of(*content).map { it.build() })
     }
 
     fun content(content: Meta): MarkupBuilder {
