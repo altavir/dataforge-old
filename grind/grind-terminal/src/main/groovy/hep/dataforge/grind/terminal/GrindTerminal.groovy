@@ -17,10 +17,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Named
 import hep.dataforge.workspace.FileBasedWorkspace
-import org.jline.reader.EndOfFileException
-import org.jline.reader.LineReader
-import org.jline.reader.LineReaderBuilder
-import org.jline.reader.UserInterruptException
+import org.jline.builtins.Completers
+import org.jline.reader.*
 import org.jline.terminal.Terminal
 import org.jline.terminal.TerminalBuilder
 import org.jline.terminal.impl.DumbTerminal
@@ -80,10 +78,6 @@ class GrindTerminal extends SimpleConfigurable {
             terminal = new DumbTerminal(System.in, System.out);
             terminal.echo(false);
 
-//            def console = System.console()
-//            if (console) {
-//                console.readLine('> Please enter your username: ')
-//            }
 
         }
 
@@ -131,6 +125,32 @@ class GrindTerminal extends SimpleConfigurable {
         }
     }
 
+    private Completers.TreeCompleter.Node completerNode(Object obj) {
+        List<Object> objs = new ArrayList()
+        if (obj != null) {
+            obj.class.declaredFields.findAll { !it.synthetic }
+                    .collect { obj.properties.get(it.name) }.findAll { it != null }
+                    .each {
+                        def node = completerNode(it)
+                        if(node!= null) {
+                            objs.add(node)
+                        }
+                    }
+            obj.class.declaredMethods.findAll { !it.synthetic }.each { objs.add(it.name) }
+        }
+        if (objs.size() > 0) {
+            return Completers.TreeCompleter.node(objs as Object[])
+        } else {
+            return null
+        }
+    }
+
+    private Completer setupCompleter() {
+        new Completers.TreeCompleter(shell.getBinding().list().values().collect {
+            completerNode(it)
+        }.findAll { it != null })
+    }
+
     /**
      * Apply some closure to each of sub-results using shell configuration
      * @param res
@@ -159,10 +179,10 @@ class GrindTerminal extends SimpleConfigurable {
 
     def show(Object obj) {
         if (obj instanceof Markedup) {
-            renderer.render{ it.ln()}
+            renderer.render { it.ln() }
             if (obj instanceof Named) {
                 renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
-                renderer.render{it.ln()}
+                renderer.render { it.ln() }
             }
             renderer.render((obj as Markedup).markup(markupConfig))
         }
@@ -186,7 +206,7 @@ class GrindTerminal extends SimpleConfigurable {
                 renderer.render(MarkupUtils.markupDescriptor(descriptor))
             }
         } else {
-            renderer.render{it.text("No description found for ").text("${obj}", "blue")}
+            renderer.render { it.text("No description found for ").text("${obj}", "blue") }
         }
         renderer.render { it.ln() }
         return null;
@@ -199,7 +219,7 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof Path) {
             scriptPath = obj as Path
         } else {
-            scriptPath = shell.context.getIo().getFile(obj as String);
+            scriptPath = shell.context.getIo().getFile(obj as String).absolutePath;
         }
 
         Files.newBufferedReader(scriptPath).withCloseable {
@@ -277,6 +297,7 @@ class GrindTerminal extends SimpleConfigurable {
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(getTerminal())
+                .completer(setupCompleter())
                 .appName("DataForge Grind terminal")
                 .build();
         PrintWriter writer = getTerminal().writer();
