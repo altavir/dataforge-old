@@ -15,7 +15,6 @@
  */
 package hep.dataforge.io.history;
 
-import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
@@ -50,7 +49,7 @@ public class Chronicle implements History, Named {
     }
 
     public Chronicle(String name) {
-        this(name, Global.INSTANCE);
+        this(name, null);
     }
 
     public void setParent(History parent) {
@@ -72,7 +71,7 @@ public class Chronicle implements History, Named {
             listener.accept(entry);
         });
 
-        if (parent != null && parent!= Global.INSTANCE) {
+        if (parent != null) {
             Record newEntry = pushTrace(entry, getName());
             parent.report(newEntry);
         }

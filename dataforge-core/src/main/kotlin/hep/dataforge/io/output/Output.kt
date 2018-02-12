@@ -91,6 +91,7 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
             //TODO add record formatter
                 else -> printer.println(obj.toString())
             }
+            stream.flush()
         }
     }
 

@@ -35,7 +35,7 @@ public class MINUITPlugin extends BasicPlugin {
     /**
      * Constant <code>staticLog</code>
      */
-    private static final Chronicle staticLog = new Chronicle("MINUIT-STATIC");
+    private static final Chronicle staticLog = new Chronicle("MINUIT-STATIC", Global.INSTANCE);
 
     /**
      * <p>

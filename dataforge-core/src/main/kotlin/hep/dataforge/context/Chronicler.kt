@@ -18,6 +18,7 @@ package hep.dataforge.context
 
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.io.history.History
+import hep.dataforge.io.history.Record
 import hep.dataforge.names.Name
 import hep.dataforge.providers.Provides
 import java.util.*
@@ -47,8 +48,7 @@ class Chronicler : BasicPlugin(), History {
     fun getChronicle(reportName: String): Chronicle {
         return historyCache.computeIfAbsent(reportName) { str ->
             val name = Name.of(str)
-            val parent: History
-            parent = if (name.length > 1) {
+            val parent: History = if (name.length > 1) {
                 getChronicle(name.cutLast().toString())
             } else {
                 this@Chronicler
@@ -57,5 +57,8 @@ class Chronicler : BasicPlugin(), History {
         }
     }
 
-
+    override fun report(entry: Record) {
+        super.report(entry)
+        context.io.output.push(entry)
+    }
 }
