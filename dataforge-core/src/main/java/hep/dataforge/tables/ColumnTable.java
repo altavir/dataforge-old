@@ -1,6 +1,7 @@
 package hep.dataforge.tables;
 
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MorphTarget;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
@@ -188,5 +189,10 @@ public class ColumnTable implements Table {
             map.remove(c);
         }
         return new ColumnTable(map.values());
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && getClass() == obj.getClass() && ((MetaMorph) obj).toMeta().equals(this.toMeta());
     }
 }

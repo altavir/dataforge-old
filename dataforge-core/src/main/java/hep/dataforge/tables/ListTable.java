@@ -19,7 +19,6 @@ import hep.dataforge.exceptions.DataFormatException;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.Values;
@@ -39,7 +38,7 @@ import java.util.stream.StreamSupport;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class ListTable extends ListOfPoints implements Table, MetaMorph {
+public class ListTable extends ListOfPoints implements Table {
 
     public static ListTable copy(@NotNull Table table) {
         if (table instanceof ListTable) {

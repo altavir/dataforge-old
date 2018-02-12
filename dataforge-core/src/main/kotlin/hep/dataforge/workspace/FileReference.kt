@@ -106,13 +106,13 @@ class FileReference private constructor(private val _context: Context, val path:
     val outputStream: OutputStream
         get() {
             prepareWrite()
-            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            return Files.newOutputStream(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
         }
 
     val channel: SeekableByteChannel
         get() {
             prepareWrite()
-            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE, StandardOpenOption.APPEND)
+            return Files.newByteChannel(absolutePath, StandardOpenOption.WRITE, StandardOpenOption.CREATE)
         }
 
     /**

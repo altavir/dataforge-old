@@ -120,7 +120,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                             try {
                                 cache.put(id, res)
                             } catch (ex: Exception) {
-                                context.logger.error("Failed to put result into the immutable", ex)
+                                context.logger.error("Failed to put result into the cache", ex)
                             }
 
                         }
