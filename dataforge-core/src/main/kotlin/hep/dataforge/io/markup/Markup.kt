@@ -233,7 +233,7 @@ class ListMarkup() : MarkupGroup() {
 
     override val type = Markup.LIST_TYPE
     var listLevel by style.mutableIntValue()
-    var bullet by style.mutableStringValue(def = "*")
+    var bullet by style.mutableStringValue(def = "- ")
 
     companion object : MorphProvider<ListMarkup> {
         override fun morph(meta: Meta): ListMarkup {

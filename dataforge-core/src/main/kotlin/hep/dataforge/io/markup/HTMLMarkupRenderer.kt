@@ -85,7 +85,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
         }
     }
 
-    override fun list(element: Markup) {
+    override fun list(element: ListMarkup) {
         val listNode = document!!.createElement("ul")
         applyHTMLStyle(listNode, element)
         stack.add(listNode)
@@ -103,7 +103,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
         stack.last.appendChild(listItemNode)
     }
 
-    override fun table(element: Markup) {
+    override fun table(element: TableMarkup) {
         val tableElement = document!!.createElement("table")
         applyHTMLStyle(tableElement, element)
         stack.add(tableElement)
@@ -112,12 +112,12 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
         stack.last.appendChild(tableElement)
     }
 
-    override fun tableRow(element: Markup) {
+    override fun tableRow(element: RowMarkup) {
         val rowElement = document!!.createElement("tr")
         applyHTMLStyle(rowElement, element)
         stack.add(rowElement)
         element.content.forEach { cell ->
-            val cellElement = document!!.createElement(if (element.getBoolean("header", false)) "th" else "td")
+            val cellElement = document!!.createElement(if (element.style.getBoolean("header", false)) "th" else "td")
             stack.add(cellElement)
             doRender(cell)
             stack.removeLast()

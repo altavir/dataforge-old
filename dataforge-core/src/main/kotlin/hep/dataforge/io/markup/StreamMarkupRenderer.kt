@@ -55,7 +55,7 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
         print(format(text, element))
     }
 
-    override fun list(element: Markup) {
+    override fun list(element: ListMarkup) {
         super.list(element)
         ln(true)
     }
@@ -69,13 +69,13 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
         doRender(element)
     }
 
-    override fun tableRow(element: Markup) {
+    override fun tableRow(element: RowMarkup) {
         element.content.forEach { cell ->
             doRender(cell)
             print("\t")
         }
 
-        if (element.getBoolean("header", false)) {
+        if (element.style.getBoolean("header", false)) {
             ln(false)
         }
 

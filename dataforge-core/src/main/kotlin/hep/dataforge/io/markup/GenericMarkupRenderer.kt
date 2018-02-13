@@ -1,10 +1,7 @@
 package hep.dataforge.io.markup
 
 import hep.dataforge.description.ValueDef
-import hep.dataforge.io.markup.Markup.Companion.GROUP_TYPE
 import hep.dataforge.io.markup.Markup.Companion.LIST_TYPE
-import hep.dataforge.io.markup.Markup.Companion.TABLE_TYPE
-import hep.dataforge.io.markup.Markup.Companion.TEXT_TYPE
 import hep.dataforge.values.ValueType.BOOLEAN
 import org.slf4j.LoggerFactory
 
@@ -29,12 +26,11 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param element
      */
     protected fun doRender(element: Markup) {
-        when (element.type) {
-            GROUP_TYPE -> element.content.forEach { this.doRender(it) }//render container
-            TEXT_TYPE -> text(element)
-            LIST_TYPE -> list(element)
-            TABLE_TYPE -> table(element)
-            else -> doRenderOther(element)
+        when (element) {
+            is TextMarkup -> text(element)
+            is ListMarkup -> list(element)
+            is TableMarkup -> table(element)
+            is MarkupGroup -> element.content.forEach { this.doRender(it) }//render container
         }
     }
 
@@ -50,12 +46,8 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
     /**
      * @param element
      */
-    protected fun text(element: Markup) {
-        val text = element.getString("text")
-        val color = element.getString("color", "")
-        text(text, color, element)
-        //        //render children
-        //        element.getContent().forEach(this::doRender);
+    protected fun text(element: TextMarkup) {
+        text(element.text, element.color, element)
     }
 
     /**
@@ -72,11 +64,10 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      *
      * @param element
      */
-    protected open fun list(element: Markup) {
-        val bullet = element.getString("bullet", "- ")
+    protected open fun list(element: ListMarkup) {
         val level = getListLevel(element)
         //TODO add numbered lists with auto-incrementing bullets
-        element.content.forEach { item -> listItem(level, bullet, item) }
+        element.content.forEach { item -> listItem(level, element.bullet, item) }
     }
 
     /**
@@ -85,9 +76,9 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param element
      * @return
      */
-    private fun getListLevel(element: Markup): Int {
-        if (element.hasValue("level")) {
-            return element.getInt("level")
+    private fun getListLevel(element: ListMarkup): Int {
+        if (element.styleStack.hasValue("level")) {
+            return element.styleStack.getInt("level")
         } else {
             var level = 1
             var parent = element.parent
@@ -115,7 +106,7 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
     protected abstract fun listItem(level: Int, bullet: String, element: Markup)
 
 
-    protected open fun table(element: Markup) {
+    protected open fun table(element: TableMarkup) {
         //TODO add header here
         element.content.forEach { this.tableRow(it) }
     }
@@ -125,8 +116,8 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      *
      * @param element
      */
-    @ValueDef(name = "header", type = arrayOf(BOOLEAN), info = "If true the row is considered to be a header")
-    protected abstract fun tableRow(element: Markup)
+    @ValueDef(name = "header", type = [BOOLEAN], info = "If true the row is considered to be a header")
+    protected abstract fun tableRow(element: RowMarkup)
 
 
     //    /**
