@@ -3,10 +3,7 @@ package hep.dataforge.io.markup
 import hep.dataforge.description.Described
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.exceptions.DescriptorException
-import hep.dataforge.io.IOUtils.format
-import hep.dataforge.io.IOUtils.getDefaultTextWidth
 import hep.dataforge.meta.Meta
-import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
 
 /**
@@ -124,29 +121,5 @@ object MarkupUtils {
         return builder
     }
 
-
-    /**
-     * Represent table as a markup
-     *
-     * @param table
-     * @return
-     */
-    fun markupTable(table: Table): MarkupBuilder {
-        val builder = MarkupBuilder().setType(Markup.TABLE_TYPE)
-
-        val header = MarkupBuilder().setValue("header", true)
-        table.format.columns.forEach { c -> header.column(c.title, getDefaultTextWidth(c.primaryType)) }
-        builder.content(header)
-
-        for (dp in table) {
-            val row = MarkupBuilder()
-            table.format.columns.forEach { c ->
-                val width = getDefaultTextWidth(c.primaryType)
-                row.column(format(dp.getValue(c.name), width), width)
-            }
-            builder.content(row)
-        }
-        return builder
-    }
 
 }

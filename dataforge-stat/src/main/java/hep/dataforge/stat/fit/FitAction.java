@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -66,7 +66,9 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
                 .run();
 
         if (meta.getBoolean("printLog", true)) {
-            log.print(writer);
+            writer.println();
+            log.getEntries().forEach(entry -> writer.println(entry.toString()));
+            writer.println();
         }
 
         return res;

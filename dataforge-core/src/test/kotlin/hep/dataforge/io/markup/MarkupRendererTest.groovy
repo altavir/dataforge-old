@@ -16,6 +16,7 @@
 
 package hep.dataforge.io.markup
 
+import hep.dataforge.meta.Meta
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table
 import spock.lang.Specification
@@ -73,11 +74,11 @@ class MarkupRendererTest extends Specification {
                 .row(0, 0, 0)
                 .build()
 
-        def tableMarkup = MarkupUtils.markupTable(table).setValue("html.width","100%");
+        def tableMarkup = table.markup(Meta.empty()).style.setValue("html.width","100%");
         builder.content(tableMarkup);
         Markup markup = builder.build();
         then:
-        println(markup.meta.toString())
+        println(markup.toMeta().toString())
         r.render(markup);
     }
 }

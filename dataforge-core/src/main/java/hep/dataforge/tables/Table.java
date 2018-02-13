@@ -15,10 +15,10 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.io.markup.KTextMarkup;
 import hep.dataforge.io.markup.Markedup;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.io.markup.TextMarkup;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
@@ -68,13 +68,13 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
         builder.content(new MarkupBuilder()
                 .setValue("header", true)
                 .setType(Markup.ROW_TYPE) //optional
-                .setContent(getFormat().getColumns().map(col -> KTextMarkup.Companion.create(col.getTitle())))
+                .setContent(getFormat().getColumns().map(col -> TextMarkup.Companion.create(col.getTitle())))
         );
         //render table itself
         forEach(dp -> {
             builder.content(new MarkupBuilder()
                     .setType(Markup.ROW_TYPE) // optional
-                    .setContent(getFormat().getColumns().map(col -> KTextMarkup.Companion.create(dp.getString(col.getName())))));
+                    .setContent(getFormat().getColumns().map(col -> TextMarkup.Companion.create(dp.getString(col.getName())))));
         });
         return builder.build();
     }

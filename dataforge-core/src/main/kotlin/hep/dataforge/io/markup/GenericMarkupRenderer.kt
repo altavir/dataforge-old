@@ -1,8 +1,8 @@
 package hep.dataforge.io.markup
 
 import hep.dataforge.description.ValueDef
+import hep.dataforge.io.markup.Markup.Companion.GROUP_TYPE
 import hep.dataforge.io.markup.Markup.Companion.LIST_TYPE
-import hep.dataforge.io.markup.Markup.Companion.MARKUP_GROUP_TYPE
 import hep.dataforge.io.markup.Markup.Companion.TABLE_TYPE
 import hep.dataforge.io.markup.Markup.Companion.TEXT_TYPE
 import hep.dataforge.values.ValueType.BOOLEAN
@@ -30,7 +30,7 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      */
     protected fun doRender(element: Markup) {
         when (element.type) {
-            MARKUP_GROUP_TYPE -> element.content.forEach { this.doRender(it) }//render container
+            GROUP_TYPE -> element.content.forEach { this.doRender(it) }//render container
             TEXT_TYPE -> text(element)
             LIST_TYPE -> list(element)
             TABLE_TYPE -> table(element)

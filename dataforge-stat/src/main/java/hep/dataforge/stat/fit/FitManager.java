@@ -68,7 +68,7 @@ public class FitManager extends BasicPlugin {
 
     public FitEngine buildEngine(String name) {
         if (name == null || name.isEmpty()) {
-            getContext().report("The fitting engine name is not defined. Using QOW engine by default");
+            getContext().getHistory().report("The fitting engine name is not defined. Using QOW engine by default");
             return new QOWFitEngine();
         }
 
@@ -119,7 +119,7 @@ public class FitManager extends BasicPlugin {
     }
 
     public FitResult runDefaultStage(FitState state, String... freePars) {
-        return runDefaultStage(state, getContext(), freePars);
+        return runDefaultStage(state, getContext().getHistory(), freePars);
     }
 
     public FitResult runDefaultStage(FitState state, History log, String... freePars) {
@@ -129,7 +129,7 @@ public class FitManager extends BasicPlugin {
 
     public FitResult runStage(FitState state, String engineName, String taskName, String... freePars) {
         FitStage task = new FitStage(engineName, taskName, freePars);
-        return runStage(state, task, getContext());
+        return runStage(state, task, getContext().getHistory());
     }
 
     public FitResult runStage(FitState state, FitStage task, History log) {
