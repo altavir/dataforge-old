@@ -71,7 +71,7 @@ sealed class Markup : MetaMorph {
                 LIST_TYPE -> ListMarkup.morph(meta)
                 TABLE_TYPE -> TableMarkup.morph(meta)
                 ROW_TYPE -> RowMarkup.morph(meta)
-                else -> MarkupGroup.morph(meta)
+                else -> throw RuntimeException("Unrecognized markup node: ${meta.name}")
             }
         }
 
@@ -206,6 +206,7 @@ class TextMarkup() : Markup() {
         override fun morph(meta: Meta): TextMarkup {
             return TextMarkup().apply {
                 text = meta.getString("text", "")
+                style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
             }
         }
 
@@ -243,17 +244,24 @@ class ListMarkup() : MarkupGroup() {
     }
 }
 
-class TableMarkup() : MarkupGroup() {
+class TableMarkup : Markup() {
 
     override val type = Markup.TABLE_TYPE
 
+    val content: MutableList<RowMarkup> = ArrayList()
+
     fun row(action: RowMarkup.() -> Unit) {
-        add(RowMarkup().apply(action))
+        content.add(RowMarkup().apply(action).also{it.parent = this})
     }
 
     companion object : MorphProvider<TableMarkup> {
         override fun morph(meta: Meta): TableMarkup {
-            return TableMarkup().apply { applyMeta(meta) }
+            return TableMarkup().apply {
+                style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
+                meta.getMetaList(Markup.ROW_TYPE).forEach {
+                    row {  content.add(RowMarkup.morph(it).apply { parent = this }) }
+                }
+            }
         }
 
     }
