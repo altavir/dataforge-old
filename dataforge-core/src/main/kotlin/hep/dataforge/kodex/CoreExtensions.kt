@@ -19,8 +19,6 @@ import java.time.Instant
 import java.util.*
 import java.util.stream.Collectors
 import kotlin.coroutines.experimental.CoroutineContext
-import kotlin.properties.ReadOnlyProperty
-import kotlin.reflect.KProperty
 
 /**
  * Core DataForge classes extensions
@@ -87,30 +85,6 @@ operator fun Value.compareTo(other: Value): Int = when (this.type) {
 
 fun Value?.isNull(): Boolean = this == null || this.isNull
 
-//ValueProvider delegates
-
-/**
- * Delegate class for valueProvider
- */
-
-
-private class ValueProviderDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<ValueProvider, T> {
-    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): T =
-            conv(thisRef.getValue(valueName ?: property.name))
-}
-
-/**
- * Delegate ValueProvider element to read only property
- */
-fun ValueProvider.valueDelegate(valueName: String? = null): ReadOnlyProperty<ValueProvider, Value> = ValueProviderDelegate(valueName) { it }
-
-//
-//fun ValueProvider.stringValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, String> = ValueProviderDelegate(valueName) { it.stringValue() }
-//fun ValueProvider.booleanValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Boolean> = ValueProviderDelegate(valueName) { it.booleanValue() }
-//fun ValueProvider.timeValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Instant> = ValueProviderDelegate(valueName) { it.timeValue() }
-//fun ValueProvider.numberValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Number> = ValueProviderDelegate(valueName) { it.numberValue() }
-//fun <T> ValueProvider.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<ValueProvider, T> = ValueProviderDelegate(valueName, conv)
-
 
 //Meta operations
 
@@ -172,14 +146,11 @@ fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
     return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.key }, { transform(it.value) }))
 }
 
-//Meta provider delegate
+val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>
+    get() = this.nodeNames.map { this.getMeta(it) }.toList()
 
-private class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta> {
-    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta =
-            thisRef.optMeta(metaName ?: property.name).orElse(null);
-}
-
-fun MetaProvider.metaNode(metaName: String? = null): ReadOnlyProperty<MetaProvider, Meta> = MetaDelegate(metaName)
+val Meta.childNodes: List<Meta>
+    get() = this.nodeNames.map { this.getMeta(it) }.toList()
 
 
 /**

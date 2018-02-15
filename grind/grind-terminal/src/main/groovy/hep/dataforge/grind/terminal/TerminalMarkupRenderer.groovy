@@ -1,9 +1,7 @@
 package hep.dataforge.grind.terminal
 
-import hep.dataforge.io.markup.GenericMarkup
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.StreamMarkupRenderer
-import hep.dataforge.meta.Meta
 import org.jline.terminal.Terminal
 import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStyle
@@ -22,15 +20,15 @@ class TerminalMarkupRenderer extends StreamMarkupRenderer {
 
     @Override
     protected
-    synchronized void text(String text, String color = null, Markup element = new GenericMarkup(Meta.empty(), null)) {
+    synchronized void text(String text, String color = null, Markup element) {
         AttributedStyle style;
-        if (element.getBoolean("bold", false)) {
+        if (element.styleStack.getBoolean("bold", false)) {
             style = AttributedStyle.BOLD;
         } else {
             style = AttributedStyle.DEFAULT;
         }
 
-        if (element.getBoolean("italic", false)) {
+        if (element.styleStack.getBoolean("italic", false)) {
             style = style.italic();
         }
 

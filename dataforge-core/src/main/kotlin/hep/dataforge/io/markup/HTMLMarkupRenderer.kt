@@ -7,7 +7,6 @@ import org.w3c.dom.Element
 import java.io.PrintStream
 import java.util.*
 import javax.xml.parsers.DocumentBuilderFactory
-import javax.xml.parsers.ParserConfigurationException
 import javax.xml.transform.OutputKeys
 import javax.xml.transform.TransformerException
 import javax.xml.transform.TransformerFactory
@@ -16,18 +15,17 @@ import javax.xml.transform.stream.StreamResult
 
 /**
  * The html renderer for markup
+ * TODO make renderer reusable
  * Created by darksnake on 07-Jan-17.
  */
 class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRenderer() {
-    private var document: Document? = null
-    private val stack = ArrayDeque<Element>()
 
-    @Throws(ParserConfigurationException::class)
-    private fun buildDocument(): Document {
+    private val document: Document by lazy {
         val factory = DocumentBuilderFactory.newInstance()
         val builder = factory.newDocumentBuilder()
-        return builder.newDocument()
+        builder.newDocument()
     }
+    private val stack = ArrayDeque<Element>()
 
     @Throws(TransformerException::class)
     private fun printDocument() {
@@ -48,8 +46,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
      * @param markup
      * @return
      */
-    fun buildDOM(document: Document, markup: Markup): Element {
-        this.document = document
+    private fun buildDOM(markup: Markup): Element {
         stack.clear()
         val root = document.createElement("body")
         stack.add(root)
@@ -63,8 +60,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
 
     override fun render(mark: Markup) {
         try {
-            val document = buildDocument()
-            document.appendChild(buildDOM(document, mark))
+            document.appendChild(buildDOM(mark))
             printDocument()
         } catch (ex: Exception) {
             throw RuntimeException(ex)
@@ -72,21 +68,21 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
 
     }
 
-    override fun text(text: String, color: String, element: Markup) {
-        if (!color.isEmpty()) {
-            val textElement = document!!.createElement("font")
+    override fun text(text: String, color: String?, element: Markup) {
+        if (color != null) {
+            val textElement = document.createElement("font")
             applyHTMLStyle(textElement, element)
             textElement.setAttribute("color", color)
             textElement.textContent = text
             stack.last.appendChild(textElement)
         } else {
-            val textElement = document!!.createTextNode(text)
+            val textElement = document.createTextNode(text)
             stack.last.appendChild(textElement)
         }
     }
 
-    override fun list(element: Markup) {
-        val listNode = document!!.createElement("ul")
+    override fun list(element: ListMarkup) {
+        val listNode = document.createElement("ul")
         applyHTMLStyle(listNode, element)
         stack.add(listNode)
         super.list(element)
@@ -95,7 +91,7 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
     }
 
     override fun listItem(level: Int, bullet: String, element: Markup) {
-        val listItemNode = document!!.createElement("li")
+        val listItemNode = document.createElement("li")
         applyHTMLStyle(listItemNode, element)
         stack.add(listItemNode)
         doRender(element)
@@ -103,8 +99,8 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
         stack.last.appendChild(listItemNode)
     }
 
-    override fun table(element: Markup) {
-        val tableElement = document!!.createElement("table")
+    override fun table(element: TableMarkup) {
+        val tableElement = document.createElement("table")
         applyHTMLStyle(tableElement, element)
         stack.add(tableElement)
         super.table(element)
@@ -112,12 +108,12 @@ class HTMLMarkupRenderer(private val stream: PrintStream) : GenericMarkupRendere
         stack.last.appendChild(tableElement)
     }
 
-    override fun tableRow(element: Markup) {
-        val rowElement = document!!.createElement("tr")
+    override fun tableRow(element: RowMarkup, isHeader: Boolean) {
+        val rowElement = document.createElement("tr")
         applyHTMLStyle(rowElement, element)
         stack.add(rowElement)
         element.content.forEach { cell ->
-            val cellElement = document!!.createElement(if (element.getBoolean("header", false)) "th" else "td")
+            val cellElement = document.createElement(if (isHeader) "th" else "td")
             stack.add(cellElement)
             doRender(cell)
             stack.removeLast()

@@ -15,8 +15,6 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.io.history.Chronicle
-import hep.dataforge.io.history.History
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
@@ -53,7 +51,7 @@ import kotlin.reflect.KClass
 open class Context(
         private val name: String,
         val parent: Context? = Global,
-        classLoader: ClassLoader? = null) : Provider, ValueProvider, History, Named, AutoCloseable, MetaID {
+        classLoader: ClassLoader? = null) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
 
     /**
      * A class loader for this context. Parent class loader is used by default
@@ -114,10 +112,6 @@ open class Context(
 
     open val history: Chronicler
         get() = pluginManager.get(Chronicler::class) ?: parent?.history ?: Global.history
-
-    override fun getChronicle(): Chronicle {
-        return history.chronicle
-    }
 
     /**
      * {@inheritDoc} namespace does not work

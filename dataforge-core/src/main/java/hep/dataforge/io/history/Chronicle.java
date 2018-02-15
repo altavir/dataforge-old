@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,9 +21,9 @@ import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * A in-memory log that can store a finite number of entries. The difference between logger events and log is that log
@@ -45,14 +45,6 @@ public class Chronicle implements History, Named {
             throw new AnonymousNotAlowedException();
         }
         this.name = name;
-        this.parent = parent;
-    }
-
-    public Chronicle(String name) {
-        this(name, null);
-    }
-
-    public void setParent(History parent) {
         this.parent = parent;
     }
 
@@ -98,14 +90,18 @@ public class Chronicle implements History, Named {
         return parent;
     }
 
-    public void print(PrintWriter out) {
-        out.println();
-        entries.forEach((entry) -> {
-            out.println(entry.toString());
-        });
-        out.println();
-        out.flush();
+    public Stream<Record> getEntries(){
+        return entries.stream();
     }
+
+//    public void print(PrintWriter out) {
+//        out.println();
+//        entries.forEach((entry) -> {
+//            out.println(entry.toString());
+//        });
+//        out.println();
+//        out.flush();
+//    }
 
     public Chronicle getChronicle() {
         return this;

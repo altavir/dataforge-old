@@ -7,6 +7,7 @@ import ch.qos.logback.core.encoder.Encoder
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeType
 import hep.dataforge.io.envelopes.TaglessEnvelopeType.TAGLESS_ENVELOPE_TYPE
+import hep.dataforge.io.history.Record
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
@@ -88,10 +89,10 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
                     //printer.println("${obj.loggerName} [${obj.level}] : ${obj.formattedMessage}")
                 }
                 is CharSequence -> printer.println(obj)
-            //TODO add record formatter
-                else -> printer.println(obj.toString())
+                is Record -> printer.println(obj)
+                else -> printer.println(obj)
             }
-            stream.flush()
+            printer.flush()
         }
     }
 

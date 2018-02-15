@@ -76,6 +76,14 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     }
 
     /**
+     * Get guaranteed unmodifiable copy of this meta
+     * @return
+     */
+    public SealedNode getSealed(){
+        return new SealedNode(this);
+    }
+
+    /**
      * Return the meta node with given name
      *
      * @param path

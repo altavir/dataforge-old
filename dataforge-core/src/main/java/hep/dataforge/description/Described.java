@@ -5,9 +5,9 @@
  */
 package hep.dataforge.description;
 
-import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.io.markup.Markup;
+import hep.dataforge.io.markup.TextMarkup;
 import hep.dataforge.names.Named;
-import org.jetbrains.annotations.Nullable;
 
 /**
  * A general interface for something with meta description
@@ -29,13 +29,14 @@ public interface Described {
      *
      * @return
      */
-    @Nullable
-    default MarkupBuilder getHeader() {
+    default Markup getHeader() {
         if (this instanceof Named) {
-            return new MarkupBuilder().text(((Named) this).getName(), "blue");
+            TextMarkup res = new TextMarkup();
+            res.setColor("blue");
+            return res;// new MarkupBuilder().text(((Named) this).getName(), "blue");
         } else {
             //TODO add customizable markup for different renderers
-            return new MarkupBuilder();
+            return new TextMarkup();
         }
     }
 }

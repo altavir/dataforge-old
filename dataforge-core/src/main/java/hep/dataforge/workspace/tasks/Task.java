@@ -17,7 +17,6 @@ package hep.dataforge.workspace.tasks;
 
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.Described;
-import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Named;
 import hep.dataforge.workspace.Workspace;
@@ -71,11 +70,6 @@ public interface Task<R> extends Named, Described {
 //    default NodeDescriptor getDescriptor() {
 //        return Descriptors.buildDescriptor(getName(), getClass());
 //    }
-
-    @Override
-    default MarkupBuilder getHeader() {
-        return new MarkupBuilder().text(getName(), "blue");
-    }
 
     /**
      * If true, the task is designated as terminal.

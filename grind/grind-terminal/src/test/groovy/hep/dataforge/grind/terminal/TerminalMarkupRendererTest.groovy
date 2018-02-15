@@ -1,8 +1,7 @@
 package hep.dataforge.grind.terminal
 
-import hep.dataforge.grind.GrindMarkupBuilder
 import hep.dataforge.io.markup.Markup
-import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.io.markup.MarkupGroup
 import hep.dataforge.io.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotDataAction
@@ -25,23 +24,26 @@ class TerminalMarkupRendererTest extends Specification {
 
     def "Test terminal markup"() {
         when:
-        MarkupBuilder builder = new MarkupBuilder()
-                .text("this is my text ")
-                .list(
-                MarkupBuilder.text("first line"),
-                MarkupBuilder.text("second line"),
-                MarkupBuilder.text("red line", "red"),
-                new MarkupBuilder().text("sub list").list(
-                        MarkupBuilder.text("first line"),
-                        MarkupBuilder.text("second line"),
-                        MarkupBuilder.text("colored line", "cyan")
-                ),
-                MarkupBuilder.text("blue line", "blue")
-        )
-                .text("text end")
-        Markup markup = builder.build();
+        MarkupGroup markup = new MarkupGroup().with {
+            it.text("this is my text ", ""){}
+            it.list {
+                it.text("first line", "") {}
+                it.text("second line", "") {}
+                it.text("red line", "red") {}
+                it.text("sub list", "") {}
+                it.list {
+                    it.text("first line", "") {}
+                    it.text("second line", "") {}
+                    it.text("colored line", "cyan") {}
+                }
+                it.text("blue line", "blue") {}
+            }
+            it.text("text end", "") {}
+            it
+        }
+
         then:
-        println(markup.meta.toString())
+        println(markup.toMeta().toString())
         r.render(markup);
         println()
     }
@@ -69,44 +71,4 @@ class TerminalMarkupRendererTest extends Specification {
         println()
     }
 
-
-    def "Test markup builder"() {
-        when:
-        Markup markup = new GrindMarkupBuilder().markup {
-            meta(someKey: "someValue")
-            text color: "red", "this is my red text "
-            text color: "blue", "and blue text"
-            list(bullet: "\$ ") {
-                text "first line"
-                text "second line"
-                group {
-                    style(bold: true, italic: true)
-                    text "sub list:"
-                    list(bullet: "* ") {
-                        text "sub list line"
-                        text "another one"
-                    }
-                }
-                group("style.color": "red") {
-                    text "composite "
-                    text color: "blue", "text"
-                }
-            }
-            text bold: true, "\n***table test***\n"
-            table {
-                style (textWidth: 10){
-                    styleChild(val:true)
-                }
-                row {
-                    text "a"
-                    text color: "cyan", "b"
-                    text "c"
-                }
-                row(["d", "e", "f"])
-            }
-        }
-        then:
-        println markup.meta
-        r.render(markup)
-    }
 }
