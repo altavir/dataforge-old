@@ -24,11 +24,10 @@ class MarkupTest {
         val markup = markup {
             +"this is my text "
             list{
-                item{
-                    +"test"
-                }
+                +"test"
             }
 
+            +"second list"
             list {
                 +"first line"
                 item {

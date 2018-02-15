@@ -18,8 +18,8 @@ package hep.dataforge.io.markup
 
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.childNodes
-import hep.dataforge.kodex.mutableIntValue
 import hep.dataforge.kodex.mutableStringValue
+import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.*
 import kotlin.reflect.KClass
 
@@ -33,10 +33,39 @@ annotation class MarkupDSL
 sealed class Markup : MetaMorph {
 
     var parent: Markup? = null
+        set(value) {
+            if (value == this) {
+                throw RuntimeException(" cyclic reference")
+            } else {
+                field = value
+            }
+        }
 
     abstract val type: String
 
+
     var style: MetaBuilder = MetaBuilder(Markup.MARKUP_STYLE_NODE)
+
+    /**
+     * Return index of column if parent is row. Otherwise return null
+     */
+    val columnNumber: Int?
+        get() = (parent as? RowMarkup)?.content?.indexOf(this)
+
+    /**
+     * Get the row number of this row inside parent table or list item inside parent list.
+     * Return null if no parent is assigned or parent is not a table or list
+     */
+    val index: Int?
+        get() = parent?.let {
+            when (it) {
+                is TableMarkup -> it.rows.indexOf(this)
+                is ListMarkup -> it.content.indexOf(this)
+                else -> null
+            }
+        }
+
+    //TODO add private style which does included in the stack but overrides anything else
 
     /**
      * Set of styles including all ancestors
@@ -50,7 +79,9 @@ sealed class Markup : MetaMorph {
 
     override fun toMeta(): MetaBuilder {
         return buildMeta(type) {
-            setNode("style", style)
+            if (!style.isEmpty) {
+                setNode("style", style)
+            }
         }
     }
 
@@ -115,7 +146,7 @@ open class MarkupGroup : Markup() {
      * Add given markup as a child
      */
     fun add(markup: Markup) {
-        this.content.add(markup.apply { parent = this })
+        this.content.add(markup.also { it.parent = this })
     }
 
     /**
@@ -128,11 +159,17 @@ open class MarkupGroup : Markup() {
 
     override fun toMeta(): MetaBuilder {
         return buildMeta(type) {
-            setNode("style", style)
+            if (!style.isEmpty) {
+                setNode("style", style)
+            }
             content.forEach {
                 putNode(it.toMeta())
             }
         }
+    }
+
+    fun item(op: MarkupGroup.() -> Unit): MarkupGroup {
+        return MarkupGroup().apply(op).also { add(it) }
     }
 
     fun text(text: String = "", color: String = "", action: TextMarkup.() -> Unit = {}): TextMarkup {
@@ -145,17 +182,18 @@ open class MarkupGroup : Markup() {
     fun header(level: Int = 1, op: HeaderMarkup.() -> Unit): HeaderMarkup {
         return HeaderMarkup()
                 .apply {
-                    this.headerLevel = level
+                    this.level = level
                 }.apply(op)
                 .also {
                     add(it)
                 }
     }
 
+    @JvmOverloads
     fun list(level: Int? = null, bullet: String? = null, action: ListMarkup.() -> Unit): ListMarkup {
         return ListMarkup()
                 .apply {
-                    level?.let { this.listLevel = it }
+                    level?.let { this.level = it }
                     bullet?.let { this.bullet = it }
                 }.apply(action)
                 .also {
@@ -191,7 +229,11 @@ open class MarkupGroup : Markup() {
 class TextMarkup() : Markup() {
 
     var text: String = ""
-    var color by style.mutableStringValue()
+    var color: String?
+        get() = styleStack.optString("color").nullable
+        set(value) {
+            style.setValue("color", value)
+        }
 
     override val type = Markup.TEXT_TYPE
 
@@ -220,7 +262,18 @@ class TextMarkup() : Markup() {
 
 class HeaderMarkup() : MarkupGroup() {
     override val type = Markup.HEADER_TYPE
-    var headerLevel by style.mutableIntValue(def = 1)
+
+    var level: Int
+        get() {
+            return if (style.hasValue("header.level")) {
+                return style.getInt("header.level")
+            } else {
+                styleStack.layers().find { it.hasValue("header.level") }?.getInt("header.level") ?: 0+1
+            }
+        }
+        set(value) {
+            this.style.setValue("header.level", value)
+        }
 
     companion object : MorphProvider<HeaderMarkup> {
         override fun morph(meta: Meta): HeaderMarkup {
@@ -233,8 +286,23 @@ class HeaderMarkup() : MarkupGroup() {
 class ListMarkup() : MarkupGroup() {
 
     override val type = Markup.LIST_TYPE
-    var listLevel by style.mutableIntValue()
-    var bullet by style.mutableStringValue(def = "- ")
+
+    var level: Int
+        get() {
+            return if (style.hasValue("list.level")) {
+                style.getInt("list.level")
+            } else {
+                (generateSequence<Markup>(parent) { it.parent }
+                        .filterIsInstance(ListMarkup::class.java)
+                        .firstOrNull()?.level ?: 0) + 1
+            }
+        }
+        set(value) {
+            this.style.setValue("list.level", value)
+        }
+
+    var bullet by style.mutableStringValue(def = "-")
+
 
     companion object : MorphProvider<ListMarkup> {
         override fun morph(meta: Meta): ListMarkup {
@@ -248,10 +316,23 @@ class TableMarkup : Markup() {
 
     override val type = Markup.TABLE_TYPE
 
-    val content: MutableList<RowMarkup> = ArrayList()
+    var header: RowMarkup? = null
+        set(value) {
+            field = value?.apply { parent = this }
+        }
+
+    val rows: MutableList<RowMarkup> = ArrayList()
+
+    fun header(action: RowMarkup.() -> Unit) {
+        header = RowMarkup(this).apply(action)
+    }
+
+    fun addRow(row: RowMarkup) {
+        rows.add(row.also { it.parent = this })
+    }
 
     fun row(action: RowMarkup.() -> Unit) {
-        content.add(RowMarkup().apply(action).also{it.parent = this})
+        addRow(RowMarkup(this).apply(action))
     }
 
     companion object : MorphProvider<TableMarkup> {
@@ -259,7 +340,7 @@ class TableMarkup : Markup() {
             return TableMarkup().apply {
                 style = meta.getMetaOrEmpty(Markup.MARKUP_STYLE_NODE).builder
                 meta.getMetaList(Markup.ROW_TYPE).forEach {
-                    row {  content.add(RowMarkup.morph(it).apply { parent = this }) }
+                    row { content.add(RowMarkup.morph(it).apply { parent = this }) }
                 }
             }
         }
@@ -267,13 +348,19 @@ class TableMarkup : Markup() {
     }
 }
 
-class RowMarkup() : MarkupGroup() {
+//TODO remove and replace by group?
+class RowMarkup(parent: TableMarkup?) : MarkupGroup() {
+
+    init {
+        this.parent = parent
+    }
 
     override val type = Markup.ROW_TYPE
 
+
     companion object : MorphProvider<RowMarkup> {
         override fun morph(meta: Meta): RowMarkup {
-            return RowMarkup().apply { applyMeta(meta) }
+            return RowMarkup(null).apply { applyMeta(meta) }
         }
 
     }

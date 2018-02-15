@@ -129,8 +129,12 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
     fun table(vararg rows: MarkupBuilder): MarkupBuilder {
         markup.table {
-            rows.forEach {
-                add(it.markup)
+            rows.forEach {row->
+                row{
+                    row.markup.content.forEach {
+                        this.add(it)
+                    }
+                }
             }
         }
         return self()
