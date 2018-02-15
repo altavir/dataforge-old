@@ -51,7 +51,8 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
         return IOUtils.formatWidth(string, element.style.getInt("textWidth", -1))
     }
 
-    @Synchronized override fun text(text: String, color: String?, element: Markup) {
+    @Synchronized
+    override fun text(text: String, color: String?, element: Markup) {
         print(format(text, element))
     }
 
@@ -61,11 +62,13 @@ abstract class StreamMarkupRenderer : GenericMarkupRenderer() {
     }
 
     override fun listItem(level: Int, bullet: String, element: Markup) {
-        ln(true)
-        for (i in 0 until level) {
-            print("\t")
+        if (element !is ListMarkup) {
+            ln(true)
+            for (i in 0 until level) {
+                print("\t")
+            }
+            print(bullet + " ")
         }
-        print(bullet +" ")
         doRender(element)
     }
 

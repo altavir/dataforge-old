@@ -301,7 +301,7 @@ class ListMarkup() : MarkupGroup() {
             this.style.setValue("list.level", value)
         }
 
-    var bullet by style.mutableStringValue(def = "-")
+    var bullet by style.mutableStringValue(valueName = "list.bullet",def = "-")
 
 
     companion object : MorphProvider<ListMarkup> {
