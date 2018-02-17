@@ -165,4 +165,16 @@ public class NameList implements Names {
         return this.nameList.stream();
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof NameList)) return false;
+        NameList strings = (NameList) o;
+        return Objects.equals(nameList, strings.nameList);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(nameList);
+    }
 }

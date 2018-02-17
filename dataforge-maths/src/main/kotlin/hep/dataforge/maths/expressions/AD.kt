@@ -10,7 +10,7 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 /**
  * A field class for automatically differentiated numbers
  */
-class ADField(val order: Int, val names: Names) : Field<AD> {
+data class ADField(val order: Int, val names: Names) : Field<AD> {
 
     constructor(order: Int, vararg names: String) : this(order, Names.of(*names))
 
