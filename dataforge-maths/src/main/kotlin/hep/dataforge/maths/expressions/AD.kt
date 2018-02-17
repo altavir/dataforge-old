@@ -24,6 +24,7 @@ data class ADField(val order: Int, val names: Names) : Field<AD> {
 
     override fun getRuntimeClass(): Class<out FieldElement<AD>> = AD::class.java
 
+
     fun variable(varName: String, value: Number): AD {
         return AD(DerivativeStructure(names.size(), order, names.getNumberByName(varName), value.toDouble()), this)
     }
@@ -31,17 +32,13 @@ data class ADField(val order: Int, val names: Names) : Field<AD> {
     fun const(value: Number): AD {
         return AD(DerivativeStructure(names.size(), order, value.toDouble()), this)
     }
+}
 
-    fun sqrt(value: AD): AD {
-        return value.sqrt()
-    }
-
-    fun exp(value: AD): AD {
-        return value.exp()
-    }
-
-    //TODO add other operations
-
+/**
+ * Perform an automatic differentiation on given expression
+ */
+fun autoDiff(order: Int, vararg parNames: String, op: ADField.() -> AD): AD {
+    return ADField(order, *parNames).op()
 }
 
 /**
@@ -67,7 +64,6 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
         return field
     }
 
-
     /**
      * Wrap a news structure using this as a reference
      */
@@ -85,63 +81,41 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
 
 
     fun deriv(parName: String): Double {
-        return ds.getPartialDerivative(field.names.getNumberByName(parName))
+        return deriv(mapOf(parName to 1))
     }
 
-    operator fun plus(num: Number): AD {
-        return if (num is AD) {
-            wrapWithOther(ds.add(num.ds), num)
-        } else {
-            wrap(ds.add(num.toDouble()))
-        }
+    fun deriv(orders: Map<String, Int>): Double {
+        return ds.getPartialDerivative(*field.names.map { orders[it] ?: 0 }.toIntArray())
     }
 
-    operator fun minus(num: Number): AD {
-        return if (num is AD) {
-            wrapWithOther(ds.subtract(num.ds), num)
-        } else {
-            wrap(ds.subtract(num.toDouble()))
-        }
-    }
+    operator fun plus(arg: AD): AD = this.add(arg)
 
-    operator fun div(num: Number): AD {
-        return if (num is AD) {
-            wrapWithOther(ds.divide(num.ds), num)
-        } else {
-            wrap(ds.divide(num.toDouble()))
-        }
-    }
+    operator fun minus(arg: AD): AD = this.subtract(arg)
 
-    operator fun times(num: Number): AD {
-        return if (num is AD) {
-            wrapWithOther(ds.multiply(num.ds), num)
-        } else {
-            wrap(ds.multiply(num.toDouble()))
-        }
-    }
+    operator fun div(arg: AD): AD = this.divide(arg)
 
-    operator fun rem(num: Number): AD {
-        return if (num is AD) {
-            wrapWithOther(ds.remainder(num.ds), num)
-        } else {
-            wrap(ds.remainder(num.toDouble()))
-        }
-    }
+    operator fun times(arg: AD): AD = this.multiply(arg)
 
-    operator fun unaryMinus(): AD {
-        return wrap(ds.negate())
-    }
+    operator fun plus(arg: Number): AD = this.add(arg.toDouble())
+
+    operator fun minus(arg: Number): AD = this.subtract(arg.toDouble())
+
+    operator fun div(arg: Number): AD = this.divide(arg.toDouble())
+
+    operator fun times(arg: Number): AD = this.multiply(arg.toDouble())
+
+    operator fun unaryMinus(): AD = this.negate()
 
     override fun multiply(a: Double): AD {
-        return this.times(a)
+        return wrap(ds.multiply(a))
     }
 
     override fun multiply(n: Int): AD {
-        return this.times(n)
+        return wrap(ds.multiply(n))
     }
 
     override fun multiply(a: AD): AD {
-        return this.times(a)
+        return wrapWithOther(ds.multiply(a.ds), a)
     }
 
     override fun floor(): AD {
@@ -149,11 +123,11 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
     }
 
     override fun remainder(a: Double): AD {
-        return this.rem(a)
+        return wrap(ds.remainder(a))
     }
 
     override fun remainder(a: AD): AD {
-        return this.rem(a)
+        return wrapWithOther(ds.remainder(a.ds), a)
     }
 
     override fun asin(): AD {
@@ -213,11 +187,11 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
     }
 
     override fun add(a: Double): AD {
-        return this.plus(a)
+        return wrap(ds.add(a))
     }
 
     override fun add(a: AD): AD {
-        return this.plus(a)
+        return wrapWithOther(ds.add(a.ds), a)
     }
 
     override fun rint(): AD {
@@ -229,11 +203,11 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
     }
 
     override fun subtract(a: Double): AD {
-        return this.minus(a)
+        return wrap(ds.subtract(a))
     }
 
     override fun subtract(a: AD): AD {
-        return this.minus(a)
+        return wrapWithOther(ds.subtract(a.ds), a)
     }
 
     override fun pow(p: Double): AD {
@@ -253,7 +227,7 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
     }
 
     override fun negate(): AD {
-        return this.unaryMinus()
+        return wrap(this.ds.negate())
     }
 
     override fun cbrt(): AD {
@@ -285,11 +259,11 @@ class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldEle
     }
 
     override fun divide(a: Double): AD {
-        return this / a
+        return wrap(ds.divide(a))
     }
 
     override fun divide(a: AD): AD {
-        return this / a
+        return wrapWithOther(ds.divide(a.ds), a)
     }
 
     override fun exp(): AD {

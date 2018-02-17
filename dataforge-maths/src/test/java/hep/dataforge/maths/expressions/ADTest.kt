@@ -16,17 +16,18 @@
 
 package hep.dataforge.maths.expressions
 
+import hep.dataforge.maths.extensions.exp
 import org.junit.Assert.assertEquals
 import org.junit.Test
 import kotlin.math.PI
 import kotlin.math.sqrt
 
 class ADTest {
+
     @Test
     fun testNormalAD() {
-        val field = ADField(1, "amp", "pos", "sigma")
         val x = 0
-        val gauss = with(field) {
+        val gauss = autoDiff(1, "amp", "pos", "sigma") {
             val amp = variable("amp", 1)
             val pos = variable("pos", 0)
             val sigma = variable("sigma", 1)
@@ -34,6 +35,6 @@ class ADTest {
         }
 
         assertEquals(1.0 / sqrt(2.0 * PI), gauss.toDouble(), 0.001)
-        assertEquals(0.0,gauss.deriv("pos"),0.001)
+        assertEquals(0.0, gauss.deriv("pos"), 0.001)
     }
 }
