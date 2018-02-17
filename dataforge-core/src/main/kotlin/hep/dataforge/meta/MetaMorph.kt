@@ -16,12 +16,14 @@
 
 package hep.dataforge.meta
 
+import java.io.ObjectStreamException
 import java.io.Serializable
 import kotlin.reflect.KClass
 import kotlin.reflect.full.companionObjectInstance
 import kotlin.reflect.full.findAnnotation
 import kotlin.reflect.full.isSubclassOf
 import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.jvm.javaType
 
 
 /**
@@ -46,7 +48,8 @@ class MorphException(val from: Class<*>, val to: Class<*>, message: String? = nu
     override val message: String = String.format("Meta morphNode from %s to %s failed", from, to) + super.message
 }
 
-private class MetaMorphProxy(val type: KClass<*>, val meta: Meta) : Serializable {
+private class MetaMorphProxy(val type: Class<*>, val meta: Meta) : Serializable {
+
     private fun readResolve(): Any {
         return MetaMorph.morph(type, meta)
     }
@@ -65,10 +68,6 @@ interface MetaMorph : Serializable, MetaID {
      */
     override fun toMeta(): Meta
 
-    private fun writeReplace(): Any {
-        return MetaMorphProxy(this::class, toMeta())
-    }
-
     companion object {
         /**
          * Create an instance of some class from its meta representation
@@ -80,14 +79,14 @@ interface MetaMorph : Serializable, MetaID {
                 val type: KClass<out T> = source.findAnnotation<MorphTarget>()?.target as KClass<out T>? ?: source
 
                 //trying to use constructor with single meta parameter
-                val constructor = type.constructors.find { it.parameters.size == 1 && it.parameters.first().type == Meta::class }
+                val constructor = type.constructors.find { it.parameters.size == 1 && it.parameters.first().type.javaType == Meta::class.java }
                 return when {
                     constructor != null -> constructor.call(meta)
                     type.companionObjectInstance is MorphProvider<*> -> (type.companionObjectInstance as MorphProvider<T>).morph(meta)
                     else -> throw RuntimeException("An instance of class $source could not be morphed")
                 }
             } catch (ex: Exception) {
-                throw MorphException(Meta::class.java, source.java)
+                throw MorphException(Meta::class.java, source.java, cause = ex)
             }
         }
 
@@ -106,6 +105,11 @@ open class SimpleMetaMorph(meta: Meta) : MetaHolder(meta), MetaMorph {
 
     override fun toMeta(): Meta {
         return meta
+    }
+
+    @Throws(ObjectStreamException::class)
+    fun writeReplace(): Any {
+        return MetaMorphProxy(this::class.java, toMeta())
     }
 
     override fun hashCode(): Int {

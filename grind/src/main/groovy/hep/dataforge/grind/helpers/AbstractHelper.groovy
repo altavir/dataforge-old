@@ -2,6 +2,7 @@ package hep.dataforge.grind.helpers
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
+import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
 
 import java.lang.reflect.Method
@@ -31,7 +32,7 @@ abstract class AbstractHelper implements GrindHelper {
     }
 
     @Override
-    MarkupBuilder getHeader() {
+    Markup getHeader() {
         MarkupBuilder builder = getHelperDescription();
 
         def methods = listDescribedMethods()
@@ -61,6 +62,6 @@ abstract class AbstractHelper implements GrindHelper {
             builder.list(descriptions)
         }
 
-        return builder;
+        return builder.build();
     }
 }

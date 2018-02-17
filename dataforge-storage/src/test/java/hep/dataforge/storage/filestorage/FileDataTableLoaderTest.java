@@ -74,7 +74,7 @@ public class FileDataTableLoaderTest {
     public void testReadWrite() throws FileNotFoundException, StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
-        FileStorage storage = FileStorageFactory.buildLocal(Global.Companion.instance(), dir, false, true);
+        FileStorage storage = FileStorageFactory.buildLocal(Global.INSTANCE, dir, false, true);
 
         TableLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", MetaTableFormat.forNames(names));
 

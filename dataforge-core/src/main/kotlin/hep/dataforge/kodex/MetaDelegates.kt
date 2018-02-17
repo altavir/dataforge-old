@@ -19,10 +19,7 @@ package hep.dataforge.kodex
 import hep.dataforge.description.Described
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.PropertyDef
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaMorph
-import hep.dataforge.meta.MutableMetaNode
-import hep.dataforge.meta.SealedNode
+import hep.dataforge.meta.*
 import hep.dataforge.values.Value
 import java.time.Instant
 import kotlin.properties.ReadOnlyProperty
@@ -224,8 +221,10 @@ fun <T> MutableMetaNode<*>.mutableCustomValue(valueName: String? = null, def: T?
 /**
  * Returns a child node of given meta that could be edited in-place
  */
-inline fun <reified M : MutableMetaNode<out MutableMetaNode<*>>> MutableMetaNode<M>.mutableNode(metaName: String? = null, def: M? = null): ReadWriteProperty<Any, M> =
-        MutableMetaDelegate<M>(this, metaName, def, { it as M }, { it })
+fun MetaBuilder.mutableNode(metaName: String? = null, def: Meta? = null): ReadWriteProperty<Any, MetaBuilder> =
+        MutableMetaDelegate(this, metaName, MetaBuilder(def ?: Meta.empty()), {
+            it as? MetaBuilder ?: it.builder
+        }, { it })
 
 fun <T> MutableMetaNode<*>.mutableCustomNode(metaName: String? = null, def: T? = null, read: (Meta) -> T, write: (T) -> Meta): ReadWriteProperty<Any, T> =
         MutableMetaDelegate(this, metaName, def, read, write)
@@ -239,3 +238,38 @@ fun <T : MetaMorph> MutableMetaNode<*>.mutableMorphNode(type: KClass<T>, metaNam
 
 inline fun <reified T : MetaMorph> MutableMetaNode<*>.mutableMorphNode(metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> =
         mutableMorphNode(T::class, metaName, def)
+
+
+
+//ValueProvider delegates
+
+/**
+ * Delegate class for valueProvider
+ */
+
+
+//private class ValueProviderDelegate<T>(private val valueName: String?, val conv: (Value) -> T) : ReadOnlyProperty<ValueProvider, T> {
+//    override operator fun getValue(thisRef: ValueProvider, property: KProperty<*>): T =
+//            conv(thisRef.getValue(valueName ?: property.name))
+//}
+//
+///**
+// * Delegate ValueProvider element to read only property
+// */
+//fun ValueProvider.valueDelegate(valueName: String? = null): ReadOnlyProperty<ValueProvider, Value> = ValueProviderDelegate(valueName) { it }
+
+//
+//fun ValueProvider.stringValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, String> = ValueProviderDelegate(valueName) { it.stringValue() }
+//fun ValueProvider.booleanValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Boolean> = ValueProviderDelegate(valueName) { it.booleanValue() }
+//fun ValueProvider.timeValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Instant> = ValueProviderDelegate(valueName) { it.timeValue() }
+//fun ValueProvider.numberValue(valueName: String? = null): ReadOnlyProperty<ValueProvider, Number> = ValueProviderDelegate(valueName) { it.numberValue() }
+//fun <T> ValueProvider.customValue(valueName: String? = null, conv: (Value) -> T): ReadOnlyProperty<ValueProvider, T> = ValueProviderDelegate(valueName, conv)
+
+//Meta provider delegate
+
+//private class MetaDelegate(private val metaName: String?) : ReadOnlyProperty<MetaProvider, Meta> {
+//    override operator fun getValue(thisRef: MetaProvider, property: KProperty<*>): Meta =
+//            thisRef.optMeta(metaName ?: property.name).orElse(null);
+//}
+//
+//fun MetaProvider.metaNode(metaName: String? = null): ReadOnlyProperty<MetaProvider, Meta> = MetaDelegate(metaName)

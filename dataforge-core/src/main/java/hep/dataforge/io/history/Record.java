@@ -15,12 +15,17 @@
  */
 package hep.dataforge.io.history;
 
+import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.utils.DateTimeUtils;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import static java.lang.String.format;
@@ -32,12 +37,18 @@ import static java.lang.String.format;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public class Record {
+public class Record implements MetaMorph {
 
     private static final DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss.SSS").withZone(ZoneId.systemDefault());
     private final List<String> sourceTrace = new ArrayList<>();
     private final String message;
     private final Instant time;
+
+    public Record(Meta meta) {
+        this.time = meta.getValue("timestame").timeValue();
+        this.message = meta.getString("message");
+        this.sourceTrace.addAll(Arrays.asList(meta.getStringArray("trace")));
+    }
 
     public Record(Record entry, String traceAdd) {
         this.sourceTrace.addAll(entry.sourceTrace);
@@ -83,5 +94,14 @@ public class Record {
         } else {
             return format("(%s) %s: %s", dateFormat.format(time), traceStr, message);
         }
+    }
+
+    @NotNull
+    @Override
+    public Meta toMeta() {
+        return new MetaBuilder("record")
+                .setValue("timestamp", time)
+                .setValue("message", message)
+                .setValue("trace", sourceTrace);
     }
 }

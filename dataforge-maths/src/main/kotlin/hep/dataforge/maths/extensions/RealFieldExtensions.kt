@@ -38,4 +38,6 @@ fun <T> rint(arg: RealFieldElement<T>): RealFieldElement<T> = arg.unary { rint()
 
 fun <T> sin(arg: RealFieldElement<T>): RealFieldElement<T> = arg.unary { sin() }
 
+fun <T> sqrt(arg: RealFieldElement<T>): RealFieldElement<T> = arg.unary { sqrt() }
+
 //TODO add everything else

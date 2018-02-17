@@ -2,6 +2,7 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.io.markup.GenericMarkupRenderer
 import hep.dataforge.io.markup.Markup
+import hep.dataforge.io.markup.RowMarkup
 
 /**
  * An FX panel markup renderer
@@ -10,8 +11,12 @@ import hep.dataforge.io.markup.Markup
 class FXMarkupRenderer(private val out: FXOutputPane) : GenericMarkupRenderer() {
 
 
-    override fun text(text: String, color: String, element: Markup) {
-        out.appendColored(text, color)
+    override fun text(text: String, color: String?, element: Markup) {
+        if (color == null) {
+            out.append(text)
+        } else {
+            out.appendColored(text, color)
+        }
     }
 
     override fun listItem(level: Int, bullet: String, element: Markup) {
@@ -23,13 +28,14 @@ class FXMarkupRenderer(private val out: FXOutputPane) : GenericMarkupRenderer() 
         doRender(element)
     }
 
-    override fun tableRow(element: Markup) {
+
+    override fun tableRow(element: RowMarkup, isHeader: Boolean) {
         element.content.forEach { cell ->
             doRender(cell)
             out.tab()
         }
 
-        if (element.getBoolean("header", false)) {
+        if (isHeader) {
             out.newline()
         }
 

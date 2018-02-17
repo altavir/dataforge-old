@@ -47,7 +47,7 @@ public class ListOfPoints implements MetaMorph, NavigableValuesSource {
         }
     }
 
-    public ListOfPoints(Meta meta){
+    public ListOfPoints(Meta meta) {
         data.addAll(buildFromMeta(meta));
     }
 
@@ -112,5 +112,10 @@ public class ListOfPoints implements MetaMorph, NavigableValuesSource {
         MetaBuilder dataNode = new MetaBuilder("data");
         forEach(dp -> dataNode.putNode("point", dp.toMeta()));
         return dataNode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        return obj != null && getClass() == obj.getClass() && ((MetaMorph) obj).toMeta().equals(this.toMeta());
     }
 }

@@ -42,7 +42,7 @@ class TcpPort(meta: Meta) : Port(meta) {
     private val socket: Socket
         get() {
             if (_socket == null || _socket!!.isClosed) {
-                _socket = Socket(getString("ip"), getInt("port")!!)
+                _socket = Socket(getString("ip"), getInt("port"))
             }
             return _socket!!
         }

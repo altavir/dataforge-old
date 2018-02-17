@@ -61,5 +61,5 @@ class KodexServer(private val _context: Context, private val _meta: Meta) : Meto
 
 fun main(args: Array<String>) {
     val meta = Meta.empty();
-    KodexServer(Global.instance(), meta).start()
+    KodexServer(Global, meta).start()
 }

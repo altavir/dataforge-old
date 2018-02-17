@@ -1,11 +1,5 @@
 package hep.dataforge.io.markup
 
-import hep.dataforge.description.ValueDef
-import hep.dataforge.io.markup.Markup.Companion.LIST_TYPE
-import hep.dataforge.io.markup.Markup.Companion.MARKUP_GROUP_TYPE
-import hep.dataforge.io.markup.Markup.Companion.TABLE_TYPE
-import hep.dataforge.io.markup.Markup.Companion.TEXT_TYPE
-import hep.dataforge.values.ValueType.BOOLEAN
 import org.slf4j.LoggerFactory
 
 /**
@@ -29,12 +23,11 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param element
      */
     protected fun doRender(element: Markup) {
-        when (element.type) {
-            MARKUP_GROUP_TYPE -> element.content.forEach { this.doRender(it) }//render container
-            TEXT_TYPE -> text(element)
-            LIST_TYPE -> list(element)
-            TABLE_TYPE -> table(element)
-            else -> doRenderOther(element)
+        when (element) {
+            is TextMarkup -> text(element)
+            is ListMarkup -> list(element)
+            is TableMarkup -> table(element)
+            is MarkupGroup -> element.content.forEach { this.doRender(it) }//render container
         }
     }
 
@@ -50,12 +43,8 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
     /**
      * @param element
      */
-    protected fun text(element: Markup) {
-        val text = element.getString("text")
-        val color = element.getString("color", "")
-        text(text, color, element)
-        //        //render children
-        //        element.getContent().forEach(this::doRender);
+    protected fun text(element: TextMarkup) {
+        text(element.text, element.color, element)
     }
 
     /**
@@ -65,43 +54,17 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      * @param color
      * @param element - additional information about rendered element
      */
-    protected abstract fun text(text: String, color: String, element: Markup)
+    protected abstract fun text(text: String, color: String?, element: Markup)
 
     /**
      * Render list of elements
      *
      * @param element
      */
-    protected open fun list(element: Markup) {
-        val bullet = element.getString("bullet", "- ")
-        val level = getListLevel(element)
+    protected open fun list(element: ListMarkup) {
         //TODO add numbered lists with auto-incrementing bullets
-        element.content.forEach { item -> listItem(level, bullet, item) }
-    }
-
-    /**
-     * Calculate the level of current list using ancestry
-     *
-     * @param element
-     * @return
-     */
-    private fun getListLevel(element: Markup): Int {
-        if (element.hasValue("level")) {
-            return element.getInt("level")
-        } else {
-            var level = 1
-            var parent = element.parent
-            while (parent != null) {
-                if (parent.type == LIST_TYPE) {
-                    if (parent.hasValue("level")) {
-                        return parent.getInt("level") + level
-                    } else {
-                        level++
-                    }
-                }
-                parent = parent.parent
-            }
-            return level
+        element.content.forEach { item ->
+            listItem(element.level, element.bullet, item)
         }
     }
 
@@ -115,9 +78,11 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
     protected abstract fun listItem(level: Int, bullet: String, element: Markup)
 
 
-    protected open fun table(element: Markup) {
-        //TODO add header here
-        element.content.forEach { this.tableRow(it) }
+    protected open fun table(element: TableMarkup) {
+        element.header?.let {
+            tableRow(it, true)
+        }
+        element.rows.forEach { this.tableRow(it) }
     }
 
     /**
@@ -125,8 +90,8 @@ abstract class GenericMarkupRenderer : MarkupRenderer {
      *
      * @param element
      */
-    @ValueDef(name = "header", type = arrayOf(BOOLEAN), info = "If true the row is considered to be a header")
-    protected abstract fun tableRow(element: Markup)
+    //@ValueDef(name = "header", type = [BOOLEAN], info = "If true the row is considered to be a header")
+    protected abstract fun tableRow(element: RowMarkup, isHeader: Boolean = false)
 
 
     //    /**

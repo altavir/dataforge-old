@@ -22,7 +22,7 @@ class StreamConsumer(val output: Output, val meta: Meta = Meta.empty()) : Output
 
     override fun flush() {
         synchronized(buffer) {
-            output.push(String(buffer.toByteArray(), Charsets.UTF_8), meta)
+            output.push(String(buffer.toByteArray(), Charsets.UTF_8).replace("\r", ""), meta)
             buffer.reset()
         }
     }

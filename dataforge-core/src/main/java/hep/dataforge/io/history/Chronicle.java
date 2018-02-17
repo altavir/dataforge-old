@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,16 +15,15 @@
  */
 package hep.dataforge.io.history;
 
-import hep.dataforge.context.Global;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
 
-import java.io.PrintWriter;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 /**
  * A in-memory log that can store a finite number of entries. The difference between logger events and log is that log
@@ -49,14 +48,6 @@ public class Chronicle implements History, Named {
         this.parent = parent;
     }
 
-    public Chronicle(String name) {
-        this(name, Global.INSTANCE);
-    }
-
-    public void setParent(History parent) {
-        this.parent = parent;
-    }
-
     protected int getMaxLogSize() {
         return 1000;
     }
@@ -72,7 +63,7 @@ public class Chronicle implements History, Named {
             listener.accept(entry);
         });
 
-        if (parent != null && parent!= Global.INSTANCE) {
+        if (parent != null) {
             Record newEntry = pushTrace(entry, getName());
             parent.report(newEntry);
         }
@@ -99,14 +90,18 @@ public class Chronicle implements History, Named {
         return parent;
     }
 
-    public void print(PrintWriter out) {
-        out.println();
-        entries.forEach((entry) -> {
-            out.println(entry.toString());
-        });
-        out.println();
-        out.flush();
+    public Stream<Record> getEntries(){
+        return entries.stream();
     }
+
+//    public void print(PrintWriter out) {
+//        out.println();
+//        entries.forEach((entry) -> {
+//            out.println(entry.toString());
+//        });
+//        out.println();
+//        out.flush();
+//    }
 
     public Chronicle getChronicle() {
         return this;

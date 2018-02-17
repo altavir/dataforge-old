@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals
 
 class WorkspaceTest {
 
-    def workspace = new WorkspaceSpec(Global.instance()).with {
+    def workspace = new WorkspaceSpec(Global.INSTANCE).with {
 
         context {
             name = "TEST"
@@ -51,8 +51,8 @@ class WorkspaceTest {
 //            helper.plot((1..100), input as List, name as String)
 //        }
 
-
-    }.build()
+        it.builder.build()
+    }
 
 
     @Test

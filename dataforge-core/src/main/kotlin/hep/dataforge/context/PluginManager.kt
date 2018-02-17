@@ -72,8 +72,8 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      * @param tag
      * @return
      */
-    fun get(tag: PluginTag): Plugin? {
-        return get(true) { tag.matches(it.tag) }
+    fun get(tag: PluginTag, recursive: Boolean = true): Plugin? {
+        return get(recursive) { tag.matches(it.tag) }
     }
 
     /**
@@ -85,8 +85,8 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      * @return
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Plugin> get(type: KClass<T>): T? {
-        return get(true) { type.isInstance(it) } as T?
+    fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? {
+        return get(recursive) { type.isInstance(it) } as T?
     }
 
     /**
@@ -101,7 +101,7 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
             throw ContextLockException()
         }
 
-        if (get(plugin::class) != null) {
+        if (get(plugin::class, false) != null) {
             throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
         } else {
             for (tag in plugin.dependsOn()) {
@@ -123,7 +123,7 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      */
     @JvmOverloads
     fun load(tag: PluginTag, meta: Meta = Meta.empty()): Plugin {
-        val loaded = get(tag)
+        val loaded = get(tag, false)
         return when {
             loaded == null -> load(pluginLoader[tag, meta])
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
@@ -136,7 +136,7 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
      */
     @JvmOverloads
     fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
-        val loaded = get(type)
+        val loaded = get(type, false)
         return when {
             loaded == null -> load(pluginLoader[type, meta])
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin

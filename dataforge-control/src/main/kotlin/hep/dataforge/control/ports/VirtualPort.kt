@@ -40,7 +40,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
 
     @Throws(PortException::class)
     override fun open() {
-        scheduler = Executors.newScheduledThreadPool(meta.getInt("numThreads", 4)!!)
+        scheduler = Executors.newScheduledThreadPool(meta.getInt("numThreads", 4))
         isOpen = true
     }
 

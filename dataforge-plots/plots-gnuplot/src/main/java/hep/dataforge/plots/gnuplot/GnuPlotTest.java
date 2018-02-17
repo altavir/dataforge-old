@@ -8,6 +8,7 @@ import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
 import hep.dataforge.tables.ValueMap;
 import hep.dataforge.values.Values;
+import kotlin.jvm.functions.Function1;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class GnuPlotTest {
         GnuPlotFrame frame = new GnuPlotFrame();
         frame.configureValue("gnuplot.path", "C:\\Program Files\\gnuplot\\bin\\gnuplot.exe");
 
-        Function<Double, Double> func = (x1) -> x1 * x1;
+        Function1<Double, Double> func = (x1) -> x1 * x1;
 
         XYFunctionPlot funcPlot = XYFunctionPlot.Companion.plot("func", 0.1, 4, 200, func);
 

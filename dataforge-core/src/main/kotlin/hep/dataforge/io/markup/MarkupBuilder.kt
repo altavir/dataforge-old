@@ -1,71 +1,32 @@
 package hep.dataforge.io.markup
 
-import hep.dataforge.kodex.toList
+import hep.dataforge.kodex.set
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.Metoid
 import hep.dataforge.utils.GenericBuilder
 import java.util.stream.Stream
 
 
 /**
+ * Backward compatibility  markup builder for Java and groovy. For kotlin use {@link Markup}.
  * Created by darksnake on 03-Jan-17.
  */
-@Deprecated("to be replaced by KMarkup")
 class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
-    private val builder = MetaBuilder("markup")
+    private val markup = MarkupGroup()
 
     override fun self(): MarkupBuilder {
         return this
     }
 
     override fun build(): Markup {
-        return Markup.morph(builder)
+        return markup
     }
 
     override fun getMeta(): Meta {
-        return builder.build()
+        return markup.toMeta()
     }
 
-    fun update(config: Meta): MarkupBuilder {
-        builder.update(config)
-        return self()
-    }
-
-    /**
-     * Directly update markup fields
-     *
-     * @param map
-     * @return
-     */
-    fun update(map: Map<String, Any>): MarkupBuilder {
-        builder.update(map)
-        return self()
-    }
-
-    /**
-     * Directly update markup fields
-     *
-     * @param key
-     * @param value
-     * @return
-     */
-    fun setValue(key: String, value: Any): MarkupBuilder {
-        builder.setValue(key, value)
-        return self()
-    }
-
-    /**
-     * Set the type of the element
-     *
-     * @param type
-     * @return
-     */
-    fun setType(type: String): MarkupBuilder {
-        builder.setValue(Markup.MARKUP_TYPE_KEY, type)
-        return self()
-    }
 
     /**
      * Set the style of element
@@ -74,44 +35,31 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun setStyle(style: Meta): MarkupBuilder {
-        builder.setNode(Markup.MARKUP_STYLE_NODE, style)
+        markup.style = style.builder
         return self()
     }
 
-    //TODO apply style
-
-    /**
-     * Add content nodes to this markup
-     *
-     * @param content
-     * @return
-     */
-    fun setContent(vararg content: Meta): MarkupBuilder {
-        builder.setNode(Markup.MARKUP_CONTENT_NODE, *content)
-        return self()
-    }
-
-    fun setContent(content: Stream<MarkupBuilder>): MarkupBuilder {
-        builder.setNode(Markup.MARKUP_CONTENT_NODE, content.map<Meta>{ it.meta }.toList())
+    fun setContent(content: Stream<Markup>): MarkupBuilder {
+        content.forEach { markup.add(it) }
         return self()
     }
 
     fun setContent(vararg content: MarkupBuilder): MarkupBuilder {
-        return setContent(Stream.of(*content))
+        return setContent(Stream.of(*content).map { it.build() })
     }
 
     fun content(content: Meta): MarkupBuilder {
-        builder.putNode(Markup.MARKUP_CONTENT_NODE, content)
+        markup.add(Markup.morph(content))
         return self()
     }
 
     fun content(content: MarkupBuilder): MarkupBuilder {
-        builder.putNode(Markup.MARKUP_CONTENT_NODE, content.meta)
+        markup.add(content.markup)
         return self()
     }
 
     fun content(content: Markup): MarkupBuilder {
-        builder.putNode(Markup.MARKUP_CONTENT_NODE, content.toMeta())
+        markup.add(content)
         return self()
     }
 
@@ -122,9 +70,8 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun text(text: String): MarkupBuilder {
-        return content(MetaBuilder(Markup.MARKUP_CONTENT_NODE)
-                .setValue("text", text)
-        )
+        markup.text(text)
+        return self()
     }
 
     /**
@@ -135,10 +82,8 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun text(text: String, color: String): MarkupBuilder {
-        return content(MetaBuilder(Markup.MARKUP_CONTENT_NODE)
-                .setValue("text", text)
-                .setValue("color", color)
-        )
+        markup.text(text) { this.color = color }
+        return self()
     }
 
     /**
@@ -158,10 +103,8 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun column(text: String, width: Int): MarkupBuilder {
-        return content(MetaBuilder(Markup.MARKUP_CONTENT_NODE)
-                .setValue("text", text)
-                .setValue("textWidth", width)
-        )
+        markup.text(text) { this.style["textWidth"] = width }
+        return self()
     }
 
     /**
@@ -171,10 +114,12 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
      * @return
      */
     fun list(vararg items: MarkupBuilder): MarkupBuilder {
-        return content(MarkupBuilder()
-                .setType(Markup.LIST_TYPE)
-                .setContent(*items)
-        )
+        markup.list {
+            items.forEach {
+                add(it.markup)
+            }
+        }
+        return self()
     }
 
     fun list(items: Collection<MarkupBuilder>): MarkupBuilder {
@@ -183,44 +128,22 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
 
 
     fun table(vararg rows: MarkupBuilder): MarkupBuilder {
-        return content(MarkupBuilder()
-                .setType(Markup.TABLE_TYPE)
-                .setContent(*rows)
-        )
+        markup.table {
+            rows.forEach {row->
+                row{
+                    row.markup.content.forEach {
+                        this.add(it)
+                    }
+                }
+            }
+        }
+        return self()
     }
 
     fun header(text: String, level: Int): MarkupBuilder {
-        return content(MarkupBuilder().setType("header").setValue("level", level).setValue("text", text))
+        markup.header(level) { text(text) }
+        return self()
     }
 
-    companion object {
-
-        //    public static MarkupBuilder create(String text) {
-        //        return new MarkupBuilder().text(text);
-        //    }
-        //
-        //    public static MarkupBuilder create(String text, String color) {
-        //        return new MarkupBuilder().text(text, color);
-        //    }
-
-        /**
-         * Create list markup with given level and bullet
-         *
-         * @param level  ignored if not positive
-         * @param bullet ignored if null
-         * @return
-         */
-        fun list(level: Int, bullet: String?): MarkupBuilder {
-            val res = MarkupBuilder().setType(Markup.LIST_TYPE)
-            if (level > 0) {
-                res.setValue("level", level)
-            }
-
-            if (bullet != null) {
-                res.setValue("bullet", bullet)
-            }
-            return res
-        }
-    }
 
 }

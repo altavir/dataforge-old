@@ -103,10 +103,10 @@ class ComPort(meta: Meta) : Port(meta) {
                 port = SerialPort(getString("name")).apply {
                     openPort()
                     val an = meta
-                    val baudRate = an.getInt("baudRate", BAUDRATE_9600)!!
-                    val dataBits = an.getInt("dataBits", DATABITS_8)!!
-                    val stopBits = an.getInt("stopBits", STOPBITS_1)!!
-                    val parity = an.getInt("parity", PARITY_NONE)!!
+                    val baudRate = an.getInt("baudRate", BAUDRATE_9600)
+                    val dataBits = an.getInt("dataBits", DATABITS_8)
+                    val stopBits = an.getInt("stopBits", STOPBITS_1)
+                    val parity = an.getInt("parity", PARITY_NONE)
                     setParams(baudRate, dataBits, stopBits, parity)
                     addEventListener(serialPortListener)
                 }

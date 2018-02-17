@@ -123,6 +123,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
      * @param path
      * @return
      */
+    @SuppressWarnings("unchecked")
     public Optional<Value> optValue(Name path) {
         if (path.getLength() == 0) {
             throw new RuntimeException("Empty path not allowed");
@@ -130,7 +131,7 @@ public abstract class MetaNode<T extends MetaNode> extends Meta implements MetaM
         if (path.getLength() == 1) {
             return Optional.ofNullable(values.get(path.toString()));
         } else {
-            return optHead(path).flatMap(it -> it.optValue(path.cutFirst()));
+            return optHead(path).flatMap( it -> it.optValue(path.cutFirst()));
         }
     }
 

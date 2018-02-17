@@ -55,14 +55,12 @@ class DefaultCache<K, V>(
 
     private val hardCache = HashMap<Meta, Path>()
     private val cacheDir: Path = manager.rootCacheDir.resolve(name)
-
-    init {
-        try {
-            Files.createDirectories(cacheDir)
-        } catch (e: IOException) {
-            throw RuntimeException("Failed to create immutable directory")
+        get() {
+            Files.createDirectories(field)
+            return field
         }
 
+    init {
         scanDirectory()
     }
 
@@ -72,7 +70,7 @@ class DefaultCache<K, V>(
 
     @Synchronized
     private fun scanDirectory() {
-        if (Files.isDirectory(cacheDir)) {
+        if (hardCacheEnabled()) {
             hardCache.clear()
             try {
                 Files.list(cacheDir).filter { it -> it.endsWith("df") }.forEach { file ->
@@ -80,7 +78,7 @@ class DefaultCache<K, V>(
                         val envelope = reader.read(file)
                         hardCache[envelope.meta] = file
                     } catch (e: Exception) {
-                        logger.error("Failed to read immutable file {}. Deleting corrupted file.", file.toString())
+                        logger.error("Failed to read cache file {}. Deleting corrupted file.", file.toString())
                         file.toFile().delete()
                     }
                 }
@@ -105,7 +103,7 @@ class DefaultCache<K, V>(
         return softCache[key] ?: getFromHardCache(id).map<V> { cacheFile ->
             try {
                 ObjectInputStream(reader.read(cacheFile).data.stream).use { ois ->
-                    (ois.readObject() as V).also {
+                    (valueType.cast(ois.readObject())).also {
                         softCache[key] = it
                     }
                 }
@@ -220,9 +218,11 @@ class DefaultCache<K, V>(
         //TODO add uninitialized check
         softCache.clear()
         try {
-            Files.deleteIfExists(cacheDir)
+            if (hardCacheEnabled() && Files.exists(cacheDir)) {
+                cacheDir.toFile().deleteRecursively()
+            }
         } catch (e: IOException) {
-            logger.error("Failed to delete immutable directory {}", cacheDir, e)
+            logger.error("Failed to delete cache directory {}", cacheDir, e)
         }
 
     }

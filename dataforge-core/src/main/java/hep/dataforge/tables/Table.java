@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,9 +15,7 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.io.markup.Markedup;
-import hep.dataforge.io.markup.Markup;
-import hep.dataforge.io.markup.MarkupBuilder;
+import hep.dataforge.io.markup.*;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
@@ -44,14 +42,16 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
 
     /**
      * Get columns as a stream
+     *
      * @return
      */
     Stream<Column> getColumns();
 
     /**
      * Get a specific value
+     *
      * @param columnName the name of the column
-     * @param rowNumber the number of the row
+     * @param rowNumber  the number of the row
      * @return
      */
     Value get(String columnName, int rowNumber);
@@ -59,20 +59,21 @@ public interface Table extends Markedup, NavigableValuesSource, MetaMorph {
     @NotNull
     @Override
     default Markup markup(@NotNull Meta configuration) {
-        MarkupBuilder builder = new MarkupBuilder().setType(Markup.TABLE_TYPE);
+        TableMarkup builder = new TableMarkup();
+
         //render header
-        builder.content(new MarkupBuilder()
-                .setValue("header", true)
-                .setType("tr") //optional
-                .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(col.getTitle())))
-        );
+        RowMarkup header = new RowMarkup(builder);
+        getFormat().getColumns().map(col -> TextMarkup.Companion.create(col.getTitle())).forEach(header::add);
+        builder.setHeader(header);
+
+
         //render table itself
         forEach(dp -> {
-            builder.content(new MarkupBuilder()
-                    .setType("td") // optional
-                    .setContent(getFormat().getColumns().map(col -> new MarkupBuilder().text(dp.getString(col.getName())))));
+            RowMarkup row = new RowMarkup(builder);
+            getFormat().getColumns().map(col -> TextMarkup.Companion.create(dp.getString(col.getName()))).forEach(row::add);
+            builder.addRow(row);
         });
-        return builder.build();
+        return builder;
     }
 
     /**

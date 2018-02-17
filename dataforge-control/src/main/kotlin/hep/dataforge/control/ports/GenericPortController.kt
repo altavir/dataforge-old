@@ -22,6 +22,8 @@ import hep.dataforge.context.Global
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.utils.ReferenceRegistry
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
@@ -60,6 +62,10 @@ open class GenericPortController(private val context: Context,
 
     }
 
+    override fun getLogger(): Logger {
+        return LoggerFactory.getLogger("${context.name}.$port")
+    }
+
     override fun acceptPhrase(message: String) {
         waiters.forEach { waiter -> waiter.acceptPhrase(message) }
         listeners.forEach { listener -> listener.acceptPhrase(message) }
@@ -67,11 +73,11 @@ open class GenericPortController(private val context: Context,
 
     override fun acceptError(errorMessage: String, error: Throwable) {
         exceptionListeners.forEach { it ->
-            context.parallelExecutor.submit {
+            context.executors.defaultExecutor.submit {
                 try {
                     it.action(errorMessage, error)
                 } catch (ex: Exception) {
-                    context.getLogger(port.toString()).error("Failed to execute error listener action", ex)
+                    logger.error("Failed to execute error listener action", ex)
                 }
             }
         }
@@ -294,11 +300,11 @@ open class GenericPortController(private val context: Context,
 
         internal fun acceptPhrase(phrase: String) {
             if (condition(phrase)) {
-                context.parallelExecutor.submit {
+                context.executors.defaultExecutor.submit {
                     try {
                         action(phrase)
                     } catch (ex: Exception) {
-                        context.getLogger(port.toString()).error("Failed to execute hooked action", ex)
+                        logger.error("Failed to execute hooked action", ex)
                     }
                 }
             }
@@ -321,7 +327,7 @@ open class GenericPortController(private val context: Context,
         @Throws(ControlException::class)
         fun sendAndWait(port: Port, request: String, timeout: Duration): String {
             try {
-                GenericPortController(Global.instance(), port).use { controller -> return controller.sendAndWait(request, timeout) { true } }
+                GenericPortController(Global, port).use { controller -> return controller.sendAndWait(request, timeout) { true } }
             } catch (e: Exception) {
                 throw ControlException("Failed to close the port", e)
             }

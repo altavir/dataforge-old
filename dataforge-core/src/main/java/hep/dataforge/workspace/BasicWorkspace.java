@@ -61,7 +61,7 @@ public class BasicWorkspace extends AbstractWorkspace {
 
     @Override
     public void clean() {
-        getLogger().info("Cleaning up immutable...");
+        getLogger().info("Cleaning up cache...");
         invalidateCache();
     }
 

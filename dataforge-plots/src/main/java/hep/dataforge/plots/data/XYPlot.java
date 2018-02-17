@@ -38,8 +38,7 @@ import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
-@NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset",
-        from = "class::hep.dataforge.tables.XYAdapter", tags = {FINAL_TAG})
+@NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = {FINAL_TAG})
 public abstract class XYPlot extends AbstractPlot {
 
     public XYPlot(String name) {
@@ -76,11 +75,11 @@ public abstract class XYPlot extends AbstractPlot {
         Value from = xRange.getValue("from", Value.NULL);
         Value to = xRange.getValue("to", Value.NULL);
         if (from != Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.isBetween(Adapters.getXValue(getAdapter(),point), from, to));
+            return data.filter(point -> ValueUtils.isBetween(Adapters.getXValue(getAdapter(), point), from, to));
         } else if (from == Value.NULL && to != Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(),point), to) < 0);
+            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(), point), to) < 0);
         } else if (to == Value.NULL) {
-            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(),point), from) > 0);
+            return data.filter(point -> ValueUtils.compare(Adapters.getXValue(getAdapter(), point), from) > 0);
         } else {
             return data;
         }

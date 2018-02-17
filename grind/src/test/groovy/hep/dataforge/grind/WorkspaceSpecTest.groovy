@@ -54,26 +54,22 @@ class WorkspaceSpecTest extends Specification {
                     item("data_$it", "value_$it")
                 }
             }
-            task build("test"){
-                data "*"
-                action{
-                    if(input.endsWith("5")){
-                        return input + "_hurray!"
-                    } else {
-                        return input
-                    }
+            task hep.dataforge.grind.workspace.DefaultTaskLib.pipe("test") { String input ->
+                if (input.endsWith("5")) {
+                    return input + "_hurray!"
+                } else {
+                    return input
                 }
             }
 
-            task build("testJoin"){
-                data "*"
-                action{
-                    return input[6]
-                }
-                join{
-                    input.sort().values().sum()
-                }
+            task hep.dataforge.grind.workspace.DefaultTaskLib.pipe("preJoin"){ String input->
+                input[6]
             }
+
+            task hep.dataforge.grind.workspace.DefaultTaskLib.join("testJoin", [dependsOn: "preJoin"] ) { Map<String,String> input ->
+                input.sort().values().sum()
+            }
+
         }
         def result = wsp.runTask("test").get("data_5")
         def joinResult = wsp.runTask("testJoin").getData().get()

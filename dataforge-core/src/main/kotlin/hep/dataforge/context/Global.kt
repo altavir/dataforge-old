@@ -18,6 +18,7 @@ package hep.dataforge.context
 import hep.dataforge.exceptions.ContextLockException
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.orElse
 import hep.dataforge.utils.ReferenceRegistry
 import hep.dataforge.values.Value
@@ -65,7 +66,9 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             return dfUserDir
         }
 
-    override val history: Chronicler by lazy { Chronicler().apply { startGlobal() } }
+    override val history: Chronicler by lazy {
+        Chronicler(buildMeta("chronicler", "printHistory" to true)).apply { startGlobal() }
+    }
 
     override val io: IOManager
         get() = pluginManager.get(IOManager::class).orElse {
@@ -73,7 +76,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
             pluginManager.load(DefaultIOManager())
         }
 
-    override val executor: ExecutorPlugin
+    override val executors: ExecutorPlugin
         get() = pluginManager.get(ExecutorPlugin::class).orElse {
             logger.debug("No executor plugin found. Using default executor.")
             pluginManager.load(DefaultExecutorPlugin())

@@ -16,14 +16,14 @@
 package hep.dataforge.fitting;
 
 import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.maths.GridCalculator;
-import hep.dataforge.maths.MatrixOperations;
-import hep.dataforge.maths.NamedMatrix;
 import hep.dataforge.maths.NamedVector;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.AbstractNamedSet;
-import hep.dataforge.stat.fit.*;
+import hep.dataforge.stat.fit.FitManager;
+import hep.dataforge.stat.fit.FitResult;
+import hep.dataforge.stat.fit.FitState;
+import hep.dataforge.stat.fit.ParamSet;
 import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.tables.Adapters;
@@ -32,8 +32,6 @@ import hep.dataforge.tables.Table;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.random.JDKRandomGenerator;
 import org.apache.commons.math3.random.RandomGenerator;
-
-import static hep.dataforge.context.Global.out;
 
 /**
  *
@@ -57,13 +55,13 @@ public class GaussianSpectrum extends AbstractNamedSet implements ParametricFunc
         return fm.runStage(state, engine, "run", "pos");
     }
 
-    public static void printInvHessian(Table data, ParamSet pars) {
-        XYModel model = new XYModel(Meta.empty(),new GaussianSpectrum());
-        FitState fs = FitState.builder().setDataSet(data).setModel(model).build();
-        NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
-        NamedMatrix hInv = new NamedMatrix(pars.namesAsArray(), MatrixOperations.inverse(h.getMatrix()));
-        FittingIOUtils.printNamedMatrix(Companion.out(), hInv);
-    }
+//    public static void printInvHessian(Table data, ParamSet pars) {
+//        XYModel model = new XYModel(Meta.empty(),new GaussianSpectrum());
+//        FitState fs = FitState.builder().setDataSet(data).setModel(model).build();
+//        NamedMatrix h = Hessian.getHessian(fs.getLogLike(), pars, pars.namesAsArray());
+//        NamedMatrix hInv = new NamedMatrix(pars.namesAsArray(), MatrixOperations.inverse(h.getMatrix()));
+//        FittingIOUtils.printNamedMatrix(System.out, hInv);
+//    }
 
     @Override
     public double derivValue(String parName, double x, Values set) {

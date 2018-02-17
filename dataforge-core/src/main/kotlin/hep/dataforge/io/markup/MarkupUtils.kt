@@ -3,10 +3,7 @@ package hep.dataforge.io.markup
 import hep.dataforge.description.Described
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.exceptions.DescriptorException
-import hep.dataforge.io.IOUtils.format
-import hep.dataforge.io.IOUtils.getDefaultTextWidth
 import hep.dataforge.meta.Meta
-import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
 
 /**
@@ -16,21 +13,21 @@ object MarkupUtils {
 
     @JvmStatic
     fun markupDescriptor(obj: Described): Markup {
-        val builder = MarkupBuilder()
+        val builder = MarkupGroup()
         applyDescriptorHead(builder, obj)
         applyDescriptorNode(obj.descriptor.meta, builder)
-        return builder.build()
+        return builder
     }
 
     @JvmStatic
     fun markupDescriptor(d: NodeDescriptor): Markup {
-        val builder = MarkupBuilder()
+        val builder = MarkupGroup()
         applyDescriptorNode(d.meta, builder)
-        return builder.build()
+        return builder
     }
 
-    private fun applyDescriptorHead(builder: MarkupBuilder, obj: Described) {
-        obj.header?.let { builder.content(it) }
+    private fun applyDescriptorHead(builder: MarkupGroup, obj: Described) {
+        obj.header?.let { builder.add(it) }
 
         //        NodeDescriptor descriptor = obj.getDescriptor();
         //        MarkupBuilder builder = new MarkupBuilder();
@@ -49,8 +46,8 @@ object MarkupUtils {
     }
 
     @Throws(DescriptorException::class)
-    private fun descriptorValue(valueDef: Meta): MarkupBuilder {
-        val builder = MarkupBuilder()
+    private fun descriptorValue(valueDef: Meta): Markup {
+        val builder = MarkupGroup()
 
         if (valueDef.getBoolean("required", false)) {
             builder.text("(*) ", "cyan")
@@ -67,13 +64,17 @@ object MarkupUtils {
         if (valueDef.hasValue("def")) {
             val def = valueDef.getValue("default")
             if (def.type == ValueType.STRING) {
-                builder.text(" = \"")
-                        .text(def.stringValue(), "yellow")
-                        .text("\": ")
+                builder.apply {
+                    text(" = \"")
+                    text(def.stringValue(), "yellow")
+                    text("\": ")
+                }
             } else {
-                builder.text(" = ")
-                        .text(def.stringValue(), "yellow")
-                        .text(": ")
+                builder.apply {
+                    text(" = ")
+                    text(def.stringValue(), "yellow")
+                    text(": ")
+                }
             }
         } else {
             builder.text(": ")
@@ -84,27 +85,31 @@ object MarkupUtils {
     }
 
     @Throws(DescriptorException::class)
-    private fun applyDescriptorNode(nodeDef: Meta, builder: MarkupBuilder = MarkupBuilder()) {
+    private fun applyDescriptorNode(nodeDef: Meta, builder: MarkupGroup) {
         if (nodeDef.hasMeta("node")) {
-            val elementList = MarkupBuilder.list(-1, "+ ")
-            for (elDef in nodeDef.getMetaList("node")) {
-                elementList.content(descriptorElement(elDef))
+            val elementList = ListMarkup().apply {
+                bullet = "+"
             }
-            builder.content(elementList)
+            for (elDef in nodeDef.getMetaList("node")) {
+                elementList.add(descriptorElement(elDef))
+            }
+            builder.add(elementList)
         }
 
         if (nodeDef.hasMeta("value")) {
-            val valueList = MarkupBuilder.list(-1, "- ")
-            for (parDef in nodeDef.getMetaList("value")) {
-                valueList.content(descriptorValue(parDef))
+            val valueList = ListMarkup().apply {
+                bullet = "-"
             }
-            builder.content(valueList)
+            for (parDef in nodeDef.getMetaList("value")) {
+                valueList.add(descriptorValue(parDef))
+            }
+            builder.add(valueList)
         }
     }
 
     @Throws(DescriptorException::class)
-    private fun descriptorElement(elementDef: Meta): MarkupBuilder {
-        val builder = MarkupBuilder()
+    private fun descriptorElement(elementDef: Meta): Markup {
+        val builder = MarkupGroup()
 
         if (elementDef.getBoolean("required", false)) {
             builder.text("(*) ", "cyan")
@@ -124,29 +129,5 @@ object MarkupUtils {
         return builder
     }
 
-
-    /**
-     * Represent table as a markup
-     *
-     * @param table
-     * @return
-     */
-    fun markupTable(table: Table): MarkupBuilder {
-        val builder = MarkupBuilder().setType(Markup.TABLE_TYPE)
-
-        val header = MarkupBuilder().setValue("header", true)
-        table.format.columns.forEach { c -> header.column(c.title, getDefaultTextWidth(c.primaryType)) }
-        builder.content(header)
-
-        for (dp in table) {
-            val row = MarkupBuilder()
-            table.format.columns.forEach { c ->
-                val width = getDefaultTextWidth(c.primaryType)
-                row.column(format(dp.getValue(c.name), width), width)
-            }
-            builder.content(row)
-        }
-        return builder
-    }
 
 }

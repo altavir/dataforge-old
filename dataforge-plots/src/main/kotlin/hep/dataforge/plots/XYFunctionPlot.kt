@@ -50,16 +50,16 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      * The minimal number of points per range
      */
 
-    var density by intValue()
-    var from by doubleValue("range.from")
-    var to by doubleValue("range.to")
+    var density by config.mutableIntValue()
+    var from by config.mutableDoubleValue("range.from")
+    var to by config.mutableDoubleValue("range.to")
 
     /**
      * Turns line smoothing on or off
      *
      * @param smoothing
      */
-    var smoothing by customValue("connectionType", read = { it.stringValue() == "spline" }) {
+    var smoothing by config.mutableCustomValue("connectionType", read = { it.stringValue() == "spline" }) {
         if (it) {
             "spline"
         } else {
@@ -67,7 +67,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
         }
     }
 
-    var range by customNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
+    var range by config.mutableCustomNode("range", read = { Pair(it.getDouble("from"), it.getDouble("to")) }) {
         invalidateCache()
         buildMeta("range", "from" to it.first, "to" to it.second)
     }

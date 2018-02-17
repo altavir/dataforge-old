@@ -51,12 +51,12 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
      *
      * @param bypass
      */
-    var bypass: (Data<*>) -> Boolean = { data -> false }
+    var bypass: (Data<*>) -> Boolean = { _ -> false }
 
     private val manager: CacheManager by lazy {
         try {
             Caching.getCachingProvider(context.classLoader).cacheManager.also {
-                context.logger.info("Loaded immutable manager $it")
+                context.logger.info("Loaded cache manager $it")
             }
         } catch (ex: CacheException) {
             context.logger.warn("Cache provider not found. Will use default immutable implementation.")
@@ -92,7 +92,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                         when {
                             data.goal.isDone -> data.inFuture.thenAccept { result.complete(it) }
                             cache.containsKey(id) -> {
-                                logger.info("Cached result found. Restoring data from immutable for id {}", id.hashCode())
+                                logger.info("Cached result found. Restoring data from cache for id {}", id.hashCode())
                                 CompletableFuture.supplyAsync { cache.get(id) }.whenComplete { res, err ->
                                     if (res != null) {
                                         result.complete(res)
@@ -101,7 +101,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                                     }
 
                                     if (err != null) {
-                                        logger.error("Failed to load data from immutable", err)
+                                        logger.error("Failed to load data from cache", err)
                                     }
                                 }
                             }
@@ -120,7 +120,7 @@ class CachePlugin(meta: Meta) : BasicPlugin(meta) {
                             try {
                                 cache.put(id, res)
                             } catch (ex: Exception) {
-                                context.logger.error("Failed to put result into the immutable", ex)
+                                context.logger.error("Failed to put result into the cache", ex)
                             }
 
                         }

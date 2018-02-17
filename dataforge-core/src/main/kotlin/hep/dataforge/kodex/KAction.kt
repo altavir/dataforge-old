@@ -28,10 +28,10 @@ class ActionEnv(val context: Context, val name: String, val meta: Meta, val log:
 /**
  * Action environment
  */
-class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBuilder) {
+class PipeBuilder<T, R>(val context: Context, val actionName: String, var name: String, var meta: MetaBuilder) {
     lateinit var result: suspend ActionEnv.(T) -> R;
 
-    var logger: Logger = LoggerFactory.getLogger("${context.name}[name]")
+    var logger: Logger = LoggerFactory.getLogger("${context.name}[$actionName:$name]")
 
     /**
      * Calculate the result of goal
@@ -48,10 +48,10 @@ class PipeBuilder<T, R>(val context: Context, var name: String, var meta: MetaBu
  * Notice that name and meta could be changed. Output object receives modified name and meta.
  */
 class KPipe<T, R>(
-        name: String? = null,
+        actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
-        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        private val action: PipeBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type())) {
@@ -63,6 +63,7 @@ class KPipe<T, R>(
 
             val pipe = PipeBuilder<T, R>(
                     context,
+                    name,
                     it.name,
                     laminate.builder
             ).apply(action)
@@ -99,7 +100,7 @@ class KPipe<T, R>(
 }
 
 
-class JoinGroup<T, R>(val context: Context, name: String? = null, internal val node: DataNode<out T>) {
+class JoinGroup<T, R>(val context: Context,  name: String? = null, internal val node: DataNode<out T>) {
     var name: String = name ?: node.name;
     var meta: MetaBuilder = node.meta.builder
 
@@ -166,10 +167,10 @@ class JoinGroupBuilder<T, R>(val context: Context, val meta: Meta) {
  * The same rules as for KPipe
  */
 class KJoin<T, R>(
-        name: String? = null,
+        actionName: String,
         private val inType: Class<T>? = null,
         private val outType: Class<R>? = null,
-        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(name) {
+        private val action: JoinGroupBuilder<T, R>.() -> Unit) : GenericAction<T, R>(actionName) {
 
     override fun run(context: Context, data: DataNode<out T>, meta: Meta): DataNode<R> {
         if (!this.inputType.isAssignableFrom(data.type())) {

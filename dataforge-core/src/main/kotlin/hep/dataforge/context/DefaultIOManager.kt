@@ -19,7 +19,6 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.UnsynchronizedAppenderBase
-import hep.dataforge.io.history.Record
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 
@@ -72,16 +71,8 @@ open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
         }
     }
 
-    /**
-     * Default history entry handler
-     */
-    open val recordHandler: (Record) -> Unit = {
-        output.push(it)
-    }
-
     override fun attach(context: Context) {
         super.attach(context)
-        context.chronicle.addListener(recordHandler)
         if (context.logger is ch.qos.logback.classic.Logger) {
             addLoggerAppender(context.logger as ch.qos.logback.classic.Logger)
         }

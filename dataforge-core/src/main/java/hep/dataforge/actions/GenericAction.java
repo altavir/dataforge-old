@@ -21,6 +21,7 @@ import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ActionDescriptor;
 import hep.dataforge.description.TypedActionDef;
+import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.MarkupBuilder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -104,7 +105,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
      */
     protected ExecutorService getExecutorService(Context context, Meta meta) {
         if (isParallelExecutionAllowed(meta)) {
-            return context.getExecutor().getDefaultExecutor();
+            return context.getExecutors().getDefaultExecutor();
         } else {
             return context.getDispatcher();
         }
@@ -152,14 +153,15 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
     }
 
     @Override
-    public MarkupBuilder getHeader() {
+    public Markup getHeader() {
         ActionDescriptor ad = getDescriptor();
         return new MarkupBuilder().text(ad.getName(), "green")
                 .text(" {input : ")
                 .text(ad.inputType(), "cyan")
                 .text(", output : ")
                 .text(ad.outputType(), "cyan")
-                .text(String.format("}: %s", ad.info()));
+                .text(String.format("}: %s", ad.info()))
+                .build();
     }
 
     /**

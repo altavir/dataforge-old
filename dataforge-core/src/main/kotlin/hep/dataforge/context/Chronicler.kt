@@ -16,16 +16,35 @@
 
 package hep.dataforge.context
 
+import hep.dataforge.description.ValueDef
 import hep.dataforge.io.history.Chronicle
 import hep.dataforge.io.history.History
+import hep.dataforge.io.history.Record
+import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.providers.Provides
+import hep.dataforge.values.ValueType
 import java.util.*
 
-class Chronicler : BasicPlugin(), History {
+@ValueDef(name = "printHistory", type = [ValueType.BOOLEAN], def = "false", info = "If true, print all incoming records in default context output")
+@PluginDef(name = "chronicler", group = "hep.dataforge", support = true, info = "The general support for history logging")
+class Chronicler(meta: Meta) : BasicPlugin(meta), History {
+
+    private val recordPusher: (Record) -> Unit = { context.io.output.push(it) }
 
     private val root: Chronicle by lazy {
-        Chronicle(context.name)
+        Chronicle(
+                context.name,
+                if (context == Global) {
+                    null
+                } else {
+                    Global.history
+                }
+        ).also {
+            if (meta.getBoolean("printHistory", false)) {
+                it.addListener(recordPusher)
+            }
+        }
     }
 
     override fun getChronicle(): Chronicle = root
@@ -47,15 +66,11 @@ class Chronicler : BasicPlugin(), History {
     fun getChronicle(reportName: String): Chronicle {
         return historyCache.computeIfAbsent(reportName) { str ->
             val name = Name.of(str)
-            val parent: History
-            parent = if (name.length > 1) {
-                getChronicle(name.cutLast().toString())
-            } else {
-                this@Chronicler
+            val parent: History? = when {
+                name.length > 1 -> getChronicle(name.cutLast().toString())
+                else -> root
             }
             Chronicle(name.last.toString(), parent)
         }
     }
-
-
 }
