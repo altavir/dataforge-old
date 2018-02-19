@@ -137,6 +137,10 @@ task buildDocs(type: org.jetbrains.dokka.gradle.DokkaTask) {
     //classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
     outputDirectory = file("target/docs/${version}/javadoc")
 
+    externalDocumentationLink {
+        url = new URL("http://docs.oracle.com/javase/8/docs/api/")
+    }
+
 //
 //    title "DataForge framework ${version}"
 //    source documentedProjects.collect { it.sourceSets.main.allJava }
