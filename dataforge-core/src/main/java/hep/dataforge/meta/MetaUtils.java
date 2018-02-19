@@ -260,7 +260,6 @@ public class MetaUtils {
      * @param out
      * @param meta        node to serialize
      * @param includeName include node name in serialization
-     * @throws IOException
      */
     public static void writeMeta(ObjectOutput out, Meta meta, boolean includeName) {
         try {

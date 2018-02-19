@@ -83,7 +83,6 @@ public interface Stateful extends Provider {
      *
      * @param name
      * @param value
-     * @return the actual state after set
      */
     void setState(String name, Object value);
 

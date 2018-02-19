@@ -111,7 +111,6 @@ public class EnvelopeTag {
      * Update existing properties
      *
      * @param props
-     * @return
      */
     public void setValues(Map<String, Value> props) {
         props.forEach(this::setValue);

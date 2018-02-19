@@ -63,8 +63,6 @@ public interface MetaStreamReader {
      *
      * @param file
      * @return
-     * @throws IOException
-     * @throws ParseException
      */
     default MetaBuilder readFile(Path file) {
         try (InputStream stream = Files.newInputStream(file, READ)) {
