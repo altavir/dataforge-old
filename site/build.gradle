@@ -132,7 +132,7 @@ task buildDocs(type: org.jetbrains.dokka.gradle.DokkaTask) {
         }
     }
 
-    reportNotDocumented = false
+    reportUndocumented = false
 
     //classpath = files(documentedProjects.collect { it.sourceSets.main.compileClasspath })
     outputDirectory = file("target/docs/${version}/javadoc")

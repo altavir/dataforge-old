@@ -26,6 +26,10 @@ data class ADField(val order: Int, val names: Names) : Field<AD> {
 
 
     fun variable(varName: String, value: Number): AD {
+        if (!names.contains(varName)) {
+            //TODO add conversions probably
+            throw RuntimeException("Name $varName is not a part of the number context")
+        }
         return AD(DerivativeStructure(names.size(), order, names.getNumberByName(varName), value.toDouble()), this)
     }
 
