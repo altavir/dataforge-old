@@ -86,6 +86,21 @@ abstract class FieldCompat<out N : Number, out C : NumberContext<N>>(val nc: C) 
         return with(nc) { self.unaryMinus() }
     }
 
+    //A temporary fix for https://youtrack.jetbrains.com/issue/KT-22972
+    abstract override fun toByte(): Byte
+
+    abstract override fun toChar(): Char
+
+    abstract override fun toDouble(): Double
+
+    abstract override fun toFloat(): Float
+
+    abstract override fun toInt(): Int
+
+    abstract override fun toLong(): Long
+
+    abstract override fun toShort(): Short
+
 }
 
 abstract class AbstractNumberContext<N : Number> : NumberContext<N> {
