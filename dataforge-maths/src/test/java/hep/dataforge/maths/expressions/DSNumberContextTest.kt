@@ -13,7 +13,7 @@ class DSNumberContextTest {
         val x = 0
         val context = DSNumberContext(1, "amp", "pos", "sigma")
 
-        val gauss = with(context) {
+        val gauss: DSNumber = with(context) {
             val amp = variable("amp", 1)
             val pos = variable("pos", 0)
             val sigma = variable("sigma", 1)

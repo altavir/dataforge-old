@@ -24,7 +24,7 @@ interface NumberContext<out N : Number> {
     /**
      * Arithmetical sum of arguments. The
      */
-    operator fun Number.plus(b: Number): N
+    operator fun Number.plus(b: Number): N // looks like  N plus(a:Number, b: Number) in java
 
     operator fun Number.minus(b: Number): N
     operator fun Number.div(b: Number): N
@@ -58,6 +58,34 @@ interface ExtendedNumberContext<out N : Number> : NumberContext<N> {
  */
 interface ExpressionContext<out N : Number> : NumberContext<N> {
     fun variable(name: String, value: Number): N
+}
+
+
+/**
+ * Backward compatibility class for connoms-math/commons-numbers field/
+ */
+abstract class FieldCompat<out N : Number, out C : NumberContext<N>>(val nc: C) : Number() {
+    abstract val self: N
+    operator fun plus(n: Number): N {
+        return with(nc) { self.plus(n) }
+    }
+
+    operator fun minus(n: Number): N {
+        return with(nc) { self.minus(n) }
+    }
+
+    operator fun times(n: Number): N {
+        return with(nc) { self.times(n) }
+    }
+
+    operator fun div(n: Number): N {
+        return with(nc) { self.div(n) }
+    }
+
+    operator fun unaryMinus(): N {
+        return with(nc) { self.unaryMinus() }
+    }
+
 }
 
 abstract class AbstractNumberContext<N : Number> : NumberContext<N> {

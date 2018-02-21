@@ -3,14 +3,15 @@ package hep.dataforge.maths.expressions
 import hep.dataforge.names.Names
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 
-class DSNumber(val ds: DerivativeStructure, val names: Names) : Number() {
+class DSNumber(val ds: DerivativeStructure, nc: DSNumberContext) : FieldCompat<DSNumber, DSNumberContext>(nc) {
+    override val self: DSNumber = this
 
     fun deriv(parName: String): Double {
         return deriv(mapOf(parName to 1))
     }
 
     fun deriv(orders: Map<String, Int>): Double {
-        return ds.getPartialDerivative(*names.map { orders[it] ?: 0 }.toIntArray())
+        return ds.getPartialDerivative(*nc.names.map { orders[it] ?: 0 }.toIntArray())
     }
 
     override fun toByte(): Byte = ds.value.toByte()
@@ -31,7 +32,7 @@ class DSNumber(val ds: DerivativeStructure, val names: Names) : Number() {
      * Return new DSNumber, obtained by applying given function to underlying ds
      */
     inline fun eval(func: (DerivativeStructure) -> DerivativeStructure): DSNumber {
-        return DSNumber(func(ds), names)
+        return DSNumber(func(ds), nc)
     }
 }
 
@@ -41,14 +42,14 @@ class DSNumberContext(val order: Int, val names: Names) : ExpressionContext<DSNu
 
     override fun transform(n: Number): DSNumber {
         return if (n is DSNumber) {
-            if (n.names == this.names) {
+            if (n.nc.names == this.names) {
                 n
             } else {
                 //TODO add conversion
                 throw RuntimeException("Names mismatch in derivative structure")
             }
         } else {
-            DSNumber(DerivativeStructure(names.size(), order, n.toDouble()), names)
+            DSNumber(DerivativeStructure(names.size(), order, n.toDouble()), this)
         }
     }
 
@@ -57,7 +58,7 @@ class DSNumberContext(val order: Int, val names: Names) : ExpressionContext<DSNu
             //TODO add conversions probably
             throw RuntimeException("Name $name is not a part of the number context")
         }
-        return DSNumber(DerivativeStructure(names.size(), order, names.getNumberByName(name), value.toDouble()), names)
+        return DSNumber(DerivativeStructure(names.size(), order, names.getNumberByName(name), value.toDouble()), this)
     }
 
     override fun Number.plus(b: Number): DSNumber {
