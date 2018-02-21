@@ -10,6 +10,7 @@ import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 /**
  * A field class for automatically differentiated numbers
  */
+@Deprecated("For test only")
 data class ADField(val order: Int, val names: Names) : Field<AD> {
 
     constructor(order: Int, vararg names: String) : this(order, Names.of(*names))
@@ -39,15 +40,9 @@ data class ADField(val order: Int, val names: Names) : Field<AD> {
 }
 
 /**
- * Perform an automatic differentiation on given expression
- */
-fun autoDiff(order: Int, vararg parNames: String, op: ADField.() -> AD): AD {
-    return ADField(order, *parNames).op()
-}
-
-/**
  * Automatically differentiated numbers
  */
+@Deprecated("For test only")
 class AD(val ds: DerivativeStructure, private val field: ADField) : RealFieldElement<AD>, Number() {
 
     override fun toByte(): Byte = ds.value.toByte()
