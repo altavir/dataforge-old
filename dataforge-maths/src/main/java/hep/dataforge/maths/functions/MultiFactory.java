@@ -8,6 +8,7 @@ package hep.dataforge.maths.functions;
 import hep.dataforge.exceptions.NotDefinedException;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.utils.MetaFactory;
+
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,21 +17,19 @@ import java.util.Map;
  *
  * @author Alexander Nozik
  */
-public class FunctionDispatcher<T> implements MetaFactory<T> {
+public class MultiFactory<T>  {
 
     private final Map<String, MetaFactory<T>> factoryMap = new HashMap<>();
 
-    @Override
-    public T build(Meta meta) {
-        String type = meta.getString("type", "");
-        if (factoryMap.containsKey(type)) {
-            return factoryMap.get(type).build(meta);
+    public T build(String key, Meta meta) {
+        if (factoryMap.containsKey(key)) {
+            return factoryMap.get(key).build(meta);
         } else {
-            throw new NotDefinedException("Function with type '" + type + "' not defined");
+            throw new NotDefinedException("Function with type '" + key + "' not defined");
         }
     }
 
-    public synchronized FunctionDispatcher addFactory(String type, MetaFactory<T> factory) {
+    public synchronized MultiFactory addFactory(String type, MetaFactory<T> factory) {
         this.factoryMap.put(type, factory);
         return this;
     }

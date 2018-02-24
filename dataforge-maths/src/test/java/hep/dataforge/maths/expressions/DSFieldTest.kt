@@ -6,12 +6,12 @@ import kotlin.math.PI
 import kotlin.math.sqrt
 
 
-class DSNumberContextTest {
+class DSFieldTest {
 
     @Test
     fun testNormal() {
         val x = 0
-        val context = DSNumberContext(1, "amp", "pos", "sigma")
+        val context = DSField(1, "amp", "pos", "sigma")
 
         val gauss: DSNumber = with(context) {
             val amp = variable("amp", 1)
@@ -20,7 +20,7 @@ class DSNumberContextTest {
             amp / (sigma * sqrt(2 * PI)) * exp(-pow(pos - x, 2) / pow(sigma, 2) / 2)
         }
 
-        println(gauss)
+        //println(gauss)
         assertEquals(1.0 / sqrt(2.0 * PI), gauss.toDouble(), 0.001)
         assertEquals(0.0, gauss.deriv("pos"), 0.001)
     }

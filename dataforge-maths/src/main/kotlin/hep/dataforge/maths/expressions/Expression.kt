@@ -22,7 +22,6 @@
 package hep.dataforge.maths.expressions
 
 import hep.dataforge.names.Names
-import hep.dataforge.values.Value
 import hep.dataforge.values.Values
 
 /**
@@ -30,12 +29,7 @@ import hep.dataforge.values.Values
  *
  * @author Alexander Nozik
  */
-interface Expression {
-
-    /**
-     * A set of names for parameters of this expression
-     */
-    val names: Names
+interface Expression<T> {
 
     /**
      * Evaluate expression using given set of parameters.
@@ -43,10 +37,66 @@ interface Expression {
      * some values, in this case exception is not thrown even if one of such parameters is missing.
      * @return
      */
-    operator fun invoke(parameters: Values): Value
+    operator fun invoke(parameters: Values): T
 }
 
+class BasicExpression<T>(val function: (Values) -> T) : Expression<T> {
+    override fun invoke(parameters: Values): T {
+        return function.invoke(parameters)
+    }
+}
 
-class PreCompiledExpression{
+/**
+ * @param names A set of names for parameters of this expression
+ */
+class ExpressionField<in T, R>(val names: Names, private val field: Field<T, R>) : ExtendedField<T, Expression<R>> {
+
+    override val one: Expression<R> = BasicExpression { field.one }
+
+    override val zero: Expression<R> = BasicExpression { field.one }
+
+    override fun transform(n: T): Expression<R> {
+        return if (n is Expression<*>) {
+            n as Expression<R>
+        } else {
+            BasicExpression { field.transform(n) }
+        }
+    }
+
+    override fun add(a: T, b: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun subtract(a: T, b: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun divide(a: T, b: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun multiply(a: T, b: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun negate(a: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun sin(n: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun cos(n: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun exp(n: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
+    override fun pow(n: T, p: T): Expression<R> {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
 
 }

@@ -1,7 +1,6 @@
 package hep.dataforge.maths
 
-import hep.dataforge.maths.expressions.DSNumberContext
-import hep.dataforge.maths.expressions.autoDiff
+import hep.dataforge.maths.expressions.DSField
 import hep.dataforge.maths.extensions.exp
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Fork
@@ -19,7 +18,7 @@ open class DSNumberBenchmark{
     @Benchmark
     fun benchmarkNumberContext() {
         val x = 0
-        val context = DSNumberContext(1, "amp", "pos", "sigma")
+        val context = DSField(1, "amp", "pos", "sigma")
 
         val gauss = with(context) {
             val amp = variable("amp", 1)

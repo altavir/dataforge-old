@@ -3,7 +3,7 @@ package hep.dataforge.maths.expressions
 import hep.dataforge.names.Names
 import org.apache.commons.math3.analysis.differentiation.DerivativeStructure
 
-class DSNumber(val ds: DerivativeStructure, nc: DSNumberContext) : FieldCompat<DSNumber, DSNumberContext>(nc) {
+class DSNumber(val ds: DerivativeStructure, nc: DSField) : FieldCompat<Number, DSNumber, DSField>(nc) {
     override val self: DSNumber = this
 
     fun deriv(parName: String): Double {
@@ -36,7 +36,11 @@ class DSNumber(val ds: DerivativeStructure, nc: DSNumberContext) : FieldCompat<D
     }
 }
 
-class DSNumberContext(val order: Int, val names: Names) : ExpressionContext<DSNumber>, ExtendedNumberContext<DSNumber> {
+class DSField(val order: Int, val names: Names) : VariableField<Number, DSNumber>, ExtendedField<Number, DSNumber> {
+
+    override val one: DSNumber = transform(1.0)
+
+    override val zero: DSNumber = transform( 0.0)
 
     constructor(order: Int, vararg names: String) : this(order, Names.of(*names))
 
@@ -61,44 +65,45 @@ class DSNumberContext(val order: Int, val names: Names) : ExpressionContext<DSNu
         return DSNumber(DerivativeStructure(names.size(), order, names.getNumberByName(name), value.toDouble()), this)
     }
 
-    override fun Number.plus(b: Number): DSNumber {
+    override fun add(a: Number,b: Number): DSNumber {
         return if (b is DSNumber) {
-            transform(this).eval { it.add(b.ds) }
+            transform(a).eval { it.add(b.ds) }
         } else {
-            transform(this).eval { it.add(b.toDouble()) }
+            transform(a).eval { it.add(b.toDouble()) }
         }
     }
 
-    override fun Number.minus(b: Number): DSNumber {
+    override fun subtract(a: Number,b: Number): DSNumber {
         return if (b is DSNumber) {
-            transform(this).eval { it.subtract(b.ds) }
+            transform(a).eval { it.subtract(b.ds) }
         } else {
-            transform(this).eval { it.subtract(b.toDouble()) }
-        }
-
-    }
-
-    override fun Number.div(b: Number): DSNumber {
-        return if (b is DSNumber) {
-            transform(this).eval { it.divide(b.ds) }
-        } else {
-            transform(this).eval { it.divide(b.toDouble()) }
+            transform(a).eval { it.subtract(b.toDouble()) }
         }
 
     }
 
-    override fun Number.times(b: Number): DSNumber {
+    override fun divide(a: Number,b: Number): DSNumber {
+        return if (b is DSNumber) {
+            transform(a).eval { it.divide(b.ds) }
+        } else {
+            transform(a).eval { it.divide(b.toDouble()) }
+        }
+
+    }
+
+    override fun negate(a: Number): DSNumber {
+        return (a as? DSNumber)?.eval { it.negate() } ?: transform(-a.toDouble())
+    }
+
+    override fun multiply(a: Number,b: Number): DSNumber {
         return when (b) {
-            is DSNumber -> transform(this).eval { it.multiply(b.ds) }
-            is Int -> transform(this).eval { it.multiply(b) }
-            else -> transform(this).eval { it.multiply(b.toDouble()) }
+            is DSNumber -> transform(a).eval { it.multiply(b.ds) }
+            is Int -> transform(a).eval { it.multiply(b) }
+            else -> transform(a).eval { it.multiply(b.toDouble()) }
         }
 
     }
 
-    override fun Number.unaryMinus(): DSNumber {
-        return (this as? DSNumber)?.eval { it.negate() } ?: transform(-this.toDouble())
-    }
 
     override fun sin(n: Number): DSNumber {
         return transform(n).eval { it.sin() }
