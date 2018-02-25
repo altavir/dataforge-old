@@ -53,7 +53,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     @Deprecated
     public static FileEnvelope createEmpty(Path path, Meta meta) throws IOException {
         try (OutputStream stream = Files.newOutputStream(path, CREATE, WRITE)) {
-            DefaultEnvelopeType.instance.getWriter().write(stream, new EnvelopeBuilder().setMeta(meta));
+            DefaultEnvelopeType.Companion.getINSTANCE().getWriter().write(stream, new EnvelopeBuilder().setMeta(meta));
         }
         return new FileEnvelope(path, false);
     }
@@ -205,7 +205,7 @@ public class FileEnvelope implements Envelope, AutoCloseable {
     }
 
     private synchronized void setDataSize(SeekableByteChannel channel, int size) throws IOException {
-        getTag().setValue(DATA_LENGTH_KEY, size);//update property
+        getTag().setValue(Companion.getDATA_LENGTH_KEY(), size);//update property
         long position = channel.position();
         channel.position(0);//seeking begin
         ByteBuffer buffer = getTag().toBytes();

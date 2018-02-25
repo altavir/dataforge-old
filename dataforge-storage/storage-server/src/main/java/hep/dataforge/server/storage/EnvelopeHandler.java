@@ -24,12 +24,12 @@ public class EnvelopeHandler implements Handler, Responder {
     @Override
     public void handle(Context ctx) throws Exception {
         ctx.parse(Form.class).then(request -> {
-            String metaType = request.get(Envelope.META_TYPE_KEY);
+            String metaType = request.get(Envelope.Companion.getMETA_TYPE_KEY());
             String metaString = request.get("meta");
 
             EnvelopeBuilder builder = new EnvelopeBuilder();
 
-            Meta meta = MetaType.resolve(metaType).getReader().readString(metaString);
+            Meta meta = MetaType.Companion.resolve(metaType).getReader().readString(metaString);
             byte[] data = request.file("data").getBytes();
 
             builder.setMeta(meta);

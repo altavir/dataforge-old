@@ -89,7 +89,7 @@ public class MetaFileReader {
             }
         }
         //Fall back and try to resolve meta as an envelope ignoring extension
-        return EnvelopeReader.readFile(file).getMeta();
+        return EnvelopeReader.Companion.readFile(file).getMeta();
     }
 
     /**

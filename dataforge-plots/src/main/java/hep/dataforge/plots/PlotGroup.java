@@ -265,7 +265,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
         @Override
         public Envelope wrap(PlotGroup group) {
             ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            EnvelopeWriter writer = DefaultEnvelopeType.instance.getWriter();
+            EnvelopeWriter writer = DefaultEnvelopeType.Companion.getINSTANCE().getWriter();
 
             for (Plottable plot : group.plots.values()) {
                 try {
@@ -284,7 +284,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             }
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .putMetaValue(WRAPPER_TYPE_KEY, PLOT_GROUP_WRAPPER_TYPE)
+                    .putMetaValue(Companion.getWRAPPER_TYPE_KEY(), PLOT_GROUP_WRAPPER_TYPE)
                     .putMetaValue("name", group.getName())
                     .putMetaNode(DEFAULT_META_NAME, group.getConfig())
                     .setContentType("wrapper")
@@ -304,7 +304,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             PlotGroup group = new PlotGroup(groupName);
             group.configure(groupMeta);
 
-            EnvelopeType internalEnvelopeType = EnvelopeType.resolve(envelope.getMeta().getString("@envelope.internalType", "default"));
+            EnvelopeType internalEnvelopeType = EnvelopeType.Companion.resolve(envelope.getMeta().getString("@envelope.internalType", "default"));
 
             try {
                 InputStream dataStream = envelope.getData().getStream();
@@ -312,7 +312,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
                 while (dataStream.available() > 0) {
                     Envelope item = internalEnvelopeType.getReader().read(dataStream);
                     try {
-                        Plottable pl = Plottable.class.cast(hep.dataforge.io.envelopes.Wrapper.unwrap(item));
+                        Plottable pl = Plottable.class.cast(hep.dataforge.io.envelopes.Wrapper.Companion.unwrap(item));
                         group.add(pl);
                     } catch (Exception ex) {
                         LoggerFactory.getLogger(getClass()).error("Failed to unwrap plottable", ex);

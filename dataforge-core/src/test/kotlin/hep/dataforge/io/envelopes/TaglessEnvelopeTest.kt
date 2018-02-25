@@ -43,7 +43,7 @@ class TaglessEnvelopeTest {
         val bais = ByteArrayInputStream(baos.toByteArray())
         val restored = envelopeType.reader.read(bais)
 
-        assertEquals(String(restored.data.buffer.array(), Charsets.UTF_8), "Всем привет!")
+        assertEquals("Всем привет!", String(restored.data.buffer.array(), Charsets.UTF_8))
     }
 
     @Test
@@ -56,6 +56,7 @@ class TaglessEnvelopeTest {
         val bais = ByteArrayInputStream(envString.toByteArray(charset("UTF-8")))
         val restored = envelopeType.reader.read(bais)
 
-        assertEquals(String(restored.data.buffer.array(), Charsets.UTF_8), "Всем привет!")
+        assertEquals(12, restored.meta.getInt("myValue"))
+        assertEquals("Всем привет!", String(restored.data.buffer.array(), Charsets.UTF_8))
     }
 }

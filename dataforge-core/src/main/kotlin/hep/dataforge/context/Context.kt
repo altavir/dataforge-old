@@ -221,8 +221,15 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> findService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
+    fun <T> optService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
         return serviceStream(serviceClass).filter(predicate).findFirst()
+    }
+
+    /**
+     * Find specific service provided by java SPI
+     */
+    fun <T> findService(serviceClass: Class<T>, condition: (T) -> Boolean): T? {
+        return serviceStream(serviceClass).filter(condition).findFirst().nullable
     }
 
     /**

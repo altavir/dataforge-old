@@ -92,7 +92,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
         if (!isReadOnly()) {
             try {
                 ByteArrayOutputStream baos = new ByteArrayOutputStream();
-                new DefaultEnvelopeWriter(FileStorageEnvelopeType.instance, JSONMetaType.instance).write(baos, env);
+                new DefaultEnvelopeWriter(FileStorageEnvelopeType.Companion.getINSTANCE(), JSONMetaType.instance).write(baos, env);
                 file.append(baos.toByteArray());
             } catch (IOException ex) {
                 throw new StorageException("Can't push envelope to loader", ex);
@@ -124,7 +124,7 @@ public class FileEnvelopeLoader extends AbstractEnvelopeLoader {
             @Override
             public Envelope next() {
                 try {
-                    return DefaultEnvelopeReader.INSTANCE.readWithData(st);
+                    return DefaultEnvelopeReader.Companion.getINSTANCE().readWithData(st);
                 } catch (IOException ex) {
                     throw new RuntimeException(ex);
                 }

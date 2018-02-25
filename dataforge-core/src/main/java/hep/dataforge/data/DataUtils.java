@@ -221,7 +221,7 @@ public class DataUtils {
      */
     public static <T> Data<T> readEnvelope(Path filePath, Meta override, Class<T> type, BiFunction<Binary, Meta, T> reader) {
         try {
-            Envelope envelope = EnvelopeReader.readFile(filePath);
+            Envelope envelope = EnvelopeReader.Companion.readFile(filePath);
             Binary binary = envelope.getData();
             Path metaFileDirectory = filePath.resolveSibling(META_DIRECTORY);
             Meta fileMeta = MetaFileReader.resolve(metaFileDirectory, filePath.getFileName().toString()).orElse(Meta.empty());

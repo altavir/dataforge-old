@@ -1,0 +1,126 @@
+/*
+ * Copyright  2018 Alexander Nozik.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *  Unless required by applicable law or agreed to in writing, software
+ *  distributed under the License is distributed on an "AS IS" BASIS,
+ *  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *  See the License for the specific language governing permissions and
+ *  limitations under the License.
+ */
+package hep.dataforge.io.envelopes
+
+import hep.dataforge.data.Data
+import hep.dataforge.data.binary.Binary
+import hep.dataforge.description.NodeDef
+import hep.dataforge.kodex.nullable
+import hep.dataforge.meta.Meta
+import hep.dataforge.meta.Metoid
+import org.slf4j.LoggerFactory
+import java.io.IOException
+import java.io.Serializable
+import java.time.Instant
+import java.util.*
+import java.util.function.Function
+
+/**
+ * The message is a pack that can include two principal parts:
+ *
+ *  * Envelope meta-data
+ *  * binary data
+ *
+ *
+ * @author Alexander Nozik
+ */
+@NodeDef(name = "@envelope", info = "An optional envelope service info node")
+interface Envelope : Metoid, Serializable {
+
+    /**
+     * Read data into buffer. This operation could take a lot of time so be
+     * careful when performing it synchronously
+     *
+     * @return
+     */
+    val data: Binary
+
+    /**
+     * The purpose of the envelope
+     *
+     * @return
+     */
+    val type: Optional<String> // TODO replace by nullables
+        get() = meta.optValue("@envelope.type").map { it.stringValue() }
+
+    /**
+     * The type of data encoding
+     *
+     * @return
+     */
+    val dataType: Optional<String> // TODO replace by nullables
+        get() = meta.optValue("@envelope.dataType").map { it.stringValue() }
+
+    /**
+     * Textual user friendly description
+     *
+     * @return
+     */
+    val description: String
+        get() = meta.getString("@envelope.description", "")
+
+    /**
+     * Time of creation of the envelope
+     *
+     * @return
+     */
+    val time: Instant?
+        get() = meta.optValue("@envelope.time").map { it.timeValue() }.nullable
+
+    /**
+     * Meta part of the envelope
+     *
+     * @return
+     */
+    override fun getMeta(): Meta
+
+    fun hasMeta(): Boolean {
+        return !meta.isEmpty
+    }
+
+    fun hasData(): Boolean {
+        try {
+            return data.size() > 0
+        } catch (e: IOException) {
+            LoggerFactory.getLogger(javaClass).error("Failed to estimate data size in the envelope", e)
+            return false
+        }
+
+    }
+
+    /**
+     * Transform Envelope to Lazy data using given transformation.
+     * In case transformation failed an exception will be thrown in call site.
+     *
+     * @param type
+     * @param transform
+     * @param <T>
+     * @return
+    </T> */
+    fun <T> map(type: Class<T>, transform: Function<Binary, T>): Data<T> {
+        return Data.generate(type, meta) { transform.apply(data) }
+    }
+
+    companion object {
+        /**
+         * Property keys
+         */
+        const val TYPE_KEY = "type"
+        const val META_TYPE_KEY = "metaType"
+        const val META_LENGTH_KEY = "metaLength"
+        const val DATA_LENGTH_KEY = "dataLength"
+    }
+}

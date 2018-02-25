@@ -87,8 +87,8 @@ public interface Plot extends Plottable {
         @Override
         public Envelope wrap(Plot plot) {
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .putMetaValue(WRAPPER_TYPE_KEY, PLOT_WRAPPER_TYPE)
-                    .putMetaValue(WRAPPER_CLASS_KEY, getClass().getName())
+                    .putMetaValue(Companion.getWRAPPER_TYPE_KEY(), PLOT_WRAPPER_TYPE)
+                    .putMetaValue(Companion.getWRAPPER_CLASS_KEY(), getClass().getName())
                     .putMetaValue("name", plot.getName())
                     //.putMetaNode("descriptor", plot.getDescriptor().toMeta())
                     .putMetaNode(DEFAULT_META_NAME, plot.getConfig())

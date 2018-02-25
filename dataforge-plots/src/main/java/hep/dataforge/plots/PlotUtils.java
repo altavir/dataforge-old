@@ -115,7 +115,7 @@ public class PlotUtils {
             File file = chooser.showSaveDialog(window);
             if (file != null) {
                 try {
-                    new DefaultEnvelopeWriter(DefaultEnvelopeType.instance, XMLMetaType.instance)
+                    new DefaultEnvelopeWriter(DefaultEnvelopeType.Companion.getINSTANCE(), XMLMetaType.Companion.getInstance())
                             .write(new FileOutputStream(file), new PlotFrame.Wrapper().wrap(frame));
                 } catch (IOException ex) {
                     throw new RuntimeException("Failed to save plot to file", ex);

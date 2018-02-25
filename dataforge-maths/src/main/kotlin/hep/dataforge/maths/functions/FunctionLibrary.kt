@@ -25,6 +25,7 @@ import hep.dataforge.context.*
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.messages.Responder
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import org.apache.commons.math3.analysis.BivariateFunction
 import org.apache.commons.math3.analysis.MultivariateFunction
@@ -83,40 +84,29 @@ class FunctionLibrary : BasicPlugin(), Responder {
                 val functionKey = request.getString("key")
                 val functionMeta = message.meta.getMetaOrEmpty("meta")
                 val arguments = request.getValue("argument").listValue().map { it.doubleValue() }
+                val requestID = request.getValue("id", -1)
 
 
-                val response = when (arguments.size) {
+                val result = when (arguments.size) {
                     0 -> throw RuntimeException("No arguments found")
                     1 -> {
                         val univariateFunction = univariateFactory.build(functionKey, functionMeta)
-                        val result = univariateFunction.value(arguments[0])
-                        request.builder.setValue("result", result)
+                        univariateFunction.value(arguments[0])
                     }
                     2 -> {
                         val bivariateFunction = bivariateFactory.build(functionKey, functionMeta)
-
-                        val result = bivariateFunction.value(arguments[0], arguments[1])
-                        request.builder.setValue("result", result)
+                        bivariateFunction.value(arguments[0], arguments[1])
                     }
                     else -> {
                         val multivariateFunction = multivariateFactory.build(functionKey, functionMeta)
-                        val result = multivariateFunction.value(arguments.toDoubleArray())
-                        request.builder.setValue("result", result)
+                        multivariateFunction.value(arguments.toDoubleArray())
                     }
                 }
-                builder.putMetaNode("response", response)
+                buildMeta("response", "result" to result, "id" to requestID)
             }
             return builder.build()
         } else {
             throw RuntimeException("Unknown action $action")
-        }
-    }
-
-
-    class Remote(private val responder: Responder) {
-
-        operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double {
-            TODO()
         }
     }
 

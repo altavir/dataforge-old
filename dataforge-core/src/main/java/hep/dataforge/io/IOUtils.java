@@ -318,6 +318,7 @@ public class IOUtils {
      * @param action
      * @return the stop line (fist line that satisfies the stopping condition)
      */
+    @Deprecated
     public static String forEachLine(InputStream stream, String charset, Predicate<String> stopCondition, Consumer<String> action) {
         ByteArrayOutputStream baos = new ByteArrayOutputStream();
         while (true) {

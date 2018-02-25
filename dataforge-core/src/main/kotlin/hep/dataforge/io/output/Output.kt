@@ -6,7 +6,7 @@ import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.encoder.Encoder
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeType
-import hep.dataforge.io.envelopes.TaglessEnvelopeType.TAGLESS_ENVELOPE_TYPE
+import hep.dataforge.io.envelopes.TaglessEnvelopeType.Companion.TAGLESS_ENVELOPE_TYPE
 import hep.dataforge.io.history.Record
 import hep.dataforge.io.markup.Markedup
 import hep.dataforge.io.markup.Markup
@@ -80,7 +80,7 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
                 is MarkupBuilder -> renderer.render(obj)
                 is Markedup -> renderer.render(obj.markup(meta))
                 is Envelope -> {
-                    val envelopeType = EnvelopeType.resolve(meta.getString("envelope.type", TAGLESS_ENVELOPE_TYPE))
+                    val envelopeType = EnvelopeType.resolve(meta.getString("envelope.type", TAGLESS_ENVELOPE_TYPE))!!
                     val envelopeProperties = meta.getMeta("envelope.properties", Meta.empty()).asMap { it.stringValue() }
                     envelopeType.getWriter(envelopeProperties).write(stream, obj)
                 }

@@ -180,7 +180,7 @@ public abstract class AbstractNetworkListener implements Metoid, AutoCloseable, 
         }
 
         private void write(Envelope envelope) throws IOException {
-            DefaultEnvelopeType.instance.getWriter().write(os, envelope);
+            DefaultEnvelopeType.Companion.getINSTANCE().getWriter().write(os, envelope);
             os.flush();
         }
 

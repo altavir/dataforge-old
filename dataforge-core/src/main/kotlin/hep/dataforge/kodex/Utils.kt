@@ -12,7 +12,6 @@ inline fun <T> T?.orElse(sup: () -> T): T {
     return this?: sup.invoke()
 }
 
-
 //object IO {
 //    /**
 //     * Create an output stream that copies its output into each of given streams
