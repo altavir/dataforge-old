@@ -27,6 +27,7 @@ import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
+import java.nio.channels.ReadableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.READ
@@ -37,9 +38,12 @@ import java.text.ParseException
  */
 open class DefaultEnvelopeReader : EnvelopeReader {
 
-
     protected open fun newTag(): EnvelopeTag {
         return EnvelopeTag()
+    }
+
+    override fun read(channel: ReadableByteChannel): Envelope {
+        return read(Channels.newInputStream(channel))
     }
 
     @Throws(IOException::class)

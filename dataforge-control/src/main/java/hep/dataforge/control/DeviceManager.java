@@ -6,7 +6,6 @@ import hep.dataforge.control.devices.DeviceFactory;
 import hep.dataforge.control.devices.DeviceHub;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
-import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;

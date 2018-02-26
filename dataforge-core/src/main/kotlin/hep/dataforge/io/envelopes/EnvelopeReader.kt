@@ -16,13 +16,13 @@
 package hep.dataforge.io.envelopes
 
 
-import java.io.ByteArrayInputStream
+import hep.dataforge.io.BufferChannel
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
+import java.nio.channels.ReadableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
-
 import java.nio.file.StandardOpenOption.READ
 
 /**
@@ -42,14 +42,16 @@ interface EnvelopeReader {
     @Throws(IOException::class)
     fun read(stream: InputStream): Envelope
 
+    fun read(channel: ReadableByteChannel): Envelope
+
     @Throws(IOException::class)
     fun read(buffer: ByteBuffer): Envelope {
-        return read(ByteArrayInputStream(buffer.array()))
+        return read(BufferChannel(buffer))//read(ByteArrayInputStream(buffer.array()))
     }
 
     @Throws(IOException::class)
     fun read(file: Path): Envelope {
-        Files.newInputStream(file, READ).use { stream -> return read(stream) }
+        return Files.newByteChannel(file, READ).use { read(it) }
     }
 
     companion object {

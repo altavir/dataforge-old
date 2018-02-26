@@ -38,8 +38,7 @@ class EnvelopeBuilder : Envelope {
      *
      * @return
      */
-    var metaBuilder = MetaBuilder("envelope")
-        private set
+    private var metaBuilder = MetaBuilder("envelope")
 
     //initializing with empty buffer
     override var data: Binary = BufferedBinary(ByteArray(0))
@@ -118,7 +117,7 @@ class EnvelopeBuilder : Envelope {
         return this
     }
 
-    override fun getMeta(): Meta {
+    override fun getMeta(): MetaBuilder {
         return metaBuilder
     }
 

@@ -20,7 +20,6 @@ import hep.dataforge.context.ContextAware;
 import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.RoleDef;
 import hep.dataforge.events.EventHandler;
-import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Metoid;

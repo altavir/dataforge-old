@@ -23,7 +23,6 @@ import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
 import hep.dataforge.exceptions.StorageException;
 import hep.dataforge.io.envelopes.Envelope;
-import hep.dataforge.io.messages.MessageValidator;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
@@ -304,8 +303,8 @@ public abstract class AbstractStorage extends MetaHolder implements Storage {
     @Override
     @NodeDef(name = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     public Responder getResponder(Meta targetInfo) {
-        String targetType = targetInfo.getString(TARGET_TYPE_KEY, LOADER_TARGET);
-        String targetName = targetInfo.getString(TARGET_NAME_KEY, "");
+        String targetType = targetInfo.getString(Companion.getTARGET_TYPE_KEY(), LOADER_TARGET);
+        String targetName = targetInfo.getString(Companion.getTARGET_NAME_KEY(), "");
         boolean allowCreate = targetInfo.getBoolean("allowCreate", true);
         Meta addMeta = targetInfo.getMeta(DEFAULT_META_NAME, Meta.empty());
         try {

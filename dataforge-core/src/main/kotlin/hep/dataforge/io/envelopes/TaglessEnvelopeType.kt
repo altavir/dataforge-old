@@ -22,9 +22,6 @@ import java.io.*
 import java.nio.ByteBuffer
 import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
-import java.nio.file.Files
-import java.nio.file.Path
-import java.nio.file.StandardOpenOption
 import java.text.ParseException
 import java.util.*
 import java.util.regex.Pattern
@@ -93,20 +90,12 @@ class TaglessEnvelopeType : EnvelopeType {
 
         private val BUFFER_SIZE = 1024
 
-        override fun read(buffer: ByteBuffer): Envelope {
-            return super.read(buffer)
-        }
-
-        override fun read(file: Path): Envelope {
-            return read(Files.newByteChannel(file, StandardOpenOption.READ))
-        }
-
         @Throws(IOException::class)
         override fun read(stream: InputStream): Envelope {
            return read(Channels.newChannel(stream))
         }
 
-        fun read(channel: ReadableByteChannel): Envelope{
+        override fun read(channel: ReadableByteChannel): Envelope{
             val properties = HashMap(override)
             val buffer = ByteBuffer.allocate(BUFFER_SIZE).apply { position(BUFFER_SIZE) }
             val meta = readMeta(channel, buffer, properties)
