@@ -15,6 +15,8 @@
  */
 package hep.dataforge.meta;
 
+import org.jetbrains.annotations.NotNull;
+
 /**
  * A general convention on object with meta-data
  *
@@ -30,5 +32,6 @@ public interface Metoid {
      * @since 0.4.0
      * @return
      */
+    @NotNull
     Meta getMeta();
 }
