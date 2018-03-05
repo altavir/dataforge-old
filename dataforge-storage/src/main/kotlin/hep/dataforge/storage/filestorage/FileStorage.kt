@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.StorageException
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.*
+import hep.dataforge.storage.api.Loader.Companion.LOADER_TYPE_KEY
 import hep.dataforge.storage.commons.AbstractStorage
 import hep.dataforge.storage.commons.StorageUtils
 import hep.dataforge.storage.filestorage.FileStorageEnvelopeType.FILE_STORAGE_ENVELOPE_TYPE
@@ -27,6 +28,7 @@ import org.apache.commons.io.FilenameUtils
 import org.slf4j.LoggerFactory
 import java.io.File
 import java.io.IOException
+import java.io.Serializable
 import java.nio.ByteBuffer
 import java.nio.channels.FileChannel
 import java.nio.file.ClosedWatchServiceException
@@ -187,7 +189,7 @@ open class FileStorage : AbstractStorage {
             this.shelves.clear()
             this.loaders.clear()
 
-            Files.list(dataDir).forEach(Consumer<Path> { this.updateFile(it) })
+            Files.list(dataDir).forEach{ this.updateFile(it) }
         } catch (ex: IOException) {
             throw RuntimeException(ex)
         }
@@ -211,7 +213,7 @@ open class FileStorage : AbstractStorage {
             try {
                 val dirName = file.fileName.toString()
                 val shelf = createShelf(buildDirectoryMeta(file), dirName)
-                (shelves as java.util.Map<String, Storage>).putIfAbsent(dirName, shelf)
+                shelves.putIfAbsent(dirName, shelf)
                 shelf.refresh()
             } catch (ex: StorageException) {
                 LoggerFactory.getLogger(javaClass)
@@ -223,7 +225,7 @@ open class FileStorage : AbstractStorage {
             try {
                 if (checkIfEnvelope(file)) {
                     val loader = buildLoader(file)
-                    (loaders as java.util.Map<String, Loader>).putIfAbsent(loader.name, loader)
+                    loaders.putIfAbsent(loader.name, loader)
                 }
             } catch (ex: Exception) {
                 logger.warn("Can't create a loader from {}", file.fileName)
@@ -233,15 +235,15 @@ open class FileStorage : AbstractStorage {
     }
 
     @Throws(Exception::class)
-    protected fun buildLoader(file: Path): Loader {
+    private fun buildLoader(file: Path): Loader {
         FileEnvelope.open(file, isReadOnly).use { envelope ->
-            when (envelope.meta.getString("type", "")) {
-                TableLoader.TABLE_LOADER_TYPE -> return FileTableLoader.fromEnvelope(this, envelope)
-                EventLoader.EVENT_LOADER_TYPE -> return FileEventLoader(this, FilenameUtils.getBaseName(envelope.file.fileName.toString()), envelope.meta, envelope)
-                StateLoader.STATE_LOADER_TYPE -> return FileStateLoader.fromEnvelope(this, envelope)
-                ObjectLoader.OBJECT_LOADER_TYPE -> return FileObjectLoader.fromEnvelope<Serializable>(this, envelope)
+            return when (envelope.meta.getString(LOADER_TYPE_KEY, "")) {
+                TableLoader.TABLE_LOADER_TYPE -> FileTableLoader(this, FilenameUtils.getBaseName(envelope.file.fileName.toString()), envelope.meta, envelope)
+                EventLoader.EVENT_LOADER_TYPE -> FileEventLoader(this, FilenameUtils.getBaseName(envelope.file.fileName.toString()), envelope.meta, envelope)
+                StateLoader.STATE_LOADER_TYPE -> FileStateLoader(this, FilenameUtils.getBaseName(envelope.file.fileName.toString()), envelope.meta, envelope)
+                ObjectLoader.OBJECT_LOADER_TYPE -> FileObjectLoader<Serializable>(this, FilenameUtils.getBaseName(envelope.file.fileName.toString()), envelope.meta, envelope)
                 else -> throw StorageException(
-                        "The loader type with type " + envelope.meta.getString("type", "") + " is not supported"
+                        "The loader type with type " + envelope.meta.getString("type", "'undefined'") + " is not supported"
                 )
             }
         }
@@ -265,18 +267,18 @@ open class FileStorage : AbstractStorage {
     }
 
     @Throws(StorageException::class)
-    protected fun buildLoaderByType(loaderName: String, loaderConfiguration: Meta, type: String): Loader {
-        when (type) {
-            TableLoader.TABLE_LOADER_TYPE -> return createNewFileLoader(loaderName, loaderConfiguration, ".points")
-            StateLoader.STATE_LOADER_TYPE -> return createNewFileLoader(loaderName, loaderConfiguration, ".state")
-            ObjectLoader.OBJECT_LOADER_TYPE -> return createNewFileLoader(loaderName, loaderConfiguration, ".binary")
-            EventLoader.EVENT_LOADER_TYPE -> return createNewFileLoader(loaderName, loaderConfiguration, ".event")
+    private fun buildLoaderByType(loaderName: String, loaderConfiguration: Meta, type: String): Loader {
+        return when (type) {
+            TableLoader.TABLE_LOADER_TYPE -> createNewFileLoader(loaderName, loaderConfiguration, ".points")
+            StateLoader.STATE_LOADER_TYPE -> createNewFileLoader(loaderName, loaderConfiguration, ".state")
+            ObjectLoader.OBJECT_LOADER_TYPE -> createNewFileLoader(loaderName, loaderConfiguration, ".binary")
+            EventLoader.EVENT_LOADER_TYPE -> createNewFileLoader(loaderName, loaderConfiguration, ".event")
             else -> throw StorageException("Loader type not supported")
         }
     }
 
     @Throws(StorageException::class)
-    protected fun createNewFileLoader(loaderName: String, meta: Meta, extension: String): Loader {
+    private fun createNewFileLoader(loaderName: String, meta: Meta, extension: String): Loader {
         try {
             val dataFile = dataDir.resolve(loaderName + extension)
             if (!Files.exists(dataFile)) {
@@ -285,7 +287,7 @@ open class FileStorage : AbstractStorage {
                             .setContentType(FILE_STORAGE_ENVELOPE_TYPE)
                             .setMeta(meta)
                             .build()
-                    FileStorageEnvelopeType().writer.write(stream, emptyEnvelope)
+                    FileStorageEnvelopeType.writer.write(stream, emptyEnvelope)
                 }
             }
             refresh()
@@ -298,8 +300,8 @@ open class FileStorage : AbstractStorage {
     }
 
     @Throws(StorageException::class)
-    public override fun createShelf(meta: Meta, path: String): FileStorage {
-        return FileStorage(this, meta, path)
+    public override fun createShelf(shelfConfiguration: Meta, shelfName: String): FileStorage {
+        return FileStorage(this, shelfConfiguration, shelfName)
     }
 
     @Throws(StorageException::class)
@@ -307,10 +309,10 @@ open class FileStorage : AbstractStorage {
         updateDirectoryLoaders()
     }
 
-    companion object {
-
-        fun entryName(path: Path): String {
-            return FilenameUtils.getBaseName(path.fileName.toString())
-        }
-    }
+//    companion object {
+//
+//        fun entryName(path: Path): String {
+//            return FilenameUtils.getBaseName(path.fileName.toString())
+//        }
+//    }
 }

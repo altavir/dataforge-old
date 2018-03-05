@@ -28,17 +28,21 @@ import hep.dataforge.storage.commons.MapIndex
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueUtils
 import org.slf4j.LoggerFactory
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.IOException
+import java.io.ObjectInputStream
+import java.io.ObjectOutputStream
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.*
 import java.util.*
-import java.util.function.Supplier
 
 /**
  * @author Alexander Nozik
  */
-abstract class FileMapIndex<T>(@field:Transient private val context: Context, private val envelopeProvider: Supplier<FileEnvelope>) : MapIndex<T, Int>(), Serializable, ContextAware {
+abstract class FileMapIndex<T>(
+        private val context: Context,
+        private val file: FileEnvelope) : MapIndex<T, Int>(), ContextAware {
 
     /**
      * The size of the data when last indexed
@@ -49,9 +53,6 @@ abstract class FileMapIndex<T>(@field:Transient private val context: Context, pr
      * The size of the data when last saved
      */
     private var savedSize: Long = -1
-
-    private val envelope: FileEnvelope
-        get() = envelopeProvider.get()
 
     private val indexFileDirectory: Path
         get() = context.io.tmpDir.resolve("storage/fileindex")
@@ -67,16 +68,15 @@ abstract class FileMapIndex<T>(@field:Transient private val context: Context, pr
             if (map.isEmpty()) {
                 loadIndex()
             }
-            val env = envelope
-            if (!isUpToDate(env)) {
-                val buffer = env.data.getBuffer(indexedSize)
+            if (!isUpToDate(file)) {
+                val buffer = file.data.getBuffer(indexedSize)
                 buffer.position(0)
                 var linePos = 0
                 val baos = ByteArrayOutputStream()
                 while (buffer.hasRemaining()) {
                     val next = buffer.get()
                     if (next == '\n'.toByte()) {
-                        val line = String(baos.toByteArray(), "UTF8")
+                        val line = baos.toString("UTF8")
                         val str = line.trim { it <= ' ' }
                         if (!str.startsWith("#") && !str.isEmpty()) {
                             val entry = readEntry(str)
@@ -110,11 +110,11 @@ abstract class FileMapIndex<T>(@field:Transient private val context: Context, pr
         return indexedSize - savedSize >= 200
     }
 
-    override fun transform(key: Int?): T {
+    override fun transform(key: Int): T {
         try {
-            return readEntry(envelope.readLine(key!!))
+            return readEntry(file.readLine(key))
         } catch (ex: IOException) {
-            throw RuntimeException("Can't read entry for key " + key!!, ex)
+            throw RuntimeException("Can't read entry for key " + key, ex)
         }
 
     }
@@ -154,15 +154,15 @@ abstract class FileMapIndex<T>(@field:Transient private val context: Context, pr
             try {
                 ObjectInputStream(Files.newInputStream(indexFile)).use { ois ->
                     val position = ois.readLong().toInt()
-                    val newMap = TreeMap<Value, List<Int>>(ValueUtils.VALUE_COMPARATPR)
+                    val newMap = TreeMap<Value, MutableList<Int>>(ValueUtils.VALUE_COMPARATOR)
                     while (ois.available() > 0) {
-                        val `val` = ValueUtils.readValue(ois)
+                        val value = ValueUtils.readValue(ois)
                         val num = ois.readShort()
                         val integers = ArrayList<Int>()
                         for (i in 0 until num) {
                             integers.add(ois.readInt())
                         }
-                        newMap[`val`] = integers
+                        newMap[value] = integers
                     }
 
 
@@ -205,7 +205,7 @@ abstract class FileMapIndex<T>(@field:Transient private val context: Context, pr
                         ValueUtils.writeValue(ous, value)
                         ous.writeShort(integers.size)
                         for (i in integers) {
-                            ous.writeInt(i!!)
+                            ous.writeInt(i)
                         }
                     } catch (e: IOException) {
                         throw RuntimeException(e)

@@ -35,19 +35,19 @@ interface Wrapper<T> : Named {
 
     val type: Class<T>
 
-    fun wrap(`object`: T): Envelope
+    fun wrap(obj: T): Envelope
 
     fun unWrap(envelope: Envelope): T
 
-    fun checkValidEnvelope(env: Envelope) {
-        if (env.meta.getString(WRAPPER_TYPE_KEY, "") != name) {
-            throw RuntimeException("Can't unwrap envelope. Wrong content type.")
-        }
-    }
+//    fun checkValidEnvelope(env: Envelope) {
+//        if (env.meta.getString(WRAPPER_TYPE_KEY, "") != name) {
+//            throw RuntimeException("Can't unwrap envelope. Wrong content type.")
+//        }
+//    }
 
     companion object {
-        val WRAPPER_TYPE_KEY = "@wrapper.type"
-        val WRAPPER_CLASS_KEY = "@wrapper.class"
+        const val WRAPPER_TYPE_KEY = "@wrapper.type"
+        const val WRAPPER_CLASS_KEY = "@wrapper.class"
 
         @Throws(Exception::class)
         fun <T> unwrap(context: Context, envelope: Envelope): T {

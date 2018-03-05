@@ -35,6 +35,9 @@ import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
+import hep.dataforge.states.MetaStateDef
+import hep.dataforge.states.StateDef
+import hep.dataforge.states.StateDefs
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER

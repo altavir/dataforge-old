@@ -18,20 +18,18 @@ package hep.dataforge.storage.filestorage
 import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
 import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.storage.commons.JSONMetaType
+import hep.dataforge.storage.commons.jsonMetaType
 
 /**
  * An envelope type for storage binaries. Infinite data allowed
  * @author darksnake
  */
 object FileStorageEnvelopeType : DefaultEnvelopeType() {
-    val FILE_STORAGE_ENVELOPE_TYPE = "storage"
+    const val FILE_STORAGE_ENVELOPE_TYPE = "storage"
 
-    override val name: String
-        get() = FILE_STORAGE_ENVELOPE_TYPE
+    override val name: String = FILE_STORAGE_ENVELOPE_TYPE
 
-    override val writer: DefaultEnvelopeWriter
-        get() = DefaultEnvelopeWriter(this, JSONMetaType.instance)
+    override val writer: DefaultEnvelopeWriter = DefaultEnvelopeWriter(this, jsonMetaType)
 
     override//DFST
     val code: Int

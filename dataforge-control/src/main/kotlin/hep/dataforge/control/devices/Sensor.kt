@@ -30,6 +30,10 @@ import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.meta.Meta
+import hep.dataforge.states.MetaStateDef
+import hep.dataforge.states.MetaStateDefs
+import hep.dataforge.states.StateDef
+import hep.dataforge.states.StateDefs
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
 import java.time.Duration

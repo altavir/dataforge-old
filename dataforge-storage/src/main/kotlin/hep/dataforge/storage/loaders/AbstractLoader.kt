@@ -15,7 +15,7 @@
  */
 package hep.dataforge.storage.loaders
 
-import hep.dataforge.control.ConnectionHelper
+import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.PushFailedException

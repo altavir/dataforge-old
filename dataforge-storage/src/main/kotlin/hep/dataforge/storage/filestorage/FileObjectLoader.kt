@@ -25,12 +25,10 @@ import hep.dataforge.exceptions.StorageException
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.ObjectLoader
 import hep.dataforge.storage.api.Storage
-import org.apache.commons.io.FilenameUtils
 import java.io.ByteArrayOutputStream
 import java.io.ObjectInputStream
 import java.io.ObjectOutputStream
 import java.io.Serializable
-import java.util.*
 
 /**
  * A file loader to store Serializable java objects
@@ -38,15 +36,12 @@ import java.util.*
  * @author Alexander Nozik
  */
 class FileObjectLoader<T : Serializable>(storage: Storage, name: String, meta: Meta, file:FileEnvelope) : FileLoader(storage, name, meta, file), ObjectLoader<T> {
-    private val dataMap = HashMap<String, T>()
-
-    @Throws(StorageException::class)
-    fun getDataMap(): MutableMap<String, T> {
-        if (dataMap.isEmpty()) {
-            dataMap.putAll(readDataMap())
+    val dataMap: HashMap<String,T> by lazy{
+        HashMap<String,T>().apply {
+            putAll(readDataMap())
         }
-        return dataMap
     }
+
 
     @Synchronized
     @Throws(StorageException::class)
@@ -76,40 +71,24 @@ class FileObjectLoader<T : Serializable>(storage: Storage, name: String, meta: M
 
     }
     override fun fragmentNames(): Collection<String> {
-        try {
-            return getDataMap().keys
+        return try {
+            dataMap.keys
         } catch (ex: Exception) {
-            return emptyList()
+            emptyList()
         }
 
     }
 
     @Throws(StorageException::class)
     override fun pull(fragmentName: String): T {
-        return getDataMap()[fragmentName]
+        return dataMap[fragmentName]?:throw StorageException("The fragment with name $fragmentName is not found in the loader $name")
     }
 
     @Throws(StorageException::class)
     override fun push(fragmentName: String, data: T) {
-        getDataMap()[fragmentName] = data
+        dataMap[fragmentName] = data
         writeDataMap(dataMap)
     }
 
-    companion object {
-
-        @Throws(Exception::class)
-        fun <T : Serializable> fromEnvelope(storage: Storage, envelope: FileEnvelope): FileObjectLoader<T> {
-            if (FileStorageEnvelopeType.validate(envelope, ObjectLoader.OBJECT_LOADER_TYPE)) {
-                val res = FileObjectLoader(storage,
-                        FilenameUtils.getBaseName(envelope.file.fileName.toString()),
-                        envelope.meta,
-                        envelope.file)
-                res.isReadOnly = envelope.isReadOnly
-                return res
-            } else {
-                throw StorageException("Is not a valid object loader file")
-            }
-        }
-    }
 
 }

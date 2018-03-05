@@ -27,7 +27,7 @@ import java.util.*
  */
 object LoaderFactory {
 
-    fun buildDataPointLoaderMeta(indexField: String?, format: TableFormat?): MetaBuilder {
+    fun buildTableLoaderMeta(indexField: String?, format: TableFormat?): MetaBuilder {
         val builder = MetaBuilder("loader")
 
         //        if (name == null || name.isEmpty()) {
@@ -72,8 +72,9 @@ object LoaderFactory {
      * @throws StorageException
      */
     @Throws(StorageException::class)
-    fun buildPointLoder(storage: Storage, loaderName: String, shelfName: String, indexField: String, format: TableFormat): TableLoader {
-        return findShelf(storage, shelfName).buildLoader(loaderName, buildDataPointLoaderMeta(indexField, format)) as TableLoader
+    @JvmStatic
+    fun buildPointLoader(storage: Storage, loaderName: String, shelfName: String, indexField: String, format: TableFormat): TableLoader {
+        return findShelf(storage, shelfName).buildLoader(loaderName, buildTableLoaderMeta(indexField, format)) as TableLoader
     }
 
     /**
@@ -86,6 +87,7 @@ object LoaderFactory {
      * @throws StorageException
      */
     @Throws(StorageException::class)
+    @JvmStatic
     fun buildObjectLoder(storage: Storage, loaderName: String, shelfName: String): ObjectLoader<*>? {
         val loaderAn = MetaBuilder("loader")
                 .putValue(Loader.LOADER_TYPE_KEY, ObjectLoader.OBJECT_LOADER_TYPE)
@@ -104,6 +106,7 @@ object LoaderFactory {
      * @throws StorageException
      */
     @Throws(StorageException::class)
+    @JvmStatic
     fun buildStateLoder(storage: Storage, loaderName: String, shelfName: String): StateLoader {
         val loaderAn = MetaBuilder("loader")
                 .putValue(Loader.LOADER_TYPE_KEY, StateLoader.STATE_LOADER_TYPE)
@@ -122,6 +125,7 @@ object LoaderFactory {
      * @throws StorageException
      */
     @Throws(StorageException::class)
+    @JvmStatic
     fun buildEventLoder(storage: Storage, loaderName: String, shelfName: String): EventLoader {
         val loaderAn = MetaBuilder("loader")
                 .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)

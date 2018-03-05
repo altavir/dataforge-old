@@ -47,7 +47,7 @@ class MessageSocket(val receiver: Receiver, private val socketFactory: () -> Soc
     fun start() {
         sendJob = launch {
             val stream = socket.getOutputStream()
-            val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, BinaryMetaType)
+            val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType)
 
             while (true) {
                 val envelope = outgoing.receive()

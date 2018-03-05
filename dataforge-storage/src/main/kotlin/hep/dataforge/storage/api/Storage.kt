@@ -15,12 +15,12 @@
  */
 package hep.dataforge.storage.api
 
+import hep.dataforge.connections.AutoConnectible
+import hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE
+import hep.dataforge.connections.Connection.LOGGER_ROLE
+import hep.dataforge.connections.RoleDef
+import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.ContextAware
-import hep.dataforge.control.AutoConnectible
-import hep.dataforge.control.Connection.EVENT_HANDLER_ROLE
-import hep.dataforge.control.Connection.LOGGER_ROLE
-import hep.dataforge.control.RoleDef
-import hep.dataforge.control.RoleDefs
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.StorageException
 import hep.dataforge.io.messages.Dispatcher

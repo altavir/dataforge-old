@@ -160,8 +160,8 @@ public interface PlotFrame extends Configurable, Serializable {
                     .setMeta(rootEnv.getMeta())
                     .setData(rootEnv.getData())
                     .setContentType("wrapper")
-                    .putMetaValue(Companion.getWRAPPER_TYPE_KEY(), PLOT_FRAME_WRAPPER_TYPE)
-                    .putMetaValue(PLOT_FRAME_CLASS_KEY, frame.getClass().getName())
+                    .setMetaValue(WRAPPER_TYPE_KEY, PLOT_FRAME_WRAPPER_TYPE)
+                    .setMetaValue(PLOT_FRAME_CLASS_KEY, frame.getClass().getName())
                     .putMetaNode(PLOT_FRAME_META_KEY, frame.getConfig());
             return builder.build();
         }

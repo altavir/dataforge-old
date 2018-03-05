@@ -38,7 +38,7 @@ open class SimpleEnvelope(meta: Meta = Meta.empty(), data: Binary = Binary.EMPTY
 
     @Throws(IOException::class)
     private fun writeObject(out: ObjectOutputStream) {
-        DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, BinaryMetaType).write(out,this)
+        DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType).write(out,this)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)

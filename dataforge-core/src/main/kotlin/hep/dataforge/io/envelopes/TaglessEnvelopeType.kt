@@ -16,7 +16,7 @@
 
 package hep.dataforge.io.envelopes
 
-import hep.dataforge.io.envelopes.Envelope.Companion.DATA_LENGTH_KEY
+import hep.dataforge.io.envelopes.Envelope.Companion.DATA_LENGTH_PROPERTY
 import hep.dataforge.meta.Meta
 import java.io.*
 import java.nio.ByteBuffer
@@ -59,7 +59,7 @@ class TaglessEnvelopeType : EnvelopeType {
 
             //printing all properties
             properties.forEach { key, value -> writer.printf("#? %s: %s;%n", key, value) }
-            writer.printf("#? %s: %s;%n", DATA_LENGTH_KEY, envelope.data.size())
+            writer.printf("#? %s: %s;%n", DATA_LENGTH_PROPERTY, envelope.data.size())
 
             //Printing meta
             if (envelope.hasMeta()) {
@@ -165,8 +165,8 @@ class TaglessEnvelopeType : EnvelopeType {
         private fun readData(channel: ReadableByteChannel, buffer: ByteBuffer, properties: Map<String, String>): ByteBuffer {
             val array = ByteArray(buffer.remaining());
             buffer.get(array)
-            if (properties.containsKey(DATA_LENGTH_KEY)) {
-                val result = ByteBuffer.allocate(Integer.parseInt(properties[DATA_LENGTH_KEY]))
+            if (properties.containsKey(DATA_LENGTH_PROPERTY)) {
+                val result = ByteBuffer.allocate(Integer.parseInt(properties[DATA_LENGTH_PROPERTY]))
                 result.put(array)//TODO fix it to not use direct array access
                 channel.read(result)
                 return result

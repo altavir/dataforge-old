@@ -21,14 +21,15 @@
  */
 package hep.dataforge.storage.commons
 
+import hep.dataforge.connections.Connectible
+import hep.dataforge.connections.Connection
+import hep.dataforge.connections.ConnectionFactory
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.control.Connectible
-import hep.dataforge.control.Connection
-import hep.dataforge.control.ConnectionFactory
 import hep.dataforge.exceptions.NotConnectedException
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.messages.Responder
+import hep.dataforge.io.messages.errorResponseBase
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
@@ -76,7 +77,7 @@ class StorageConnection : Connection, Responder, Metoid, ContextAware {
         return if (isOpen) {
             storage.respond(message)
         } else {
-            MessageFactory().errorResponseBase(message, NotConnectedException(this)).build()
+            errorResponseBase(message, NotConnectedException(this)).build()
         }
     }
 

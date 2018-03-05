@@ -19,10 +19,11 @@ import hep.dataforge.io.envelopes.DefaultEnvelopeReader
 import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.messages.Responder
+import hep.dataforge.io.messages.errorResponseBase
+import hep.dataforge.io.messages.isTerminator
+import hep.dataforge.io.messages.terminator
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
-import hep.dataforge.storage.commons.MessageFactory.Companion.isTerminator
-import hep.dataforge.storage.commons.MessageFactory.Companion.terminator
 import org.slf4j.LoggerFactory
 
 import java.io.IOException
@@ -45,9 +46,6 @@ abstract class AbstractNetworkListener(listnerConfig: Meta?) : Metoid, AutoClose
 
     private val port: Int
         get() = meta.getInt("port", 8335)
-
-    protected val responseFactory: MessageFactory
-        get() = MessageFactory()
 
     init {
         if (listnerConfig == null) {
@@ -135,7 +133,7 @@ abstract class AbstractNetworkListener(listnerConfig: Meta?) : Metoid, AutoClose
                             response = respond(request)
                         } catch (ex: Exception) {
                             logger.error("Uncatched exception during response evaluation", ex)
-                            response = responseFactory.errorResponseBase("", ex).build()
+                            response = errorResponseBase("", ex).build()
                         }
 
                         //Null respnses are ignored
@@ -153,7 +151,7 @@ abstract class AbstractNetworkListener(listnerConfig: Meta?) : Metoid, AutoClose
             logger.info("Client processing finished for {}", socket.remoteSocketAddress.toString())
             if (!socket.isClosed) {
                 try {
-                    write(terminator())//Sending additional terminator to notify client that server is closing connection
+                    write(terminator)//Sending additional terminator to notify client that server is closing connection
                 } catch (ex: IOException) {
                     logger.error("Terminator send failed", ex)
                 }

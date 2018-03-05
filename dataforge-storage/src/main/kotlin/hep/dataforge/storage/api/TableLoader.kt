@@ -17,7 +17,6 @@ package hep.dataforge.storage.api
 
 import hep.dataforge.description.NodeDef
 import hep.dataforge.exceptions.StorageException
-import hep.dataforge.tables.PointListener
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.tables.ValuesSource
 import hep.dataforge.values.Values
@@ -33,7 +32,8 @@ import hep.dataforge.values.Values
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
 interface TableLoader : Loader, ValuesSource {
 
-
+    override val type: String
+        get() = TABLE_LOADER_TYPE
     /**
      * The minimal format for points in this loader. Is null for unformatted loader
      *
@@ -47,12 +47,10 @@ interface TableLoader : Loader, ValuesSource {
      * @return
      */
     val index: ValueIndex<Values>
-        get() = if (meta.hasValue("index")) {
-            getIndex(meta.getString("index"))
-        } else if (meta.hasValue("index.key")) {
-            getIndex(meta.getString("index.key"))
-        } else {
-            getIndex(DEFAULT_INDEX_FIELD)
+        get() = when {
+            meta.hasValue("index") -> getIndex(meta.getString("index"))
+            meta.hasValue("index.key") -> getIndex(meta.getString("index.key"))
+            else -> getIndex(DEFAULT_INDEX_FIELD)
         }
 
     /**
@@ -84,25 +82,14 @@ interface TableLoader : Loader, ValuesSource {
      * @throws StorageException
      */
     @Throws(StorageException::class)
-    fun push(dps: Collection<Values>)
-
-    /**
-     * Set a PointListener which is called on each push operations
-     *
-     * @param listener
-     */
-    fun addPointListener(listener: PointListener)
-
-    /**
-     * Remove current PointLostener. If no PointListener is registered, do
-     * nothing.
-     */
-    fun removePointListener(listener: PointListener)
+    fun push(dps: Collection<Values>){
+        dps.forEach { push(it) }
+    }
 
     companion object {
 
-        val TABLE_LOADER_TYPE = "table"
-        val DEFAULT_INDEX_FIELD = ""
+        const val TABLE_LOADER_TYPE = "loader.table"
+        const val DEFAULT_INDEX_FIELD = ""
     }
 
 }

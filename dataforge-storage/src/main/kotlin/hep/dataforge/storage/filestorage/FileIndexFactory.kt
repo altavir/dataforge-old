@@ -37,32 +37,18 @@ import java.util.function.Function
  *
  * @author Alexander Nozik
  */
-class FileIndexFactory(private val context: Context, private val uri: String?) : ContextAware {
-    private var envelope: FileEnvelope? = null
-
-    /**
-     * Get or builder envelope from uri
-     *
-     * @return
-     * @throws IOException
-     */
-    private val evelope: FileEnvelope
-        @Throws(IOException::class)
-        get() {
-            if (envelope == null) {
-                val file = Paths.get(uri)
-                if (Files.isReadable(file)) {
-                    envelope = FileEnvelope.open(uri, true)
-                } else {
-                    invalidate()
-                    throw RuntimeException("Can't read file " + uri)
-                }
-            }
-            return envelope
+class FileIndexFactory(private val context: Context, private val uri: String) : ContextAware {
+    private val envelope: FileEnvelope by lazy{
+        val file = Paths.get(uri)
+        if (Files.isReadable(file)) {
+            FileEnvelope.open(uri, true)
+        } else {
+            throw RuntimeException("Can't read file $uri")
         }
+    }
 
     init {
-        if (uri == null || uri.isEmpty()) {
+        if (uri.isEmpty()) {
             throw IllegalArgumentException("Uri is empty")
         }
     }
@@ -79,7 +65,7 @@ class FileIndexFactory(private val context: Context, private val uri: String?) :
      * @return
     </T> */
     fun <T> buildDefaultIndex(transformation: Function<String, T>): DefaultIndex<T> {
-        return DefaultIndex(iterable(transformation))
+        return DefaultIndex(asIterable(transformation))
     }
 
     /**
@@ -91,20 +77,24 @@ class FileIndexFactory(private val context: Context, private val uri: String?) :
      * @return
     </T> */
     fun <T : ValueProvider> buildProviderStreamIndex(valueName: String, transformation: Function<String, T>): ValueProviderIndex<T> {
-        return ValueProviderIndex(iterable(transformation), valueName)
+        return ValueProviderIndex(asIterable(transformation), valueName)
     }
 
-    protected fun <T> iterable(transformation: Function<String, T>): Iterable<T> {
-        return { buildIterator(transformation) }
+    private fun <T> asIterable(transformation: Function<String, T>): Iterable<T> {
+        return  object : Iterable<T>{
+            override fun iterator(): Iterator<T> {
+                return buildIterator(transformation)
+            }
+
+        }
     }
 
-    protected fun <T> buildIterator(transformation: Function<String, T>): Iterator<T> {
+    private fun <T> buildIterator(transformation: Function<String, T>): Iterator<T> {
         try {
-            val env = evelope
+            val env = this.envelope
             return env.data.lines().map(transformation).iterator()
         } catch (ex: IOException) {
-            invalidate()
-            throw RuntimeException("Cant operate file envelope", ex)
+            throw RuntimeException("Cant operate file envelope $uri", ex)
         }
 
     }
@@ -113,14 +103,10 @@ class FileIndexFactory(private val context: Context, private val uri: String?) :
      * Invalidate this factory and force it to reload file envelope
      */
     fun invalidate() {
-        if (envelope != null) {
-            try {
-                envelope!!.close()
-            } catch (ex: Exception) {
-                LoggerFactory.getLogger(javaClass).error("Can't close the file envelope", ex)
-            }
-
-            envelope = null
+        try {
+            this.envelope.close()
+        } catch (ex: Exception) {
+            LoggerFactory.getLogger(javaClass).error("Can't close the file envelope $uri", ex)
         }
     }
 

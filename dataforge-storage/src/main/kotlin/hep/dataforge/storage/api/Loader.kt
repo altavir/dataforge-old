@@ -15,15 +15,16 @@
  */
 package hep.dataforge.storage.api
 
+import hep.dataforge.connections.AutoConnectible
+import hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE
+import hep.dataforge.connections.Connection.LOGGER_ROLE
+import hep.dataforge.connections.RoleDef
+import hep.dataforge.connections.RoleDefs
 import hep.dataforge.context.Context
 import hep.dataforge.context.ContextAware
-import hep.dataforge.control.AutoConnectible
-import hep.dataforge.control.Connection.EVENT_HANDLER_ROLE
-import hep.dataforge.control.Connection.LOGGER_ROLE
-import hep.dataforge.control.RoleDef
-import hep.dataforge.control.RoleDefs
 import hep.dataforge.description.ValueDef
 import hep.dataforge.events.EventHandler
+import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.messages.Responder
 import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Laminate
@@ -111,7 +112,7 @@ interface Loader : Metoid, AutoCloseable, Named, Responder, AutoConnectible, Con
     }
 
     companion object {
-        const val LOADER_NAME_KEY = "name"
-        const val LOADER_TYPE_KEY = "type"
+//        const val LOADER_NAME_KEY = "name"
+        const val LOADER_TYPE_KEY = Envelope.ENVELOPE_DATA_TYPE_KEY
     }
 }

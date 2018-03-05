@@ -54,7 +54,7 @@ public class FileObjectLoaderTest {
     @Test
     public void test() throws FileNotFoundException, StorageException {
 
-        FileStorage storage = FileStorageFactory.buildLocal(Global.INSTANCE,dir,false,true);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE,dir,false,true);
 
         ObjectLoader loader = LoaderFactory.buildObjectLoder(storage, "test", "");
 

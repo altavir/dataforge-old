@@ -15,10 +15,13 @@
  */
 package hep.dataforge.storage.api
 
-import hep.dataforge.exceptions.StorageException
+import hep.dataforge.kodex.optional
+import hep.dataforge.meta.Meta
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import java.util.*
+import java.util.stream.Stream
 
 /**
  * State loader is
@@ -27,6 +30,8 @@ import hep.dataforge.values.ValueProvider
  */
 interface StateLoader : Loader, ValueProvider {
 
+    override val type: String
+        get() = STATE_LOADER_TYPE
     /**
      * List of all available state names (including default values if they are
      * available)
@@ -34,26 +39,37 @@ interface StateLoader : Loader, ValueProvider {
      * @return
      */
     @get:ProvidesNames(ValueProvider.VALUE_TARGET)
-    val stateNames: Set<String>
+    val valueStream: Stream<Pair<String, Value>>
+    val metaStream: Stream<Pair<String, Meta>>
 
     /**
      * Change the state and generate corresponding StateChangedEvent
      *
      * @param path
      * @param value
-     * @throws hep.dataforge.exceptions.StorageException
      */
-    @Throws(StorageException::class)
-    fun pushState(path: String, value: Value)
+    fun push(path: String, value: Value)
 
-    @Throws(StorageException::class)
-    fun pushState(path: String, value: Any) {
-        pushState(path, Value.of(value))
+    fun push(path: String, meta: Meta)
+
+    fun push(path: String, value: Any) {
+        if (value is Meta) {
+            push(path, value)
+        } else {
+            push(path, Value.of(value))
+        }
+    }
+
+    fun pull(path: String): Value?
+
+    fun pullMeta(path: String): Meta?
+
+    override fun optValue(path: String): Optional<Value> {
+        return pull(path).optional
     }
 
     companion object {
-
-        val STATE_LOADER_TYPE = "state"
+        const val STATE_LOADER_TYPE = "state"
     }
 
 }

@@ -24,7 +24,7 @@ import hep.dataforge.storage.loaders.AbstractLoader
 
 abstract class FileLoader(storage: Storage, name: String, meta: Meta, val file: FileEnvelope) : AbstractLoader(storage, name, meta) {
     override val isEmpty: Boolean
-        get() = file.hasData()
+        get() = !file.hasData()
 
     override val isOpen: Boolean
         get() = file.isOpen

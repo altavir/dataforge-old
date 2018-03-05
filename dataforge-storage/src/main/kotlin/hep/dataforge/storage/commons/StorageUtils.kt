@@ -22,7 +22,6 @@ import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_NAME_KEY
 import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_TYPE_KEY
 import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.storage.api.Loader
 import hep.dataforge.storage.api.Loader.Companion.LOADER_TYPE_KEY
@@ -77,13 +76,6 @@ object StorageUtils {
     //            }
     //        }
     //    }
-
-    fun getErrorMeta(err: Throwable): Meta {
-        return MetaBuilder("error")
-                .putValue("type", err.javaClass.name)
-                .putValue("message", err.message)
-                .build()
-    }
 
     /**
      * Stream of all loaders in the storage with corresponding relative names

@@ -72,8 +72,8 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
         buildMeta("range", "from" to it.first, "to" to it.second)
     }
 
-    override fun applyValueChange(name: String, oldItem: Value?, newItem: Value?) {
-        super.applyValueChange(name, oldItem, newItem)
+    override fun applyValueChange(name: String, oldValue: Value?, newValue: Value?) {
+        super.applyValueChange(name, oldValue, newValue)
         if (name == "density") {
             invalidateCache()
         }

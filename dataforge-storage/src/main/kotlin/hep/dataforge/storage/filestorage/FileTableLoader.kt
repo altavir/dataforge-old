@@ -21,145 +21,64 @@
  */
 package hep.dataforge.storage.filestorage
 
-import hep.dataforge.context.Context
+import hep.dataforge.exceptions.NotDefinedException
 import hep.dataforge.exceptions.StorageException
+import hep.dataforge.exceptions.WrongTargetException
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.LineIterator
+import hep.dataforge.io.envelopes.Envelope
+import hep.dataforge.io.messages.ACTION_KEY
+import hep.dataforge.io.messages.PULL_ACTION
+import hep.dataforge.io.messages.PUSH_ACTION
+import hep.dataforge.io.messages.okResponseBase
+import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Names
+import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.storage.api.Storage
+import hep.dataforge.storage.api.TableLoader
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.storage.commons.DefaultIndex
-import hep.dataforge.storage.loaders.AbstractTableLoader
-import hep.dataforge.tables.MetaTableFormat
-import hep.dataforge.tables.PointParser
-import hep.dataforge.tables.SimpleParser
-import hep.dataforge.tables.TableFormat
+import hep.dataforge.storage.commons.StorageMessageUtils
+import hep.dataforge.storage.commons.StorageMessageUtils.QUERY_ELEMENT
+import hep.dataforge.storage.commons.StorageMessageUtils.confirmationResponse
+import hep.dataforge.tables.*
 import hep.dataforge.values.Value
 import hep.dataforge.values.Values
-import org.apache.commons.io.FilenameUtils
-
-import java.io.BufferedReader
 import java.io.IOException
-import java.nio.channels.Channels
-import java.nio.file.Path
-import java.util.function.Supplier
+import java.util.*
 
 /**
  * @author Alexander Nozik
  */
-class FileTableLoader(storage: Storage, name: String, meta: Meta, private val path: Path) : AbstractTableLoader(storage, name, meta) {
-    //FIXME move to abstract
-    private var format: TableFormat? = null
-    private var parser: PointParser? = null
+class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnvelope) : FileLoader(storage, name, meta, file), TableLoader {
 
-    /**
-     * An envelope used for pushing
-     */
-    private var envelope: FileEnvelope? = null
-
-    override val isEmpty: Boolean
-        get() {
-            try {
-                return envelope != null && !envelope!!.hasData() || !buildEnvelope(true).hasData()
-            } catch (ex: StorageException) {
-                throw RuntimeException("Can't access loader envelope", ex)
-            }
-
-        }
-
-    @Throws(Exception::class)
-    override fun open() {
-        if (this.meta == null) {
-            this.meta = buildEnvelope(true).meta
-        }
-        // read format from first line if it is not defined in meta
-        if (getFormat() == null) {
-            buildEnvelope(true).use { envelope ->
-                BufferedReader(Channels.newReader(envelope.data.channel, "UTF8"))
-                        .lines()
-                        .findFirst()
-                        .ifPresent { line ->
-                            if (line.startsWith("#f")) {
-                                format = MetaTableFormat.forNames(Names.of(*line.substring(2).trim { it <= ' ' }.split("[^\\w']+".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()))
-                            }
-                        }
-            }
+    override val format: TableFormat by lazy {
+        when {
+            file.meta.hasMeta("format") -> MetaTableFormat(meta.getMeta("format"))
+            file.meta.hasValue("format") -> MetaTableFormat.forNames(meta.getStringArray("format"))
+            else -> throw RuntimeException("Format definition not found")
         }
     }
 
-    @Throws(Exception::class)
-    override fun close() {
-        parser = null
-        format = null
-        if (envelope != null) {
-            envelope!!.close()
-            envelope = null
-        }
-        super.close()
+    private val parser: PointParser by lazy {
+        SimpleParser(format)
     }
 
-    private fun buildEnvelope(readOnly: Boolean): FileEnvelope {
-        return FileEnvelope.open(path, readOnly)
-    }
-
-    /**
-     * Get writeable reusable single access envelope for this loader
-     *
-     * @return
-     */
-    private fun getEnvelope(): FileEnvelope {
-        if (this.envelope == null) {
-            this.envelope = buildEnvelope(false)
-        }
-        return this.envelope
-    }
-
-    override fun getFormat(): TableFormat? {
-        if (format == null) {
-            if (getMeta()!!.hasMeta("format")) {
-                format = MetaTableFormat(getMeta()!!.getMeta("format"))
-            } else if (getMeta()!!.hasValue("format")) {
-                format = MetaTableFormat.forNames(getMeta()!!.getStringArray("format"))
-            } else {
-                format = null
-            }
-        }
-        return format
-    }
-
-    private fun getParser(): PointParser {
-        if (parser == null) {
-            parser = SimpleParser(getFormat()!!)
-        }
-        return parser
-    }
-
-    @Throws(StorageException::class)
-    override fun pushPoint(dp: Values) {
+    override fun iterator(): MutableIterator<Values> {
         try {
-            if (!getEnvelope().hasData()) {
-                getEnvelope().appendLine(IOUtils.formatCaption(getFormat()!!))
-            }
-            val str = IOUtils.formatDataPoint(getFormat()!!, dp)
-            getEnvelope().appendLine(str)
-        } catch (ex: IOException) {
-            throw StorageException("Error while openning an envelope", ex)
-        }
+            val iterator = LineIterator(file.data.stream, "UTF-8")
+            return object : MutableIterator<Values> {
 
-    }
+                override fun remove() {
+                    TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                }
 
-    override fun iterator(): Iterator<Values> {
-        try {
-            val reader = buildEnvelope(true)
-            val iterator = LineIterator(reader.data.stream, "UTF-8")
-            return object : Iterator<Values> {
                 override fun hasNext(): Boolean {
                     return iterator.hasNext()
                 }
 
                 override fun next(): Values {
-                    return transform(iterator.next())
+                    return parser.parse(iterator.next())
                 }
             }
         } catch (ex: StorageException) {
@@ -170,21 +89,120 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, private val pa
 
     }
 
-    private fun transform(line: String?): Values {
-        return getParser().parse(line)
-    }
-
-    public override fun buildIndex(name: String?): ValueIndex<Values> {
+    private fun buildIndex(name: String?): ValueIndex<Values> {
         return if (name == null || name.isEmpty()) {
             //use point number index
             DefaultIndex(this)
         } else {
-            FilePointIndex(name, storage.context, Supplier { this.getEnvelope() })
+            FilePointIndex(name)
         }
     }
 
 
-    private inner class FilePointIndex(private val valueName: String, context: Context, sup: Supplier<FileEnvelope>) : FileMapIndex<Values>(context, sup) {
+    private val indexMap = HashMap<String, ValueIndex<Values>>()
+
+    @Throws(StorageException::class)
+    override fun push(dps: Collection<Values>) {
+        for (dp in dps) {
+            push(dp)
+        }
+    }
+
+    @Synchronized
+    override fun getIndex(name: String): ValueIndex<Values> {
+        return indexMap.computeIfAbsent(name) { this.buildIndex(it) }
+    }
+
+    /**
+     * Push point and notify all listeners
+     *
+     * @param dp
+     * @throws StorageException
+     */
+    @Throws(StorageException::class)
+    override fun push(dp: Values) {
+        //Notifying the listener
+        connectionHelper.forEachConnection(PointListener::class.java) {
+            it.accept(dp)
+        }
+
+        try {
+            val str = IOUtils.formatDataPoint(format, dp)
+            file.appendLine(str)
+        } catch (ex: IOException) {
+            throw StorageException("Error while opening an envelope", ex)
+        }
+    }
+
+    override fun respond(message: Envelope): Envelope {
+        try {
+            if (!validator.isValid(message)) {
+                return StorageMessageUtils.exceptionResponse(message, WrongTargetException())
+            }
+            val messageMeta = message.meta
+            val operation = messageMeta.getString(ACTION_KEY)
+            when (operation) {
+                PUSH_ACTION -> {
+                    if (!messageMeta.hasMeta("data")) {
+                        //TODO реализовать бинарную передачу данных
+                        throw StorageException("No data in the push data command")
+                    }
+
+                    val data = messageMeta.getMeta("data")
+                    for (dp in ListOfPoints.buildFromMeta(data)) {
+                        this.push(dp)
+                    }
+
+                    return confirmationResponse(message)
+                }
+
+                PULL_ACTION -> {
+                    var points: List<Values> = ArrayList()
+                    when {
+                        messageMeta.hasMeta(QUERY_ELEMENT) -> points = index.query(messageMeta.getMeta(QUERY_ELEMENT)).toList()
+                        messageMeta.hasValue("value") -> {
+                            val valueName = messageMeta.getString("valueName", "")
+                            points = messageMeta.getValue("value").listValue().stream()
+                                    .map { `val` -> getIndex(valueName).pullOne(`val`) }
+                                    .filter { it.isPresent }.map<Values> { it.get() }
+                                    .toList()
+                        }
+                        messageMeta.hasMeta("range") -> {
+                            val valueName = messageMeta.getString("valueName", "")
+                            for (rangeAn in messageMeta.getMetaList("range")) {
+                                val from = rangeAn.getValue("from", Value.getNull())
+                                val to = rangeAn.getValue("to", Value.getNull())
+                                //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
+                                points = this.getIndex(valueName).pull(from, to).toList()
+                            }
+                        }
+                    }
+
+                    val dataAn = MetaBuilder("data")
+                    for (dp in points) {
+                        dataAn.putNode(dp.toMeta())
+                    }
+                    return okResponseBase(message, true, false)
+                            .putMetaNode(dataAn)
+                            .setMetaValue("data.size", points.size)
+                            .build()
+                }
+
+                else -> throw NotDefinedException(operation)
+            }
+
+        } catch (ex: StorageException) {
+            return StorageMessageUtils.exceptionResponse(message, ex)
+        } catch (ex: UnsupportedOperationException) {
+            return StorageMessageUtils.exceptionResponse(message, ex)
+        } catch (ex: NotDefinedException) {
+            return StorageMessageUtils.exceptionResponse(message, ex)
+        }
+
+    }
+
+
+    private inner class FilePointIndex(private val valueName: String) : FileMapIndex<Values>(context, file) {
 
         override fun getIndexedValue(entry: Values): Value {
             return entry.getValue(valueName)
@@ -199,25 +217,8 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, private val pa
         }
 
         override fun readEntry(str: String): Values {
-            return this@FileTableLoader.transform(str)
+            return parser.parse(str)
         }
 
-    }
-
-    companion object {
-
-        @Throws(Exception::class)
-        fun fromEnvelope(storage: Storage, envelope: FileEnvelope): FileTableLoader {
-            if (FileStorageEnvelopeType.validate(envelope, TableLoader.TABLE_LOADER_TYPE)) {
-                val res = FileTableLoader(storage,
-                        FilenameUtils.getBaseName(envelope.file.fileName.toString()),
-                        envelope.meta,
-                        envelope.file)
-                res.isReadOnly = envelope.isReadOnly
-                return res
-            } else {
-                throw StorageException("Is not a valid point loader file")
-            }
-        }
     }
 }

@@ -17,6 +17,8 @@ package hep.dataforge.storage.api
 
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventBuilder
+import hep.dataforge.kodex.stringValue
+import hep.dataforge.kodex.value
 import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
 
@@ -32,37 +34,31 @@ class StateChangedEvent(meta: Meta) : Event(meta) {
      *
      * @return
      */
-    fun stateName(): String {
-        return meta.getString(STATE_NAME_KEY)
-    }
+    val stateName: String by meta.stringValue(STATE_NAME_KEY)
 
     /**
      * The value before change
      *
      * @return
      */
-    fun oldState(): Value {
-        return meta.getValue(OLD_STATE_KEY)
-    }
+    val oldState: Value by meta.value(OLD_STATE_KEY)
 
     /**
      * The value after change
      *
      * @return
      */
-    fun newState(): Value {
-        return meta.getValue(NEW_STATE_KEY)
-    }
+    val newState: Value by meta.value(NEW_STATE_KEY)
 
     override fun toString(): String {
-        return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), sourceTag(), stateName(), oldState().stringValue(), newState().stringValue())
+        return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), sourceTag(), stateName, oldState.stringValue(), newState.stringValue())
     }
 
     companion object {
 
-        val STATE_NAME_KEY = "stateName"
-        val OLD_STATE_KEY = "oldState"
-        val NEW_STATE_KEY = "newState"
+        const val STATE_NAME_KEY = "stateName"
+        const val OLD_STATE_KEY = "oldState"
+        const val NEW_STATE_KEY = "newState"
 
         //TODO add source declaration here
         fun build(stateName: String, oldState: Value, newState: Value): StateChangedEvent {

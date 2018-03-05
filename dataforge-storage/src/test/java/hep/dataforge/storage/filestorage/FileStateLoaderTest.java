@@ -60,13 +60,13 @@ public class FileStateLoaderTest {
 
     @Test
     public void testIO() throws Exception {
-        FileStorage storage = FileStorageFactory.buildLocal(Global.INSTANCE, dir, false, true);
-        StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", null);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE, dir, false, true);
+        StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", "");
 
         System.out.println("***starting write test***");
-        loader.pushState("my.favorite.key", Value.of("my.favorite.value"));
-        loader.pushState("pi", Value.of(Math.PI));
-        loader.pushState("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
+        loader.push("my.favorite.key", Value.of("my.favorite.value"));
+        loader.push("pi", Value.of(Math.PI));
+        loader.push("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
         loader.close();
         System.out.println("passed!");
         System.out.println("***starting read test***");

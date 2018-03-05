@@ -30,7 +30,6 @@ import hep.dataforge.values.Values;
 import org.junit.*;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Duration;
@@ -71,12 +70,12 @@ public class FileDataTableLoaderTest {
     }
 
     @Test
-    public void testReadWrite() throws FileNotFoundException, StorageException {
+    public void testReadWrite() throws StorageException {
         String[] names = {"key", "2key", "sqrt"};
 
-        FileStorage storage = FileStorageFactory.buildLocal(Global.INSTANCE, dir, false, true);
+        FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE, dir, false, true);
 
-        TableLoader loader = LoaderFactory.buildPointLoder(storage, "test_points", null, "key", MetaTableFormat.forNames(names));
+        TableLoader loader = LoaderFactory.buildPointLoader(storage, "test_points", "", "key", MetaTableFormat.forNames(names));
 
         System.out.println("push");
         Instant start = DateTimeUtils.now();

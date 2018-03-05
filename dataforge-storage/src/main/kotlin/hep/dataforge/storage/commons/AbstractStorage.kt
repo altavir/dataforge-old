@@ -15,8 +15,8 @@
  */
 package hep.dataforge.storage.commons
 
+import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
-import hep.dataforge.control.ConnectionHelper
 import hep.dataforge.description.NodeDef
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
@@ -27,6 +27,7 @@ import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_NAME_KEY
 import hep.dataforge.io.messages.Dispatcher.Companion.TARGET_TYPE_KEY
 import hep.dataforge.io.messages.Responder
 import hep.dataforge.io.messages.Validator
+import hep.dataforge.io.messages.errorResponseBase
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
@@ -152,13 +153,13 @@ abstract class AbstractStorage : MetaHolder, Storage {
     /**
      * Create a child loader but do not add it to loader list
      *
-     * @param name
+     * @param loaderName
      * @param loaderConfiguration
      * @return
      * @throws StorageException
      */
     @Throws(StorageException::class)
-    protected abstract fun createLoader(name: String, loaderConfiguration: Meta): Loader
+    protected abstract fun createLoader(loaderName: String, loaderConfiguration: Meta): Loader
 
 
     @Throws(StorageException::class)
@@ -178,12 +179,12 @@ abstract class AbstractStorage : MetaHolder, Storage {
      * Create a direct child shelf but do not add it to shelf list
      *
      * @param shelfConfiguration
-     * @param name
+     * @param shelfName
      * @return
      * @throws StorageException
      */
     @Throws(StorageException::class)
-    protected abstract fun createShelf(shelfConfiguration: Meta, name: String): Storage
+    protected abstract fun createShelf(shelfConfiguration: Meta, shelfName: String): Storage
 
     /**
      * update an annotation of loader using overriding annotation
@@ -258,7 +259,7 @@ abstract class AbstractStorage : MetaHolder, Storage {
         return if (responder == this) {
             //TODO add security management here
             //TODO implement
-            MessageFactory().errorResponseBase("", UnsupportedOperationException("Not supported yet.")).build()
+            errorResponseBase("", UnsupportedOperationException("Not supported yet.")).build()
         } else {
             responder.respond(message)
         }

@@ -24,30 +24,18 @@ package hep.dataforge.storage.commons
 import hep.dataforge.io.MetaStreamReader
 import hep.dataforge.io.MetaStreamWriter
 import hep.dataforge.io.envelopes.MetaType
-import java.util.*
-import java.util.function.Predicate
+
+val jsonMetaType = JSONMetaType()
 
 class JSONMetaType : MetaType {
+    override val codes: List<Short> = listOf(0x4a53, 1)//JS
 
-    override val codes: List<Short>
-        get() = Arrays.asList(*JSON_META_CODES)
+    override val name: String = "JSON"
 
-    override val name: String
-        get() = "JSON"
+    override val reader: MetaStreamReader = JSONMetaReader()
 
-    override val reader: MetaStreamReader
-        get() = JSONMetaReader()
+    override val writer: MetaStreamWriter = JSONMetaWriter()
 
-    override val writer: MetaStreamWriter
-        get() = JSONMetaWriter()
-
-    override fun fileNameFilter(): Predicate<String> {
-        return Predicate{ str -> str.toLowerCase().endsWith(".json") }
-    }
-
-    companion object {
-        val instance = JSONMetaType()
-        var JSON_META_CODES = arrayOf<Short>(0x4a53, 1)//JS
-    }
+    override val fileNameFilter: (String) -> Boolean = { it.toLowerCase().endsWith(".json") }
 
 }

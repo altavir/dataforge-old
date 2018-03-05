@@ -15,108 +15,64 @@
  */
 package hep.dataforge.storage.filestorage
 
-import hep.dataforge.exceptions.StorageException
+import hep.dataforge.io.envelopes.Envelope
+import hep.dataforge.io.envelopes.MetaType
+import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
+import hep.dataforge.storage.api.StateLoader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.loaders.AbstractStateLoader
+import hep.dataforge.storage.commons.jsonMetaType
+import hep.dataforge.storage.loaders.StateHolder
 import hep.dataforge.values.Value
-import org.apache.commons.io.FilenameUtils
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.nio.charset.Charset
-import java.nio.file.Path
-import java.util.regex.Pattern
+import java.util.stream.Stream
 
 /**
  * A file implementation of state loader
  *
  * @author Alexander Nozik
  */
-class FileStateLoader @Throws(IOException::class, StorageException::class)
-constructor(private val path: Path, storage: Storage, name: String, annotation: Meta) : AbstractStateLoader(storage, name, annotation) {
-    private var file: FileEnvelope? = null
+class FileStateLoader(storage: Storage, name: String, annotation: Meta, file: FileEnvelope) : FileLoader(storage, name, annotation, file), StateLoader {
+    val metaType: MetaType = jsonMetaType
 
-    override val isOpen: Boolean
-        get() = file != null
+    private val loader = object : StateHolder.MetaHandler {
 
-    @Throws(Exception::class)
-    override fun open() {
-        if (this.meta == null) {
-            this.meta = getFile()!!.meta
+        override val hash: Int
+            get() = file.meta.optNumber("metaHash").map { it.toInt() }.orElse(0)
+
+        override fun push(meta: Meta) {
+            file.clearData()
+            file.append(metaType.writer.writeString(meta).toByteArray())
         }
-        if (!isOpen) {
-            file = FileEnvelope.open(path, isReadOnly)
-        }
-    }
 
-    @Throws(Exception::class)
-    override fun close() {
-        getFile()!!.close()
-        file = null
-        super.close()
-    }
-
-    @Throws(StorageException::class)
-    override fun commit() {
-        try {
-            getFile()!!.clearData()
-            for ((key, value) in states) {
-                getFile()!!.append(String.format("%s=%s;\r\n", key, value.stringValue()).toByteArray(Charset.forName("UTF-8")))
-            }
-        } catch (ex: Exception) {
-            throw StorageException(ex)
+        override fun pull(): Meta? {
+            return metaType.reader.readBuffer(file.data.buffer)
         }
 
     }
 
-    @Synchronized
-    @Throws(StorageException::class)
-    override fun update() {
-        try {
-            val reader = BufferedReader(InputStreamReader(getFile()!!.data.stream))
-            states.clear()
-            reader.lines().forEach { line ->
-                if (!line.isEmpty()) {
-                    val match = Pattern.compile("(?<key>[^=]*)\\s*=\\s*(?<value>.*);").matcher(line)
-                    if (match.matches()) {
-                        val key = match.group("key")
-                        val value = Value.of(match.group("value"))
-                        states[key] = value
-                    }
-                }
-            }
-            isUpToDate = true
-        } catch (ex: Exception) {
-            throw StorageException(ex)
-        }
+    private val stateHolder = StateHolder(this.connectionHelper, loader)
 
+    override val valueStream: Stream<Pair<String, Value>> = stateHolder.states
+
+    override val metaStream: Stream<Pair<String, Meta>> = stateHolder.metaStates
+
+    override fun push(path: String, value: Value) {
+        stateHolder.push(path, value)
     }
 
-    /**
-     * @return the file
-     */
-    @Throws(Exception::class)
-    private fun getFile(): FileEnvelope? {
-        if (file == null) {
-            open()
-        }
-        return file
+    override fun push(path: String, meta: Meta) {
+        stateHolder.push(path, meta)
     }
 
-    companion object {
+    override fun pull(path: String): Value? {
+        return stateHolder.config.optValue(path).nullable
+    }
 
-        @Throws(Exception::class)
-        fun fromEnvelope(storage: Storage, envelope: FileEnvelope): FileStateLoader {
-            if (FileStorageEnvelopeType.validate(envelope, StateLoader.STATE_LOADER_TYPE)) {
-                val res = FileStateLoader(envelope.file,
-                        storage, FilenameUtils.getBaseName(envelope.file.fileName.toString()),
-                        envelope.meta)
-                res.isReadOnly = envelope.isReadOnly
-                return res
-            } else {
-                throw StorageException("Is not a valid state loader file")
-            }
-        }
+    override fun pullMeta(path: String): Meta? {
+        return stateHolder.config.optMeta(path).nullable
+    }
+
+    override fun respond(message: Envelope): Envelope {
+        return stateHolder.respond(message)
     }
 }

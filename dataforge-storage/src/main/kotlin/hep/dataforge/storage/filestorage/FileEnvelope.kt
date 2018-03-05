@@ -18,6 +18,7 @@ package hep.dataforge.storage.filestorage
 import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.io.envelopes.*
 import hep.dataforge.meta.Meta
+import hep.dataforge.storage.commons.jsonMetaType
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -38,8 +39,9 @@ import java.nio.file.StandardOpenOption.*
  *
  * @author Alexander Nozik
  */
-open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Boolean) : Envelope, AutoCloseable {
+open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Boolean = true, val metaType: MetaType = jsonMetaType) : Envelope, AutoCloseable {
 
+    //TODO redo file envelopes
     private var isOpenForRead: Boolean = false
     private var isOpenForWrite: Boolean = false
 
@@ -54,7 +56,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
 
     private val writeChannel: FileChannel by lazy {
         if (isReadOnly) {
-            throw IOException("Trying to write to readonly file " + file)
+            throw IOException("Trying to write to readonly file $file")
         } else {
             FileChannel.open(file, WRITE).also {
                 isOpenForRead = true
@@ -127,7 +129,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
     @Synchronized
     @Throws(Exception::class)
     override fun close() {
-        LoggerFactory.getLogger(javaClass).trace("Closing FileEnvelope " + file)
+        LoggerFactory.getLogger(javaClass).trace("Closing FileEnvelope $file")
         if (isOpenForRead) {
             readChannel.close()
         }
@@ -201,7 +203,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
     @Synchronized
     @Throws(IOException::class)
     private fun setDataSize(channel: SeekableByteChannel, size: Int) {
-        tag.setValue(Envelope.DATA_LENGTH_KEY, size)//update property
+        tag.setValue(Envelope.DATA_LENGTH_PROPERTY, size)//update property
         val position = channel.position()
         channel.position(0)//seeking begin
         val buffer = tag.toBytes()
@@ -255,12 +257,12 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
 
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {
-        return SimpleEnvelope(getMeta(), data)
+        return SimpleEnvelope(meta, data)
     }
 
     companion object {
-        val INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1)
-        private val NEWLINE = "\r\n"
+        //val INFINITE_DATA_SIZE = Integer.toUnsignedLong(-1)
+        private const val NEWLINE = "\r\n"
 
         /**
          * Create empty envelope with given meta

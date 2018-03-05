@@ -97,7 +97,7 @@ public class ParamSet implements Values, MetaMorph {
         }
 
         MetaUtils.nodeStream(params).forEach(entry -> {
-            setPar(new Param(entry.getValue()));
+            setPar(new Param(entry.getSecond()));
         });
     }
 

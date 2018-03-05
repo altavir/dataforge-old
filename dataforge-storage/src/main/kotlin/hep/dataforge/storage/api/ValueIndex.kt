@@ -135,9 +135,9 @@ interface ValueIndex<T> : Index<T> {
 
     companion object {
 
-        val FROM_KEY = "from"
-        val TO_KEY = "to"
-        val LIMIT_KEY = "limit"
+        const val FROM_KEY = "from"
+        const val TO_KEY = "to"
+        const val LIMIT_KEY = "limit"
     }
 
 

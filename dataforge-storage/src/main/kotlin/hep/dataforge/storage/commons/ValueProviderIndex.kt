@@ -73,7 +73,7 @@ class ValueProviderIndex<T : ValueProvider> : ValueIndex<T> {
     }
 
     override fun keySet(): NavigableSet<Value> {
-        val res = TreeSet(ValueUtils.VALUE_COMPARATPR)
+        val res = TreeSet(ValueUtils.VALUE_COMPARATOR)
         StreamSupport.stream(iterable.spliterator(), true).map { it -> it.getValue(valueName, defaultValue) }.forEach { it -> res.add(it) }
         return res
     }

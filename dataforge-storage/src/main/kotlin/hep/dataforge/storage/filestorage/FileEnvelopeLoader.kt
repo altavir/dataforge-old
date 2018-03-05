@@ -28,7 +28,7 @@ import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.EnvelopeLoader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.commons.JSONMetaType
+import hep.dataforge.storage.commons.jsonMetaType
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream
@@ -45,7 +45,7 @@ class FileEnvelopeLoader(storage: Storage, name: String, meta: Meta, file: FileE
         if (!isReadOnly) {
             try {
                 val baos = ByteArrayOutputStream()
-                DefaultEnvelopeWriter(FileStorageEnvelopeType, JSONMetaType.instance).write(baos, env)
+                DefaultEnvelopeWriter(FileStorageEnvelopeType, jsonMetaType).write(baos, env)
                 file.append(baos.toByteArray())
             } catch (ex: IOException) {
                 throw StorageException("Can't push envelope to loader", ex)

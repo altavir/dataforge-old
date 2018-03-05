@@ -28,14 +28,10 @@ import java.nio.ByteBuffer
  */
 object StorageMessageUtils {
 
-    val ACTION_KEY = "action"
-
     val QUERY_ELEMENT = "query"
 
 
-    //Message operations
-    val PUSH_OPERATION = "push"
-    val PULL_OPERATION = "pull"
+
 
     /**
      * Create a default 'OK' response for push request

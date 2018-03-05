@@ -25,24 +25,22 @@ import hep.dataforge.meta.MetaUtils
 import java.io.*
 import java.nio.charset.Charset
 import java.text.ParseException
-import java.util.*
-import java.util.function.Predicate
+
+
+val binaryMetaType = BinaryMetaType()
 
 /**
  * Binary meta type
  * Created by darksnake on 02-Mar-17.
  */
-object BinaryMetaType : MetaType {
+class BinaryMetaType : MetaType {
 
-    val BINARY_META_CODES = arrayOf<Short>(0x4249, 10)
-
-    override val codes: List<Short> = Arrays.asList(*BINARY_META_CODES)
+    override val codes: List<Short> = listOf(0x4249, 10)//BI
 
     override val name: String = "binary"
 
-    override fun fileNameFilter(): Predicate<String> {
-        return Predicate { str -> str.toLowerCase().endsWith(".meta") }
-    }
+    override val fileNameFilter: (String)->Boolean = { str -> str.toLowerCase().endsWith(".meta") }
+
 
     override val reader: MetaStreamReader = object : MetaStreamReader {
 
@@ -60,7 +58,7 @@ object BinaryMetaType : MetaType {
         }
 
         override fun withCharset(charset: Charset): MetaStreamReader {
-            //charet is ignored
+            //charset is ignored
             return this
         }
 

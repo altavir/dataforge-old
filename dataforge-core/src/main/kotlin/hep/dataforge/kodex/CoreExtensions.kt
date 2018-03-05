@@ -144,7 +144,7 @@ fun Meta.useMetaList(metaName: String, action: (List<Meta>) -> Unit) {
 }
 
 fun <T> Meta.asMap(transform: (Value) -> T): Map<String, T> {
-    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.key }, { transform(it.value) }))
+    return MetaUtils.valueStream(this).collect(Collectors.toMap({ it.first }, { transform(it.second) }))
 }
 
 val <T : MetaNode<*>> MetaNode<T>.childNodes: List<T>

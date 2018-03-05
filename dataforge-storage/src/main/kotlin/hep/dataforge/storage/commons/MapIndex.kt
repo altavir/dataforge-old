@@ -35,13 +35,14 @@ import kotlin.collections.ArrayList
  * and requires a lot of memory, so it should be used only in cases of repeated
  * pull requests.
  *
+ * @param <T> the type of resulting entity
  * @param <K> intermediate key representation for entries.
  * @author Alexander Nozik
-</K> */
+*/
 abstract class MapIndex<T, K> : ValueIndex<T> {
 
     //TODO add custom request that fetches roots of the tree
-    protected var map = TreeMap<Value, MutableList<K>>(ValueUtils.VALUE_COMPARATPR)
+    protected var map = TreeMap<Value, MutableList<K>>(ValueUtils.VALUE_COMPARATOR)
 
     /**
      * Store index entry
@@ -50,7 +51,7 @@ abstract class MapIndex<T, K> : ValueIndex<T> {
      * @param key
      */
     protected fun putToIndex(v: Value, key: K) {
-        map.getOrPut(v){
+        map.getOrPut(v) {
             ArrayList()
         }.add(key)
     }
@@ -101,23 +102,25 @@ abstract class MapIndex<T, K> : ValueIndex<T> {
 
     @Throws(StorageException::class)
     override fun pull(from: Value, to: Value): Stream<T> {
-        var from = from
-        var to = to
         update()
         if (map.isEmpty()) {
             return Stream.empty()
         }
+
         //If null, use the whole range
-        if (from === Value.NULL) {
-            from = map.firstKey()
+        val theFrom = if (from.isNull) {
+            map.firstKey()
+        } else {
+            from
         }
 
-        if (to === Value.NULL) {
-            to = map.lastKey()
+        val theTo = if (to.isNull) {
+            map.lastKey()
+        } else {
+            to
         }
 
-
-        return map.subMap(from, true, to, true).values.stream().flatMap { u -> u.stream().map<T> { this.transform(it) } }
+        return map.subMap(theFrom, true, theTo, true).values.stream().flatMap { it.stream().map<T> { this.transform(it) } }
     }
 
 
