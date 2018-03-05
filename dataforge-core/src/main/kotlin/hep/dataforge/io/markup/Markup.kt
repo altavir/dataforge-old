@@ -318,7 +318,7 @@ class TableMarkup : Markup() {
 
     var header: RowMarkup? = null
         set(value) {
-            field = value?.apply { parent = this }
+            field = value?.also { it.parent = this }
         }
 
     val rows: MutableList<RowMarkup> = ArrayList()

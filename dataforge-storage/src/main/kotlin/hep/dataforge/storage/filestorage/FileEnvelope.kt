@@ -48,21 +48,28 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
     val isOpen: Boolean
         get() = isOpenForRead || isOpenForWrite
 
-    private val readChannel: FileChannel by lazy {
-        FileChannel.open(file, READ).also {
-            isOpenForWrite = true
+    private lateinit var _readChannel: FileChannel
+    private val readChannel: FileChannel
+        get(){
+        if(!isOpenForRead || !_readChannel.isOpen){
+            _readChannel = FileChannel.open(file, READ)
+            isOpenForRead = true
         }
+        return _readChannel
     }
 
-    private val writeChannel: FileChannel by lazy {
-        if (isReadOnly) {
-            throw IOException("Trying to write to readonly file $file")
-        } else {
-            FileChannel.open(file, WRITE).also {
-                isOpenForRead = true
+    private lateinit var _writeChannel: FileChannel
+    private val writeChannel: FileChannel
+        get(){
+            if (isReadOnly) {
+                throw IOException("Trying to write to readonly file $file")
             }
+            if(!isOpenForWrite || !_writeChannel.isOpen){
+                _writeChannel = FileChannel.open(file, WRITE)
+                isOpenForWrite = true
+            }
+            return _writeChannel
         }
-    }
 
     private val readerPos: Long
         get() {
@@ -132,9 +139,11 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
         LoggerFactory.getLogger(javaClass).trace("Closing FileEnvelope $file")
         if (isOpenForRead) {
             readChannel.close()
+            isOpenForRead = false
         }
         if (isOpenForWrite) {
             writeChannel.close()
+            isOpenForWrite = false
         }
     }
 
