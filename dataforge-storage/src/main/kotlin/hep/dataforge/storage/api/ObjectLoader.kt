@@ -48,7 +48,7 @@ interface ObjectLoader<T> : Loader {
 
     companion object {
 
-        val OBJECT_LOADER_TYPE = "object"
-        val DEFAULT_FRAGMENT_NAME = ""
+        const val OBJECT_LOADER_TYPE = "object"
+        const val DEFAULT_FRAGMENT_NAME = ""
     }
 }
