@@ -16,8 +16,8 @@
 package hep.dataforge.io.envelopes
 
 import hep.dataforge.io.envelopes.DefaultEnvelopeType.Companion.SEPARATOR
-import hep.dataforge.io.envelopes.Envelope.Companion.DATA_LENGTH_KEY
-import hep.dataforge.io.envelopes.Envelope.Companion.META_LENGTH_KEY
+import hep.dataforge.io.envelopes.Envelope.Companion.DATA_LENGTH_PROPERTY
+import hep.dataforge.io.envelopes.Envelope.Companion.META_LENGTH_PROPERTY
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.OutputStream
@@ -60,9 +60,9 @@ class DefaultEnvelopeWriter(private val envelopeType: EnvelopeType, private val 
             meta = baos.toByteArray()
             metaSize = meta.size + 2
         }
-        tag.setValue(META_LENGTH_KEY, metaSize)
+        tag.setValue(META_LENGTH_PROPERTY, metaSize)
 
-        tag.setValue(DATA_LENGTH_KEY, envelope.data.size())
+        tag.setValue(DATA_LENGTH_PROPERTY, envelope.data.size())
 
         stream.write(tag.toBytes().array())
 
@@ -76,7 +76,7 @@ class DefaultEnvelopeWriter(private val envelopeType: EnvelopeType, private val 
 
 //    companion object {
 //        private val TAG_PROPERTIES = HashSet(
-//                Arrays.asList(Envelope.TYPE_KEY, Envelope.META_TYPE_KEY, Envelope.META_LENGTH_KEY, Envelope.DATA_LENGTH_KEY)
+//                Arrays.asList(Envelope.TYPE_PROPERTY, Envelope.META_TYPE_PROPERTY, Envelope.META_LENGTH_PROPERTY, Envelope.DATA_LENGTH_PROPERTY)
 //        )
 //    }
 

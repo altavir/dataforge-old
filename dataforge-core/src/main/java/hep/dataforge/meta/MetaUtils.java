@@ -11,7 +11,7 @@ import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueProvider;
 import hep.dataforge.values.ValueType;
 import hep.dataforge.values.ValueUtils;
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.io.IOException;
 import java.io.ObjectInput;
@@ -239,18 +239,17 @@ public class MetaUtils {
 
     public static Stream<Pair<String, Value>> valueStream(Meta node) {
         return nodeStream("", node, true).flatMap((Pair<String, Meta> entry) -> {
-            String key = entry.getKey();
-            Meta childMeta = entry.getValue();
-            return childMeta.getValueNames()
-                    .map((String valueName) -> {
-                        String prefix;
-                        if (key.isEmpty()) {
-                            prefix = "";
-                        } else {
-                            prefix = key + ".";
-                        }
-                        return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
-                    });
+            String key = entry.getFirst();
+            Meta childMeta = entry.getSecond();
+            return childMeta.getValueNames().map((String valueName) -> {
+                String prefix;
+                if (key.isEmpty()) {
+                    prefix = "";
+                } else {
+                    prefix = key + ".";
+                }
+                return new Pair<>(prefix + valueName, childMeta.getValue(valueName));
+            });
         });
     }
 

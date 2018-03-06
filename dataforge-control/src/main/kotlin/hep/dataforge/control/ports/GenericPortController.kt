@@ -24,6 +24,7 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.utils.ReferenceRegistry
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.ByteArrayOutputStream
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ExecutionException
@@ -33,18 +34,18 @@ import java.util.concurrent.TimeoutException
 
 /**
  * A port controller helper that allows both synchronous and asynchronous operations on port
+ * @property port the port associated with this controller
  */
-open class GenericPortController(private val context: Context,
-                                 /**
-                                  * Get the port associated with this controller
-                                  *
-                                  * @return
-                                  */
-                                 val port: Port) : Port.PortController, AutoCloseable, ContextAware {
+open class GenericPortController(
+        private val context: Context,
+        val port: Port,
+        private val phraseCondition: (String) -> Boolean = {it.endsWith("\n")}
+) : PortController, AutoCloseable, ContextAware {
 
     private val waiters = ReferenceRegistry<FuturePhrase>()
     private val listeners = ReferenceRegistry<PhraseListener>()
     private val exceptionListeners = ReferenceRegistry<ErrorListener>()
+    private val buffer = ByteArrayOutputStream();
 
     override fun getContext(): Context {
         return context
@@ -66,12 +67,28 @@ open class GenericPortController(private val context: Context,
         return LoggerFactory.getLogger("${context.name}.$port")
     }
 
-    override fun acceptPhrase(message: String) {
+    override fun accept(byte: Byte) {
+        synchronized(port) {
+            buffer.write(byte.toInt())
+            val string = buffer.toString("UTF8")
+            if (phraseCondition(string)) {
+                acceptPhrase(string)
+                buffer.reset()
+            }
+        }
+    }
+
+    override fun accept(bytes: ByteArray) {
+        //TODO improve performance using byte buffers
+        bytes.forEach { accept(it) }
+    }
+
+    private fun acceptPhrase(message: String) {
         waiters.forEach { waiter -> waiter.acceptPhrase(message) }
         listeners.forEach { listener -> listener.acceptPhrase(message) }
     }
 
-    override fun acceptError(errorMessage: String, error: Throwable) {
+    override fun error(errorMessage: String, error: Throwable) {
         exceptionListeners.forEach { it ->
             context.executors.defaultExecutor.submit {
                 try {

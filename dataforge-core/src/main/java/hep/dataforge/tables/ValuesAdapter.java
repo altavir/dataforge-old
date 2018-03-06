@@ -21,7 +21,7 @@ import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.Values;
-import javafx.util.Pair;
+import kotlin.Pair;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -71,7 +71,7 @@ public interface ValuesAdapter extends Metoid, MetaMorph {
      * @return
      */
     default Stream<String> listComponents() {
-        return MetaUtils.valueStream(getMeta()).map(Pair::getKey);
+        return MetaUtils.valueStream(getMeta()).map(Pair::getFirst);
     }
 
 

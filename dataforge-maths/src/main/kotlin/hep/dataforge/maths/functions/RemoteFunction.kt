@@ -29,10 +29,10 @@ class SimpleRemoteFunction(val responder: Responder): RemoteFunction{
     override suspend operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double {
         val request = EnvelopeBuilder()
                 .setContentType("hep.dataforge.function.request")
-                .putMetaValue("action", "getValue")
-                .putMetaValue("request.key",key)
+                .setMetaValue("action", "getValue")
+                .setMetaValue("request.key",key)
                 .putMetaNode("request.meta", meta)
-                .putMetaValue("request.argument",arguments)
+                .setMetaValue("request.argument",arguments)
                 .build()
 
         val response = async {

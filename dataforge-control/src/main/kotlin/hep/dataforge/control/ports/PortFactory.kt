@@ -44,7 +44,7 @@ object PortFactory : MetaFactory<Port> {
             ValueDef(name = "address", required = true, info = "The specific designation of this port according to type"),
             ValueDef(name = "type", def = "tcp", info = "The type of the port")
     )
-    override fun build(meta: Meta): Port {
+    override fun build(meta: Meta, phraseCondition: (String) -> Boolean): Port {
         val protocol = meta.getString("type", "tcp")
         val address = meta.getString("address")
         val canonPortName = meta.getString("name", "$protocol:$address")
@@ -74,7 +74,7 @@ object PortFactory : MetaFactory<Port> {
         return build(nameToMeta(portName))
     }
 
-    fun nameToMeta(portName:String):Meta{
+    fun nameToMeta(portName: String): Meta {
         val builder = MetaBuilder("port")
                 .setValue("name", portName)
 

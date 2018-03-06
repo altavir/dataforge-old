@@ -29,7 +29,7 @@ import java.util.List;
  */
 public class SimpleConfigurable implements Configurable {
 
-    private Configuration configuration = null;
+    private final Configuration configuration;
 
 
     /**
@@ -38,10 +38,27 @@ public class SimpleConfigurable implements Configurable {
      */
     public SimpleConfigurable(Configuration configuration) {
         this.configuration = configuration;
+        configuration.addObserver(new ConfigChangeListener() {
+
+            @Override
+            public void notifyValueChanged(Name name, Value oldItem, Value newItem) {
+                applyValueChange(name.toUnescaped(), oldItem, newItem);
+            }
+
+            @Override
+            public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
+                applyNodeChange(name.toUnescaped(), oldItem, newItem);
+            }
+        });
+    }
+
+    public SimpleConfigurable(Meta meta) {
+        this(new Configuration(meta));
     }
 
 
     public SimpleConfigurable() {
+        this(new Configuration());
     }
 
     /**
@@ -51,21 +68,9 @@ public class SimpleConfigurable implements Configurable {
      */
     @Override
     public final Configuration getConfig() {
-        if (configuration == null) {
-            initConfig();
-        }
         return configuration;
     }
 
-//    /**
-//     * Get configuration as an immutable annotation underplayed by defaults from class description
-//     *
-//     * @return
-//     */
-//    @Override
-//    public Meta getMeta() {
-//        return new Laminate(getConfig()).withDescriptor(Descriptors.buildDescriptor(getClass()));
-//    }
 
     /**
      * Apply the whole new configuration. It does not change configuration,
@@ -81,10 +86,10 @@ public class SimpleConfigurable implements Configurable {
      * Apply specific value change. By default applies the whole configuration.
      *
      * @param name
-     * @param oldItem
-     * @param newItem
+     * @param oldValue
+     * @param newValue
      */
-    protected void applyValueChange(@NotNull String name, Value oldItem, Value newItem) {
+    protected void applyValueChange(@NotNull String name, Value oldValue, Value newValue) {
         applyConfig(getConfig());
     }
 
@@ -96,7 +101,7 @@ public class SimpleConfigurable implements Configurable {
      * @param oldItem
      * @param newItem
      */
-    protected void applyElementChange(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
+    protected void applyNodeChange(String name, List<? extends Meta> oldItem, List<? extends Meta> newItem) {
         applyConfig(getConfig());
     }
 
@@ -128,24 +133,6 @@ public class SimpleConfigurable implements Configurable {
      */
     protected Meta validate(Meta config) {
         return config;
-    }
-
-    private void initConfig() {
-        if (configuration == null) {
-            configuration = new Configuration("");
-        }
-        configuration.addObserver(new ConfigChangeListener() {
-
-            @Override
-            public void notifyValueChanged(Name name, Value oldItem, Value newItem) {
-                applyValueChange(name.toUnescaped(), oldItem, newItem);
-            }
-
-            @Override
-            public void notifyNodeChanged(Name name, @NotNull List<? extends Meta> oldItem, @NotNull List<? extends Meta> newItem) {
-                applyElementChange(name.toUnescaped(), oldItem, newItem);
-            }
-        });
     }
 
     /**

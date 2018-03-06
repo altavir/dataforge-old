@@ -17,6 +17,10 @@ package hep.dataforge.io.envelopes
 
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.BufferedBinary
+import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_DATA_TYPE_KEY
+import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_DESCRIPTION_KEY
+import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_TIME_KEY
+import hep.dataforge.io.envelopes.Envelope.Companion.ENVELOPE_TYPE_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 
@@ -24,7 +28,7 @@ import java.io.ByteArrayOutputStream
 import java.io.ObjectStreamException
 import java.io.OutputStream
 import java.nio.ByteBuffer
-import java.util.function.Consumer
+import java.time.Instant
 
 /**
  * The convenient builder for envelopes
@@ -38,7 +42,7 @@ class EnvelopeBuilder : Envelope {
      *
      * @return
      */
-    private var metaBuilder = MetaBuilder("envelope")
+    private var metaBuilder = MetaBuilder()
 
     //initializing with empty buffer
     override var data: Binary = BufferedBinary(ByteArray(0))
@@ -81,8 +85,8 @@ class EnvelopeBuilder : Envelope {
      * @param value
      * @return
      */
-    fun putMetaValue(name: String, value: Any): EnvelopeBuilder {
-        this.metaBuilder.putValue(name, value)
+    fun setMetaValue(name: String, value: Any): EnvelopeBuilder {
+        this.metaBuilder.setValue(name, value)
         return this
     }
 
@@ -101,19 +105,24 @@ class EnvelopeBuilder : Envelope {
         return this
     }
 
-    fun setData(data: Consumer<OutputStream>): EnvelopeBuilder {
+    fun setData(consumer: (OutputStream) -> Unit): EnvelopeBuilder {
         val baos = ByteArrayOutputStream()
-        data.accept(baos)
+        consumer(baos)
         return setData(baos.toByteArray())
     }
 
+    fun setEnvelopeType(type: String): EnvelopeBuilder {
+        setMetaValue(ENVELOPE_TYPE_KEY, type)
+        return this
+    }
+
     fun setContentType(type: String): EnvelopeBuilder {
-        putMetaValue("@envelope.type", type)
+        setMetaValue(ENVELOPE_DATA_TYPE_KEY, type)
         return this
     }
 
     fun setContentDescription(description: String): EnvelopeBuilder {
-        putMetaValue("@envelope.description", description)
+        setMetaValue(ENVELOPE_DESCRIPTION_KEY, description)
         return this
     }
 
@@ -122,6 +131,7 @@ class EnvelopeBuilder : Envelope {
     }
 
     fun build(): Envelope {
+        setMetaValue(ENVELOPE_TIME_KEY, Instant.now())
         return SimpleEnvelope(metaBuilder, data)
     }
 

@@ -1,11 +1,14 @@
 package hep.dataforge.control;
 
+import hep.dataforge.connections.Connection;
 import hep.dataforge.context.*;
 import hep.dataforge.control.devices.Device;
 import hep.dataforge.control.devices.DeviceFactory;
 import hep.dataforge.control.devices.DeviceHub;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.exceptions.EnvelopeTargetNotFoundException;
+import hep.dataforge.io.envelopes.Envelope;
+import hep.dataforge.io.messages.Dispatcher;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
@@ -52,7 +55,7 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
 
     public Device buildDevice(Meta deviceMeta) {
         DeviceFactory factory = getContext()
-                .findService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
+                .optService(DeviceFactory.class, f -> Objects.equals(f.getType(), ControlUtils.getDeviceType(deviceMeta)))
                 .orElseThrow(() -> new RuntimeException("Can't find factory for given device type"));
         Device device = factory.build(getContext(), deviceMeta);
 
@@ -64,8 +67,15 @@ public class DeviceManager extends BasicPlugin implements Dispatcher, DeviceHub 
         return device;
     }
 
+    @NotNull
     @Override
-    public Responder getResponder(Meta targetInfo) throws EnvelopeTargetNotFoundException {
+    public Responder getResponder(@NotNull Meta targetInfo) throws EnvelopeTargetNotFoundException {
+        throw new UnsupportedOperationException();
+    }
+
+    @NotNull
+    @Override
+    public Responder getResponder(@NotNull Envelope envelope) {
         throw new UnsupportedOperationException();
     }
 

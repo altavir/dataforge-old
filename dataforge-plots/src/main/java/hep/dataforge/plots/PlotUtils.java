@@ -18,7 +18,7 @@ package hep.dataforge.plots;
 import hep.dataforge.context.Context;
 import hep.dataforge.io.envelopes.DefaultEnvelopeType;
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter;
-import hep.dataforge.io.envelopes.XMLMetaType;
+import hep.dataforge.io.envelopes.XMLMetaTypeKt;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.plots.data.DataPlot;
@@ -115,7 +115,7 @@ public class PlotUtils {
             File file = chooser.showSaveDialog(window);
             if (file != null) {
                 try {
-                    new DefaultEnvelopeWriter(DefaultEnvelopeType.Companion.getINSTANCE(), XMLMetaType.Companion.getInstance())
+                    new DefaultEnvelopeWriter(DefaultEnvelopeType.Companion.getINSTANCE(), XMLMetaTypeKt.getXmlMetaType())
                             .write(new FileOutputStream(file), new PlotFrame.Wrapper().wrap(frame));
                 } catch (IOException ex) {
                     throw new RuntimeException("Failed to save plot to file", ex);

@@ -54,7 +54,7 @@ interface Envelope : Metoid, Serializable {
      * @return
      */
     val type: Optional<String> // TODO replace by nullables
-        get() = meta.optValue("@envelope.type").map { it.stringValue() }
+        get() = meta.optString(ENVELOPE_TYPE_KEY)
 
     /**
      * The type of data encoding
@@ -62,15 +62,15 @@ interface Envelope : Metoid, Serializable {
      * @return
      */
     val dataType: Optional<String> // TODO replace by nullables
-        get() = meta.optValue("@envelope.dataType").map { it.stringValue() }
+        get() = meta.optString(ENVELOPE_DATA_TYPE_KEY)
 
     /**
      * Textual user friendly description
      *
      * @return
      */
-    val description: String
-        get() = meta.getString("@envelope.description", "")
+    val description: String?
+        get() = meta.optString(ENVELOPE_DESCRIPTION_KEY).nullable
 
     /**
      * Time of creation of the envelope
@@ -78,7 +78,7 @@ interface Envelope : Metoid, Serializable {
      * @return
      */
     val time: Instant?
-        get() = meta.optValue("@envelope.time").map { it.timeValue() }.nullable
+        get() = meta.optTime(ENVELOPE_TIME_KEY).nullable
 
     /**
      * Meta part of the envelope
@@ -118,9 +118,18 @@ interface Envelope : Metoid, Serializable {
         /**
          * Property keys
          */
-        const val TYPE_KEY = "type"
-        const val META_TYPE_KEY = "metaType"
-        const val META_LENGTH_KEY = "metaLength"
-        const val DATA_LENGTH_KEY = "dataLength"
+        const val TYPE_PROPERTY = "type"
+        const val META_TYPE_PROPERTY = "metaType"
+        const val META_LENGTH_PROPERTY = "metaLength"
+        const val DATA_LENGTH_PROPERTY = "dataLength"
+
+        /**
+         * meta keys
+         */
+        const val ENVELOPE_NODE = "@envelope"
+        const val ENVELOPE_TYPE_KEY = "@envelope.type"
+        const val ENVELOPE_DATA_TYPE_KEY = "@envelope.dataType"
+        const val ENVELOPE_DESCRIPTION_KEY = "@envelope.description"
+        const val ENVELOPE_TIME_KEY = "@envelope.time"
     }
 }

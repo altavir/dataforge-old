@@ -20,7 +20,6 @@ import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import org.slf4j.LoggerFactory
 import java.io.BufferedInputStream
-import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.net.Socket
 
@@ -49,7 +48,8 @@ class TcpPort(meta: Meta) : Port(meta) {
 
     private var listenerThread: Thread? = null
 
-    @Volatile private var stopFlag = false
+    @Volatile
+    private var stopFlag = false
 
     override val isOpen: Boolean
         get() = listenerThread != null
@@ -105,18 +105,13 @@ class TcpPort(meta: Meta) : Port(meta) {
     private fun startListenerThread(): Thread {
         val task = {
             var reader: BufferedInputStream? = null
-            val buffer = ByteArrayOutputStream()
             while (!stopFlag) {
                 try {
                     if (reader == null) {
                         reader = BufferedInputStream(socket.getInputStream())
                     }
-                    buffer.write(reader.read())
-                    val str = buffer.toString()
-                    if (isPhrase(str)) {
-                        receivePhrase(str)
-                        buffer.reset()
-                    }
+                    //TODO switch to nio
+                    receive(reader.read().toByte())
                 } catch (ex: IOException) {
                     if (!stopFlag) {
                         LoggerFactory.getLogger(javaClass).error("TCP connection broken on {}. Reconnecting.", toString())

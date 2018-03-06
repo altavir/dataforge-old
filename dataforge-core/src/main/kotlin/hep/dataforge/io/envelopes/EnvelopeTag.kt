@@ -33,7 +33,7 @@ import java.util.*
 open class EnvelopeTag {
 
     val values = HashMap<String, Value>()
-    var metaType: MetaType = XMLMetaType
+    var metaType: MetaType = xmlMetaType
     var envelopeType: EnvelopeType = DefaultEnvelopeType.INSTANCE
 
 
@@ -48,9 +48,11 @@ open class EnvelopeTag {
      */
     open val length: Int = 20
 
-    val metaSize: Int = values.getOrDefault(Envelope.META_LENGTH_KEY, Value.of(0)).intValue()
+    val metaSize: Int
+        get() = values.getOrDefault(Envelope.META_LENGTH_PROPERTY, Value.of(0)).intValue()
 
-    val dataSize: Int = values.getOrDefault(Envelope.DATA_LENGTH_KEY, Value.of(0)).intValue()
+    val dataSize: Int
+        get() = values.getOrDefault(Envelope.DATA_LENGTH_PROPERTY, Value.of(0)).intValue()
 
     /**
      * Read header line
@@ -75,7 +77,7 @@ open class EnvelopeTag {
         val envelopeType = EnvelopeType.resolve(type)
 
         if (envelopeType != null) {
-            res[Envelope.TYPE_KEY] = Value.of(envelopeType.name)
+            res[Envelope.TYPE_PROPERTY] = Value.of(envelopeType.name)
         } else {
             LoggerFactory.getLogger(EnvelopeTag::class.java).warn("Could not resolve envelope type code. Using default")
         }
@@ -85,17 +87,17 @@ open class EnvelopeTag {
         val metaType = MetaType.resolve(metaTypeCode)
 
         if (metaType != null) {
-            res[Envelope.META_TYPE_KEY] = Value.of(metaType.name)
+            res[Envelope.META_TYPE_PROPERTY] = Value.of(metaType.name)
         } else {
             LoggerFactory.getLogger(EnvelopeTag::class.java).warn("Could not resolve meta type. Using default")
         }
 
         //reading meta length
         val metaLength = Integer.toUnsignedLong(buffer.getInt(8))
-        res[Envelope.META_LENGTH_KEY] = Value.of(metaLength)
+        res[Envelope.META_LENGTH_PROPERTY] = Value.of(metaLength)
         //reading data length
         val dataLength = Integer.toUnsignedLong(buffer.getInt(12))
-        res[Envelope.DATA_LENGTH_KEY] = Value.of(dataLength)
+        res[Envelope.DATA_LENGTH_PROPERTY] = Value.of(dataLength)
 
         val endSequence = ByteArray(4)
         buffer.position(16)
@@ -130,14 +132,14 @@ open class EnvelopeTag {
     }
 
     fun setValue(name: String, value: Value) {
-        if (Envelope.TYPE_KEY == name) {
+        if (Envelope.TYPE_PROPERTY == name) {
             val type = if (value.type == ValueType.NUMBER) EnvelopeType.resolve(value.intValue()) else EnvelopeType.resolve(value.stringValue())
             if (type != null) {
                 envelopeType = type
             } else {
                 LoggerFactory.getLogger(javaClass).trace("Can't resolve envelope type")
             }
-        } else if (Envelope.META_TYPE_KEY == name) {
+        } else if (Envelope.META_TYPE_PROPERTY == name) {
             val type = if (value.type == ValueType.NUMBER) MetaType.resolve(value.intValue().toShort()) else MetaType.resolve(value.stringValue())
             if (type != null) {
                 metaType = type
@@ -178,8 +180,8 @@ open class EnvelopeTag {
 
         buffer.putInt(envelopeType.code)
         buffer.putShort(metaType.codes[0])
-        buffer.putInt(values[Envelope.META_LENGTH_KEY]!!.longValue().toInt())
-        buffer.putInt(values[Envelope.DATA_LENGTH_KEY]!!.longValue().toInt())
+        buffer.putInt(values[Envelope.META_LENGTH_PROPERTY]!!.longValue().toInt())
+        buffer.putInt(values[Envelope.DATA_LENGTH_PROPERTY]!!.longValue().toInt())
         buffer.put(endSequence)
         return buffer
     }

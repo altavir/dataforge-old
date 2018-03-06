@@ -15,20 +15,21 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.connections.AutoConnectible;
+import hep.dataforge.connections.RoleDef;
 import hep.dataforge.context.ContextAware;
-import hep.dataforge.control.AutoConnectible;
 import hep.dataforge.control.ControlUtils;
-import hep.dataforge.control.RoleDef;
 import hep.dataforge.events.EventHandler;
 import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Named;
+import hep.dataforge.states.Stateful;
 import org.slf4j.Logger;
 
-import static hep.dataforge.control.Connection.EVENT_HANDLER_ROLE;
-import static hep.dataforge.control.Connection.LOGGER_ROLE;
+import static hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE;
+import static hep.dataforge.connections.Connection.LOGGER_ROLE;
 import static hep.dataforge.control.connections.Roles.DEVICE_LISTENER_ROLE;
 import static hep.dataforge.control.connections.Roles.VIEW_ROLE;
 

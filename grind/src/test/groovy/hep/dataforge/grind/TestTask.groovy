@@ -26,7 +26,7 @@ class TestTask extends MultiStageTask {
             b.putStatic(key, value);
         }
         MetaUtils.valueStream(model.getMeta()).forEach { pair ->
-            b.putStatic("meta." + pair.getKey(), pair.getValue())
+            b.putStatic("meta." + pair.first, pair.second)
         }
 
         state.finish(b.build())

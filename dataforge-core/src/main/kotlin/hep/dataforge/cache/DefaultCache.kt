@@ -297,6 +297,6 @@ class DefaultCache<K, V>(
     companion object {
 
         private val reader = DefaultEnvelopeReader()
-        private val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, XMLMetaType)
+        private val writer = DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, xmlMetaType)
     }
 }

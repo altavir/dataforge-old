@@ -20,7 +20,7 @@ import java.util.List;
 public class ValueUtils {
 
     public static final Comparator<Number> NUMBER_COMPARATOR = new NumberComparator();
-    public static final Comparator<Value> VALUE_COMPARATPR = new ValueComparator();
+    public static final Comparator<Value> VALUE_COMPARATOR = new ValueComparator();
 
     public static int compare(Value val1, Value val2) {
         switch (val1.getType()) {

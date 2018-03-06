@@ -284,8 +284,8 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
             }
 
             EnvelopeBuilder builder = new EnvelopeBuilder()
-                    .putMetaValue(Companion.getWRAPPER_TYPE_KEY(), PLOT_GROUP_WRAPPER_TYPE)
-                    .putMetaValue("name", group.getName())
+                    .setMetaValue(WRAPPER_TYPE_KEY, PLOT_GROUP_WRAPPER_TYPE)
+                    .setMetaValue("name", group.getName())
                     .putMetaNode(DEFAULT_META_NAME, group.getConfig())
                     .setContentType("wrapper")
                     .setData(baos.toByteArray());

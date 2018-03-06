@@ -17,6 +17,7 @@
 package hep.dataforge.control.devices
 
 import hep.dataforge.meta.Meta
+import hep.dataforge.states.Stateful
 import hep.dataforge.values.Value
 import java.time.Instant
 import kotlin.properties.ReadWriteProperty

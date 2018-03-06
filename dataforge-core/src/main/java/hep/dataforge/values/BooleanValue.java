@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
@@ -109,6 +110,7 @@ class BooleanValue extends AbstractValue {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return ValueType.BOOLEAN;

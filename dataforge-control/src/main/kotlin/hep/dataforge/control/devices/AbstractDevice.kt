@@ -15,10 +15,10 @@
  */
 package hep.dataforge.control.devices
 
+import hep.dataforge.connections.Connection
+import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.control.Connection
-import hep.dataforge.control.ConnectionHelper
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException

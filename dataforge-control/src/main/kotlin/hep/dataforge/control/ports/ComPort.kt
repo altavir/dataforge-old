@@ -16,14 +16,13 @@
 package hep.dataforge.control.ports
 
 import hep.dataforge.exceptions.PortException
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import jssc.SerialPort
 import jssc.SerialPort.*
 import jssc.SerialPortEventListener
 import jssc.SerialPortException
 import org.slf4j.LoggerFactory
-import java.io.ByteArrayOutputStream
 import java.io.IOException
 
 /**
@@ -35,26 +34,17 @@ class ComPort(meta: Meta) : Port(meta) {
     //    private static final int MAX_SIZE = 50;
     private var port: SerialPort? = null
 
-    private val buffer = ByteArrayOutputStream()
-
     private val serialPortListener = SerialPortEventListener { event ->
         if (event.isRXCHAR) {
             val chars = event.eventValue
             try {
                 val bytes = port!!.readBytes(chars)
-                buffer.write(bytes)
+                receive(bytes)
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             } catch (ex: SerialPortException) {
                 throw RuntimeException(ex)
             }
-
-            val str = String(buffer.toByteArray())
-            if (isPhrase(str)) {
-                receivePhrase(str)
-                buffer.reset()
-            }
-
         }
     }
 
@@ -68,33 +58,6 @@ class ComPort(meta: Meta) : Port(meta) {
     override fun toString(): String {
         return name
     }
-
-    /**
-     * Construct ComPort with default parameters:
-     *
-     *
-     * Baud rate: 9600
-     *
-     *
-     * Data bits: 8
-     *
-     *
-     * Stop bits: 1
-     *
-     *
-     * Parity: non
-     *
-     * @param portName
-     */
-    @JvmOverloads constructor(portName: String, baudRate: Int = BAUDRATE_9600, dataBits: Int = DATABITS_8, stopBits: Int = STOPBITS_1, parity: Int = PARITY_NONE) : this(MetaBuilder("handler")
-            .setValue("type", "com")
-            .putValue("name", portName)
-            .putValue("baudRate", baudRate)
-            .putValue("dataBits", dataBits)
-            .putValue("stopBits", stopBits)
-            .putValue("parity", parity)
-            .build()
-    )
 
     @Throws(PortException::class)
     override fun open() {
@@ -151,6 +114,38 @@ class ComPort(meta: Meta) : Port(meta) {
             } catch (ex: SerialPortException) {
                 throw RuntimeException(ex)
             }
+        }
+    }
+
+    companion object {
+
+        /**
+         * Construct ComPort with default parameters:
+         *
+         *
+         * Baud rate: 9600
+         *
+         *
+         * Data bits: 8
+         *
+         *
+         * Stop bits: 1
+         *
+         *
+         * Parity: non
+         *
+         * @param portName
+         */
+        @JvmOverloads
+        fun create(portName: String, baudRate: Int = BAUDRATE_9600, dataBits: Int = DATABITS_8, stopBits: Int = STOPBITS_1, parity: Int = PARITY_NONE): ComPort {
+            return ComPort(buildMeta {
+                setValue("type", "com")
+                putValue("name", portName)
+                putValue("baudRate", baudRate)
+                putValue("dataBits", dataBits)
+                putValue("stopBits", stopBits)
+                putValue("parity", parity)
+            })
         }
     }
 }

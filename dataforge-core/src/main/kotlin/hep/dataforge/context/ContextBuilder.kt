@@ -71,7 +71,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
                 properties[propertyNode.getString("key")] = propertyNode.getValue("value")
             }
         } else if (config.name == "properties") {
-            MetaUtils.valueStream(config).forEach { pair -> properties[pair.key] = pair.value }
+            MetaUtils.valueStream(config).forEach { pair -> properties[pair.first] = pair.second }
         }
         return this
     }

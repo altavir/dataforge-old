@@ -1,7 +1,7 @@
 package hep.dataforge.control.devices;
 
+import hep.dataforge.connections.Connection;
 import hep.dataforge.context.Context;
-import hep.dataforge.control.Connection;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
 import hep.dataforge.providers.Provider;

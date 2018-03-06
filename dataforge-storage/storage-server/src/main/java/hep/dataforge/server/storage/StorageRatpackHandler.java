@@ -110,9 +110,9 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("StateLoader.ftl");
 
             Map<String, String> stateMap = new HashMap<>();
-            for (String stateName : loader.getStateNames()) {
-                stateMap.put(stateName, loader.getString(stateName));
-            }
+
+            loader.getValueStream().forEach(pair->  stateMap.put(pair.getFirst(), pair.getSecond().stringValue()));
+            // TODO add metastates
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
             data.put("states", stateMap);

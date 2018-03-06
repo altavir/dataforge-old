@@ -25,16 +25,12 @@ import hep.dataforge.io.MetaStreamReader
 import hep.dataforge.io.MetaStreamWriter
 import hep.dataforge.io.XMLMetaReader
 import hep.dataforge.io.XMLMetaWriter
-import java.util.*
-import java.util.function.Predicate
 
-object XMLMetaType : MetaType {
+val xmlMetaType = XMLMetaType()
 
-    const val XML_META_TYPE = "XML"
-    val XML_META_CODES = arrayOf<Short>(0x584d, 0)//XM
+class XMLMetaType : MetaType {
 
-
-    override val codes: List<Short> = Arrays.asList(*XML_META_CODES)
+    override val codes: List<Short> = listOf(0x584d, 0)//XM
 
     override val name: String = XML_META_TYPE
 
@@ -42,8 +38,10 @@ object XMLMetaType : MetaType {
 
     override val writer: MetaStreamWriter = XMLMetaWriter()
 
-    override fun fileNameFilter(): Predicate<String> {
-        return Predicate{ str -> str.toLowerCase().endsWith(".xml") }
+    override val fileNameFilter: (String) -> Boolean = { str -> str.toLowerCase().endsWith(".xml") }
+
+    companion object {
+        const val XML_META_TYPE = "XML"
     }
 
 }

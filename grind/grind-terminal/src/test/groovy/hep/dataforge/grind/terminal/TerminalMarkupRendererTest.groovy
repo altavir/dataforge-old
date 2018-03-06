@@ -52,7 +52,7 @@ class TerminalMarkupRendererTest extends Specification {
         when:
         Markup markup = MarkupUtils.markupDescriptor(new PlotDataAction().getDescriptor())
         then:
-        println(markup.meta.toString())
+        println(markup.toMeta())
         r.render(markup)
         println()
     }

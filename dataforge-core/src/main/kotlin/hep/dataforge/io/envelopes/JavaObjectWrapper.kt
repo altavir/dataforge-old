@@ -40,15 +40,15 @@ object JavaObjectWrapper : Wrapper<Any> {
         return JAVA_OBJECT_TYPE
     }
 
-    override fun wrap(`object`: Any): Envelope {
+    override fun wrap(obj: Any): Envelope {
         val builder = EnvelopeBuilder()
                 .setContentType("wrapper")
-                .putMetaValue(Wrapper.WRAPPER_TYPE_KEY, JAVA_OBJECT_TYPE)
-                .putMetaValue(JAVA_CLASS_KEY, `object`.javaClass.name)
+                .setMetaValue(Wrapper.WRAPPER_TYPE_KEY, JAVA_OBJECT_TYPE)
+                .setMetaValue(JAVA_CLASS_KEY, obj.javaClass.name)
         val baos = ByteArrayOutputStream()
         try {
             ObjectOutputStream(baos).use { stream ->
-                stream.writeObject(`object`)
+                stream.writeObject(obj)
                 builder.setData(baos.toByteArray())
                 return builder.build()
             }

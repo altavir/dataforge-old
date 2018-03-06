@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -136,20 +136,25 @@ public class Configuration extends MutableMetaNode<Configuration> {
      *
      * @param meta
      */
-    public void update(Meta meta) {
+    public void update(Meta meta, boolean notify) {
         if (meta != null) {
             meta.getValueNames(true).forEach((valueName) -> {
-                setValue(valueName, meta.getValue(valueName));
+                setValue(valueName, meta.getValue(valueName), notify);
             });
 
             meta.getNodeNames(true).forEach((elementName) -> {
                 setNode(elementName,
                         meta.getMetaList(elementName).stream()
                                 .map(Configuration::new)
-                                .collect(Collectors.toList())
+                                .collect(Collectors.toList()),
+                        notify
                 );
             });
         }
+    }
+
+    public void update(Meta meta) {
+        update(meta, true);
     }
 
     @Override

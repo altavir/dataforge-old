@@ -84,7 +84,7 @@ public class MetaFileReader {
     public Meta read(Context context, Path file, Charset encoding) throws IOException, ParseException {
         String fileName = file.getFileName().toString();
         for (MetaType type : loader) {
-            if (type.fileNameFilter().test(fileName)) {
+            if (type.getFileNameFilter().invoke(fileName)) {
                 return transform(context, type.getReader().withCharset(encoding).readFile(file));
             }
         }

@@ -8,10 +8,7 @@ package hep.dataforge.io.envelopes
 import hep.dataforge.context.Global
 import hep.dataforge.io.MetaStreamReader
 import hep.dataforge.io.MetaStreamWriter
-import hep.dataforge.io.envelopes.Envelope.Companion.META_TYPE_KEY
-import java.util.*
-import java.util.function.Predicate
-import java.util.stream.StreamSupport
+import hep.dataforge.io.envelopes.Envelope.Companion.META_TYPE_PROPERTY
 
 /**
  *
@@ -32,11 +29,9 @@ interface MetaType {
      * A file name filter for meta encoded in this format
      * @return
      */
-    fun fileNameFilter(): Predicate<String>
+    val fileNameFilter: (String) -> Boolean
 
     companion object {
-
-        val loader: ServiceLoader<MetaType> = ServiceLoader.load(MetaType::class.java)
 
         /**
          * Resolve a meta type code and return null if code could not be resolved
@@ -45,10 +40,9 @@ interface MetaType {
          */
         fun resolve(code: Short): MetaType? {
             //TODO add caching here?
-            synchronized(Global) {
-                return StreamSupport.stream(loader.spliterator(), false)
-                        .filter { it -> it.codes.contains(code) }.findFirst().orElse(null)
-            }
+            return Global.serviceStream(MetaType::class.java)
+                    .filter { it -> it.codes.contains(code) }.findFirst().orElse(null)
+
         }
 
         /**
@@ -57,14 +51,12 @@ interface MetaType {
          * @return
          */
         fun resolve(name: String): MetaType? {
-            synchronized(Global) {
-                return StreamSupport.stream(loader.spliterator(), false)
-                        .filter { it -> it.name.equals(name, ignoreCase = true) }.findFirst().orElse(null)
-            }
+            return Global.serviceStream(MetaType::class.java)
+                    .filter { it -> it.name.equals(name, ignoreCase = true) }.findFirst().orElse(null)
         }
 
         fun resolve(properties: Map<String, String>): MetaType {
-            return properties[META_TYPE_KEY]?.let { MetaType.resolve(it) } ?: XMLMetaType
+            return properties[META_TYPE_PROPERTY]?.let { MetaType.resolve(it) } ?: xmlMetaType
         }
     }
 }

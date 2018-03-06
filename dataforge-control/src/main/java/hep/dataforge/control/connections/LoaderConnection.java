@@ -37,8 +37,8 @@ public class LoaderConnection implements PointListenerConnection {
     }
 
     @Override
-    public void open(Object object) throws Exception {
-        loader.open();
+    public void open(Object object) {
+
     }
 
     @Override

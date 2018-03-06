@@ -35,6 +35,9 @@ import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
+import hep.dataforge.states.MetaStateDef
+import hep.dataforge.states.StateDef
+import hep.dataforge.states.StateDefs
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
@@ -114,45 +117,28 @@ abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, met
         }
     }
 
+    protected open fun connect(meta: Meta): GenericPortController {
+        val port = PortFactory.build(meta)
+        return GenericPortController(context, port)
+    }
+
+    fun setupConnection(portMeta: Meta) {
+        connection?.close()
+        this.connection = connect(portMeta)
+        if (connected) {
+            connection?.open()
+        }
+        setDebugMode(debug)
+        updateLogicalMetaState(PORT_STATE, portMeta)
+        updateLogicalState(PORT_STATE, portMeta)
+    }
+
     override fun requestMetaStateChange(stateName: String, meta: Meta) {
         if (stateName == PORT_STATE) {
-            val port = PortFactory.build(meta)
-            connection?.close()
-            this.connection = GenericPortController(context, port).apply {
-                if (connected) {
-                    open()
-                }
-                setDebugMode(debug)
-            }
-            updateLogicalMetaState(PORT_STATE, port.meta)
-            updateLogicalState(PORT_STATE, port.name)
+            setupConnection(meta)
         } else {
             super.requestMetaStateChange(stateName, meta)
         }
-    }
-//
-//    private fun disconnect() {
-//        connection?.close()
-//        connection = null
-//        updateLogicalState(CONNECTED_STATE, false)
-//    }
-//
-//    private fun connect(portMeta: Meta) {
-//        this.connection = GenericPortController(context, buildPort(port)).apply {
-//            //Add debug listener
-//            if (meta.getBoolean("debugMode", false)) {
-//                onAnyPhrase { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
-//                onError { message, error -> logger.error("Device {} exception: {}", name, message, error) }
-//            }
-//            open()
-//        }
-//        updateLogicalState(CONNECTED_STATE, true)
-//    }
-
-
-    override fun init() {
-
-        super.init()
     }
 
     @Throws(ControlException::class)
@@ -184,24 +170,8 @@ abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, met
     }
 
     companion object {
-
         const val CONNECTED_STATE = "connected"
         const val PORT_STATE = "port"
         const val DEBUG_STATE = "debug"
     }
-
-    /*
-     * @return the port
-     * @throws hep.dataforge.exceptions.ControlException
-     */
-    //    protected Port getPort() throws ControlException {
-    //        if (port == null) {
-    //            String port = meta().getString(PORT_STATE);
-    //            setPort(buildPort(port));
-    //            this.port.open();
-    //            updateLogicalState(CONNECTED_STATE, true);
-    //        }
-    //        return port;
-    //    }
-
 }

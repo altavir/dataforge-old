@@ -6,9 +6,12 @@ import hep.dataforge.io.envelopes.MetaType;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.storage.commons.JSONMetaWriter;
+import org.jetbrains.annotations.NotNull;
 import ratpack.form.Form;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
+
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Created by darksnake on 05-Oct-16.
@@ -24,7 +27,7 @@ public class EnvelopeHandler implements Handler, Responder {
     @Override
     public void handle(Context ctx) throws Exception {
         ctx.parse(Form.class).then(request -> {
-            String metaType = request.get(Envelope.Companion.getMETA_TYPE_KEY());
+            String metaType = request.get(Envelope.META_TYPE_PROPERTY);
             String metaString = request.get("meta");
 
             EnvelopeBuilder builder = new EnvelopeBuilder();
@@ -40,8 +43,15 @@ public class EnvelopeHandler implements Handler, Responder {
         });
     }
 
+    @NotNull
     @Override
-    public Envelope respond(Envelope message) {
+    public Envelope respond(@NotNull Envelope message) {
         return responder.respond(message);
+    }
+
+    @NotNull
+    @Override
+    public CompletableFuture<Envelope> respondInFuture(@NotNull Envelope message) {
+        return CompletableFuture.supplyAsync(() -> respond(message));
     }
 }

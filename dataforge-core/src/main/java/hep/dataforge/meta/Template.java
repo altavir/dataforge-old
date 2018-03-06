@@ -71,9 +71,9 @@ public class Template implements Metoid, UnaryOperator<Meta> {
     public MetaBuilder compile(ValueProvider valueProvider, MetaProvider metaProvider) {
         MetaBuilder res = new MetaBuilder(getMeta());
         MetaUtils.nodeStream(res).forEach(pair -> {
-            MetaBuilder node = (MetaBuilder) pair.getValue();
+            MetaBuilder node = (MetaBuilder) pair.getSecond();
             if (node.hasValue("@include")) {
-                String includePath = pair.getValue().getString("@include");
+                String includePath = pair.getSecond().getString("@include");
                 if (metaProvider != null && metaProvider.hasMeta(includePath)) {
                     MetaBuilder parent = node.getParent();
                     parent.replaceChildNode(node, metaProvider.getMeta(includePath));
@@ -88,9 +88,9 @@ public class Template implements Metoid, UnaryOperator<Meta> {
         });
 
         MetaUtils.valueStream(res).forEach(pair -> {
-            Value val = pair.getValue();
+            Value val = pair.getSecond();
             if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-                res.setValue(pair.getKey(), transformValue(val, valueProvider, def));
+                res.setValue(pair.getFirst(), transformValue(val, valueProvider, def));
             }
         });
         return res;
