@@ -21,7 +21,10 @@ import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
 import java.time.Duration
 import java.util.*
-import java.util.concurrent.*
+import java.util.concurrent.CopyOnWriteArraySet
+import java.util.concurrent.Executors
+import java.util.concurrent.ScheduledFuture
+import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 /**
@@ -30,7 +33,6 @@ import java.util.function.Supplier
 abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Configurable {
 
     private val futures = CopyOnWriteArraySet<TaggedFuture>()
-    private var scheduler: ScheduledExecutorService? = null
     override var isOpen = false
     private var configuration = Configuration("virtualPort")
 
@@ -90,14 +92,14 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
      */
     @Synchronized protected fun planResponse(response: String, delay: Duration, vararg tags: String) {
         clearCompleted()
-        val task = { receivePhrase(response) }
+        val task = { receive(response.toByteArray()) }
         val future = scheduler!!.schedule(task, delay.toNanos(), TimeUnit.NANOSECONDS)
         this.futures.add(TaggedFuture(future, *tags))
     }
 
     @Synchronized protected fun planRegularResponse(responseBuilder: Supplier<String>, delay: Duration, period: Duration, vararg tags: String) {
         clearCompleted()
-        val task = { receivePhrase(responseBuilder.get()) }
+        val task = { receive(responseBuilder.get().toByteArray()) }
         val future = scheduler!!.scheduleAtFixedRate(task, delay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS)
         this.futures.add(TaggedFuture(future, *tags))
     }

@@ -22,13 +22,16 @@
 package hep.dataforge.control.devices
 
 import hep.dataforge.context.Context
+import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_MESSAGE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_META_STATE
+import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_PROGRESS_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_RESULT_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.states.MetaStateDef
 import hep.dataforge.states.MetaStateDefs
@@ -36,19 +39,24 @@ import hep.dataforge.states.StateDef
 import hep.dataforge.states.StateDefs
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.time.delay
 import java.time.Duration
-import java.util.concurrent.Future
-import java.util.concurrent.TimeUnit
+import java.time.Instant
 
 /**
- * A device with which could perform one type of one-time or regular measurements
+ * A device with which could perform of one-time or regular measurements. Only one measurement is allowed at a time
  *
  * @author Alexander Nozik
  */
 @ValueDef(name = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
 @StateDefs(
         StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring"))
+        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
+        StateDef(ValueDef(name = MEASUREMENT_MESSAGE_STATE, info = "Current message")),
+        StateDef(ValueDef(name = MEASUREMENT_PROGRESS_STATE, type = [ValueType.NUMBER], info = "Current progress"))
 )
 @MetaStateDefs(
         MetaStateDef(value = NodeDef(name = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
@@ -56,12 +64,19 @@ import java.util.concurrent.TimeUnit
 )
 abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, meta) {
 
-    private val measurements: MutableMap<Meta, Future<*>> = HashMap()
+    private val coroutineContext = executor.asCoroutineDispatcher()
+
+    protected var job: Job? = null
 
     /**
      * The result of last measurement
      */
     val result: Meta by metaState(MEASUREMENT_RESULT_STATE)
+
+    /**
+     * The error from last measurement
+     */
+    val error: Meta by metaState(MEASUREMENT_ERROR_STATE)
 
     /**
      * Current measurement configuration
@@ -78,16 +93,33 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      */
     val measurementState by stringState(MEASUREMENT_STATE_STATE)
 
+    val message by stringState(MEASUREMENT_MESSAGE_STATE)
+
+    val progress by doubleState(MEASUREMENT_PROGRESS_STATE)
+
     override fun shutdown() {
-        stopAllMeasurements()
+        stopMeasurement()
         super.shutdown()
+    }
+
+    /**
+     * Start measurement with current configuration if it is not in progress
+     */
+    fun measure() {
+        if (!measuring) {
+            measuring = true
+        }
     }
 
     /**
      * update result
      */
     protected fun notifyResult(result: Meta) {
-        updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
+        if (result.getBoolean("success", true)) {
+            updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
+        } else {
+            updateLogicalMetaState(MEASUREMENT_ERROR_STATE, result)
+        }
     }
 
     /**
@@ -110,9 +142,9 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
             MEASURING_STATE -> {
                 val meta = optMetaState(MEASUREMENT_META_STATE).orElse(Meta.empty())
                 if (value.booleanValue()) {
-                    startMeasurement(measurement, meta)
+                    setMeasurement(measurement, meta)
                 } else {
-                    stopMeasurement(meta)
+                    stopMeasurement()
                 }
             }
             else -> super.requestStateChange(stateName, value)
@@ -124,7 +156,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         when (stateName) {
             MEASUREMENT_META_STATE -> {
                 val oldMeta = optMetaState(MEASUREMENT_META_STATE).orElse(null)
-                startMeasurement(oldMeta, meta)
+                setMeasurement(oldMeta, meta)
             }
             else -> super.requestMetaStateChange(stateName, meta)
         }
@@ -137,67 +169,83 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * @param newMeta Meta of new measurement. If null, then clear measurement
      * @return actual meta for new measurement
      */
-    protected abstract fun startMeasurement(oldMeta: Meta, newMeta: Meta)
+    protected abstract fun setMeasurement(oldMeta: Meta?, newMeta: Meta)
 
     /**
      * stop measurement with given meta
      */
-    protected open fun stopMeasurement(meta: Meta) {
-        measurements[meta]?.cancel(false)
-    }
-
-    protected fun stopCurrentMeasurement(){
-        stopMeasurement(measurement)
-    }
-
-    /**
-     * Stop all active measurements
-     */
-    protected open fun stopAllMeasurements() {
-        measurements.values.forEach {
-            if (!it.isDone) {
-                it.cancel(false)
-            }
+    protected open fun stopMeasurement() {
+        synchronized(this) {
+            job?.cancel()
+            notifyMeasurementState(MeasurementState.STOPPED)
         }
     }
-
 
     protected fun startMeasurement(action: () -> Meta) {
-        synchronized(measurement) {
-            val future = executor.submit {
-                notifyMeasurementState(MeasurementState.IN_PROGRESS)
-                val res = action.invoke()
-                notifyResult(res)
-                notifyMeasurementState(MeasurementState.STOPPED)
-            }
-            measurements.put(measurement, future)
+        job = launch {
+            notifyMeasurementState(MeasurementState.IN_PROGRESS)
+            val res = action.invoke()
+            notifyResult(res)
+            notifyMeasurementState(MeasurementState.STOPPED)
         }
     }
 
-    protected fun scheduleMeasurement(delay: Duration, action: () -> Meta) {
-        synchronized(measurement) {
-            notifyMeasurementState(MeasurementState.WAITING)
-            val future = executor.schedule({
-                notifyMeasurementState(MeasurementState.IN_PROGRESS)
-                val res = action.invoke()
-                notifyResult(res)
-                notifyMeasurementState(MeasurementState.STOPPED)
-            }, delay.toMillis(), TimeUnit.MILLISECONDS)
-            measurements.put(measurement, future)
+    protected fun scheduleMeasurement(interval: Duration, action: () -> Meta) {
+        job = launch {
+            delay(interval)
+            notifyMeasurementState(MeasurementState.IN_PROGRESS)
+            val res = action.invoke()
+            notifyResult(res)
+            notifyMeasurementState(MeasurementState.STOPPED)
         }
     }
 
     protected fun startRegularMeasurement(interval: Duration, action: () -> Meta) {
-        synchronized(measurement) {
-            notifyMeasurementState(MeasurementState.WAITING)
-            val future = executor.scheduleWithFixedDelay({
+        job = launch {
+            while (true) {
                 notifyMeasurementState(MeasurementState.IN_PROGRESS)
                 val res = action.invoke()
                 notifyResult(res)
+                notifyMeasurementState(MeasurementState.WAITING)
+                delay(interval)
+            }
+        }.apply {
+            invokeOnCompletion(onCancelling = true, invokeImmediately = true) {
                 notifyMeasurementState(MeasurementState.STOPPED)
-            }, 0, interval.toMillis(), TimeUnit.MILLISECONDS)
-            measurements.put(measurement, future)
+            }
         }
+    }
+
+    protected fun produceResult(value: Any, timestamp: Instant = Instant.now()): Meta {
+        return buildMeta("result") {
+            RESULT_SUCCESS to true
+            RESULT_TIMESTAMP to timestamp
+            if (value is Meta) {
+                setNode(RESULT_VALUE, value)
+            } else {
+                RESULT_VALUE to value
+            }
+        }
+    }
+
+    protected fun produceError(value: Any, timestamp: Instant = Instant.now()): Meta {
+        return buildMeta("error") {
+            RESULT_SUCCESS to false
+            RESULT_TIMESTAMP to timestamp
+            if (value is Meta) {
+                setNode(RESULT_VALUE, value)
+            } else {
+                RESULT_VALUE to value
+            }
+        }
+    }
+
+    protected fun updateMessage(message: String) {
+        updateLogicalState(MEASUREMENT_MESSAGE_STATE, message)
+    }
+
+    protected fun updateProgress(progress: Double) {
+        updateLogicalState(MEASUREMENT_PROGRESS_STATE, progress)
     }
 
     companion object {
@@ -215,6 +263,10 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
             WAITING, // waiting on scheduler
             STOPPED // stopped
         }
+
+        const val RESULT_SUCCESS = "success"
+        const val RESULT_TIMESTAMP = "timestamp"
+        const val RESULT_VALUE = "value"
 
     }
 

@@ -24,65 +24,65 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KProperty
 
 class StateDelegate(private val stateName: String?): ReadWriteProperty<Stateful, Value> {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Value =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Value =
             thisRef.getState(stateName ?: property.name)
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Value) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Value) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class StringStateDelegate(private val stateName: String?) : ReadWriteProperty<Stateful, String> {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): String =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): String =
             thisRef.getState(stateName ?: property.name).stringValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: String) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: String) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class BooleanStateDelegate(private val stateName: String?): ReadWriteProperty<Stateful, Boolean> {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Boolean =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Boolean =
             thisRef.getState(stateName ?: property.name).booleanValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Boolean) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Boolean) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class TimeStateDelegate(private val stateName: String?): ReadWriteProperty<Stateful, Instant>  {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Instant =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Instant =
             thisRef.getState(stateName ?: property.name).timeValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Instant) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Instant) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class NumberStateDelegate(private val stateName: String?): ReadWriteProperty<Stateful, Number>  {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Number =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Number =
             thisRef.getState(stateName ?: property.name).numberValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Number) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Number) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class DoubleStateDelegate(private val stateName: String?) : ReadWriteProperty<Stateful, Double> {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Double =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Double =
             thisRef.getState(stateName ?: property.name).doubleValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Double) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Double) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
 class IntStateDelegate(private val stateName: String?) : ReadWriteProperty<Stateful, Int> {
-    operator override fun getValue(thisRef: Stateful, property: KProperty<*>): Int =
+    override operator fun getValue(thisRef: Stateful, property: KProperty<*>): Int =
             thisRef.getState(stateName ?: property.name).intValue()
 
-    operator override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Int) {
-        thisRef.setState(stateName ?: property.name, value);
+    override operator fun setValue(thisRef: Stateful, property: KProperty<*>, value: Int) {
+        thisRef.setState(stateName ?: property.name, value)
     }
 }
 
@@ -91,7 +91,7 @@ class MetaStateDelegate(private val stateName: String?) : ReadWriteProperty<Stat
             thisRef.getMetaState(stateName ?: property.name)
 
     override fun setValue(thisRef: Stateful, property: KProperty<*>, value: Meta) {
-        thisRef.setMetaState(stateName ?: property.name, value);
+        thisRef.setMetaState(stateName ?: property.name, value)
     }
 
 }

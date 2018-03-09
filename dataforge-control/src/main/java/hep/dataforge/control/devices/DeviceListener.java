@@ -17,6 +17,7 @@ package hep.dataforge.control.devices;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.values.Value;
+import org.jetbrains.annotations.Nullable;
 
 /**
  * A listener that listens to device state change initialization and shut down
@@ -57,7 +58,7 @@ public interface DeviceListener {
      * @param message
      * @param exception
      */
-    default void evaluateDeviceException(Device device, String message, Throwable exception) {
+    default void evaluateDeviceException(Device device, String message, @Nullable Throwable exception) {
 
     }
 }

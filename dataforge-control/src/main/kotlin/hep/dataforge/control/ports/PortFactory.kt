@@ -44,13 +44,13 @@ object PortFactory : MetaFactory<Port> {
             ValueDef(name = "address", required = true, info = "The specific designation of this port according to type"),
             ValueDef(name = "type", def = "tcp", info = "The type of the port")
     )
-    override fun build(meta: Meta, phraseCondition: (String) -> Boolean): Port {
+    override fun build(meta: Meta): Port {
         val protocol = meta.getString("type", "tcp")
         val address = meta.getString("address")
         val canonPortName = meta.getString("name", "$protocol:$address")
         return portMap.getOrPut(canonPortName) {
             when (protocol) {
-                "com" -> ComPort(address)
+                "com" -> ComPort(meta)
                 "tcp" -> TcpPort(address, meta.getInt("port", 8080));
                 "virtual" -> buildVirtualPort(meta)
                 else -> throw ControlException("Unknown protocol")

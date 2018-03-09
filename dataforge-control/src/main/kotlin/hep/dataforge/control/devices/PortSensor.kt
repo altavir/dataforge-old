@@ -122,7 +122,7 @@ abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, met
         return GenericPortController(context, port)
     }
 
-    fun setupConnection(portMeta: Meta) {
+    private fun setupConnection(portMeta: Meta) {
         connection?.close()
         this.connection = connect(portMeta)
         if (connected) {
