@@ -109,7 +109,7 @@ class ComPort(meta: Meta) : Port(meta) {
         }
         execute {
             try {
-                LoggerFactory.getLogger(javaClass).debug("SEND: " + message)
+                LoggerFactory.getLogger(javaClass).debug("SEND: $message")
                 port!!.writeString(message)
             } catch (ex: SerialPortException) {
                 throw RuntimeException(ex)

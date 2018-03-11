@@ -19,12 +19,11 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.asCoroutineDispatcher
+import kotlinx.coroutines.experimental.launch
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.CopyOnWriteArraySet
-import java.util.concurrent.Executors
-import java.util.concurrent.ScheduledFuture
-import java.util.concurrent.TimeUnit
 import java.util.function.Supplier
 
 /**
@@ -36,13 +35,15 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     override var isOpen = false
     private var configuration = Configuration("virtualPort")
 
+    protected val coroutineContext = executor.asCoroutineDispatcher()
+
     init {
         configuration = Configuration(meta)
     }
 
     @Throws(PortException::class)
     override fun open() {
-        scheduler = Executors.newScheduledThreadPool(meta.getInt("numThreads", 4))
+        //scheduler = Executors.newScheduledThreadPool(meta.getInt("numThreads", 4))
         isOpen = true
     }
 
@@ -75,12 +76,14 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
      */
     protected abstract fun evaluateRequest(request: String)
 
-    @Synchronized protected fun clearCompleted() {
-        futures.stream().filter { future -> future.future.isDone || future.future.isCancelled }.forEach{ futures.remove(it) }
+    @Synchronized
+    protected fun clearCompleted() {
+        futures.stream().filter { future -> future.future.isCompleted }.forEach { futures.remove(it) }
     }
 
-    @Synchronized protected fun cancelByTag(tag: String) {
-        futures.stream().filter { future -> future.hasTag(tag) }.forEach{ it.cancel() }
+    @Synchronized
+    protected fun cancelByTag(tag: String) {
+        futures.stream().filter { future -> future.hasTag(tag) }.forEach { it.cancel() }
     }
 
     /**
@@ -90,42 +93,45 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
      * @param delay
      * @param tags
      */
-    @Synchronized protected fun planResponse(response: String, delay: Duration, vararg tags: String) {
+    @Synchronized
+    protected fun planResponse(response: String, delay: Duration, vararg tags: String) {
         clearCompleted()
-        val task = { receive(response.toByteArray()) }
-        val future = scheduler!!.schedule(task, delay.toNanos(), TimeUnit.NANOSECONDS)
+        val future = launch(coroutineContext) {
+            kotlinx.coroutines.experimental.time.delay(delay)
+            receive(response.toByteArray())
+        }
         this.futures.add(TaggedFuture(future, *tags))
     }
 
-    @Synchronized protected fun planRegularResponse(responseBuilder: Supplier<String>, delay: Duration, period: Duration, vararg tags: String) {
+    @Synchronized
+    protected fun planRegularResponse(responseBuilder: Supplier<String>, delay: Duration, period: Duration, vararg tags: String) {
         clearCompleted()
-        val task = { receive(responseBuilder.get().toByteArray()) }
-        val future = scheduler!!.scheduleAtFixedRate(task, delay.toNanos(), period.toNanos(), TimeUnit.NANOSECONDS)
+        val future = launch(coroutineContext) {
+            kotlinx.coroutines.experimental.time.delay(delay)
+            while (true) {
+                receive(responseBuilder.get().toByteArray())
+                kotlinx.coroutines.experimental.time.delay(period)
+            }
+        }
         this.futures.add(TaggedFuture(future, *tags))
     }
 
     @Throws(Exception::class)
     override fun close() {
         futures.clear()
-        this.scheduler!!.shutdownNow()
         isOpen = false
         super.close()
     }
 
-    private inner class TaggedFuture(internal var future: ScheduledFuture<*>, vararg tags: String) {
-        internal var tags: MutableSet<String>
-
-        init {
-            this.tags = HashSet()
-            this.tags.addAll(Arrays.asList(*tags))
-        }
+    private inner class TaggedFuture(internal val future: Job, vararg tags: String) {
+        internal val tags = setOf(*tags)
 
         fun hasTag(tag: String): Boolean {
             return tags.contains(tag)
         }
 
         fun cancel(): Boolean {
-            return future.cancel(true)
+            return future.cancel()
         }
     }
 }

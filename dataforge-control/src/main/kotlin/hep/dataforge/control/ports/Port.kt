@@ -56,7 +56,7 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, Metoid, Named
 
     private var controller: PortController? = null
 
-    private val executor = Executors.newSingleThreadExecutor { r ->
+    protected val executor = Executors.newSingleThreadExecutor { r ->
         val res = Thread(r)
         res.name = "port::$name"
         res.priority = Thread.MAX_PRIORITY
@@ -136,26 +136,6 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, Metoid, Named
         this.controller = controller
     }
 
-//    /**
-//     * The condition that should be satisfied to complete the incoming message
-//     *
-//     * @param str
-//     * @return
-//     */
-//    protected fun isPhrase(str: String): Boolean {
-//        return phraseCondition(str)
-//    }
-
-//    /**
-//     * This method accepts complete phrase and sends it to current controller
-//     *
-//     * @param phrase
-//     */
-//    @Synchronized
-//    protected fun receivePhrase(phrase: String) {
-//        logger.trace("RECEIVE: $phrase")
-//        controller?.acceptPhrase(phrase)
-//    }
 
     /**
      * Receive a single byte

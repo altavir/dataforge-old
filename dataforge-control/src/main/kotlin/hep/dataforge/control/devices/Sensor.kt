@@ -32,6 +32,7 @@ import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.buildMeta
+import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.states.MetaStateDef
 import hep.dataforge.states.MetaStateDefs
@@ -155,7 +156,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     override fun requestMetaStateChange(stateName: String, meta: Meta) {
         when (stateName) {
             MEASUREMENT_META_STATE -> {
-                val oldMeta = optMetaState(MEASUREMENT_META_STATE).orElse(null)
+                val oldMeta = optMetaState(MEASUREMENT_META_STATE).nullable
                 setMeasurement(oldMeta, meta)
             }
             else -> super.requestMetaStateChange(stateName, meta)

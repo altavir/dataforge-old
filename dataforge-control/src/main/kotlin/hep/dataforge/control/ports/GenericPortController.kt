@@ -39,8 +39,11 @@ import java.util.concurrent.TimeoutException
 open class GenericPortController(
         private val context: Context,
         val port: Port,
-        private val phraseCondition: (String) -> Boolean = {it.endsWith("\n")}
+        private val phraseCondition: (String) -> Boolean = { it.endsWith("\n") }
 ) : PortController, AutoCloseable, ContextAware {
+
+
+    constructor(context: Context, port: Port, delimeter: String) : this(context, port, { it.endsWith(delimeter) })
 
     private val waiters = ReferenceRegistry<FuturePhrase>()
     private val listeners = ReferenceRegistry<PhraseListener>()
@@ -152,8 +155,8 @@ open class GenericPortController(
      * @param condition
      * @param action
      */
-    fun onPhrase(condition: (String) -> Boolean, tag: String? = null, action: (String) -> Unit) {
-        val listener = PhraseListener(condition, tag, action)
+    fun onPhrase(condition: (String) -> Boolean, owner: Any? = null, action: (String) -> Unit) {
+        val listener = PhraseListener(condition, owner, action)
         listeners.add(listener)
     }
 
@@ -164,17 +167,17 @@ open class GenericPortController(
      * @param action
      * @return
      */
-    fun weakOnPhrase(condition: (String) -> Boolean, tag: String? = null, action: (String) -> Unit) {
-        val listener = PhraseListener(condition, tag, action)
+    fun weakOnPhrase(condition: (String) -> Boolean, owner: Any? = null, action: (String) -> Unit) {
+        val listener = PhraseListener(condition, owner, action)
         listeners.add(listener, false)
     }
 
-    fun weakOnPhrase(pattern: String, tag: String? = null, action: (String) -> Unit) {
-        weakOnPhrase({ it.matches(pattern.toRegex()) }, tag, action)
+    fun weakOnPhrase(pattern: String, owner: Any? = null, action: (String) -> Unit) {
+        weakOnPhrase({ it.matches(pattern.toRegex()) }, owner, action)
     }
 
-    fun weakOnPhrase(tag: String? = null, action: (String) -> Unit) {
-        weakOnPhrase({ true }, tag, action)
+    fun weakOnPhrase(owner: Any? = null, action: (String) -> Unit) {
+        weakOnPhrase({ true }, owner, action)
     }
 
     /**
@@ -182,8 +185,8 @@ open class GenericPortController(
      *
      * @param listener
      */
-    fun removePhraseListener(tag: String) {
-        this.listeners.removeIf { it.tag == tag }
+    fun removePhraseListener(owner: Any) {
+        this.listeners.removeIf { it.owner == owner }
     }
 
     /**
@@ -193,8 +196,8 @@ open class GenericPortController(
      * @param action
      * @return
      */
-    fun onPhrase(pattern: String, tag: String? = null, action: (String) -> Unit) {
-        onPhrase({ it.matches(pattern.toRegex()) }, tag, action)
+    fun onPhrase(pattern: String, owner: Any? = null, action: (String) -> Unit) {
+        onPhrase({ it.matches(pattern.toRegex()) }, owner, action)
     }
 
     /**
@@ -203,8 +206,8 @@ open class GenericPortController(
      * @param action
      * @return
      */
-    fun onAnyPhrase(tag: String? = null, action: (String) -> Unit) {
-        onPhrase({ true }, tag, action)
+    fun onAnyPhrase(owner: Any? = null, action: (String) -> Unit) {
+        onPhrase({ true }, owner, action)
     }
 
     /**
@@ -213,8 +216,8 @@ open class GenericPortController(
      * @param listener
      * @return
      */
-    fun onError(tag: String? = null, listener: (String, Throwable?) -> Unit) {
-        this.exceptionListeners.add(ErrorListener(tag, listener))
+    fun onError(owner: Any? = null, listener: (String, Throwable?) -> Unit) {
+        this.exceptionListeners.add(ErrorListener(owner, listener))
     }
 
     /**
@@ -223,17 +226,16 @@ open class GenericPortController(
      * @param listener
      * @return
      */
-    fun weakOnError(tag: String? = null, listener: (String, Throwable?) -> Unit) {
-        this.exceptionListeners.add(ErrorListener(tag, listener), false)
+    fun weakOnError(owner: Any? = null, listener: (String, Throwable?) -> Unit) {
+        this.exceptionListeners.add(ErrorListener(owner, listener), false)
     }
 
     /**
      * remove specific error listener
      *
-     * @param listener
      */
-    fun removeErrorListener(tag: String) {
-        this.exceptionListeners.removeIf { it.tag == tag }
+    fun removeErrorListener(owner: Any) {
+        this.exceptionListeners.removeIf { it.owner == owner }
     }
 
     /**
@@ -246,7 +248,7 @@ open class GenericPortController(
             open()
             port.send(this, message)
         } catch (e: PortException) {
-            throw RuntimeException("Failed to send message to port " + port)
+            throw RuntimeException("Failed to send message to port $port")
         }
 
     }
@@ -313,7 +315,7 @@ open class GenericPortController(
         }
     }
 
-    private inner class PhraseListener(private val condition: (String) -> Boolean, val tag: String? = null, private val action: (String) -> Unit) {
+    private inner class PhraseListener(private val condition: (String) -> Boolean, val owner: Any? = null, private val action: (String) -> Unit) {
 
         internal fun acceptPhrase(phrase: String) {
             if (condition(phrase)) {
@@ -328,7 +330,7 @@ open class GenericPortController(
         }
     }
 
-    private inner class ErrorListener(val tag: String? = null, val action: (String, Throwable?) -> Unit)
+    private inner class ErrorListener(val owner: Any? = null, val action: (String, Throwable?) -> Unit)
 
     companion object {
 

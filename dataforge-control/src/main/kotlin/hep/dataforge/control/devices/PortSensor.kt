@@ -58,7 +58,7 @@ import java.time.Duration
 @ValueDefs(
         ValueDef(name = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
 )
-abstract class PortSensor<T>(context: Context, meta: Meta) : Sensor(context, meta) {
+abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) {
 
     protected var connection: GenericPortController? = null
 
