@@ -31,6 +31,7 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
+import hep.dataforge.io.messages.RESPONSE_SUCCESS_KEY
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
@@ -116,7 +117,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * update result
      */
     protected fun notifyResult(result: Meta) {
-        if (result.getBoolean("success", true)) {
+        if (result.getBoolean(RESPONSE_SUCCESS_KEY, true)) {
             updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
         } else {
             updateLogicalMetaState(MEASUREMENT_ERROR_STATE, result)
