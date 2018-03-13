@@ -9,6 +9,7 @@ import hep.dataforge.context.Global
 import hep.dataforge.io.MetaStreamReader
 import hep.dataforge.io.MetaStreamWriter
 import hep.dataforge.io.envelopes.Envelope.Companion.META_TYPE_PROPERTY
+import hep.dataforge.kodex.toList
 
 /**
  *
@@ -34,14 +35,19 @@ interface MetaType {
     companion object {
 
         /**
+         * Lazy cache of meta types to improve performance
+         */
+        private val metaTypes by lazy{
+            Global.serviceStream(MetaType::class.java).toList()
+        }
+
+        /**
          * Resolve a meta type code and return null if code could not be resolved
          * @param code
          * @return
          */
         fun resolve(code: Short): MetaType? {
-            //TODO add caching here?
-            return Global.serviceStream(MetaType::class.java)
-                    .filter { it -> it.codes.contains(code) }.findFirst().orElse(null)
+            return metaTypes.firstOrNull { it -> it.codes.contains(code) }
 
         }
 

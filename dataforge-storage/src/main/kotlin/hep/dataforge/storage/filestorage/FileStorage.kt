@@ -111,7 +111,7 @@ open class FileStorage : AbstractStorage {
         }
 
         //starting directory monitoring
-        if (getMeta().getBoolean("monitor", false)) {
+        if (meta.getBoolean("monitor", false)) {
             startMonitor()
         }
     }

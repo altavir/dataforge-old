@@ -92,11 +92,11 @@ interface Envelope : Metoid, Serializable {
     }
 
     fun hasData(): Boolean {
-        try {
-            return data.size() > 0
+        return try {
+            data.size() > 0
         } catch (e: IOException) {
             LoggerFactory.getLogger(javaClass).error("Failed to estimate data size in the envelope", e)
-            return false
+            false
         }
 
     }
