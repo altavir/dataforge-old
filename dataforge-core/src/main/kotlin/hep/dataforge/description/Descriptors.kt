@@ -129,9 +129,9 @@ object Descriptors {
 
     @JvmStatic
     fun buildDescriptor(string: String): NodeDescriptor {
-        try {
+        return try {
             val path = Path.of(string)
-            return if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {
+            if (path.target.isEmpty() || "class" == path.target || "method" == path.target) {
                 val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element $path not found")
                 buildDescriptor(target)
             } else if ("resource" == path.target) {
@@ -141,7 +141,7 @@ object Descriptors {
             }
         } catch (ex: Exception) {
             LoggerFactory.getLogger(Descriptors::class.java).error("Failed to build descriptor", ex)
-            return NodeDescriptor(Meta.empty());
+            NodeDescriptor(Meta.empty());
         }
     }
 

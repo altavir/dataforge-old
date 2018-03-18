@@ -32,6 +32,7 @@ public interface Described {
     default Markup getHeader() {
         if (this instanceof Named) {
             TextMarkup res = new TextMarkup();
+            res.setText(((Named) this).getName());
             res.setColor("blue");
             return res;// new MarkupBuilder().text(((Named) this).getName(), "blue");
         } else {

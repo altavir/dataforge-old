@@ -22,14 +22,17 @@
 package hep.dataforge.maths.functions
 
 import hep.dataforge.context.*
+import hep.dataforge.exceptions.NotDefinedException
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.messages.Responder
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.utils.MetaFactory
 import org.apache.commons.math3.analysis.BivariateFunction
 import org.apache.commons.math3.analysis.MultivariateFunction
 import org.apache.commons.math3.analysis.UnivariateFunction
+import java.util.*
 
 /**
  * Mathematical plugin. Stores function library and other useful things.
@@ -38,6 +41,22 @@ import org.apache.commons.math3.analysis.UnivariateFunction
  */
 @PluginDef(name = "functions", group = "hep.dataforge", info = "A library of pre-compiled functions")
 class FunctionLibrary : BasicPlugin(), Responder {
+
+    private class MultiFactory<T> {
+
+        private val factoryMap = HashMap<String, MetaFactory<T>>()
+
+        fun build(key: String, meta: Meta): T {
+            return factoryMap[key]?.build(meta)?: throw NotDefinedException("Function with type '$key' not defined")
+        }
+
+        @Synchronized
+        fun addFactory(type: String, factory: MetaFactory<T>): MultiFactory<*> {
+            this.factoryMap[type] = factory
+            return this
+        }
+
+    }
 
     private val univariateFactory = MultiFactory<UnivariateFunction>()
     private val bivariateFactory = MultiFactory<BivariateFunction>()
@@ -48,11 +67,11 @@ class FunctionLibrary : BasicPlugin(), Responder {
     }
 
     fun addUnivariateFactory(type: String, factory: (Meta) -> UnivariateFunction) {
-        this.univariateFactory.addFactory(type, factory)
+        this.univariateFactory.addFactory(type, MetaFactory(factory))
     }
 
     fun addUnivariate(type: String, function: (Double) -> Double) {
-        this.univariateFactory.addFactory(type) { UnivariateFunction(function) }
+        this.univariateFactory.addFactory(type, MetaFactory { UnivariateFunction(function) })
     }
 
     fun buildBivariateFunction(key: String, meta: Meta): BivariateFunction {
@@ -64,15 +83,15 @@ class FunctionLibrary : BasicPlugin(), Responder {
     }
 
     fun addBivariateFactory(key: String, factory: (Meta) -> BivariateFunction) {
-        this.bivariateFactory.addFactory(key, factory)
+        this.bivariateFactory.addFactory(key, MetaFactory(factory))
     }
 
     fun addBivariate(key: String, function: BivariateFunction) {
-        this.bivariateFactory.addFactory(key) { function }
+        this.bivariateFactory.addFactory(key, MetaFactory { function })
     }
 
     fun addBivariate(key: String, function: (Double, Double) -> Double) {
-        this.bivariateFactory.addFactory(key) { BivariateFunction(function) }
+        this.bivariateFactory.addFactory(key,  MetaFactory{ BivariateFunction(function) })
     }
 
 
