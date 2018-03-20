@@ -129,7 +129,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         }
         dirBuilder.setName(dirNode.getString(DataFactory.NODE_NAME_KEY, dirNode.name))
         if (dirNode.hasMeta(DataFactory.NODE_META_KEY)) {
-            dirBuilder.meta = dirNode.getMeta(DataFactory.NODE_META_KEY)
+            dirBuilder.setMeta(dirNode.getMeta(DataFactory.NODE_META_KEY))
         }
 
         val recurse = dirNode.getBoolean("recursive", true)

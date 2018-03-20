@@ -42,16 +42,16 @@ abstract class AbstractNetworkListener(listnerConfig: Meta?) : Metoid, AutoClose
     @Volatile
     private var finishflag = false
     private var serverSocket: ServerSocket? = null
-    private val config: Meta
+    final override val meta: Meta
 
     private val port: Int
         get() = meta.getInt("port", 8335)
 
     init {
         if (listnerConfig == null) {
-            this.config = Meta.buildEmpty("listener")
+            this.meta = Meta.buildEmpty("listener")
         } else {
-            this.config = listnerConfig
+            this.meta = listnerConfig
         }
     }
 
@@ -62,10 +62,6 @@ abstract class AbstractNetworkListener(listnerConfig: Meta?) : Metoid, AutoClose
             serverSocket!!.close()
         }
         logger.info("Closing listner...")
-    }
-
-    override fun getMeta(): Meta {
-        return config
     }
 
     abstract override fun respond(message: Envelope): Envelope

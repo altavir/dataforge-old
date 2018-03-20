@@ -68,7 +68,7 @@ open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
 
         // Apply node meta
         if (dataConfig.hasMeta(NODE_META_KEY)) {
-            builder.meta = dataConfig.getMeta(NODE_META_KEY)
+            builder.setMeta(dataConfig.getMeta(NODE_META_KEY))
         }
 
         // Apply non-specific child nodes

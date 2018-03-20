@@ -29,23 +29,22 @@ import java.io.ObjectOutputStream
  */
 open class SimpleEnvelope(meta: Meta = Meta.empty(), data: Binary = Binary.EMPTY) : Envelope {
 
-    private var _meta: Meta = meta
-
-    override var data:Binary = data
+    override var meta: Meta = meta
         protected set
 
-    override fun getMeta(): Meta = _meta
+    override var data: Binary = data
+        protected set
 
     @Throws(IOException::class)
     private fun writeObject(out: ObjectOutputStream) {
-        DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType).write(out,this)
+        DefaultEnvelopeWriter(DefaultEnvelopeType.INSTANCE, binaryMetaType).write(out, this)
     }
 
     @Throws(IOException::class, ClassNotFoundException::class)
     private fun readObject(`in`: ObjectInputStream) {
         val envelope = DefaultEnvelopeReader.INSTANCE.read(`in`)
 
-        this._meta = envelope.meta
+        this.meta = envelope.meta
         this.data = envelope.data
     }
 

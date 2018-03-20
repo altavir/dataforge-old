@@ -23,10 +23,7 @@ class MarkupBuilder : GenericBuilder<Markup, MarkupBuilder>, Metoid {
         return markup
     }
 
-    override fun getMeta(): Meta {
-        return markup.toMeta()
-    }
-
+    override val meta: Meta = markup.toMeta()
 
     /**
      * Set the style of element

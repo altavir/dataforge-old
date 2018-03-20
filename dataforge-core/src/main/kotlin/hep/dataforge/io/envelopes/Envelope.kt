@@ -85,7 +85,7 @@ interface Envelope : Metoid, Serializable {
      *
      * @return
      */
-    override fun getMeta(): Meta
+    override val meta: Meta
 
     fun hasMeta(): Boolean {
         return !meta.isEmpty

@@ -13,16 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.meta;
-
-import org.jetbrains.annotations.NotNull;
+package hep.dataforge.meta
 
 /**
  * A general convention on object with meta-data
  *
  * @author Alexander Nozik
  */
-public interface Metoid {
+interface Metoid {
 
     /**
      * Get the meta-data for this object. By convention null is not allowed. If
@@ -32,6 +30,5 @@ public interface Metoid {
      * @since 0.4.0
      * @return
      */
-    @NotNull
-    Meta getMeta();
+    val meta: Meta
 }

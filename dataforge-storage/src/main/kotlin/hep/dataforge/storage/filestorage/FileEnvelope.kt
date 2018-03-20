@@ -85,7 +85,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
         buildTag().read(readChannel)
     }
 
-    private val _meta: Meta by lazy {
+    override val meta: Meta by lazy {
         try {
             readChannel.position(tag.length.toLong())
             val buffer = ByteBuffer.allocate(tag.metaSize)
@@ -144,11 +144,6 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
             writeChannel.close()
             isOpenForWrite = false
         }
-    }
-
-    @Synchronized
-    override fun getMeta(): Meta {
-        return _meta
     }
 
     /**

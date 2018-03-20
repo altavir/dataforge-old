@@ -33,13 +33,9 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
 
     private val futures = CopyOnWriteArraySet<TaggedFuture>()
     override var isOpen = false
-    private var configuration = Configuration("virtualPort")
+    override var meta =  Configuration(meta)
 
     protected val coroutineContext = executor.asCoroutineDispatcher()
-
-    init {
-        configuration = Configuration(meta)
-    }
 
     @Throws(PortException::class)
     override fun open() {
@@ -48,16 +44,12 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
     }
 
     override fun getConfig(): Configuration {
-        return configuration
+        return meta
     }
 
     override fun configure(config: Meta): Configurable {
-        configuration.update(config)
+        meta.update(config)
         return this
-    }
-
-    override fun getMeta(): Meta {
-        return configuration
     }
 
     override fun toString(): String {

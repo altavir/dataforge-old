@@ -42,7 +42,7 @@ import hep.dataforge.storage.api.Storage
 @AnonymousNotAlowed
 class StorageConnection : Connection, Responder, Metoid, ContextAware {
 
-    private val meta: Meta
+    override val meta: Meta
     val storage: Storage
 
     /**
@@ -90,10 +90,6 @@ class StorageConnection : Connection, Responder, Metoid, ContextAware {
 
     override fun getContext(): Context {
         return storage.context
-    }
-
-    override fun getMeta(): Meta {
-        return meta
     }
 
     class Factory : ConnectionFactory {

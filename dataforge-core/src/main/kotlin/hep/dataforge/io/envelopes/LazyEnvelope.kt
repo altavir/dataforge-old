@@ -27,13 +27,9 @@ import java.util.function.Supplier
  * @property Return supplier of data for lazy calculation. The supplier is supposed to
  * @author darksnake
  */
-class LazyEnvelope(private val meta: Meta, private val dataSupplier: Supplier<Binary>) : Envelope {
+class LazyEnvelope(override val meta: Meta, private val dataSupplier: Supplier<Binary>) : Envelope {
 
     constructor(meta: Meta, sup: () -> Binary) : this(meta, Supplier(sup))
-
-    override fun getMeta(): Meta {
-        return meta
-    }
 
     /**
      * Calculate data buffer if it is not already calculated and return result.
@@ -44,7 +40,7 @@ class LazyEnvelope(private val meta: Meta, private val dataSupplier: Supplier<Bi
 
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {
-        return SimpleEnvelope(getMeta(), data)
+        return SimpleEnvelope(meta, data)
     }
 
 }

@@ -42,14 +42,14 @@ class EnvelopeBuilder : Envelope {
      *
      * @return
      */
-    private var metaBuilder = MetaBuilder()
+    override var meta = MetaBuilder()
 
     //initializing with empty buffer
     override var data: Binary = BufferedBinary(ByteArray(0))
         private set
 
     constructor(envelope: Envelope) {
-        this.metaBuilder = envelope.meta.builder
+        this.meta = envelope.meta.builder
         this.data = envelope.data
     }
 
@@ -58,7 +58,7 @@ class EnvelopeBuilder : Envelope {
     }
 
     fun setMeta(annotation: Meta): EnvelopeBuilder {
-        this.metaBuilder = annotation.builder
+        this.meta = annotation.builder
         return this
     }
 
@@ -69,12 +69,12 @@ class EnvelopeBuilder : Envelope {
      * @return
      */
     fun putMetaNode(nodeName: String, element: Meta): EnvelopeBuilder {
-        this.metaBuilder.putNode(nodeName, element)
+        this.meta.putNode(nodeName, element)
         return this
     }
 
     fun putMetaNode(element: Meta): EnvelopeBuilder {
-        this.metaBuilder.putNode(element)
+        this.meta.putNode(element)
         return this
     }
 
@@ -86,7 +86,7 @@ class EnvelopeBuilder : Envelope {
      * @return
      */
     fun setMetaValue(name: String, value: Any): EnvelopeBuilder {
-        this.metaBuilder.setValue(name, value)
+        this.meta.setValue(name, value)
         return this
     }
 
@@ -126,13 +126,9 @@ class EnvelopeBuilder : Envelope {
         return this
     }
 
-    override fun getMeta(): MetaBuilder {
-        return metaBuilder
-    }
-
     fun build(): Envelope {
         setMetaValue(ENVELOPE_TIME_KEY, Instant.now())
-        return SimpleEnvelope(metaBuilder, data)
+        return SimpleEnvelope(this.meta, data)
     }
 
     @Throws(ObjectStreamException::class)

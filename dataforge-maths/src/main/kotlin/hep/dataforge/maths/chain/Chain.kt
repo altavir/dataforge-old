@@ -116,7 +116,7 @@ class MarkovChain<R : Any>(private val seed: () -> R, private val gen: suspend (
     override val value: R
         get() = _value ?: seed()
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         synchronized(this) {
             _value = gen(value)
             return value

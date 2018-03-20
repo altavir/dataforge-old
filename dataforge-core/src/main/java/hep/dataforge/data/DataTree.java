@@ -8,6 +8,7 @@ package hep.dataforge.data;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collection;
@@ -336,6 +337,12 @@ public class DataTree<T> implements DataNode<T> {
             return this;
         }
 
+        @NotNull
+        @Override
+        public Meta getMeta() {
+            return this.tree.getMeta();
+        }
+
         @Override
         public Builder<T> setMeta(Meta meta) {
             if (meta == null) {
@@ -403,11 +410,6 @@ public class DataTree<T> implements DataNode<T> {
         @Override
         public Builder<T> self() {
             return this;
-        }
-
-        @Override
-        public Meta getMeta() {
-            return this.tree.getMeta();
         }
 
         public boolean isEmpty() {

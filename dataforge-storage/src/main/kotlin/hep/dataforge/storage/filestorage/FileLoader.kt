@@ -32,17 +32,12 @@ abstract class FileLoader(storage: Storage, name: String, meta: Meta, val file: 
     override val isReadOnly: Boolean
         get() = file.isReadOnly
 
-    private val metaOverride: Laminate by lazy {
-        Laminate(super.getMeta(), file.meta)
+    override val meta: Laminate by lazy {
+        Laminate(super.meta, file.meta)
     }
-
 
     @Throws(Exception::class)
     override fun close() {
         file.close()
-    }
-
-    override fun getMeta(): Laminate {
-        return metaOverride
     }
 }

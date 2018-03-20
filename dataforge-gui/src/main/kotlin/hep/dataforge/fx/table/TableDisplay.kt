@@ -15,8 +15,8 @@ import tornadofx.*
 /**
  * Table display fragment
  */
-class TableDisplay(val table: Table, private val _meta: Meta = Meta.empty())
-    : Fragment(title = _meta.optString("title").orElse(null), icon = ImageView(dfIcon)), Metoid {
+class TableDisplay(val table: Table, override val meta: Meta = Meta.empty())
+    : Fragment(title = meta.optString("title").orElse(null), icon = ImageView(dfIcon)), Metoid {
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {
@@ -46,10 +46,6 @@ class TableDisplay(val table: Table, private val _meta: Meta = Meta.empty())
 
     override val root = borderpane {
         center = spreadsheet;
-    }
-
-    override fun getMeta(): Meta {
-        return _meta
     }
 
     class CustomSpreadSheetView(grid: Grid) : SpreadsheetView(grid) {

@@ -34,18 +34,11 @@ import java.util.*
  *
  * @author Alexander Nozik
  */
-open class MetaHolder(private val meta: Meta) : Metoid, Described, ValueProvider {
+open class MetaHolder(override val meta: Meta) : Metoid, Described, ValueProvider {
 
     @Transient
     private var descriptor: NodeDescriptor = super.getDescriptor()
 
-    /**
-     * Return meta of this object. If it is null, than return default meta from
-     * `getDefaultMeta()` method
-     *
-     * @return
-     */
-    override fun getMeta(): Meta = meta
 
     /**
      * Get descriptor for contetn of this metaholder
@@ -74,7 +67,7 @@ open class MetaHolder(private val meta: Meta) : Metoid, Described, ValueProvider
      */
     override fun optValue(name: String): Optional<Value> {
         return Optionals
-                .either(getMeta().optValue(name))
+                .either(meta.optValue(name))
                 .or { getDescriptor().optValueDescriptor(name).map { it.defaultValue() } }
                 .opt()
     }
@@ -86,7 +79,7 @@ open class MetaHolder(private val meta: Meta) : Metoid, Described, ValueProvider
      * @return
      */
     override fun hasValue(name: String): Boolean {
-        return getMeta().hasValue(name) || getDescriptor().hasDefaultForValue(name)
+        return meta.hasValue(name) || getDescriptor().hasDefaultForValue(name)
     }
 
 }
