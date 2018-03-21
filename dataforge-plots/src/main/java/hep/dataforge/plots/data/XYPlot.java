@@ -16,6 +16,7 @@
 package hep.dataforge.plots.data;
 
 import hep.dataforge.description.NodeDef;
+import hep.dataforge.description.ValueDef;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.tables.Adapters;
@@ -38,6 +39,7 @@ import static hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY;
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
+@ValueDef(name = "color", info = "The color of line or symbol.", tags = {"color"})
 @NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = {FINAL_TAG})
 public abstract class XYPlot extends AbstractPlot {
 

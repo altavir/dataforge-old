@@ -40,9 +40,9 @@ import java.io.IOException;
  */
 public class PlotUtils {
 
-    public static Color getAWTColor(Meta reader, Color def) {
-        if (reader.hasValue("color")) {
-            javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.valueOf(reader.getString("color"));
+    public static Color getAWTColor(Meta meta, Color def) {
+        if (meta.hasValue("color")) {
+            javafx.scene.paint.Color fxColor = javafx.scene.paint.Color.valueOf(meta.getString("color"));
             return new Color((float) fxColor.getRed(), (float) fxColor.getGreen(), (float) fxColor.getBlue());
         } else {
             return def;
