@@ -12,6 +12,7 @@ import javafx.scene.control.cell.TextFieldTreeTableCell
 import javafx.scene.layout.Priority
 import javafx.scene.paint.Color
 import javafx.scene.text.Text
+import org.controlsfx.glyphfont.Glyph
 import tornadofx.*
 
 /**
@@ -20,13 +21,6 @@ import tornadofx.*
  * @author Alexander Nozik
  */
 class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescriptor? = null) : Fragment() {
-
-    companion object {
-        /**
-         * The tag not to display node or value in configurator
-         */
-        val NO_CONFIGURATOR_TAG = "nocfg"
-    }
 
     val filter: (ConfigFX) -> Boolean = { cfg ->
         when (cfg) {
@@ -101,15 +95,20 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
         }
     }
 
-    private fun showNameDialog(forNode: Boolean): String? {
+    private fun showNodeDialog(): String? {
         val dialog = TextInputDialog()
-        if (forNode) {
-            dialog.title = "Node name selection"
-            dialog.contentText = "Enter a name for new node: "
-        } else {
-            dialog.title = "Value name selection"
-            dialog.contentText = "Enter a name for new value: "
-        }
+        dialog.title = "Node name selection"
+        dialog.contentText = "Enter a name for new node: "
+        dialog.headerText = null
+
+        val result = dialog.showAndWait()
+        return result.orElse(null)
+    }
+
+    private fun showValueDialog(): String? {
+        val dialog = TextInputDialog()
+        dialog.title = "Value name selection"
+        dialog.contentText = "Enter a name for new value: "
         dialog.headerText = null
 
         val result = dialog.showAndWait()
@@ -131,18 +130,19 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                         is ConfigFXNode -> {
                             text = null
                             graphic = hbox {
-                                button("+Node") {
-                                    hgrow = Priority.ALWAYS
+                                button("", Glyph("FontAwesome", "PLUS_CIRCLE")) {
                                     action {
-                                        showNameDialog(true)?.let {
+                                        showNodeDialog()?.let {
                                             item.addNode(it)
                                         }
                                     }
                                 }
-                                button("+Value") {
+                                pane {
                                     hgrow = Priority.ALWAYS
+                                }
+                                button("", Glyph("FontAwesome", "PLUS_SQUARE")) {
                                     action {
-                                        showNameDialog(false)?.let {
+                                        showValueDialog()?.let {
                                             item.addValue(it)
                                         }
                                     }
@@ -165,32 +165,12 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
 
     }
 
-//    class ConfigFXTreeItem(value: ConfigFX, graphic: Node? = null, val filter: (ConfigFX) -> Boolean = { true }) : TreeItem<ConfigFX>(value, graphic) {
-//
-//        //private val descriptorProvider: Function<Configuration, NodeDescriptor>? = null
-//
-//        init {
-//            (value as?ConfigFXNode)?.let { node ->
-//                fillChildren(node)
-//            }
-//        }
-//
-//
-//        private fun fillChildren(node: ConfigFXNode) {
-//            val filtered = node.children.filtered(filter)
-//            //children.bind(filtered){ConfigFXTreeItem(it)}
-//            children.setAll(filtered.map { ConfigFXTreeItem(it) })
-//            filtered.onChange {
-//                children.setAll(filtered.map { ConfigFXTreeItem(it) })
-//            }
-//        }
-//
-//
-//
-//        override fun isLeaf(): Boolean {
-//            return value is ConfigFXValue
-//        }
-//    }
+    companion object {
+        /**
+         * The tag not to display node or value in configurator
+         */
+        const val NO_CONFIGURATOR_TAG = "nocfg"
+    }
 }
 
 
