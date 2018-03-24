@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.context;
+package hep.dataforge.context
 
-import hep.dataforge.names.Named;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import hep.dataforge.names.Named
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 /**
  * The interface for something that encapsulated in context
@@ -25,19 +25,18 @@ import org.slf4j.LoggerFactory;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface ContextAware {
+interface ContextAware {
     /**
      * Get context for this object
      *
      * @return
      */
-    Context getContext();
+    val context: Context
 
-    default Logger getLogger() {
-        if (this instanceof Named) {
-            return LoggerFactory.getLogger(getContext().getName() + "." + ((Named) this).getName());
+    val logger: Logger
+        get() = if (this is Named) {
+            LoggerFactory.getLogger(context.name + "." + (this as Named).name)
         } else {
-            return getContext().getLogger();
+            context.logger
         }
-    }
 }

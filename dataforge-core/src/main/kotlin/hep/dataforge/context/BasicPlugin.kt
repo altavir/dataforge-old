@@ -25,7 +25,9 @@ import hep.dataforge.meta.MetaHolder
  */
 abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta.sealed), Plugin {
 
-    private var context: Context? = null
+    private var _context: Context? = null
+    override val context: Context
+        get() = _context ?: throw RuntimeException("Plugin not attached")
 
     override fun dependsOn(): Array<PluginTag> {
         return if (tag.hasValue("dependsOn")) {
@@ -48,21 +50,18 @@ abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta.sealed),
      * Load this plugin to the Global without annotation
      */
     fun startGlobal() {
-        if (context != null && Global != getContext()) {
+        if (_context != null && Global != context) {
             Global.logger.warn("Loading plugin as global from non-global context")
         }
         Global.pluginManager.load(this)
     }
 
     override fun attach(context: Context) {
-        this.context = context
+        this._context = context
     }
 
     override fun detach() {
-        this.context = null
+        this._context = null
     }
 
-    override fun getContext(): Context {
-        return context ?: throw RuntimeException("Plugin not attached")
-    }
 }
