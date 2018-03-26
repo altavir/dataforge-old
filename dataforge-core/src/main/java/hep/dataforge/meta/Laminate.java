@@ -15,10 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.Named;
 import hep.dataforge.description.Described;
 import hep.dataforge.description.Descriptors;
 import hep.dataforge.description.NodeDescriptor;
-import hep.dataforge.names.Named;
 import hep.dataforge.values.Value;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;

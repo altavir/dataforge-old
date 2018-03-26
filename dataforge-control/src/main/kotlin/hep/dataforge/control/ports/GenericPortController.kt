@@ -37,7 +37,7 @@ import java.util.concurrent.TimeoutException
  * @property port the port associated with this controller
  */
 open class GenericPortController(
-        private val context: Context,
+        override val context: Context,
         val port: Port,
         private val phraseCondition: (String) -> Boolean = { it.endsWith("\n") }
 ) : PortController, AutoCloseable, ContextAware {
@@ -50,9 +50,6 @@ open class GenericPortController(
     private val exceptionListeners = ReferenceRegistry<ErrorListener>()
     private val buffer = ByteArrayOutputStream();
 
-    override fun getContext(): Context {
-        return context
-    }
 
     fun open() {
         try {
@@ -63,12 +60,10 @@ open class GenericPortController(
         } catch (e: PortException) {
             throw RuntimeException("Can't hold the port $port by generic handler", e)
         }
-
     }
 
-    override fun getLogger(): Logger {
-        return LoggerFactory.getLogger("${context.name}.$port")
-    }
+    override val logger: Logger
+        get() = LoggerFactory.getLogger("${context.name}.$port")
 
     override fun accept(byte: Byte) {
         synchronized(port) {

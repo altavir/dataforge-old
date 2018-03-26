@@ -69,9 +69,9 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
      * @return
      */
     protected ActionResult<R> runOne(Context context, NamedData<? extends T> data, Meta actionMeta) {
-        if (!this.getInputType().isAssignableFrom(data.type())) {
+        if (!this.getInputType().isAssignableFrom(data.getType())) {
             throw new RuntimeException(String.format("Type mismatch in action %s. %s expected, but %s recieved",
-                    getName(), getInputType().getName(), data.type().getName()));
+                    getName(), getInputType().getName(), data.getType().getName()));
         }
 
         Pair<String, Meta> resultParamters = outputParameters(context, data, actionMeta);
@@ -80,7 +80,7 @@ public abstract class OneToOneAction<T, R> extends GenericAction<T, R> {
         String resultName = resultParamters.getKey();
         Meta outputMeta = resultParamters.getValue();
 
-        PipeGoal<? extends T, R> goal = new PipeGoal<>(data.getGoal(), getExecutorService(context, meta),
+        PipeGoal<? extends T, R> goal = new PipeGoal<>(getExecutorService(context, meta), data.getGoal(),
                 input -> {
                     Thread.currentThread().setName(Name.joinString(getThreadName(actionMeta), resultName));
                     return transform(context, resultName, input, meta);

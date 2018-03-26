@@ -17,6 +17,7 @@ package hep.dataforge.actions;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.data.DataNode;
+import hep.dataforge.data.DataNodeEditor;
 import hep.dataforge.data.DataSet;
 import hep.dataforge.data.NamedData;
 import hep.dataforge.description.ActionDescriptor;
@@ -83,18 +84,18 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable {
             name = getName();
         }
 
-        DataSet.Builder<R> builder = DataSet.builder(getOutputType());
-        result.forEach(builder::putData);
+        DataNodeEditor<R> builder = DataSet.Companion.edit(getOutputType());
+        result.forEach(builder::add);
         builder.setName(name);
         builder.setMeta(meta);
         return builder.build();
     }
 
     protected void checkInput(DataNode input) {
-        if (!getInputType().isAssignableFrom(input.type())) {
+        if (!getInputType().isAssignableFrom(input.getType())) {
             //FIXME add specific exception
             throw new RuntimeException(String.format("Type mismatch on action %s start. Expected %s but found %s.",
-                    getName(), getInputType().getName(), input.type().getName()));
+                    getName(), getInputType().getName(), input.getType().getName()));
         }
     }
 

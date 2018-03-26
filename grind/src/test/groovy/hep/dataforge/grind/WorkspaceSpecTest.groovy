@@ -62,17 +62,17 @@ class WorkspaceSpecTest extends Specification {
                 }
             }
 
-            task hep.dataforge.grind.workspace.DefaultTaskLib.pipe("preJoin"){ String input->
+            task hep.dataforge.grind.workspace.DefaultTaskLib.pipe("preJoin") { String input ->
                 input[6]
             }
 
-            task hep.dataforge.grind.workspace.DefaultTaskLib.join("testJoin", [dependsOn: "preJoin"] ) { Map<String,String> input ->
+            task hep.dataforge.grind.workspace.DefaultTaskLib.join("testJoin", [dependsOn: "preJoin"]) { Map<String, String> input ->
                 input.sort().values().sum()
             }
 
         }
-        def result = wsp.runTask("test").get("data_5")
-        def joinResult = wsp.runTask("testJoin").getData().get()
+        def result = wsp.runTask("test", "test").get("data_5")
+        def joinResult = wsp.runTask("testJoin", "testJoin").getData().get()
         then:
         result.endsWith("hurray!")
         joinResult == "1123456789"

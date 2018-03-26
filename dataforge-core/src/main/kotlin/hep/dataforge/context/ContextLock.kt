@@ -2,7 +2,6 @@ package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
 import java.util.*
-import java.util.concurrent.Callable
 import java.util.concurrent.ExecutionException
 
 /**
@@ -40,7 +39,7 @@ class ContextLock(override val context: Context) : ContextAware {
      * @param mod
      */
     @Synchronized
-    fun <T> modify(mod: Callable<T>): T {
+    fun <T> modify(mod: ()->T): T {
         tryModify()
         try {
             return context.dispatcher.submit(mod).get()
@@ -53,7 +52,7 @@ class ContextLock(override val context: Context) : ContextAware {
     }
 
     @Synchronized
-    fun modify(mod: Runnable) {
+    fun modify(mod: () -> Unit) {
         tryModify()
         try {
             context.dispatcher.submit(mod).get()

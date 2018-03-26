@@ -15,7 +15,7 @@
  */
 package hep.dataforge.tables;
 
-import hep.dataforge.names.Named;
+import hep.dataforge.Named;
 import hep.dataforge.values.Value;
 
 import java.io.Serializable;

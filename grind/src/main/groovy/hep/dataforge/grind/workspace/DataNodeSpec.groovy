@@ -1,5 +1,6 @@
 package hep.dataforge.grind.workspace
 
+import hep.dataforge.Named
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
 import hep.dataforge.goals.GeneratorGoal
@@ -8,7 +9,6 @@ import hep.dataforge.goals.StaticGoal
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.Meta
-import hep.dataforge.names.Named
 
 /**
  * A specification to build data node. Not thread safe
@@ -40,13 +40,13 @@ class DataNodeSpec {
     private final String name;
     private final Class type;
     private Meta meta = Meta.empty()
-    private DataTree.Builder tree;
+    private DataNodeEditor tree;
 
     DataNodeSpec(Context context, String name, Class type = Object.class) {
         this.context = context
         this.name = name
         this.type = type
-        tree = DataTree.builder().setName(name);
+        tree = DataTree.edit(Object).setName(name);
     }
 
     void meta(Map values = [:], @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
@@ -72,11 +72,11 @@ class DataNodeSpec {
     }
 
     void item(NamedData data) {
-        tree.putData(data)
+        tree.add(data)
     }
 
     void item(String name, Data data) {
-        tree.putData(name, data)
+        tree.putData(name, data,false)
     }
 
     void item(String name, @DelegatesTo(ItemSpec) Closure cl) {
@@ -164,7 +164,7 @@ class DataNodeSpec {
         }
 
         private NamedData build() {
-            return new NamedData(name, goal, type, meta);
+            return new NamedData(name, type, goal, meta);
         }
     }
 }

@@ -36,9 +36,7 @@ object JavaObjectWrapper : Wrapper<Any> {
     override val type: Class<Any>
         get() = Any::class.java
 
-    override fun getName(): String {
-        return JAVA_OBJECT_TYPE
-    }
+    override val name: String = JAVA_OBJECT_TYPE
 
     override fun wrap(obj: Any): Envelope {
         val builder = EnvelopeBuilder()

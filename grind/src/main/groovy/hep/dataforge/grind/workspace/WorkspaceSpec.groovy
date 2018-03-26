@@ -30,8 +30,7 @@ class WorkspaceSpec {
      * @param context - the context for specification it is by default used as a parent for resulting workspace
      */
     WorkspaceSpec(Context context) {
-        this.builder = BasicWorkspace.builder();
-        this.builder.setContext(context);
+        this.builder = new BasicWorkspace.Builder(context);
 //        this.context = context
     }
 

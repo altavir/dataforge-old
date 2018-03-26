@@ -8,6 +8,9 @@ import hep.dataforge.workspace.WorkspaceParser
 import org.codehaus.groovy.control.CompilerConfiguration
 import org.codehaus.groovy.control.customizers.ImportCustomizer
 
+import java.nio.file.Files
+import java.nio.file.Path
+
 @CompileStatic
 class GroovyWorkspaceParser implements WorkspaceParser {
 
@@ -15,6 +18,8 @@ class GroovyWorkspaceParser implements WorkspaceParser {
     List<String> listExtensions() {
         return [".groovy", ".grind"];
     }
+
+
 
     @Override
     Workspace.Builder parse(Context parentContext = Global.INSTANCE, Reader reader) {
@@ -39,4 +44,7 @@ class GroovyWorkspaceParser implements WorkspaceParser {
     }
 
 
+    Workspace.Builder parse(Context context, Path path){
+        return parse(context, Files.newBufferedReader(path))
+    }
 }

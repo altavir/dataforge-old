@@ -42,7 +42,7 @@ import java.util.concurrent.*
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaHolder(meta), Device {
+abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
     private val states = HashMap<String, Value>()
     private val metaStates = HashMap<String, Meta>()
@@ -95,18 +95,8 @@ abstract class AbstractDevice(private val context: Context?, meta: Meta) : MetaH
     }
 
 
-    override fun getContext(): Context {
-        return if (context == null) {
-            logger.warn("Context for device not defined. Using GLOBAL context.")
-            Global
-        } else {
-            this.context
-        }
-    }
-
-    override fun getName(): String {
-        return meta.getString("name", type)
-    }
+    override val name: String
+        get() = meta.getString("name", type)
 
     protected fun execute(runnable: () -> Unit): Future<*> {
         return executor.submit(runnable)

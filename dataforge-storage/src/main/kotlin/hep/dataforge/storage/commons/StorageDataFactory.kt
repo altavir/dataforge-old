@@ -24,7 +24,7 @@ package hep.dataforge.storage.commons
 import hep.dataforge.context.Context
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataFactory
-import hep.dataforge.data.DataTree
+import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.Loader
 
@@ -33,11 +33,12 @@ import hep.dataforge.storage.api.Loader
  */
 class StorageDataFactory : DataFactory<Loader>(Loader::class.java) {
 
-    override fun getName(): String {
-        return "storage"
-    }
+    override val name: String
+        get() {
+            return "storage"
+        }
 
-    override fun fill(builder: DataTree.Builder<Loader>, context: Context, meta: Meta) {
+    override fun fill(builder: DataNodeEditor<Loader>, context: Context, meta: Meta) {
         //FIXME this process takes long time for large storages. Need to wrap it in process
         val storage = StorageManager.buildFrom(context).buildStorage(meta)
         StorageUtils.loaderStream(storage).forEach { loader -> builder.putData(loader.fullName.toUnescaped(), Data.buildStatic(loader, loader.meta)) }

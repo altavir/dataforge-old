@@ -15,7 +15,7 @@
  */
 package hep.dataforge.context
 
-import hep.dataforge.names.Named
+import hep.dataforge.Named
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

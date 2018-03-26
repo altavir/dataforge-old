@@ -64,7 +64,7 @@ class ExecTest extends Specification {
             }
         }
         when:
-        def builder = DataSet.builder(Object)
+        def builder = DataSet.edit(Object)
         (1..8).each {
             builder.putData("test$it","test$it",Grind.buildMeta(result: "OK$it"))
         }

@@ -21,9 +21,9 @@
  */
 package hep.dataforge.io.envelopes
 
+import hep.dataforge.Named
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.names.Named
 
 /**
  * The class to unwrap object of specific type from envelope. Generally, T is
@@ -55,7 +55,7 @@ interface Wrapper<T> : Named {
                 envelope.meta.hasValue(WRAPPER_CLASS_KEY) ->
                     Class.forName(envelope.meta.getString(WRAPPER_CLASS_KEY)).getConstructor().newInstance() as Wrapper<T>
                 envelope.meta.hasValue(WRAPPER_TYPE_KEY) ->
-                    context.findService(Wrapper::class.java) { it -> it.getName() == envelope.meta.getString(WRAPPER_TYPE_KEY) } as Wrapper<T>?
+                    context.findService(Wrapper::class.java) { it -> it.name == envelope.meta.getString(WRAPPER_TYPE_KEY) } as Wrapper<T>?
                             ?: throw RuntimeException("Unwrapper not found")
                 else -> throw IllegalArgumentException("Not a wrapper envelope")
             }

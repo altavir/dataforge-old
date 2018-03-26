@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.api
 
+import hep.dataforge.Named
 import hep.dataforge.connections.AutoConnectible
 import hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE
 import hep.dataforge.connections.Connection.LOGGER_ROLE
@@ -32,7 +33,6 @@ import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AlphanumComparator
 import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.names.Name
-import hep.dataforge.names.Named
 import hep.dataforge.providers.Provider
 import org.slf4j.Logger
 import java.util.*
@@ -204,13 +204,12 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
     }
 
 
-    override fun compareTo(o: Named): Int {
-        return AlphanumComparator.INSTANCE.compare(this.name, o.name)
+    override fun compareTo(other: Named): Int {
+        return AlphanumComparator.INSTANCE.compare(this.name, other.name)
     }
 
-    override fun getLogger(): Logger {
-        return optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
-    }
+    override val logger: Logger
+        get() = optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
 
     companion object {
         //TODO consider removing dispatcher to helper classes

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -15,7 +15,7 @@
  */
 package hep.dataforge.values;
 
-import hep.dataforge.names.Named;
+import hep.dataforge.Named;
 
 import java.time.Instant;
 
@@ -27,8 +27,8 @@ import java.time.Instant;
  */
 public class NamedValue implements Named, Value {
 
-    public static NamedValue of(String name, Object value){
-        return new NamedValue(name,Value.of(value));
+    public static NamedValue of(String name, Object value) {
+        return new NamedValue(name, Value.of(value));
     }
 
     private final Value value;
@@ -46,6 +46,7 @@ public class NamedValue implements Named, Value {
 
     /**
      * Return underlying value without a name
+     *
      * @return
      */
     public Value getAnonymousValue() {
@@ -100,4 +101,5 @@ public class NamedValue implements Named, Value {
     public Object value() {
         return value.value();
     }
+
 }

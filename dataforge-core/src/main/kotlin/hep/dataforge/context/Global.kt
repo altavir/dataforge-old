@@ -126,20 +126,6 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     }
 
     /**
-     * Use that context when the context for some reason is not provided. By default throws a runtime exception.
-     *
-     * @return
-     */
-    @JvmStatic
-    var defaultContext: Context? = null
-        get() {
-            if (field == null) {
-                throw RuntimeException("Context not specified")
-            }
-            return field
-        }
-
-    /**
      * A single thread executor for DataForge messages dispatch. No heavy calculations should be done on this thread
      *
      * @return

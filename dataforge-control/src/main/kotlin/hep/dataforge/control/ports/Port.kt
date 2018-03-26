@@ -15,12 +15,12 @@
  */
 package hep.dataforge.control.ports
 
+import hep.dataforge.Named
 import hep.dataforge.exceptions.PortException
 import hep.dataforge.exceptions.PortLockException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
 import hep.dataforge.meta.Metoid
-import hep.dataforge.names.Named
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration

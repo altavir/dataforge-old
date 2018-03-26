@@ -36,7 +36,7 @@ import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
         NodeDef(name = FILTER_KEY, from = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished"),
         NodeDef(name = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
 )
-open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
+open class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
 
     override fun build(context: Context, meta: Meta): DataNode<T> {
         //Creating filter
@@ -58,17 +58,17 @@ open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
      * @param dataConfig
      * @return
      */
-    protected fun builder(context: Context, dataConfig: Meta): DataTree.Builder<T> {
-        val builder = DataTree.builder(baseType)
+    protected fun builder(context: Context, dataConfig: Meta): DataTree<T>.Editor {
+        val builder = DataTree.edit(baseType)
 
         // Apply node name
         if (dataConfig.hasValue(NODE_NAME_KEY)) {
-            builder.setName(dataConfig.getString(NODE_NAME_KEY))
+            builder.name = dataConfig.getString(NODE_NAME_KEY)
         }
 
         // Apply node meta
         if (dataConfig.hasMeta(NODE_META_KEY)) {
-            builder.setMeta(dataConfig.getMeta(NODE_META_KEY))
+            builder.meta = dataConfig.getMeta(NODE_META_KEY)
         }
 
         // Apply non-specific child nodes
@@ -76,13 +76,13 @@ open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
             dataConfig.getMetaList(NODE_KEY).forEach { nodeMeta: Meta ->
                 //FIXME check types for child nodes
                 val node = build(context, nodeMeta)
-                builder.putNode(node)
+                builder.add(node)
             }
         }
 
         //Add custom items
         if (dataConfig.hasMeta(ITEM_KEY)) {
-            dataConfig.getMetaList(ITEM_KEY).forEach { itemMeta -> builder.putData(buildData(context, itemMeta)) }
+            dataConfig.getMetaList(ITEM_KEY).forEach { itemMeta -> builder.add(buildData(context, itemMeta)) }
         }
 
         // Apply child nodes specific to this factory
@@ -91,7 +91,7 @@ open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
     }
 
     @NodeDef(name = NODE_META_KEY, info = "Meta for this item")
-    protected fun buildData(context: Context, itemMeta: Meta): NamedData<out T> {
+    private fun buildData(context: Context, itemMeta: Meta): NamedData<T> {
         val name = itemMeta.getString(NODE_NAME_KEY)
 
         val obj = itemMeta.optValue("path")
@@ -110,13 +110,11 @@ open class DataFactory<T>(private val baseType: Class<T>) : DataLoader<T> {
      * @param builder
      * @param meta
      */
-    protected open fun fill(builder: DataTree.Builder<T>, context: Context, meta: Meta) {
+    protected open fun fill(builder: DataNodeEditor<T>, context: Context, meta: Meta) {
         //Do nothing for default factory
     }
 
-    override fun getName(): String {
-        return "default"
-    }
+    override val name: String = "default"
 
     companion object {
 

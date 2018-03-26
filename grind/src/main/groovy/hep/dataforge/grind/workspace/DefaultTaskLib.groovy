@@ -19,6 +19,7 @@ package hep.dataforge.grind.workspace
 import hep.dataforge.actions.Action
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
+import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataSet
 import hep.dataforge.kodex.ActionEnv
 import hep.dataforge.meta.Meta
@@ -129,7 +130,7 @@ class DefaultTaskLib {
     static class CustomTaskSpec {
         final TaskModel model
         final DataNode input
-        final DataNode.Builder result = DataSet.builder();
+        final DataNodeEditor result = DataSet.Companion.edit();
 
         CustomTaskSpec(TaskModel model, DataNode input) {
             this.model = model

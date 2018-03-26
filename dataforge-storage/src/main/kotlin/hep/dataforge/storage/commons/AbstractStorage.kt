@@ -53,8 +53,8 @@ abstract class AbstractStorage : MetaHolder, Storage {
 
     protected val loaders: MutableMap<String, Loader> = HashMap()
     protected val shelves: MutableMap<String, Storage> = HashMap()
-    private val name: String
-    private val context: Context
+    override val name: String
+    override val context: Context
     /**
      * @return the parent
      */
@@ -68,7 +68,7 @@ abstract class AbstractStorage : MetaHolder, Storage {
         get() = parent == null
 
     override val validator: Validator
-        get() = StorageUtils.defaultMessageValidator(Storage.STORAGE_TARGET, getName())
+        get() = StorageUtils.defaultMessageValidator(Storage.STORAGE_TARGET, name)
 
     protected constructor(parent: Storage, name: String, meta: Meta) : super(Laminate(meta, parent.meta)) {
         this.name = name.replace(".", "_")
@@ -203,9 +203,6 @@ abstract class AbstractStorage : MetaHolder, Storage {
         }
     }
 
-    override fun getName(): String {
-        return name
-    }
 
     @Provides(LOADER_TARGET)
     override fun optLoader(name: String): Optional<Loader> {
@@ -240,18 +237,6 @@ abstract class AbstractStorage : MetaHolder, Storage {
     override fun shelves(): Collection<Storage> {
         return Collections.unmodifiableCollection(shelves.values)
     }
-
-    override fun getContext(): Context {
-        return context
-    }
-
-    //    @Override
-    //    public EventLoader getDefaultEventLoader() throws StorageException {
-    //        return (EventLoader) buildLoader(new MetaBuilder("loader")
-    //                .putValue(Loader.LOADER_NAME_KEY, DEFAULT_EVENT_LOADER_NAME)
-    //                .putValue(Loader.LOADER_TYPE_KEY, EventLoader.EVENT_LOADER_TYPE)
-    //                .builder());
-    //    }
 
     @NodeDef(name = "security", info = "Some information for  security manager")
     override fun respond(message: Envelope): Envelope {

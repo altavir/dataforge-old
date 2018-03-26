@@ -42,9 +42,7 @@ abstract class BasicPlugin(meta: Meta = Meta.empty()) : MetaHolder(meta.sealed),
      *
      * @return
      */
-    override fun getTag(): PluginTag {
-        return PluginTag.resolve(javaClass)
-    }
+    override val tag: PluginTag by lazy { PluginTag.resolve(javaClass) }
 
     /**
      * Load this plugin to the Global without annotation

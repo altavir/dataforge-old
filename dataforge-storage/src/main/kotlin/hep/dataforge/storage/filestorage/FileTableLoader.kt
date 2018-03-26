@@ -31,6 +31,7 @@ import hep.dataforge.io.messages.ACTION_KEY
 import hep.dataforge.io.messages.PULL_ACTION
 import hep.dataforge.io.messages.PUSH_ACTION
 import hep.dataforge.io.messages.okResponseBase
+import hep.dataforge.isAnonymous
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -209,7 +210,7 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
         }
 
         override fun indexFileName(): String {
-            return if (storage.isAnonimous) {
+            return if (storage.isAnonymous) {
                 name + "_" + valueName
             } else {
                 storage.name + "/" + name + "_" + valueName

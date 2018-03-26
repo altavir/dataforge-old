@@ -15,6 +15,7 @@
  */
 package hep.dataforge.control.devices;
 
+import hep.dataforge.Named;
 import hep.dataforge.connections.AutoConnectible;
 import hep.dataforge.connections.RoleDef;
 import hep.dataforge.context.ContextAware;
@@ -24,7 +25,6 @@ import hep.dataforge.exceptions.ControlException;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
-import hep.dataforge.names.Named;
 import hep.dataforge.states.Stateful;
 import org.slf4j.Logger;
 

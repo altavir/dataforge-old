@@ -15,8 +15,8 @@
  */
 package hep.dataforge.io.history;
 
+import hep.dataforge.Named;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
-import hep.dataforge.names.Named;
 import hep.dataforge.utils.ReferenceRegistry;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.helpers.MessageFormatter;
@@ -122,4 +122,5 @@ public class Chronicle implements History, Named {
     public void reportError(String str, Object... parameters) {
         Chronicle.this.report(new Record("[ERROR] " + MessageFormatter.arrayFormat(str, parameters).getMessage()));
     }
+
 }

@@ -5,9 +5,9 @@
  */
 package hep.dataforge.description;
 
+import hep.dataforge.Named;
 import hep.dataforge.io.markup.Markup;
 import hep.dataforge.io.markup.TextMarkup;
-import hep.dataforge.names.Named;
 
 /**
  * A general interface for something with meta description

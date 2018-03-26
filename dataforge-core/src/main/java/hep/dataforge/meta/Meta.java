@@ -15,9 +15,10 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.Named;
+import hep.dataforge.NamedKt;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.io.XMLMetaWriter;
-import hep.dataforge.names.Named;
 import hep.dataforge.providers.Provider;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
@@ -99,7 +100,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
      * @return
      */
     public int indexOf(Meta node) {
-        if (node.isAnonimous()) {
+        if (NamedKt.isAnonymous(node)) {
             throw new AnonymousNotAlowedException("Anonimous nodes are not allowed in 'indexOf'");
         }
         List<? extends Meta> list = getMetaList(node.getName());
@@ -210,6 +211,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     public Meta toMeta() {
         return this;
     }
+
 
     private static class EmptyMeta extends Meta {
 

@@ -5,11 +5,12 @@
  */
 package hep.dataforge.description;
 
+import hep.dataforge.Named;
+import hep.dataforge.NamedKt;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.names.Name;
-import hep.dataforge.names.Named;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -39,7 +40,7 @@ public class NodeDescriptor implements Named, MetaMorph, Metoid {
      * @return
      */
     public boolean isMultiple() {
-        return getMeta().getBoolean("multiple", true) || isAnonimous();
+        return getMeta().getBoolean("multiple", true) || NamedKt.isAnonymous(this);
     }
 
     /**
@@ -204,4 +205,5 @@ public class NodeDescriptor implements Named, MetaMorph, Metoid {
     public Meta getMeta() {
         return meta;
     }
+
 }

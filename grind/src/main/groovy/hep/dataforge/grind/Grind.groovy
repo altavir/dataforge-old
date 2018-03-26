@@ -5,11 +5,8 @@ import hep.dataforge.context.Global
 import hep.dataforge.grind.extensions.ExtensionInitializer
 import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.meta.MetaBuilder
-import hep.dataforge.workspace.FileBasedWorkspace
 import hep.dataforge.workspace.Workspace
 import org.codehaus.groovy.control.CompilerConfiguration
-
-import java.nio.file.Paths
 
 /**
  * Created by darksnake on 04-Aug-16.
@@ -129,13 +126,13 @@ class Grind {
 //        }
 //    }
 
-    static Workspace buildWorkspace(File file) {
-        return FileBasedWorkspace.build(file.toPath());
-    }
-
-    static Workspace buildWorkspace(String file) {
-        return FileBasedWorkspace.build(Paths.get(file));
-    }
+//    static Workspace buildWorkspace(File file) {
+//        return FileBasedWorkspace.Companion.build(file.toPath());
+//    }
+//
+//    static Workspace buildWorkspace(String file) {
+//        return FileBasedWorkspace.Companion.build(Paths.get(file));
+//    }
 
     static Workspace buildWorkspace(@DelegatesTo(value = WorkspaceSpec, strategy = Closure.DELEGATE_ONLY) Closure cl) {
         WorkspaceSpec spec = new WorkspaceSpec(Global.INSTANCE);

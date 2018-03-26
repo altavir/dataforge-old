@@ -40,28 +40,10 @@ import hep.dataforge.storage.api.Storage
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-class StorageConnection : Connection, Responder, Metoid, ContextAware {
-
-    override val meta: Meta
-    val storage: Storage
-
-    /**
-     * Connection to predefined storage
-     *
-     * @param storage
-     */
-    constructor(storage: Storage) {
-        this.storage = storage
-        this.meta = storage.meta
-    }
-
-    /**
-     * Create storage from context and meta
-     */
-    constructor(context: Context, meta: Meta) {
-        this.meta = meta
+class StorageConnection(override val context: Context, override val meta: Meta) : Connection, Responder, Metoid, ContextAware {
+    val storage: Storage by lazy {
         val storageManager = context.pluginManager.load(StorageManager::class.java)
-        this.storage = storageManager.buildStorage(meta)
+        storageManager.buildStorage(meta)
     }
 
     override fun isOpen(): Boolean {
@@ -88,10 +70,6 @@ class StorageConnection : Connection, Responder, Metoid, ContextAware {
         }
     }
 
-    override fun getContext(): Context {
-        return storage.context
-    }
-
     class Factory : ConnectionFactory {
 
         override fun getType(): String {
@@ -108,4 +86,6 @@ class StorageConnection : Connection, Responder, Metoid, ContextAware {
             }
         }
     }
+
+
 }

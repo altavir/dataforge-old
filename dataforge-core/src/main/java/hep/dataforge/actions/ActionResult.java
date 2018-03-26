@@ -31,7 +31,7 @@ public class ActionResult<R> extends NamedData<R> {
     private final Chronicle log;
 
     public ActionResult(String name, Class<R> type, Goal<R> goal, Meta meta, Chronicle log) {
-        super(name, goal, type, meta);
+        super(name, type, goal, meta);
         this.log = log;
     }
 

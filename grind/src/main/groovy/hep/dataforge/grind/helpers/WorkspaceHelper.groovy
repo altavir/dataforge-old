@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.io.markup.MarkupBuilder
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Method
 
@@ -26,4 +28,9 @@ class WorkspaceHelper extends AbstractHelper {
     protected MarkupBuilder getHelperDescription() {
         return new MarkupBuilder().text("The helper for workspace operations");
     }
+
+    Logger getLogger(){
+        return LoggerFactory.getLogger(getClass())
+    }
+
 }

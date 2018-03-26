@@ -41,7 +41,7 @@ import java.util.*
  * @author Alexander Nozik
  */
 abstract class FileMapIndex<T>(
-        private val context: Context,
+        override val context: Context,
         private val file: FileEnvelope) : MapIndex<T, Int>(), ContextAware {
 
     /**
@@ -136,11 +136,6 @@ abstract class FileMapIndex<T>(
         indexedSize = 0
         super.invalidate()
     }
-
-    override fun getContext(): Context {
-        return context
-    }
-
 
     /**
      * Load index content from external file

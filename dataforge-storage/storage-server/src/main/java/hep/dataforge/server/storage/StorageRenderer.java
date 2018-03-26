@@ -1,7 +1,7 @@
 package hep.dataforge.server.storage;
 
+import hep.dataforge.Named;
 import hep.dataforge.exceptions.StorageException;
-import hep.dataforge.names.Named;
 import hep.dataforge.storage.api.Loader;
 import hep.dataforge.storage.api.Storage;
 

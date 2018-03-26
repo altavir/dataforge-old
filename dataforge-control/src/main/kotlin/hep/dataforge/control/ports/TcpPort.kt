@@ -54,9 +54,8 @@ class TcpPort(meta: Meta) : Port(meta) {
     override val isOpen: Boolean
         get() = listenerThread != null
 
-    override fun getName(): String {
-        return String.format("tcp::%s:%s", getString("ip"), getString("port"))
-    }
+    override val name: String
+        get() = String.format("tcp::%s:%s", getString("ip"), getString("port"))
 
     @Throws(PortException::class)
     override fun open() {

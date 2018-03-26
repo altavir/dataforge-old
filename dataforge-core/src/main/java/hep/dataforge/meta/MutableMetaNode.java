@@ -15,6 +15,7 @@
  */
 package hep.dataforge.meta;
 
+import hep.dataforge.NamedKt;
 import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
@@ -167,7 +168,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
         if (element.isEmpty()) {
             return self();
         }
-        if (element.isAnonimous() && !element.hasValue("@name")) {
+        if (NamedKt.isAnonymous(element) && !element.hasValue("@name")) {
             throw new AnonymousNotAlowedException();
         }
         return putNode(element.getName(), element, true);
@@ -237,7 +238,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      * @param element
      */
     public T setNode(Meta element) {
-        if (element.isAnonimous()) {
+        if (NamedKt.isAnonymous(element)) {
             throw new AnonymousNotAlowedException();
         }
 

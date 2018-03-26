@@ -203,10 +203,10 @@ suspend fun <R> Goal<R>.await(): R {
 }
 
 inline fun <T, reified R> Data<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): Data<R> =
-        Data(this.goal.pipe(dispatcher, transform), R::class.java, this.meta)
+        Data(R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
 
 inline fun <T, reified R> NamedData<T>.pipe(dispatcher: CoroutineContext, noinline transform: suspend (T) -> R): NamedData<R> =
-        NamedData(this.name, this.goal.pipe(dispatcher, transform), R::class.java, this.meta)
+        NamedData(this.name, R::class.java, this.goal.pipe(dispatcher, transform), this.meta)
 
 operator fun Names.plus(other: Names): Names {
     return this.plus(*other.asArray())

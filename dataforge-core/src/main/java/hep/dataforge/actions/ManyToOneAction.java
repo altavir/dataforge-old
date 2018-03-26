@@ -86,12 +86,12 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     protected MetaBuilder outputMeta(DataNode<T> input) {
         MetaBuilder builder = new MetaBuilder(MetaBuilder.DEFAULT_META_NAME)
                 .putValue("name", input.getName())
-                .putValue("type", input.type().getName());
+                .putValue("type", input.getType().getName());
         input.dataStream().forEach((NamedData<? extends T> data) -> {
             MetaBuilder dataNode = new MetaBuilder("data")
                     .putValue("name", data.getName());
-            if (!data.type().equals(input.type())) {
-                dataNode.putValue("type", data.type().getName());
+            if (!data.getType().equals(input.getType())) {
+                dataNode.putValue("type", data.getType().getName());
             }
 //            if (!data.meta().isEmpty()) {
 //                dataNode.putNode(DataFactory.NODE_META_KEY, data.meta());

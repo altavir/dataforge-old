@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger
 
 class WorkspaceTest {
 
-    @Test(timeout = 900)
+    @Test//(timeout = 900)
     fun testExecution() {
         LoggerFactory.getLogger(javaClass).info("Starting execution test")
         val res = wsp.runTask("test2", Meta.empty())

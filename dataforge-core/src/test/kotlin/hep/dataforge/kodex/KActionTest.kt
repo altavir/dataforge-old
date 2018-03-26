@@ -27,7 +27,7 @@ import org.junit.Test
 import java.time.Duration
 
 class KActionTest {
-    val data: DataSet<String> = DataSet.builder(String::class.java).apply {
+    val data: DataSet<String> = DataSet.edit(String::class.java).apply {
         (1..10).forEach {
             putData("$it", "this is my data $it", buildMeta { "index" to it });
         }
@@ -49,7 +49,7 @@ class KActionTest {
     fun testPipe() {
         println("test pipe")
         val res = pipe.run(Global, data, Meta.empty());
-        val datum = res.optData("newName_4").get()
+        val datum = res.getData("newName_4")
         val value = datum.goal.get()
         assertTrue(datum.meta.getBoolean("odd"))
         assertEquals("this is my data 4: stage1", value)
@@ -78,7 +78,7 @@ class KActionTest {
 
         val res = workspace.runTask("test")
 
-        val datum = res.optData("newName_4").get()
+        val datum = res.getData("newName_4")
         val value = datum.goal.get()
         assertTrue(datum.meta.getBoolean("odd"))
         assertEquals("this is my data 4: stage1", value)

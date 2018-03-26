@@ -37,7 +37,7 @@ import java.util.function.Function
  *
  * @author Alexander Nozik
  */
-class FileIndexFactory(private val context: Context, private val uri: String) : ContextAware {
+class FileIndexFactory(override val context: Context, private val uri: String) : ContextAware {
     private val envelope: FileEnvelope by lazy{
         val file = Paths.get(uri)
         if (Files.isReadable(file)) {
@@ -51,10 +51,6 @@ class FileIndexFactory(private val context: Context, private val uri: String) : 
         if (uri.isEmpty()) {
             throw IllegalArgumentException("Uri is empty")
         }
-    }
-
-    override fun getContext(): Context {
-        return context
     }
 
     /**

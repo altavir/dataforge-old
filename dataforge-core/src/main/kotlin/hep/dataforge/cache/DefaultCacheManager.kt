@@ -33,7 +33,7 @@ import javax.cache.spi.CachingProvider
 /**
  * Created by darksnake on 08-Feb-17.
  */
-class DefaultCacheManager(private val context: Context, cfg: Meta) : MetaHolder(cfg), CacheManager, ContextAware {
+class DefaultCacheManager(override val context: Context, cfg: Meta) : MetaHolder(cfg), CacheManager, ContextAware {
     private var map: MutableMap<String, DefaultCache<*, *>> = ConcurrentHashMap();
 
     val rootCacheDir: Path
@@ -109,8 +109,5 @@ class DefaultCacheManager(private val context: Context, cfg: Meta) : MetaHolder(
         }
     }
 
-    override fun getContext(): Context {
-        return context
-    }
 
 }

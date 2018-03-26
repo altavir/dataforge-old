@@ -51,9 +51,8 @@ class ComPort(meta: Meta) : Port(meta) {
     override val isOpen: Boolean
         get() = port?.isOpened ?: false
 
-    override fun getName(): String {
-        return String.format("com::%s", getString("name"))
-    }
+    override val name: String
+        get() = String.format("com::%s", getString("name"))
 
     override fun toString(): String {
         return name

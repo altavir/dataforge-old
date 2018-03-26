@@ -37,7 +37,7 @@ public class FitHelper {
     }
 
     public FitHelper() {
-        this(Global.getDefaultContext());
+        this(Global.INSTANCE);
     }
 
     public FitManager getManager() {

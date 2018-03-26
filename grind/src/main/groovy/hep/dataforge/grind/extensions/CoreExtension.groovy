@@ -19,7 +19,6 @@ package hep.dataforge.grind.extensions
 import groovy.transform.CompileStatic
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindMetaBuilder
 import hep.dataforge.meta.*
@@ -349,11 +348,11 @@ class CoreExtension {
             Meta meta = Grind.parseMeta(command);
             return wsp.runTask(meta);
         } else {
-            return wsp.runTask(command)
+            return wsp.runTask(command,command)
         }
     }
 
     static <T> Data<? extends T> getAt(final DataNode<T> self, String key){
-        return self.optData(key).orElseThrow{new NameNotFoundException(key)}
+        return self.optData(key)
     }
 }

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.storage.api
 
+import hep.dataforge.Named
 import hep.dataforge.connections.AutoConnectible
 import hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE
 import hep.dataforge.connections.Connection.LOGGER_ROLE
@@ -31,7 +32,6 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AlphanumComparator
 import hep.dataforge.names.Name
-import hep.dataforge.names.Named
 import hep.dataforge.providers.Path
 import hep.dataforge.storage.api.Loader.Companion.LOADER_TYPE_KEY
 import org.slf4j.Logger
@@ -96,20 +96,18 @@ interface Loader : Metoid, AutoCloseable, Named, Responder, AutoConnectible, Con
     @Throws(Exception::class)
     override fun close()
 
-    override fun getContext(): Context {
-        return storage.context
-    }
+    override val context: Context
+        get() = storage.context
 
     override fun compareTo(other: Named): Int {
         return AlphanumComparator.INSTANCE.compare(this.name, other.name)
     }
 
-    override fun getLogger(): Logger {
-        return optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
-    }
+    override val logger: Logger
+        get() = optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
 
     companion object {
-//        const val LOADER_NAME_KEY = "name"
+        //        const val LOADER_NAME_KEY = "name"
         const val LOADER_TYPE_KEY = Envelope.ENVELOPE_DATA_TYPE_KEY
     }
 }

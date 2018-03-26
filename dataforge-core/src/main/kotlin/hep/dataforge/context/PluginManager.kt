@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-class PluginManager(private val context: Context) : ContextAware, AutoCloseable {
+class PluginManager(override val context: Context) : ContextAware, AutoCloseable {
 
     /**
      * A set of loaded plugins
@@ -42,9 +42,6 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
 
     private val parent: PluginManager? = context.parent?.pluginManager
 
-    override fun getContext(): Context {
-        return this.context
-    }
 
     fun stream(recursive: Boolean): Stream<Plugin> {
         return if (recursive && parent != null) {
@@ -109,7 +106,7 @@ class PluginManager(private val context: Context) : ContextAware, AutoCloseable 
             }
 
             logger.info("Loading plugin {} into {}", plugin.name, context.name)
-            plugin.attach(getContext())
+            plugin.attach(context)
             plugins.add(plugin)
             return plugin
         }

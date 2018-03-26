@@ -41,11 +41,9 @@ import java.nio.file.Path
 )
 class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
-    override fun getName(): String {
-        return "file"
-    }
+    override val name: String="file"
 
-    override fun fill(builder: DataTree.Builder<Binary>, context: Context, meta: Meta) {
+    override fun fill(builder: DataNodeEditor<Binary>, context: Context, meta: Meta) {
         val parentFile: Path = when {
             meta.hasMeta(IOManager.DATA_DIRECTORY_CONTEXT_KEY) -> context.io.rootDir.resolve(meta.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY))
             else -> context.io.dataDir
@@ -93,7 +91,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
      * @param parentFile
      * @param fileNode
      */
-    private fun addFile(context: Context, builder: DataTree.Builder<Binary>, parentFile: Path, fileNode: Meta) {
+    private fun addFile(context: Context, builder: DataNodeEditor<Binary>, parentFile: Path, fileNode: Meta) {
         val files = listFiles(context, parentFile, fileNode)
         when {
             files.isEmpty() -> context.logger.warn("No files matching the filter: " + fileNode.toString())
@@ -121,15 +119,15 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
     }
 
-    private fun addDir(context: Context, builder: DataTree.Builder<Binary>, parentFile: Path, dirNode: Meta) {
-        val dirBuilder = DataTree.builder(Binary::class.java)
+    private fun addDir(context: Context, builder: DataNodeEditor<Binary>, parentFile: Path, dirNode: Meta) {
+        val dirBuilder = DataTree.edit(Binary::class.java)
         val dir = parentFile.resolve(dirNode.getString("path"))
         if (!Files.isDirectory(dir)) {
             throw RuntimeException("The directory $dir does not exist")
         }
-        dirBuilder.setName(dirNode.getString(DataFactory.NODE_NAME_KEY, dirNode.name))
+        dirBuilder.name = dirNode.getString(DataFactory.NODE_NAME_KEY, dirNode.name)
         if (dirNode.hasMeta(DataFactory.NODE_META_KEY)) {
-            dirBuilder.setMeta(dirNode.getMeta(DataFactory.NODE_META_KEY))
+            dirBuilder.meta = dirNode.getMeta(DataFactory.NODE_META_KEY)
         }
 
         val recurse = dirNode.getBoolean("recursive", true)
@@ -147,7 +145,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
             throw RuntimeException(e)
         }
 
-        builder.putNode(dirBuilder.build())
+        builder.add(dirBuilder.build())
 
     }
 

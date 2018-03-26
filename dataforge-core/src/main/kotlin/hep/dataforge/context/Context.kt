@@ -15,13 +15,13 @@
  */
 package hep.dataforge.context
 
+import hep.dataforge.Named
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaID
-import hep.dataforge.names.Named
 import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
@@ -49,7 +49,7 @@ import kotlin.reflect.KClass
  * @author Alexander Nozik
  */
 open class Context(
-        private val name: String,
+        override val name: String,
         val parent: Context? = Global,
         classLoader: ClassLoader? = null) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
 
@@ -89,7 +89,7 @@ open class Context(
      * @return
      */
     val dispatcher: ExecutorService by lazy {
-        logger.info("Initializing dispatch thread executor in {}", getName())
+        logger.info("Initializing dispatch thread executor in {}", name)
         Executors.newSingleThreadExecutor { r ->
             Thread(r).apply {
                 priority = 8 // slightly higher priority
@@ -118,15 +118,6 @@ open class Context(
      */
     override fun optValue(path: String): Optional<Value> {
         return (properties[path] ?: parent?.optValue(path).nullable).optional
-    }
-
-    /**
-     * The name of the context
-     *
-     * @return
-     */
-    override fun getName(): String {
-        return name
     }
 
     /**
