@@ -130,7 +130,7 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
      * @param type
      * @param consumer
      */
-    fun <R : Any> visit(type: Class<R>, consumer: (NamedData<in R>) -> Unit) {
+    fun <R : Any> visit(type: Class<R>, consumer: (NamedData<R>) -> Unit) {
         dataStream().asSequence().filter { d -> type.isAssignableFrom(d.type) }
                 .forEach { d -> consumer(d.cast(type)) }
     }
@@ -245,22 +245,22 @@ interface DataNode<T : Any> : Iterable<NamedData<out T>>, Named, Metoid, Provide
             return EmptyDataNode("", Any::class.java)
         }
 
-//        /**
-//         * A data node wrapping single data
-//         *
-//         * @param <T>
-//         * @param dataName
-//         * @param data
-//         * @param nodeMeta
-//         * @return
-//         */
-//        fun <T : Any> of(dataName: String, data: Data<T>, nodeMeta: Meta): DataNode<T> {
-//            return DataSet.builder(data.type)
-//                    .setName(dataName)
-//                    .setMeta(nodeMeta)
-//                    .putData(dataName, data)
-//                    .build()
-//        }
+        /**
+         * A data node wrapping single data
+         *
+         * @param <T>
+         * @param dataName
+         * @param data
+         * @param nodeMeta
+         * @return
+         */
+        fun <T : Any> of(dataName: String, data: Data<T>, nodeMeta: Meta): DataNode<T> {
+            return DataSet.edit(data.type).apply {
+                name = dataName
+                meta = nodeMeta
+                putData(dataName,data)
+            }.build()
+        }
     }
 
 }

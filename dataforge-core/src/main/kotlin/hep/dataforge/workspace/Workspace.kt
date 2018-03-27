@@ -183,15 +183,17 @@ interface Workspace : ContextAware, Provider {
 
     interface Builder : GenericBuilder<Workspace, Workspace.Builder>, ContextAware {
 
+        override var context: Context
+
         fun loadFrom(meta: Meta): Workspace.Builder {
             if (meta.hasValue("context")) {
-                setContext(Global.getContext(meta.getString("context")))
+                context = Global.getContext(meta.getString("context"))
             }
             if (meta.hasMeta("data")) {
                 meta.getMetaList("data").forEach { dataMeta: Meta ->
                     val factory: DataFactory<out Any> = if (dataMeta.hasValue("dataFactoryClass")) {
                         try {
-                            Class.forName(dataMeta.getString("dataFactoryClass")).newInstance() as DataFactory<Any>
+                            Class.forName(dataMeta.getString("dataFactoryClass")).newInstance() as DataFactory<*>
                         } catch (ex: Exception) {
                             throw RuntimeException("Error while initializing data factory", ex)
                         }
@@ -199,7 +201,7 @@ interface Workspace : ContextAware, Provider {
                         FileDataFactory()
                     }
                     val key = dataMeta.getString("as", "")
-                    data(key, factory.build(context, dataMeta) )
+                    data(key, factory.build(context, dataMeta))
                 }
             }
             if (meta.hasMeta("target")) {
@@ -208,8 +210,6 @@ interface Workspace : ContextAware, Provider {
 
             return self()
         }
-
-        fun setContext(ctx: Context): Workspace.Builder
 
         fun data(key: String, data: Data<out Any>): Workspace.Builder
 
@@ -242,7 +242,7 @@ interface Workspace : ContextAware, Provider {
          * @param dataConfig
          * @return
          */
-        fun data(place: String, factory: DataLoader<Any>, dataConfig: Meta): Workspace.Builder {
+        fun data(place: String, factory: DataLoader<out Any>, dataConfig: Meta): Workspace.Builder {
             return data(place, factory.build(context, dataConfig))
         }
 

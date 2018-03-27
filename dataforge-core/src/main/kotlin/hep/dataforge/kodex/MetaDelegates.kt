@@ -30,11 +30,12 @@ import kotlin.reflect.full.findAnnotation
 
 //Metoid values
 
-private fun getDescribedValue(valueName: String, thisRef: Any, property: KProperty<*>): Value {
+private fun getDescribedValue(valueName: String, thisRef: Any?, property: KProperty<*>): Value {
     val propertyAnnotation = property.findAnnotation<PropertyDef>()
     return when {
         propertyAnnotation != null -> Value.of(propertyAnnotation.def)
-        else -> Descriptors.extractValue(valueName, Descriptors.buildDescriptor(thisRef))
+        thisRef!= null -> Descriptors.extractValue(valueName, Descriptors.buildDescriptor(thisRef))
+        else -> Value.NULL
     }
 }
 
@@ -60,11 +61,11 @@ class ValueDelegate<out T>(
         val valueName: String? = null,
         val def: T? = null,
         private val converter: (Value) -> T
-) : ReadOnlyProperty<Any, T> {
+) : ReadOnlyProperty<Any?, T> {
 
     private var cached: T? = null
 
-    private fun getValueInternal(thisRef: Any, property: KProperty<*>): T {
+    private fun getValueInternal(thisRef: Any?, property: KProperty<*>): T {
         val key = valueName ?: property.name
         return when {
             target.hasValue(key) -> converter(target.getValue(key))
@@ -73,7 +74,7 @@ class ValueDelegate<out T>(
         }
     }
 
-    override operator fun getValue(thisRef: Any, property: KProperty<*>): T {
+    override operator fun getValue(thisRef: Any?, property: KProperty<*>): T {
         if (target is SealedNode && cached == null) {
             cached = getValueInternal(thisRef, property)
         }

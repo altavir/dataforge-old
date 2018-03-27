@@ -24,7 +24,6 @@ import hep.dataforge.values.ValueProvider
 import hep.dataforge.workspace.Workspace
 import org.slf4j.LoggerFactory
 import java.util.*
-import java.util.function.Consumer
 import java.util.stream.Stream
 
 /**
@@ -292,9 +291,8 @@ class TaskModel private constructor(
          * @param transform
          * @return
          */
-        fun configure(transform: Consumer<MetaBuilder>): Builder {
-            //            taskMeta = new MetaBuilder(getName());
-            transform.accept(taskMeta)
+        fun configure(transform: (MetaBuilder) -> Unit): Builder {
+            transform(taskMeta)
             return self()
         }
 

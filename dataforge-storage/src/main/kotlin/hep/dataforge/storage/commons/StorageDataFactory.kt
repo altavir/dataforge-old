@@ -33,10 +33,7 @@ import hep.dataforge.storage.api.Loader
  */
 class StorageDataFactory : DataFactory<Loader>(Loader::class.java) {
 
-    override val name: String
-        get() {
-            return "storage"
-        }
+    override val name= "storage"
 
     override fun fill(builder: DataNodeEditor<Loader>, context: Context, meta: Meta) {
         //FIXME this process takes long time for large storages. Need to wrap it in process

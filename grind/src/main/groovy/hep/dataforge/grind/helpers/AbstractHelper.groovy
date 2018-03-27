@@ -4,6 +4,8 @@ import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
 import hep.dataforge.io.markup.Markup
 import hep.dataforge.io.markup.MarkupBuilder
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 
 import java.lang.reflect.Method
 
@@ -63,5 +65,9 @@ abstract class AbstractHelper implements GrindHelper {
         }
 
         return builder.build();
+    }
+
+    Logger getLogger(){
+        return LoggerFactory.getLogger(getClass())
     }
 }

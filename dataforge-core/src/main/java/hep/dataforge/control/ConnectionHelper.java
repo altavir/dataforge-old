@@ -1,8 +1,8 @@
 package hep.dataforge.control;
 
+import hep.dataforge.Named;
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
-import hep.dataforge.names.Named;
 import org.slf4j.Logger;
 
 import java.util.*;
@@ -83,7 +83,7 @@ public class ConnectionHelper implements Connectible {
     @Override
     public synchronized void disconnect(Connection connection) {
         if (connections.containsKey(connection)) {
-            String conName = Named.nameOf(connection);
+            String conName = Named.Companion.nameOf(connection);
             try {
                 getLogger().debug("Closing connection {}", conName);
                 connection.close();

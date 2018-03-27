@@ -2,7 +2,10 @@ package hep.dataforge.server;
 
 import hep.dataforge.context.Context;
 import hep.dataforge.context.ContextAware;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import ratpack.handling.Chain;
 
 import java.util.stream.Stream;
@@ -61,5 +64,11 @@ public interface ServerObject extends ContextAware, AutoCloseable {
     @Override
     default Context getContext() {
         return getManager().getContext();
+    }
+
+    @NotNull
+    @Override
+    default Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
     }
 }

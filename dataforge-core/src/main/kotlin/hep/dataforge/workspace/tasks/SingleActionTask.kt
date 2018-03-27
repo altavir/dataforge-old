@@ -27,13 +27,13 @@ import org.jetbrains.annotations.Contract
  */
 abstract class SingleActionTask<T: Any, R: Any> : AbstractTask<R>() {
 
-    protected fun gatherNode(data: DataNode<out Any>): DataNode<T> {
+    protected open fun gatherNode(data: DataNode<out Any>): DataNode<T> {
         return data as DataNode<T>
     }
 
     protected abstract fun getAction(model: TaskModel): Action<T, R>
 
-    protected fun transformMeta(model: TaskModel): Meta {
+    protected open fun transformMeta(model: TaskModel): Meta {
         return model.meta
     }
 

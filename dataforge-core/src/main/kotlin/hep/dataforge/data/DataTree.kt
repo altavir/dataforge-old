@@ -11,6 +11,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import java.util.*
 import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 /**
  * A tree data structure
@@ -283,6 +284,10 @@ class DataTree<T: Any> constructor(
         @JvmStatic
         fun <T: Any> edit(type: Class<T>): DataTree<T>.Editor {
             return DataTree("", type, Meta.empty(), null).editor
+        }
+
+        fun <T: Any> edit(type: KClass<T>): DataTree<T>.Editor {
+            return edit(type.java)
         }
 
         /**

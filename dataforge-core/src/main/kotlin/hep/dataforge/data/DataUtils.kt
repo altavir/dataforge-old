@@ -44,14 +44,14 @@ object DataUtils {
     /**
      * Combine two data elements of different type into single data
      */
-    fun <R, S1, S2> combine(data1: Data<S1>, data2: Data<S2>,
+    fun <S1, S2, R> combine(data1: Data<out S1>, data2: Data<out S2>,
                             type: Class<R>,
                             meta: Meta,
-                            transform: BiFunction<S1, S2, R>): Data<R> {
+                            transform: (S1, S2) -> R): Data<R> {
         val combineGoal = object : AbstractGoal<R>() {
             @Throws(Exception::class)
             override fun compute(): R {
-                return transform.apply(data1.get(), data2.get())
+                return transform(data1.get(), data2.get())
             }
 
             override fun dependencies(): Stream<Goal<*>> {

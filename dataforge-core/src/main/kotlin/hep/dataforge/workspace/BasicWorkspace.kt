@@ -74,11 +74,6 @@ class BasicWorkspace private constructor(
             return this
         }
 
-        override fun setContext(ctx: Context): Builder {
-            context = ctx
-            return self()
-        }
-
         override fun data(key: String, data: Data<out Any>): Builder {
 //            if (this.data.optNode(key) != null) {
 //                logger.warn("Overriding non-empty data during workspace data fill")

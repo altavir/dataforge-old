@@ -25,6 +25,7 @@ import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,7 @@ public abstract class ManyToOneAction<T, R> extends GenericAction<T, R> {
     }
 
     @Override
+    @NotNull
     public DataNode<R> run(Context context, DataNode<? extends T> set, Meta actionMeta) {
         checkInput(set);
         List<DataNode<T>> groups = buildGroups(context, (DataNode<T>) set, actionMeta);

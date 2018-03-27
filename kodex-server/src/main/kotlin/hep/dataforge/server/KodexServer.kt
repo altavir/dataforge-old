@@ -20,15 +20,11 @@ class ServerInterceptor(val path: String, val builder: Route.() -> Unit)
 
 typealias InterceptorFactory = ContextMetaFactory<ServerInterceptor>
 
-class KodexServer(private val _context: Context, override val meta: Meta) : Metoid, ContextAware {
+class KodexServer(override val context: Context, override val meta: Meta) : Metoid, ContextAware {
 
     private var engine: NettyApplicationEngine? = null;
     private val interceptors: MutableList<InterceptorFactory> = ArrayList();
 
-
-    override fun getContext(): Context {
-        return _context;
-    }
 
     fun intercept(path: String, builder: Route.(Context, Meta) -> Unit): KodexServer {
         interceptors.add(InterceptorFactory { context, meta -> ServerInterceptor(path) { builder.invoke(this, context, meta) } })

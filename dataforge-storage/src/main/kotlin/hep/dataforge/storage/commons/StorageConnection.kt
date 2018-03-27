@@ -35,16 +35,14 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.storage.api.Storage
+import hep.dataforge.utils.ContextMetaFactory
 
 /**
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-class StorageConnection(override val context: Context, override val meta: Meta) : Connection, Responder, Metoid, ContextAware {
-    val storage: Storage by lazy {
-        val storageManager = context.pluginManager.load(StorageManager::class.java)
-        storageManager.buildStorage(meta)
-    }
+class StorageConnection(val storage: Storage) : Connection, Responder, ContextAware {
+    override val context: Context = storage.context
 
     override fun isOpen(): Boolean {
         return storage.isOpen
@@ -78,14 +76,19 @@ class StorageConnection(override val context: Context, override val meta: Meta) 
 
         override fun <T : Connectible> build(obj: T, context: Context, meta: Meta): Connection {
             return if (obj is Metoid) {
-                StorageConnection(context,
-                        Laminate((obj as Metoid).meta.getMetaOrEmpty("storage"), meta)
+                build(context, Laminate((obj as Metoid).meta.getMetaOrEmpty("storage"), meta)
                 )
             } else {
-                StorageConnection(context, meta)
+                build(context, meta)
             }
         }
     }
 
+    companion object: ContextMetaFactory<StorageConnection> {
+        override fun build(context: Context, meta: Meta): StorageConnection {
+            val storageManager = context.pluginManager.load(StorageManager::class.java)
+            return StorageConnection(storageManager.buildStorage(meta))
+        }
+    }
 
 }

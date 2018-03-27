@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Collectors
 import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 /**
  * A simple static representation of DataNode
@@ -100,6 +101,11 @@ class DataSet<T: Any> internal constructor(
         fun <T: Any> edit(type: Class<T>): DataSetEditor<T> {
             return DataSetEditor(type)
         }
+
+        fun <T: Any> edit(type: KClass<T>): DataSetEditor<T> {
+            return DataSetEditor(type.java)
+        }
+
 
         /**
          * Unbound builder
