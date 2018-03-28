@@ -98,10 +98,10 @@ public class ActionManager extends BasicPlugin {
 
     public final void putTask(Class<? extends Task> taskClass) {
         try {
-            put(taskClass.newInstance());
+            put(taskClass.getConstructor().newInstance());
         } catch (IllegalAccessException ex) {
             throw new RuntimeException("Task must have default empty constructor to be registered.");
-        } catch (InstantiationException ex) {
+        } catch (Exception ex) {
             throw new RuntimeException("Error while constructing Task", ex);
         }
     }

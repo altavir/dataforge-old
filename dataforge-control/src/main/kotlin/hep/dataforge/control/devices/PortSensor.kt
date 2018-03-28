@@ -24,7 +24,6 @@ package hep.dataforge.control.devices
 import hep.dataforge.context.Context
 import hep.dataforge.control.devices.PortSensor.Companion.CONNECTED_STATE
 import hep.dataforge.control.devices.PortSensor.Companion.DEBUG_STATE
-import hep.dataforge.control.devices.PortSensor.Companion.PORT_STATE
 import hep.dataforge.control.ports.GenericPortController
 import hep.dataforge.control.ports.PortFactory
 import hep.dataforge.description.NodeDef
@@ -51,7 +50,7 @@ import java.time.Duration
  */
 @StateDefs(
         StateDef(value = ValueDef(name = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
-        StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
+        //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
         StateDef(value = ValueDef(name = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
 )
 @MetaStateDef(value = NodeDef(name = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
@@ -60,7 +59,9 @@ import java.time.Duration
 )
 abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) {
 
-    protected var connection: GenericPortController? = null
+    private var _connection: GenericPortController? = null
+    protected val connection: GenericPortController
+        get() = _connection ?: throw RuntimeException("Not connected")
 
     var connected by booleanState(CONNECTED_STATE)
     var debug by booleanState(DEBUG_STATE)
@@ -79,7 +80,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     @Throws(ControlException::class)
     override fun computeState(stateName: String): Any {
         return if (CONNECTED_STATE == stateName) {
-            connection?.port?.isOpen ?: false
+            connection.port.isOpen
         } else {
             super.computeState(stateName)
         }
@@ -88,12 +89,12 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     private fun setDebugMode(debugMode: Boolean) {
         //Add debug listener
         if (debugMode) {
-            connection?.apply {
+            connection.apply {
                 onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
                 onError("$name[debug]") { message, error -> logger.error("Device {} exception: {}", name, message, error) }
             }
         } else {
-            connection?.apply {
+            connection.apply {
                 removePhraseListener("$name[debug]")
                 removeErrorListener("$name[debug]")
             }
@@ -104,16 +105,20 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     @Throws(ControlException::class)
     override fun requestStateChange(stateName: String, value: Value) {
         when (stateName) {
-            CONNECTED_STATE -> if (value.booleanValue()) {
-                connection?.open() ?: throw ControlException("Not connected to port")
-                updateLogicalState(CONNECTED_STATE, true)
-            } else {
-                connection?.close()
-                connection = null
-                updateLogicalState(CONNECTED_STATE, false)
-            }
+            CONNECTED_STATE -> connect(value.booleanValue())
             DEBUG_STATE -> setDebugMode(value.booleanValue())
             else -> super.requestStateChange(stateName, value)
+        }
+    }
+
+    protected open fun connect(connected: Boolean){
+        if (connected) {
+            connection.open()
+            updateLogicalState(CONNECTED_STATE, true)
+        } else {
+            _connection?.close()
+            _connection = null
+            updateLogicalState(CONNECTED_STATE, false)
         }
     }
 
@@ -123,10 +128,10 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     }
 
     private fun setupConnection(portMeta: Meta) {
-        connection?.close()
-        this.connection = connect(portMeta)
+        _connection?.close()
+        this._connection = connect(portMeta)
         if (connected) {
-            connection?.open()
+            connection.open()
         }
         setDebugMode(debug)
         updateLogicalMetaState(PORT_STATE, portMeta)
@@ -149,18 +154,15 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     }
 
     protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout): String {
-        return connection?.sendAndWait(request, timeout) { true } ?: throw ControlException("Not connected to port")
+        return connection.sendAndWait(request, timeout) { true }
     }
 
     protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout, predicate: (String) -> Boolean): String {
-        return connection?.sendAndWait(request, timeout, predicate) ?: throw ControlException("Not connected to port")
+        return connection.sendAndWait(request, timeout, predicate)
     }
 
     protected fun send(message: String) {
-        if (connection == null) {
-            throw ControlException("Not connected to port")
-        }
-        connection?.send(message)
+        connection.send(message)
         dispatchEvent(
                 EventBuilder
                         .make(name)

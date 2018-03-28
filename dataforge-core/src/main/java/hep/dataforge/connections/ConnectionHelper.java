@@ -124,7 +124,13 @@ public class ConnectionHelper implements Connectible {
     public <T> Stream<T> connections(String role, Class<T> type) {
         return connections.entrySet().stream()
                 .filter(entry -> type.isInstance(entry.getKey()))
-                .filter(entry -> entry.getValue().stream().anyMatch(r -> r.matches(role)))
+                .filter(entry -> role.isEmpty() || entry.getValue().stream().anyMatch(r -> r.matches(role)))
+                .map(entry -> type.cast(entry.getKey()));
+    }
+
+    public <T> Stream<T> connections(Class<T> type) {
+        return connections.entrySet().stream()
+                .filter(entry -> type.isInstance(entry.getKey()))
                 .map(entry -> type.cast(entry.getKey()));
     }
 

@@ -21,7 +21,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.providers.Provides;
 import hep.dataforge.providers.ProvidesNames;
 import hep.dataforge.utils.ContextMetaFactory;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.HashSet;
 import java.util.Objects;
@@ -46,7 +45,7 @@ public class ModelManager extends BasicPlugin {
      * @param meta
      * @return
      */
-    public static Optional<Model> restoreModel(@Nullable Context context, Meta meta) {
+    public static Optional<Model> restoreModel(Context context, Meta meta) {
         return context.optFeature(ModelManager.class).flatMap(manager -> manager.getModel(meta));
     }
 

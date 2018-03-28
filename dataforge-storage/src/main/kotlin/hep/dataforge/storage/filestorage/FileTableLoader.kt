@@ -123,7 +123,7 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
     @Throws(StorageException::class)
     override fun push(dp: Values) {
         //Notifying the listener
-        connectionHelper.forEachConnection(PointListener::class.java) {
+        connectionHelper.forEachConnection(ValuesListener::class.java) {
             it.accept(dp)
         }
 

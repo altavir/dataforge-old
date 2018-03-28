@@ -113,28 +113,28 @@ class NodeDelegate<out T>(
  * Delegate value and meta getter to target meta using thisref description
  */
 
-fun Meta.value(valueName: String? = null, def: Value? = null): ReadOnlyProperty<Any, Value> =
+fun Meta.value(valueName: String? = null, def: Value? = null): ReadOnlyProperty<Any?, Value> =
         ValueDelegate(this, valueName, def) { it }
 
-fun Meta.stringValue(valueName: String? = null, def: String? = null): ReadOnlyProperty<Any, String> =
+fun Meta.stringValue(valueName: String? = null, def: String? = null): ReadOnlyProperty<Any?, String> =
         ValueDelegate(this, valueName, def) { it.stringValue() }
 
-fun Meta.booleanValue(valueName: String? = null, def: Boolean? = null): ReadOnlyProperty<Any, Boolean> =
+fun Meta.booleanValue(valueName: String? = null, def: Boolean? = null): ReadOnlyProperty<Any?, Boolean> =
         ValueDelegate(this, valueName, def) { it.booleanValue() }
 
-fun Meta.timeValue(valueName: String? = null, def: Instant? = null): ReadOnlyProperty<Any, Instant> =
+fun Meta.timeValue(valueName: String? = null, def: Instant? = null): ReadOnlyProperty<Any?, Instant> =
         ValueDelegate(this, valueName, def) { it.timeValue() }
 
-fun Meta.numberValue(valueName: String? = null, def: Number? = null): ReadOnlyProperty<Any, Number> =
+fun Meta.numberValue(valueName: String? = null, def: Number? = null): ReadOnlyProperty<Any?, Number> =
         ValueDelegate(this, valueName, def) { it.numberValue() }
 
-fun Meta.doubleValue(valueName: String? = null, def: Double? = null): ReadOnlyProperty<Any, Double> =
+fun Meta.doubleValue(valueName: String? = null, def: Double? = null): ReadOnlyProperty<Any?, Double> =
         ValueDelegate(this, valueName, def) { it.doubleValue() }
 
-fun Meta.intValue(valueName: String? = null, def: Int? = null): ReadOnlyProperty<Any, Int> =
+fun Meta.intValue(valueName: String? = null, def: Int? = null): ReadOnlyProperty<Any?, Int> =
         ValueDelegate(this, valueName, def) { it.intValue() }
 
-fun <T> Meta.customValue(valueName: String? = null, def: T? = null, conv: (Value) -> T): ReadOnlyProperty<Any, T> =
+fun <T> Meta.customValue(valueName: String? = null, def: T? = null, conv: (Value) -> T): ReadOnlyProperty<Any?, T> =
         ValueDelegate(this, valueName, def, conv)
 
 fun Meta.node(nodeName: String? = null, def: Meta? = null): ReadOnlyProperty<Any, Meta> =

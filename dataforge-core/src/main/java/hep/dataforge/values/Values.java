@@ -17,6 +17,7 @@ package hep.dataforge.values;
 
 import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
+import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.names.NameSetContainer;
 
 import java.util.HashMap;
@@ -25,7 +26,7 @@ import java.util.Map;
 /**
  * A named set of values with fixed name list.
  */
-public interface Values extends NameSetContainer, ValueProvider {
+public interface Values extends NameSetContainer, ValueProvider, MetaMorph {
 
     /**
      * Faster search for existing values

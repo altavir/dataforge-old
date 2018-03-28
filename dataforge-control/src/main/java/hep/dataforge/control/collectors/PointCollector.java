@@ -15,8 +15,8 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.tables.PointListener;
 import hep.dataforge.tables.ValueMap;
+import hep.dataforge.tables.ValuesListener;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
 
@@ -34,16 +34,16 @@ import java.util.concurrent.ConcurrentHashMap;
 public class PointCollector implements ValueCollector {
 
     private final List<String> names;
-    private final PointListener consumer;
+    private final ValuesListener consumer;
     private final Map<String, Value> valueMap = new ConcurrentHashMap<>();
     //TODO make time averaging?
 
-    public PointCollector(PointListener consumer, Collection<String> names) {
+    public PointCollector(ValuesListener consumer, Collection<String> names) {
         this.names = new ArrayList<>(names);
         this.consumer = consumer;
     }
 
-    public PointCollector(PointListener consumer, String... names) {
+    public PointCollector(ValuesListener consumer, String... names) {
         this.names = Arrays.asList(names);
         this.consumer = consumer;
     }

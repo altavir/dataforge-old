@@ -81,15 +81,25 @@ fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = CommonPoo
             }
 }
 
-infix fun <R> Goal<R>.ui(func: (R) -> Unit): Goal<R> {
-    this.onComplete(uiExecutor, BiConsumer { res, _ ->
-        if (res != null) {
-            func.invoke(res);
-        }
-    });
-    return this;
+infix fun <R> Goal<R>.ui(action: (R) -> Unit): Goal<R> {
+    return this.apply {
+        onComplete(uiExecutor, BiConsumer { res, _ ->
+            if (res != null) {
+                action(res);
+            }
+        })
+    }
 }
 
+infix fun <R> Goal<R>.except(action: (Throwable) -> Unit): Goal<R> {
+    return this.apply {
+        onComplete(uiExecutor, BiConsumer { _, ex ->
+            if (ex != null) {
+                action(ex);
+            }
+        })
+    }
+}
 
 /**
  * Add a listener that performs some update action on any window size change

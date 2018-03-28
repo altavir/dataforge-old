@@ -183,19 +183,6 @@ open class FileStorage : AbstractStorage {
         }
     }
 
-    @Synchronized
-    protected open fun updateDirectoryLoaders() {
-        try {
-            this.shelves.clear()
-            this.loaders.clear()
-
-            Files.list(dataDir).forEach{ this.updateFile(it) }
-        } catch (ex: IOException) {
-            throw RuntimeException(ex)
-        }
-
-    }
-
     protected fun buildDirectoryMeta(directory: Path): Meta {
         return Meta.empty()
         //        return new MetaBuilder("storage")
@@ -306,7 +293,14 @@ open class FileStorage : AbstractStorage {
 
     @Throws(StorageException::class)
     override fun refresh() {
-        updateDirectoryLoaders()
+        try {
+            this.shelves.clear()
+            this.loaders.clear()
+
+            Files.list(dataDir).forEach{ this.updateFile(it) }
+        } catch (ex: IOException) {
+            throw RuntimeException(ex)
+        }
     }
 
     companion object {

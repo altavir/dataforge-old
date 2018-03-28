@@ -25,6 +25,6 @@ import java.util.function.Consumer;
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-public interface PointListener extends Consumer<Values> {
+public interface ValuesListener extends Consumer<Values> {
 
 }

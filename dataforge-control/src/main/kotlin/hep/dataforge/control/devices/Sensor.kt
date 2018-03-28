@@ -35,6 +35,7 @@ import hep.dataforge.io.messages.RESPONSE_SUCCESS_KEY
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
+import hep.dataforge.meta.MetaMorph
 import hep.dataforge.states.MetaStateDef
 import hep.dataforge.states.MetaStateDefs
 import hep.dataforge.states.StateDef
@@ -222,10 +223,10 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         return buildMeta("result") {
             RESULT_SUCCESS to true
             RESULT_TIMESTAMP to timestamp
-            if (value is Meta) {
-                setNode(RESULT_VALUE, value)
-            } else {
-                RESULT_VALUE to value
+            when (value) {
+                is Meta -> setNode(RESULT_VALUE, value)
+                is MetaMorph -> setNode(RESULT_VALUE, value.toMeta())
+                else -> RESULT_VALUE to value
             }
         }
     }
