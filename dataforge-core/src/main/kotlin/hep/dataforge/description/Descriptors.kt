@@ -154,6 +154,23 @@ object Descriptors {
     }
 
     @JvmStatic
+    fun buildDescriptorMeta(nodeDef: NodeDef): Meta {
+        var nodeMeta = MetaBuilder("node")
+                .putValue("name", nodeDef.name)
+                .putValue("info", nodeDef.info)
+                .putValue("required", nodeDef.required)
+                .putValue("multiple", nodeDef.multiple)
+                .putValue("tags", nodeDef.tags)
+
+        // If descriptor target is present, use it
+        if (!nodeDef.from.isEmpty()) {
+            val descriptor = buildDescriptor(nodeDef.from)
+            nodeMeta = MergeRule.replace(nodeMeta, descriptor.meta)
+        }
+        return nodeMeta
+    }
+
+    @JvmStatic
     fun buildDescriptorMeta(element: AnnotatedElement): MetaBuilder {
         // applying meta from resource file
         val res = if (element.isAnnotationPresent(DescriptorFileDef::class.java)) {
@@ -174,20 +191,7 @@ object Descriptors {
                     if (exists) {
                         LoggerFactory.getLogger(Descriptors::class.java).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.name)
                     } else {
-
-                        var nodeMeta = MetaBuilder("node")
-                                .putValue("name", nodeDef.name)
-                                .putValue("info", nodeDef.info)
-                                .putValue("required", nodeDef.required)
-                                .putValue("multiple", nodeDef.multiple)
-                                .putValue("tags", nodeDef.tags)
-
-                        // If descriptor target is present, use it
-                        if (!nodeDef.from.isEmpty()) {
-                            val descriptor = buildDescriptor(nodeDef.from)
-                            nodeMeta = MergeRule.replace(nodeMeta, descriptor.meta)
-                        }
-                        putDescription(res, nodeMeta)
+                        putDescription(res, buildDescriptorMeta(nodeDef))
                     }
 
                 }

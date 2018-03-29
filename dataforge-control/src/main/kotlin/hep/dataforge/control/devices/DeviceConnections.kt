@@ -29,7 +29,7 @@ class SensorResultListener(capacity: Int = 50, private val coroutineContext: Cor
     val results = Channel<Meta>(capacity)
     val messages = Channel<String>(capacity)
 
-    override fun notifyDeviceStateChanged(device: Device, name: String, state: Value) {
+    override fun notifyStateChanged(device: Device, name: String, state: Value) {
         async(coroutineContext) {
             when (name) {
                 Sensor.MEASUREMENT_MESSAGE_STATE -> messages.send(state.stringValue())
@@ -37,7 +37,7 @@ class SensorResultListener(capacity: Int = 50, private val coroutineContext: Cor
         }
     }
 
-    override fun notifyDeviceStateChanged(device: Device, name: String, state: Meta) {
+    override fun notifyMetaStateChanged(device: Device, name: String, state: Meta) {
         async(coroutineContext) {
             when (name) {
                 Sensor.MEASUREMENT_RESULT_STATE -> results.send(state)

@@ -22,14 +22,21 @@ import hep.dataforge.context.Global
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
+import hep.dataforge.kodex.listAnnotations
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
+import hep.dataforge.meta.MetaMorph
 import hep.dataforge.names.AnonymousNotAlowed
+import hep.dataforge.states.*
 import hep.dataforge.utils.Optionals
 import hep.dataforge.values.Value
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.selects.select
 import java.time.Duration
 import java.util.*
 import java.util.concurrent.*
+import kotlin.collections.HashMap
 
 /**
  *
@@ -44,12 +51,31 @@ import java.util.concurrent.*
 @AnonymousNotAlowed
 abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
-    private val states = HashMap<String, Value>()
-    private val metaStates = HashMap<String, Meta>()
+    private val stateMap: MutableMap<String, State<*>> = HashMap()
+
+    private val stateListenerJob: Job = launch {
+        select<Unit> {
+            while(true) {
+                states.forEach { state ->
+                    state.channel.onReceive {
+                        onStateChange(state.name, it)
+                    }
+                }
+            }
+        }
+    }
+
+    override val states: Collection<State<*>>
+        get() = stateMap.values
+
     private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this, this.logger) }
 
     override fun getConnectionHelper(): ConnectionHelper {
         return _connectionHelper
+    }
+
+    override fun optState(stateName: String): State<*>? {
+        return stateMap[stateName]
     }
 
     /**
@@ -67,10 +93,16 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     init {
         //initialize states
-        stateDefs.stream()
-                .filter { !it.value.def.isEmpty() }
-                .forEach { states[it.value.name] = Value.of(it.value.def) }
-        //TODO initialize states from meta
+        listAnnotations(javaClass, StateDef::class.java, true).forEach {
+            initState(ValueState(it))
+        }
+        listAnnotations(javaClass, MetaStateDef::class.java, true).forEach {
+            initState(MetaState(it))
+        }
+    }
+
+    protected fun initState(state: State<*>) {
+        this.stateMap[state.name] = state
     }
 
 
@@ -91,6 +123,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
             }
         }
         updateLogicalState(Device.INITIALIZED_STATE, false)
+        stateListenerJob.cancel(CancellationException("Device is shut down"))
         executor.shutdown()
     }
 
@@ -114,12 +147,12 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     /**
      * Override to apply custom internal reaction of state change
      */
-    protected open fun onStateChange(stateName: String, oldState: Value?, newState: Value) {
+    protected open fun onStateChange(stateName: String, newState: Any) {
 
     }
 
     /**
-     * Update logical state if it is changed
+     * Update logical state if it is changed. If argument is Meta or MetaMorph, then redirect to {@link updateLogicalMetaState}
      *
      * @param stateName
      * @param stateValue
@@ -127,6 +160,8 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     protected fun updateLogicalState(stateName: String, stateValue: Any) {
         if (stateValue is Meta) {
             updateLogicalMetaState(stateName, stateValue)
+        } else if (stateValue is MetaMorph) {
+            updateLogicalMetaState(stateName, stateValue.toMeta())
         } else {
             val oldState = this.states[stateName]
             val newState = Value.of(stateValue)
@@ -141,7 +176,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                         logger.info("State {} changed to {}", stateName, newState)
                     }
                     forEachConnection(DeviceListener::class.java) {
-                        it.notifyDeviceStateChanged(this, stateName, newState)
+                        it.notifyStateChanged(this, stateName, newState)
                     }
                     onStateChange(stateName, oldState, newState)
                 }
@@ -169,7 +204,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                     logger.info("Metastate {} changed to {}", stateName, metaStateValue)
                 }
                 forEachConnection(DeviceListener::class.java) {
-                    it.notifyDeviceStateChanged(this, stateName, metaStateValue)
+                    it.notifyMetaStateChanged(this, stateName, metaStateValue)
                 }
                 onMetaStateChange(stateName, oldState, metaStateValue)
             }
@@ -318,14 +353,6 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     }
 
-    override fun optState(stateName: String): Optional<Value> {
-        return if (states.containsKey(stateName)) {
-            Optional.ofNullable(states[stateName])
-        } else {
-            super.optState(stateName)
-        }
-    }
-
     fun getMetaStateInFuture(stateName: String): Future<Meta> {
         return call {
             this.metaStates.computeIfAbsent(stateName) {
@@ -338,14 +365,6 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                     }
                 }
             }
-        }
-    }
-
-    override fun optMetaState(stateName: String): Optional<Meta> {
-        return if (states.containsKey(stateName)) {
-            Optional.ofNullable(metaStates[stateName])
-        } else {
-            super.optMetaState(stateName)
         }
     }
 

@@ -31,9 +31,7 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.io.messages.RESPONSE_SUCCESS_KEY
 import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.states.MetaStateDef
@@ -115,17 +113,6 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     }
 
     /**
-     * update result
-     */
-    protected fun notifyResult(result: Meta) {
-        if (result.getBoolean(RESPONSE_SUCCESS_KEY, true)) {
-            updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
-        } else {
-            updateLogicalMetaState(MEASUREMENT_ERROR_STATE, result)
-        }
-    }
-
-    /**
      * Notify measurement state changed
      */
     protected fun notifyMeasurementState(state: MeasurementState) {
@@ -187,7 +174,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     protected fun startMeasurement(action: () -> Meta) {
         job = launch {
             notifyMeasurementState(MeasurementState.IN_PROGRESS)
-            val res = action.invoke()
+            val res = action()
             notifyResult(res)
             notifyMeasurementState(MeasurementState.STOPPED)
         }
@@ -219,9 +206,8 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         }
     }
 
-    protected fun produceResult(value: Any, timestamp: Instant = Instant.now()): Meta {
-        return buildMeta("result") {
-            RESULT_SUCCESS to true
+    protected fun notifyResult(value: Any, timestamp: Instant = Instant.now()) {
+        val result = buildMeta("result") {
             RESULT_TIMESTAMP to timestamp
             when (value) {
                 is Meta -> setNode(RESULT_VALUE, value)
@@ -229,11 +215,11 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
                 else -> RESULT_VALUE to value
             }
         }
+        updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
     }
 
-    protected fun produceError(value: Any, timestamp: Instant = Instant.now()): Meta {
-        return buildMeta("error") {
-            RESULT_SUCCESS to false
+    protected fun notifyError(value: Any, timestamp: Instant = Instant.now()) {
+        val result = buildMeta("error") {
             RESULT_TIMESTAMP to timestamp
             if (value is Meta) {
                 setNode(RESULT_VALUE, value)
@@ -241,7 +227,9 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
                 RESULT_VALUE to value
             }
         }
+        updateLogicalMetaState(MEASUREMENT_ERROR_STATE, result)
     }
+
 
     protected fun updateMessage(message: String) {
         updateLogicalState(MEASUREMENT_MESSAGE_STATE, message)

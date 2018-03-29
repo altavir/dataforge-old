@@ -36,11 +36,11 @@ class Aggregator<out R>(buffer: Int = 100,val key: String = Sensor.MEASUREMENT_R
         get() = converter.invoke(device.getMetaState(Sensor.MEASUREMENT_RESULT_STATE))
 
 
-    override fun notifyDeviceStateChanged(device: Device, name: String, state: Value) {
+    override fun notifyStateChanged(device: Device, name: String, state: Value) {
         //Do nothing
     }
 
-    override fun notifyDeviceStateChanged(device: Device, name: String, state: Meta) {
+    override fun notifyMetaStateChanged(device: Device, name: String, state: Meta) {
         if (name == key) {
             launch {
                 channel.send(converter.invoke(state))

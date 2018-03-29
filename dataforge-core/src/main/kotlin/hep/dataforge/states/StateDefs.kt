@@ -19,18 +19,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.states;
+package hep.dataforge.states
 
-import java.lang.annotation.*;
+import java.lang.annotation.Inherited
 
 /**
  *
  * @author Alexander Nozik
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
+@MustBeDocumented
 @Inherited
-public @interface StateDefs {
-    StateDef[] value();
-}
+annotation class StateDefs(vararg val value: StateDef)

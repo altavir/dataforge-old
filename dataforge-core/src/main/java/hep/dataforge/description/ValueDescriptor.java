@@ -12,6 +12,7 @@ import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.values.Value;
 import hep.dataforge.values.ValueType;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -62,6 +63,12 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
         return new ValueDescriptor(builder);
     }
 
+    public static ValueDescriptor empty(String valueName){
+        MetaBuilder builder = new MetaBuilder("value")
+                .setValue("name", valueName);
+        return new ValueDescriptor(builder);
+    }
+
     public ValueDescriptor(Meta meta) {
         super(meta);
     }
@@ -98,6 +105,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      *
      * @return
      */
+    @NotNull
     @Override
     public String getName() {
         return getMeta().getString("name", "");

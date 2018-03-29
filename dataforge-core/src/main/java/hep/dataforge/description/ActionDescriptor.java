@@ -30,10 +30,6 @@ import hep.dataforge.meta.MetaBuilder;
  */
 public class ActionDescriptor extends NodeDescriptor {
 
-    public ActionDescriptor(String name) {
-        super(name);
-    }
-
     public ActionDescriptor(Meta meta) {
         super(meta);
     }

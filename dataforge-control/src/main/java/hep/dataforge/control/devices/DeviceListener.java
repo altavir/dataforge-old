@@ -33,7 +33,7 @@ public interface DeviceListener {
      * @param name   the name of the state
      * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value state);
+    void notifyStateChanged(Device device, String name, Value state);
 
     /**
      * Notify meta state changed
@@ -41,7 +41,7 @@ public interface DeviceListener {
      * @param name
      * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Meta state);
+    void notifyMetaStateChanged(Device device, String name, Meta state);
 
 //    /**
 //     * Notify that device configuration has changed. By default is ignored.

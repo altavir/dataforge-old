@@ -19,41 +19,15 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.states;
+package hep.dataforge.states
 
-import hep.dataforge.description.NodeDef;
-
-import java.lang.annotation.*;
+import java.lang.annotation.Inherited
 
 /**
- * The definition of state for a stateful object.
  *
  * @author Alexander Nozik
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
+@Target(AnnotationTarget.CLASS, AnnotationTarget.FILE)
+@MustBeDocumented
 @Inherited
-@Repeatable(MetaStateDefs.class)
-public @interface MetaStateDef {
-
-    /**
-     * The definition for metastate content
-     * @return
-     */
-    NodeDef value();
-
-    /**
-     * This state could be read
-     *
-     * @return
-     */
-    boolean readable() default true;
-
-    /**
-     * This state could be written
-     *
-     * @return
-     */
-    boolean writable() default false;
-}
+annotation class MetaStateDefs(vararg val value: MetaStateDef)
