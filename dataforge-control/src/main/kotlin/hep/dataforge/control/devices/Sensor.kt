@@ -116,11 +116,11 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * Notify measurement state changed
      */
     protected fun notifyMeasurementState(state: MeasurementState) {
-        updateLogicalState(MEASUREMENT_STATE_STATE, state.name)
+        updateState(MEASUREMENT_STATE_STATE, state.name)
         when (state) {
-            MeasurementState.STOPPED -> updateLogicalState(MEASURING_STATE, false)
-            MeasurementState.IN_PROGRESS -> updateLogicalState(MEASURING_STATE, true)
-            MeasurementState.WAITING -> updateLogicalState(MEASURING_STATE, true)
+            MeasurementState.STOPPED -> updateState(MEASURING_STATE, false)
+            MeasurementState.IN_PROGRESS -> updateState(MEASURING_STATE, true)
+            MeasurementState.WAITING -> updateState(MEASURING_STATE, true)
             else -> {
             }
         }
@@ -215,7 +215,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
                 else -> RESULT_VALUE to value
             }
         }
-        updateLogicalMetaState(MEASUREMENT_RESULT_STATE, result)
+        updateState(MEASUREMENT_RESULT_STATE, result)
     }
 
     protected fun notifyError(value: Any, timestamp: Instant = Instant.now()) {
@@ -227,16 +227,16 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
                 RESULT_VALUE to value
             }
         }
-        updateLogicalMetaState(MEASUREMENT_ERROR_STATE, result)
+        updateState(MEASUREMENT_ERROR_STATE, result)
     }
 
 
     protected fun updateMessage(message: String) {
-        updateLogicalState(MEASUREMENT_MESSAGE_STATE, message)
+        updateState(MEASUREMENT_MESSAGE_STATE, message)
     }
 
     protected fun updateProgress(progress: Double) {
-        updateLogicalState(MEASUREMENT_PROGRESS_STATE, progress)
+        updateState(MEASUREMENT_PROGRESS_STATE, progress)
     }
 
     companion object {

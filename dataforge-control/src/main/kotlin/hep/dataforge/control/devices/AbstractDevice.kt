@@ -55,9 +55,9 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     private val stateListenerJob: Job = launch {
         select<Unit> {
-            while(true) {
+            while (true) {
                 states.forEach { state ->
-                    state.channel.onReceive {
+                    state.future.onAwait {
                         onStateChange(state.name, it)
                     }
                 }
@@ -109,7 +109,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     @Throws(ControlException::class)
     override fun init() {
         logger.info("Initializing device '{}'...", name)
-        updateLogicalState(Device.INITIALIZED_STATE, true)
+        updateState(Device.INITIALIZED_STATE, true)
     }
 
     @Throws(ControlException::class)
@@ -122,7 +122,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                 logger.error("Failed to close connection", e)
             }
         }
-        updateLogicalState(Device.INITIALIZED_STATE, false)
+        updateState(Device.INITIALIZED_STATE, false)
         stateListenerJob.cancel(CancellationException("Device is shut down"))
         executor.shutdown()
     }
@@ -157,57 +157,22 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
      * @param stateName
      * @param stateValue
      */
-    protected fun updateLogicalState(stateName: String, stateValue: Any) {
-        if (stateValue is Meta) {
-            updateLogicalMetaState(stateName, stateValue)
-        } else if (stateValue is MetaMorph) {
-            updateLogicalMetaState(stateName, stateValue.toMeta())
-        } else {
-            val oldState = this.states[stateName]
-            val newState = Value.of(stateValue)
-            //Notify only if state really changed
-            if (newState != oldState) {
-                //Update logical state and notify listeners.
-                execute {
-                    this.states[stateName] = newState
-                    if (newState.isNull) {
-                        logger.info("State {} is reset", stateName)
-                    } else {
-                        logger.info("State {} changed to {}", stateName, newState)
-                    }
-                    forEachConnection(DeviceListener::class.java) {
-                        it.notifyStateChanged(this, stateName, newState)
-                    }
-                    onStateChange(stateName, oldState, newState)
-                }
+    protected fun updateState(stateName: String, stateValue: Any?) {
+        val state = stateMap.getOrPut(stateName){
+            logger.warn("State with name $stateName is not registered. Creating new logical state")
+            when(stateValue){
+                is Meta -> MetaState(stateName).also { initState(it) }
+                is MetaMorph ->  MorphState(stateName, (stateValue as MetaMorph)::class)
+                else -> ValueState(stateName).also { initState(it) }
             }
         }
-    }
 
-    /**
-     * Override to apply custom internal reaction of metastate change
-     */
-    protected open fun onMetaStateChange(stateName: String, oldState: Meta?, newState: Meta) {
-
-    }
-
-    protected fun updateLogicalMetaState(stateName: String, metaStateValue: Meta) {
-        val oldState = this.metaStates[stateName]
-        //Notify only if state really changed
-        if (metaStateValue != oldState) {
-            //Update logical state and notify listeners.
-            execute {
-                this.metaStates[stateName] = metaStateValue
-                if (metaStateValue.isEmpty) {
-                    logger.info("Metastate {} is reset", stateName)
-                } else {
-                    logger.info("Metastate {} changed to {}", stateName, metaStateValue)
-                }
-                forEachConnection(DeviceListener::class.java) {
-                    it.notifyMetaStateChanged(this, stateName, metaStateValue)
-                }
-                onMetaStateChange(stateName, oldState, metaStateValue)
-            }
+        if(stateValue==null){
+            state.invalidate()
+            logger.info("State {} is reset", stateName)
+        } else {
+            state.update(stateValue)
+            logger.info("State {} changed to {}", stateName, stateValue)
         }
     }
 
@@ -225,14 +190,8 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     /**
      * Reset state to its default value if it is present
      */
-    fun resetState(stateName: String) {
-        run {
-            this.states.remove(stateName)
-            stateDefs.stream()
-                    .filter { it.value.name == stateName }
-                    .findFirst()
-                    .ifPresent { value -> states.put(stateName, Value.of(value)) }
-        }
+    fun invalidateState(stateName: String) {
+        stateMap[stateName]?.invalidate()
     }
 
     /**
@@ -264,7 +223,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                 shutdown()
             }
         } else {
-            updateLogicalState(stateName, value)
+            updateState(stateName, value)
         }
     }
 
@@ -277,7 +236,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
      */
     @Throws(ControlException::class)
     protected open fun requestMetaStateChange(stateName: String, meta: Meta) {
-        updateLogicalMetaState(stateName, meta)
+        updateState(stateName, meta)
     }
 
 

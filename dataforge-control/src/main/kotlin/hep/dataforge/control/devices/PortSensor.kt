@@ -99,7 +99,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
                 removeErrorListener("$name[debug]")
             }
         }
-        updateLogicalState(DEBUG_STATE, debugMode)
+        updateState(DEBUG_STATE, debugMode)
     }
 
     @Throws(ControlException::class)
@@ -114,11 +114,11 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     protected open fun connect(connected: Boolean){
         if (connected) {
             connection.open()
-            updateLogicalState(CONNECTED_STATE, true)
+            updateState(CONNECTED_STATE, true)
         } else {
             _connection?.close()
             _connection = null
-            updateLogicalState(CONNECTED_STATE, false)
+            updateState(CONNECTED_STATE, false)
         }
     }
 
@@ -134,8 +134,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
             connection.open()
         }
         setDebugMode(debug)
-        updateLogicalMetaState(PORT_STATE, portMeta)
-        updateLogicalState(PORT_STATE, portMeta)
+        updateState(PORT_STATE, portMeta)
     }
 
     override fun requestMetaStateChange(stateName: String, meta: Meta) {

@@ -19,10 +19,7 @@ package hep.dataforge.meta
 import java.io.ObjectStreamException
 import java.io.Serializable
 import kotlin.reflect.KClass
-import kotlin.reflect.full.companionObjectInstance
-import kotlin.reflect.full.findAnnotation
-import kotlin.reflect.full.isSubclassOf
-import kotlin.reflect.full.isSuperclassOf
+import kotlin.reflect.full.*
 import kotlin.reflect.jvm.javaType
 
 
@@ -129,6 +126,16 @@ inline fun <reified T : Any> Meta.morph(): T {
     return MetaMorph.morph(T::class, this);
 }
 
+
+fun <T:Any> MetaMorph.morph(type: KClass<T>): T{
+    return when {
+        type.isSuperclassOf(this::class) -> type.cast(this)
+        type.isSuperclassOf(Meta::class) -> type.cast(toMeta())
+        type.isSubclassOf(MetaMorph::class) -> toMeta().morph(type)
+        else -> throw MorphException(javaClass, type.java)
+    }
+}
+
 /**
  * Converts MetaMorph to Meta or another metamorph using transformation to meta and back.
  * If the conversion is failed, catch the exception and rethrow it as [MorphException]
@@ -138,12 +145,5 @@ inline fun <reified T : Any> Meta.morph(): T {
  * @return
  */
 inline fun <reified T : Any> MetaMorph.morph(): T {
-    val type = T::class.java
-    return when {
-        T::class.isSuperclassOf(this::class) -> this as T
-        T::class.isSuperclassOf(Meta::class) -> toMeta() as T
-        T::class.isSubclassOf(MetaMorph::class) -> toMeta().morph<T>()
-        else -> throw MorphException(javaClass, type)
-    }
-
+    return this.morph(T::class)
 }
