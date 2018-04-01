@@ -63,28 +63,28 @@ public interface Value extends Serializable {
         try {
             int val = Integer.parseInt(str);
             return of(val);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException ignored) {
         }
 
         //Trying to get double        
         try {
             double val = Double.parseDouble(str);
             return of(val);
-        } catch (NumberFormatException ex) {
+        } catch (NumberFormatException ignored) {
         }
 
         //Trying to get Instant
         try {
             Instant val = Instant.parse(str);
             return of(val);
-        } catch (DateTimeParseException ex) {
+        } catch (DateTimeParseException ignored) {
         }
 
         //Trying to parse LocalDateTime
         try {
             Instant val = LocalDateTime.parse(str).toInstant(ZoneOffset.UTC);
             return of(val);
-        } catch (DateTimeParseException ex) {
+        } catch (DateTimeParseException ignored) {
         }
 
         if ("true".equals(str) || "false".equals(str)) {
@@ -148,8 +148,7 @@ public interface Value extends Serializable {
     }
 
     static Value of(Collection<Object> list) {
-        List<Object> l = new ArrayList<>();
-        l.addAll(list);
+        List<Object> l = new ArrayList<>(list);
         if (l.isEmpty()) {
             return getNull();
         } else if (l.size() == 1) {
@@ -185,8 +184,7 @@ public interface Value extends Serializable {
     static Value of(Object obj) {
         if (obj == null) {
             return Value.NULL;
-        }
-        if (obj instanceof Value) {
+        } else if (obj instanceof Value) {
             //это можно делать так как Value неизменяемый
             return (Value) obj;
         } else if (obj instanceof Number) {
@@ -205,6 +203,8 @@ public interface Value extends Serializable {
             return of(((Stream) obj).collect(Collectors.toList()));
         } else if (obj.getClass().isArray()) {
             return of((Object[]) obj);
+        } else if (obj instanceof Enum){
+            return of(((Enum) obj).name());
         } else {
             return of(obj.toString());
         }

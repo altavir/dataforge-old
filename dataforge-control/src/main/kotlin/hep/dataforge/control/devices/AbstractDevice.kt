@@ -19,24 +19,23 @@ import hep.dataforge.connections.Connection
 import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import hep.dataforge.control.connections.Roles
+import hep.dataforge.control.devices.Device.INITIALIZED_STATE
+import hep.dataforge.description.ValueDef
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.listAnnotations
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
-import hep.dataforge.meta.MetaMorph
 import hep.dataforge.names.AnonymousNotAlowed
 import hep.dataforge.states.*
-import hep.dataforge.utils.Optionals
-import hep.dataforge.values.Value
+import hep.dataforge.values.ValueType
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.selects.select
 import java.time.Duration
-import java.util.*
 import java.util.concurrent.*
-import kotlin.collections.HashMap
 
 /**
  *
@@ -49,9 +48,27 @@ import kotlin.collections.HashMap
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
+@StateDef(value = ValueDef(name = INITIALIZED_STATE, type = [ValueType.BOOLEAN], def = "false", info = "Initialization state of the device"), writable = true)
 abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
-    private val stateMap: MutableMap<String, State<*>> = HashMap()
+    override val states = StateHolder()
+
+
+    val initializedState: ValueState = valueState(INITIALIZED_STATE) { old, value ->
+        if(old != value) {
+            if (value.booleanValue()) {
+                init()
+            } else {
+                shutdown()
+            }
+        }
+        value
+    }
+
+    /**
+     * Initialization state
+     */
+    val init by initializedState.boolean
 
     private val stateListenerJob: Job = launch {
         select<Unit> {
@@ -65,17 +82,10 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         }
     }
 
-    override val states: Collection<State<*>>
-        get() = stateMap.values
-
     private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this, this.logger) }
 
     override fun getConnectionHelper(): ConnectionHelper {
         return _connectionHelper
-    }
-
-    override fun optState(stateName: String): State<*>? {
-        return stateMap[stateName]
     }
 
     /**
@@ -94,22 +104,17 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     init {
         //initialize states
         listAnnotations(javaClass, StateDef::class.java, true).forEach {
-            initState(ValueState(it))
+            states.init(ValueState(it))
         }
         listAnnotations(javaClass, MetaStateDef::class.java, true).forEach {
-            initState(MetaState(it))
+            states.init(MetaState(it))
         }
     }
-
-    protected fun initState(state: State<*>) {
-        this.stateMap[state.name] = state
-    }
-
 
     @Throws(ControlException::class)
     override fun init() {
         logger.info("Initializing device '{}'...", name)
-        updateState(Device.INITIALIZED_STATE, true)
+        states.update(INITIALIZED_STATE, true)
     }
 
     @Throws(ControlException::class)
@@ -122,7 +127,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                 logger.error("Failed to close connection", e)
             }
         }
-        updateState(Device.INITIALIZED_STATE, false)
+        states.update(INITIALIZED_STATE, false)
         stateListenerJob.cancel(CancellationException("Device is shut down"))
         executor.shutdown()
     }
@@ -147,32 +152,9 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     /**
      * Override to apply custom internal reaction of state change
      */
-    protected open fun onStateChange(stateName: String, newState: Any) {
-
-    }
-
-    /**
-     * Update logical state if it is changed. If argument is Meta or MetaMorph, then redirect to {@link updateLogicalMetaState}
-     *
-     * @param stateName
-     * @param stateValue
-     */
-    protected fun updateState(stateName: String, stateValue: Any?) {
-        val state = stateMap.getOrPut(stateName){
-            logger.warn("State with name $stateName is not registered. Creating new logical state")
-            when(stateValue){
-                is Meta -> MetaState(stateName).also { initState(it) }
-                is MetaMorph ->  MorphState(stateName, (stateValue as MetaMorph)::class)
-                else -> ValueState(stateName).also { initState(it) }
-            }
-        }
-
-        if(stateValue==null){
-            state.invalidate()
-            logger.info("State {} is reset", stateName)
-        } else {
-            state.update(stateValue)
-            logger.info("State {} changed to {}", stateName, stateValue)
+    protected open fun onStateChange(stateName: String, value: Any) {
+        forEachConnection(Roles.DEVICE_LISTENER_ROLE, DeviceListener::class.java) {
+            it.notifyStateChanged(this, stateName, value)
         }
     }
 
@@ -187,158 +169,23 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         forEachConnection(EventHandler::class.java) { it -> it.pushEvent(event) }
     }
 
-    /**
-     * Reset state to its default value if it is present
-     */
-    fun invalidateState(stateName: String) {
-        stateMap[stateName]?.invalidate()
-    }
-
-    /**
-     * Get logical state
-     *
-     * @param stateName
-     * @return
-     */
-    protected fun getLogicalState(stateName: String): Value {
-        return Optionals.either(Optional.ofNullable(states[stateName]))
-                .or(optStateDef(stateName).map<String> { it.value.def }.map { Value.of(it) })
-                .opt()
-                .orElseThrow { RuntimeException("Can't calculate state " + stateName) }
-    }
-
-    /**
-     * Request the change of physical and/or logical state.
-     *
-     * @param stateName
-     * @param value
-     * @throws ControlException
-     */
-    @Throws(ControlException::class)
-    protected open fun requestStateChange(stateName: String, value: Value) {
-        if (stateName == Device.INITIALIZED_STATE) {
-            if (value.booleanValue()) {
-                init()
-            } else {
-                shutdown()
-            }
-        } else {
-            updateState(stateName, value)
-        }
-    }
-
-    /**
-     * Request the change of physical ano/or logical meta state.
-     *
-     * @param stateName
-     * @param meta
-     * @throws ControlException
-     */
-    @Throws(ControlException::class)
-    protected open fun requestMetaStateChange(stateName: String, meta: Meta) {
-        updateState(stateName, meta)
-    }
-
-
-    /**
-     * Compute physical state
-     *
-     * @param stateName
-     * @return
-     * @throws ControlException
-     */
-    open fun computeState(stateName: String): Any {
-        throw RuntimeException("Physical state with name $stateName not found")
-    }
-
-    /**
-     * Compute physical meta state
-     *
-     * @param stateName
-     * @return
-     * @throws ControlException
-     */
-    open fun computeMetaState(stateName: String): Meta {
-        throw RuntimeException("Physical metastate with name $stateName not found")
-    }
-
-    /**
-     * Request state change and update result
-     *
-     * @param stateName
-     * @param value
-     */
-    override fun setState(stateName: String, value: Any) {
-        run {
-            try {
-                requestStateChange(stateName, Value.of(value))
-            } catch (e: Exception) {
-                logger.error("Failed to set state {} to {} with exception: {}", stateName, value, e.toString())
-            }
-        }
-    }
-
-    override fun setMetaState(stateName: String, meta: Meta) {
-        run {
-            try {
-                requestMetaStateChange(stateName, meta)
-            } catch (e: Exception) {
-                logger.error("Failed to set  metastate {} to {} with exception: {}", stateName, meta, e.toString())
-            }
-        }
-    }
-
-    fun getStateInFuture(stateName: String): Future<Value> {
-        return call {
-            states.computeIfAbsent(stateName) { t: String ->
-                try {
-                    states.computeIfAbsent(t) { Value.of(computeState(it)) }
-                } catch (ex: ControlException) {
-                    notifyError("Can't calculate state $stateName", ex)
-                    states.computeIfAbsent(t) { Value.NULL }
-                }
-            }
-        }
-    }
-
-    override fun getState(stateName: String): Value {
-        try {
-            return getStateInFuture(stateName).get()
-        } catch (e: InterruptedException) {
-            throw RuntimeException("Failed to calculate state $stateName")
-        } catch (e: ExecutionException) {
-            throw RuntimeException("Failed to calculate state $stateName")
-        }
-
-    }
-
-    fun getMetaStateInFuture(stateName: String): Future<Meta> {
-        return call {
-            this.metaStates.computeIfAbsent(stateName) {
-                metaStates.computeIfAbsent(stateName) { state ->
-                    try {
-                        metaStates.computeIfAbsent(state) { computeMetaState(stateName) }
-                    } catch (ex: ControlException) {
-                        notifyError("Can't calculate metastate $stateName", ex)
-                        metaStates.computeIfAbsent(state) { Meta.empty() }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun getMetaState(stateName: String): Meta {
-        try {
-            return getMetaStateInFuture(stateName).get()
-        } catch (e: InterruptedException) {
-            throw RuntimeException("Failed to calculate metastate " + stateName)
-        } catch (e: ExecutionException) {
-            throw RuntimeException("Failed to calculate metastate " + stateName)
-        }
-
-    }
 
     override fun getType(): String {
         return meta.getString("type", "unknown")
     }
+
+    protected fun updateState(stateName: String, value: Any?) {
+        states.update(stateName, value)
+    }
 }
+
+
+val Device.init: Boolean
+    get() {
+        return if (this is AbstractDevice) {
+            this.init
+        } else {
+            this.states.filter { it.name == INITIALIZED_STATE }.filterIsInstance(ValueState::class.java).firstOrNull()?.value?.booleanValue()
+                    ?: false
+        }
+    }

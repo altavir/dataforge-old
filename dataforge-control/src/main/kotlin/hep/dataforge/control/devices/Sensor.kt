@@ -26,19 +26,14 @@ import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_MESSAGE_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_META_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_PROGRESS_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_RESULT_STATE
-import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATE_STATE
+import hep.dataforge.control.devices.Sensor.Companion.MEASUREMENT_STATUS_STATE
 import hep.dataforge.control.devices.Sensor.Companion.MEASURING_STATE
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.ValueDef
-import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaMorph
-import hep.dataforge.states.MetaStateDef
-import hep.dataforge.states.MetaStateDefs
-import hep.dataforge.states.StateDef
-import hep.dataforge.states.StateDefs
-import hep.dataforge.values.Value
+import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
@@ -55,7 +50,7 @@ import java.time.Instant
 @ValueDef(name = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
 @StateDefs(
         StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATE_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
+        StateDef(ValueDef(name = MEASUREMENT_STATUS_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
         StateDef(ValueDef(name = MEASUREMENT_MESSAGE_STATE, info = "Current message")),
         StateDef(ValueDef(name = MEASUREMENT_PROGRESS_STATE, type = [ValueType.NUMBER], info = "Current progress"))
 )
@@ -82,21 +77,31 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     /**
      * Current measurement configuration
      */
-    var measurement by metaState(MEASUREMENT_META_STATE)
+    var measurement by metaState(MEASUREMENT_META_STATE) { old: Meta?, value: Meta ->
+        startMeasurement(old, value)
+        value
+    }
 
     /**
-     * true if measurement in pro
+     * true if measurement in process
      */
-    var measuring by booleanState(MEASURING_STATE)
+    var measuring by valueState(MEASURING_STATE) { _, value ->
+        if (value.booleanValue()) {
+            startMeasurement(null, measurement)
+        } else {
+            stopMeasurement()
+        }
+        value
+    }.boolean
 
     /**
      * Current state of the measurement
      */
-    val measurementState by stringState(MEASUREMENT_STATE_STATE)
+    val measurementState by valueState(MEASUREMENT_STATUS_STATE).enum<MeasurementState>()
 
-    val message by stringState(MEASUREMENT_MESSAGE_STATE)
+    var message by valueState(MEASUREMENT_MESSAGE_STATE).string
 
-    val progress by doubleState(MEASUREMENT_PROGRESS_STATE)
+    var progress by valueState(MEASUREMENT_PROGRESS_STATE).double
 
     override fun shutdown() {
         stopMeasurement()
@@ -116,42 +121,14 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * Notify measurement state changed
      */
     protected fun notifyMeasurementState(state: MeasurementState) {
-        updateState(MEASUREMENT_STATE_STATE, state.name)
+        updateState(MEASUREMENT_STATUS_STATE, state.name)
         when (state) {
+            MeasurementState.NOT_STARTED -> updateState(MEASURING_STATE, false)
             MeasurementState.STOPPED -> updateState(MEASURING_STATE, false)
             MeasurementState.IN_PROGRESS -> updateState(MEASURING_STATE, true)
             MeasurementState.WAITING -> updateState(MEASURING_STATE, true)
-            else -> {
-            }
         }
     }
-
-    @Throws(ControlException::class)
-    override fun requestStateChange(stateName: String, value: Value) {
-        when (stateName) {
-            MEASURING_STATE -> {
-                val meta = optMetaState(MEASUREMENT_META_STATE).orElse(Meta.empty())
-                if (value.booleanValue()) {
-                    setMeasurement(measurement, meta)
-                } else {
-                    stopMeasurement()
-                }
-            }
-            else -> super.requestStateChange(stateName, value)
-        }
-    }
-
-    @Throws(ControlException::class)
-    override fun requestMetaStateChange(stateName: String, meta: Meta) {
-        when (stateName) {
-            MEASUREMENT_META_STATE -> {
-                val oldMeta = optMetaState(MEASUREMENT_META_STATE).nullable
-                setMeasurement(oldMeta, meta)
-            }
-            else -> super.requestMetaStateChange(stateName, meta)
-        }
-    }
-
 
     /**
      * Set active measurement using given meta
@@ -159,7 +136,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * @param newMeta Meta of new measurement. If null, then clear measurement
      * @return actual meta for new measurement
      */
-    protected abstract fun setMeasurement(oldMeta: Meta?, newMeta: Meta)
+    protected abstract fun startMeasurement(oldMeta: Meta?, newMeta: Meta)
 
     /**
      * stop measurement with given meta
@@ -171,31 +148,28 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         }
     }
 
-    protected fun startMeasurement(action: () -> Meta) {
+    protected fun measurement(action: suspend () -> Unit) {
         job = launch {
             notifyMeasurementState(MeasurementState.IN_PROGRESS)
-            val res = action()
-            notifyResult(res)
+            action.invoke()
             notifyMeasurementState(MeasurementState.STOPPED)
         }
     }
 
-    protected fun scheduleMeasurement(interval: Duration, action: () -> Meta) {
+    protected fun scheduleMeasurement(interval: Duration, action: suspend () -> Unit) {
         job = launch {
             delay(interval)
             notifyMeasurementState(MeasurementState.IN_PROGRESS)
-            val res = action.invoke()
-            notifyResult(res)
+            action.invoke()
             notifyMeasurementState(MeasurementState.STOPPED)
         }
     }
 
-    protected fun startRegularMeasurement(interval: Duration, action: () -> Meta) {
+    protected fun regularMeasurement(interval: Duration, action: suspend () -> Unit) {
         job = launch {
             while (true) {
                 notifyMeasurementState(MeasurementState.IN_PROGRESS)
-                val res = action.invoke()
-                notifyResult(res)
+                action.invoke()
                 notifyMeasurementState(MeasurementState.WAITING)
                 delay(interval)
             }
@@ -230,18 +204,9 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         updateState(MEASUREMENT_ERROR_STATE, result)
     }
 
-
-    protected fun updateMessage(message: String) {
-        updateState(MEASUREMENT_MESSAGE_STATE, message)
-    }
-
-    protected fun updateProgress(progress: Double) {
-        updateState(MEASUREMENT_PROGRESS_STATE, progress)
-    }
-
     companion object {
         const val MEASURING_STATE = "measurement.active"
-        const val MEASUREMENT_STATE_STATE = "measurement.state"
+        const val MEASUREMENT_STATUS_STATE = "measurement.state"
         const val MEASUREMENT_META_STATE = "measurement.meta"
         const val MEASUREMENT_RESULT_STATE = "measurement.result"
         const val MEASUREMENT_ERROR_STATE = "measurement.error"

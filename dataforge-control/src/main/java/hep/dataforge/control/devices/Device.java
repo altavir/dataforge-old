@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -77,14 +77,6 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
      * @return
      */
     String getType();
-
-    /**
-     * True if device is initialized and not shut down
-     * @return
-     */
-    default boolean isInitialized(){
-        return optBooleanState(INITIALIZED_STATE).orElse(false);
-    }
 
     /**
      * Initialize device and check if it is working but do not start any

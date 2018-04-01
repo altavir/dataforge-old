@@ -34,10 +34,7 @@ import hep.dataforge.exceptions.ControlException
 import hep.dataforge.kodex.useMeta
 import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
-import hep.dataforge.states.MetaStateDef
-import hep.dataforge.states.StateDef
-import hep.dataforge.states.StateDefs
-import hep.dataforge.values.Value
+import hep.dataforge.states.*
 import hep.dataforge.values.ValueType.BOOLEAN
 import hep.dataforge.values.ValueType.NUMBER
 import java.time.Duration
@@ -63,26 +60,35 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     protected val connection: GenericPortController
         get() = _connection ?: throw RuntimeException("Not connected")
 
-    var connected by booleanState(CONNECTED_STATE)
-    var debug by booleanState(DEBUG_STATE)
+    var connected by valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
+        if (old != value) {
+            connect(value.booleanValue())
+        }
+        value
+    }.boolean
+
+    var debug by valueState(DEBUG_STATE) { old, value ->
+        if(old != value){
+            setDebugMode(value.booleanValue())
+        }
+        value
+    }.boolean
+
+    var port by metaState(PORT_STATE, getter = {connection.port.meta}){old, value->
+        if(old != value) {
+            setupConnection(value)
+        }
+        value
+    }
 
     private val defaultTimeout: Duration = Duration.ofMillis(meta.getInt("timeout", 400).toLong())
 
     init {
         meta.useMeta(PORT_STATE) {
-            setMetaState(PORT_STATE, it)
+            port = it
         }
         meta.useValue(DEBUG_STATE) {
-            setState(DEBUG_STATE, it)
-        }
-    }
-
-    @Throws(ControlException::class)
-    override fun computeState(stateName: String): Any {
-        return if (CONNECTED_STATE == stateName) {
-            connection.port.isOpen
-        } else {
-            super.computeState(stateName)
+            debug = it.booleanValue()
         }
     }
 
@@ -102,16 +108,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         updateState(DEBUG_STATE, debugMode)
     }
 
-    @Throws(ControlException::class)
-    override fun requestStateChange(stateName: String, value: Value) {
-        when (stateName) {
-            CONNECTED_STATE -> connect(value.booleanValue())
-            DEBUG_STATE -> setDebugMode(value.booleanValue())
-            else -> super.requestStateChange(stateName, value)
-        }
-    }
-
-    protected open fun connect(connected: Boolean){
+    protected open fun connect(connected: Boolean) {
         if (connected) {
             connection.open()
             updateState(CONNECTED_STATE, true)
@@ -137,18 +134,9 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         updateState(PORT_STATE, portMeta)
     }
 
-    override fun requestMetaStateChange(stateName: String, meta: Meta) {
-        if (stateName == PORT_STATE) {
-            setupConnection(meta)
-        } else {
-            super.requestMetaStateChange(stateName, meta)
-        }
-    }
-
     @Throws(ControlException::class)
     override fun shutdown() {
-        setState(CONNECTED_STATE, false)
-//        connection?.port?.close()
+        connected = false
         super.shutdown()
     }
 
