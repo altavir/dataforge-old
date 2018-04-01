@@ -111,7 +111,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
                 });
 
 
-        MenuItem dfpExport = PlotUtils.getDFPlotExportMenuItem(menu.getOwnerWindow(), frame);
+        MenuItem dfpExport = PlotUtils.INSTANCE.getDFPlotExportMenuItem(menu.getOwnerWindow(), frame);
 
         parent.getItems().add(dfpExport);
     }
@@ -312,12 +312,12 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         render.setDefaultLinesVisible(showLines);
 
         //Build Legend map to avoid serialization issues
-        double thickness = PlotUtils.getThickness(meta);
+        double thickness = PlotUtils.INSTANCE.getThickness(meta);
         if (thickness > 0) {
             render.setSeriesStroke(0, new BasicStroke((float) thickness));
         }
 
-        Color color = PlotUtils.getAWTColor(meta, colorCache.get(name));
+        Color color = PlotUtils.INSTANCE.getAWTColor(meta, colorCache.get(name));
         if (color != null) {
             render.setSeriesPaint(0, color);
         }
@@ -367,7 +367,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
     @Override
     public Optional<Value> getActualColor(Name name) {
-        return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.awtColorToString(color)));
+        return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.INSTANCE.awtColorToString(color)));
     }
 
 //    @Override
@@ -381,7 +381,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
     @NotNull
     private Object writeReplace() throws ObjectStreamException {
-        return new PlotFrameEnvelope(wrapper.wrap(this));
+        return new PlotFrameEnvelope(Companion.getWrapper().wrap(this));
     }
 
     private static class LabelGenerator implements XYSeriesLabelGenerator, Serializable {

@@ -11,7 +11,6 @@ import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
 import javafx.application.Platform
 
-import static hep.dataforge.data.DataUtils.combine
 import static hep.dataforge.grind.workspace.DefaultTaskLib.custom
 import static hep.dataforge.grind.workspace.DefaultTaskLib.pipe
 

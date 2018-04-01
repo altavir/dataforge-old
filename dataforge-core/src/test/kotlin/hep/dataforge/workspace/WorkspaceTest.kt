@@ -103,7 +103,7 @@ class WorkspaceTest {
             }
 
             wsp = BasicWorkspace.Builder()
-                    .setContext(context)
+                    .apply { this.context = context}
                     .staticData("data_1", 1)
                     .staticData("data_2", 2)
                     .staticData("data_3", 3)

@@ -13,16 +13,16 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots
 
-import hep.dataforge.meta.Meta;
+import hep.dataforge.meta.Meta
 
 /**
  *
  * @author Alexander Nozik
  */
-public interface PlotBuilder<T> {
-    Plottable build(T source);
-    Plottable build(T source, Meta plotAnnotation);    
-    Plottable build(T source, String name, Meta plotAnnotation);
+interface PlotBuilder<T> {
+    fun build(source: T): Plottable
+    fun build(source: T, plotAnnotation: Meta): Plottable
+    fun build(source: T, name: String, plotAnnotation: Meta): Plottable
 }

@@ -261,10 +261,10 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     }
 
     private inner class ContainerChangeListener(val item: TreeItem<Plottable>) : PlotListener {
-        override fun dataChanged(name: Name?, plot: Plot?) {
+        override fun dataChanged(name: Name, plot: Plot) {
         }
 
-        override fun metaChanged(name: Name?, plottable: Plottable?, laminate: Laminate?) {
+        override fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate) {
         }
 
         override fun plotAdded(name: Name, plottable: Plottable) {

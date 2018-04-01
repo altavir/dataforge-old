@@ -19,7 +19,9 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 import hep.dataforge.plots.data.XYPlot
+import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.DEFAULT_XY_ADAPTER
 import hep.dataforge.tables.Adapters.buildXYDataPoint
 import hep.dataforge.values.Value
@@ -42,7 +44,7 @@ import java.util.*
         ValueDef(name = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
         ValueDef(name = "connectionType", def = "spline")
 )
-class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(name) {
+class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(Name.ofSingle(name), meta, Adapters.DEFAULT_XY_ADAPTER) {
 
     private val cache = TreeMap<Double, Double>()
 
@@ -89,7 +91,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
      */
     private fun validateCache() {
         // recalculate immutable if boundaries are finite, otherwise use existing immutable
-        val nodes = this.density.toInt()
+        val nodes = this.density
         if (java.lang.Double.isFinite(from) && java.lang.Double.isFinite(to)) {
             for (i in 0 until nodes) {
                 val blockBegin = from + i * (to - from) / (nodes - 1)
@@ -114,7 +116,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
     @Synchronized
     private fun eval(x: Double): Double {
         val y = function(x)
-        this.cache.put(x, y)
+        this.cache[x] = y
         return y
     }
 
@@ -156,7 +158,7 @@ class XYFunctionPlot(name: String, val function: (Double) -> Double) : XYPlot(na
 
         @JvmOverloads
         fun plot(name: String, from: Double, to: Double, numPoints: Int = DEFAULT_DENSITY, function: (Double) -> Double): XYFunctionPlot {
-            val p = XYFunctionPlot(name, function)
+            val p = XYFunctionPlot(name,Meta.empty(), function)
             p.range = Pair(from, to)
             p.density = numPoints
             return p

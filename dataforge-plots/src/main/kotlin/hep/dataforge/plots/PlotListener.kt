@@ -13,23 +13,23 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots
 
-import hep.dataforge.meta.Laminate;
-import hep.dataforge.names.Name;
+import hep.dataforge.meta.Laminate
+import hep.dataforge.names.Name
 
 /**
  * Listener for plot state changes
  * @author darksnake
  */
-public interface PlotListener {
+interface PlotListener {
 
     /**
      * Data changed for a specific plot. Data for group could not be changed
      * @param name
      * @param plot
      */
-    void dataChanged(Name name, Plot plot);
+    fun dataChanged(name: Name, plot: Plot)
 
     /**
      * Configuration changed for node or plot
@@ -37,18 +37,18 @@ public interface PlotListener {
      * @param plottable a caller object
      * @param laminate combinded meta of all layers
      */
-    void metaChanged(Name name, Plottable plottable, Laminate laminate);
+    fun metaChanged(name: Name, plottable: Plottable, laminate: Laminate)
 
     /**
      * Ne plot or node added
      * @param name
      * @param plottable
      */
-    void plotAdded(Name name, Plottable plottable);
+    fun plotAdded(name: Name, plottable: Plottable)
 
     /**
      * plot or node removed
      * @param name
      */
-    void plotRemoved(Name name);
+    fun plotRemoved(name: Name)
 }

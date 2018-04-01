@@ -164,10 +164,10 @@ fun <T : Configurable> T.configure(transform: KMetaBuilder.() -> Unit): T {
 
 //Annotations
 
-fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean): List<T> {
+fun <T : Annotation> listAnnotations(source: AnnotatedElement, type: Class<T>, searchSuper: Boolean = true): List<T> {
     if (source is Class<*>) {
         val res = ArrayList<T>()
-        val array = source.getDeclaredAnnotationsByType(type)
+        val array = source.getAnnotationsByType(type)
         res.addAll(Arrays.asList(*array))
         if (searchSuper) {
             val superClass = source.superclass

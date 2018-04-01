@@ -66,7 +66,7 @@ public class JFreeFXTest extends Application {
         data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
-        DataPlot dataPlot = DataPlot.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
+        DataPlot dataPlot = DataPlot.Companion.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);
 
         frame.getConfig().putNode(new MetaBuilder("yAxis").putValue("logScale", true));
 

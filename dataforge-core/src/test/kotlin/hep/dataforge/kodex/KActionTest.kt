@@ -73,7 +73,7 @@ class KActionTest {
                 .data("test", data)
                 .task(testTask)
                 .target("test", Meta.empty())
-                .setContext(Global)
+                .apply { context = Global}
                 .build()
 
         val res = workspace.runTask("test")

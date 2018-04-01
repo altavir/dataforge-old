@@ -13,19 +13,18 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package hep.dataforge.plots;
+package hep.dataforge.plots
 
-import hep.dataforge.context.Plugin;
-import hep.dataforge.exceptions.NameNotFoundException;
-import hep.dataforge.meta.Meta;
+import hep.dataforge.context.Plugin
+import hep.dataforge.exceptions.NameNotFoundException
+import hep.dataforge.meta.Meta
 
 /**
  * Любой объект, который может содержать график или набор графиков
  *
  * @author Alexander Nozik
  */
-public interface PlotPlugin extends Plugin {
-    String DEFAULT_STAGE_NAME = "default";
+interface PlotPlugin : Plugin {
 
     /**
      * Get or create a plot frame with default meta
@@ -34,27 +33,31 @@ public interface PlotPlugin extends Plugin {
      * @return
      * @throws NameNotFoundException
      */
-    PlotFrame getPlotFrame(String stage, String name);
+    fun getPlotFrame(stage: String, name: String): PlotFrame
 
-    default PlotFrame getPlotFrame(String stage, String name, Meta meta) {
-        PlotFrame frame = getPlotFrame(stage, name);
-        frame.configure(meta);
-        return frame;
+    fun getPlotFrame(stage: String, name: String, meta: Meta): PlotFrame {
+        val frame = getPlotFrame(stage, name)
+        frame.configure(meta)
+        return frame
     }
 
-    default PlotFrame getPlotFrame(String name, Meta meta) {
-        return getPlotFrame(DEFAULT_STAGE_NAME, name, meta);
-    }
-
-
-    default PlotFrame getPlotFrame(String name) {
-        return getPlotFrame(DEFAULT_STAGE_NAME, name);
+    fun getPlotFrame(name: String, meta: Meta): PlotFrame {
+        return getPlotFrame(DEFAULT_STAGE_NAME, name, meta)
     }
 
 
-    boolean hasPlotFrame(String stage, String name);
+    fun getPlotFrame(name: String): PlotFrame {
+        return getPlotFrame(DEFAULT_STAGE_NAME, name)
+    }
 
-    default boolean hasPlotFrame(String name) {
-        return hasPlotFrame(DEFAULT_STAGE_NAME, name);
+
+    fun hasPlotFrame(stage: String, name: String): Boolean
+
+    fun hasPlotFrame(name: String): Boolean {
+        return hasPlotFrame(DEFAULT_STAGE_NAME, name)
+    }
+
+    companion object {
+        val DEFAULT_STAGE_NAME = "default"
     }
 }
