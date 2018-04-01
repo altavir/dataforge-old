@@ -16,6 +16,7 @@
 
 package hep.dataforge.plots
 
+import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.Envelope
@@ -41,15 +42,10 @@ import java.util.stream.Stream
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
  */
-class PlotGroup : SimpleConfigurable, Plottable, Provider, PlotListener, Iterable<Plottable> {
+class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescriptor.empty("group"))
+    : SimpleConfigurable(), Plottable, Provider, PlotListener, Iterable<Plottable> {
 
-    //    public PlotGroup(String name, NodeDescriptor descriptor) {
-    //        this.name = name;
-    //        this.descriptor = descriptor;
-    //    }
-
-    override val name: Name
-    private var descriptor = NodeDescriptor.empty("group")
+    override val name: Name = Name.ofSingle(name)
 
     private val plots = HashMap<Name, Plottable>()
     private val listeners = ReferenceRegistry<PlotListener>()
@@ -58,14 +54,9 @@ class PlotGroup : SimpleConfigurable, Plottable, Provider, PlotListener, Iterabl
         get() = plots.values
 
 
-    constructor(name: String) {
-        this.name = Name.ofSingle(name)
-    }
-
-    constructor(name: String, descriptor: NodeDescriptor) {
-        this.name = Name.ofSingle(name)
-        this.descriptor = descriptor
-    }
+//    constructor(name: String) {
+//        this.name = Name.ofSingle(name)
+//    }
 
     private fun getNameForListener(arg: Name): Name {
         return Name.join(name, arg)
@@ -294,7 +285,7 @@ class PlotGroup : SimpleConfigurable, Plottable, Provider, PlotListener, Iterabl
             //checkValidEnvelope(envelope);
             val groupName = envelope.meta.getString("name")
             val groupMeta = envelope.meta.getMetaOrEmpty(DEFAULT_META_NAME)
-            val group = PlotGroup(groupName)
+            val group = PlotGroup<Plottable>(groupName)
             group.configure(groupMeta)
 
             val internalEnvelopeType = EnvelopeType.resolve(envelope.meta.getString("@envelope.internalType", "default"))
@@ -331,4 +322,10 @@ class PlotGroup : SimpleConfigurable, Plottable, Provider, PlotListener, Iterabl
 
         val WRAPPER = Wrapper()
     }
+
+}
+
+
+inline fun <reified T:Plottable> PlotGroup(name:String): PlotGroup{
+    return PlotGroup(name, Descriptors.buildDescriptor(T::class.java))
 }
