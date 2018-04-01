@@ -23,11 +23,16 @@ import java.util.*;
  */
 public class NodeDescriptor implements Named, MetaMorph, Metoid {
 
+    public static NodeDescriptor build(NodeDef nodeDef){
+        return new NodeDescriptor(Descriptors.buildDescriptorMeta(nodeDef));
+    }
+
+    public static NodeDescriptor empty(String nodeName){
+        return new NodeDescriptor(Meta.buildEmpty(nodeName));
+    }
+
     private final Meta meta;
 
-    public NodeDescriptor(String name) {
-        this.meta = Meta.buildEmpty(name);
-    }
 
     public NodeDescriptor(Meta meta) {
         this.meta = meta;
@@ -169,6 +174,7 @@ public class NodeDescriptor implements Named, MetaMorph, Metoid {
      *
      * @return
      */
+    @NotNull
     @Override
     public String getName() {
         return getMeta().getString("name", getMeta().getName());
@@ -201,6 +207,7 @@ public class NodeDescriptor implements Named, MetaMorph, Metoid {
         return meta;
     }
 
+    @NotNull
     @Override
     public Meta getMeta() {
         return meta;

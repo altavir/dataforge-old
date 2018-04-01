@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,6 +26,7 @@ import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.messages.Responder;
 import hep.dataforge.meta.Metoid;
 import hep.dataforge.states.Stateful;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 
 import static hep.dataforge.connections.Connection.EVENT_HANDLER_ROLE;
@@ -78,14 +79,6 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
     String getType();
 
     /**
-     * True if device is initialized and not shut down
-     * @return
-     */
-    default boolean isInitialized(){
-        return optBooleanState(INITIALIZED_STATE).orElse(false);
-    }
-
-    /**
      * Initialize device and check if it is working but do not start any
      * measurements or issue commands. Init method could be called only once per
      * MeasurementDevice object. On second call it throws exception or does
@@ -104,11 +97,13 @@ public interface Device extends AutoConnectible, Metoid, ContextAware, Named, Re
      */
     void shutdown() throws ControlException;
 
+    @NotNull
     @Override
-    default Envelope respond(Envelope message) {
+    default Envelope respond(@NotNull Envelope message) {
         return ControlUtils.getDefaultDeviceResponse(this, message);
     }
 
+    @NotNull
     @Override
     default Logger getLogger() {
         return optConnection(LOGGER_ROLE, Logger.class).orElse(getContext().getLogger());

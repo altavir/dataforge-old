@@ -15,8 +15,6 @@
  */
 package hep.dataforge.control.devices;
 
-import hep.dataforge.meta.Meta;
-import hep.dataforge.values.Value;
 import org.jetbrains.annotations.Nullable;
 
 /**
@@ -33,24 +31,7 @@ public interface DeviceListener {
      * @param name   the name of the state
      * @param state
      */
-    void notifyDeviceStateChanged(Device device, String name, Value state);
-
-    /**
-     * Notify meta state changed
-     * @param device
-     * @param name
-     * @param state
-     */
-    void notifyDeviceStateChanged(Device device, String name, Meta state);
-
-//    /**
-//     * Notify that device configuration has changed. By default is ignored.
-//     *
-//     * @param device
-//     */
-//    default void notifyDeviceConfigChanged(Device device) {
-//
-//    }
+    void notifyStateChanged(Device device, String name, Object state);
 
     /**
      *

@@ -31,7 +31,7 @@ public class PlotGroup extends SimpleConfigurable implements Plottable, Provider
     public static final Wrapper WRAPPER = new Wrapper();
 
     private final Name name;
-    private NodeDescriptor descriptor = new NodeDescriptor("group");
+    private NodeDescriptor descriptor = NodeDescriptor.empty("group");
 
     private Map<Name, Plottable> plots = new HashMap<>();
     private ReferenceRegistry<PlotListener> listeners = new ReferenceRegistry<>();

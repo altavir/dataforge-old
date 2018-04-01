@@ -20,7 +20,7 @@ import hep.dataforge.exceptions.PortException
 import hep.dataforge.exceptions.PortLockException
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaHolder
-import hep.dataforge.meta.Metoid
+import hep.dataforge.meta.MetaID
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.time.Duration
@@ -50,7 +50,7 @@ interface PortController {
  *
  * @author Alexander Nozik
  */
-abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, Metoid, Named {
+abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named {
 
     private val portLock = ReentrantLock(true)
 
@@ -210,6 +210,10 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, Metoid, Named
 
     class PortTimeoutException(private val timeout: Duration) : PortException() {
         override val message: String = String.format("The timeout time of '%s' is exceeded", timeout)
+    }
+
+    override fun toMeta(): Meta {
+        return meta
     }
 
     companion object {
