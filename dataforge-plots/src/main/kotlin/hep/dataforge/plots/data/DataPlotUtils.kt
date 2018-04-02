@@ -6,6 +6,7 @@
 package hep.dataforge.plots.data
 
 import hep.dataforge.kodex.toList
+import hep.dataforge.plots.Plot
 import hep.dataforge.plots.XYPlotFrame
 import hep.dataforge.tables.*
 import hep.dataforge.values.Value
@@ -22,17 +23,19 @@ object DataPlotUtils {
         val names = ArrayList<String>()
         names.add("x")
 
-        frame.plots.list()
-                .map { frame[it] }
-                .filter { pl -> !visibleOnly || pl.getConfig().getBoolean("visible", true) }
-                .forEach { pl ->
-                    names.add(pl.title)
-                    pl.data.forEach { point ->
-                        val x = Adapters.getXValue(pl.adapter, point)
-                        val mdp: ValueMap.Builder = points.getOrPut(x) {
-                            ValueMap.Builder().apply { putValue("x", x) }
+        frame.plots.stream()
+                .map { it.value }
+                .filter {!visibleOnly || it.config.getBoolean("visible", true) }
+                .forEach {
+                    (it as? Plot)?.let {plot->
+                        names.add(plot.title)
+                        plot.data.forEach { point ->
+                            val x = Adapters.getXValue(plot.adapter, point)
+                            val mdp: ValueMap.Builder = points.getOrPut(x) {
+                                ValueMap.Builder().apply { putValue("x", x) }
+                            }
+                            mdp.putValue(plot.title, Adapters.getYValue(plot.adapter, point))
                         }
-                        mdp.putValue(pl.title, Adapters.getYValue(pl.adapter, point))
                     }
                 }
 

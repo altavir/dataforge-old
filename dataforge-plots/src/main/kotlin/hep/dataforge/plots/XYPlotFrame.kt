@@ -95,6 +95,6 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
      * @return
      */
     open fun getActualColor(name: Name): Optional<Value> {
-        return plots.opt(name).flatMap { plot -> plot.config.optValue("color") }
+        return plots[name]?.config?.optValue("color") ?: Optional.empty()
     }
 }

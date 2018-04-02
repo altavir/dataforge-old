@@ -98,8 +98,6 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
 
     private void addExportPlotAction(ContextMenu menu, JFreeChartFrame frame) {
-
-
         Menu parent = menu.getItems().stream()
                 .filter(it -> it instanceof javafx.scene.control.Menu && it.getText().equals("Export As"))
                 .map(javafx.scene.control.Menu.class::cast)

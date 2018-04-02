@@ -16,7 +16,6 @@
 package hep.dataforge.plots
 
 import hep.dataforge.description.ValueDef
-import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.SimpleEnvelope
@@ -26,7 +25,6 @@ import hep.dataforge.meta.Meta
 import java.io.ObjectStreamException
 import java.io.OutputStream
 import java.io.Serializable
-import java.util.*
 
 /**
  * Набор графиков (plot) в одном окошке (frame) с общими осями.
@@ -96,11 +94,8 @@ interface PlotFrame : Configurable, Serializable {
      * @param name
      * @return
      */
-    fun opt(name: String): Optional<Plot>
+    operator fun get(name: String): Plot?
 
-    operator fun get(name: String): Plot {
-        return opt(name).orElseThrow { NameNotFoundException(name) }
-    }
 
     /**
      * Save plot as image
@@ -108,7 +103,7 @@ interface PlotFrame : Configurable, Serializable {
      * @param stream
      * @param config
      */
-    open fun asImage(stream: OutputStream, config: Meta) {
+    fun asImage(stream: OutputStream, config: Meta) {
         throw UnsupportedOperationException()
     }
 
@@ -119,11 +114,7 @@ interface PlotFrame : Configurable, Serializable {
     /**
      * Use exclusively for plot frame serialization
      */
-    class PlotFrameEnvelope : SimpleEnvelope {
-
-        constructor() {}
-
-        constructor(envelope: Envelope) : super(envelope.meta, envelope.data) {}
+    class PlotFrameEnvelope(envelope: Envelope) : SimpleEnvelope(envelope.meta, envelope.data) {
 
         @Throws(ObjectStreamException::class)
         private fun readResolve(): Any {

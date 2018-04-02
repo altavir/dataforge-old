@@ -38,6 +38,7 @@ import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.util.*
 import java.util.stream.Stream
+import kotlin.reflect.KClass
 
 /**
  * A group of plottables. It could store Plots as well as other plot groups.
@@ -128,11 +129,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
                 removed.removeListener(this)
             }
         } else {
-            opt(name.cutLast()).ifPresent { group ->
-                if (group is PlotGroup) {
-                    group.remove(name.last)
-                }
-            }
+            (get(name.cutLast()) as? PlotGroup)?.remove(name.last)
         }
         return this
     }
@@ -147,7 +144,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
     /**
-     * Stream of all plots excluding intermediate nodes
+     * Recursive stream of all plots excluding intermediate nodes
      *
      * @return
      */
@@ -162,27 +159,15 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
     @Provides(PLOT_TARGET)
-    fun opt(name: String): Optional<Plottable> {
-        return opt(Name.of(name))
+    operator fun get(name: String): Plottable? {
+        return get(Name.of(name))
     }
 
-    fun has(name: String): Boolean {
-        return opt(name).isPresent
-    }
-
-    fun opt(name: Name): Optional<Plottable> {
-        return if (name.length == 0) {
-            throw RuntimeException("Zero length names are not allowed")
-        } else if (name.length == 1) {
-            Optional.ofNullable(plots[name])
-        } else {
-            opt(name.cutLast()).flatMap { plot ->
-                if (plot is PlotGroup) {
-                    plot.opt(name.last)
-                } else {
-                    Optional.empty()
-                }
-            }
+    operator fun get(name: Name): Plottable? {
+        return when {
+            name.length == 0 -> throw RuntimeException("Zero length names are not allowed")
+            name.length == 1 -> plots[name]
+            else -> (get(name.cutLast()) as? PlotGroup)?.get(name.last)
         }
     }
 
@@ -232,6 +217,10 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         notifyConfigChanged()
     }
 
+    fun setType(type: KClass<out Plottable>) {
+        setDescriptor(Descriptors.buildDescriptor(type.java))
+    }
+
     /**
      * Iterate over direct descendants
      *
@@ -255,13 +244,10 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
 
             for (plot in obj.plots.values) {
                 try {
-                    val env: Envelope
-                    if (plot is PlotGroup) {
-                        env = wrap(plot)
-                    } else if (plot is Plot) {
-                        env = plotWrapper.wrap(plot)
-                    } else {
-                        throw RuntimeException("Unknown plottable type")
+                    val env: Envelope = when (plot) {
+                        is PlotGroup -> wrap(plot)
+                        is Plot -> plotWrapper.wrap(plot)
+                        else -> throw RuntimeException("Unknown plottable type")
                     }
                     writer.write(baos, env)
                 } catch (ex: IOException) {
@@ -285,7 +271,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
             //checkValidEnvelope(envelope);
             val groupName = envelope.meta.getString("name")
             val groupMeta = envelope.meta.getMetaOrEmpty(DEFAULT_META_NAME)
-            val group = PlotGroup<Plottable>(groupName)
+            val group = PlotGroup(groupName)
             group.configure(groupMeta)
 
             val internalEnvelopeType = EnvelopeType.resolve(envelope.meta.getString("@envelope.internalType", "default"))
@@ -312,7 +298,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         }
 
         companion object {
-            val PLOT_GROUP_WRAPPER_TYPE = "df.plots.group"
+            const val PLOT_GROUP_WRAPPER_TYPE = "df.plots.group"
             private val plotWrapper = Plot.Wrapper()
         }
     }
@@ -320,12 +306,11 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     companion object {
         const val PLOT_TARGET = "plot"
 
+        inline fun <reified T : Plottable> typed(name: String): PlotGroup {
+            return PlotGroup(name, Descriptors.buildDescriptor(T::class.java))
+        }
+
         val WRAPPER = Wrapper()
     }
 
-}
-
-
-inline fun <reified T:Plottable> PlotGroup(name:String): PlotGroup{
-    return PlotGroup(name, Descriptors.buildDescriptor(T::class.java))
 }

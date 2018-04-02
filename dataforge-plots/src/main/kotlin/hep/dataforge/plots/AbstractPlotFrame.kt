@@ -19,7 +19,6 @@ import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.names.Name
-import java.util.*
 
 /**
  * @author Alexander Nozik
@@ -36,14 +35,8 @@ abstract class AbstractPlotFrame : SimpleConfigurable, PlotFrame, PlotListener {
 
     constructor() {}
 
-    override fun opt(name: String): Optional<Plot> {
-        return plots.opt(name).flatMap { it ->
-            if (it is Plot) {
-                Optional.of(it)
-            } else {
-                Optional.empty()
-            }
-        }
+    override fun get(name: String): Plot? {
+        return plots.get(name) as? Plot
     }
 
     /**

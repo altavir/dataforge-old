@@ -37,7 +37,7 @@ import java.io.IOException
  */
 object PlotUtils {
 
-    fun getAWTColor(meta: Meta, def: Color): Color {
+    fun getAWTColor(meta: Meta, def: Color?): Color? {
         if (meta.hasValue("color")) {
             val fxColor = javafx.scene.paint.Color.valueOf(meta.getString("color"))
             return Color(fxColor.red.toFloat(), fxColor.green.toFloat(), fxColor.blue.toFloat())
@@ -104,7 +104,7 @@ object PlotUtils {
      * @param frame
      * @return
      */
-    fun getDFPlotExportMenuItem(window: Window, frame: PlotFrame): MenuItem {
+    fun getDFPlotExportMenuItem(window: Window?, frame: PlotFrame): MenuItem {
         val dfpExport = MenuItem("DF...")
         dfpExport.setOnAction { event ->
             val chooser = FileChooser()
