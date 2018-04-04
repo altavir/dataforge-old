@@ -43,7 +43,7 @@ import kotlin.reflect.KProperty
 sealed class State<T : Any>(
         override val name: String, def: T? = null,
         private val getter: (suspend () -> T)? = null,
-        private val setter: (suspend (T?, T) -> T?)? = null) : Named, MetaID, ReadWriteProperty<Any?, T> {
+        private val setter: (suspend (T?, T) -> T?)? = null) : Named, MetaID {
     private var initialized: Boolean = false
     private val reference: AtomicReference<T> = AtomicReference()
 
@@ -112,11 +112,7 @@ sealed class State<T : Any>(
         return if (initialized) {
             reference.get()
         } else {
-            if (getter == null) {
-                throw RuntimeException("The state $name not initialized")
-            } else {
-                runBlocking { getter.invoke() }.also { updateValue(it) }
-            }
+            runBlocking { read() }
         }
     }
 
@@ -128,6 +124,18 @@ sealed class State<T : Any>(
         initialized = false
     }
 
+    /**
+     * read the state if the getter is available and update logical
+     */
+    suspend fun read(): T {
+        if (getter == null) {
+            throw RuntimeException("The getter for state $name not defined")
+        } else {
+            val res = getter.invoke()
+            updateValue(res)
+            return res
+        }
+    }
 
     /**
      * Read == get()
@@ -137,12 +145,14 @@ sealed class State<T : Any>(
         get() = get()
         set(value) = set(value)
 
-    override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-        return value
-    }
+    val delegate = object: ReadWriteProperty<Any?, T>{
+        override fun getValue(thisRef: Any?, property: KProperty<*>): T {
+            return value
+        }
 
-    override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
-        this.value = value
+        override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+            this@State.value = value
+        }
     }
 }
 
@@ -177,7 +187,7 @@ class ValueState(
         return buildMeta("state", "name" to name, "value" to value)
     }
 
-    val boolean: ReadWriteProperty<Any?, Boolean> = object : ReadWriteProperty<Any?, Boolean> {
+    val booleanDelegate: ReadWriteProperty<Any?, Boolean> = object : ReadWriteProperty<Any?, Boolean> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Boolean) {
             set(value)
         }
@@ -187,7 +197,9 @@ class ValueState(
         }
     }
 
-    val string: ReadWriteProperty<Any?, String> = object : ReadWriteProperty<Any?, String> {
+    val booleanValue = value.booleanValue()
+
+    val stringDelegate: ReadWriteProperty<Any?, String> = object : ReadWriteProperty<Any?, String> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
             set(value)
         }
@@ -197,7 +209,7 @@ class ValueState(
         }
     }
 
-    val time: ReadWriteProperty<Any?, Instant> = object : ReadWriteProperty<Any?, Instant> {
+    val timeDelegate: ReadWriteProperty<Any?, Instant> = object : ReadWriteProperty<Any?, Instant> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Instant) {
             set(value)
         }
@@ -207,7 +219,9 @@ class ValueState(
         }
     }
 
-    val int: ReadWriteProperty<Any?, Int> = object : ReadWriteProperty<Any?, Int> {
+    val timeValue = value.timeValue()
+
+    val intDelegate: ReadWriteProperty<Any?, Int> = object : ReadWriteProperty<Any?, Int> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
             set(value)
         }
@@ -217,7 +231,9 @@ class ValueState(
         }
     }
 
-    val double: ReadWriteProperty<Any?, Double> = object : ReadWriteProperty<Any?, Double> {
+    val intValue = value.intValue()
+
+    val doubleDelegate: ReadWriteProperty<Any?, Double> = object : ReadWriteProperty<Any?, Double> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
             set(value)
         }
@@ -227,6 +243,8 @@ class ValueState(
         }
     }
 
+    val doubleValue = value.doubleValue()
+
     inline fun <reified T : Enum<T>> enum(): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             return enumValueOf<T>(value.stringValue())
@@ -235,8 +253,12 @@ class ValueState(
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
             set(value.name)
         }
-
     }
+
+    inline fun <reified T : Enum<T>> enumValue(): T{
+        return enumValueOf(value.stringValue())
+    }
+
 }
 
 fun ValueState(def: StateDef): ValueState {

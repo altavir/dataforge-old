@@ -43,7 +43,10 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
     override val root = borderpane {
         center = treetableview<ConfigFX> {
             root = TreeItem(ConfigFXRoot(configuration, descriptor))
-            root.update()
+            runAsync {
+                root.update()
+                refresh()
+            }
             root.isExpanded = true
             sortMode = TreeSortMode.ALL_DESCENDANTS
             columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
@@ -55,7 +58,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                 if (!empty) {
                                     if (treeTableRow.item != null) {
                                         textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding {
-                                            if (it!!) {
+                                            if (it == true) {
                                                 Color.GRAY
                                             } else {
                                                 Color.BLACK

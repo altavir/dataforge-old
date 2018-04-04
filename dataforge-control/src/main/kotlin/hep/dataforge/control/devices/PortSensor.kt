@@ -65,21 +65,21 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
             connect(value.booleanValue())
         }
         value
-    }.boolean
+    }.booleanDelegate
 
     var debug by valueState(DEBUG_STATE) { old, value ->
         if(old != value){
             setDebugMode(value.booleanValue())
         }
         value
-    }.boolean
+    }.booleanDelegate
 
     var port by metaState(PORT_STATE, getter = {connection.port.meta}){old, value->
         if(old != value) {
             setupConnection(value)
         }
         value
-    }
+    }.delegate
 
     private val defaultTimeout: Duration = Duration.ofMillis(meta.getInt("timeout", 400).toLong())
 

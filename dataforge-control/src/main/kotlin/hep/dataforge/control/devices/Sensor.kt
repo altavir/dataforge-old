@@ -64,15 +64,17 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
 
     protected var job: Job? = null
 
+    val resultState = metaState(MEASUREMENT_RESULT_STATE)
+
     /**
      * The result of last measurement
      */
-    val result: Meta by metaState(MEASUREMENT_RESULT_STATE)
+    val result: Meta by resultState.delegate
 
     /**
      * The error from last measurement
      */
-    val error: Meta by metaState(MEASUREMENT_ERROR_STATE)
+    val error: Meta by metaState(MEASUREMENT_ERROR_STATE).delegate
 
     /**
      * Current measurement configuration
@@ -80,7 +82,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     var measurement by metaState(MEASUREMENT_META_STATE) { old: Meta?, value: Meta ->
         startMeasurement(old, value)
         value
-    }
+    }.delegate
 
     /**
      * true if measurement in process
@@ -92,16 +94,16 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
             stopMeasurement()
         }
         value
-    }.boolean
+    }.booleanDelegate
 
     /**
      * Current state of the measurement
      */
     val measurementState by valueState(MEASUREMENT_STATUS_STATE).enum<MeasurementState>()
 
-    var message by valueState(MEASUREMENT_MESSAGE_STATE).string
+    var message by valueState(MEASUREMENT_MESSAGE_STATE).stringDelegate
 
-    var progress by valueState(MEASUREMENT_PROGRESS_STATE).double
+    var progress by valueState(MEASUREMENT_PROGRESS_STATE).doubleDelegate
 
     override fun shutdown() {
         stopMeasurement()

@@ -68,7 +68,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     /**
      * Initialization state
      */
-    val init by initializedState.boolean
+    val init by initializedState.booleanDelegate
 
     private val stateListenerJob: Job = launch {
         select<Unit> {

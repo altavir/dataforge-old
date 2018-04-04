@@ -119,7 +119,7 @@ open class GenericPortController(
      * @return
      */
     fun next(pattern: String): CompletableFuture<String> {
-        return next({ it -> it.matches(pattern.toRegex()) })
+        return next{ it -> it.matches(pattern.toRegex()) }
     }
 
     /**
@@ -268,18 +268,8 @@ open class GenericPortController(
      * @param condition
      * @return
      */
-    fun sendAndWait(message: String, timeout: Duration, condition: (String) -> Boolean): String {
-        try {
-            return sendAndGet(message, condition)
-                    .get(timeout.toMillis(), TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            throw RuntimeException(e)
-        } catch (e: ExecutionException) {
-            throw RuntimeException(e)
-        } catch (e: TimeoutException) {
-            throw RuntimeException(e)
-        }
-
+    fun sendAndWait(message: String, timeout: Duration, condition: (String) -> Boolean = {true}): String {
+        return sendAndGet(message, condition).get(timeout.toMillis(), TimeUnit.MILLISECONDS)
     }
 
     /**
