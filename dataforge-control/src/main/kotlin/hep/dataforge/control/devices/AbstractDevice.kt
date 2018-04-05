@@ -71,8 +71,8 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     val initialized by initializedState.booleanDelegate
 
     private val stateListenerJob: Job = launch {
-        select<Unit> {
-            while (true) {
+        while (true) {
+            select<Unit> {
                 states.forEach { state ->
                     state.future.onAwait {
                         onStateChange(state.name, it)

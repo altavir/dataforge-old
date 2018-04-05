@@ -190,7 +190,7 @@ abstract class Port(meta: Meta) : MetaHolder(meta), AutoCloseable, MetaID, Named
             assert(controller != null)
             if (controller == this.controller) {
                 this.controller = null
-                run {
+                execute {
                     portLock.unlock()
                     logger.debug("Unlocked by {}", controller)
                 }
