@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -29,25 +29,25 @@ public class ValueConversionException extends RuntimeException {
     Value value;
     ValueType to;
 
-    
-    
-    
+
     /**
      * <p>Constructor for ValueConversionException.</p>
      *
      * @param value a {@link hep.dataforge.values.Value} object.
-     * @param to a {@link hep.dataforge.values.ValueType} object.
+     * @param to    a {@link hep.dataforge.values.ValueType} object.
      */
     public ValueConversionException(Value value, ValueType to) {
         this.value = value;
         this.to = to;
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public String getMessage() {
-        return String.format("Failed to convert value '%s' to %s", value.stringValue(),to.name());
+        return String.format("Failed to convert value '%s' of type %s to %s", value.stringValue(), value.getType(), to.name());
     }
-    
+
 
 }

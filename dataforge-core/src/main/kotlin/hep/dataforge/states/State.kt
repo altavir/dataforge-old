@@ -145,7 +145,7 @@ sealed class State<T : Any>(
         get() = get()
         set(value) = set(value)
 
-    val delegate = object: ReadWriteProperty<Any?, T>{
+    val delegate = object : ReadWriteProperty<Any?, T> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             return value
         }
@@ -197,7 +197,8 @@ class ValueState(
         }
     }
 
-    val booleanValue = value.booleanValue()
+    val booleanValue
+        get() = value.booleanValue()
 
     val stringDelegate: ReadWriteProperty<Any?, String> = object : ReadWriteProperty<Any?, String> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
@@ -209,6 +210,9 @@ class ValueState(
         }
     }
 
+    val stringValue: String
+        get() = value.stringValue()
+
     val timeDelegate: ReadWriteProperty<Any?, Instant> = object : ReadWriteProperty<Any?, Instant> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Instant) {
             set(value)
@@ -219,7 +223,8 @@ class ValueState(
         }
     }
 
-    val timeValue = value.timeValue()
+    val timeValue: Instant
+        get() = value.timeValue()
 
     val intDelegate: ReadWriteProperty<Any?, Int> = object : ReadWriteProperty<Any?, Int> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
@@ -231,7 +236,8 @@ class ValueState(
         }
     }
 
-    val intValue = value.intValue()
+    val intValue
+        get() = value.intValue()
 
     val doubleDelegate: ReadWriteProperty<Any?, Double> = object : ReadWriteProperty<Any?, Double> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
@@ -243,9 +249,10 @@ class ValueState(
         }
     }
 
-    val doubleValue = value.doubleValue()
+    val doubleValue
+        get() = value.doubleValue()
 
-    inline fun <reified T : Enum<T>> enum(): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
+    inline fun <reified T : Enum<T>> enumDelegate(): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
             return enumValueOf<T>(value.stringValue())
         }
@@ -255,7 +262,7 @@ class ValueState(
         }
     }
 
-    inline fun <reified T : Enum<T>> enumValue(): T{
+    inline fun <reified T : Enum<T>> enumValue(): T {
         return enumValueOf(value.stringValue())
     }
 

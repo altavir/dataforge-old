@@ -45,6 +45,9 @@ public interface MetaStreamReader {
     MetaBuilder read(InputStream stream, long length) throws IOException, ParseException;
 
     default MetaBuilder read(InputStream stream) throws IOException, ParseException {
+        if(stream == null){
+            throw new RuntimeException("Stream is null");
+        }
         return read(stream, -1);
     }
 

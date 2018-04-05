@@ -104,7 +104,7 @@ class BooleanValue extends AbstractValue {
      */
     @Override
     public Instant timeValue() {
-        throw new ValueConversionException(this, ValueType.BOOLEAN);
+        throw new ValueConversionException(this, ValueType.TIME);
     }
 
     /**

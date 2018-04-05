@@ -99,7 +99,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     /**
      * Current state of the measurement
      */
-    val measurementState by valueState(MEASUREMENT_STATUS_STATE).enum<MeasurementState>()
+    val measurementState by valueState(MEASUREMENT_STATUS_STATE).enumDelegate<MeasurementState>()
 
     var message by valueState(MEASUREMENT_MESSAGE_STATE).stringDelegate
 
