@@ -43,8 +43,9 @@ class VirtualSensor(context: Context) : Sensor(context, Meta.empty()) {
     }
 
 
-    override fun getType(): String {
-        return VIRTUAL_SENSOR_TYPE
-    }
+    override val type: String
+        get() {
+            return VIRTUAL_SENSOR_TYPE
+        }
 
 }

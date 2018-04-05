@@ -74,14 +74,14 @@ abstract class AbstractStorage : MetaHolder, Storage {
         this.name = name.replace(".", "_")
         this.parent = parent
         context = parent.context
-        connectionHelper = ConnectionHelper(this, context.logger)
+        connectionHelper = ConnectionHelper(this)
     }
 
     protected constructor(context: Context, meta: Meta) : super(meta) {
         this.name = meta.getString("name", "").replace(".", "_")
         this.context = context
         this.parent = null
-        connectionHelper = ConnectionHelper(this, context.logger)
+        connectionHelper = ConnectionHelper(this)
     }
 
     override fun getConnectionHelper(): ConnectionHelper {

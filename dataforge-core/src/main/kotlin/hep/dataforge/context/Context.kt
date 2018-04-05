@@ -33,7 +33,6 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
-import java.util.function.Predicate
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 import kotlin.reflect.KClass
@@ -212,7 +211,7 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> optService(serviceClass: Class<T>, predicate: Predicate<T>): Optional<T> {
+    fun <T> optService(serviceClass: Class<T>, predicate: (T) -> Boolean): Optional<T> {
         return serviceStream(serviceClass).filter(predicate).findFirst()
     }
 

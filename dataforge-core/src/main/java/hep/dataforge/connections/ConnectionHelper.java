@@ -20,6 +20,7 @@ import hep.dataforge.Named;
 import hep.dataforge.context.Context;
 import hep.dataforge.meta.Meta;
 import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.stream.Stream;
@@ -31,16 +32,15 @@ public class ConnectionHelper implements Connectible {
     //TODO isolate errors inside connections
     private final Map<Connection, Set<String>> connections = new HashMap<>();
     private final Connectible caller;
-    private final Logger logger;
+    private final Logger logger = LoggerFactory.getLogger(getClass());
 
-    public ConnectionHelper(Connectible caller, Logger logger) {
+    public ConnectionHelper(Connectible caller) {
         this.caller = caller;
-        this.logger = logger;
     }
 
-    public Logger getLogger() {
-        return logger;
-    }
+//    public Logger getLogger() {
+//        return logger;
+//    }
 
     /**
      * Attach connection
@@ -50,15 +50,15 @@ public class ConnectionHelper implements Connectible {
      */
     @Override
     public synchronized void connect(Connection connection, String... roles) {
-        getLogger().info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
+        logger.info("Attaching connection {} with roles {}", connection.toString(), String.join(", ", roles));
         //Checking if connection could serve given roles
         for (String role : roles) {
             if (!acceptsRole(role)) {
-                getLogger().warn("The connectible does not support role {}", role);
+                logger.warn("The connectible does not support role {}", role);
             } else {
                 roleDefs().stream().filter((roleDef) -> roleDef.name().equals(role)).forEach(rd -> {
                     if (!rd.objectType().isInstance(connection)) {
-                        getLogger().error("Connection does not meet type requirement for role {}. Must be {}.",
+                        logger.error("Connection does not meet type requirement for role {}. Must be {}.",
                                 role, rd.objectType().getName());
                     }
                 });
@@ -74,7 +74,7 @@ public class ConnectionHelper implements Connectible {
         }
 
         try {
-            getLogger().debug("Opening connection {}", connection.toString());
+            logger.debug("Opening connection {}", connection.toString());
             connection.open(caller);
         } catch (Exception ex) {
             throw new RuntimeException("Can not open connection", ex);
@@ -101,12 +101,12 @@ public class ConnectionHelper implements Connectible {
         if (connections.containsKey(connection)) {
             String conName = Named.Companion.nameOf(connection);
             try {
-                getLogger().debug("Closing connection {}", conName);
+                logger.debug("Closing connection {}", conName);
                 connection.close();
             } catch (Exception ex) {
-                getLogger().error("Can not close connection", ex);
+                logger.error("Can not close connection", ex);
             }
-            getLogger().info("Detaching connection {}", conName);
+            logger.info("Detaching connection {}", conName);
             this.connections.remove(connection);
         }
     }

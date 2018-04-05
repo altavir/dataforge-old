@@ -20,7 +20,7 @@ import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.control.connections.Roles
-import hep.dataforge.control.devices.Device.INITIALIZED_STATE
+import hep.dataforge.control.devices.Device.Companion.INITIALIZED_STATE
 import hep.dataforge.description.ValueDef
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
@@ -55,7 +55,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
 
     val initializedState: ValueState = valueState(INITIALIZED_STATE) { old, value ->
-        if(old != value) {
+        if (old != value) {
             if (value.booleanValue()) {
                 init()
             } else {
@@ -68,7 +68,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     /**
      * Initialization state
      */
-    val init by initializedState.booleanDelegate
+    val initialized by initializedState.booleanDelegate
 
     private val stateListenerJob: Job = launch {
         select<Unit> {
@@ -82,7 +82,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         }
     }
 
-    private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this, this.logger) }
+    private val _connectionHelper: ConnectionHelper by lazy { ConnectionHelper(this) }
 
     override fun getConnectionHelper(): ConnectionHelper {
         return _connectionHelper
@@ -170,9 +170,8 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     }
 
 
-    override fun getType(): String {
-        return meta.getString("type", "unknown")
-    }
+    override val type: String
+        get() = meta.getString("type", "unknown")
 
     protected fun updateState(stateName: String, value: Any?) {
         states.update(stateName, value)
@@ -180,12 +179,13 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 }
 
 
-val Device.init: Boolean
+val Device.initialized: Boolean
     get() {
         return if (this is AbstractDevice) {
-            this.init
+            this.initialized
         } else {
-            this.states.filter { it.name == INITIALIZED_STATE }.filterIsInstance(ValueState::class.java).firstOrNull()?.value?.booleanValue()
-                    ?: false
+            this.states
+                    .filter { it.name == INITIALIZED_STATE }
+                    .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.booleanValue() ?: false
         }
     }

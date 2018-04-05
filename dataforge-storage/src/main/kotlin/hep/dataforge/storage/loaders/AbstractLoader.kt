@@ -30,13 +30,13 @@ import hep.dataforge.storage.commons.StorageUtils
  * @author Alexander Nozik
  */
 abstract class AbstractLoader(final override val storage: Storage, final override val name: String, override val meta: Meta) : Loader {
-    private val connectionHelper = ConnectionHelper(this, storage.logger)
+    private val _connectionHelper by lazy{ ConnectionHelper(this)}
 
     override val validator: Validator = StorageUtils.defaultMessageValidator(Storage.LOADER_TARGET, name)
 
 
     override fun getConnectionHelper(): ConnectionHelper {
-        return connectionHelper
+        return _connectionHelper
     }
 
     @Throws(PushFailedException::class)
