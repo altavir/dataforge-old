@@ -13,7 +13,7 @@ The center of control API is a `Device` class.
 The device has following important features:
 <ul>
     <li>
-        <strong>States:</strong> each device has a number of states that could be accessed by `getState` method. States could be either stored as some internal variables or calculated on demand. States calculation is synchronous!
+        <strong>States:</strong> each device has a number of states that could be accessed by `getStatus` method. States could be either stored as some internal variables or calculated on demand. States calculation is synchronous!
     </li>
     <li>
         <strong>Listeners:</strong> some external class which listens device state changes and events. By default listeners are represented by weak references so they could be finalized any time if not used.
