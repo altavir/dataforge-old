@@ -87,14 +87,14 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
     /**
      * true if measurement in process
      */
-    var measuring by valueState(MEASURING_STATE) { _, value ->
+    val measuring = valueState(MEASURING_STATE) { _, value ->
         if (value.booleanValue()) {
             startMeasurement(null, measurement)
         } else {
             stopMeasurement()
         }
         value
-    }.booleanDelegate
+    }
 
     /**
      * Current state of the measurement
@@ -114,8 +114,8 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * Start measurement with current configuration if it is not in progress
      */
     fun measure() {
-        if (!measuring) {
-            measuring = true
+        if (!measuring.booleanValue) {
+            measuring.set(true)
         }
     }
 
