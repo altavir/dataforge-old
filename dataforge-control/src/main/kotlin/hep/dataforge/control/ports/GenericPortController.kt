@@ -339,15 +339,3 @@ open class GenericPortController(
         }
     }
 }
-/**
- * Wait for any phrase
- *
- * @return
- */
-/**
- * Block thread until next phrase
- *
- * @param timeout
- * @return
- * @throws PortException
- */

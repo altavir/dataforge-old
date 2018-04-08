@@ -6,9 +6,13 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.values.NamedValue
 
+@DslMarker
+annotation class MetaDSL
+
 /**
  * Kotlin meta builder extension
  */
+@MetaDSL
 class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(name) {
     operator fun Meta.unaryPlus() {
         putNode(this);
@@ -62,6 +66,7 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     /**
      * Attach new node
      */
+    @MetaDSL
     fun node(name: String, vararg values: Pair<String, Any>, transform: (KMetaBuilder.() -> Unit)? = null) {
         val node = KMetaBuilder(name);
         values.forEach {

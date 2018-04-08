@@ -26,10 +26,14 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.produce
+import kotlinx.coroutines.experimental.selects.select
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import java.util.*
 import java.util.stream.Stream
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 
@@ -87,19 +91,19 @@ fun Stateful.valueState(
     return state
 }
 
-fun <T: MetaMorph> Stateful.morphState(
+fun <T : MetaMorph> Stateful.morphState(
         name: String,
         type: KClass<T>,
         def: T? = null,
         getter: (suspend () -> T)? = null,
         setter: (suspend (T?, T) -> T?)? = null
-): MorphState<T>{
+): MorphState<T> {
     val state = MorphState<T>(name, type, def, getter, setter)
     states.init(state)
     return state
 }
 
-class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::class.java)) : Provider, Iterable<State<*>>, ValueProvider {
+class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::class.java)) : Provider, Iterable<State<*>>, ValueProvider, AutoCloseable {
     private val stateMap: MutableMap<String, State<*>> = HashMap()
 
     operator fun get(stateName: String): State<*>? {
@@ -107,10 +111,17 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
     }
 
     /**
+     * Type checked version of the get method
+     */
+    inline fun <reified S : State<*>> getState(stateName: String): S? {
+        return get(stateName) as? S
+    }
+
+    /**
      * null invalidates the state
      */
     operator fun set(stateName: String, value: Any?) {
-        this[stateName]?.set(value) ?: throw NameNotFoundException(stateName)
+        stateMap[stateName]?.set(value) ?: throw NameNotFoundException(stateName)
     }
 
     val names: Collection<String>
@@ -155,10 +166,33 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
         }
 
         state.update(stateValue)
-        logger.info("State {} changed to {}", stateName, stateValue)
+//        logger.info("State {} changed to {}", stateName, stateValue)
     }
 
     override fun optValue(path: String): Optional<Value> {
         return (get(path) as? ValueState)?.value.optional
+    }
+
+    /**
+     * Subscribe on updates of specific states. By default subscribes on all updates.
+     * Subscription is formed when the method is called, so states initialized after that are ignored.
+     */
+    fun subscribe(pattern: Regex = ".*".toRegex()): ReceiveChannel<Pair<String, Any>> {
+        val subs = stateMap.filter { it.key.matches(pattern) }.mapValues { it.value.subscribe() }
+        return produce {
+            while (true) {
+                select<Unit> {
+                    subs.forEach { key, value ->
+                        value.onReceive {
+                            send(Pair(key, it))
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    override fun close() {
+
     }
 }

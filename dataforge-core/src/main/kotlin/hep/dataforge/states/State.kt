@@ -27,10 +27,14 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.morph
 import hep.dataforge.values.Value
-import kotlinx.coroutines.experimental.CompletableDeferred
-import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.channels.BroadcastChannel
+import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
+import kotlinx.coroutines.experimental.launch
 import kotlinx.coroutines.experimental.runBlocking
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadWriteProperty
@@ -41,35 +45,52 @@ import kotlin.reflect.KProperty
  * A logical state possibly backed by physical state
  */
 sealed class State<T : Any>(
-        override val name: String, def: T? = null,
+        final override val name: String,
+        def: T? = null,
+        buffer: Int = 100,
         private val getter: (suspend () -> T)? = null,
         private val setter: (suspend (T?, T) -> T?)? = null) : Named, MetaID {
-    private var initialized: Boolean = false
-    private val reference: AtomicReference<T> = AtomicReference()
+    private var valid: Boolean = false
 
-    private var _future = CompletableDeferred<T>()
+    //TODO do something with logging names
+    var logger: Logger = LoggerFactory.getLogger("state::$name")
+
+    private val parentJob = Job()
+    private val ref = AtomicReference<T>()
+    val channel = BroadcastChannel<T>(buffer)
+
     /**
-     * The future representing next state change. It is reset with the new reference after each complete
+     * Open subscription for updates of this state
      */
-    val future: Deferred<T>
-        get() = _future
+    fun subscribe(): SubscriptionReceiveChannel<T> {
+        return channel.openSubscription()
+    }
+
+    fun onChange(action: suspend (T) -> Unit) {
+        val subscription = subscribe()
+        launch(parent = parentJob) {
+            while (true) {
+                action(subscription.receive())
+            }
+        }
+    }
 
     init {
         if (def != null) {
-            reference.set(def)
-            initialized = true
+            channel.offer(def)
+            ref.set(def)
+            valid = true
         }
     }
 
     /**
      * Update the logical value without triggering the change of backing physical state
      */
-    fun updateValue(value: T) {
-        initialized = true
-        reference.set(value)
-        //Complete and reset the future
-        _future.complete(value)
-        _future = CompletableDeferred()
+    private fun updateValue(value: T) {
+        ref.set(value)
+        channel.offer(value)
+        valid = true
+        logger.debug("State {} changed to {}", name, value)
     }
 
     protected abstract fun transform(value: Any): T
@@ -96,7 +117,7 @@ sealed class State<T : Any>(
         } else {
             setter?.let {
                 async {
-                    val res = it.invoke(reference.get(), transform(value))
+                    val res = it.invoke(ref.get(), transform(value))
                     if (res != null) {
                         updateValue(res)
                     }
@@ -109,8 +130,8 @@ sealed class State<T : Any>(
      * Get current value or invoke getter if it is present. Getter is invoked in blocking mode. If state is invalid
      */
     private fun get(): T {
-        return if (initialized) {
-            reference.get()
+        return if (valid) {
+            ref.get()
         } else {
             runBlocking { read() }
         }
@@ -121,7 +142,7 @@ sealed class State<T : Any>(
      * If getter is not defined, then subsequent calls will produce error.
      */
     fun invalidate() {
-        initialized = false
+        valid = false
     }
 
     /**
@@ -134,6 +155,12 @@ sealed class State<T : Any>(
             val res = getter.invoke()
             updateValue(res)
             return res
+        }
+    }
+
+    fun readBlocking(): T{
+        return runBlocking {
+            read()
         }
     }
 
@@ -171,7 +198,7 @@ class ValueState(
         def: Any? = null,
         getter: (suspend () -> Any)? = null,
         setter: (suspend (Value?, Value) -> Any?)? = null
-) : State<Value>(name, def?.let { Value.of(it) }, getter?.toValue(), setter?.toValue()) {
+) : State<Value>(name, def?.let { Value.of(it) }, getter = getter?.toValue(), setter = setter?.toValue()) {
 
     constructor(
             def: ValueDef,
@@ -279,7 +306,7 @@ class MetaState(
         def: Meta? = null,
         getter: (suspend () -> Meta)? = null,
         setter: (suspend (Meta?, Meta) -> Meta?)? = null
-) : State<Meta>(name, def, getter, setter) {
+) : State<Meta>(name, def, getter = getter, setter = setter) {
     constructor(
             def: NodeDef,
             getter: (suspend () -> Meta)? = null,
@@ -308,7 +335,7 @@ class MorphState<T : MetaMorph>(
         def: T? = null,
         getter: (suspend () -> T)? = null,
         setter: (suspend (T?, T) -> T?)? = null
-) : State<T>(name, def, getter, setter) {
+) : State<T>(name, def, getter = getter, setter = setter) {
     override fun transform(value: Any): T {
         return (value as? MetaMorph)?.morph(type)
                 ?: throw RuntimeException("The state $name requires metamorph value, but found ${value::class}")

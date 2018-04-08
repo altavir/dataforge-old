@@ -33,7 +33,8 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
 
     private val futures = CopyOnWriteArraySet<TaggedFuture>()
     override var isOpen = false
-    override var meta =  Configuration(meta)
+    override var meta = Configuration(meta)
+    protected open val delimeter = meta.getString("delimenter", "\n")
 
     protected val coroutineContext = executor.asCoroutineDispatcher()
 
@@ -90,7 +91,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
         clearCompleted()
         val future = launch(coroutineContext) {
             kotlinx.coroutines.experimental.time.delay(delay)
-            receive(response.toByteArray())
+            receive((response + delimeter).toByteArray())
         }
         this.futures.add(TaggedFuture(future, *tags))
     }
@@ -101,7 +102,7 @@ abstract class VirtualPort protected constructor(meta: Meta) : Port(meta), Confi
         val future = launch(coroutineContext) {
             kotlinx.coroutines.experimental.time.delay(delay)
             while (true) {
-                receive(responseBuilder.get().toByteArray())
+                receive((responseBuilder.get() + delimeter).toByteArray())
                 kotlinx.coroutines.experimental.time.delay(period)
             }
         }

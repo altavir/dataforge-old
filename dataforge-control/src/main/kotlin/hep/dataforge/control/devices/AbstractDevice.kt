@@ -33,7 +33,6 @@ import hep.dataforge.states.*
 import hep.dataforge.values.ValueType
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.selects.select
 import java.time.Duration
 import java.util.concurrent.*
 
@@ -51,7 +50,7 @@ import java.util.concurrent.*
 @StateDef(value = ValueDef(name = INITIALIZED_STATE, type = [ValueType.BOOLEAN], def = "false", info = "Initialization state of the device"), writable = true)
 abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
-    override val states = StateHolder()
+    final override val states = StateHolder()
 
 
     val initializedState: ValueState = valueState(INITIALIZED_STATE) { old, value ->
@@ -71,14 +70,9 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     val initialized by initializedState.booleanDelegate
 
     private val stateListenerJob: Job = launch {
+        val subscription = states.subscribe()
         while (true) {
-            select<Unit> {
-                states.forEach { state ->
-                    state.future.onAwait {
-                        onStateChange(state.name, it)
-                    }
-                }
-            }
+            subscription.receive().also { onStateChange(it.first, it.second) }
         }
     }
 
@@ -144,8 +138,12 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
         return executor.submit(callable)
     }
 
-    protected fun schedule(delay: Duration, runnable: Runnable): ScheduledFuture<*> {
+    protected fun schedule(delay: Duration, runnable: () -> Unit): ScheduledFuture<*> {
         return executor.schedule(runnable, delay.toMillis(), TimeUnit.MILLISECONDS)
+    }
+
+    protected fun repeat(interval: Duration, delay: Duration = Duration.ZERO, runnable: () -> Unit): ScheduledFuture<*> {
+        return executor.scheduleWithFixedDelay(runnable, delay.toMillis(), interval.toMillis(), TimeUnit.MILLISECONDS)
     }
 
 
