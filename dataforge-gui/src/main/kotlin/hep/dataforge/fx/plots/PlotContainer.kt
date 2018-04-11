@@ -145,7 +145,11 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                             "color" -> textFill = if (newItem == null) {
                                                 Color.BLACK
                                             } else {
-                                                Color.valueOf(newItem.stringValue())
+                                                try {
+                                                    Color.valueOf(newItem.stringValue())
+                                                } catch (ex: Exception){
+                                                    Color.BLACK
+                                                }
                                             }
                                             "visible" -> isSelected = newItem?.booleanValue() ?: true
                                         }

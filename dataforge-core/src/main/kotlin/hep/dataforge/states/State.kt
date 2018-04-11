@@ -27,14 +27,13 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.morph
 import hep.dataforge.values.Value
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.BroadcastChannel
 import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
+import kotlinx.coroutines.experimental.time.withTimeout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.time.Duration
 import java.time.Instant
 import java.util.concurrent.atomic.AtomicReference
 import kotlin.properties.ReadWriteProperty
@@ -115,15 +114,43 @@ sealed class State<T : Any>(
         if (value == null) {
             invalidate()
         } else {
-            setter?.let {
-                async {
-                    val res = it.invoke(ref.get(), transform(value))
-                    if (res != null) {
-                        updateValue(res)
-                    }
-                }
-            } ?: update(value)
+            setValueAsync(transform(value))
         }
+    }
+
+    fun setValueAsync(value: T): Deferred<T> {
+        return setter?.let {
+            async<T> {
+                val res = it.invoke(ref.get(), value)
+                if (res != null) {
+                    updateValue(res)
+                    return@async res
+                } else {
+                    return@async this@State.value
+                }
+            }
+        } ?: async {
+            update(value)
+            return@async value
+        }
+    }
+
+    /**
+     * Set the value and block calling thread until it is set or until timeout expires
+     */
+    fun setValueAndWait(value: T, timeout: Duration? = null): T {
+        val deferred = setValueAsync(value)
+        return runBlocking {
+            if (timeout == null) {
+                deferred.await()
+            } else {
+                withTimeout(timeout) { deferred.await() }
+            }
+        }
+    }
+
+    fun setAndWait(value: Any, timeout: Duration? = null): T {
+        return setValueAndWait(transform(value),timeout)
     }
 
     /**
@@ -158,7 +185,7 @@ sealed class State<T : Any>(
         }
     }
 
-    fun readBlocking(): T{
+    fun readBlocking(): T {
         return runBlocking {
             read()
         }

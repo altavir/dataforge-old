@@ -21,8 +21,6 @@
  */
 package hep.dataforge.control.devices
 
-import ch.qos.logback.classic.Level
-import ch.qos.logback.classic.Logger
 import hep.dataforge.context.Context
 import hep.dataforge.control.devices.PortSensor.Companion.CONNECTED_STATE
 import hep.dataforge.control.devices.PortSensor.Companion.DEBUG_STATE
@@ -33,7 +31,6 @@ import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.events.EventBuilder
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.kodex.useMeta
 import hep.dataforge.kodex.useValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.states.*
@@ -72,6 +69,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
 
     var debug by valueState(DEBUG_STATE) { old, value ->
         if (old != value) {
+            logger.info("Turning debug mode to $value")
             setDebugMode(value.booleanValue())
         }
         value
@@ -87,25 +85,22 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     private val defaultTimeout: Duration = Duration.ofMillis(meta.getInt("timeout", 400).toLong())
 
     init {
-        meta.useMeta(PORT_STATE) {
-            port = it
-        }
+//        meta.useMeta(PORT_STATE) {
+//            port = it
+//        }
         meta.useValue(DEBUG_STATE) {
-            debug = it.booleanValue()
+            updateState(DEBUG_STATE, it.booleanValue())
         }
     }
 
     private fun setDebugMode(debugMode: Boolean) {
         //Add debug listener
-
         if (debugMode) {
-            (logger as? Logger)?.level = Level.DEBUG
             connection.apply {
-                onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
-                onError("$name[debug]") { message, error -> logger.error("Device {} exception: {}", name, message, error) }
+                onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: \n{}", name, phrase) }
+                onError("$name[debug]") { message, error -> logger.error("Device {} exception: \n{}", name, message, error) }
             }
         } else {
-            (logger as? Logger)?.level = Level.INFO
             connection.apply {
                 removePhraseListener("$name[debug]")
                 removeErrorListener("$name[debug]")

@@ -27,9 +27,7 @@ import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.time.Duration
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ExecutionException
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeoutException
 
 
 /**
@@ -106,9 +104,9 @@ open class GenericPortController(
     @JvmOverloads
     fun next(condition: (String) -> Boolean = { true }): CompletableFuture<String> {
         //No need for synchronization since ReferenceRegistry is synchronized
+        waiters.removeIf { it.isDone }
         val res = FuturePhrase(condition)
         waiters.add(res)
-        waiters.removeIf { it.isDone }
         return res
     }
 
@@ -119,7 +117,7 @@ open class GenericPortController(
      * @return
      */
     fun next(pattern: String): CompletableFuture<String> {
-        return next{ it -> it.matches(pattern.toRegex()) }
+        return next { it -> it.matches(pattern.toRegex()) }
     }
 
     /**
@@ -132,16 +130,8 @@ open class GenericPortController(
      */
     @JvmOverloads
     fun waitFor(timeout: Duration, predicate: (String) -> Boolean = { true }): String {
-        try {
-            return next(predicate).get(timeout.toMillis(), TimeUnit.MILLISECONDS)
-        } catch (e: InterruptedException) {
-            throw RuntimeException(e)
-        } catch (e: ExecutionException) {
-            throw RuntimeException(e)
-        } catch (e: TimeoutException) {
-            throw RuntimeException(e)
-        }
-
+        return next(predicate)
+                .get(timeout.toMillis(), TimeUnit.MILLISECONDS)
     }
 
     /**
@@ -268,8 +258,9 @@ open class GenericPortController(
      * @param condition
      * @return
      */
-    fun sendAndWait(message: String, timeout: Duration, condition: (String) -> Boolean = {true}): String {
-        return sendAndGet(message, condition).get(timeout.toMillis(), TimeUnit.MILLISECONDS)
+    fun sendAndWait(message: String, timeout: Duration, condition: (String) -> Boolean = { true }): String {
+        return sendAndGet(message, condition)
+                .get(timeout.toMillis(), TimeUnit.MILLISECONDS)
     }
 
     /**
@@ -292,7 +283,6 @@ open class GenericPortController(
     }
 
     private inner class FuturePhrase(internal val condition: (String) -> Boolean) : CompletableFuture<String>() {
-
         internal fun acceptPhrase(phrase: String) {
             if (condition(phrase)) {
                 complete(phrase)
