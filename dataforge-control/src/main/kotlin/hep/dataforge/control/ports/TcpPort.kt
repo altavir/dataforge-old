@@ -29,8 +29,7 @@ import java.net.Socket
 class TcpPort(meta: Meta) : Port(meta) {
 
     constructor(ip: String, port: Int) : this(
-            buildMeta(
-                    "handler",
+            buildMeta("handler",
                     "type" to "tcp",
                     "ip" to ip,
                     "port" to port

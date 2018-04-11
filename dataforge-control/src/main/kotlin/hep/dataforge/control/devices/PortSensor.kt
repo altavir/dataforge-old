@@ -21,6 +21,8 @@
  */
 package hep.dataforge.control.devices
 
+import ch.qos.logback.classic.Level
+import ch.qos.logback.classic.Logger
 import hep.dataforge.context.Context
 import hep.dataforge.control.devices.PortSensor.Companion.CONNECTED_STATE
 import hep.dataforge.control.devices.PortSensor.Companion.DEBUG_STATE
@@ -60,22 +62,23 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     protected val connection: GenericPortController
         get() = _connection ?: throw RuntimeException("Not connected")
 
-    var connected by valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
+    val connected = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
         if (old != value) {
+            logger.info("State 'connect' changed to $value")
             connect(value.booleanValue())
         }
         value
-    }.booleanDelegate
+    }
 
     var debug by valueState(DEBUG_STATE) { old, value ->
-        if(old != value){
+        if (old != value) {
             setDebugMode(value.booleanValue())
         }
         value
     }.booleanDelegate
 
-    var port by metaState(PORT_STATE, getter = {connection.port.meta}){old, value->
-        if(old != value) {
+    var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
+        if (old != value) {
             setupConnection(value)
         }
         value
@@ -94,12 +97,15 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
 
     private fun setDebugMode(debugMode: Boolean) {
         //Add debug listener
+
         if (debugMode) {
+            (logger as? Logger)?.level = Level.DEBUG
             connection.apply {
                 onAnyPhrase("$name[debug]") { phrase -> logger.debug("Device {} received phrase: {}", name, phrase) }
                 onError("$name[debug]") { message, error -> logger.error("Device {} exception: {}", name, message, error) }
             }
         } else {
+            (logger as? Logger)?.level = Level.INFO
             connection.apply {
                 removePhraseListener("$name[debug]")
                 removeErrorListener("$name[debug]")
@@ -108,35 +114,41 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
         updateState(DEBUG_STATE, debugMode)
     }
 
-    protected open fun connect(connected: Boolean) {
+    private fun connect(connected: Boolean) {
         if (connected) {
-            connection.open()
-            updateState(CONNECTED_STATE, true)
+            try {
+                if (_connection == null) {
+                    logger.debug("Setting up connection using device meta")
+                    setupConnection(meta.getMetaOrEmpty(PORT_STATE))
+                }
+                connection.open()
+                this.connected.update(true)
+            } catch (ex: Exception) {
+                notifyError("Failed to open connection", ex)
+                this.connected.update(false)
+            }
         } else {
             _connection?.close()
             _connection = null
-            updateState(CONNECTED_STATE, false)
+            this.connected.update(false)
         }
     }
 
-    protected open fun connect(meta: Meta): GenericPortController {
+    protected open fun buildConnection(meta: Meta): GenericPortController {
         val port = PortFactory.build(meta)
         return GenericPortController(context, port)
     }
 
     private fun setupConnection(portMeta: Meta) {
         _connection?.close()
-        this._connection = connect(portMeta)
-        if (connected) {
-            connection.open()
-        }
+        this._connection = buildConnection(portMeta)
         setDebugMode(debug)
         updateState(PORT_STATE, portMeta)
     }
 
     @Throws(ControlException::class)
     override fun shutdown() {
-        connected = false
+        connected.set(false)
         super.shutdown()
     }
 

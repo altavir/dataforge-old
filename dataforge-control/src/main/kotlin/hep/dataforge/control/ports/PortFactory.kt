@@ -36,7 +36,7 @@ import java.util.*
  */
 object PortFactory : MetaFactory<Port> {
 
-    private val portMap = HashMap<String, Port>()
+    private val portMap = HashMap<Meta, Port>()
 
 
     @ValueDefs(
@@ -46,16 +46,13 @@ object PortFactory : MetaFactory<Port> {
     )
     override fun build(meta: Meta): Port {
         val protocol = meta.getString("type", "tcp")
-        val address = meta.getString("address")
-        val canonPortName = meta.getString("name", "$protocol:$address")
-        return portMap.getOrPut(canonPortName) {
-            when (protocol) {
-                "com" -> ComPort(meta)
-                "tcp" -> TcpPort(address, meta.getInt("port", 8080));
-                "virtual" -> buildVirtualPort(meta)
-                else -> throw ControlException("Unknown protocol")
-            }
+        val port = when (protocol) {
+            "com" -> ComPort(meta)
+            "tcp" -> TcpPort(meta);
+            "virtual" -> buildVirtualPort(meta)
+            else -> throw ControlException("Unknown protocol")
         }
+        return portMap.getOrPut(port.meta) { port }
     }
 
     private fun buildVirtualPort(meta: Meta): Port {
@@ -74,7 +71,7 @@ object PortFactory : MetaFactory<Port> {
         return build(nameToMeta(portName))
     }
 
-    fun nameToMeta(portName: String): Meta {
+    private fun nameToMeta(portName: String): Meta {
         val builder = MetaBuilder("port")
                 .setValue("name", portName)
 
@@ -86,7 +83,7 @@ object PortFactory : MetaFactory<Port> {
             }
             portName.contains(".") -> {
                 builder["type"] = "tcp"
-                builder["address"] = portName
+                builder["ip"] = portName
             }
             else -> {
                 builder["type"] = "com"
@@ -94,17 +91,5 @@ object PortFactory : MetaFactory<Port> {
             }
         }
         return builder.build();
-    }
-
-    /**
-     * Register custom portHandler. Useful for virtual ports
-     * @param handler
-     */
-    fun registerPort(handler: Port) {
-        if (portMap.containsKey(handler.toString())) {
-            throw RuntimeException("Port with given id already exists")
-        } else {
-            portMap.put(handler.toString(), handler)
-        }
     }
 }

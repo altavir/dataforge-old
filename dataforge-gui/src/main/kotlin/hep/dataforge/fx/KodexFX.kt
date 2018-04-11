@@ -7,6 +7,7 @@ import javafx.application.Platform
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
+import javafx.scene.Node
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
@@ -133,9 +134,9 @@ fun runNow(r: Runnable) {
     }
 }
 
-fun UIComponent.bindWindow(toggle: BooleanProperty) {
+fun UIComponent.bindWindow(owner: Node, toggle: BooleanProperty) {
     toggle.onChange {
-        val stage = openWindow()
+        val stage = openWindow(owner = owner.scene.window)
         if (it) {
             stage?.show()
         } else {

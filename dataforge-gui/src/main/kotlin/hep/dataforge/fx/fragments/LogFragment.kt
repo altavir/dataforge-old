@@ -109,8 +109,6 @@ class LogFragment : Fragment("DataForge output log") {
     @Deprecated("")
     fun hookStd() {
         if (!stdHooked) {
-            //            System.setOut(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_OUT)));
-            //            System.setErr(new PrintStream(new TeeOutputStream(outputPane.getStream(), STD_ERR)));
             System.setOut(PrintStream(outputPane.stream))
             System.setErr(PrintStream(outputPane.stream))
             stdHooked = true
@@ -139,7 +137,7 @@ class LogFragment : Fragment("DataForge output log") {
         private val STD_OUT = System.out
         private val STD_ERR = System.err
 
-        private val FX_LOG_APPENDER_NAME = "hep.dataforge.fx"
+        private const val FX_LOG_APPENDER_NAME = "hep.dataforge.fx"
     }
 
 }

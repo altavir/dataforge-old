@@ -22,7 +22,7 @@ class FXOutputPaneTest : Application() {
         out.setMaxLines(5)
 
         for (i in 0..11) {
-            out.appendLine("my text number " + i)
+            out.appendLine("my text number $i")
         }
 
         //        onComplete.appendLine("a\tb\tc");
