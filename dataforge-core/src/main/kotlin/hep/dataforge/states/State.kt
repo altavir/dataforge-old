@@ -27,9 +27,12 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.morph
 import hep.dataforge.values.Value
-import kotlinx.coroutines.experimental.*
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.async
 import kotlinx.coroutines.experimental.channels.BroadcastChannel
 import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
+import kotlinx.coroutines.experimental.launch
+import kotlinx.coroutines.experimental.runBlocking
 import kotlinx.coroutines.experimental.time.withTimeout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -48,7 +51,7 @@ sealed class State<T : Any>(
         def: T? = null,
         buffer: Int = 100,
         private val getter: (suspend () -> T)? = null,
-        private val setter: (suspend (T?, T) -> T?)? = null) : Named, MetaID {
+        private val setter: (suspend (T?, T) -> Unit)? = null) : Named, MetaID {
     private var valid: Boolean = false
 
     //TODO do something with logging names
@@ -114,24 +117,12 @@ sealed class State<T : Any>(
         if (value == null) {
             invalidate()
         } else {
-            setValueAsync(transform(value))
-        }
-    }
-
-    fun setValueAsync(value: T): Deferred<T> {
-        return setter?.let {
-            async<T> {
-                val res = it.invoke(ref.get(), value)
-                if (res != null) {
-                    updateValue(res)
-                    return@async res
-                } else {
-                    return@async this@State.value
+            val transformed = transform(value)
+            setter?.let {
+                launch {
+                    it.invoke(ref.get(), transformed)
                 }
-            }
-        } ?: async {
-            update(value)
-            return@async value
+            } ?: update(value)
         }
     }
 
@@ -139,7 +130,15 @@ sealed class State<T : Any>(
      * Set the value and block calling thread until it is set or until timeout expires
      */
     fun setValueAndWait(value: T, timeout: Duration? = null): T {
-        val deferred = setValueAsync(value)
+        val deferred = setter?.let {
+            async<T> {
+                it.invoke(ref.get(), value)
+                return@async channel.openSubscription().receive()
+            }
+        } ?: async {
+            update(value)
+            return@async value
+        }
         return runBlocking {
             if (timeout == null) {
                 deferred.await()
@@ -149,8 +148,12 @@ sealed class State<T : Any>(
         }
     }
 
-    fun setAndWait(value: Any, timeout: Duration? = null): T {
-        return setValueAndWait(transform(value),timeout)
+    fun setAndWait(value: Any?, timeout: Duration? = null): T {
+        if (value == null) {
+            invalidate()
+            return runBlocking { read(timeout) }
+        }
+        return setValueAndWait(transform(value), timeout)
     }
 
     /**
@@ -185,6 +188,16 @@ sealed class State<T : Any>(
         }
     }
 
+    suspend fun read(timeout: Duration?): T {
+        return if (timeout == null) {
+            read()
+        } else {
+            withTimeout(timeout) {
+                read()
+            }
+        }
+    }
+
     fun readBlocking(): T {
         return runBlocking {
             read()
@@ -214,9 +227,9 @@ private fun (suspend () -> Any).toValue(): (suspend () -> Value) {
     return { Value.of(this.invoke()) }
 }
 
-private fun (suspend (Value?, Value) -> Any?).toValue(): (suspend (Value?, Value) -> Value?) {
-    return { old, new -> Value.of(this.invoke(old, new)) }
-}
+//private fun (suspend (Value?, Value) -> Any?).toValue(): (suspend (Value?, Value) -> Value?) {
+//    return { old, new -> Value.of(this.invoke(old, new)) }
+//}
 
 
 class ValueState(
@@ -224,13 +237,13 @@ class ValueState(
         val descriptor: ValueDescriptor = ValueDescriptor.empty(name),
         def: Any? = null,
         getter: (suspend () -> Any)? = null,
-        setter: (suspend (Value?, Value) -> Any?)? = null
-) : State<Value>(name, def?.let { Value.of(it) }, getter = getter?.toValue(), setter = setter?.toValue()) {
+        setter: (suspend (Value?, Value) -> Unit)? = null
+) : State<Value>(name, def?.let { Value.of(it) }, getter = getter?.toValue(), setter = setter) {
 
     constructor(
             def: ValueDef,
             getter: (suspend () -> Any)? = null,
-            setter: (suspend (Value?, Value) -> Any?)? = null
+            setter: (suspend (Value?, Value) -> Unit)? = null
     ) : this(def.name, ValueDescriptor.build(def), Value.of(def.def), getter, setter)
 
     override fun transform(value: Any): Value {
@@ -332,12 +345,12 @@ class MetaState(
         val descriptor: NodeDescriptor = NodeDescriptor.empty(name),
         def: Meta? = null,
         getter: (suspend () -> Meta)? = null,
-        setter: (suspend (Meta?, Meta) -> Meta?)? = null
+        setter: (suspend (Meta?, Meta) -> Unit)? = null
 ) : State<Meta>(name, def, getter = getter, setter = setter) {
     constructor(
             def: NodeDef,
             getter: (suspend () -> Meta)? = null,
-            setter: (suspend (Meta?, Meta) -> Meta?)? = null
+            setter: (suspend (Meta?, Meta) -> Unit)? = null
     ) : this(def.name, NodeDescriptor.build(def), null, getter, setter)// TODO fix default value
 
     override fun transform(value: Any): Meta {
@@ -361,7 +374,7 @@ class MorphState<T : MetaMorph>(
         val type: KClass<T>,
         def: T? = null,
         getter: (suspend () -> T)? = null,
-        setter: (suspend (T?, T) -> T?)? = null
+        setter: (suspend (T?, T) -> Unit)? = null
 ) : State<T>(name, def, getter = getter, setter = setter) {
     override fun transform(value: Any): T {
         return (value as? MetaMorph)?.morph(type)

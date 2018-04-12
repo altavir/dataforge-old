@@ -130,19 +130,19 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
     override val name: String
         get() = meta.getString("name", type)
 
-    protected fun execute(runnable: () -> Unit): Future<*> {
+    protected fun runOnDeviceThread(runnable: () -> Unit): Future<*> {
         return executor.submit(runnable)
     }
 
-    protected fun <T> call(callable: () -> T): Future<T> {
+    protected fun <T> callOnDeviceThread(callable: () -> T): Future<T> {
         return executor.submit(callable)
     }
 
-    protected fun schedule(delay: Duration, runnable: () -> Unit): ScheduledFuture<*> {
+    protected fun scheduleOnDeviceThread(delay: Duration, runnable: () -> Unit): ScheduledFuture<*> {
         return executor.schedule(runnable, delay.toMillis(), TimeUnit.MILLISECONDS)
     }
 
-    protected fun repeat(interval: Duration, delay: Duration = Duration.ZERO, runnable: () -> Unit): ScheduledFuture<*> {
+    protected fun repeatOnDeviceThread(interval: Duration, delay: Duration = Duration.ZERO, runnable: () -> Unit): ScheduledFuture<*> {
         return executor.scheduleWithFixedDelay(runnable, delay.toMillis(), interval.toMillis(), TimeUnit.MILLISECONDS)
     }
 

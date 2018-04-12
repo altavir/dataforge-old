@@ -64,7 +64,7 @@ interface Stateful : Provider {
 fun Stateful.metaState(
         name: String,
         getter: (suspend () -> Meta)? = null,
-        setter: (suspend (Meta?, Meta) -> Meta?)? = null
+        setter: (suspend (Meta?, Meta) -> Unit)? = null
 ): MetaState {
     val def: MetaStateDef? = listAnnotations(this::class.java, MetaStateDef::class.java, true).find { it.value.name == name }
     val state: MetaState = if (def == null) {
@@ -76,10 +76,18 @@ fun Stateful.metaState(
     return state
 }
 
+fun Stateful.metaState(
+        name: String,
+        getter: (suspend () -> Meta)? = null,
+        setter: (suspend (Meta) -> Unit)
+): MetaState {
+    return metaState(name, getter = getter, setter = { old, value -> if (old != value) setter.invoke(value) })
+}
+
 fun Stateful.valueState(
         name: String,
         getter: (suspend () -> Any)? = null,
-        setter: (suspend (Value?, Value) -> Any?)? = null
+        setter: (suspend (Value?, Value) -> Unit)? = null
 ): ValueState {
     val def: StateDef? = listAnnotations(this::class.java, StateDef::class.java, true).find { it.value.name == name }
     val state: ValueState = if (def == null) {
@@ -91,12 +99,23 @@ fun Stateful.valueState(
     return state
 }
 
+/**
+ * Simplified version of value state generator, applies setter only if value is changed
+ */
+fun Stateful.valueState(
+        name: String,
+        getter: (suspend () -> Any)? = null,
+        setter: (suspend (Value) -> Unit)
+): ValueState {
+    return valueState(name, getter = getter, setter = { old, value -> if (old != value) setter.invoke(value) })
+}
+
 fun <T : MetaMorph> Stateful.morphState(
         name: String,
         type: KClass<T>,
         def: T? = null,
         getter: (suspend () -> T)? = null,
-        setter: (suspend (T?, T) -> T?)? = null
+        setter: (suspend (T?, T) -> Unit)? = null
 ): MorphState<T> {
     val state = MorphState<T>(name, type, def, getter, setter)
     states.init(state)
