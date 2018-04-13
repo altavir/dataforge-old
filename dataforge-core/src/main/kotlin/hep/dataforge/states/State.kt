@@ -51,7 +51,7 @@ sealed class State<T : Any>(
         def: T? = null,
         buffer: Int = 100,
         private val getter: (suspend () -> T)? = null,
-        private val setter: (suspend (T?, T) -> Unit)? = null) : Named, MetaID {
+        private val setter: (suspend State<T>.(T?, T) -> Unit)? = null) : Named, MetaID {
     private var valid: Boolean = false
 
     //TODO do something with logging names
@@ -120,7 +120,7 @@ sealed class State<T : Any>(
             val transformed = transform(value)
             setter?.let {
                 launch {
-                    it.invoke(ref.get(), transformed)
+                    it.invoke(this@State, ref.get(), transformed)
                 }
             } ?: update(value)
         }
@@ -130,21 +130,23 @@ sealed class State<T : Any>(
      * Set the value and block calling thread until it is set or until timeout expires
      */
     fun setValueAndWait(value: T, timeout: Duration? = null): T {
-        val deferred = setter?.let {
-            async<T> {
-                it.invoke(ref.get(), value)
-                return@async channel.openSubscription().receive()
+        if (setter != null) {
+            val deferred = async {
+                val subscription = channel.openSubscription()
+                setter.invoke(this@State, ref.get(), value)
+                return@async subscription.receive()
             }
-        } ?: async {
+
+            return runBlocking {
+                if (timeout == null) {
+                    deferred.await()
+                } else {
+                    withTimeout(timeout) { deferred.await() }
+                }
+            }
+        } else {
             update(value)
-            return@async value
-        }
-        return runBlocking {
-            if (timeout == null) {
-                deferred.await()
-            } else {
-                withTimeout(timeout) { deferred.await() }
-            }
+            return value
         }
     }
 
@@ -179,12 +181,12 @@ sealed class State<T : Any>(
      * read the state if the getter is available and update logical
      */
     suspend fun read(): T {
-        if (getter == null) {
-            throw RuntimeException("The getter for state $name not defined")
-        } else {
+        if (getter != null) {
             val res = getter.invoke()
             updateValue(res)
             return res
+        } else {
+            throw RuntimeException("The getter for state $name not defined and the state is invalid")
         }
     }
 
@@ -235,15 +237,15 @@ private fun (suspend () -> Any).toValue(): (suspend () -> Value) {
 class ValueState(
         name: String,
         val descriptor: ValueDescriptor = ValueDescriptor.empty(name),
-        def: Any? = null,
+        def: Any? = Value.NULL,
         getter: (suspend () -> Any)? = null,
-        setter: (suspend (Value?, Value) -> Unit)? = null
+        setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
 ) : State<Value>(name, def?.let { Value.of(it) }, getter = getter?.toValue(), setter = setter) {
 
     constructor(
             def: ValueDef,
             getter: (suspend () -> Any)? = null,
-            setter: (suspend (Value?, Value) -> Unit)? = null
+            setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
     ) : this(def.name, ValueDescriptor.build(def), Value.of(def.def), getter, setter)
 
     override fun transform(value: Any): Value {
@@ -343,15 +345,15 @@ fun ValueState(def: StateDef): ValueState {
 class MetaState(
         name: String,
         val descriptor: NodeDescriptor = NodeDescriptor.empty(name),
-        def: Meta? = null,
+        def: Meta = Meta.empty(),
         getter: (suspend () -> Meta)? = null,
-        setter: (suspend (Meta?, Meta) -> Unit)? = null
+        setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
 ) : State<Meta>(name, def, getter = getter, setter = setter) {
     constructor(
             def: NodeDef,
             getter: (suspend () -> Meta)? = null,
-            setter: (suspend (Meta?, Meta) -> Unit)? = null
-    ) : this(def.name, NodeDescriptor.build(def), null, getter, setter)// TODO fix default value
+            setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
+    ) : this(def.name, NodeDescriptor.build(def), Meta.empty(), getter, setter)// TODO fix default value
 
     override fun transform(value: Any): Meta {
         return (value as? MetaID)?.toMeta()
@@ -374,7 +376,7 @@ class MorphState<T : MetaMorph>(
         val type: KClass<T>,
         def: T? = null,
         getter: (suspend () -> T)? = null,
-        setter: (suspend (T?, T) -> Unit)? = null
+        setter: (suspend State<T>.(T?, T) -> Unit)? = null
 ) : State<T>(name, def, getter = getter, setter = setter) {
     override fun transform(value: Any): T {
         return (value as? MetaMorph)?.morph(type)

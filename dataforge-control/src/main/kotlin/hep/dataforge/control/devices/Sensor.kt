@@ -81,19 +81,19 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      */
     var measurement by metaState(MEASUREMENT_META_STATE) { old: Meta?, value: Meta ->
         startMeasurement(old, value)
-        value
+        update(value)
     }.delegate
 
     /**
      * true if measurement in process
      */
-    val measuring = valueState(MEASURING_STATE) { _, value ->
+    val measuring = valueState(MEASURING_STATE) { value ->
         if (value.booleanValue()) {
             startMeasurement(null, measurement)
         } else {
             stopMeasurement()
         }
-        value
+        update(value)
     }
 
     /**

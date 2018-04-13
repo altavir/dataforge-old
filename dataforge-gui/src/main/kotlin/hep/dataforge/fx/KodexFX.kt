@@ -12,6 +12,7 @@ import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
+import javafx.stage.Stage
 import kotlinx.coroutines.experimental.CommonPool
 import tornadofx.*
 import java.util.*
@@ -134,18 +135,33 @@ fun runNow(r: Runnable) {
     }
 }
 
-fun UIComponent.bindWindow(owner: Node, toggle: BooleanProperty) {
-    toggle.onChange {
-        val stage = openWindow(owner = owner.scene.window)
-        if (it) {
-            stage?.show()
-        } else {
-            stage?.hide()
+class ToggleUIComponent(
+        private val component: UIComponent,
+        private val owner: Node,
+        private val toggle: BooleanProperty) {
+    val stage: Stage by lazy {
+        val res = component.openWindow(owner = owner.scene.window)
+                ?: throw RuntimeException("Can'topen window for $component")
+        res.showingProperty().onChange {
+            toggle.set(it)
         }
-        stage?.showingProperty()?.onChange {
-            toggle.set(false)
-        }
+        res
     }
+
+    init {
+        toggle.onChange {
+            if (it) {
+                stage.show()
+            } else {
+                stage.hide()
+            }
+        }
+
+    }
+}
+
+fun UIComponent.bindWindow(owner: Node, toggle: BooleanProperty): ToggleUIComponent {
+    return ToggleUIComponent(this, owner, toggle)
 }
 
 //fun TableView<Values>.table(table: Table){

@@ -64,7 +64,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
             logger.info("State 'connect' changed to $value")
             connect(value.booleanValue())
         }
-        value
+        update(value)
     }
 
     var debug by valueState(DEBUG_STATE) { old, value ->
@@ -72,14 +72,14 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
             logger.info("Turning debug mode to $value")
             setDebugMode(value.booleanValue())
         }
-        value
+        update(value)
     }.booleanDelegate
 
     var port by metaState(PORT_STATE, getter = { connection.port.meta }) { old, value ->
         if (old != value) {
             setupConnection(value)
         }
-        value
+        update(value)
     }.delegate
 
     private val defaultTimeout: Duration = Duration.ofMillis(meta.getInt("timeout", 400).toLong())
@@ -143,8 +143,8 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
 
     @Throws(ControlException::class)
     override fun shutdown() {
-        connected.set(false)
         super.shutdown()
+        connected.set(false)
     }
 
     protected fun sendAndWait(request: String, timeout: Duration = defaultTimeout): String {

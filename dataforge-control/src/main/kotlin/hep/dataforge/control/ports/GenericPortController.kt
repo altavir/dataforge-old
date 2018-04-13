@@ -82,7 +82,7 @@ open class GenericPortController(
     private fun acceptPhrase(message: String) {
         waiters.forEach { waiter -> waiter.acceptPhrase(message) }
         listeners.forEach { listener -> listener.acceptPhrase(message) }
-    }
+     }
 
     override fun error(errorMessage: String, error: Throwable) {
         exceptionListeners.forEach { it ->
