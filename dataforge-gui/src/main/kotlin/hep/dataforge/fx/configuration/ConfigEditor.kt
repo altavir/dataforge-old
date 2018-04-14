@@ -26,7 +26,6 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
         when (cfg) {
             is ConfigFXNode -> !(cfg.descriptor?.tags()?.contains(NO_CONFIGURATOR_TAG) ?: false)
             is ConfigFXValue -> !(cfg.descriptor?.tags()?.contains(NO_CONFIGURATOR_TAG) ?: false)
-            else -> true
         }
     }
 
@@ -151,11 +150,6 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                     }
                                 }
                             }
-                        }
-                        else -> {
-                            text = null
-                            graphic = null
-                            isEditable = false
                         }
                     }
 

@@ -26,6 +26,7 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import kotlinx.coroutines.experimental.CancellationException
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
 import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.selects.select
@@ -42,6 +43,7 @@ import kotlin.reflect.KClass
  */
 interface Stateful : Provider {
 
+    val logger: Logger
     val states: StateHolder
 
     @Provides(STATE_TARGET)
@@ -63,17 +65,16 @@ interface Stateful : Provider {
  */
 fun Stateful.metaState(
         name: String,
+        owner: Stateful? = null,
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
 ): MetaState {
     val def: MetaStateDef? = listAnnotations(this::class.java, MetaStateDef::class.java, true).find { it.value.name == name }
-    val state: MetaState = if (def == null) {
-        MetaState(name = name, getter = getter, setter = setter)
+    return if (def == null) {
+        MetaState(name = name, owner = this, getter = getter, setter = setter)
     } else {
-        MetaState(def.value, getter, setter)
+        MetaState(def.value, this, getter, setter)
     }
-    states.init(state)
-    return state
 }
 
 fun Stateful.metaState(
@@ -90,13 +91,11 @@ fun Stateful.valueState(
         setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
 ): ValueState {
     val def: StateDef? = listAnnotations(this::class.java, StateDef::class.java, true).find { it.value.name == name }
-    val state: ValueState = if (def == null) {
-        ValueState(name = name, getter = getter, setter = setter)
+    return if (def == null) {
+        ValueState(name = name, owner = this, getter = getter, setter = setter)
     } else {
-        ValueState(def.value, getter, setter)
+        ValueState(def.value,this, getter, setter)
     }
-    states.init(state)
-    return state
 }
 
 /**
@@ -117,9 +116,7 @@ fun <T : MetaMorph> Stateful.morphState(
         getter: (suspend () -> T)? = null,
         setter: (suspend State<T>.(T?, T) -> Unit)? = null
 ): MorphState<T> {
-    val state = MorphState<T>(name, type, def, getter, setter)
-    states.init(state)
-    return state
+    return MorphState(name, type, def, this, getter, setter)
 }
 
 class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::class.java)) : Provider, Iterable<State<*>>, ValueProvider, AutoCloseable {
@@ -197,15 +194,21 @@ class StateHolder(val logger: Logger = LoggerFactory.getLogger(StateHolder::clas
      * Subscription is formed when the method is called, so states initialized after that are ignored.
      */
     fun subscribe(pattern: Regex = ".*".toRegex()): ReceiveChannel<Pair<String, Any>> {
-        val subs = stateMap.filter { it.key.matches(pattern) }.mapValues { it.value.subscribe() }
+        val subscriptions = stateMap.filter { it.key.matches(pattern) }.mapValues { it.value.subscribe() }
         return produce {
-            while (true) {
-                select<Unit> {
-                    subs.forEach { key, value ->
-                        value.onReceive {
-                            send(Pair(key, it))
+            try {
+                while (true) {
+                    select<Unit> {
+                        subscriptions.forEach { key, value ->
+                            value.onReceive {
+                                send(Pair(key, it))
+                            }
                         }
                     }
+                }
+            } catch (ex: CancellationException) {
+                subscriptions.values.forEach {
+                    it.close()
                 }
             }
         }

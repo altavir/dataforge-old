@@ -240,7 +240,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    protected synchronized void updateLegend(Meta legendMeta) {
+    protected synchronized void updateLegend(@NotNull Meta legendMeta) {
         run(() -> {
             if (legendMeta.getBoolean("show", true)) {
                 if (chart.getLegend() == null) {
@@ -253,7 +253,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
     }
 
     @Override
-    protected synchronized void updateFrame(Meta meta) {
+    protected synchronized void updateFrame(@NotNull Meta meta) {
         run(() -> {
             this.chart.setTitle(meta.getString("title", ""));
         });

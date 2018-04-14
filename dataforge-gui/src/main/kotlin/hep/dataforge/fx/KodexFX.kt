@@ -8,6 +8,7 @@ import javafx.beans.property.BooleanProperty
 import javafx.beans.property.SimpleDoubleProperty
 import javafx.beans.property.SimpleStringProperty
 import javafx.scene.Node
+import javafx.scene.control.ToggleButton
 import javafx.scene.image.Image
 import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
@@ -76,9 +77,7 @@ fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = CommonPoo
     val monitor = getMonitor(id);
     return Coal(Collections.emptyList(), dispatcher, id) { block.invoke(monitor) }
             .apply {
-                onComplete { _, _ ->
-                    removeMonitor(this@runGoal, id)
-                }
+                onComplete { _, _ -> removeMonitor(this@runGoal, id) }
                 run()
             }
 }
@@ -162,6 +161,10 @@ class ToggleUIComponent(
 
 fun UIComponent.bindWindow(owner: Node, toggle: BooleanProperty): ToggleUIComponent {
     return ToggleUIComponent(this, owner, toggle)
+}
+
+fun UIComponent.bindWindow(button: ToggleButton): ToggleUIComponent {
+    return bindWindow(button, button.selectedProperty())
 }
 
 //fun TableView<Values>.table(table: Table){

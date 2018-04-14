@@ -118,13 +118,13 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
             return DataPlot(name, Meta.empty(), adapter, data)
         }
 
-        fun plot(name: String, adapter: ValuesAdapter, showErrors: Boolean): DataPlot {
-            val builder = MetaBuilder("dataPlot").setValue("showErrors", showErrors)
+        fun plot(name: String, adapter: ValuesAdapter): DataPlot {
+            val builder = MetaBuilder("dataPlot")
             return DataPlot(name, builder, adapter)
         }
 
         fun plot(name: String, adapter: ValuesAdapter, data: Iterable<Values>): DataPlot {
-            val plot = plot(name, adapter, true)
+            val plot = plot(name, adapter)
             plot.fillData(data)
             return plot
         }

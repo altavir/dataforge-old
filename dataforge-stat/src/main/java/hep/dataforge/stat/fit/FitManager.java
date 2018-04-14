@@ -53,9 +53,9 @@ public class FitManager extends BasicPlugin {
     public Optional<?> provide(Path path) {
         switch (path.getTarget()) {
             case FIT_ENGINE_TARGET:
-                return Optional.ofNullable(engineList.get(path.nameString()));
+                return Optional.ofNullable(engineList.get(path.getName().toString()));
             case Action.ACTION_TARGET:
-                if (path.nameString().equals(FitAction.FIT_ACTION_NAME)) {
+                if (path.getName().toString().equals(FitAction.FIT_ACTION_NAME)) {
                     return Optional.of(new FitAction());
                 } else {
                     return Optional.empty();

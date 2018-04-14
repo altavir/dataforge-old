@@ -135,7 +135,7 @@ object Descriptors {
                 val target = findAnnotatedElement(path) ?: throw RuntimeException("Target element $path not found")
                 buildDescriptor(target)
             } else if ("resource" == path.target) {
-                NodeDescriptor(buildMetaFromResource("node", path.nameString()))
+                NodeDescriptor(buildMetaFromResource("node", path.name.toString()))
             } else {
                 throw NameNotFoundException("Cant create descriptor from given target", string)
             }

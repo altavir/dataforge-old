@@ -66,10 +66,6 @@ public interface Path {
      */
     Name getName();
 
-    default String nameString() {
-        return getName().toString();
-    }
-
     /**
      * Returns non-empty optional containing the chain without first segment in case of chain path.
      *

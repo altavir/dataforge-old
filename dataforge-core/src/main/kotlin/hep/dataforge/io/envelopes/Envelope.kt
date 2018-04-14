@@ -25,7 +25,6 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.Serializable
 import java.time.Instant
-import java.util.*
 import java.util.function.Function
 
 /**
@@ -53,16 +52,16 @@ interface Envelope : Metoid, Serializable {
      *
      * @return
      */
-    val type: Optional<String> // TODO replace by nullables
-        get() = meta.optString(ENVELOPE_TYPE_KEY)
+    val type: String?
+        get() = meta.optString(ENVELOPE_TYPE_KEY).nullable
 
     /**
      * The type of data encoding
      *
      * @return
      */
-    val dataType: Optional<String> // TODO replace by nullables
-        get() = meta.optString(ENVELOPE_DATA_TYPE_KEY)
+    val dataType: String?
+        get() = meta.optString(ENVELOPE_DATA_TYPE_KEY).nullable
 
     /**
      * Textual user friendly description

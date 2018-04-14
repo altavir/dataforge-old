@@ -25,7 +25,7 @@ public class Providers {
      * @return
      */
     public static Optional<?> provide(Path path, Function<String, Optional<?>> resolver) {
-        Optional<?> opt = resolver.apply(path.nameString());
+        Optional<?> opt = resolver.apply(path.getName().toString());
         Optional<Path> tailOpt = path.optTail();
         if (tailOpt.isPresent()) {
             return opt.flatMap(res -> {

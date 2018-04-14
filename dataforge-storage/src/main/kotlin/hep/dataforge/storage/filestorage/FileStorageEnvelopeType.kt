@@ -53,7 +53,7 @@ object FileStorageEnvelopeType : DefaultEnvelopeType() {
      * @return
      */
     fun validate(envelope: Envelope): Boolean {
-        return envelope.type.orElse(FILE_STORAGE_ENVELOPE_TYPE) == FILE_STORAGE_ENVELOPE_TYPE
+        return envelope.type ?: (FILE_STORAGE_ENVELOPE_TYPE) == FILE_STORAGE_ENVELOPE_TYPE
     }
 
     fun validate(envelope: Envelope, loaderType: String): Boolean {

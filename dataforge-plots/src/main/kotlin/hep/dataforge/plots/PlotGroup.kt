@@ -93,12 +93,25 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
     }
 
     @Synchronized
-    fun add(plot: Plottable): PlotGroup {
+    fun add(plot: Plottable) {
         this.plots[plot.name] = plot
         plot.addListener(this)
 
         notifyPlotAdded(plot)
-        return this
+    }
+
+    /**
+     * Recursively create plot groups using given name
+     */
+    fun createGroup(name: Name): PlotGroup {
+        return if (name.isEmpty) {
+            this
+        } else {
+            synchronized(this) {
+                val subGroup = get(name.first) as? PlotGroup ?: PlotGroup(name.first.toString()).also { add(it) }
+                subGroup.createGroup(name.cutFirst())
+            }
+        }
     }
 
     private fun notifyPlotRemoved(plot: Plottable) {

@@ -27,12 +27,9 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.morph
 import hep.dataforge.values.Value
-import kotlinx.coroutines.experimental.Job
-import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.BroadcastChannel
 import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
-import kotlinx.coroutines.experimental.launch
-import kotlinx.coroutines.experimental.runBlocking
 import kotlinx.coroutines.experimental.time.withTimeout
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -49,17 +46,21 @@ import kotlin.reflect.KProperty
 sealed class State<T : Any>(
         final override val name: String,
         def: T? = null,
-        buffer: Int = 100,
+        owner: Stateful? = null,
         private val getter: (suspend () -> T)? = null,
         private val setter: (suspend State<T>.(T?, T) -> Unit)? = null) : Named, MetaID {
     private var valid: Boolean = false
 
-    //TODO do something with logging names
-    var logger: Logger = LoggerFactory.getLogger("state::$name")
+    val logger: Logger = owner?.logger ?: LoggerFactory.getLogger("state::$name")
 
     private val parentJob = Job()
     private val ref = AtomicReference<T>()
-    val channel = BroadcastChannel<T>(buffer)
+    val channel = BroadcastChannel<T>(BUFFER_SIZE)
+
+    init {
+        @Suppress("LeakingThis")
+        owner?.states?.init(this)
+    }
 
     /**
      * Open subscription for updates of this state
@@ -71,8 +72,12 @@ sealed class State<T : Any>(
     fun onChange(action: suspend (T) -> Unit) {
         val subscription = subscribe()
         launch(parent = parentJob) {
-            while (true) {
-                action(subscription.receive())
+            try {
+                while (true) {
+                    action(subscription.receive())
+                }
+            } catch (ex: CancellationException) {
+                subscription.close()
             }
         }
     }
@@ -90,6 +95,7 @@ sealed class State<T : Any>(
      */
     private fun updateValue(value: T) {
         ref.set(value)
+        //TODO evict on full
         channel.offer(value)
         valid = true
         logger.debug("State {} changed to {}", name, value)
@@ -130,11 +136,14 @@ sealed class State<T : Any>(
      * Set the value and block calling thread until it is set or until timeout expires
      */
     fun setValueAndWait(value: T, timeout: Duration? = null): T {
-        if (setter != null) {
-            val deferred = async {
-                val subscription = channel.openSubscription()
+        if (setter == null) {
+            update(value)
+            return value
+        } else {
+            val deferred = async<T> {
+                val subscription = subscribe()
                 setter.invoke(this@State, ref.get(), value)
-                return@async subscription.receive()
+                return@async subscription.receive().also { subscription.close() }
             }
 
             return runBlocking {
@@ -144,18 +153,16 @@ sealed class State<T : Any>(
                     withTimeout(timeout) { deferred.await() }
                 }
             }
-        } else {
-            update(value)
-            return value
         }
     }
 
     fun setAndWait(value: Any?, timeout: Duration? = null): T {
-        if (value == null) {
+        return if (value == null) {
             invalidate()
-            return runBlocking { read(timeout) }
+            runBlocking { read(timeout) }
+        } else {
+            setValueAndWait(transform(value), timeout)
         }
-        return setValueAndWait(transform(value), timeout)
     }
 
     /**
@@ -181,12 +188,12 @@ sealed class State<T : Any>(
      * read the state if the getter is available and update logical
      */
     suspend fun read(): T {
-        if (getter != null) {
+        if (getter == null) {
+            throw RuntimeException("The getter for state $name not defined")
+        } else {
             val res = getter.invoke()
             updateValue(res)
             return res
-        } else {
-            throw RuntimeException("The getter for state $name not defined and the state is invalid")
         }
     }
 
@@ -223,30 +230,32 @@ sealed class State<T : Any>(
             this@State.value = value
         }
     }
+
+    companion object {
+        const val BUFFER_SIZE = 100
+    }
 }
 
 private fun (suspend () -> Any).toValue(): (suspend () -> Value) {
     return { Value.of(this.invoke()) }
 }
 
-//private fun (suspend (Value?, Value) -> Any?).toValue(): (suspend (Value?, Value) -> Value?) {
-//    return { old, new -> Value.of(this.invoke(old, new)) }
-//}
-
 
 class ValueState(
         name: String,
         val descriptor: ValueDescriptor = ValueDescriptor.empty(name),
-        def: Any? = Value.NULL,
+        def: Value = Value.NULL,
+        owner: Stateful? = null,
         getter: (suspend () -> Any)? = null,
         setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
-) : State<Value>(name, def?.let { Value.of(it) }, getter = getter?.toValue(), setter = setter) {
+) : State<Value>(name, def, owner, getter?.toValue(), setter) {
 
     constructor(
             def: ValueDef,
+            owner: Stateful? = null,
             getter: (suspend () -> Any)? = null,
             setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
-    ) : this(def.name, ValueDescriptor.build(def), Value.of(def.def), getter, setter)
+    ) : this(def.name, ValueDescriptor.build(def), Value.of(def.def), owner, getter, setter)
 
     override fun transform(value: Any): Value {
         return Value.of(value)
@@ -346,14 +355,16 @@ class MetaState(
         name: String,
         val descriptor: NodeDescriptor = NodeDescriptor.empty(name),
         def: Meta = Meta.empty(),
+        owner: Stateful? = null,
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-) : State<Meta>(name, def, getter = getter, setter = setter) {
+) : State<Meta>(name, def, owner, getter, setter) {
     constructor(
             def: NodeDef,
+            owner: Stateful? = null,
             getter: (suspend () -> Meta)? = null,
             setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-    ) : this(def.name, NodeDescriptor.build(def), Meta.empty(), getter, setter)// TODO fix default value
+    ) : this(def.name, NodeDescriptor.build(def), Meta.empty(), owner, getter, setter)
 
     override fun transform(value: Any): Meta {
         return (value as? MetaID)?.toMeta()
@@ -375,9 +386,10 @@ class MorphState<T : MetaMorph>(
         name: String,
         val type: KClass<T>,
         def: T? = null,
+        owner: Stateful? = null,
         getter: (suspend () -> T)? = null,
         setter: (suspend State<T>.(T?, T) -> Unit)? = null
-) : State<T>(name, def, getter = getter, setter = setter) {
+) : State<T>(name, def, owner, getter, setter) {
     override fun transform(value: Any): T {
         return (value as? MetaMorph)?.morph(type)
                 ?: throw RuntimeException("The state $name requires metamorph value, but found ${value::class}")

@@ -31,7 +31,7 @@ public class SimpleHistogram extends Histogram {
     }
 
     @Override
-    public Optional<Bin> findBin(Double... point) {
+    public synchronized Optional<Bin> findBin(Double... point) {
         //Simple slow lookup mechanism
         return binMap.values().stream().filter(bin -> bin.contains(point)).findFirst();
     }
