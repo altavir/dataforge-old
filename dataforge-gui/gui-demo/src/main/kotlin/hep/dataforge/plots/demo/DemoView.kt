@@ -99,7 +99,7 @@ class DemoView : View("Plot demonstration") {
     private fun dataChanged(plotName: String) {
         synchronized(this) {
             if (dataMap.containsKey(plotName)) {
-                if (!frame.get(plotName).isPresent) {
+                if (frame.get(plotName) == null) {
                     frame.add(DataPlot(plotName))
                 }
 

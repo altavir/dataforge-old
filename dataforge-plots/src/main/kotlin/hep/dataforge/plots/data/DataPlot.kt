@@ -17,8 +17,8 @@ package hep.dataforge.plots.data
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
+import hep.dataforge.kodex.KMetaBuilder
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.*
@@ -118,15 +118,14 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
             return DataPlot(name, Meta.empty(), adapter, data)
         }
 
-        fun plot(name: String, adapter: ValuesAdapter): DataPlot {
-            val builder = MetaBuilder("dataPlot")
-            return DataPlot(name, builder, adapter)
+        fun plot(name: String, adapter: ValuesAdapter, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
+            val meta = KMetaBuilder("plot").apply(metaBuilder)
+            return DataPlot(name, meta, adapter)
         }
 
-        fun plot(name: String, adapter: ValuesAdapter, data: Iterable<Values>): DataPlot {
-            val plot = plot(name, adapter)
-            plot.fillData(data)
-            return plot
+        fun plot(name: String, adapter: ValuesAdapter, data: Iterable<Values>, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
+            val meta = KMetaBuilder("plot").apply(metaBuilder)
+            return DataPlot(name, meta, adapter, data)
         }
     }
 

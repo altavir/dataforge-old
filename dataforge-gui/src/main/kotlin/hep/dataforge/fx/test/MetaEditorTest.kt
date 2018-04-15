@@ -6,7 +6,7 @@
 package hep.dataforge.fx.test
 
 import hep.dataforge.description.DescriptorBuilder
-import hep.dataforge.fx.configuration.ConfigEditor
+import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.meta.ConfigChangeListener
 import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
@@ -17,12 +17,13 @@ import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
 import org.slf4j.LoggerFactory
+import tornadofx.*
 import java.io.IOException
 
 /**
  * @author Alexander Nozik
  */
-class MetaEditorTest : Application() {
+class MetaEditorTest : App() {
 
     private val logger = LoggerFactory.getLogger("test")
 
@@ -64,7 +65,7 @@ class MetaEditorTest : Application() {
             }
         })
 
-        val scene = Scene(ConfigEditor(config, descriptor).root, 400.0, 400.0)
+        val scene = Scene(ConfigEditor(config, descriptor = descriptor).root, 400.0, 400.0)
 
         stage.title = "Meta editor test"
         stage.scene = scene

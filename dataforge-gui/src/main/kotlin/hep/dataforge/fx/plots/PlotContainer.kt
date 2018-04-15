@@ -2,8 +2,8 @@ package hep.dataforge.fx.plots
 
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.fx.configuration.ConfigEditor
 import hep.dataforge.fx.dfIcon
+import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
@@ -147,7 +147,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                             } else {
                                                 try {
                                                     Color.valueOf(newItem.stringValue())
-                                                } catch (ex: Exception){
+                                                } catch (ex: Exception) {
                                                     Color.BLACK
                                                 }
                                             }
@@ -235,7 +235,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
     private fun displayConfigurator(header: String, obj: hep.dataforge.meta.Configurable, desc: NodeDescriptor) {
         configWindows.getOrPut(obj) {
             Stage().apply {
-                scene = Scene(ConfigEditor(obj.config, desc).root)
+                scene = Scene(ConfigEditor(obj.config, "Configuration editor", desc).root)
                 height = 400.0
                 width = 400.0
                 title = header

@@ -134,10 +134,13 @@ fun runNow(r: Runnable) {
     }
 }
 
+/**
+ * A display window that could be toggled
+ */
 class ToggleUIComponent(
-        private val component: UIComponent,
-        private val owner: Node,
-        private val toggle: BooleanProperty) {
+        val component: UIComponent,
+        val owner: Node,
+        val toggle: BooleanProperty) {
     val stage: Stage by lazy {
         val res = component.openWindow(owner = owner.scene.window)
                 ?: throw RuntimeException("Can'topen window for $component")

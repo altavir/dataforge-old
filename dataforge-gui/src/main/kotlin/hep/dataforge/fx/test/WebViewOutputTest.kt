@@ -9,12 +9,13 @@ import javafx.application.Application
 import javafx.scene.Scene
 import javafx.scene.web.WebView
 import javafx.stage.Stage
+import tornadofx.*
 
 /**
  *
  * @author Alexander Nozik
  */
-class WebViewOutputTest : Application() {
+class WebViewOutputTest : App() {
 
     override fun start(stage: Stage) {
 

@@ -9,12 +9,13 @@ import hep.dataforge.fx.output.FXOutputPane
 import javafx.application.Application
 import javafx.scene.Scene
 import javafx.stage.Stage
+import tornadofx.*
 
 /**
  *
  * @author Alexander Nozik
  */
-class FXOutputPaneTest : Application() {
+class FXOutputPaneTest : App() {
 
     override fun start(stage: Stage) {
 

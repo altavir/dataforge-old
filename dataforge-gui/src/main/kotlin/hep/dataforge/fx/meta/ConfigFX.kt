@@ -1,4 +1,4 @@
-package hep.dataforge.fx.configuration
+package hep.dataforge.fx.meta
 
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.description.ValueDescriptor
@@ -20,11 +20,6 @@ import javafx.collections.ObservableList
 import tornadofx.*
 import java.util.HashSet
 import kotlin.collections.ArrayList
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.find
-import kotlin.collections.forEach
-import kotlin.collections.mapTo
 
 /**
  * A node, containing relative representation of configuration node and description

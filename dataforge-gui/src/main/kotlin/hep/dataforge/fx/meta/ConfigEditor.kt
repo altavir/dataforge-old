@@ -3,9 +3,10 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.fx.configuration
+package hep.dataforge.fx.meta
 
 import hep.dataforge.description.NodeDescriptor
+import hep.dataforge.fx.dfIconView
 import hep.dataforge.meta.Configuration
 import javafx.scene.control.*
 import javafx.scene.control.cell.TextFieldTreeTableCell
@@ -20,7 +21,7 @@ import tornadofx.*
  *
  * @author Alexander Nozik
  */
-class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescriptor? = null) : Fragment() {
+class ConfigEditor(val configuration: Configuration, title: String = "Configuration editor", val descriptor: NodeDescriptor? = null) : Fragment(title = title, icon = dfIconView) {
 
     val filter: (ConfigFX) -> Boolean = { cfg ->
         when (cfg) {
@@ -41,6 +42,18 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
 
     override val root = borderpane {
         center = treetableview<ConfigFX> {
+            //            stylesheet {
+//                Stylesheet.treeTableRowCell {
+//                    borderColor += box(Color.BLACK)
+//                    borderStyle += BorderStrokeStyle.SOLID
+//                    and(Stylesheet.even) {
+//                        backgroundColor += Color.WHITE
+//                    }
+//                    and(Stylesheet.odd) {
+//                        backgroundColor += Color.LIGHTGRAY
+//                    }
+//                }
+//            }
             root = TreeItem(ConfigFXRoot(configuration, descriptor))
             runAsync {
                 root.update()
@@ -54,6 +67,7 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                         object : TextFieldTreeTableCell<ConfigFX, String>() {
                             override fun updateItem(item: String?, empty: Boolean) {
                                 super.updateItem(item, empty)
+                                contextMenu?.items?.removeIf { it.text == "Remove" }
                                 if (!empty) {
                                     if (treeTableRow.item != null) {
                                         textFillProperty().bind(treeTableRow.item.isEmpty.objectBinding {
@@ -63,16 +77,16 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                                                 Color.BLACK
                                             }
                                         })
-                                        contextmenu {
-                                            item("Remove") {
-                                                action {
-                                                    treeTableRow.item.remove()
+                                        if (!treeTableRow.treeItem.value.isEmpty.get()) {
+                                            contextmenu {
+                                                item("Remove") {
+                                                    action {
+                                                        treeTableRow.item.remove()
+                                                    }
                                                 }
                                             }
                                         }
                                     }
-                                } else {
-                                    contextMenu = null
                                 }
                             }
                         }
@@ -121,7 +135,6 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
 
         public override fun updateItem(item: ConfigFX?, empty: Boolean) {
             if (!empty) {
-                //val row = treeTableRow.item
                 if (item != null) {
                     when (item) {
                         is ConfigFXValue -> {
@@ -132,17 +145,18 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
                         is ConfigFXNode -> {
                             text = null
                             graphic = hbox {
-                                button("", Glyph("FontAwesome", "PLUS_CIRCLE")) {
+                                button("node", Glyph("FontAwesome", "PLUS_CIRCLE")) {
+                                    hgrow = Priority.ALWAYS
+                                    maxWidth = Double.POSITIVE_INFINITY
                                     action {
                                         showNodeDialog()?.let {
                                             item.addNode(it)
                                         }
                                     }
                                 }
-                                pane {
+                                button("value", Glyph("FontAwesome", "PLUS_SQUARE")) {
                                     hgrow = Priority.ALWAYS
-                                }
-                                button("", Glyph("FontAwesome", "PLUS_SQUARE")) {
+                                    maxWidth = Double.POSITIVE_INFINITY
                                     action {
                                         showValueDialog()?.let {
                                             item.addValue(it)
@@ -169,5 +183,3 @@ class ConfigEditor(val configuration: Configuration, val descriptor: NodeDescrip
         const val NO_CONFIGURATOR_TAG = "nocfg"
     }
 }
-
-
