@@ -77,8 +77,9 @@ public class XMLMetaWriter implements MetaStreamWriter {
         }
     }
 
-    private String normalizeName(String str) {
-        return str.replace("@", "_at_");
+    private String encodeName(String str) {
+        return str.replaceFirst("^(\\d)","_$1")
+                .replace("@", "_at_");
     }
 
     private Element getXMLElement(Meta meta, Document doc) {
@@ -88,19 +89,19 @@ public class XMLMetaWriter implements MetaStreamWriter {
         } else {
             elementName = meta.getName();
         }
-        Element res = doc.createElement(normalizeName(elementName));
+        Element res = doc.createElement(encodeName(elementName));
 
 
         meta.getValueNames(true).forEach(valueName -> {
             List<Value> valueList = meta.getValue(valueName).listValue();
             if (valueList.size() == 1) {
-                res.setAttribute(normalizeName(valueName), valueList.get(0).stringValue());
+                res.setAttribute(encodeName(valueName), valueList.get(0).stringValue());
             } else {
                 String val = valueList
                         .stream()
                         .map(Value::stringValue)
                         .collect(Collectors.joining(", ", "[", "]"));
-                res.setAttribute(normalizeName(valueName), val);
+                res.setAttribute(encodeName(valueName), val);
             }
         });
 

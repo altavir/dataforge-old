@@ -118,11 +118,13 @@ class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? 
             return DataPlot(name, Meta.empty(), adapter, data)
         }
 
+        @JvmOverloads
         fun plot(name: String, adapter: ValuesAdapter, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
             val meta = KMetaBuilder("plot").apply(metaBuilder)
             return DataPlot(name, meta, adapter)
         }
 
+        @JvmOverloads
         fun plot(name: String, adapter: ValuesAdapter, data: Iterable<Values>, metaBuilder: KMetaBuilder.() -> Unit = {}): DataPlot {
             val meta = KMetaBuilder("plot").apply(metaBuilder)
             return DataPlot(name, meta, adapter, data)

@@ -72,12 +72,12 @@ public class XMLMetaReader implements MetaStreamReader {
     }
 
     private MetaBuilder buildNode(Element element)  {
-        MetaBuilder res = new MetaBuilder(normalizeName(element.getTagName()));
+        MetaBuilder res = new MetaBuilder(decodeName(element.getTagName()));
         List<NamedValue> values = getValues(element);
         List<Element> elements = getElements(element);
 
         for (NamedValue value : values) {
-            res.putValue(normalizeName(value.getName()), value.getAnonymousValue());
+            res.putValue(decodeName(value.getName()), value.getAnonymousValue());
         }
 
         for (Element e : elements) {
@@ -90,7 +90,7 @@ public class XMLMetaReader implements MetaStreamReader {
 
         //записываем значения только если нет наследников
         if (!element.getTextContent().isEmpty() && (element.getElementsByTagName("*").getLength() == 0)) {
-            res.putValue(normalizeName(element.getTagName()), element.getTextContent());
+            res.putValue(decodeName(element.getTagName()), element.getTextContent());
         }
         //res.putContent(new AnnotatedData("xmlsource", element));
 
@@ -159,7 +159,8 @@ public class XMLMetaReader implements MetaStreamReader {
         return value.replace("\\n","\n");
     }
 
-    private String normalizeName(String str) {
-        return str.replace("_at_", "@");
+    private String decodeName(String str) {
+        return str.replaceFirst("^_(\\d)","$1")
+                .replace("_at_", "@");
     }
 }
