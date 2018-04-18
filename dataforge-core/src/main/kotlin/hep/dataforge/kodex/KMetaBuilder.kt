@@ -34,26 +34,30 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
         putValue(this, value);
     }
 
-    /**
-     * Short infix notation to put value
-     */
-    infix fun String.v(value: Any) {
-        putValue(this, value);
+    infix fun String.to(metaBuilder: KMetaBuilder.() -> Unit) {
+        putNode(this, KMetaBuilder(this).apply(metaBuilder))
     }
 
-    /**
-     * Short infix notation to put node
-     */
-    infix fun String.n(node: Meta) {
-        putNode(this, node)
-    }
-
-    /**
-     * Short infix notation  to put any object that could be converted to meta
-     */
-    infix fun String.n(node: MetaID) {
-        putNode(this, node.toMeta())
-    }
+//    /**
+//     * Short infix notation to put value
+//     */
+//    infix fun String.v(value: Any) {
+//        putValue(this, value);
+//    }
+//
+//    /**
+//     * Short infix notation to put node
+//     */
+//    infix fun String.n(node: Meta) {
+//        putNode(this, node)
+//    }
+//
+//    /**
+//     * Short infix notation  to put any object that could be converted to meta
+//     */
+//    infix fun String.n(node: MetaID) {
+//        putNode(this, node.toMeta())
+//    }
 
     fun putNode(node: MetaID) {
         putNode(node.toMeta())
