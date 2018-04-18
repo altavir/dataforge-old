@@ -8,6 +8,9 @@ inline val <T> Optional<T>?.nullable: T?
 inline val <T> T?.optional: Optional<T>
     get() = Optional.ofNullable(this)
 
+/**
+ * To use instead of ?: for block operations
+ */
 inline fun <T> T?.orElse(sup: () -> T): T {
     return this?: sup.invoke()
 }
