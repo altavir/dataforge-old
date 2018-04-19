@@ -60,7 +60,7 @@ class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Me
     fun put(point: Values) {
         val v = point.getValue(yKey)
         if (point.hasValue(timestampKey)) {
-            put(point.getValue(timestampKey).timeValue(), v)
+            put(point.getValue(timestampKey).getTime(), v)
         } else {
             put(v)
         }

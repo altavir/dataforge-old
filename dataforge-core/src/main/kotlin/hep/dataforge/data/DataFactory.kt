@@ -95,7 +95,7 @@ open class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
         val name = itemMeta.getString(NODE_NAME_KEY)
 
         val obj = itemMeta.optValue("path")
-                .flatMap { path -> context.provide(path.stringValue(), baseType) }
+                .flatMap { path -> context.provide(path.getString(), baseType) }
                 .orElse(null)
 
         val meta = itemMeta.optMeta(NODE_META_KEY).orElse(Meta.empty())

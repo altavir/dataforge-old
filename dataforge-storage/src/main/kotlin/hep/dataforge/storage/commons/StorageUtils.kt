@@ -114,8 +114,8 @@ object StorageUtils {
     fun <T> sparsePull(index: ValueIndex<T>, from: Value, to: Value, limit: Int): Stream<T> {
         if (limit > 0) {
             if (isNumeric(from) && isNumeric(to)) {
-                val a = from.doubleValue()
-                val b = to.doubleValue()
+                val a = from.getDouble()
+                val b = to.getDouble()
                 return sparsePull(index, a, b, limit)
             } else {
                 return index.pull(from, to).limit(limit.toLong())
@@ -142,10 +142,10 @@ object StorageUtils {
         var from = from
         var to = to
         if (!java.lang.Double.isFinite(from)) {
-            from = index.firstKey.doubleValue()
+            from = index.firstKey.getDouble()
         }
         if (!java.lang.Double.isFinite(to)) {
-            to = index.lastKey.doubleValue()
+            to = index.lastKey.getDouble()
         }
 
         val start = from

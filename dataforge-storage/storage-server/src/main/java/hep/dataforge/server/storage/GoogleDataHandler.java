@@ -80,16 +80,16 @@ public abstract class GoogleDataHandler implements Handler {
             Value value = point.getValue(valueName);
             switch (value.getType()) {
                 case TIME:
-                    values.add(Json.createObjectBuilder().add("v", formatTime(value.timeValue()))
-                            .add("f", value.stringValue()));
+                    values.add(Json.createObjectBuilder().add("v", formatTime(value.getTime()))
+                            .add("f", value.getString()));
                     break;
                 case NUMBER:
-                    values.add(Json.createObjectBuilder().add("v", value.doubleValue())
-                            .add("f", value.stringValue()));
+                    values.add(Json.createObjectBuilder().add("v", value.getDouble())
+                            .add("f", value.getString()));
                     break;
                 default:
-                    values.add(Json.createObjectBuilder().add("v", value.stringValue())
-                            .add("f", value.stringValue()));
+                    values.add(Json.createObjectBuilder().add("v", value.getString())
+                            .add("f", value.getString()));
             }
 
         }

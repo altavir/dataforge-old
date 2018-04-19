@@ -40,8 +40,8 @@ public class JoinRule extends MergeRule {
     @Override
     protected Value mergeValues(Name valueName, Value first, Value second) {
         List<Value> list = new ArrayList<>();
-        list.addAll(first.listValue());
-        list.addAll(second.listValue());
+        list.addAll(first.getList());
+        list.addAll(second.getList());
         return Value.of(list);
     }
 

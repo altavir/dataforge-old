@@ -55,7 +55,7 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
 
     val initializedState: ValueState = valueState(INITIALIZED_STATE) { old, value ->
         if (old != value) {
-            if (value.booleanValue()) {
+            if (value.getBoolean()) {
                 init()
             } else {
                 shutdown()
@@ -184,6 +184,6 @@ val Device.initialized: Boolean
         } else {
             this.states
                     .filter { it.name == INITIALIZED_STATE }
-                    .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.booleanValue() ?: false
+                    .filterIsInstance(ValueState::class.java).firstOrNull()?.value?.getBoolean() ?: false
         }
     }

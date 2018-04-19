@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
+import org.jetbrains.annotations.NotNull;
 
 import java.text.NumberFormat;
 import java.text.ParseException;
@@ -51,7 +52,7 @@ class StringValue extends AbstractValue {
             return false;
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
-            return Objects.equals(this.stringValue(), other.stringValue());
+            return Objects.equals(this.getString(), other.getString());
         } else {
             return super.equals(obj);
         }
@@ -80,7 +81,7 @@ class StringValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
+    public boolean getBoolean() {
         try {
             return Boolean.valueOf(value);
         } catch (NumberFormatException ex) {
@@ -92,7 +93,7 @@ class StringValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         try {
             return NumberFormat.getInstance().parse(value);
         } catch (ParseException | NumberFormatException ex) {
@@ -107,7 +108,7 @@ class StringValue extends AbstractValue {
      * проблем с пробелами
      */
     @Override
-    public String stringValue() {
+    public String getString() {
         return value;
     }
 
@@ -115,7 +116,7 @@ class StringValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         try {
             if (value.endsWith("Z")) {
                 return Instant.parse(value);
@@ -130,6 +131,7 @@ class StringValue extends AbstractValue {
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return ValueType.STRING;

@@ -47,7 +47,7 @@ class DefaultIndex<T>(private val iterable: Iterable<T>) : ValueIndex<T> {
 
     @Throws(StorageException::class)
     override fun pull(value: Value): Stream<T> {
-        return stream().filter { pair -> value.intValue() == pair.key }
+        return stream().filter { pair -> value.getInt() == pair.key }
                 .map{ it.value }
     }
 

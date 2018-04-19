@@ -41,7 +41,7 @@ internal class MetaItem(val meta: Meta) : Item() {
 
 internal class ValueItem(name: String, val value: Value) : Item() {
     override val titleProperty = SimpleStringProperty(name)
-    override val valueProperty: StringProperty = SimpleStringProperty(value.stringValue())
+    override val valueProperty: StringProperty = SimpleStringProperty(value.getString())
 }
 
 class MetaViewer(val meta: Meta) : Fragment(title = "Meta viewe: ${meta.name}", icon = dfIconView) {

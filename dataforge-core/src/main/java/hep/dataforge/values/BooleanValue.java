@@ -59,7 +59,7 @@ class BooleanValue extends AbstractValue {
             return false;
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
-            return this.booleanValue() == other.booleanValue();
+            return this.getBoolean() == other.getBoolean();
         } else {
             return super.equals(obj);
         }
@@ -75,7 +75,7 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
+    public boolean getBoolean() {
         return value;
     }
 
@@ -83,7 +83,7 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         if (value) {
             return 1;
         } else {
@@ -95,7 +95,7 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public String stringValue() {
+    public String getString() {
         return Boolean.toString(value);
     }
 
@@ -103,7 +103,7 @@ class BooleanValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         throw new ValueConversionException(this, ValueType.TIME);
     }
 

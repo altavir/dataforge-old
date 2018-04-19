@@ -126,7 +126,7 @@ final class JFCDataWrapper extends AbstractIntervalXYDataset {
         if (value.isNull()) {
             return null;
         } else {
-            return value.doubleValue();
+            return value.getDouble();
         }
     }
 

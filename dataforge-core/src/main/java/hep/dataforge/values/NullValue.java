@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Instant;
 
 /**
@@ -30,7 +32,7 @@ class NullValue implements Value {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
+    public boolean getBoolean() {
         return false;
     }
 
@@ -40,7 +42,7 @@ class NullValue implements Value {
      * @return
      */
     @Override
-    public double doubleValue() {
+    public double getDouble() {
         return Double.NaN;
     }
 
@@ -48,7 +50,7 @@ class NullValue implements Value {
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         return 0;
     }
 
@@ -58,7 +60,7 @@ class NullValue implements Value {
      * @return
      */
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         return Instant.MIN;
     }
 
@@ -66,7 +68,7 @@ class NullValue implements Value {
      * {@inheritDoc}
      */
     @Override
-    public String stringValue() {
+    public String getString() {
         return "";
     }
 
@@ -75,6 +77,7 @@ class NullValue implements Value {
      *
      * @return
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return ValueType.NULL;

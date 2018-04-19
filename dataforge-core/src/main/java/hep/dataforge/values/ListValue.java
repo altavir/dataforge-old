@@ -44,36 +44,36 @@ public class ListValue implements Value {
     }
 
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         if (values.size() > 0) {
-            return values.get(0).numberValue();
+            return values.get(0).getNumber();
         } else {
             return 0;
         }
     }
 
     @Override
-    public boolean booleanValue() {
-        return values.size() > 0 && values.get(0).booleanValue();
+    public boolean getBoolean() {
+        return values.size() > 0 && values.get(0).getBoolean();
     }
 
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         if (values.size() > 0) {
-            return values.get(0).timeValue();
+            return values.get(0).getTime();
         } else {
             return Instant.ofEpochMilli(0);
         }
     }
 
     @Override
-    public String stringValue() {
+    public String getString() {
         if (values.isEmpty()) {
             return "";
         } else if (values.size() == 1) {
-            return values.get(0).stringValue();
+            return values.get(0).getString();
         } else {
-            return values.stream().map(Value::stringValue).collect(Collectors.joining(", ", "[", "]"));
+            return values.stream().map(Value::getString).collect(Collectors.joining(", ", "[", "]"));
         }
     }
 
@@ -88,7 +88,7 @@ public class ListValue implements Value {
     }
 
     @Override
-    public List<Value> listValue() {
+    public List<Value> getList() {
         return this.values;
     }
 
@@ -118,7 +118,7 @@ public class ListValue implements Value {
 
     @Override
     public String toString() {
-        return stringValue();
+        return getString();
     }
 
     @Override

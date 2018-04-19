@@ -19,23 +19,20 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.storage.commons
+package hep.dataforge.io
 
-import hep.dataforge.io.MetaStreamReader
-import hep.dataforge.io.MetaStreamWriter
 import hep.dataforge.io.envelopes.MetaType
-
-val jsonMetaType = JSONMetaType()
 
 class JSONMetaType : MetaType {
     override val codes: List<Short> = listOf(0x4a53, 1)//JS
 
     override val name: String = "JSON"
 
-    override val reader: MetaStreamReader = JSONMetaReader()
+    override val reader: MetaStreamReader = JSONMetaReader
 
-    override val writer: MetaStreamWriter = JSONMetaWriter()
+    override val writer: MetaStreamWriter = JSONMetaWriter
 
     override val fileNameFilter: (String) -> Boolean = { it.toLowerCase().endsWith(".json") }
-
 }
+
+val jsonMetaType = JSONMetaType()

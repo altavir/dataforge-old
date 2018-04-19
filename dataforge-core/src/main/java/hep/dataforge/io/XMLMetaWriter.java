@@ -22,11 +22,8 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 import java.io.OutputStream;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.stream.Collectors;
-
-import static hep.dataforge.io.IOUtils.UTF8_CHARSET;
 
 /**
  * A writer for XML represented Meta
@@ -34,14 +31,6 @@ import static hep.dataforge.io.IOUtils.UTF8_CHARSET;
  * @author Alexander Nozik
  */
 public class XMLMetaWriter implements MetaStreamWriter {
-
-    Charset charset = UTF8_CHARSET;
-
-    @Override
-    public XMLMetaWriter withCharset(Charset charset) {
-        this.charset = charset;
-        return this;
-    }
 
     @Override
     public void write(OutputStream stream, Meta meta) {
@@ -55,7 +44,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
             transformer.setOutputProperty(OutputKeys.OMIT_XML_DECLARATION, "yes");
             transformer.setOutputProperty(OutputKeys.INDENT, "yes");
             transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
-            transformer.setOutputProperty(OutputKeys.ENCODING, charset.displayName());
+            transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8");
 //            transformer.setOutputProperty(OutputKeys.METHOD, "text");
 //            StringWriter writer = new StringWriter();
             transformer.transform(new DOMSource(doc), new StreamResult(stream));
@@ -78,7 +67,7 @@ public class XMLMetaWriter implements MetaStreamWriter {
     }
 
     private String encodeName(String str) {
-        return str.replaceFirst("^(\\d)","_$1")
+        return str.replaceFirst("^(\\d)", "_$1")
                 .replace("@", "_at_");
     }
 
@@ -93,13 +82,17 @@ public class XMLMetaWriter implements MetaStreamWriter {
 
 
         meta.getValueNames(true).forEach(valueName -> {
-            List<Value> valueList = meta.getValue(valueName).listValue();
+            List<Value> valueList = meta.getValue(valueName).getList();
             if (valueList.size() == 1) {
-                res.setAttribute(encodeName(valueName), valueList.get(0).stringValue());
+                String value = valueList.get(0).getString();
+                if (value.startsWith("[")) {
+                    value = "[" + value + "]";
+                }
+                res.setAttribute(encodeName(valueName), value);
             } else {
                 String val = valueList
                         .stream()
-                        .map(Value::stringValue)
+                        .map(Value::getString)
                         .collect(Collectors.joining(", ", "[", "]"));
                 res.setAttribute(encodeName(valueName), val);
             }

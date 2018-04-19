@@ -328,9 +328,9 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         boolean visible = meta
                 .collectValue(
                         "visible",
-                        Collectors.reducing(Value.of(true), (v1, v2) -> Value.of(v1.booleanValue() && v2.booleanValue()))
+                        Collectors.reducing(Value.of(true), (v1, v2) -> Value.of(v1.getBoolean() && v2.getBoolean()))
                 )
-                .booleanValue();
+                .getBoolean();
 
         render.setSeriesVisible(0, visible);
 

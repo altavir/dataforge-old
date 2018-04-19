@@ -25,10 +25,10 @@ import hep.dataforge.exceptions.StorageException
 import hep.dataforge.io.envelopes.DefaultEnvelopeReader
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
 import hep.dataforge.io.envelopes.Envelope
+import hep.dataforge.io.jsonMetaType
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.EnvelopeLoader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.commons.jsonMetaType
 import java.io.ByteArrayOutputStream
 import java.io.IOException
 import java.io.InputStream

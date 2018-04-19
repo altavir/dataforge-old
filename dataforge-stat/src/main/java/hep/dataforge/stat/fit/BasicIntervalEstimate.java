@@ -42,7 +42,7 @@ public class BasicIntervalEstimate implements IntervalEstimate {
         out.printf("%s\t%s\t%-8s\t%-8s%n", "name", "CL ", "Lower", "Upper");
         ranges.stream().sorted().forEach(range -> {
             out.printf("%s\t%2.2g%%\t%8.8g\t%8.8g%n", range.parName, range.cl,
-                    range.lower.doubleValue(), range.upper.doubleValue());
+                    range.lower.getDouble(), range.upper.getDouble());
         });
         out.println();
     }

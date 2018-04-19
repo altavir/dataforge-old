@@ -77,7 +77,7 @@ class GrindMetaBuilder extends BuilderSupport {
     }
 
     void put(NamedValue value) {
-        (this.current as MetaBuilder).putValue(value.name, value.anonymousValue);
+        (this.current as MetaBuilder).putValue(value.name, value.anonymous);
     }
 
     void put(Map<String, ?> map) {

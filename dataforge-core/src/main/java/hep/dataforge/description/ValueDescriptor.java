@@ -118,9 +118,9 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      */
     public List<ValueType> type() {
         if (getMeta().hasValue("type")) {
-            return getMeta().getValue("type").listValue()
+            return getMeta().getValue("type").getList()
                     .stream()
-                    .map((v) -> ValueType.valueOf(v.stringValue()))
+                    .map((v) -> ValueType.valueOf(v.getString()))
                     .collect(Collectors.toList());
         } else {
             return Collections.emptyList();
@@ -178,7 +178,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
                 map.put(allowed.getValue("value"), allowed.getString("description", ""));
             }
         } else if (getMeta().hasValue("allowedValues")) {
-            for (Value val : getMeta().getValue("allowedValues").listValue()) {
+            for (Value val : getMeta().getValue("allowedValues").getList()) {
                 map.put(val, "");
             }
         } else if (type().size() == 1 && type().get(0) == ValueType.BOOLEAN) {

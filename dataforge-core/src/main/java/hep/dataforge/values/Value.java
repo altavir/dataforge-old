@@ -92,7 +92,7 @@ public interface Value extends Serializable {
         }
 
         if (str.startsWith("[") && str.endsWith("]")) {
-            //FIXME there will be a problem with nested lists
+            //FIXME there will be a problem with nested lists because of splitting
             String[] strings = NamingUtils.parseArray(str);
             return Value.of(strings);
         }
@@ -215,25 +215,25 @@ public interface Value extends Serializable {
      *
      * @return a {@link java.lang.Number} object.
      */
-    Number numberValue();
+    Number getNumber();
 
     /**
      * Boolean representation of this Value
      *
      * @return a boolean.
      */
-    boolean booleanValue();
+    boolean getBoolean();
 
-    default double doubleValue() {
-        return numberValue().doubleValue();
+    default double getDouble() {
+        return getNumber().doubleValue();
     }
 
-    default int intValue() {
-        return numberValue().intValue();
+    default int getInt() {
+        return getNumber().intValue();
     }
 
-    default long longValue() {
-        return numberValue().longValue();
+    default long getLong() {
+        return getNumber().longValue();
     }
 
     /**
@@ -241,14 +241,14 @@ public interface Value extends Serializable {
      *
      * @return
      */
-    Instant timeValue();
+    Instant getTime();
 
     /**
      * The String representation of this value
      *
      * @return a {@link java.lang.String} object.
      */
-    String stringValue();
+    String getString();
 
     @NotNull
     ValueType getType();
@@ -265,7 +265,7 @@ public interface Value extends Serializable {
      *
      * @return
      */
-    default List<Value> listValue() {
+    default List<Value> getList() {
         return Collections.singletonList(this);
     }
 

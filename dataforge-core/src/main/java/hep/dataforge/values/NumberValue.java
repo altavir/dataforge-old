@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.exceptions.ValueConversionException;
+import org.jetbrains.annotations.NotNull;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
@@ -49,7 +50,7 @@ class NumberValue extends AbstractValue {
         } else if (obj instanceof Value) {
             final Value other = (Value) obj;
             try {
-                return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
+                return ValueUtils.NUMBER_COMPARATOR.compare(this.getNumber(), other.getNumber()) == 0;
             }catch (ValueConversionException ex){
                 return false;
             }
@@ -80,7 +81,7 @@ class NumberValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
+    public boolean getBoolean() {
         return value.doubleValue() > 0;
     }
 
@@ -88,7 +89,7 @@ class NumberValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         return value;
     }
 
@@ -96,7 +97,7 @@ class NumberValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public String stringValue() {
+    public String getString() {
         return value.toString();
     }
 
@@ -106,13 +107,14 @@ class NumberValue extends AbstractValue {
      * Время в СЕКУНДАХ
      */
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         return Instant.ofEpochMilli(value.longValue());
     }
 
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return ValueType.NUMBER;

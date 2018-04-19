@@ -260,7 +260,7 @@ public class IOUtils {
 //        if (number instanceof BigDecimal) {
 //            bd = (BigDecimal) number;
 //        } else if (number instanceof Integer) {
-//            bd = BigDecimal.valueOf(number.intValue());
+//            bd = BigDecimal.valueOf(number.getInt());
 //        } else {
 //
 //            bd = BigDecimal.valueOf(number.doubleValue());
@@ -287,8 +287,8 @@ public class IOUtils {
         switch (val.getType()) {
             case BOOLEAN:
                 if (width >= 5) {
-                    return Boolean.toString(val.booleanValue());
-                } else if (val.booleanValue()) {
+                    return Boolean.toString(val.getBoolean());
+                } else if (val.getBoolean()) {
                     return formatWidth("+", width);
                 } else {
                     return formatWidth("-", width);
@@ -296,12 +296,12 @@ public class IOUtils {
             case NULL:
                 return formatWidth(NULL_STRING, width);
             case NUMBER:
-                return formatWidth(formatNumber(val.numberValue(), width), width);
+                return formatWidth(formatNumber(val.getNumber(), width), width);
             case STRING:
-                return formatWidth(val.stringValue(), width);
+                return formatWidth(val.getString(), width);
             case TIME:
                 //TODO add time shortening
-                return formatWidth(val.stringValue(), width);
+                return formatWidth(val.getString(), width);
             default:
                 throw new IllegalArgumentException("Unsupported input value type");
         }

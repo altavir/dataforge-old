@@ -36,8 +36,8 @@ public abstract class SubstProvider implements ValueProvider {
     @Override
     public Value getValue(String name) {
         Value val = getValueForName(name);
-        if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
-            String valStr = val.stringValue();
+        if (val.getType().equals(ValueType.STRING) && val.getString().contains("$")) {
+            String valStr = val.getString();
             Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
             while (matcher.find()) {
                 valStr = valStr.replace(matcher.group(), evaluateSubst(matcher.group("sub")));
@@ -65,7 +65,7 @@ public abstract class SubstProvider implements ValueProvider {
      * @return a {@link java.lang.String} object.
      */
     protected String evaluateSubst(String subst) {
-        return getValueForName(subst).stringValue();
+        return getValueForName(subst).getString();
     }
 
 }

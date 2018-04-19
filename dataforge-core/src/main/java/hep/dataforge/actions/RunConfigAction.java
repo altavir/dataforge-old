@@ -47,7 +47,7 @@ public class RunConfigAction extends GenericAction {
         if (meta.hasValue("configFile")) {
             Path cfgFile = context.getIo().getRootDir().resolve(meta.getString("configFile"));
             try {
-                cfg = MetaFileReader.instance().read(ac, cfgFile, null);
+                cfg = MetaFileReader.instance().read(ac, cfgFile);
             } catch (IOException | ParseException ex) {
                 throw new ContentException("Can't read config file", ex);
             }

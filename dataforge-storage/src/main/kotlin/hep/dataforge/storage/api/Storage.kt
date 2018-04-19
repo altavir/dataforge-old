@@ -79,7 +79,7 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
      */
     val isReadOnly: Boolean
         get() = meta.optValue("readOnly")
-                .map<Boolean> { it.booleanValue() }
+                .map<Boolean> { it.getBoolean() }
                 .orElseGet { parent != null && parent!!.isReadOnly }
 
     val fullName: Name

@@ -43,9 +43,9 @@ class CoreExtension {
     static Value plus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() + other.numberValue());
+                return Value.of(self.getNumber() + other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() + other.stringValue());
+                return Value.of(self.getString() + other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -64,9 +64,9 @@ class CoreExtension {
     static Value minus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() - other.numberValue());
+                return Value.of(self.getNumber() - other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() - other.stringValue());
+                return Value.of(self.getString() - other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -83,13 +83,13 @@ class CoreExtension {
         switch (self.getType()) {
             case ValueType.NUMBER:
                 //TODO fix non-dobule values
-                return Value.of(-self.doubleValue());
+                return Value.of(-self.getDouble());
             case ValueType.STRING:
                 throw new RuntimeException("Can't negate String value")
             case ValueType.TIME:
                 throw new RuntimeException("Can't negate time value")
             case ValueType.BOOLEAN:
-                return Value.of(!self.booleanValue());
+                return Value.of(!self.getBoolean());
             case ValueType.NULL:
                 return self;
         }
@@ -102,9 +102,9 @@ class CoreExtension {
     static Value multiply(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.numberValue() * other.numberValue());
+                return Value.of(self.getNumber() * other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.stringValue() * other.intValue());
+                return Value.of(self.getString() * other.getInt());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time multiply operator is not yet supported")
@@ -119,23 +119,23 @@ class CoreExtension {
     static Object asType(final Value self, Class type) {
         switch (type) {
             case double:
-                return self.doubleValue();
+                return self.getDouble();
             case int:
-                return self.intValue();
+                return self.getInt();
             case short:
-                return self.numberValue().shortValue();
+                return self.getNumber().shortValue();
             case long:
-                return self.numberValue().longValue();
+                return self.getNumber().longValue();
             case Number:
-                return self.numberValue();
+                return self.getNumber();
             case String:
-                return self.stringValue();
+                return self.getString();
             case boolean:
-                return self.booleanValue();
+                return self.getBoolean();
             case Instant:
-                return self.timeValue();
+                return self.getTime();
             case Date:
-                return Date.from(self.timeValue());
+                return Date.from(self.getTime());
             default:
                 throw new RuntimeException("Unknown value cast type: ${type}");
         }
@@ -151,9 +151,9 @@ class CoreExtension {
 //            case ValueType.NUMBER:
 //                return self.doubleValue();
 //            case ValueType.STRING:
-//                return self.stringValue();
+//                return self.getString();
 //            case ValueType.TIME:
-//                return self.timeValue();
+//                return self.getTime();
 //            case ValueType.BOOLEAN:
 //                return self.booleanValue();
 //            case ValueType.NULL:

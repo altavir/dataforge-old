@@ -89,7 +89,7 @@ public class Template implements Metoid, UnaryOperator<Meta> {
 
         MetaUtils.valueStream(res).forEach(pair -> {
             Value val = pair.getSecond();
-            if (val.getType().equals(ValueType.STRING) && val.stringValue().contains("$")) {
+            if (val.getType().equals(ValueType.STRING) && val.getString().contains("$")) {
                 res.setValue(pair.getFirst(), transformValue(val, valueProvider, def));
             }
         });

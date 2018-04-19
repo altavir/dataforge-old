@@ -39,7 +39,7 @@ public class XYPoissonAdapter extends BasicAdapter {
     public Optional<Value> optComponent(Values values, String component) {
         if (Objects.equals(component, Adapters.Y_ERROR_KEY)) {
             return Optionals.either(super.optComponent(values, Adapters.Y_ERROR_KEY)).or(() -> {
-                double y = Adapters.getYValue(this, values).doubleValue();
+                double y = Adapters.getYValue(this, values).getDouble();
                 if (y > 0) {
                     return Optional.of(Value.of(Math.sqrt(y)));
                 } else {

@@ -16,15 +16,11 @@
 
 package hep.dataforge.io.envelopes
 
-import hep.dataforge.io.IOUtils
 import hep.dataforge.io.MetaStreamReader
 import hep.dataforge.io.MetaStreamWriter
 import hep.dataforge.meta.Meta
-import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaUtils
 import java.io.*
-import java.nio.charset.Charset
-import java.text.ParseException
 
 
 val binaryMetaType = BinaryMetaType()
@@ -42,37 +38,19 @@ class BinaryMetaType : MetaType {
     override val fileNameFilter: (String)->Boolean = { str -> str.toLowerCase().endsWith(".meta") }
 
 
-    override val reader: MetaStreamReader = object : MetaStreamReader {
-
-        @Throws(IOException::class, ParseException::class)
-        override fun read(stream: InputStream, length: Long): MetaBuilder {
-            val actualStream = if (length > 0) {
-                val bytes = ByteArray(length.toInt())
-                stream.read(bytes)
-                ByteArrayInputStream(bytes)
-            } else {
-                stream
-            }
-            val ois = ObjectInputStream(actualStream)
-            return MetaUtils.readMeta(ois)
+    override val reader: MetaStreamReader = MetaStreamReader { stream, length ->
+        val actualStream = if (length > 0) {
+            val bytes = ByteArray(length.toInt())
+            stream.read(bytes)
+            ByteArrayInputStream(bytes)
+        } else {
+            stream
         }
-
-        override fun withCharset(charset: Charset): MetaStreamReader {
-            //charset is ignored
-            return this
-        }
-
-        override fun getCharset(): Charset {
-            return IOUtils.ASCII_CHARSET
-        }
+        val ois = ObjectInputStream(actualStream)
+        MetaUtils.readMeta(ois)
     }
 
     override val writer = object : MetaStreamWriter {
-
-        override fun withCharset(charset: Charset): MetaStreamWriter {
-            //charset is ignored
-            return this
-        }
 
         @Throws(IOException::class)
         override fun write(stream: OutputStream, meta: Meta) {

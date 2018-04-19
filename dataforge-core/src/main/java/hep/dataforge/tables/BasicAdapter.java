@@ -26,12 +26,12 @@ public class BasicAdapter extends MetaHolder implements ValuesAdapter {
 
     private void updateMapping() {
         MetaUtils.valueStream(getMeta()).forEach(pair -> {
-            mappings.put(pair.getFirst(), pair.getSecond().stringValue());
+            mappings.put(pair.getFirst(), pair.getSecond().getString());
 //
 //            if(pair.getKey().endsWith(".value")){
-//                mappings.put(pair.getKey().replace(".value",""),pair.getValue().stringValue());
+//                mappings.put(pair.getKey().replace(".value",""),pair.getValue().getString());
 //            } else {
-//                mappings.put(pair.getKey(), pair.getValue().stringValue());
+//                mappings.put(pair.getKey(), pair.getValue().getString());
 //            }
         });
     }

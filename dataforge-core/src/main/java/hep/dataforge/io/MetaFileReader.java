@@ -13,7 +13,6 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 
 import java.io.IOException;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -52,7 +51,7 @@ public class MetaFileReader {
 
     public static Meta read(Path file) {
         try {
-            return instance().read(Global.INSTANCE, file, null);
+            return instance().read(Global.INSTANCE, file);
         } catch (IOException | ParseException e) {
             throw new RuntimeException("Failed to read meta file " + file.toString(), e);
         }
@@ -73,19 +72,15 @@ public class MetaFileReader {
         }
     }
 
-    public Meta read(Context context, String path, Charset encoding) throws IOException, ParseException {
-        return read(context, context.getIo().getRootDir().resolve(path), encoding);
-    }
-
     public Meta read(Context context, String path) throws IOException, ParseException {
-        return read(context, context.getIo().getRootDir().resolve(path), null);
+        return read(context, context.getIo().getRootDir().resolve(path));
     }
 
-    public Meta read(Context context, Path file, Charset encoding) throws IOException, ParseException {
+    public Meta read(Context context, Path file) throws IOException, ParseException {
         String fileName = file.getFileName().toString();
         for (MetaType type : loader) {
             if (type.getFileNameFilter().invoke(fileName)) {
-                return transform(context, type.getReader().withCharset(encoding).readFile(file));
+                return transform(context, type.getReader().readFile(file));
             }
         }
         //Fall back and try to resolve meta as an envelope ignoring extension

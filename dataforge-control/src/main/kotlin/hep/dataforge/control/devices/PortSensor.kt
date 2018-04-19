@@ -62,7 +62,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     val connected = valueState(CONNECTED_STATE, getter = { connection.port.isOpen }) { old, value ->
         if (old != value) {
             logger.info("State 'connect' changed to $value")
-            connect(value.booleanValue())
+            connect(value.getBoolean())
         }
         update(value)
     }
@@ -70,7 +70,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
     var debug by valueState(DEBUG_STATE) { old, value ->
         if (old != value) {
             logger.info("Turning debug mode to $value")
-            setDebugMode(value.booleanValue())
+            setDebugMode(value.getBoolean())
         }
         update(value)
     }.booleanDelegate
@@ -89,7 +89,7 @@ abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) 
 //            port = it
 //        }
         meta.useValue(DEBUG_STATE) {
-            updateState(DEBUG_STATE, it.booleanValue())
+            updateState(DEBUG_STATE, it.getBoolean())
         }
     }
 

@@ -295,7 +295,7 @@ open class Context(
 
             meta.optString("rootDir").ifPresent { builder.setRootDir(it) }
 
-            meta.optValue("classpath").ifPresent { value -> value.listValue().stream().map<String> { it.stringValue() }.forEach { builder.classPath(it) } }
+            meta.optValue("classpath").ifPresent { value -> value.getList().stream().map<String> { it.getString() }.forEach { builder.classPath(it) } }
 
             meta.getMetaList("plugin").forEach { builder.plugin(it) }
 

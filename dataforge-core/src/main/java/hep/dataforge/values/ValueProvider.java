@@ -61,63 +61,63 @@ public interface ValueProvider {
 
     @Provides(BOOLEAN_TARGET)
     default Optional<Boolean> optBoolean(String name) {
-        return optValue(name).map(Value::booleanValue);
+        return optValue(name).map(Value::getBoolean);
     }
 
     @NotNull
     default Boolean getBoolean(String name, boolean def) {
-        return optValue(name).map(Value::booleanValue).orElse(def);
+        return optValue(name).map(Value::getBoolean).orElse(def);
     }
 
     @NotNull
     default Boolean getBoolean(String name, Supplier<Boolean> def) {
-        return optValue(name).map(Value::booleanValue).orElseGet(def);
+        return optValue(name).map(Value::getBoolean).orElseGet(def);
     }
 
     @NotNull
     default Boolean getBoolean(String name) {
-        return getValue(name).booleanValue();
+        return getValue(name).getBoolean();
     }
 
     @Provides(NUMBER_TARGET)
     default Optional<Number> optNumber(String name) {
-        return optValue(name).map(Value::numberValue);
+        return optValue(name).map(Value::getNumber);
     }
 
     @NotNull
     default Double getDouble(String name, double def) {
-        return optValue(name).map(Value::doubleValue).orElse(def);
+        return optValue(name).map(Value::getDouble).orElse(def);
     }
 
     @NotNull
     default Double getDouble(String name, Supplier<Double> def) {
-        return optValue(name).map(Value::doubleValue).orElseGet(def);
+        return optValue(name).map(Value::getDouble).orElseGet(def);
     }
 
     @NotNull
     default Double getDouble(String name) {
-        return getValue(name).doubleValue();
+        return getValue(name).getDouble();
     }
 
     @NotNull
     default Integer getInt(String name, int def) {
-        return optValue(name).map(Value::intValue).orElse(def);
+        return optValue(name).map(Value::getInt).orElse(def);
     }
 
     @NotNull
     default Integer getInt(String name, Supplier<Integer> def) {
-        return optValue(name).map(Value::intValue).orElseGet(def);
+        return optValue(name).map(Value::getInt).orElseGet(def);
 
     }
 
     @NotNull
     default Integer getInt(String name) {
-        return getValue(name).intValue();
+        return getValue(name).getInt();
     }
 
     @Provides(STRING_TARGET)
     default Optional<String> optString(String name) {
-        return optValue(name).map(Value::stringValue);
+        return optValue(name).map(Value::getString);
     }
 
     @NotNull
@@ -132,7 +132,7 @@ public interface ValueProvider {
 
     @NotNull
     default String getString(String name) {
-        return getValue(name).stringValue();
+        return getValue(name).getString();
     }
 
     @NotNull
@@ -147,14 +147,14 @@ public interface ValueProvider {
 
     @Provides(TIME_TARGET)
     default Optional<Instant> optTime(String name) {
-        return optValue(name).map(Value::timeValue);
+        return optValue(name).map(Value::getTime);
     }
 
     default String[] getStringArray(String name) {
-        List<Value> vals = getValue(name).listValue();
+        List<Value> vals = getValue(name).getList();
         String[] res = new String[vals.size()];
         for (int i = 0; i < res.length; i++) {
-            res[i] = vals.get(i).stringValue();
+            res[i] = vals.get(i).getString();
         }
         return res;
     }

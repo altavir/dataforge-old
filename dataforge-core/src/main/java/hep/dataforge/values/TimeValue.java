@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -74,7 +76,7 @@ class TimeValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
+    public boolean getBoolean() {
         return value.isAfter(Instant.MIN);
     }
 
@@ -82,7 +84,7 @@ class TimeValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
+    public Number getNumber() {
         return value.toEpochMilli();
     }
 
@@ -90,7 +92,7 @@ class TimeValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public String stringValue() {
+    public String getString() {
         return value.toString();
 //        return LocalDateTime.ofInstant(value, ZoneId.systemDefault()).toString();
     }
@@ -99,13 +101,14 @@ class TimeValue extends AbstractValue {
      * {@inheritDoc}
      */
     @Override
-    public Instant timeValue() {
+    public Instant getTime() {
         return value;
     }
 
     /**
      * {@inheritDoc}
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return ValueType.TIME;

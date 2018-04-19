@@ -235,6 +235,7 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
             return Stream.empty();
         }
 
+        @NotNull
         @Override
         public String getName() {
             return "";

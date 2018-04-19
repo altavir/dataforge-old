@@ -65,7 +65,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
         if (meta.hasValue(FILE_NODE)) {
             val fileValue = meta.getValue(FILE_NODE)
-            fileValue.listValue().forEach { fileName ->
+            fileValue.getList().forEach { fileName ->
                 addFile(context, builder, parentFile, MetaBuilder(FILE_NODE)
                         .putValue("path", fileName))
             }

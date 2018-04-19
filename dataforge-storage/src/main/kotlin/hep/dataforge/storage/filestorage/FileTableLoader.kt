@@ -163,7 +163,7 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
                         messageMeta.hasMeta(QUERY_ELEMENT) -> points = index.query(messageMeta.getMeta(QUERY_ELEMENT)).toList()
                         messageMeta.hasValue("value") -> {
                             val valueName = messageMeta.getString("valueName", "")
-                            points = messageMeta.getValue("value").listValue().stream()
+                            points = messageMeta.getValue("value").getList().stream()
                                     .map { `val` -> getIndex(valueName).pullOne(`val`) }
                                     .filter { it.isPresent }.map<Values> { it.get() }
                                     .toList()

@@ -6,12 +6,12 @@
 package hep.dataforge.io;
 
 import hep.dataforge.meta.MetaBuilder;
+import kotlin.text.Charsets;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -52,16 +52,6 @@ public interface MetaStreamReader {
     }
 
     /**
-     * Set charset for current reader instance
-     *
-     * @param charset
-     * @return
-     */
-    MetaStreamReader withCharset(Charset charset);
-
-    Charset getCharset();
-
-    /**
      * Read the Meta from file. The whole file is considered to be Meta file.
      *
      * @param file
@@ -85,7 +75,7 @@ public interface MetaStreamReader {
      */
     default MetaBuilder readString(String string) throws IOException, ParseException {
         byte[] bytes;
-        bytes = string.getBytes(getCharset());
+        bytes = string.getBytes(Charsets.UTF_8);
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         return read(bais, bytes.length);
     }

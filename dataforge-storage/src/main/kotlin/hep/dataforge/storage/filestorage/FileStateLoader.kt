@@ -17,11 +17,11 @@ package hep.dataforge.storage.filestorage
 
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.MetaType
+import hep.dataforge.io.jsonMetaType
 import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.StateLoader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.commons.jsonMetaType
 import hep.dataforge.storage.loaders.StateHolder
 import hep.dataforge.values.Value
 import java.util.stream.Stream

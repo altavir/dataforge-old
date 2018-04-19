@@ -137,15 +137,15 @@ public class Filtering {
     public static Predicate<Values> buildCondition(Meta an) {
         Predicate<Values> res = null;
         if (an.hasValue("tag")) {
-            List<Value> tagList = an.getValue("tag").listValue();
+            List<Value> tagList = an.getValue("tag").getList();
             String[] tags = new String[tagList.size()];
             for (int i = 0; i < tagList.size(); i++) {
-                tags[i] = tagList.get(i).stringValue();
+                tags[i] = tagList.get(i).getString();
             }
             res = getTagCondition(tags);
         }
         if (an.hasValue("value")) {
-            String valueName = an.getValue("value").stringValue();
+            String valueName = an.getValue("value").getString();
             Predicate<Values> valueCondition;
             if (an.hasValue("equals")) {
                 Value equals = an.getValue("equals");

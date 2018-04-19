@@ -83,7 +83,7 @@ class FunctionLibrary : BasicPlugin(), Responder {
             message.meta.getMetaList("request").forEach { request ->
                 val functionKey = request.getString("key")
                 val functionMeta = message.meta.getMetaOrEmpty("meta")
-                val arguments = request.getValue("argument").listValue().map { it.doubleValue() }
+                val arguments = request.getValue("argument").getList().map { it.getDouble() }
                 val requestID = request.getValue("id", -1)
 
 

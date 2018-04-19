@@ -76,7 +76,7 @@ public final class ListColumn implements Column, MetaMorph {
 
     ListColumn(Meta meta) {
         this.format = MetaMorph.Companion.morph(ColumnFormat.class, meta.getMeta("format"));
-        this.values = meta.getValue("data").listValue();
+        this.values = meta.getValue("data").getList();
     }
 
     public ListColumn(ColumnFormat format, Stream<Value> values) {

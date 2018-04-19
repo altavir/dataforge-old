@@ -18,14 +18,6 @@ import java.nio.charset.Charset;
 public interface MetaStreamWriter {
 
     /**
-     * Set charset for this writer
-     *
-     * @param charset
-     * @return
-     */
-    MetaStreamWriter withCharset(Charset charset);
-
-    /**
      * write Meta object to the giver OuputStream using given charset (if it is
      * possible)
      *

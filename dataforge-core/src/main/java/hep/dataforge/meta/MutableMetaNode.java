@@ -203,7 +203,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
             if (hasValue(name)) {
                 Value oldValue = getValue(name);
 
-                List<Value> list = new ArrayList<>(oldValue.listValue());
+                List<Value> list = new ArrayList<>(oldValue.getList());
                 list.add(value);
 
                 Value newValue = Value.of(list);

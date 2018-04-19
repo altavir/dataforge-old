@@ -51,7 +51,7 @@ class StateChangedEvent(meta: Meta) : Event(meta) {
     val newState: Value by meta.value(NEW_STATE_KEY)
 
     override fun toString(): String {
-        return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), sourceTag(), stateName, oldState.stringValue(), newState.stringValue())
+        return String.format("(%s) [%s] : changed state '%s' from %s to %s", time().toString(), sourceTag(), stateName, oldState.getString(), newState.getString())
     }
 
     companion object {

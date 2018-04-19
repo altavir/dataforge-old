@@ -48,23 +48,23 @@ fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextB
 
 operator fun Value.plus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() + other.numberValue());
-            ValueType.STRING -> Value.of(this.stringValue() + other.stringValue());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() + other.timeValue().toEpochMilli()))
-            ValueType.BOOLEAN -> Value.of(this.booleanValue() || other.booleanValue());
+            ValueType.NUMBER -> Value.of(this.getNumber() + other.getNumber());
+            ValueType.STRING -> Value.of(this.getString() + other.getString());
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.getTime().toEpochMilli() + other.getTime().toEpochMilli()))
+            ValueType.BOOLEAN -> Value.of(this.getBoolean() || other.getBoolean());
             ValueType.NULL -> other;
         }
 
 operator fun Value.minus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() - other.numberValue());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.timeValue().toEpochMilli() - other.timeValue().toEpochMilli()))
+            ValueType.NUMBER -> Value.of(this.getNumber() - other.getNumber());
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.getTime().toEpochMilli() - other.getTime().toEpochMilli()))
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
 operator fun Value.times(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.numberValue() * other.numberValue());
+            ValueType.NUMBER -> Value.of(this.getNumber() * other.getNumber());
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
@@ -77,10 +77,10 @@ operator fun Value.times(other: Any): Value = this * Value.of(other)
 //Value comparison
 
 operator fun Value.compareTo(other: Value): Int = when (this.type) {
-    ValueType.NUMBER -> this.numberValue().compareTo(other.numberValue());
-    ValueType.STRING -> this.stringValue().compareTo(other.stringValue())
-    ValueType.TIME -> this.timeValue().compareTo(other.timeValue())
-    ValueType.BOOLEAN -> this.booleanValue().compareTo(other.booleanValue())
+    ValueType.NUMBER -> this.getNumber().compareTo(other.getNumber());
+    ValueType.STRING -> this.getString().compareTo(other.getString())
+    ValueType.TIME -> this.getTime().compareTo(other.getTime())
+    ValueType.BOOLEAN -> this.getBoolean().compareTo(other.getBoolean())
     ValueType.NULL -> if (other.isNull) 0 else 1
 }
 
@@ -91,10 +91,12 @@ fun Value?.isNull(): Boolean = this == null || this.isNull
 
 operator fun Meta.get(path: String): Value = this.getValue(path)
 
+operator fun Value.get(index: Int): Value = this.list[index]
+
 operator fun <T : MutableMetaNode<*>> MutableMetaNode<T>.set(path: String, value: Any): T = this.setValue(path, value)
 
 operator fun <T : MutableMetaNode<*>> T.plusAssign(value: NamedValue) {
-    this.setValue(value.name, value.anonymousValue);
+    this.setValue(value.name, value.anonymous);
 }
 
 operator fun <T : MutableMetaNode<*>> T.plusAssign(meta: Meta) {
@@ -109,7 +111,7 @@ operator fun Meta.plus(meta: Meta): Meta = this.builder.putNode(meta)
 /**
  * create a new meta with added value
  */
-operator fun Meta.plus(value: NamedValue): Meta = this.builder.putValue(value.name, value.anonymousValue)
+operator fun Meta.plus(value: NamedValue): Meta = this.builder.putValue(value.name, value.anonymous)
 
 /**
  * Get a value if it is present and apply action to it

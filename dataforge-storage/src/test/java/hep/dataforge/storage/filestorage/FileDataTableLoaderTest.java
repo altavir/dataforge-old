@@ -115,7 +115,7 @@ public class FileDataTableLoaderTest {
 
         System.out.println("pull consistency check");
         Values dp = index.pull(24, 26).findFirst().get();
-        assertEquals(Math.sqrt(24), dp.getValue("sqrt").doubleValue(), 0.001);
+        assertEquals(Math.sqrt(24), dp.getValue("sqrt").getDouble(), 0.001);
 
         ((MapIndex) index).invalidate();
     }

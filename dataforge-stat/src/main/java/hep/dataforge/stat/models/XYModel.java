@@ -58,7 +58,7 @@ public class XYModel extends AbstractModel {
     public double disDeriv(String parName, Values point, Values pars) throws NotDefinedException {
         if (source.providesDeriv(parName)) {
             if (source.providesDeriv(parName)) {
-                return derivValue(parName, Adapters.getXValue(adapter, point).doubleValue(), pars);
+                return derivValue(parName, Adapters.getXValue(adapter, point).getDouble(), pars);
             } else {
                 throw new NotDefinedException();
             }
@@ -90,8 +90,8 @@ public class XYModel extends AbstractModel {
      */
     @Override
     public double distance(Values point, Values pars) {
-        double x = Adapters.getXValue(adapter, point).doubleValue();
-        double y = Adapters.getYValue(adapter, point).doubleValue();
+        double x = Adapters.getXValue(adapter, point).getDouble();
+        double y = Adapters.getYValue(adapter, point).getDouble();
         return value(x, pars) - y;
     }
 

@@ -6,7 +6,6 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.server.ServletUtils;
 import hep.dataforge.storage.api.*;
-import hep.dataforge.storage.commons.JSONMetaWriter;
 import org.slf4j.LoggerFactory;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
@@ -111,7 +110,7 @@ public class StorageRatpackHandler implements Handler {
 
             Map<String, String> stateMap = new HashMap<>();
 
-            loader.getValueStream().forEach(pair->  stateMap.put(pair.getFirst(), pair.getSecond().stringValue()));
+            loader.getValueStream().forEach(pair->  stateMap.put(pair.getFirst(), pair.getSecond().getString()));
             // TODO add metastates
 
             Map<String, Object> data = buildLoaderData(ctx, loader);

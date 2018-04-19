@@ -15,7 +15,7 @@ public interface NavigableValuesSource extends ValuesSource {
     }
 
     default double getDouble(String name, int index){
-        return get(name, index).doubleValue();
+        return get(name, index).getDouble();
     }
 
     /**

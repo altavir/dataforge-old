@@ -59,7 +59,7 @@ public class RegularPointCollector implements ValueCollector {
             point.putValue("timestamp", average);
 
             for (Map.Entry<String, List<Value>> entry : values.entrySet()) {
-                point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble(Value::doubleValue).sum() / entry.getValue().size());
+                point.putValue(entry.getKey(), entry.getValue().stream().mapToDouble(Value::getDouble).sum() / entry.getValue().size());
             }
 
             // filling all missing values with nulls

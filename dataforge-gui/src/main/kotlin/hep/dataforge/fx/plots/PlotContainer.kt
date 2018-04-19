@@ -129,7 +129,7 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
 
                                     if (frame is XYPlotFrame) {
                                         frame.getActualColor(getFullName(this@cellFormat.treeItem)).ifPresent {
-                                            textFill = Color.valueOf(it.stringValue())
+                                            textFill = Color.valueOf(it.getString())
                                         }
                                     } else if (item.config.hasValue("color")) {
                                         textFill = Color.valueOf(item.config.getString("color"))
@@ -140,18 +140,18 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                             "title" -> text = if (newItem == null) {
                                                 item.title
                                             } else {
-                                                newItem.stringValue()
+                                                newItem.getString()
                                             }
                                             "color" -> textFill = if (newItem == null) {
                                                 Color.BLACK
                                             } else {
                                                 try {
-                                                    Color.valueOf(newItem.stringValue())
+                                                    Color.valueOf(newItem.getString())
                                                 } catch (ex: Exception) {
                                                     Color.BLACK
                                                 }
                                             }
-                                            "visible" -> isSelected = newItem?.booleanValue() ?: true
+                                            "visible" -> isSelected = newItem?.getBoolean() ?: true
                                         }
                                     }
 

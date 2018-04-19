@@ -16,6 +16,7 @@
 package hep.dataforge.values;
 
 import hep.dataforge.Named;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Instant;
 
@@ -39,6 +40,7 @@ public class NamedValue implements Named, Value {
         this.value = value;
     }
 
+    @NotNull
     @Override
     public String getName() {
         return name;
@@ -49,7 +51,7 @@ public class NamedValue implements Named, Value {
      *
      * @return
      */
-    public Value getAnonymousValue() {
+    public Value getAnonymous() {
         return value;
     }
 
@@ -57,24 +59,24 @@ public class NamedValue implements Named, Value {
      * {@inheritDoc}
      */
     @Override
-    public boolean booleanValue() {
-        return value.booleanValue();
+    public boolean getBoolean() {
+        return value.getBoolean();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public Number numberValue() {
-        return value.numberValue();
+    public Number getNumber() {
+        return value.getNumber();
     }
 
     /**
      * {@inheritDoc}
      */
     @Override
-    public String stringValue() {
-        return value.stringValue();
+    public String getString() {
+        return value.getString();
     }
 
     /**
@@ -83,8 +85,8 @@ public class NamedValue implements Named, Value {
      * @return
      */
     @Override
-    public Instant timeValue() {
-        return value.timeValue();
+    public Instant getTime() {
+        return value.getTime();
     }
 
     /**
@@ -92,6 +94,7 @@ public class NamedValue implements Named, Value {
      *
      * @return
      */
+    @NotNull
     @Override
     public ValueType getType() {
         return value.getType();

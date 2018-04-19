@@ -306,9 +306,9 @@ public class FittingIOUtils {
         out.printf("%8s\t%8s\t%8s\t%8s\t%8s%n", "x", "data", "error", "fit", "residual");
 
         for (Values dp : data) {
-            double x = Adapters.getXValue(adapter, dp).doubleValue();
-            double y = Adapters.getYValue(adapter, dp).doubleValue();
-            double sigma = Adapters.getError(adapter, Adapters.Y_AXIS, dp).doubleValue();
+            double x = Adapters.getXValue(adapter, dp).getDouble();
+            double y = Adapters.getYValue(adapter, dp).getDouble();
+            double sigma = Adapters.getError(adapter, Adapters.Y_AXIS, dp).getDouble();
 
             double value = spectrum.value(x, pars);
             double dif = -(value - y) / sigma;

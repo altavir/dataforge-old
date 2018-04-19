@@ -62,7 +62,7 @@ public interface ValuesAdapter extends Metoid, MetaMorph {
     }
 
     default Optional<Double> optDouble(Values values, String component) {
-        return optComponent(values, component).map(Value::doubleValue);
+        return optComponent(values, component).map(Value::getDouble);
     }
 
     /**

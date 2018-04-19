@@ -45,7 +45,7 @@ public class Record implements MetaMorph {
     private final Instant time;
 
     public Record(Meta meta) {
-        this.time = meta.getValue("timestame").timeValue();
+        this.time = meta.getValue("timestame").getTime();
         this.message = meta.getString("message");
         this.sourceTrace.addAll(Arrays.asList(meta.getStringArray("trace")));
     }

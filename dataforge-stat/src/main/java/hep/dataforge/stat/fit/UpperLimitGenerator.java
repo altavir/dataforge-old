@@ -42,8 +42,8 @@ public class UpperLimitGenerator {
         Column x = readFile().getColumn("val");
         Column y = readFile().getColumn(columnName);
 
-        double[] xArray = x.stream().mapToDouble(v -> v.doubleValue()).toArray();
-        double[] yArray = y.stream().mapToDouble(v -> v.doubleValue()).toArray();
+        double[] xArray = x.stream().mapToDouble(v -> v.getDouble()).toArray();
+        double[] yArray = y.stream().mapToDouble(v -> v.getDouble()).toArray();
 
         SplineInterpolator interpolator = new SplineInterpolator();
         //PENDING add function caching here?

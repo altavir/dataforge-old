@@ -92,8 +92,8 @@ public class FXLineChartFrame extends XYPlotFrame implements FXObject {
             LoggerFactory.getLogger(getClass()).warn("The provided Plot is not a subclass of XYPlot");
         }
 
-        Function<Values, Number> xFunc = (Values point) -> Adapters.getXValue(plot.getAdapter(),point).numberValue();
-        Function<Values, Number> yFunc = (Values point) ->  Adapters.getYValue(plot.getAdapter(),point).numberValue();
+        Function<Values, Number> xFunc = (Values point) -> Adapters.getXValue(plot.getAdapter(),point).getNumber();
+        Function<Values, Number> yFunc = (Values point) ->  Adapters.getYValue(plot.getAdapter(),point).getNumber();
 
         //TODO apply filtering here
 

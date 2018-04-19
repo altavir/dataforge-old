@@ -116,7 +116,7 @@ public class ValueMap implements Values, MetaMorph {
             } else {
                 res.append(", ");
             }
-            res.append(name).append(":").append(getValue(name).stringValue());
+            res.append(name).append(":").append(getValue(name).getString());
         }
         return res + "]";
     }

@@ -49,10 +49,10 @@ open class EnvelopeTag {
     open val length: Int = 20
 
     val metaSize: Int
-        get() = values.getOrDefault(Envelope.META_LENGTH_PROPERTY, Value.of(0)).intValue()
+        get() = values.getOrDefault(Envelope.META_LENGTH_PROPERTY, Value.of(0)).getInt()
 
     val dataSize: Int
-        get() = values.getOrDefault(Envelope.DATA_LENGTH_PROPERTY, Value.of(0)).intValue()
+        get() = values.getOrDefault(Envelope.DATA_LENGTH_PROPERTY, Value.of(0)).getInt()
 
     /**
      * Read header line
@@ -133,14 +133,14 @@ open class EnvelopeTag {
 
     fun setValue(name: String, value: Value) {
         if (Envelope.TYPE_PROPERTY == name) {
-            val type = if (value.type == ValueType.NUMBER) EnvelopeType.resolve(value.intValue()) else EnvelopeType.resolve(value.stringValue())
+            val type = if (value.type == ValueType.NUMBER) EnvelopeType.resolve(value.getInt()) else EnvelopeType.resolve(value.getString())
             if (type != null) {
                 envelopeType = type
             } else {
                 LoggerFactory.getLogger(javaClass).trace("Can't resolve envelope type")
             }
         } else if (Envelope.META_TYPE_PROPERTY == name) {
-            val type = if (value.type == ValueType.NUMBER) MetaType.resolve(value.intValue().toShort()) else MetaType.resolve(value.stringValue())
+            val type = if (value.type == ValueType.NUMBER) MetaType.resolve(value.getInt().toShort()) else MetaType.resolve(value.getString())
             if (type != null) {
                 metaType = type
             } else {
@@ -180,8 +180,8 @@ open class EnvelopeTag {
 
         buffer.putInt(envelopeType.code)
         buffer.putShort(metaType.codes[0])
-        buffer.putInt(values[Envelope.META_LENGTH_PROPERTY]!!.longValue().toInt())
-        buffer.putInt(values[Envelope.DATA_LENGTH_PROPERTY]!!.longValue().toInt())
+        buffer.putInt(values[Envelope.META_LENGTH_PROPERTY]!!.getLong().toInt())
+        buffer.putInt(values[Envelope.DATA_LENGTH_PROPERTY]!!.getLong().toInt())
         buffer.put(endSequence)
         return buffer
     }

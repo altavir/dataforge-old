@@ -24,7 +24,7 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
     }
 
     operator fun NamedValue.unaryPlus() {
-        putValue(this.name, this.anonymousValue)
+        putValue(this.name, this.anonymous)
     }
 
     /**

@@ -29,22 +29,22 @@ fun <T : Any> State<T>.asProperty(): ObjectProperty<T> {
 }
 
 fun State<Value>.asStringProperty(): StringProperty {
-    val property = SimpleStringProperty(null, this.name, this.value.stringValue())
-    onChange { property.set(it.stringValue()) }
+    val property = SimpleStringProperty(null, this.name, this.value.getString())
+    onChange { property.set(it.getString()) }
     property.onChange { this.set(it) }
     return property
 }
 
 fun State<Value>.asBooleanProperty(): BooleanProperty {
-    val property = SimpleBooleanProperty(null, this.name, this.value.booleanValue())
-    onChange { property.set(it.booleanValue()) }
+    val property = SimpleBooleanProperty(null, this.name, this.value.getBoolean())
+    onChange { property.set(it.getBoolean()) }
     property.onChange { this.set(it) }
     return property
 }
 
 fun State<Value>.asDoubleProperty(): DoubleProperty {
-    val property = SimpleDoubleProperty(null, this.name, this.value.doubleValue())
-    onChange { property.set(it.doubleValue()) }
+    val property = SimpleDoubleProperty(null, this.name, this.value.getDouble())
+    onChange { property.set(it.getDouble()) }
     property.onChange { this.set(it) }
     return property
 }

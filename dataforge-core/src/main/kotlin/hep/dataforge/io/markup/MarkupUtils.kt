@@ -66,13 +66,13 @@ object MarkupUtils {
             if (def.type == ValueType.STRING) {
                 builder.apply {
                     text(" = \"")
-                    text(def.stringValue(), "yellow")
+                    text(def.getString(), "yellow")
                     text("\": ")
                 }
             } else {
                 builder.apply {
                     text(" = ")
-                    text(def.stringValue(), "yellow")
+                    text(def.getString(), "yellow")
                     text(": ")
                 }
             }

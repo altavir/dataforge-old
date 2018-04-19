@@ -18,10 +18,10 @@ package hep.dataforge.storage.filestorage
 import hep.dataforge.events.Event
 import hep.dataforge.exceptions.StorageException
 import hep.dataforge.io.IOUtils
+import hep.dataforge.io.JSONMetaWriter
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.EventLoader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.commons.JSONMetaWriter
 import java.util.function.Predicate
 
 /**
@@ -48,7 +48,7 @@ class FileEventLoader(storage: Storage, name: String, annotation: Meta, file: Fi
     override fun pushEvent(event: Event): Boolean {
         return if (filter?.test(event) != false) {
             try {
-                val eventString = JSONMetaWriter(false).writeString(event.meta)
+                val eventString = JSONMetaWriter.writeString(event.meta)
                 file.append(eventString.toByteArray(IOUtils.UTF8_CHARSET))
                 file.append(NEWLINE)
                 true

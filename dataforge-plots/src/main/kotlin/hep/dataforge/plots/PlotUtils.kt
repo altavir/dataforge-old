@@ -106,7 +106,7 @@ object PlotUtils {
      */
     fun getDFPlotExportMenuItem(window: Window?, frame: PlotFrame): MenuItem {
         val dfpExport = MenuItem("DF...")
-        dfpExport.setOnAction { event ->
+        dfpExport.setOnAction { _ ->
             val chooser = FileChooser()
             chooser.extensionFilters.setAll(FileChooser.ExtensionFilter("DataForge envelope", "*.df"))
             chooser.title = "Select file to save plot into"

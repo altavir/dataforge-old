@@ -68,7 +68,7 @@ public interface Values extends NameSetContainer, ValueProvider, MetaMorph {
      * @return
      */
     default boolean hasTag(String name) {
-        return getNames().contains(name) && getValue(name).booleanValue();
+        return getNames().contains(name) && getValue(name).getBoolean();
     }
 
     default Meta toMeta() {

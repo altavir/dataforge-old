@@ -39,6 +39,6 @@ class StateTest {
         state.set(1)
         state.set(2)
         Thread.sleep(50)
-        assertEquals(2, ref.get().intValue())
+        assertEquals(2, ref.get().getInt())
     }
 }

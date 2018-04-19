@@ -25,14 +25,14 @@ public class ValueUtils {
     public static int compare(Value val1, Value val2) {
         switch (val1.getType()) {
             case NUMBER:
-                return NUMBER_COMPARATOR.compare(val1.numberValue(), val2.numberValue());
+                return NUMBER_COMPARATOR.compare(val1.getNumber(), val2.getNumber());
             case BOOLEAN:
-                return Boolean.compare(val1.booleanValue(), val2.booleanValue());
+                return Boolean.compare(val1.getBoolean(), val2.getBoolean());
             case STRING:
                 //use alphanumeric comparator here
-                return val1.stringValue().compareTo(val2.stringValue());
+                return val1.getString().compareTo(val2.getString());
             case TIME:
-                return val1.timeValue().compareTo(val2.timeValue());
+                return val1.getTime().compareTo(val2.getTime());
             case NULL:
                 return val2.getType() == ValueType.NULL ? 0 : -1;
             default:
@@ -69,8 +69,8 @@ public class ValueUtils {
     public static void writeValue(ObjectOutput oos, Value value) throws IOException {
         if (value.isList()) {
             oos.writeChar('L'); // List designation
-            oos.writeShort(value.listValue().size());
-            for (Value subValue : value.listValue()) {
+            oos.writeShort(value.getList().size());
+            for (Value subValue : value.getList()) {
                 writeValue(oos, subValue);
             }
         } else {
@@ -80,16 +80,16 @@ public class ValueUtils {
                     break;
                 case TIME:
                     oos.writeChar('T');//Instant
-                    oos.writeLong(value.timeValue().getEpochSecond());
-                    oos.writeLong(value.timeValue().getNano());
+                    oos.writeLong(value.getTime().getEpochSecond());
+                    oos.writeLong(value.getTime().getNano());
                     break;
                 case STRING:
                     //TODO add encding specification
                     oos.writeChar('S');//String
-                    IOUtils.writeString(oos,value.stringValue());
+                    IOUtils.writeString(oos,value.getString());
                     break;
                 case NUMBER:
-                    Number num = value.numberValue();
+                    Number num = value.getNumber();
                     if (num instanceof Double) {
                         oos.writeChar('D'); // double
                         oos.writeDouble(num.doubleValue());
@@ -109,7 +109,7 @@ public class ValueUtils {
                     }
                     break;
                 case BOOLEAN:
-                    if (value.booleanValue()) {
+                    if (value.getBoolean()) {
                         oos.writeChar('+'); //true
                     } else {
                         oos.writeChar('-'); // false

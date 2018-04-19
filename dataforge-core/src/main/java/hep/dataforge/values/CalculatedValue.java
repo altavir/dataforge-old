@@ -15,6 +15,8 @@
  */
 package hep.dataforge.values;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.time.Instant;
 import java.util.function.Supplier;
 
@@ -52,25 +54,26 @@ public class CalculatedValue implements Value {
     }
 
     @Override
-    public Number numberValue() {
-        return getValue().numberValue();
+    public Number getNumber() {
+        return getValue().getNumber();
     }
 
     @Override
-    public boolean booleanValue() {
-        return getValue().booleanValue();
+    public boolean getBoolean() {
+        return getValue().getBoolean();
     }
 
     @Override
-    public Instant timeValue() {
-        return getValue().timeValue();
+    public Instant getTime() {
+        return getValue().getTime();
     }
 
     @Override
-    public String stringValue() {
-        return getValue().stringValue();
+    public String getString() {
+        return getValue().getString();
     }
 
+    @NotNull
     @Override
     public ValueType getType() {
         return type;

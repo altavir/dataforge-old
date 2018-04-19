@@ -18,7 +18,7 @@ package hep.dataforge.storage.filestorage
 import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
 import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.storage.commons.jsonMetaType
+import hep.dataforge.io.jsonMetaType
 
 /**
  * An envelope type for storage binaries. Infinite data allowed

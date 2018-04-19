@@ -55,7 +55,7 @@ public class CustomMergeRule extends MergeRule {
 
     @Override
     protected Value mergeValues(Name valueName, Value first, Value second) {
-        return Value.of(valueMerger.merge(valueName.toString(), first.listValue(), second.listValue()));
+        return Value.of(valueMerger.merge(valueName.toString(), first.getList(), second.getList()));
     }
 
     @Override

@@ -46,7 +46,7 @@ public class ValueConversionException extends RuntimeException {
      */
     @Override
     public String getMessage() {
-        return String.format("Failed to convert value '%s' of type %s to %s", value.stringValue(), value.getType(), to.name());
+        return String.format("Failed to convert value '%s' of type %s to %s", value.getString(), value.getType(), to.name());
     }
 
 

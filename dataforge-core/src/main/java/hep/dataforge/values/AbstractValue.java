@@ -22,34 +22,34 @@ public abstract class AbstractValue implements Value {
             try {
                 switch (getType()) {
                     case BOOLEAN:
-                        return this.booleanValue() == other.booleanValue();
+                        return this.getBoolean() == other.getBoolean();
                     case TIME:
-                        return this.timeValue().equals(other.timeValue());
+                        return this.getTime().equals(other.getTime());
                     case STRING:
-                        return this.stringValue().equals(other.stringValue());
+                        return this.getString().equals(other.getString());
                     case NUMBER:
-                        return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), other.numberValue()) == 0;
+                        return ValueUtils.NUMBER_COMPARATOR.compare(this.getNumber(), other.getNumber()) == 0;
                     case NULL:
                         return other.getType() == ValueType.NULL;
                     default:
                         //unreachable statement, but using string comparison just to be sure
-                        return this.stringValue().equals(other.stringValue());
+                        return this.getString().equals(other.getString());
                 }
             } catch (ValueConversionException ex) {
                 return false;
             }
         } else if (obj instanceof Double) {
-            return this.doubleValue() == (double) obj;
+            return this.getDouble() == (double) obj;
         } else if (obj instanceof Integer) {
-            return this.intValue() == (int) obj;
+            return this.getInt() == (int) obj;
         } else if (obj instanceof Number) {
-            return ValueUtils.NUMBER_COMPARATOR.compare(this.numberValue(), (Number) obj) == 0;
+            return ValueUtils.NUMBER_COMPARATOR.compare(this.getNumber(), (Number) obj) == 0;
         } else if (obj instanceof String) {
-            return this.stringValue().equals(obj);
+            return this.getString().equals(obj);
         } else if (obj instanceof Boolean) {
-            return this.booleanValue() == (boolean) obj;
+            return this.getBoolean() == (boolean) obj;
         } else if (obj instanceof Instant) {
-            return this.timeValue().equals(obj);
+            return this.getTime().equals(obj);
         } else if (obj == null) {
             return this.getType() == ValueType.NULL;
         } else {
@@ -63,19 +63,19 @@ public abstract class AbstractValue implements Value {
      * @param type
      * @return
      */
-    public Object asType(Class type) {
+    public Object asType(Class<?> type) {
         if (type.isAssignableFrom(String.class)) {
-            return this.stringValue();
+            return this.getString();
         } else if (type.isAssignableFrom(Double.class)) {
-            return this.doubleValue();
+            return this.getDouble();
         } else if (type.isAssignableFrom(Integer.class)) {
-            return this.intValue();
+            return this.getInt();
         } else if (type.isAssignableFrom(Number.class)) {
-            return this.numberValue();
+            return this.getNumber();
         } else if (type.isAssignableFrom(Boolean.class)) {
-            return this.booleanValue();
+            return this.getBoolean();
         } else if (type.isAssignableFrom(Instant.class)) {
-            return this.timeValue();
+            return this.getTime();
         } else {
             return type.cast(this);
         }
@@ -83,6 +83,6 @@ public abstract class AbstractValue implements Value {
 
     @Override
     public String toString() {
-        return stringValue();
+        return getString();
     }
 }

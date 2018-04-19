@@ -81,7 +81,7 @@ open class StreamOutput(val stream: OutputStream) : Output, AutoCloseable {
                 is Markedup -> renderer.render(obj.markup(meta))
                 is Envelope -> {
                     val envelopeType = EnvelopeType.resolve(meta.getString("envelope.type", TAGLESS_ENVELOPE_TYPE))!!
-                    val envelopeProperties = meta.getMeta("envelope.properties", Meta.empty()).asMap { it.stringValue() }
+                    val envelopeProperties = meta.getMeta("envelope.properties", Meta.empty()).asMap { it.getString() }
                     envelopeType.getWriter(envelopeProperties).write(stream, obj)
                 }
                 is ILoggingEvent -> {

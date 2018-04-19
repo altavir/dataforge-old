@@ -20,8 +20,8 @@ class TableDisplay(val table: Table, override val meta: Meta = Meta.empty())
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {
-            ValueType.NUMBER -> SpreadsheetCellType.DOUBLE.createCell(row, column, 1, 1, value.doubleValue())
-            else -> SpreadsheetCellType.STRING.createCell(row, column, 1, 1, value.stringValue())
+            ValueType.NUMBER -> SpreadsheetCellType.DOUBLE.createCell(row, column, 1, 1, value.getDouble())
+            else -> SpreadsheetCellType.STRING.createCell(row, column, 1, 1, value.getString())
         }
     }
 

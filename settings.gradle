@@ -1,5 +1,6 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
+include ':dataforge-core:dataforge-json' // core classes and data structures
 //include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
 
 include ':dataforge-plots' // plot library
