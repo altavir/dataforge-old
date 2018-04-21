@@ -42,29 +42,6 @@ import java.text.ParseException
  */
 object JSONMetaReader : MetaStreamReader {
 
-//    private fun readStream(stream: InputStream): ByteArray {
-//        val baos = ByteArrayOutputStream()
-//        var braceCounter = 0
-//
-//        var nextByte: Int
-//        var stopFlag = false
-//        while (!stopFlag && stream.available() > 0) {
-//            nextByte = stream.read()
-//
-//            //The first symbol is required to be '{'
-//            if (nextByte == '{'.toInt()) {
-//                braceCounter++
-//            } else if (nextByte == '}'.toInt()) {
-//                braceCounter--
-//            }
-//            baos.write(nextByte)
-//            if (braceCounter == 0) {
-//                stopFlag = true
-//            }
-//        }
-//        return baos.toByteArray()
-//    }
-
     @Throws(IOException::class, ParseException::class)
     override fun read(stream: InputStream, length: Long): MetaBuilder {
         return if (length == 0L) {
@@ -106,7 +83,7 @@ object JSONMetaReader : MetaStreamReader {
 
     private fun appendValue(builder: KMetaBuilder, key: String, value: Any?) {
         when (value) {
-            is JsonObject -> builder.putNode(key, value.toMeta())
+            is JsonObject -> builder.attachNode(value.toMeta().rename(key))
             is JsonArray -> {
                 value.forEach {
                     if(it is JsonArray){

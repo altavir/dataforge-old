@@ -23,10 +23,17 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 class Coal<R>(
         private val deps: Collection<Goal<*>> = Collections.emptyList(),
-        dispatcher: CoroutineContext,
+        private val dispatcher: CoroutineContext,
         val id: String = "",
         block: suspend () -> R) : Goal<R> {
-    //TODO add Context based CoroutineContext object
+
+    /**
+     * Construct using context
+     */
+    constructor(deps: Collection<Goal<*>> = Collections.emptyList(),
+                context: Context,
+                id: String = "",
+                block: suspend () -> R) : this(deps, context.coroutineContext, id, block)
 
     private val listeners = ReferenceRegistry<GoalListener<R>>();
 
@@ -48,11 +55,12 @@ class Coal<R>(
 
     private fun notifyListeners(action: GoalListener<R>.() -> Unit) {
         listeners.forEach {
-            try {
-                //TODO use Global dispatch thread here
-                action.invoke(it)
-            } catch (ex: Exception) {
-                LoggerFactory.getLogger(javaClass).error("Failed to notify goal listener", ex)
+            async(context = dispatcher) {
+                try {
+                    action.invoke(it)
+                } catch (ex: Exception) {
+                    LoggerFactory.getLogger(javaClass).error("Failed to notify goal listener", ex)
+                }
             }
         }
     }

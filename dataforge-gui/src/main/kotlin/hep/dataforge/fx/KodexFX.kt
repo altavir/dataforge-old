@@ -14,7 +14,7 @@ import javafx.scene.image.ImageView
 import javafx.scene.layout.Region
 import javafx.scene.paint.Color
 import javafx.stage.Stage
-import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.DefaultDispatcher
 import tornadofx.*
 import java.util.*
 import java.util.concurrent.Executor
@@ -73,13 +73,17 @@ private fun removeMonitor(component: UIComponent, id: String) {
     }
 }
 
-fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = CommonPool, block: suspend GoalMonitor.() -> R): Coal<R> {
+fun <R> UIComponent.runGoal(id: String, dispatcher: CoroutineContext = DefaultDispatcher, block: suspend GoalMonitor.() -> R): Coal<R> {
     val monitor = getMonitor(id);
-    return Coal(Collections.emptyList(), dispatcher, id) { block.invoke(monitor) }
-            .apply {
-                onComplete { _, _ -> removeMonitor(this@runGoal, id) }
-                run()
-            }
+    return Coal(Collections.emptyList(), dispatcher, id) {
+        monitor.progress = -1.0
+        block(monitor).also {
+            monitor.progress = 1.0
+        }
+    }.apply {
+        onComplete { _, _ -> removeMonitor(this@runGoal, id) }
+        run()
+    }
 }
 
 infix fun <R> Goal<R>.ui(action: (R) -> Unit): Goal<R> {
@@ -142,8 +146,8 @@ class ToggleUIComponent(
         val owner: Node,
         val toggle: BooleanProperty) {
     val stage: Stage by lazy {
-        val res = component.openWindow(owner = owner.scene.window)
-                ?: throw RuntimeException("Can'topen window for $component")
+        val res = component.modalStage ?: component.openWindow(owner = owner.scene.window)
+        ?: throw RuntimeException("Can'topen window for $component")
         res.showingProperty().onChange {
             toggle.set(it)
         }

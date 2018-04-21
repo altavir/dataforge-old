@@ -5,6 +5,7 @@ dependencies {
     compile project(':dataforge-plots')
     compile 'org.controlsfx:controlsfx:8.40.14'
     compile "no.tornado:tornadofx:1.7.15"
+    compile 'no.tornado:tornadofx-controlsfx:0.1'
     compile group: 'org.fxmisc.richtext', name: 'richtextfx', version: '0.9.0'
 
     // optional dependency for JFreeChart

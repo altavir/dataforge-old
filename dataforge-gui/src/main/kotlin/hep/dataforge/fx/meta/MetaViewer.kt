@@ -22,7 +22,6 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
 import javafx.beans.property.SimpleStringProperty
 import javafx.beans.property.StringProperty
-import javafx.scene.Parent
 import javafx.scene.control.TreeItem
 import javafx.scene.control.TreeSortMode
 import javafx.scene.control.TreeTableView
@@ -44,32 +43,30 @@ internal class ValueItem(name: String, val value: Value) : Item() {
     override val valueProperty: StringProperty = SimpleStringProperty(value.getString())
 }
 
-class MetaViewer(val meta: Meta) : Fragment(title = "Meta viewe: ${meta.name}", icon = dfIconView) {
-    override val root: Parent = borderpane {
+open class MetaViewer(val meta: Meta, title: String = "Meta viewer: ${meta.name}") : Fragment(title, dfIconView) {
+    override val root = borderpane {
         center {
-            scrollpane {
-                treetableview<Item> {
-                    isShowRoot = false
-                    root = TreeItem(MetaItem(meta))
-                    populate {
-                        val value: Item = it.value
-                        when (value) {
-                            is MetaItem -> {
-                                val meta = value.meta
-                                Stream.concat(
-                                        meta.nodeNames.flatMap { meta.getMetaList(it).stream() }.map { MetaItem(it) },
-                                        meta.valueNames.map { ValueItem(it, meta.getValue(it)) }
-                                ).toList()
-                            }
-                            is ValueItem -> null
+            treetableview<Item> {
+                isShowRoot = false
+                root = TreeItem(MetaItem(meta))
+                populate {
+                    val value: Item = it.value
+                    when (value) {
+                        is MetaItem -> {
+                            val meta = value.meta
+                            Stream.concat(
+                                    meta.nodeNames.flatMap { meta.getMetaList(it).stream() }.map { MetaItem(it) },
+                                    meta.valueNames.map { ValueItem(it, meta.getValue(it)) }
+                            ).toList()
                         }
+                        is ValueItem -> null
                     }
-                    root.isExpanded = true
-                    sortMode = TreeSortMode.ALL_DESCENDANTS
-                    columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
-                    column("Name", Item::titleProperty)
-                    column("Value", Item::valueProperty)
                 }
+                root.isExpanded = true
+                sortMode = TreeSortMode.ALL_DESCENDANTS
+                columnResizePolicy = TreeTableView.CONSTRAINED_RESIZE_POLICY
+                column("Name", Item::titleProperty)
+                column("Value", Item::valueProperty)
             }
         }
     }

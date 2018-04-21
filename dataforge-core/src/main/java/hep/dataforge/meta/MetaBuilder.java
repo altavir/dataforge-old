@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -200,7 +200,9 @@ public class MetaBuilder extends MutableMetaNode<MetaBuilder> implements Generic
     }
 
     /**
-     * Attach nod to this one changing attached node's parent
+     * Attach node without cloning it first to this one and change its parent.
+     * This is much faster then set or put operation but all external
+     * changes to the attached node will reflect on this one.
      *
      * @param node
      */
