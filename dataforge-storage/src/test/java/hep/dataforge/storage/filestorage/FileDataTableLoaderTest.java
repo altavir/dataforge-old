@@ -75,7 +75,7 @@ public class FileDataTableLoaderTest {
 
         FileStorage storage = FileStorageFactory.Companion.buildLocal(Global.INSTANCE, dir, false, true);
 
-        TableLoader loader = LoaderFactory.buildPointLoader(storage, "test_points", "", "key", MetaTableFormat.forNames(names));
+        TableLoader loader = LoaderFactory.buildPointLoader(storage, "test_points", "", "key", MetaTableFormat.Companion.forNames(names));
 
         System.out.println("push");
         Instant start = DateTimeUtils.now();

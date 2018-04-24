@@ -40,7 +40,7 @@ public class ColumnedDataWriter implements AutoCloseable {
 
 
     public ColumnedDataWriter(OutputStream stream, String... names) {
-        this(stream, MetaTableFormat.forNames(names));
+        this(stream, MetaTableFormat.Companion.forNames(names));
     }
 
 
@@ -54,7 +54,7 @@ public class ColumnedDataWriter implements AutoCloseable {
     }
 
     public ColumnedDataWriter(File file, boolean append, String... names) throws FileNotFoundException {
-        this(file, append, Charset.defaultCharset(), MetaTableFormat.forNames(names));
+        this(file, append, Charset.defaultCharset(), MetaTableFormat.Companion.forNames(names));
     }
 
     public ColumnedDataWriter(File file, boolean append, Charset encoding, TableFormat format) throws FileNotFoundException {
@@ -118,7 +118,7 @@ public class ColumnedDataWriter implements AutoCloseable {
         TableFormat format;
         if (data.getFormat().getNames().size() == 0) {
             //Если набор задан в свободной форме, то конструируется автоматический формат по первой точке
-            format = MetaTableFormat.forValues(data.iterator().next());
+            format = MetaTableFormat.Companion.forValues(data.iterator().next());
             LoggerFactory.getLogger(ColumnedDataWriter.class)
                     .debug("No DataSet format defined. Constucting default based on the first data point");
         } else {

@@ -43,6 +43,7 @@ public class ValueMap implements Values, MetaMorph {
         return new ValueMap(map.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> Value.of(entry.getValue()))));
     }
 
+    @SafeVarargs
     public static ValueMap ofPairs(Pair<String, ?>... pairs) {
         Builder builder = new Builder();
         for(Pair<String, ?> pair: pairs){

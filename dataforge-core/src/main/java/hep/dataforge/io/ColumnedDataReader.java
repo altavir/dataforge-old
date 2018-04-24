@@ -20,8 +20,6 @@ import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.Table;
 import hep.dataforge.values.Values;
 
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -79,7 +77,7 @@ public class ColumnedDataReader implements Iterable<Values> {
                 points.add(p);
             }
         }
-        return new ListTable(points);
+        return ListTable.Companion.infer(points);
     }
 
 }
