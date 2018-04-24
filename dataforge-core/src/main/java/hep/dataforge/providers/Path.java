@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -89,9 +89,14 @@ public interface Path {
 
     /**
      * Create or append chain path
+     *
      * @param segment
      * @return
      */
     Path append(Path segment);
+
+    default Path append(String target, String name) {
+        return append(Path.of(target, name));
+    }
 
 }
