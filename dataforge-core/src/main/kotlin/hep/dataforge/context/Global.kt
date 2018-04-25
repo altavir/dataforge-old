@@ -16,6 +16,8 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
+import hep.dataforge.io.DefaultIOManager
+import hep.dataforge.io.IOManager
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
 import hep.dataforge.kodex.buildMeta

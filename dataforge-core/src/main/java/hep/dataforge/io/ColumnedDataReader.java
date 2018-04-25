@@ -16,8 +16,9 @@
 package hep.dataforge.io;
 
 import hep.dataforge.tables.ListTable;
-import hep.dataforge.tables.PointParser;
 import hep.dataforge.tables.Table;
+import hep.dataforge.tables.ValuesParser;
+import hep.dataforge.tables.ValuesReader;
 import hep.dataforge.values.Values;
 
 import java.io.IOException;
@@ -37,15 +38,15 @@ import java.util.List;
  */
 public class ColumnedDataReader implements Iterable<Values> {
 
-    private DataPointStringIterator reader;
+    private ValuesReader reader;
 
-    public ColumnedDataReader(InputStream stream, PointParser parser) {
+    public ColumnedDataReader(InputStream stream, ValuesParser parser) {
 
-        this.reader = new DataPointStringIterator(stream, parser);
+        this.reader = new ValuesReader(stream, parser);
     }
 
     public ColumnedDataReader(InputStream stream, String... format) {
-        this.reader = new DataPointStringIterator(stream, format);
+        this.reader = new ValuesReader(stream, format);
     }
 
     public ColumnedDataReader(Path path) throws IOException {
@@ -58,7 +59,7 @@ public class ColumnedDataReader implements Iterable<Values> {
         if (!iterator.hasNext()) {
             throw new IllegalStateException();
         }
-        this.reader = new DataPointStringIterator(iterator, headline);
+        this.reader = new ValuesReader(iterator, headline);
     }
 
     public void skipLines(int n) {

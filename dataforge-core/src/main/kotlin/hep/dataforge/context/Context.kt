@@ -16,6 +16,7 @@
 package hep.dataforge.context
 
 import hep.dataforge.Named
+import hep.dataforge.io.IOManager
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
@@ -295,7 +296,7 @@ open class Context(
 
             meta.optString("rootDir").ifPresent { builder.setRootDir(it) }
 
-            meta.optValue("classpath").ifPresent { value -> value.getList().stream().map<String> { it.getString() }.forEach { builder.classPath(it) } }
+            meta.optValue("classpath").ifPresent { value -> value.list.stream().map<String> { it.string }.forEach { builder.classPath(it) } }
 
             meta.getMetaList("plugin").forEach { builder.plugin(it) }
 

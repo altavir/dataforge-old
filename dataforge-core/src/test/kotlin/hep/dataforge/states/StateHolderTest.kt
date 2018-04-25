@@ -50,7 +50,7 @@ class StateHolderTest {
 
         Thread.sleep(200)
 
-        assertEquals(2, results["state2"]?.getInt())
-        assertEquals(3, results["state1"]?.getInt())
+        assertEquals(2, results["state2"]?.int)
+        assertEquals(3, results["state1"]?.int)
     }
 }

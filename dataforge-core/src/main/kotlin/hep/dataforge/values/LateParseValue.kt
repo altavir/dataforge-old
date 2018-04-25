@@ -45,7 +45,8 @@ class LateParseValue(str: String) : AbstractValue() {
         return value.type
     }
 
-    override fun value(): Any {
-        return value.value()
-    }
+    override val value: Any
+        get() {
+            return value.value
+        }
 }

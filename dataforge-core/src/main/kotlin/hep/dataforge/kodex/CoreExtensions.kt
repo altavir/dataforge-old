@@ -48,23 +48,23 @@ fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextB
 
 operator fun Value.plus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.getNumber() + other.getNumber());
-            ValueType.STRING -> Value.of(this.getString() + other.getString());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.getTime().toEpochMilli() + other.getTime().toEpochMilli()))
-            ValueType.BOOLEAN -> Value.of(this.getBoolean() || other.getBoolean());
+            ValueType.NUMBER -> Value.of(this.number + other.number);
+            ValueType.STRING -> Value.of(this.string + other.string);
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.time.toEpochMilli() + other.time.toEpochMilli()))
+            ValueType.BOOLEAN -> Value.of(this.boolean || other.boolean);
             ValueType.NULL -> other;
         }
 
 operator fun Value.minus(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.getNumber() - other.getNumber());
-            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.getTime().toEpochMilli() - other.getTime().toEpochMilli()))
+            ValueType.NUMBER -> Value.of(this.number - other.number);
+            ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.time.toEpochMilli() - other.time.toEpochMilli()))
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
 operator fun Value.times(other: Value): Value =
         when (this.type) {
-            ValueType.NUMBER -> Value.of(this.getNumber() * other.getNumber());
+            ValueType.NUMBER -> Value.of(this.number * other.number);
             else -> throw RuntimeException("Operation minus not allowed for ${this.type}");
         }
 
@@ -77,10 +77,10 @@ operator fun Value.times(other: Any): Value = this * Value.of(other)
 //Value comparison
 
 operator fun Value.compareTo(other: Value): Int = when (this.type) {
-    ValueType.NUMBER -> this.getNumber().compareTo(other.getNumber());
-    ValueType.STRING -> this.getString().compareTo(other.getString())
-    ValueType.TIME -> this.getTime().compareTo(other.getTime())
-    ValueType.BOOLEAN -> this.getBoolean().compareTo(other.getBoolean())
+    ValueType.NUMBER -> this.number.compareTo(other.number);
+    ValueType.STRING -> this.string.compareTo(other.string)
+    ValueType.TIME -> this.time.compareTo(other.time)
+    ValueType.BOOLEAN -> this.boolean.compareTo(other.boolean)
     ValueType.NULL -> if (other.isNull) 0 else 1
 }
 

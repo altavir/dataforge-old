@@ -13,12 +13,15 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package hep.dataforge.context
+package hep.dataforge.io
 
 import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.UnsynchronizedAppenderBase
+import hep.dataforge.context.Context
+import hep.dataforge.context.Global
+import hep.dataforge.context.PluginDef
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 
@@ -57,14 +60,14 @@ open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
     private fun addLoggerAppender(logger: Logger) {
         val loggerContext = logger.loggerContext
         val appender = createLoggerAppender()
-        appender.name = IOManager.LOGGER_APPENDER_NAME
+        appender.name = LOGGER_APPENDER_NAME
         appender.context = loggerContext
         appender.start()
         logger.addAppender(appender)
     }
 
     private fun removeLoggerAppender(logger: Logger) {
-        val app = logger.getAppender(IOManager.LOGGER_APPENDER_NAME)
+        val app = logger.getAppender(LOGGER_APPENDER_NAME)
         if (app != null) {
             logger.detachAppender(app)
             app.stop()

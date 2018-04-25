@@ -168,7 +168,7 @@ class CoreExtension {
      */
     static Map<String, Object> unbox(final Values self) {
         self.getNames().collectEntries {
-            [it: self.getValue(it).value()]
+            [it: self.getValue(it).getValue()]
         }
     }
 
@@ -179,7 +179,7 @@ class CoreExtension {
      * @return
      */
     static Object getAt(final Values self, String field) {
-        return self.getValue(field).value();
+        return self.getValue(field).getValue();
     }
 
     static Value getProperty(final Values self, String name) {
@@ -284,7 +284,7 @@ class CoreExtension {
     }
 
     static Object getAt(final Meta self, String name) {
-        return self.getValue(name).value();
+        return self.getValue(name).getValue();
     }
 
     static void setAt(final MetaBuilder self, String name, Object value) {
@@ -339,7 +339,7 @@ class CoreExtension {
     }
 
     static Object getAt(final Table self, String name, int index) {
-        return self.get(name, index).value();
+        return self.get(name, index).getValue();
     }
 
     //workspace extension

@@ -61,8 +61,8 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
         }
     }
 
-    private val parser: PointParser by lazy {
-        SimpleParser(format)
+    private val parser: ValuesParser by lazy {
+        SimpleValuesParser(format)
     }
 
     override fun iterator(): MutableIterator<Values> {

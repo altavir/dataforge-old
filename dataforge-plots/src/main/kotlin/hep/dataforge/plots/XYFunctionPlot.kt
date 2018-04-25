@@ -61,7 +61,7 @@ class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Dou
      *
      * @param smoothing
      */
-    var smoothing by config.mutableCustomValue("connectionType", read = { it.getString() == "spline" }) {
+    var smoothing by config.mutableCustomValue("connectionType", read = { it.string == "spline" }) {
         if (it) {
             "spline"
         } else {

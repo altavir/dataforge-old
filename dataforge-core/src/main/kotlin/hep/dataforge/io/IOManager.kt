@@ -13,13 +13,13 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package hep.dataforge.context
+package hep.dataforge.io
 
+import hep.dataforge.context.BasicPlugin
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
-import hep.dataforge.io.IOUtils
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamConsumer
 import hep.dataforge.kodex.buildMeta
@@ -91,14 +91,14 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     val stream: OutputStream by lazy { StreamConsumer(output) }
 
     /**
-     * An outputstream wrapper for backward compatibility.
+     * An [OutputStream] wrapper for backward compatibility.
      */
     fun stream(meta: Meta): OutputStream {
         return StreamConsumer(output(meta))
     }
 
     /**
-     * An outputstream wrapper for backward compatibility.
+     * An [OutputStream] wrapper for backward compatibility.
      */
     @JvmOverloads
     fun stream(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): OutputStream {

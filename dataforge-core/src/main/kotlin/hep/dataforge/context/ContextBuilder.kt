@@ -16,6 +16,8 @@
 
 package hep.dataforge.context
 
+import hep.dataforge.io.DefaultIOManager
+import hep.dataforge.io.IOManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaUtils

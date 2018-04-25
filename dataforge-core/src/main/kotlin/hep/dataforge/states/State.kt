@@ -271,12 +271,12 @@ class ValueState(
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Boolean {
-            return value.getBoolean()
+            return value.boolean
         }
     }
 
     val booleanValue
-        get() = value.getBoolean()
+        get() = value.boolean
 
     val stringDelegate: ReadWriteProperty<Any?, String> = object : ReadWriteProperty<Any?, String> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: String) {
@@ -284,12 +284,12 @@ class ValueState(
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): String {
-            return value.getString()
+            return value.string
         }
     }
 
     val stringValue: String
-        get() = value.getString()
+        get() = value.string
 
     val timeDelegate: ReadWriteProperty<Any?, Instant> = object : ReadWriteProperty<Any?, Instant> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Instant) {
@@ -297,12 +297,12 @@ class ValueState(
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Instant {
-            return value.getTime()
+            return value.time
         }
     }
 
     val timeValue: Instant
-        get() = value.getTime()
+        get() = value.time
 
     val intDelegate: ReadWriteProperty<Any?, Int> = object : ReadWriteProperty<Any?, Int> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Int) {
@@ -310,12 +310,12 @@ class ValueState(
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Int {
-            return value.getInt()
+            return value.int
         }
     }
 
     val intValue
-        get() = value.getInt()
+        get() = value.int
 
     val doubleDelegate: ReadWriteProperty<Any?, Double> = object : ReadWriteProperty<Any?, Double> {
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: Double) {
@@ -323,16 +323,16 @@ class ValueState(
         }
 
         override fun getValue(thisRef: Any?, property: KProperty<*>): Double {
-            return value.getDouble()
+            return value.double
         }
     }
 
     val doubleValue
-        get() = value.getDouble()
+        get() = value.double
 
     inline fun <reified T : Enum<T>> enumDelegate(): ReadWriteProperty<Any?, T> = object : ReadWriteProperty<Any?, T> {
         override fun getValue(thisRef: Any?, property: KProperty<*>): T {
-            return enumValueOf<T>(value.getString())
+            return enumValueOf<T>(value.string)
         }
 
         override fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
@@ -341,7 +341,7 @@ class ValueState(
     }
 
     inline fun <reified T : Enum<T>> enumValue(): T {
-        return enumValueOf(value.getString())
+        return enumValueOf(value.string)
     }
 
 }

@@ -18,7 +18,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
     override fun buildNode(): TextField {
         val node = TextField()
         val defaultValue = currentValue()
-        node.text = currentValue().getString()
+        node.text = currentValue().string
         node.style = String.format("-fx-text-fill: %s;", textColor(defaultValue))
 
         // commit on enter
@@ -30,7 +30,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
         // restoring value on click outside
         node.focusedProperty().addListener { _: ObservableValue<out Boolean>, oldValue: Boolean, newValue: Boolean ->
             if (oldValue && !newValue) {
-                node.text = currentValue().getString()
+                node.text = currentValue().string
             }
         }
 
@@ -60,7 +60,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
 
     private fun textColor(item: Value): String {
         return when (item.type) {
-            ValueType.BOOLEAN -> if (item.getBoolean()) {
+            ValueType.BOOLEAN -> if (item.boolean) {
                 "blue"
             } else {
                 "salmon"
@@ -80,6 +80,6 @@ class TextValueChooser : ValueChooserBase<TextField>() {
     //    }
 
     override fun setDisplayValue(value: Value) {
-        node.text = value.getString()
+        node.text = value.string
     }
 }

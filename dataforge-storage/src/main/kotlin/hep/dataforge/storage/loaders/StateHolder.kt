@@ -61,14 +61,14 @@ class StateHolder(val connections: ConnectionHelper, val handler: MetaHandler) :
                 PULL_ACTION -> {
                     if (envelopeMeta.hasValue("state") || envelopeMeta.hasValue("metaState")) {
                         envelopeMeta.useValue("state"){
-                            it.getList().forEach {
-                                res.putMetaNode(buildMeta("state", "key" to it, "value" to config.getValue(it.getString())))
+                            it.list.forEach {
+                                res.putMetaNode(buildMeta("state", "key" to it, "value" to config.getValue(it.string)))
                             }
                         }
                         envelopeMeta.useValue("metaState"){
-                            it.getList().forEach {
+                            it.list.forEach {
                                 res.putMetaNode(buildMeta("state", "key" to it){
-                                    putNode("value", config.getMeta(it.getString()))
+                                    putNode("value", config.getMeta(it.string))
                                 })
                             }
 

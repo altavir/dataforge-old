@@ -117,22 +117,22 @@ fun Meta.value(valueName: String? = null, def: Value? = null): ReadOnlyProperty<
         ValueDelegate(this, valueName, def) { it }
 
 fun Meta.stringValue(valueName: String? = null, def: String? = null): ReadOnlyProperty<Any?, String> =
-        ValueDelegate(this, valueName, def) { it.getString() }
+        ValueDelegate(this, valueName, def) { it.string }
 
 fun Meta.booleanValue(valueName: String? = null, def: Boolean? = null): ReadOnlyProperty<Any?, Boolean> =
-        ValueDelegate(this, valueName, def) { it.getBoolean() }
+        ValueDelegate(this, valueName, def) { it.boolean }
 
 fun Meta.timeValue(valueName: String? = null, def: Instant? = null): ReadOnlyProperty<Any?, Instant> =
-        ValueDelegate(this, valueName, def) { it.getTime() }
+        ValueDelegate(this, valueName, def) { it.time }
 
 fun Meta.numberValue(valueName: String? = null, def: Number? = null): ReadOnlyProperty<Any?, Number> =
-        ValueDelegate(this, valueName, def) { it.getNumber() }
+        ValueDelegate(this, valueName, def) { it.number }
 
 fun Meta.doubleValue(valueName: String? = null, def: Double? = null): ReadOnlyProperty<Any?, Double> =
-        ValueDelegate(this, valueName, def) { it.getDouble() }
+        ValueDelegate(this, valueName, def) { it.double }
 
 fun Meta.intValue(valueName: String? = null, def: Int? = null): ReadOnlyProperty<Any?, Int> =
-        ValueDelegate(this, valueName, def) { it.getInt() }
+        ValueDelegate(this, valueName, def) { it.int }
 
 fun <T> Meta.customValue(valueName: String? = null, def: T? = null, conv: (Value) -> T): ReadOnlyProperty<Any?, T> =
         ValueDelegate(this, valueName, def, conv)
@@ -199,22 +199,22 @@ fun MutableMetaNode<*>.mutableValue(valueName: String? = null, def: Value? = nul
         MutableValueDelegate(this, valueName, def, { it }, { it })
 
 fun MutableMetaNode<*>.mutableStringValue(valueName: String? = null, def: String? = null): ReadWriteProperty<Any, String> =
-        MutableValueDelegate(this, valueName, def, { it.getString() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.string }, { Value.of(it) })
 
 fun MutableMetaNode<*>.mutableBooleanValue(valueName: String? = null, def: Boolean? = null): ReadWriteProperty<Any, Boolean> =
-        MutableValueDelegate(this, valueName, def, { it.getBoolean() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.boolean }, { Value.of(it) })
 
 fun MutableMetaNode<*>.mutableTimeValue(valueName: String? = null, def: Instant? = null): ReadWriteProperty<Any, Instant> =
-        MutableValueDelegate(this, valueName, def, { it.getTime() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.time }, { Value.of(it) })
 
 fun MutableMetaNode<*>.mutableNumberValue(valueName: String? = null, def: Number? = null): ReadWriteProperty<Any, Number> =
-        MutableValueDelegate(this, valueName, def, { it.getNumber() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.number }, { Value.of(it) })
 
 fun MutableMetaNode<*>.mutableDoubleValue(valueName: String? = null, def: Double? = null): ReadWriteProperty<Any, Double> =
-        MutableValueDelegate(this, valueName, def, { it.getDouble() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.double }, { Value.of(it) })
 
 fun MutableMetaNode<*>.mutableIntValue(valueName: String? = null, def: Int? = null): ReadWriteProperty<Any, Int> =
-        MutableValueDelegate(this, valueName, def, { it.getInt() }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.int }, { Value.of(it) })
 
 fun <T> MutableMetaNode<*>.mutableCustomValue(valueName: String? = null, def: T? = null, read: (Value) -> T, write: (T) -> Any): ReadWriteProperty<Any, T> =
         MutableValueDelegate(this, valueName, def, read, write)

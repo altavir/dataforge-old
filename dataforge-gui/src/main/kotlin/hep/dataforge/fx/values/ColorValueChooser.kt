@@ -10,11 +10,11 @@ import org.slf4j.LoggerFactory
  */
 class ColorValueChooser : ValueChooserBase<ColorPicker>() {
     override fun setDisplayValue(value: Value) {
-        if (!value.getString().isEmpty()) {
+        if (!value.string.isEmpty()) {
             try {
-                node.value = Color.valueOf(value.getString())
+                node.value = Color.valueOf(value.string)
             } catch (ex: Exception) {
-                LoggerFactory.getLogger(javaClass).warn("Invalid color field value: " + value.getString())
+                LoggerFactory.getLogger(javaClass).warn("Invalid color field value: " + value.string)
             }
 
         }

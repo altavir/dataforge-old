@@ -88,7 +88,7 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
      * true if measurement in process
      */
     val measuring = valueState(MEASURING_STATE) { value ->
-        if (value.getBoolean()) {
+        if (value.boolean) {
             startMeasurement(null, measurement)
         } else {
             stopMeasurement()

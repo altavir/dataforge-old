@@ -22,10 +22,10 @@
 package hep.dataforge.data
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.IOManager
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
+import hep.dataforge.io.IOManager
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
