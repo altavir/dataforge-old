@@ -17,6 +17,7 @@ package hep.dataforge.tables
 
 import hep.dataforge.io.LineIterator
 import hep.dataforge.values.Value
+import hep.dataforge.values.Value.Companion.NULL_STRING
 import hep.dataforge.values.Values
 import java.io.InputStream
 import java.util.*

@@ -56,6 +56,7 @@ object ValueUtils {
      * @param val2
      * @return
      */
+    @JvmStatic
     fun isBetween(`val`: Value, val1: Value, val2: Value): Boolean {
         return compare(`val`, val1) > 0 && compare(`val`, val2) < 0 || compare(`val`, val2) > 0 && compare(`val`, val1) < 0
 

@@ -49,10 +49,9 @@ fun buildContext(name: String, vararg plugins: Class<out Plugin>, init: ContextB
 operator fun Value.plus(other: Value): Value =
         when (this.type) {
             ValueType.NUMBER -> Value.of(this.number + other.number);
-            ValueType.STRING -> Value.of(this.string + other.string);
             ValueType.TIME -> Value.of(Instant.ofEpochMilli(this.time.toEpochMilli() + other.time.toEpochMilli()))
-            ValueType.BOOLEAN -> Value.of(this.boolean || other.boolean);
             ValueType.NULL -> other;
+            else -> throw RuntimeException("Operation plus not allowed for ${this.type}");
         }
 
 operator fun Value.minus(other: Value): Value =
@@ -82,6 +81,7 @@ operator fun Value.compareTo(other: Value): Int = when (this.type) {
     ValueType.TIME -> this.time.compareTo(other.time)
     ValueType.BOOLEAN -> this.boolean.compareTo(other.boolean)
     ValueType.NULL -> if (other.isNull) 0 else 1
+    ValueType.BINARY -> this.binary.compareTo(other.binary)
 }
 
 fun Value?.isNull(): Boolean = this == null || this.isNull

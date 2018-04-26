@@ -23,30 +23,19 @@ import java.time.Instant
  */
 class LateParseValue(str: String) : AbstractValue() {
 
-    private val value: Value by lazy { Value.of(str) }
-
-    override fun getNumber(): Number {
-        return value.number
-    }
-
-    override fun getBoolean(): Boolean {
-        return value.boolean
-    }
-
-    override fun getTime(): Instant {
-        return value.time
-    }
-
-    override fun getString(): String {
-        return value.string
-    }
-
-    override fun getType(): ValueType {
-        return value.type
-    }
-
+    private val _value: Value by lazy { Value.of(str) }
     override val value: Any
-        get() {
-            return value.value
-        }
+        get() = _value.value
+
+    override val number: Number
+        get() = _value.number
+    override val boolean: Boolean
+        get() = _value.boolean
+    override val time: Instant
+        get() = _value.time
+    override val string: String
+        get() = _value.string
+    override val type: ValueType
+        get() = _value.type
+
 }

@@ -89,6 +89,7 @@ subprojects {
 
         compileKotlin {
             kotlinOptions {
+                freeCompilerArgs = ['-Xenable-jvm-default']
                 jvmTarget = "1.8"
                 javaParameters = true
             }
@@ -96,6 +97,7 @@ subprojects {
 
         compileTestKotlin {
             kotlinOptions {
+                freeCompilerArgs = ['-Xenable-jvm-default']
                 jvmTarget = "1.8"
                 javaParameters = true
             }

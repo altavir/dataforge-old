@@ -32,6 +32,7 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
      * @param path
      * @return
      */
+    @JvmDefault
     override fun hasValue(path: String): Boolean {
         return this.names.contains(path)
     }
@@ -42,6 +43,7 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
      * @param num
      * @return
      */
+    @JvmDefault
     operator fun get(num: Int): Value {
         return getValue(this.names.get(num))
     }
@@ -50,6 +52,7 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
      * Convert a DataPoint to a Map. Order is not guaranteed
      * @return
      */
+    @JvmDefault
     fun asMap(): Map<String, Value> {
         val res = HashMap<String, Value>()
         for (field in this.names) {
@@ -64,10 +67,12 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
      * @param name
      * @return
      */
+    @JvmDefault
     fun hasTag(name: String): Boolean {
         return names.contains(name) && getValue(name).boolean
     }
 
+    @JvmDefault
     override fun toMeta(): Meta {
         val builder = MetaBuilder("point")
         for (name in namesAsArray()) {

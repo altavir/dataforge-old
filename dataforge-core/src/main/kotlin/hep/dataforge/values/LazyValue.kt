@@ -16,7 +16,6 @@
 package hep.dataforge.values
 
 import java.time.Instant
-import java.util.function.Supplier
 
 /**
  * A lazy calculated value defined by some supplier. The value is calculated
@@ -30,34 +29,20 @@ import java.util.function.Supplier
  *
  * @author Darksnake
  */
-class CalculatedValue(override val type: ValueType, private val supplier: Supplier<Value>) : Value {
-    private var value: Value? = null
+class LazyValue(override val type: ValueType, supplier: () -> Value) : AbstractValue() {
+
+    override val value: Value by lazy(supplier)
 
     override val number: Number
-        get() = getValue()!!.number
+        get() = value.number
 
     override val boolean: Boolean
-        get() = getValue()!!.boolean
+        get() = value.boolean
 
     override val time: Instant
-        get() = getValue()!!.time
+        get() = value.time
 
     override val string: String
-        get() = getValue()!!.string
+        get() = value.string
 
-    private fun calculate() {
-        this.value = supplier.get()
-    }
-
-    private fun getValue(): Value? {
-        if (this.value == null) {
-            calculate()
-        }
-        return value
-    }
-
-    override val value: Any
-        get() {
-            return getValue()!!.value
-        }
 }
