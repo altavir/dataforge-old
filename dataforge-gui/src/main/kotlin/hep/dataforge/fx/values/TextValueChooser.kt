@@ -7,6 +7,7 @@ package hep.dataforge.fx.values
 
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import hep.dataforge.values.asValue
 import javafx.beans.value.ObservableValue
 import javafx.scene.control.TextField
 import javafx.scene.input.KeyCode
@@ -48,7 +49,7 @@ class TextValueChooser : ValueChooserBase<TextField>() {
     }
 
     private fun commit() {
-        val newValue = Value.of(node.text)
+        val newValue = node.text.asValue()
         if (validate(newValue)) {
             value = newValue
         } else {

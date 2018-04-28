@@ -16,12 +16,9 @@
 package hep.dataforge.values
 
 import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.providers.Path
-import hep.dataforge.providers.Provider
 import hep.dataforge.providers.Provides
 import java.time.Instant
 import java.util.*
-import java.util.function.Supplier
 
 interface ValueProvider {
 
@@ -50,7 +47,7 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getBoolean(name: String, def: Supplier<Boolean>): Boolean {
+    fun getBoolean(name: String, def: () -> Boolean): Boolean {
         return optValue(name).map<Boolean> { it.boolean }.orElseGet(def)
     }
 
@@ -71,7 +68,7 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getDouble(name: String, def: Supplier<Double>): Double {
+    fun getDouble(name: String, def: () -> Double): Double {
         return optValue(name).map<Double> { it.double }.orElseGet(def)
     }
 
@@ -86,7 +83,7 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getInt(name: String, def: Supplier<Int>): Int {
+    fun getInt(name: String, def: () -> Int): Int {
         return optValue(name).map<Int> { it.int }.orElseGet(def)
 
     }
@@ -108,7 +105,7 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getString(name: String, def: Supplier<String>): String {
+    fun getString(name: String, def: () -> String): String {
         return optString(name).orElseGet(def)
     }
 
@@ -123,7 +120,7 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getValue(name: String, def: Supplier<Value>): Value {
+    fun getValue(name: String, def: () -> Value): Value {
         return optValue(name).orElseGet(def)
     }
 
@@ -140,11 +137,11 @@ interface ValueProvider {
     }
 
     @JvmDefault
-    fun getStringArray(name: String, def: Supplier<Array<String>>): Array<String> {
+    fun getStringArray(name: String, def: () -> Array<String>): Array<String> {
         return if (this.hasValue(name)) {
             getStringArray(name)
         } else {
-            def.get()
+            def()
         }
     }
 
@@ -164,19 +161,5 @@ interface ValueProvider {
         const val NUMBER_TARGET = "number"
         const val BOOLEAN_TARGET = "boolean"
         const val TIME_TARGET = "time"
-
-        /**
-         * Build a meta provider from given general provider
-         *
-         * @param provider
-         * @return
-         */
-        fun buildFrom(provider: Provider): ValueProvider {
-            return provider as? ValueProvider ?: object : ValueProvider {
-                override fun optValue(path: String): Optional<Value> {
-                    return provider.provide(Path.of(path, VALUE_TARGET)).map<Value> { Value::class.java.cast(it) }
-                }
-            }
-        }
     }
 }

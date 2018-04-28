@@ -17,6 +17,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class CustomMergeRule extends MergeRule {
 
     @Override
     protected Value mergeValues(Name valueName, Value first, Value second) {
-        return Value.of(valueMerger.merge(valueName.toString(), first.getList(), second.getList()));
+        return ValueFactory.of(valueMerger.merge(valueName.toString(), first.getList(), second.getList()));
     }
 
     @Override

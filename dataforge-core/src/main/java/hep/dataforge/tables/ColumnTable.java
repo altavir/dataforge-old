@@ -3,9 +3,7 @@ package hep.dataforge.tables;
 import hep.dataforge.exceptions.NameNotFoundException;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MorphTarget;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueType;
-import hep.dataforge.values.Values;
+import hep.dataforge.values.*;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
@@ -134,7 +132,7 @@ public class ColumnTable implements Table {
      */
     public ColumnTable addColumn(String name, ValueType type, Stream<?> data, String... tags) {
         ColumnFormat format = ColumnFormat.build(name, type, tags);
-        Column column = new ListColumn(format, data.map(Value::of));
+        Column column = new ListColumn(format, data.map(ValueFactory::of));
         return addColumn(column);
     }
 

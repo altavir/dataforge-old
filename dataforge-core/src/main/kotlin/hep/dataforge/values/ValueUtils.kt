@@ -17,14 +17,26 @@
 package hep.dataforge.values
 
 import hep.dataforge.io.IOUtils
+import hep.dataforge.providers.Path
+import hep.dataforge.providers.Provider
+import hep.dataforge.values.ValueUtils.asValueProvider
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
 import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
+import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.*
+
+data class ValueRange(override val start: Value, override val endInclusive: Value) : ClosedRange<Value>{
+    operator fun contains(any: Any): Boolean{
+        return contains(Value.of(any))
+    }
+}
+
+operator fun Value.rangeTo(other: Value): ValueRange = ValueRange(this, other)
 
 
 /**
@@ -33,39 +45,6 @@ import java.util.*
 object ValueUtils {
 
     val NUMBER_COMPARATOR: Comparator<Number> = NumberComparator()
-    val VALUE_COMPARATOR: Comparator<Value> = ValueComparator()
-
-    fun compare(val1: Value, val2: Value): Int {
-        return when (val1.type) {
-            ValueType.NUMBER -> NUMBER_COMPARATOR.compare(val1.number, val2.number)
-            ValueType.BOOLEAN -> java.lang.Boolean.compare(val1.boolean, val2.boolean)
-            ValueType.STRING ->
-                //use alphanumeric comparator here
-                val1.string.compareTo(val2.string)
-            ValueType.TIME -> val1.time.compareTo(val2.time)
-            ValueType.NULL -> if (val2.type == ValueType.NULL) 0 else -1
-            ValueType.BINARY -> TODO()
-        }
-    }
-
-    /**
-     * Checks if given value is between `val1` and `val1`. Could
-     * throw ValueConversionException if value conversion is not possible.
-     *
-     * @param val1
-     * @param val2
-     * @return
-     */
-    @JvmStatic
-    fun isBetween(`val`: Value, val1: Value, val2: Value): Boolean {
-        return compare(`val`, val1) > 0 && compare(`val`, val2) < 0 || compare(`val`, val2) > 0 && compare(`val`, val1) < 0
-
-    }
-
-    fun isBetween(`val`: Any, val1: Value, val2: Value): Boolean {
-        return isBetween(Value.of(`val`), val1, val2)
-    }
-
 
     /**
      * Fast and compact serialization for values
@@ -75,9 +54,10 @@ object ValueUtils {
      * @throws IOException
      */
     @Throws(IOException::class)
+    @JvmStatic
     fun writeValue(oos: ObjectOutput, value: Value) {
         if (value.isList) {
-            oos.write('L'.toInt()) // List designation
+            oos.write('*'.toInt()) // List designation
             oos.writeShort(value.list.size)
             for (subValue in value.list) {
                 writeValue(oos, subValue)
@@ -91,7 +71,6 @@ object ValueUtils {
                     oos.writeLong(value.time.nano.toLong())
                 }
                 ValueType.STRING -> {
-                    //TODO add encding specification
                     oos.writeChar('S'.toInt())//String
                     IOUtils.writeString(oos, value.string)
                 }
@@ -105,6 +84,10 @@ object ValueUtils {
                         is Int -> {
                             oos.write('I'.toInt()) // integer
                             oos.writeInt(num.toInt())
+                        }
+                        is Long ->{
+                            oos.write('L'.toInt())
+                            oos.writeLong(num.toLong())
                         }
                         is BigDecimal -> {
                             oos.write('B'.toInt()) // BigDecimal
@@ -125,10 +108,16 @@ object ValueUtils {
                 } else {
                     oos.write('-'.toInt()) // false
                 }
-                else -> {
-                    oos.write('C'.toInt())//custom
-                    oos.writeObject(value)
+                ValueType.BINARY -> {
+                    val binary = value.binary
+                    oos.write('X'.toInt())
+                    oos.write(binary.limit())
+                    oos.write(binary.array())
                 }
+//                else -> {
+//                    oos.write('C'.toInt())//custom
+//                    oos.writeObject(value)
+//                }
             }
         }
     }
@@ -142,10 +131,11 @@ object ValueUtils {
      * @throws ClassNotFoundException
      */
     @Throws(IOException::class, ClassNotFoundException::class)
+    @JvmStatic
     fun readValue(ois: ObjectInput): Value {
         val c = ois.read()
         when (c.toChar()) {
-            'L' -> {
+            '*' -> {
                 val listSize = ois.readShort()
                 val valueList = ArrayList<Value>()
                 for (i in 0 until listSize) {
@@ -156,30 +146,46 @@ object ValueUtils {
             '0' -> return Value.NULL
             'T' -> {
                 val time = Instant.ofEpochSecond(ois.readLong(), ois.readLong())
-                return Value.of(time)
+                return time.asValue()
             }
-            'S' -> return Value.of(IOUtils.readString(ois))
-            'D' -> return Value.of(ois.readDouble())
-            'I' -> return Value.of(ois.readInt())
+            'S' -> return IOUtils.readString(ois).asValue()
+            'D' -> return ois.readDouble().asValue()
+            'I' -> return ois.readInt().asValue()
+            'L' -> return ois.readLong().asValue()
             'B' -> {
                 val intSize = ois.readShort()
                 val intBytes = ByteArray(intSize.toInt())
                 ois.read(intBytes)
                 val scale = ois.readInt()
                 val bdc = BigDecimal(BigInteger(intBytes), scale)
-                return Value.of(bdc)
+                return bdc.asValue()
             }
             'N' -> return Value.of(ois.readObject())
+            'X' -> {
+                val length = ois.read()
+                val buffer = ByteArray(length)
+                ois.readFully(buffer)
+                return BinaryValue(ByteBuffer.wrap(buffer))
+            }
             '+' -> return BooleanValue.TRUE
             '-' -> return BooleanValue.FALSE
-            'C' -> return ois.readObject() as Value
+            '?' -> return ois.readObject() as Value // Read as custom object. Currently reserved
             else -> throw RuntimeException("Wrong value serialization format. Designation $c is unexpected")
         }
     }
 
-    private class ValueComparator : Comparator<Value>, Serializable {
-        override fun compare(o1: Value, o2: Value): Int {
-            return ValueUtils.compare(o1, o2)
+    /**
+     * Build a meta provider from given general provider
+     *
+     * @param provider
+     * @return
+     */
+    @JvmStatic
+    fun Provider.asValueProvider(): ValueProvider {
+        return this as? ValueProvider ?: object : ValueProvider {
+            override fun optValue(path: String): Optional<Value> {
+                return this@asValueProvider.provide(Path.of(path, ValueProvider.VALUE_TARGET)).map<Value> { Value::class.java.cast(it) }
+            }
         }
     }
 
@@ -198,7 +204,7 @@ object ValueUtils {
         }
 
         companion object {
-            private val RELATIVE_NUMERIC_PRECISION = 1e-5
+            private const val RELATIVE_NUMERIC_PRECISION = 1e-5
 
             private fun isSpecial(x: Number): Boolean {
                 val specialDouble = x is Double && (java.lang.Double.isNaN(x) || java.lang.Double.isInfinite(x))

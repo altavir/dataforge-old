@@ -23,9 +23,9 @@ import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.tables.MetaTableFormat;
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.junit.*;
 
@@ -80,7 +80,7 @@ public class FileDataTableLoaderTest {
         System.out.println("push");
         Instant start = DateTimeUtils.now();
         for (int i = 0; i < 1000; i++) {
-            loader.push(ValueMap.of(names, i, i * 2, Math.sqrt(i)));
+            loader.push(ValueMap.Companion.of(names, i, i * 2, Math.sqrt(i)));
 //            System.out.printf("Point with number %d loaded%n", i);
         }
         System.out.printf("Push operation for 1000 element completed in %s%n", Duration.between(start, DateTimeUtils.now()));

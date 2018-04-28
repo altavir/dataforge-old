@@ -22,7 +22,7 @@ import hep.dataforge.plots.jfreechart.JFreeChartFrame;
 import hep.dataforge.tables.Adapters;
 import hep.dataforge.tables.ListTable;
 import hep.dataforge.tables.Table;
-import hep.dataforge.tables.ValueMap;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import javafx.application.Application;
 import javafx.scene.Scene;
@@ -61,9 +61,9 @@ public class JFreeFXTest extends Application {
         String[] names = {"myX", "myY", "myXErr", "myYErr"};
 
         List<Values> data = new ArrayList<>();
-        data.add(ValueMap.of(names, 0.5d, 0.2, 0.1, 0.1));
-        data.add(ValueMap.of(names, 1d, 1d, 0.2, 0.5));
-        data.add(ValueMap.of(names, 3d, 7d, 0, 0.5));
+        data.add(ValueMap.Companion.of(names, 0.5d, 0.2, 0.1, 0.1));
+        data.add(ValueMap.Companion.of(names, 1d, 1d, 0.2, 0.5));
+        data.add(ValueMap.Companion.of(names, 3d, 7d, 0, 0.5));
         Table ds = new ListTable(data);
 
         DataPlot dataPlot = DataPlot.Companion.plot("dataPlot", Adapters.buildXYAdapter("myX", "myY", "myXErr", "myYErr"), ds);

@@ -23,7 +23,7 @@ import java.time.Instant
  */
 class LateParseValue(str: String) : AbstractValue() {
 
-    private val _value: Value by lazy { Value.of(str) }
+    private val _value: Value by lazy { str.parseValue() }
     override val value: Any
         get() = _value.value
 

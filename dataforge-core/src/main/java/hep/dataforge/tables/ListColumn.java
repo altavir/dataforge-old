@@ -19,6 +19,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.Collections;
@@ -65,7 +66,7 @@ public final class ListColumn implements Column, MetaMorph {
     }
 
     public static ListColumn build(ColumnFormat format, Stream<?> values) {
-        return new ListColumn(format, values.map(Value::of));
+        return new ListColumn(format, values.map(ValueFactory::of));
     }
 
     private ColumnFormat format;

@@ -25,7 +25,6 @@ import hep.dataforge.exceptions.StorageException
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
-import hep.dataforge.values.ValueUtils
 import java.util.*
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
@@ -69,11 +68,11 @@ class ValueProviderIndex<T : ValueProvider> : ValueIndex<T> {
     @Throws(StorageException::class)
     override fun pull(from: Value, to: Value): Stream<T> {
         return StreamSupport.stream(iterable.spliterator(), true)
-                .filter { it -> ValueUtils.isBetween(it.getValue(valueName, defaultValue), from, to) }
+                .filter { it -> it.getValue(valueName, defaultValue) in from..to }
     }
 
     override fun keySet(): NavigableSet<Value> {
-        val res = TreeSet(ValueUtils.VALUE_COMPARATOR)
+        val res = TreeSet<Value>()
         StreamSupport.stream(iterable.spliterator(), true).map { it -> it.getValue(valueName, defaultValue) }.forEach { it -> res.add(it) }
         return res
     }

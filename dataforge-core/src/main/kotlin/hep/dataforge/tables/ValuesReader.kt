@@ -16,11 +16,10 @@
 package hep.dataforge.tables
 
 import hep.dataforge.io.LineIterator
-import hep.dataforge.values.Value
-import hep.dataforge.values.Value.Companion.NULL_STRING
+import hep.dataforge.values.LateParseValue
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
 import java.io.InputStream
-import java.util.*
 
 /**
  *
@@ -83,31 +82,8 @@ class SimpleValuesParser : ValuesParser {
      * @param str
      */
     override fun parse(str: String): Values {
-        val sc = Scanner(str)
-
-        val values = arrayOfNulls<Value>(format.size)
-        for (i in format.indices) {
-            if (sc.hasNextDouble()) {
-                values[i] = Value.of(sc.nextDouble())
-            } else if (sc.hasNextInt()) {
-                values[i] = Value.of(sc.nextInt())
-            } else if (sc.hasNext()) {
-                val next = sc.next()
-                if (next == NULL_STRING) {
-                    values[i] = Value.NULL
-                } else {
-                    values[i] = Value.of(next)
-                }
-            } else {
-                values[i] = Value.NULL
-            }
-        }
-
-        //            //Все, что после послднего значения считаем тэгами
-        //            while (sc.hasNext()) {
-        //                point.addTag(sc.next());
-        //            }
-        return ValueMap.of(format, *values as Array<*>)
+        val strings = str.split("\\s+")
+        return ValueMap((0 until format.size).associate { format[it] to LateParseValue(strings[it]) })
     }
 
 }

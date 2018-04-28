@@ -24,7 +24,7 @@ package hep.dataforge.storage.commons
 import hep.dataforge.exceptions.StorageException
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueUtils
+import hep.dataforge.values.rangeTo
 import javafx.util.Pair
 import java.util.*
 import java.util.concurrent.atomic.AtomicInteger
@@ -37,7 +37,7 @@ import java.util.stream.StreamSupport
  *
  * @param <T>
  * @author Alexander Nozik
-</T> */
+ */
 class DefaultIndex<T>(private val iterable: Iterable<T>) : ValueIndex<T> {
 
     fun stream(): Stream<Pair<Int, T>> {
@@ -48,18 +48,17 @@ class DefaultIndex<T>(private val iterable: Iterable<T>) : ValueIndex<T> {
     @Throws(StorageException::class)
     override fun pull(value: Value): Stream<T> {
         return stream().filter { pair -> value.int == pair.key }
-                .map{ it.value }
+                .map { it.value }
     }
 
     @Throws(StorageException::class)
     override fun pull(from: Value, to: Value): Stream<T> {
-        return stream().filter { pair -> ValueUtils.isBetween(pair.key, from, to) }
-                .map{ it.value }
+        return stream().filter { pair -> pair.key in from..to }.map { it.value }
     }
 
     fun pull(predicate: Predicate<Int>): Stream<T> {
         return stream().filter { t -> predicate.test(t.key) }
-                .map{ it.value }
+                .map { it.value }
     }
 
     override fun keySet(): NavigableSet<Value> {

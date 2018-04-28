@@ -27,6 +27,7 @@ import hep.dataforge.meta.MetaID
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.meta.morph
 import hep.dataforge.values.Value
+import hep.dataforge.values.parseValue
 import kotlinx.coroutines.experimental.*
 import kotlinx.coroutines.experimental.channels.BroadcastChannel
 import kotlinx.coroutines.experimental.channels.SubscriptionReceiveChannel
@@ -255,7 +256,7 @@ class ValueState(
             owner: Stateful? = null,
             getter: (suspend () -> Any)? = null,
             setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
-    ) : this(def.name, ValueDescriptor.build(def), Value.of(def.def), owner, getter, setter)
+    ) : this(def.name, ValueDescriptor.build(def), def.def.parseValue(), owner, getter, setter)
 
     override fun transform(value: Any): Value {
         return Value.of(value)

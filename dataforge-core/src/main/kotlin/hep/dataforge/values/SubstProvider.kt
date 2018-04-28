@@ -30,16 +30,16 @@ abstract class SubstProvider : ValueProvider {
      * @param name
      */
     override fun getValue(name: String): Value {
-        val `val` = getValueForName(name)
-        if (`val`.type == ValueType.STRING && `val`.string.contains("$")) {
-            var valStr = `val`.string
-            val matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr)
+        val value = getValueForName(name)
+        return if (value.type == ValueType.STRING && value.string.contains("$")) {
+            var valStr = value.string
+            val matcher = Pattern.compile("\\$\\{(?<sub>.*)}").matcher(valStr)
             while (matcher.find()) {
                 valStr = valStr.replace(matcher.group(), evaluateSubst(matcher.group("sub")))
             }
-            return Value.of(valStr)
+            valStr.parseValue()
         } else {
-            return `val`
+            value
         }
     }
 

@@ -20,6 +20,7 @@ import hep.dataforge.description.Described;
 import hep.dataforge.description.Descriptors;
 import hep.dataforge.description.NodeDescriptor;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -356,7 +357,7 @@ public final class Laminate extends Meta implements Described {
      * @return
      */
     public Collection<Meta> collectNodes(String nodeName, String key) {
-        return collectNodes(nodeName, meta -> getValue(key, Value.NULL));
+        return collectNodes(nodeName, meta -> getValue(key, ValueFactory.NULL));
     }
 
     /**

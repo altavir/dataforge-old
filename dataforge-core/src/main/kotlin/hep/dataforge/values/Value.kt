@@ -15,15 +15,14 @@
  */
 package hep.dataforge.values
 
+import hep.dataforge.names.AlphanumComparator
 import hep.dataforge.utils.NamingUtils
 import java.io.Serializable
-import java.math.BigDecimal
 import java.nio.ByteBuffer
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeParseException
-import java.util.*
 import java.util.stream.Stream
 import kotlin.streams.toList
 
@@ -46,7 +45,7 @@ enum class ValueType {
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-interface Value : Serializable {
+interface Value : Serializable, Comparable<Value> {
 
     /**
      * The number representation of this value
@@ -62,12 +61,15 @@ interface Value : Serializable {
      */
     val boolean: Boolean
 
+    @JvmDefault
     val double: Double
         get() = number.toDouble()
 
+    @JvmDefault
     val int: Int
         get() = number.toInt()
 
+    @JvmDefault
     val long: Long
         get() = number.toLong()
 
@@ -78,6 +80,7 @@ interface Value : Serializable {
      */
     val time: Instant
 
+    @JvmDefault
     val binary: ByteBuffer
         get() = ByteBuffer.wrap(string.toByteArray())
 
@@ -97,9 +100,11 @@ interface Value : Serializable {
      *
      * @return
      */
+    @JvmDefault
     val list: List<Value>
         get() = listOf(this)
 
+    @JvmDefault
     val isNull: Boolean
         get() = this.type == ValueType.NULL
 
@@ -108,6 +113,7 @@ interface Value : Serializable {
      *
      * @return
      */
+    @JvmDefault
     val isList: Boolean
         get() = false
 
@@ -116,155 +122,184 @@ interface Value : Serializable {
      */
     val value: Any
 
+    @JvmDefault
+    override fun compareTo(other: Value): Int {
+        return when (type) {
+            ValueType.NUMBER -> ValueUtils.NUMBER_COMPARATOR.compare(number, other.number)
+            ValueType.BOOLEAN -> boolean.compareTo(other.boolean)
+            ValueType.STRING -> AlphanumComparator.INSTANCE.compare(this.string, other.string)
+            ValueType.TIME -> time.compareTo(other.time)
+            ValueType.NULL -> if (other.type == ValueType.NULL) 0 else -1
+            ValueType.BINARY -> binary.compareTo(other.binary)
+        }
+    }
+
     companion object {
         const val NULL_STRING = "@null"
 
-        val NULL: Value = NullValue()
-
-        /**
-         * Create Value from String using closest match conversion
-         *
-         * @param str a [String] object.
-         * @return a [Value] object.
-         */
-        fun of(str: String): Value {
-
-            //Trying to get integer
-            if (str.isEmpty()) {
-                return Value.NULL
-            }
-
-            //string constants
-            if (str.startsWith("\"") && str.endsWith("\"")) {
-                return StringValue(str.substring(1, str.length - 2))
-            }
-
-            try {
-                val `val` = Integer.parseInt(str)
-                return of(`val`)
-            } catch (ignored: NumberFormatException) {
-            }
-
-            //Trying to get double
-            try {
-                val `val` = java.lang.Double.parseDouble(str)
-                return of(`val`)
-            } catch (ignored: NumberFormatException) {
-            }
-
-            //Trying to get Instant
-            try {
-                val `val` = Instant.parse(str)
-                return of(`val`)
-            } catch (ignored: DateTimeParseException) {
-            }
-
-            //Trying to parse LocalDateTime
-            try {
-                val `val` = LocalDateTime.parse(str).toInstant(ZoneOffset.UTC)
-                return of(`val`)
-            } catch (ignored: DateTimeParseException) {
-            }
-
-            if ("true" == str || "false" == str) {
-                return BooleanValue.ofBoolean(str)
-            }
-
-            if (str.startsWith("[") && str.endsWith("]")) {
-                //FIXME there will be a problem with nested lists because of splitting
-                val strings = NamingUtils.parseArray(str)
-                return Value.of(strings)
-            }
-
-            //Give up and return a StringValue
-            return StringValue(str)
-        }
-
-        fun of(strings: Array<String>): Value {
-            val values = ArrayList<Value>()
-            for (str in strings) {
-                values.add(Value.of(str))
-            }
-            return Value.of(values)
-        }
-
-        /**
-         * create a boolean Value
-         *
-         * @param b a boolean.
-         * @return a [Value] object.
-         */
-        fun of(b: Boolean): Value {
-            return BooleanValue.ofBoolean(b)
-        }
-
-        fun of(d: Double): Value {
-            return NumberValue(d)
-        }
-
-        fun of(i: Int): Value {
-            return NumberValue(i)
-        }
-
-        fun of(l: Long): Value {
-            return NumberValue(l)
-        }
-
-        fun of(bd: BigDecimal): Value {
-            return NumberValue(bd)
-        }
-
-        fun of(t: LocalDateTime): Value {
-            return TimeValue(t)
-        }
-
-        fun of(t: Instant): Value {
-            return TimeValue(t)
+        val NULL: Value = object : Value {
+            override val boolean: Boolean = false
+            override val double: Double = java.lang.Double.NaN
+            override val number: Number = 0
+            override val time: Instant = Instant.MIN
+            override val string: String = "@null"
+            override val type: ValueType = ValueType.NULL
+            override val value: Any = double
         }
 
         fun of(vararg list: Any): Value {
-            return of(Arrays.asList(*list))
+            return list.map(::of).asValue()
         }
 
-        fun of(list: Collection<Any>): Value {
-            return when {
-                list.isEmpty() -> NULL
-                list.size == 1 -> of(list.first())
-                else -> ListValue(list.map { Value.of(it) })
-            }
-        }
-
-        fun of(vararg list: Value): Value {
-            return when (list.size) {
-                0 -> NULL
-                1 -> list[0]
-                else -> ListValue(list.toList())
-            }
+        fun of(list: Collection<Any?>): Value {
+            return list.map(::of).asValue()
         }
 
         /**
-         * Create Value from any object using closest match conversion. Throws a
-         * RuntimeException if given object could not be converted to Value
+         * Reflection based Value resolution
          *
          * @param obj a [Object] object.
          * @return a [Value] object.
          */
-        fun of(obj: Any?): Value {
-            return if (obj == null) {
-                Value.NULL
-            } else obj as? Value ?: when {
-                obj is Number -> NumberValue(obj)
-                obj is Instant -> of(obj)
-                obj is LocalDateTime -> TimeValue(obj)
-                obj is Boolean -> BooleanValue.ofBoolean(obj)
-                obj is String -> StringValue(obj)
-                obj is Collection<*> -> of(obj as Collection<*>?)
-                obj is Stream<*> -> of(obj.toList())
-                obj.javaClass.isArray -> ListValue((obj as Array<*>).map { Value.of(it) })
-                obj is Enum<*> -> of(obj.name)
-                else -> of(obj.toString())
+        fun of(value: Any?): Value {
+            return when (value) {
+                null -> Value.NULL
+                is Number -> NumberValue(value)
+                is Instant -> TimeValue(value)
+                is LocalDateTime -> TimeValue(value)
+                is Boolean -> BooleanValue.ofBoolean(value)
+                is String -> StringValue(value)
+                is Collection<Any?> -> Value.of(value)
+                is Stream<*> -> Value.of(value.toList())
+                is Array<*> -> Value.of(value.map(::of))
+                is Enum<*> -> StringValue(value.name)
+                else -> StringValue(value.toString())
             }
         }
     }
+}
 
+/**
+ * Java compatibility layer
+ */
+object ValueFactory {
+    @JvmField
+    val NULL = Value.NULL
+
+    @JvmStatic
+    fun of(value: Any?): Value = Value.of(value)
+
+    @JvmStatic
+    @JvmOverloads
+    fun parse(value: String, lazy: Boolean = true): Value {
+        return if (lazy) {
+            LateParseValue(value)
+        } else {
+            value.parseValue()
+        }
+    }
+}
+
+
+fun String.asValue(): Value {
+    return StringValue(this)
+}
+
+/**
+ * create a boolean Value
+ *
+ * @param b a boolean.
+ * @return a [Value] object.
+ */
+fun Boolean.asValue(): Value {
+    return BooleanValue.ofBoolean(this)
+}
+
+fun Number.asValue(): Value {
+    return NumberValue(this)
+}
+
+fun LocalDateTime.asValue(): Value {
+    return TimeValue(this)
+}
+
+fun Instant.asValue(): Value {
+    return TimeValue(this)
+}
+
+fun Iterable<Value>.asValue(): Value {
+    val list = this.toList()
+    return when (list.size) {
+        0 -> Value.NULL
+        1 -> list[0]
+        else -> ListValue(list)
+    }
+}
+
+//fun asValue(list: Collection<Any>): Value {
+//    return when {
+//        list.isEmpty() -> Value.NULL
+//        list.size == 1 -> asValue(list.first())
+//        else -> ListValue(list.map { Value.of(it) })
+//    }
+//}
+
+
+/**
+ * Create Value from String using closest match conversion
+ *
+ * @param str a [String] object.
+ * @return a [Value] object.
+ */
+fun String.parseValue(): Value {
+
+    //Trying to get integer
+    if (isEmpty()) {
+        return Value.NULL
+    }
+
+    //string constants
+    if (startsWith("\"") && endsWith("\"")) {
+        return StringValue(substring(1, length - 2))
+    }
+
+    try {
+        val `val` = Integer.parseInt(this)
+        return Value.of(`val`)
+    } catch (ignored: NumberFormatException) {
+    }
+
+    //Trying to get double
+    try {
+        val `val` = java.lang.Double.parseDouble(this)
+        return Value.of(`val`)
+    } catch (ignored: NumberFormatException) {
+    }
+
+    //Trying to get Instant
+    try {
+        val `val` = Instant.parse(this)
+        return Value.of(`val`)
+    } catch (ignored: DateTimeParseException) {
+    }
+
+    //Trying to parse LocalDateTime
+    try {
+        val `val` = LocalDateTime.parse(this).toInstant(ZoneOffset.UTC)
+        return Value.of(`val`)
+    } catch (ignored: DateTimeParseException) {
+    }
+
+    if ("true" == this || "false" == this) {
+        return BooleanValue.ofBoolean(this)
+    }
+
+    if (startsWith("[") && endsWith("]")) {
+        //FIXME there will be a problem with nested lists because of splitting
+        val strings = NamingUtils.parseArray(this)
+        return Value.of(strings)
+    }
+
+    //Give up and return a StringValue
+    return StringValue(this)
 }

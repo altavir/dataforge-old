@@ -1,6 +1,7 @@
 package hep.dataforge.fx.values
 
 import hep.dataforge.values.Value
+import hep.dataforge.values.asValue
 import javafx.scene.control.ColorPicker
 import javafx.scene.paint.Color
 import org.slf4j.LoggerFactory
@@ -24,7 +25,7 @@ class ColorValueChooser : ValueChooserBase<ColorPicker>() {
         val node = ColorPicker()
         node.styleClass.add("split-button")
         node.maxWidth = java.lang.Double.MAX_VALUE
-        node.setOnAction { _ -> value = Value.of(node.value.toString()) }
+        node.setOnAction { _ -> value = node.value.toString().asValue() }
         return node
     }
 }

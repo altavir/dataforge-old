@@ -149,7 +149,7 @@ abstract class FileMapIndex<T>(
             try {
                 ObjectInputStream(Files.newInputStream(indexFile)).use { ois ->
                     val position = ois.readLong().toInt()
-                    val newMap = TreeMap<Value, MutableList<Int>>(ValueUtils.VALUE_COMPARATOR)
+                    val newMap = TreeMap<Value, MutableList<Int>>()
                     while (ois.available() > 0) {
                         val value = ValueUtils.readValue(ois)
                         val num = ois.readShort()

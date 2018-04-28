@@ -24,8 +24,6 @@ package hep.dataforge.storage.commons
 import hep.dataforge.exceptions.StorageException
 import hep.dataforge.storage.api.ValueIndex
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueUtils
-
 import java.util.*
 import java.util.stream.Stream
 import kotlin.collections.ArrayList
@@ -42,7 +40,7 @@ import kotlin.collections.ArrayList
 abstract class MapIndex<T, K> : ValueIndex<T> {
 
     //TODO add custom request that fetches roots of the tree
-    protected var map = TreeMap<Value, MutableList<K>>(ValueUtils.VALUE_COMPARATOR)
+    protected var map = TreeMap<Value, MutableList<K>>()
 
     /**
      * Store index entry

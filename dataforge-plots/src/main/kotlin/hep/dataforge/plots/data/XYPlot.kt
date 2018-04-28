@@ -26,7 +26,6 @@ import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
 import hep.dataforge.tables.ValuesAdapter.ADAPTER_KEY
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueUtils
 import hep.dataforge.values.Values
 import java.util.stream.Stream
 
@@ -71,20 +70,20 @@ abstract class XYPlot(name: Name, meta: Meta, adapter: ValuesAdapter?) : Abstrac
         val from = xRange.getValue("from", Value.NULL)
         val to = xRange.getValue("to", Value.NULL)
         return if (from !== Value.NULL && to !== Value.NULL) {
-            data.filter { point -> ValueUtils.isBetween(Adapters.getXValue(adapter, point), from, to) }
+            data.filter { point -> Adapters.getXValue(adapter, point) in from..to }
         } else if (from === Value.NULL && to !== Value.NULL) {
-            data.filter { point -> ValueUtils.compare(Adapters.getXValue(adapter, point), to) < 0 }
+            data.filter { point -> Adapters.getXValue(adapter, point) < to }
         } else if (to === Value.NULL) {
-            data.filter { point -> ValueUtils.compare(Adapters.getXValue(adapter, point), from) > 0 }
+            data.filter { point -> Adapters.getXValue(adapter, point) > from }
         } else {
             data
         }
     }
 
     protected fun filterDataStream(data: Stream<Values>, cfg: Meta): Stream<Values> {
-        return if(cfg.hasMeta("xRange")){
+        return if (cfg.hasMeta("xRange")) {
             filterXRange(data, cfg.getMeta("xRange"))
-        } else{
+        } else {
             data
         }
     }

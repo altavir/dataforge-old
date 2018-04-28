@@ -21,6 +21,7 @@ import hep.dataforge.description.Descriptors
 import hep.dataforge.description.PropertyDef
 import hep.dataforge.meta.*
 import hep.dataforge.values.Value
+import hep.dataforge.values.parseValue
 import java.time.Instant
 import kotlin.properties.ReadOnlyProperty
 import kotlin.properties.ReadWriteProperty
@@ -33,7 +34,7 @@ import kotlin.reflect.full.findAnnotation
 private fun getDescribedValue(valueName: String, thisRef: Any?, property: KProperty<*>): Value {
     val propertyAnnotation = property.findAnnotation<PropertyDef>()
     return when {
-        propertyAnnotation != null -> Value.of(propertyAnnotation.def)
+        propertyAnnotation != null -> propertyAnnotation.def.parseValue()
         thisRef!= null -> Descriptors.extractValue(valueName, Descriptors.buildDescriptor(thisRef))
         else -> Value.NULL
     }
@@ -199,7 +200,7 @@ fun MutableMetaNode<*>.mutableValue(valueName: String? = null, def: Value? = nul
         MutableValueDelegate(this, valueName, def, { it }, { it })
 
 fun MutableMetaNode<*>.mutableStringValue(valueName: String? = null, def: String? = null): ReadWriteProperty<Any, String> =
-        MutableValueDelegate(this, valueName, def, { it.string }, { Value.of(it) })
+        MutableValueDelegate(this, valueName, def, { it.string }, { it.parseValue() })
 
 fun MutableMetaNode<*>.mutableBooleanValue(valueName: String? = null, def: Boolean? = null): ReadWriteProperty<Any, Boolean> =
         MutableValueDelegate(this, valueName, def, { it.boolean }, { Value.of(it) })

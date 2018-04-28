@@ -16,6 +16,7 @@
 package hep.dataforge.connections;
 
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 
 /**
  *
@@ -25,6 +26,6 @@ public interface ValueListener {
     void pushValue(Value value);
     
     default void pushValue(Object obj){
-        pushValue(Value.of(obj));
+        pushValue(ValueFactory.of(obj));
     }
 }

@@ -198,7 +198,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
                 List<Value> list = new ArrayList<>(oldValue.get().getList());
                 list.add(value);
 
-                Value newValue = Value.of(list);
+                Value newValue = Value.Companion.of(list);
 
                 setValueItem(name, newValue);
 
@@ -335,7 +335,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
 
     public T setValue(String name, Object object) {
-        return setValue(name, Value.of(object));
+        return setValue(name, Value.Companion.of(object));
     }
 
     /**
@@ -348,7 +348,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
      */
     public T putValue(String name, Object value) {
         if (value != null) {
-            putValue(name, Value.of(value));
+            putValue(name, Value.Companion.of(value));
         }
         return self();
     }

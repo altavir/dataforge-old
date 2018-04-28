@@ -114,8 +114,8 @@ object StorageUtils {
     fun <T> sparsePull(index: ValueIndex<T>, from: Value, to: Value, limit: Int): Stream<T> {
         if (limit > 0) {
             if (isNumeric(from) && isNumeric(to)) {
-                val a = from.getDouble()
-                val b = to.getDouble()
+                val a = from.double
+                val b = to.double
                 return sparsePull(index, a, b, limit)
             } else {
                 return index.pull(from, to).limit(limit.toLong())
@@ -136,23 +136,12 @@ object StorageUtils {
      * @param <T>
      * @return
      * @throws StorageException
-    </T> */
+     */
     @Throws(StorageException::class)
-    fun <T> sparsePull(index: ValueIndex<T>, from: Double, to: Double, limit: Int): Stream<T> {
-        var from = from
-        var to = to
-        if (!java.lang.Double.isFinite(from)) {
-            from = index.firstKey.getDouble()
-        }
-        if (!java.lang.Double.isFinite(to)) {
-            to = index.lastKey.getDouble()
-        }
-
-        val start = from
+    fun <T> sparsePull(index: ValueIndex<T>, from: Double = index.firstKey.double, to: Double = index.lastKey.double, limit: Int): Stream<T> {
         val step = (to - from) / limit
-
         return IntStream.range(0, limit).mapToObj<T> { i ->
-            val x = start + step * i
+            val x = from + step * i
             try {
                 index.pullOne(x + step / 2).get()
             } catch (e: StorageException) {

@@ -11,6 +11,7 @@ import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.meta.SimpleMetaMorph;
 import hep.dataforge.names.AnonymousNotAlowed;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.ValueType;
 import org.jetbrains.annotations.NotNull;
 
@@ -162,7 +163,7 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
      * @return
      */
     public Value defaultValue() {
-        return getMeta().getValue("default", Value.NULL);
+        return getMeta().getValue("default", ValueFactory.NULL);
     }
 
     /**
@@ -182,8 +183,8 @@ public class ValueDescriptor extends SimpleMetaMorph implements Named {
                 map.put(val, "");
             }
         } else if (type().size() == 1 && type().get(0) == ValueType.BOOLEAN) {
-            map.put(Value.of(true), "");
-            map.put(Value.of(false), "");
+            map.put(ValueFactory.of(true), "");
+            map.put(ValueFactory.of(false), "");
         }
 
         return map;

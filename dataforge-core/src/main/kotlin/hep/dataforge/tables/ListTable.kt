@@ -19,6 +19,7 @@ import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.exceptions.NamingException
 import hep.dataforge.meta.Meta
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.ValueProvider
 import hep.dataforge.values.Values
 import java.util.stream.Stream

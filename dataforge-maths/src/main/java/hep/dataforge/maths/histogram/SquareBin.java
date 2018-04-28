@@ -4,8 +4,8 @@ import hep.dataforge.maths.domains.HyperSquareDomain;
 import hep.dataforge.names.NameSetContainer;
 import hep.dataforge.names.Names;
 import hep.dataforge.names.NamesUtils;
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.utils.ArgumentChecker;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 
 import java.util.Arrays;

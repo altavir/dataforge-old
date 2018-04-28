@@ -22,6 +22,7 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaUtils
 import hep.dataforge.values.Value
+import hep.dataforge.values.asValue
 import java.io.IOException
 import java.net.MalformedURLException
 import java.net.URI
@@ -56,7 +57,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
             if (Files.isDirectory(libPath)) {
                 classPath(libPath.toUri())
             }
-            properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY] = Value.of(path.toString())
+            properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY] = path.toString().asValue()
         }
 
     var dataDir: String
@@ -64,7 +65,7 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
                 ?: parent.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY, parent.io.rootDir.toString())
         set(value) {
             setDefaultIO()
-            properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY] = Value.of(value)
+            properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
         }
 
     fun properties(config: Meta): ContextBuilder {

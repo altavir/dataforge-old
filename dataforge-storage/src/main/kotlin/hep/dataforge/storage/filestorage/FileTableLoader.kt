@@ -163,7 +163,7 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
                         messageMeta.hasMeta(QUERY_ELEMENT) -> points = index.query(messageMeta.getMeta(QUERY_ELEMENT)).toList()
                         messageMeta.hasValue("value") -> {
                             val valueName = messageMeta.getString("valueName", "")
-                            points = messageMeta.getValue("value").getList().stream()
+                            points = messageMeta.getValue("value").list.stream()
                                     .map { `val` -> getIndex(valueName).pullOne(`val`) }
                                     .filter { it.isPresent }.map<Values> { it.get() }
                                     .toList()
@@ -171,8 +171,8 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
                         messageMeta.hasMeta("range") -> {
                             val valueName = messageMeta.getString("valueName", "")
                             for (rangeAn in messageMeta.getMetaList("range")) {
-                                val from = rangeAn.getValue("from", Value.getNull())
-                                val to = rangeAn.getValue("to", Value.getNull())
+                                val from = rangeAn.getValue("from", Value.NULL)
+                                val to = rangeAn.getValue("to", Value.NULL)
                                 //                            int maxItems = rangeAn.getInt("maxItems", Integer.MAX_VALUE);
                                 points = this.getIndex(valueName).pull(from, to).toList()
                             }

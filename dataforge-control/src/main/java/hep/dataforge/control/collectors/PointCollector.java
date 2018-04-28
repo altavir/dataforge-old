@@ -15,10 +15,10 @@
  */
 package hep.dataforge.control.collectors;
 
-import hep.dataforge.tables.ValueMap;
 import hep.dataforge.tables.ValuesListener;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueMap;
 
 import java.time.Instant;
 import java.util.*;

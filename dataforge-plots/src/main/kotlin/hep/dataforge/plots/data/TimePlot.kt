@@ -24,13 +24,12 @@ import hep.dataforge.plots.data.TimePlot.Companion.MAX_AGE_KEY
 import hep.dataforge.plots.data.TimePlot.Companion.MAX_ITEMS_KEY
 import hep.dataforge.plots.data.TimePlot.Companion.PREF_ITEMS_KEY
 import hep.dataforge.tables.Adapters
-import hep.dataforge.tables.ValueMap
 import hep.dataforge.utils.DateTimeUtils
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
 import org.slf4j.LoggerFactory
-
 import java.time.Duration
 import java.time.Instant
 import java.util.*
@@ -60,7 +59,7 @@ class TimePlot(name: String, val yKey: String = Adapters.Y_AXIS, meta: Meta = Me
     fun put(point: Values) {
         val v = point.getValue(yKey)
         if (point.hasValue(timestampKey)) {
-            put(point.getValue(timestampKey).getTime(), v)
+            put(point.getValue(timestampKey).time, v)
         } else {
             put(v)
         }

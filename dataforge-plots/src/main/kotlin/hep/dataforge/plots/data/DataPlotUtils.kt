@@ -8,8 +8,12 @@ package hep.dataforge.plots.data
 import hep.dataforge.kodex.toList
 import hep.dataforge.plots.Plot
 import hep.dataforge.plots.XYPlotFrame
-import hep.dataforge.tables.*
+import hep.dataforge.tables.Adapters
+import hep.dataforge.tables.ListTable
+import hep.dataforge.tables.MetaTableFormat
+import hep.dataforge.tables.Table
 import hep.dataforge.values.Value
+import hep.dataforge.values.ValueMap
 import java.util.*
 
 /**

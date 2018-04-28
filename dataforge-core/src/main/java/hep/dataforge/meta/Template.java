@@ -6,10 +6,7 @@
 package hep.dataforge.meta;
 
 import hep.dataforge.providers.Provider;
-import hep.dataforge.values.MapValueProvider;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
-import hep.dataforge.values.ValueType;
+import hep.dataforge.values.*;
 import org.slf4j.LoggerFactory;
 
 import java.util.Map;
@@ -97,7 +94,7 @@ public class Template implements Metoid, UnaryOperator<Meta> {
     }
 
     public MetaBuilder compile(Provider provider) {
-        return compile(ValueProvider.buildFrom(provider), MetaProvider.buildFrom(provider));
+        return compile(ValueUtils.asValueProvider(provider), MetaProvider.buildFrom(provider));
     }
 
     @Override

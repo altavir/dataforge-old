@@ -18,6 +18,7 @@ package hep.dataforge.io.envelopes
 
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
+import hep.dataforge.values.asValue
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.io.InputStream
@@ -77,7 +78,7 @@ open class EnvelopeTag {
         val envelopeType = EnvelopeType.resolve(type)
 
         if (envelopeType != null) {
-            res[Envelope.TYPE_PROPERTY] = Value.of(envelopeType.name)
+            res[Envelope.TYPE_PROPERTY] = envelopeType.name.asValue()
         } else {
             LoggerFactory.getLogger(EnvelopeTag::class.java).warn("Could not resolve envelope type code. Using default")
         }
@@ -87,7 +88,7 @@ open class EnvelopeTag {
         val metaType = MetaType.resolve(metaTypeCode)
 
         if (metaType != null) {
-            res[Envelope.META_TYPE_PROPERTY] = Value.of(metaType.name)
+            res[Envelope.META_TYPE_PROPERTY] = metaType.name.asValue()
         } else {
             LoggerFactory.getLogger(EnvelopeTag::class.java).warn("Could not resolve meta type. Using default")
         }

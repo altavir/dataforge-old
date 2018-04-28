@@ -27,7 +27,11 @@ import hep.dataforge.stat.models.XYModel;
 import hep.dataforge.stat.parametric.ParametricFunction;
 import hep.dataforge.stat.parametric.ParametricUtils;
 import hep.dataforge.stat.parametric.ParametricValue;
-import hep.dataforge.tables.*;
+import hep.dataforge.tables.Adapters;
+import hep.dataforge.tables.ListTable;
+import hep.dataforge.tables.Table;
+import hep.dataforge.tables.ValuesAdapter;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.apache.commons.math3.analysis.UnivariateFunction;
 import org.apache.commons.math3.distribution.MultivariateNormalDistribution;
@@ -60,7 +64,7 @@ public class FittingIOUtils {
                 values[j] = point.getVector().getEntry(j);
             }
             values[values.length - 1] = func.value(point);
-            Values dp = ValueMap.of(format, (Object[]) values);
+            Values dp = ValueMap.Companion.of(format, (Object[]) values);
             res.row(dp);
         }
         return res.build();

@@ -5,6 +5,7 @@ import hep.dataforge.meta.Meta;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 
@@ -110,7 +111,7 @@ public class Adapters {
     }
 
     public static Values buildXYDataPoint(ValuesAdapter adapter, double x, double y, double yErr) {
-        return ValueMap.of(new String[]{
+        return ValueMap.Companion.of(new String[]{
                 adapter.getComponentName(X_VALUE_KEY),
                 adapter.getComponentName(Y_VALUE_KEY),
                 adapter.getComponentName(Y_ERROR_KEY)
@@ -118,7 +119,7 @@ public class Adapters {
     }
 
     public static Values buildXYDataPoint(ValuesAdapter adapter, double x, double y) {
-        return ValueMap.of(new String[]{
+        return ValueMap.Companion.of(new String[]{
                 adapter.getComponentName(X_VALUE_KEY),
                 adapter.getComponentName(Y_VALUE_KEY)
         }, x, y);

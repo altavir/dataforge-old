@@ -17,6 +17,7 @@
 package hep.dataforge.connections;
 
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 
 /**
  * Created by darksnake on 25-May-17.
@@ -25,6 +26,6 @@ public interface NamedValueListener {
     void pushValue(String valueName, Value value);
 
     default void pushValue(String valueName, Object obj) {
-        pushValue(valueName, Value.of(obj));
+        pushValue(valueName, ValueFactory.of(obj));
     }
 }

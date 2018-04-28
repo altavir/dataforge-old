@@ -8,7 +8,7 @@ package hep.dataforge.io;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.values.LateParseValue;
 import hep.dataforge.values.NamedValue;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import kotlin.text.Charsets;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -116,9 +116,9 @@ public class XMLMetaReader implements MetaStreamReader {
             if (!(elNode.getElementsByTagName("*").getLength() > 0 || elNode.hasAttributes())) {
                 String name = elNode.getTagName();
                 if (elNode.getTextContent().isEmpty()) {
-                    res.add(new NamedValue(name, Value.of(Boolean.TRUE)));
+                    res.add(new NamedValue(name, ValueFactory.of(Boolean.TRUE)));
                 } else {
-                    res.add(new NamedValue(name, Value.of(elNode.getTextContent())));
+                    res.add(new NamedValue(name, new LateParseValue(elNode.getTextContent())));
                 }
 
             }

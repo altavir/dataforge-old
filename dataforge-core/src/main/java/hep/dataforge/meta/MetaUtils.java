@@ -7,10 +7,7 @@ package hep.dataforge.meta;
 
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.io.IOUtils;
-import hep.dataforge.values.Value;
-import hep.dataforge.values.ValueProvider;
-import hep.dataforge.values.ValueType;
-import hep.dataforge.values.ValueUtils;
+import hep.dataforge.values.*;
 import kotlin.Pair;
 
 import java.io.IOException;
@@ -83,7 +80,7 @@ public class MetaUtils {
      * @return
      */
     public static Optional<Meta> findNodeByValue(Meta root, String path, String key, Object value) {
-        return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(Value.of(value)));
+        return findNode(root, path, (m) -> m.hasValue(key) && m.getValue(key).equals(ValueFactory.of(value)));
     }
 
     /**
@@ -108,7 +105,7 @@ public class MetaUtils {
         if (val.getType().equals(ValueType.STRING) && val.getString().contains("$")) {
             String valStr = val.getString();
 //            Matcher matcher = Pattern.compile("\\$\\{(?<sub>.*)\\}").matcher(valStr);
-            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?\\}").matcher(valStr);
+            Matcher matcher = Pattern.compile("\\$\\{(?<sub>[^|]*)(?:\\|(?<def>.*))?}").matcher(valStr);
             while (matcher.find()) {
                 String group = matcher.group();
                 String sub = matcher.group("sub");
@@ -123,7 +120,7 @@ public class MetaUtils {
                     valStr = valStr.replace(group, replacement);
                 }
             }
-            return Value.of(valStr);
+            return ValueFactory.parse(valStr, false);
         } else {
             return val;
         }
@@ -181,11 +178,10 @@ public class MetaUtils {
             String key = split[0].trim();
             String value = split[1].trim();
             //TODO implement compare operators
-            return meta -> meta.getValue(key, Value.getNull()).equals(Value.of(value));
+            return meta -> meta.getValue(key, ValueFactory.NULL).equals(ValueFactory.of(value));
         } else {
             throw new NamingException("'" + token + "' is not a valid query");
         }
-
     }
 
     /**

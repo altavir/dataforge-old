@@ -24,6 +24,7 @@ import hep.dataforge.plots.PlotUtils;
 import hep.dataforge.plots.XYPlotFrame;
 import hep.dataforge.utils.FXObject;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import javafx.application.Platform;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
@@ -328,7 +329,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
         boolean visible = meta
                 .collectValue(
                         "visible",
-                        Collectors.reducing(Value.of(true), (v1, v2) -> Value.of(v1.getBoolean() && v2.getBoolean()))
+                        Collectors.reducing(ValueFactory.of(true), (Value v1, Value v2) -> ValueFactory.of(v1.getBoolean() && v2.getBoolean()))
                 )
                 .getBoolean();
 
@@ -365,7 +366,7 @@ public class JFreeChartFrame extends XYPlotFrame implements FXObject, Serializab
 
     @Override
     public Optional<Value> getActualColor(Name name) {
-        return Optional.ofNullable(colorCache.get(name)).map(color -> Value.of(PlotUtils.INSTANCE.awtColorToString(color)));
+        return Optional.ofNullable(colorCache.get(name)).map(color -> ValueFactory.of(PlotUtils.INSTANCE.awtColorToString(color)));
     }
 
 //    @Override

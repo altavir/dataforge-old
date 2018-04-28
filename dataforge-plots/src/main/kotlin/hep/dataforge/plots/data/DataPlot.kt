@@ -22,8 +22,8 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Adapters.*
-import hep.dataforge.tables.ValueMap
 import hep.dataforge.tables.ValuesAdapter
+import hep.dataforge.values.ValueMap
 import hep.dataforge.values.ValueType
 import hep.dataforge.values.Values
 import java.util.*
