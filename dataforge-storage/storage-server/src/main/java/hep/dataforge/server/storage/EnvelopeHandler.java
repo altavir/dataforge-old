@@ -1,5 +1,6 @@
 package hep.dataforge.server.storage;
 
+import hep.dataforge.io.JSONMetaWriter;
 import hep.dataforge.io.envelopes.Envelope;
 import hep.dataforge.io.envelopes.EnvelopeBuilder;
 import hep.dataforge.io.envelopes.MetaType;
@@ -38,7 +39,7 @@ public class EnvelopeHandler implements Handler, Responder {
             builder.setData(data);
 
             Envelope response = respond(builder.build());
-            ctx.render(new JSONMetaWriter().writeString(response.getMeta()));
+            ctx.render(JSONMetaWriter.INSTANCE.writeString(response.getMeta()));
         });
     }
 

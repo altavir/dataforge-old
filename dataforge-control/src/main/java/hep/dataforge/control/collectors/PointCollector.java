@@ -18,6 +18,7 @@ package hep.dataforge.control.collectors;
 import hep.dataforge.tables.ValuesListener;
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.ValueMap;
 
 import java.time.Instant;
@@ -58,7 +59,7 @@ public class PointCollector implements ValueCollector {
 
     @Override
     public void put(String name, Object value) {
-        valueMap.put(name, Value.of(value));
+        valueMap.put(name, ValueFactory.of(value));
         if (valueMap.keySet().containsAll(names)) {
             collect();
         }
@@ -76,13 +77,13 @@ public class PointCollector implements ValueCollector {
         ValueMap.Builder point = new ValueMap.Builder();
 
         point.putValue("timestamp", time);
-        valueMap.entrySet().stream().forEach((entry) -> {
+        valueMap.entrySet().forEach((entry) -> {
             point.putValue(entry.getKey(), entry.getValue());
         });
 
         // filling all missing values with nulls
         names.stream().filter((name) -> (!point.build().hasValue(name))).forEach((name) -> {
-            point.putValue(name, Value.getNull());
+            point.putValue(name, ValueFactory.NULL);
         });
 
         consumer.accept(point.build());

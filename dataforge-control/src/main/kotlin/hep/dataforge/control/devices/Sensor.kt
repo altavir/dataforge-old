@@ -50,7 +50,7 @@ import java.time.Instant
 @ValueDef(name = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
 @StateDefs(
         StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATUS_STATE, enumeration = Sensor.Companion.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
+        StateDef(ValueDef(name = MEASUREMENT_STATUS_STATE, enumeration = Sensor.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
         StateDef(ValueDef(name = MEASUREMENT_MESSAGE_STATE, info = "Current message")),
         StateDef(ValueDef(name = MEASUREMENT_PROGRESS_STATE, type = [ValueType.NUMBER], info = "Current progress"))
 )
@@ -206,6 +206,13 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         updateState(MEASUREMENT_ERROR_STATE, result)
     }
 
+    enum class MeasurementState {
+        NOT_STARTED, // initial state, not started
+        IN_PROGRESS, // in progress
+        WAITING, // waiting on scheduler
+        STOPPED // stopped
+    }
+
     companion object {
         const val MEASURING_STATE = "measurement.active"
         const val MEASUREMENT_STATUS_STATE = "measurement.state"
@@ -214,13 +221,6 @@ abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, me
         const val MEASUREMENT_ERROR_STATE = "measurement.error"
         const val MEASUREMENT_MESSAGE_STATE = "measurement.message"
         const val MEASUREMENT_PROGRESS_STATE = "measurement.progress"
-
-        enum class MeasurementState {
-            NOT_STARTED, // initial state, not started
-            IN_PROGRESS, // in progress
-            WAITING, // waiting on scheduler
-            STOPPED // stopped
-        }
 
         const val RESULT_SUCCESS = "success"
         const val RESULT_TIMESTAMP = "timestamp"

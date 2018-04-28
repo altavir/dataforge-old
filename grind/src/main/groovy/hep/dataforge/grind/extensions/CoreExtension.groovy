@@ -37,15 +37,15 @@ class CoreExtension {
     //value extensions
 
     static Value plus(final Value self, Object obj) {
-        return plus(self, Value.of(obj))
+        return plus(self, ValueFactory.of(obj))
     }
 
     static Value plus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.getNumber() + other.getNumber());
+                return ValueFactory.of(self.getNumber() + other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.getString() + other.getString());
+                return ValueFactory.of(self.getString() + other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -58,15 +58,15 @@ class CoreExtension {
     }
 
     static Value minus(final Value self, Object obj) {
-        return minus(self, Value.of(obj))
+        return minus(self, ValueFactory.of(obj))
     }
 
     static Value minus(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.getNumber() - other.getNumber());
+                return ValueFactory.of(self.getNumber() - other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.getString() - other.getString());
+                return ValueFactory.of(self.getString() - other.getString());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time plus operator is not yet supported")
@@ -83,28 +83,28 @@ class CoreExtension {
         switch (self.getType()) {
             case ValueType.NUMBER:
                 //TODO fix non-dobule values
-                return Value.of(-self.getDouble());
+                return ValueFactory.of(-self.getDouble());
             case ValueType.STRING:
                 throw new RuntimeException("Can't negate String value")
             case ValueType.TIME:
                 throw new RuntimeException("Can't negate time value")
             case ValueType.BOOLEAN:
-                return Value.of(!self.getBoolean());
+                return ValueFactory.of(!self.getBoolean());
             case ValueType.NULL:
                 return self;
         }
     }
 
     static Value multiply(final Value self, Object obj) {
-        return multiply(self, Value.of(obj))
+        return multiply(self, ValueFactory.of(obj))
     }
 
     static Value multiply(final Value self, Value other) {
         switch (self.getType()) {
             case ValueType.NUMBER:
-                return Value.of(self.getNumber() * other.getNumber());
+                return ValueFactory.of(self.getNumber() * other.getNumber());
             case ValueType.STRING:
-                return Value.of(self.getString() * other.getInt());
+                return ValueFactory.of(self.getString() * other.getInt());
             case ValueType.TIME:
                 //TODO implement
                 throw new RuntimeException("Time multiply operator is not yet supported")
@@ -112,7 +112,7 @@ class CoreExtension {
                 //TODO implement
                 throw new RuntimeException("Boolean multiply operator is not yet supported")
             case ValueType.NULL:
-                return Value.NULL;
+                return ValueFactory.NULL;
         }
     }
 

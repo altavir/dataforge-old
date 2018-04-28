@@ -7,6 +7,7 @@ package hep.dataforge.control.collectors;
 
 import hep.dataforge.utils.DateTimeUtils;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 
@@ -65,7 +66,7 @@ public class RegularPointCollector implements ValueCollector {
             // filling all missing values with nulls
             for (String name : names) {
                 if (!point.build().hasValue(name)) {
-                    point.putValue(name, Value.getNull());
+                    point.putValue(name, ValueFactory.NULL);
                 }
             }
 

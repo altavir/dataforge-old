@@ -61,7 +61,6 @@ abstract class AbstractDevice(override val context: Context = Global, meta: Meta
                 shutdown()
             }
         }
-        value
     }
 
     /**

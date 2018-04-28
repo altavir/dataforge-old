@@ -41,10 +41,15 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
     /**
      * Registered devices
      */
-    private val devices = HashMap<Name, Device>()
+    private val _devices = HashMap<Name, Device>()
+
+    /**
+     * the list of top level devices
+     */
+    val devices: Collection<Device> = _devices.values
 
     override val deviceNames: Stream<Name>
-        get() = devices.entries.stream().flatMap { entry ->
+        get() = _devices.entries.stream().flatMap { entry ->
             if (entry.value is DeviceHub) {
                 (entry.value as DeviceHub).deviceNames.map { it -> entry.key.append(it) }
             } else {
@@ -55,15 +60,15 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
 
     fun add(device: Device) {
         val name = Name.ofSingle(device.name)
-        if (devices.containsKey(name)) {
+        if (_devices.containsKey(name)) {
             logger.warn("Replacing existing device in device manager!")
             remove(name)
         }
-        devices[name] = device
+        _devices[name] = device
     }
 
     fun remove(name: Name) {
-        Optional.ofNullable(this.devices.remove(name)).ifPresent { it ->
+        Optional.ofNullable(this._devices.remove(name)).ifPresent { it ->
             try {
                 it.shutdown()
             } catch (e: ControlException) {
@@ -97,8 +102,8 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
     override fun optDevice(name: Name): Optional<Device> {
         return when {
             name.isEmpty -> throw IllegalArgumentException("Can't provide a device with zero name")
-            name.length == 1 -> Optional.ofNullable(devices[name])
-            else -> Optional.ofNullable(devices[name.first]).flatMap { hub ->
+            name.length == 1 -> Optional.ofNullable(_devices[name])
+            else -> Optional.ofNullable(_devices[name.first]).flatMap { hub ->
                 if (hub is DeviceHub) {
                     (hub as DeviceHub).optDevice(name.cutFirst())
                 } else {
@@ -108,17 +113,8 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
         }
     }
 
-    /**
-     * Get the stream of top level devices
-     *
-     * @return
-     */
-    fun getDevices(): Stream<Device> {
-        return devices.values.stream()
-    }
-
     override fun detach() {
-        devices.values.forEach { it ->
+        _devices.values.forEach { it ->
             try {
                 it.shutdown()
             } catch (e: ControlException) {
@@ -129,11 +125,11 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
     }
 
     override fun connectAll(connection: Connection, vararg roles: String) {
-        this.devices.values.forEach { device -> device.connect(connection, *roles) }
+        this._devices.values.forEach { device -> device.connect(connection, *roles) }
     }
 
     override fun connectAll(context: Context, meta: Meta) {
-        this.devices.values.forEach { device -> device.connectionHelper.connect(context, meta) }
+        this._devices.values.forEach { device -> device.connectionHelper.connect(context, meta) }
     }
 
     class Factory : PluginFactory() {

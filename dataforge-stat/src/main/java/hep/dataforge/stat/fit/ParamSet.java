@@ -24,6 +24,7 @@ import hep.dataforge.meta.MetaMorph;
 import hep.dataforge.meta.MetaUtils;
 import hep.dataforge.names.Names;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.Values;
 import org.jetbrains.annotations.NotNull;
 import org.slf4j.LoggerFactory;
@@ -126,7 +127,7 @@ public class ParamSet implements Values, MetaMorph {
 
     @Override
     public Optional<Value> optValue(@NotNull String path) {
-        return optByName(path).map(par -> Value.of(par.getValue()));
+        return optByName(path).map(par -> ValueFactory.of(par.getValue()));
     }
 
 
@@ -262,9 +263,8 @@ public class ParamSet implements Values, MetaMorph {
      *
      * @param str
      */
-    @NotNull
     @Override
-    public Double getDouble(String str) throws NameNotFoundException {
+    public double getDouble(String str) throws NameNotFoundException {
         Param p;
         p = this.getByName(str);
         return p.getValue();

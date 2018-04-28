@@ -192,6 +192,7 @@ class ListTable(private val format: TableFormat, points: List<Values>, unsafe: B
         /**
          * Infer format from the first oint
          */
+        @JvmStatic
         fun infer(points: List<Values>): ListTable {
             if (points.isEmpty()) {
                 throw IllegalArgumentException("Can't create ListTable from the empty list. Format required.")

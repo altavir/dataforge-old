@@ -2,6 +2,7 @@ package hep.dataforge.server.storage;
 
 import freemarker.template.Template;
 import hep.dataforge.exceptions.NameNotFoundException;
+import hep.dataforge.io.JSONMetaWriter;
 import hep.dataforge.meta.MetaBuilder;
 import hep.dataforge.server.ServerManager;
 import hep.dataforge.server.ServletUtils;
@@ -151,7 +152,7 @@ public class StorageRatpackHandler implements Handler {
             Template template = ServletUtils.freemarkerConfig().getTemplate("PointLoader.ftl");
 
             Map<String, Object> data = buildLoaderData(ctx, loader);
-            String plotParams = new JSONMetaWriter().writeString(pointLoaderPlotOptions(loader)).trim();
+            String plotParams = JSONMetaWriter.INSTANCE.writeString(pointLoaderPlotOptions(loader)).trim();
             data.put("plotParams", plotParams);
             //            data.put("data", loader.getIndex(valueName).pull(Value.of(from), Value.of(to), Integer.valueOf(maxItems)));
 
