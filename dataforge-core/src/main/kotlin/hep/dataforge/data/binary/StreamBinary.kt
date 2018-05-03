@@ -20,12 +20,13 @@ class StreamBinary(private val sup: () -> InputStream) : Binary {
         Channels.newChannel(stream)
     }
 
-    override fun size(): Long = -1
+    override val size: Long
+        get() = -1
 
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {
         try {
-            return BufferedBinary(buffer.array())
+            return BufferedBinary(read.array())
         } catch (e: IOException) {
             throw WriteAbortedException("Failed to get byte buffer", e)
         }

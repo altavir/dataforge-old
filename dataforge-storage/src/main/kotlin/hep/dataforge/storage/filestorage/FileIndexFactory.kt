@@ -30,7 +30,6 @@ import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.function.Function
 
 /**
  * A factory for file indexes
@@ -38,7 +37,7 @@ import java.util.function.Function
  * @author Alexander Nozik
  */
 class FileIndexFactory(override val context: Context, private val uri: String) : ContextAware {
-    private val envelope: FileEnvelope by lazy{
+    private val envelope: FileEnvelope by lazy {
         val file = Paths.get(uri)
         if (Files.isReadable(file)) {
             FileEnvelope.open(uri, true)
@@ -60,7 +59,7 @@ class FileIndexFactory(override val context: Context, private val uri: String) :
      * @param transformation transformation from string to a given object type
      * @return
     </T> */
-    fun <T> buildDefaultIndex(transformation: Function<String, T>): DefaultIndex<T> {
+    fun <T> buildDefaultIndex(transformation: (String) -> T): DefaultIndex<T> {
         return DefaultIndex(asIterable(transformation))
     }
 
@@ -72,12 +71,12 @@ class FileIndexFactory(override val context: Context, private val uri: String) :
      * @param transformation
      * @return
     </T> */
-    fun <T : ValueProvider> buildProviderStreamIndex(valueName: String, transformation: Function<String, T>): ValueProviderIndex<T> {
+    fun <T : ValueProvider> buildProviderStreamIndex(valueName: String, transformation: (String) -> T): ValueProviderIndex<T> {
         return ValueProviderIndex(asIterable(transformation), valueName)
     }
 
-    private fun <T> asIterable(transformation: Function<String, T>): Iterable<T> {
-        return  object : Iterable<T>{
+    private fun <T> asIterable(transformation: (String) -> T): Iterable<T> {
+        return object : Iterable<T> {
             override fun iterator(): Iterator<T> {
                 return buildIterator(transformation)
             }
@@ -85,10 +84,9 @@ class FileIndexFactory(override val context: Context, private val uri: String) :
         }
     }
 
-    private fun <T> buildIterator(transformation: Function<String, T>): Iterator<T> {
+    private fun <T> buildIterator(transformation: (String) -> T): Iterator<T> {
         try {
-            val env = this.envelope
-            return env.data.lines().map(transformation).iterator()
+            return envelope.data.buffer.asCharBuffer().lineSequence().map(transformation).iterator()
         } catch (ex: IOException) {
             throw RuntimeException("Cant operate file envelope $uri", ex)
         }

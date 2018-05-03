@@ -273,7 +273,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
                     .setMetaValue(WRAPPER_TYPE_KEY, PLOT_GROUP_WRAPPER_TYPE)
                     .setMetaValue("name", obj.name)
                     .putMetaNode(DEFAULT_META_NAME, obj.config)
-                    .setContentType("wrapper")
+                    .setDataType("wrapper")
                     .setData(baos.toByteArray())
 
             builder.putMetaNode("descriptor", obj.getDescriptor().toMeta())

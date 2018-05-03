@@ -6,6 +6,7 @@ import hep.dataforge.meta.Meta
  * Something that could be represented as a text markup
  * Created by darksnake on 05-Feb-17.
  */
+@Deprecated("Delegate rendering to output")
 interface Markedup {
     /**
      * Represent this object as a text markup

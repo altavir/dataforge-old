@@ -62,7 +62,7 @@ class DefaultEnvelopeWriter(private val envelopeType: EnvelopeType, private val 
         }
         tag.setValue(META_LENGTH_PROPERTY, metaSize)
 
-        tag.setValue(DATA_LENGTH_PROPERTY, envelope.data.size())
+        tag.setValue(DATA_LENGTH_PROPERTY, envelope.data.size)
 
         stream.write(tag.toBytes().array())
 
@@ -71,7 +71,7 @@ class DefaultEnvelopeWriter(private val envelopeType: EnvelopeType, private val 
             stream.write(SEPARATOR)
         }
 
-        Channels.newChannel(stream).write(envelope.data.buffer)
+        Channels.newChannel(stream).write(envelope.data.read)
     }
 
 //    companion object {

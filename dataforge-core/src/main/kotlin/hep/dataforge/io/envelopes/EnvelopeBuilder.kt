@@ -116,12 +116,12 @@ class EnvelopeBuilder : Envelope {
         return this
     }
 
-    fun setContentType(type: String): EnvelopeBuilder {
+    fun setDataType(type: String): EnvelopeBuilder {
         setMetaValue(ENVELOPE_DATA_TYPE_KEY, type)
         return this
     }
 
-    fun setContentDescription(description: String): EnvelopeBuilder {
+    fun setDescription(description: String): EnvelopeBuilder {
         setMetaValue(ENVELOPE_DESCRIPTION_KEY, description)
         return this
     }

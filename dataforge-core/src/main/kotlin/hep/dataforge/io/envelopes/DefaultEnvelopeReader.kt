@@ -17,6 +17,7 @@ package hep.dataforge.io.envelopes
 
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.BufferedBinary
+import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.exceptions.EnvelopeFormatException
 import hep.dataforge.io.envelopes.DefaultEnvelopeType.Companion.SEPARATOR
 import hep.dataforge.meta.Meta
@@ -51,12 +52,11 @@ open class DefaultEnvelopeReader : EnvelopeReader {
         val tag = newTag().read(stream)
         val parser = tag.metaType.reader
         val metaLength = tag.metaSize
-        val meta: Meta
-        if (metaLength == 0) {
-            meta = Meta.buildEmpty(DEFAULT_META_NAME)
+        val meta: Meta = if (metaLength == 0) {
+            Meta.buildEmpty(DEFAULT_META_NAME)
         } else {
             try {
-                meta = parser.read(stream, metaLength.toLong())
+                parser.read(stream, metaLength.toLong())
             } catch (ex: ParseException) {
                 throw EnvelopeFormatException("Error parsing meta", ex)
             }
@@ -81,15 +81,14 @@ open class DefaultEnvelopeReader : EnvelopeReader {
      *
      * @return
      */
-    @Throws(IOException::class)
-    fun readLazy(path: Path): Envelope {
-        val channel = Files.newByteChannel(path, READ)
+    override fun read(file: Path): Envelope {
+        val channel = Files.newByteChannel(file, READ)
         val tag = newTag().read(channel)
         val metaLength = tag.metaSize
         val dataLength = tag.dataSize
         if (metaLength < 0 || dataLength < 0) {
             LoggerFactory.getLogger(javaClass).error("Can't lazy read infinite data or meta. Returning non-lazy envelope")
-            return read(path)
+            return read(file)
         }
 
         val metaBuffer = ByteBuffer.allocate(metaLength)
@@ -97,12 +96,11 @@ open class DefaultEnvelopeReader : EnvelopeReader {
         channel.read(metaBuffer)
         val parser = tag.metaType.reader
 
-        val meta: Meta
-        if (metaLength == 0) {
-            meta = Meta.buildEmpty(DEFAULT_META_NAME)
+        val meta: Meta = if (metaLength == 0) {
+            Meta.buildEmpty(DEFAULT_META_NAME)
         } else {
             try {
-                meta = parser.readBuffer(metaBuffer)
+                parser.readBuffer(metaBuffer)
             } catch (ex: ParseException) {
                 throw EnvelopeFormatException("Error parsing annotation", ex)
             }
@@ -110,18 +108,7 @@ open class DefaultEnvelopeReader : EnvelopeReader {
         }
         channel.close()
 
-        return LazyEnvelope(meta){
-            try {
-                Files.newByteChannel(path, READ).use { dataChannel ->
-                    dataChannel.position((tag.length + metaLength).toLong())
-                    val dataBuffer = ByteBuffer.allocate(dataLength)
-                    dataChannel.read(dataBuffer)
-                    BufferedBinary(dataBuffer)
-                }
-            } catch (ex: IOException) {
-                throw RuntimeException(ex)
-            }
-        }
+        return SimpleEnvelope(meta, FileBinary(file, (tag.length + metaLength).toLong()))
     }
 
     protected fun separator(): ByteArray {
@@ -130,16 +117,16 @@ open class DefaultEnvelopeReader : EnvelopeReader {
 
     @Throws(IOException::class)
     private fun readData(stream: InputStream, length: Int): Binary {
-        if (length == -1) {
+        return if (length == -1) {
             val baos = ByteArrayOutputStream()
             while (stream.available() > 0) {
                 baos.write(stream.read())
             }
-            return BufferedBinary(baos.toByteArray())
+            BufferedBinary(baos.toByteArray())
         } else {
             val buffer = ByteBuffer.allocate(length)
             Channels.newChannel(stream).read(buffer)
-            return BufferedBinary(buffer)
+            BufferedBinary(buffer)
         }
     }
 

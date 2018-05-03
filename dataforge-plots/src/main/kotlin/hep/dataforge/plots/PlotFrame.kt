@@ -137,7 +137,7 @@ interface PlotFrame : Configurable, Serializable {
             val builder = EnvelopeBuilder()
                     .setMeta(rootEnv.meta)
                     .setData(rootEnv.data)
-                    .setContentType("wrapper")
+                    .setDataType("wrapper")
                     .setMetaValue(WRAPPER_TYPE_KEY, PLOT_FRAME_WRAPPER_TYPE)
                     .setMetaValue(PLOT_FRAME_CLASS_KEY, obj.javaClass.name)
                     .putMetaNode(PLOT_FRAME_META_KEY, obj.config)

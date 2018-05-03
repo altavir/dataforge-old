@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,13 +19,10 @@ import hep.dataforge.context.Context;
 import hep.dataforge.context.ContextBuilder;
 import hep.dataforge.data.DataNode;
 import hep.dataforge.description.TypedActionDef;
-import hep.dataforge.exceptions.ContentException;
 import hep.dataforge.io.MetaFileReader;
 import hep.dataforge.meta.Meta;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.text.ParseException;
 
 @TypedActionDef(name = "run", info = "Run action with given configuration")
 public class RunConfigAction extends GenericAction {
@@ -43,14 +40,10 @@ public class RunConfigAction extends GenericAction {
         Meta meta = inputMeta(context, input.getMeta(), actionMeta);
 
         String contextName = meta.getString("contextName", getName());
-        Context ac = new ContextBuilder(contextName,context).build();
+        Context ac = new ContextBuilder(contextName, context).build();
         if (meta.hasValue("configFile")) {
             Path cfgFile = context.getIo().getRootDir().resolve(meta.getString("configFile"));
-            try {
-                cfg = MetaFileReader.instance().read(ac, cfgFile);
-            } catch (IOException | ParseException ex) {
-                throw new ContentException("Can't read config file", ex);
-            }
+            cfg = MetaFileReader.Companion.instance().read(ac, cfgFile);
         } else {
             cfg = actionMeta;
         }

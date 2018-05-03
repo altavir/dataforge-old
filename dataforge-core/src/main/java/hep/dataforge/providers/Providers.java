@@ -34,7 +34,7 @@ public class Providers {
                     //using default chain target if needed
                     Path tail = tailOpt.get();
                     if (tail.getTarget().isEmpty()) {
-                        tail = tail.withTarget(p.defaultChainTarget());
+                        tail = tail.withTarget(p.getDefaultChainTarget());
                     }
                     return p.provide(tail);
                 } else {
@@ -90,7 +90,7 @@ public class Providers {
 
         // using default target if needed
         if (target.isEmpty() && provider instanceof Provider) {
-            target = ((Provider) provider).defaultTarget();
+            target = ((Provider) provider).getDefaultTarget();
         }
 
         if (!providers.containsKey(target)) {

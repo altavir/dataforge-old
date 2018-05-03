@@ -19,7 +19,6 @@ package hep.dataforge.values
 import hep.dataforge.io.IOUtils
 import hep.dataforge.providers.Path
 import hep.dataforge.providers.Provider
-import hep.dataforge.values.ValueUtils.asValueProvider
 import java.io.IOException
 import java.io.ObjectInput
 import java.io.ObjectOutput
@@ -30,8 +29,8 @@ import java.nio.ByteBuffer
 import java.time.Instant
 import java.util.*
 
-data class ValueRange(override val start: Value, override val endInclusive: Value) : ClosedRange<Value>{
-    operator fun contains(any: Any): Boolean{
+data class ValueRange(override val start: Value, override val endInclusive: Value) : ClosedRange<Value> {
+    operator fun contains(any: Any): Boolean {
         return contains(Value.of(any))
     }
 }
@@ -85,7 +84,7 @@ object ValueUtils {
                             oos.write('I'.toInt()) // integer
                             oos.writeInt(num.toInt())
                         }
-                        is Long ->{
+                        is Long -> {
                             oos.write('L'.toInt())
                             oos.writeLong(num.toLong())
                         }
@@ -133,8 +132,14 @@ object ValueUtils {
     @Throws(IOException::class, ClassNotFoundException::class)
     @JvmStatic
     fun readValue(ois: ObjectInput): Value {
-        val c = ois.read()
-        when (c.toChar()) {
+        return readValue(ois, ois.read().toChar())
+    }
+
+    /**
+     * Read value knowing its type-character
+     */
+    fun readValue(ois: ObjectInput, type: Char): Value {
+        when (type) {
             '*' -> {
                 val listSize = ois.readShort()
                 val valueList = ArrayList<Value>()
@@ -170,7 +175,7 @@ object ValueUtils {
             '+' -> return BooleanValue.TRUE
             '-' -> return BooleanValue.FALSE
             '?' -> return ois.readObject() as Value // Read as custom object. Currently reserved
-            else -> throw RuntimeException("Wrong value serialization format. Designation $c is unexpected")
+            else -> throw RuntimeException("Wrong value serialization format. Designation $type is unexpected")
         }
     }
 

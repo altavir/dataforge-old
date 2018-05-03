@@ -69,7 +69,7 @@ abstract class FileMapIndex<T>(
                 loadIndex()
             }
             if (!isUpToDate(file)) {
-                val buffer = file.data.getBuffer(indexedSize)
+                val buffer = file.data.read(indexedSize)
                 buffer.position(0)
                 var linePos = 0
                 val baos = ByteArrayOutputStream()
@@ -121,7 +121,7 @@ abstract class FileMapIndex<T>(
 
     @Throws(IOException::class)
     private fun isUpToDate(env: FileEnvelope): Boolean {
-        return env.data.size() == this.indexedSize.toLong()
+        return env.data.size == this.indexedSize.toLong()
     }
 
     @Throws(StorageException::class)

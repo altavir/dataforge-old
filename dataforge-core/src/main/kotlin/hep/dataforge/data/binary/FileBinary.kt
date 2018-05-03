@@ -5,65 +5,36 @@
  */
 package hep.dataforge.data.binary
 
-import java.io.*
+import java.io.IOException
+import java.io.InputStream
+import java.io.ObjectStreamException
+import java.io.WriteAbortedException
 import java.nio.ByteBuffer
 import java.nio.channels.ByteChannel
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption.READ
-import java.util.stream.Stream
 
-class FileBinary : Binary {
-
-    /**
-     * File to create binary from
-     */
-    private val file: Path
-
-    /**
-     * dataOffset form beginning of file
-     */
-    private val dataOffset: Int
-
-    private val size: Int
+/**
+ *
+ * @param file File to create binary from
+ * @param dataOffset  dataOffset form beginning of file
+ */
+class FileBinary(
+        private val file: Path,
+        val dataOffset: Long = 0,
+        private val _size: Long = -1
+) : Binary {
 
     override val stream: InputStream
-        @Throws(IOException::class)
-        get() = getStream(0)
+        get() = Files.newInputStream(file, READ).also { it.skip(dataOffset) }
 
     override val channel: ByteChannel
-        @Throws(IOException::class)
-        get() = Files.newByteChannel(file, READ).position(dataOffset.toLong())
+        get() = FileChannel.open(file, READ).position(dataOffset)
 
     override val buffer: ByteBuffer
-        @Throws(IOException::class)
-        get() = getBuffer(0, size().toInt())
-
-    constructor(file: Path, dataOffset: Int, size: Int) {
-        this.file = file
-        this.dataOffset = dataOffset
-        this.size = size
-    }
-
-    constructor(file: Path, dataOffset: Int) {
-        this.file = file
-        this.dataOffset = dataOffset
-        this.size = -1
-    }
-
-    constructor(file: Path) {
-        this.file = file
-        this.dataOffset = 0
-        this.size = -1
-    }
-
-    @Throws(IOException::class)
-    fun getStream(offset: Int): InputStream {
-        val stream = Files.newInputStream(file, READ)
-        stream.skip((dataOffset + offset).toLong())
-        return stream
-    }
+        get() = read(0, size.toInt())
 
     /**
      * Read a buffer with given dataOffset in respect to data block start and given size. If data size w
@@ -73,30 +44,16 @@ class FileBinary : Binary {
      * @return
      * @throws IOException
      */
-    @Throws(IOException::class)
-    fun getBuffer(offset: Int, size: Int): ByteBuffer {
+    override fun read(offset: Int, size: Int): ByteBuffer {
         FileChannel.open(file).use { channel ->
             val buffer = ByteBuffer.allocate(size)
-            channel.read(buffer, (offset + dataOffset).toLong())
+            channel.read(buffer, offset + dataOffset)
             return buffer
         }
     }
 
-    @Throws(IOException::class)
-    fun getBuffer(start: Int): ByteBuffer {
-        return getBuffer(start, (size() - start).toInt())
-    }
-
-    @Throws(IOException::class)
-    override fun size(): Long {
-        return if (size >= 0) size.toLong() else Files.size(file) - dataOffset
-    }
-
-    @Throws(IOException::class)
-    fun lines(): Stream<String> {
-        return BufferedReader(InputStreamReader(stream)).lines()
-    }
-
+    override val size: Long
+        get() = if (_size >= 0) _size else Files.size(file) - dataOffset
 
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {

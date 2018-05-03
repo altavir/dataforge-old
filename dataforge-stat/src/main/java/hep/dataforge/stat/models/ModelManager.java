@@ -84,7 +84,7 @@ public class ModelManager extends BasicPlugin {
     }
 
     @Override
-    public String defaultTarget() {
+    public String getDefaultTarget() {
         return MODEL_TARGET;
     }
 
