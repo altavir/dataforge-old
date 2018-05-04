@@ -153,7 +153,7 @@ interface AppendableLoader<T: Any> : Loader<T> {
 /**
  * Loader which could be accessed by keys
  */
-interface IndexedLoader<K: Any, T: Any> : Loader<T> {
+interface IndexedLoader<K: Comparable<K>, T: Any> : Loader<T> {
     /**
      * List of available loader keys. Duplicate keys are not allowed
      */
@@ -178,7 +178,7 @@ interface IndexedLoader<K: Any, T: Any> : Loader<T> {
 /**
  * Mutable version of indexed loader. Set operation is thread safe
  */
-interface MutableIndexedLoader<K: Any, T: Any> : IndexedLoader<K, T> {
+interface MutableIndexedLoader<K: Comparable<K>, T: Any> : IndexedLoader<K, T> {
 
     @JvmDefault
     operator fun set(key: K, value: T) {

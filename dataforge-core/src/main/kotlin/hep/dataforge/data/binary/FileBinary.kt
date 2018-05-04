@@ -14,6 +14,7 @@ import java.nio.channels.ByteChannel
 import java.nio.channels.FileChannel
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardOpenOption
 import java.nio.file.StandardOpenOption.READ
 
 /**
@@ -45,11 +46,7 @@ class FileBinary(
      * @throws IOException
      */
     override fun read(offset: Int, size: Int): ByteBuffer {
-        FileChannel.open(file).use { channel ->
-            val buffer = ByteBuffer.allocate(size)
-            channel.read(buffer, offset + dataOffset)
-            return buffer
-        }
+        return FileChannel.open(file, StandardOpenOption.READ).map(FileChannel.MapMode.READ_ONLY, offset.toLong(), size.toLong())
     }
 
     override val size: Long

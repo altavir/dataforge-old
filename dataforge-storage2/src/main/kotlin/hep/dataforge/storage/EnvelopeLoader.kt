@@ -32,7 +32,8 @@ abstract class EnvelopeLoader<T : Any> protected constructor(
         final override val path: Path
 ) : Loader<T>, FileStorageElement {
     private val _connectionHelper = ConnectionHelper(this)
-    protected val envelope: Envelope by lazy {
+
+    protected open val envelope: Envelope by lazy {
         EnvelopeReader.readFile(path)
     }
 
@@ -46,9 +47,12 @@ abstract class EnvelopeLoader<T : Any> protected constructor(
     val data: Binary
         get() = envelope.data
 
-    protected abstract fun readAll(): Sequence<T>
+    /**
+     * Sequence of pairs of offset and value
+     */
+    protected abstract fun readAll(): Sequence<Pair<Int, T>>
 
-    override fun iterator(): Iterator<T> = readAll().iterator()
+    override fun iterator(): Iterator<T> = readAll().map { it.second }.iterator()
 
     override fun close() {
         //do nothing
