@@ -26,7 +26,7 @@ class StreamBinary(private val sup: () -> InputStream) : Binary {
     @Throws(ObjectStreamException::class)
     private fun writeReplace(): Any {
         try {
-            return BufferedBinary(read.array())
+            return BufferedBinary(buffer.array())
         } catch (e: IOException) {
             throw WriteAbortedException("Failed to get byte buffer", e)
         }

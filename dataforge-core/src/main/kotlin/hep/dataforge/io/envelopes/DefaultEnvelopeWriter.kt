@@ -71,7 +71,7 @@ class DefaultEnvelopeWriter(private val envelopeType: EnvelopeType, private val 
             stream.write(SEPARATOR)
         }
 
-        Channels.newChannel(stream).write(envelope.data.read)
+        Channels.newChannel(stream).write(envelope.data.buffer)
     }
 
 //    companion object {

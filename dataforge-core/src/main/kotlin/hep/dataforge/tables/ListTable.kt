@@ -37,7 +37,7 @@ import kotlin.streams.toList
  * @param unsafe if `true`, skip format compatibility on the init.
  * @author Alexander Nozik
  */
-class ListTable(private val format: TableFormat, points: List<Values>, unsafe: Boolean = false) : ListOfPoints(points), Table {
+class ListTable(override val format: TableFormat, points: List<Values>, unsafe: Boolean = false) : ListOfPoints(points), Table {
 
     constructor(format: TableFormat, points: Iterable<Values>) : this(format, points.toList())
 
@@ -60,13 +60,6 @@ class ListTable(private val format: TableFormat, points: List<Values>, unsafe: B
 
     /**
      * {@inheritDoc}
-     */
-    override fun getFormat(): TableFormat {
-        return format
-    }
-
-    /**
-     * {@inheritDoc}
      *
      * @param columnName
      * @return
@@ -78,7 +71,7 @@ class ListTable(private val format: TableFormat, points: List<Values>, unsafe: B
         }
         return object : Column {
             override fun getFormat(): ColumnFormat {
-                return this@ListTable.getFormat().getColumn(columnName)
+                return this@ListTable.format.getColumn(columnName)
             }
 
             override fun get(n: Int): Value {
@@ -103,8 +96,8 @@ class ListTable(private val format: TableFormat, points: List<Values>, unsafe: B
         }
     }
 
-    override fun getColumns(): Stream<Column> {
-        return getFormat().names.stream().map { getColumn(it) }
+    override val columns: Collection<Column> by lazy {
+        format.names.map { getColumn(it) }
     }
 
     override fun get(columnName: String, rowNumber: Int): Value {
@@ -124,7 +117,7 @@ class ListTable(private val format: TableFormat, points: List<Values>, unsafe: B
 
         constructor(format: Iterable<String>) : this(MetaTableFormat.forNames(format))
 
-        constructor(vararg format: String) : this(MetaTableFormat.forNames(format))
+        constructor(vararg format: String) : this(MetaTableFormat.forNames(*format))
 
         /**
          * Если formatter == null, то могут быть любые точки

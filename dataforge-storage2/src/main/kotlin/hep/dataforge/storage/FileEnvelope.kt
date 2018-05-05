@@ -124,7 +124,7 @@ abstract class FileEnvelope(path: Path) : Envelope, AutoCloseable {
 
 class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
 
-    private val tag = EnvelopeTag().read(channel)
+    private val tag = Files.newByteChannel(path, StandardOpenOption.READ).use { EnvelopeTag().read(it) }
 
     override val dataOffset: Long = (tag.length + tag.metaSize).toLong()
 

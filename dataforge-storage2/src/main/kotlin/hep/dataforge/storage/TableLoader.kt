@@ -17,7 +17,12 @@
 package hep.dataforge.storage
 
 import hep.dataforge.io.envelopes.*
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
+import hep.dataforge.storage.TableLoaderType.BINARY_DATA_TYPE
+import hep.dataforge.storage.TableLoaderType.TABLE_FORMAT_KEY
+import hep.dataforge.storage.TableLoaderType.TEXT_DATA_TYPE
+import hep.dataforge.storage.TableLoaderType.binaryTableWriter
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.tables.ValuesSource
@@ -56,8 +61,8 @@ interface MutableTableLoader : TableLoader, AppendableLoader<Values>
 /**
  * @param reader read Values and move buffer position to next entry
  */
-open class FileTableLoader(
-        parent: StorageElement,
+open class FileTableLoader internal constructor(
+        parent: StorageElement?,
         path: Path,
         val reader: (ByteBuffer, TableFormat) -> Values
 ) : EnvelopeLoader<Values>(
@@ -66,10 +71,11 @@ open class FileTableLoader(
         parent = parent,
         path = path
 ), IndexedTableLoader {
+
     override val format: TableFormat by lazy {
         when {
-            meta.hasMeta("format") -> MetaTableFormat(meta.getMeta("format"))
-            meta.hasValue("format") -> MetaTableFormat.forNames(meta.getStringArray("format"))
+            meta.hasMeta(TABLE_FORMAT_KEY) -> MetaTableFormat(meta.getMeta("format"))
+            meta.hasValue(TABLE_FORMAT_KEY) -> MetaTableFormat.forNames(*meta.getStringArray("format"))
             else -> throw RuntimeException("Format definition not found")
         }
     }
@@ -98,11 +104,11 @@ open class FileTableLoader(
         }
     }
 
-    override fun mutable(): MutableTableLoader {
-        if (this is MutableTableLoader) {
-            return this
-        } else {
-            TODO("not implemented")
+    override fun mutable(): AppendableFileTableLoader {
+        return when (meta.getString(Envelope.ENVELOPE_DATA_TYPE_KEY)) {
+            BINARY_DATA_TYPE -> AppendableFileTableLoader(this, binaryTableWriter)
+            TEXT_DATA_TYPE -> error("Text output is no longer supported")
+            else -> error("Unsupported table serialization format")
         }
     }
 
@@ -115,7 +121,11 @@ open class FileTableLoader(
     }
 
     override suspend fun updateIndex() {
-        readAll(defaultIndex.lastKey().int)
+        if(defaultIndex.isEmpty()){
+            readAll()
+        } else {
+            readAll(defaultIndex.lastKey().int)
+        }
     }
 
 
@@ -169,6 +179,10 @@ class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values
         loader.updateIndex()
     }
 
+    suspend fun append(vararg values: Any) {
+        append(ValueMap.of(format.namesAsArray(), *values))
+    }
+
     override fun close() {
         mutableEnvelope.close()
     }
@@ -179,8 +193,10 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
     const val BINARY_DATA_TYPE = "binary"
     const val TEXT_DATA_TYPE = "text"
 
+    const val TABLE_FORMAT_KEY = "format"
 
-    private val textTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
+
+    val textTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
         val line = buildString {
             do {
                 val char = buffer.get().toChar()
@@ -191,7 +207,7 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
         ValueMap(format.names.zip(values).toMap())
     }
 
-    private val binaryTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
+    val binaryTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
         ValueMap(format.names.associate { it to buffer.getValue() }.toMap()).also {
             do {
                 val char = buffer.get().toChar()
@@ -199,12 +215,32 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
         }
     }
 
-    override suspend fun create(parent: FileStorage, meta: Meta): EnvelopeLoader<Values> {
-        if (!meta.hasMeta("format")) {
+    val textTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
+        val string = format.names.map { values[it] }.joinToString(separator = "\t", postfix = "\n")
+        ByteBuffer.wrap(string.toByteArray(Charsets.UTF_8))
+    }
+
+    val binaryTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
+        //TODO Fix the way value is serialized
+        val buffer = ByteBuffer.allocate(256)
+        format.names.map { values[it] }.forEach { buffer.putValue(it) }
+        buffer.put('\n'.toByte())
+        buffer.limit(buffer.position())
+        buffer.position(0)
+        buffer
+    }
+
+    override suspend fun create(parent: FileStorage, meta: Meta): FileTableLoader {
+        if (!meta.hasMeta(TABLE_FORMAT_KEY)) {
             throw IllegalArgumentException("Values format not found")
         }
         val fileName = meta.getString("name")
         val path: Path = parent.path.resolve("$fileName.df")
+        return create(parent, path, meta)
+    }
+
+    suspend fun create(parent: FileStorage?, path: Path, meta: Meta): FileTableLoader {
+        val type = meta.getString(Envelope.ENVELOPE_DATA_TYPE_KEY, BINARY_DATA_TYPE)
 
         val envelope = EnvelopeBuilder()
                 .setEnvelopeType(TABLE_ENVELOPE_TYPE)
@@ -212,7 +248,7 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
                 .build()
 
         return Files.newOutputStream(path, StandardOpenOption.CREATE_NEW, StandardOpenOption.WRITE).use {
-            when (meta.getString(Envelope.ENVELOPE_DATA_TYPE_KEY, "binary")) {
+            when (type) {
                 BINARY_DATA_TYPE -> {
                     DefaultEnvelopeType.INSTANCE.writer.write(it, envelope)
                     FileTableLoader(parent, path, binaryTableReader)
@@ -224,6 +260,17 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
                 else -> throw RuntimeException("Unknown data type for table loader")
             }
         }
+    }
+
+    suspend fun create(parent: FileStorage?, path: Path, format: TableFormat, binary: Boolean = true): FileTableLoader {
+        return create(parent, path, buildMeta {
+            TABLE_FORMAT_KEY to format.toMeta()
+            Envelope.ENVELOPE_DATA_TYPE_KEY to if (binary) {
+                BINARY_DATA_TYPE
+            } else {
+                TEXT_DATA_TYPE
+            }
+        })
     }
 
     override suspend fun read(parent: FileStorage, path: Path): EnvelopeLoader<Values> {

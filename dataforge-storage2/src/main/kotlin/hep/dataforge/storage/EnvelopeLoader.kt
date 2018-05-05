@@ -18,6 +18,7 @@ package hep.dataforge.storage
 
 import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.context.Context
+import hep.dataforge.context.Global
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeReader
@@ -28,7 +29,7 @@ import kotlin.reflect.KClass
 abstract class EnvelopeLoader<T : Any> protected constructor(
         final override val name: String,
         final override val type: KClass<T>,
-        final override val parent: StorageElement,
+        final override val parent: StorageElement?,
         final override val path: Path
 ) : Loader<T>, FileStorageElement {
     private val _connectionHelper = ConnectionHelper(this)
@@ -40,7 +41,7 @@ abstract class EnvelopeLoader<T : Any> protected constructor(
     override val meta: Meta
         get() = envelope.meta
 
-    override val context: Context = parent.context
+    override val context: Context = parent?.context?: Global
 
     override fun getConnectionHelper(): ConnectionHelper = _connectionHelper
 

@@ -25,7 +25,7 @@ public class ColumnTable implements Table {
         if (table instanceof ColumnTable) {
             return (ColumnTable) table;
         } else {
-            return new ColumnTable(table.getColumns().collect(Collectors.toList()));
+            return new ColumnTable(new ArrayList<>(table.getColumns()));
         }
     }
 
@@ -69,7 +69,7 @@ public class ColumnTable implements Table {
 
     @Override
     public Values getRow(int i) {
-        return new ValueMap(getColumns().map(Column::getName).collect(Collectors.toMap(it -> it, it -> get(it, i))));
+        return new ValueMap(getColumns().stream().map(Column::getName).collect(Collectors.toMap(it -> it, it -> get(it, i))));
     }
 
     @Override
@@ -83,8 +83,8 @@ public class ColumnTable implements Table {
     }
 
     @Override
-    public Stream<Column> getColumns() {
-        return columns.values().stream();
+    public Collection<Column> getColumns() {
+        return columns.values();
     }
 
     @Override
@@ -94,7 +94,7 @@ public class ColumnTable implements Table {
 
     @Override
     public TableFormat getFormat() {
-        return () -> getColumns().map(Column::getFormat);
+        return () -> getColumns().stream().map(Column::getFormat);
     }
 
     @NotNull

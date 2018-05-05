@@ -21,8 +21,6 @@ import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.values.Value
 
-import java.util.stream.Stream
-
 
 /**
  * An immutable table of values
@@ -36,7 +34,7 @@ interface Table : Markedup, NavigableValuesSource, MetaMorph {
      *
      * @return
      */
-    val columns: Stream<Column>
+    val columns: Collection<Column>
 
     /**
      * A minimal set of fields to be displayed in this table. Could return empty format if source is unformatted

@@ -81,7 +81,7 @@ class MetaTableFormat(meta: Meta) : SimpleMetaMorph(meta), TableFormat {
          * @param names
          * @return
          */
-        fun forNames(names: Array<out String>): TableFormat {
+        fun forNames(vararg names: String): TableFormat {
             val builder = MetaBuilder("format")
             for (n in names) {
                 builder.putNode(MetaBuilder("column").setValue("name", n))
@@ -91,7 +91,7 @@ class MetaTableFormat(meta: Meta) : SimpleMetaMorph(meta), TableFormat {
 
 
         fun forNames(names: Iterable<String>): TableFormat {
-            return forNames(names.toList().toTypedArray())
+            return forNames(*names.toList().toTypedArray())
         }
 
         /**
