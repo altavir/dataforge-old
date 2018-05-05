@@ -21,12 +21,14 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.tables.MetaTableFormat
 import hep.dataforge.tables.TableFormat
 import hep.dataforge.tables.ValuesSource
-import hep.dataforge.values.Value
-import hep.dataforge.values.Values
+import hep.dataforge.values.*
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
 import java.nio.file.StandardOpenOption
+import java.util.*
 import kotlin.coroutines.experimental.buildSequence
 
 interface TableLoader : Loader<Values>, ValuesSource {
@@ -37,6 +39,15 @@ interface TableLoader : Loader<Values>, ValuesSource {
 
 interface IndexedTableLoader : TableLoader, IndexedLoader<Value, Values> {
     operator fun get(any: Any): Values? = get(Value.of(any))
+
+    /**
+     * Notify loader that it should update index for this loader
+     */
+    suspend fun updateIndex()
+
+    fun select(from: Value, to: Value): List<Values> {
+        return keys.subSet(from, true, to, true).map { get(it)!! }
+    }
 }
 
 interface MutableTableLoader : TableLoader, AppendableLoader<Values>
@@ -54,7 +65,7 @@ open class FileTableLoader(
         type = Values::class,
         parent = parent,
         path = path
-), TableLoader {
+), IndexedTableLoader {
     override val format: TableFormat by lazy {
         when {
             meta.hasMeta("format") -> MetaTableFormat(meta.getMeta("format"))
@@ -63,11 +74,27 @@ open class FileTableLoader(
         }
     }
 
-    override fun indexed(meta: Meta): IndexedTableLoader {
-        if (this is IndexedTableLoader) {
-            return this
-        } else {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    protected val defaultIndex = TreeMap<Value, Int>()
+
+    protected fun getOffset(index: Int): Int? {
+        if (index == 0) {
+            return 0
+        } else if (index >= defaultIndex.size) {
+            readAll(defaultIndex.size)
+        }
+        return defaultIndex[index.asValue()]
+    }
+
+    override val keys: NavigableSet<Value>
+        get() = synchronized(defaultIndex) { defaultIndex.navigableKeySet() }
+
+    override fun getInFuture(key: Value): Deferred<Values>? {
+        return getOffset(key.int)?.let {
+            async {
+                synchronized(data) {
+                    reader(data.buffer.apply { position(it) }, format)
+                }
+            }
         }
     }
 
@@ -75,18 +102,75 @@ open class FileTableLoader(
         if (this is MutableTableLoader) {
             return this
         } else {
-            TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+            TODO("not implemented")
         }
     }
 
-    override fun readAll(): Sequence<Pair<Int, Values>> {
-        val buffer = data.buffer
-        buffer.position(0)
-        return buildSequence {
-            while (buffer.remaining() > 0) {
-                yield(Pair(buffer.position(), reader(buffer, format)))
+    override fun indexed(meta: Meta): IndexedTableLoader {
+        return if (meta.isEmpty) {
+            this
+        } else {
+            IndexedFileTableLoader(this, meta.getString("field"))
+        }
+    }
+
+    override suspend fun updateIndex() {
+        readAll(defaultIndex.lastKey().int)
+    }
+
+
+    override fun readAll(startIndex: Int): Sequence<Triple<Int, Int, Values>> {
+        val offset = getOffset(startIndex) ?: throw Error("The index value is unavailable")
+        synchronized(data) {
+            var counter = startIndex
+            val buffer = data.buffer
+            buffer.position(offset)
+            return buildSequence {
+                while (buffer.remaining() > 0) {
+                    defaultIndex.putIfAbsent(counter.asValue(), buffer.position())
+                    yield(Triple(counter, buffer.position(), reader(buffer, format)))
+                    counter++
+                }
             }
         }
+    }
+}
+
+/**
+ * File table loader with alternate index
+ */
+class IndexedFileTableLoader(val loader: FileTableLoader, val indexField: String) : IndexedTableLoader by loader {
+
+    //TODO implement index caching
+    private val secondaryIndex: TreeMap<Value, Value> by lazy {
+        TreeMap<Value, Value>().apply {
+            loader.forEachIndexed { index, values ->
+                this[values.getValue(indexField)] = index.asValue()
+            }
+        }
+    }
+
+    override suspend fun updateIndex() {
+        loader.forEachIndexed { index, values ->
+            secondaryIndex[values.getValue(indexField)] = index.asValue()
+        }
+    }
+
+    override fun getInFuture(key: Value): Deferred<Values>? {
+        return secondaryIndex[key]?.let { loader.getInFuture(it) }
+    }
+}
+
+class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values, TableFormat) -> ByteBuffer) : IndexedTableLoader by loader, MutableTableLoader {
+    private val mutableEnvelope = FileEnvelope.readExisting(loader.path)
+
+    override suspend fun append(item: Values) {
+        mutableEnvelope.append(writer(item, format))
+        loader.updateIndex()
+    }
+
+    override fun close() {
+        mutableEnvelope.close()
     }
 }
 
@@ -96,12 +180,23 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
     const val TEXT_DATA_TYPE = "text"
 
 
-    private val textTableReader: (ByteBuffer, TableFormat) -> Values = {
-        
+    private val textTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
+        val line = buildString {
+            do {
+                val char = buffer.get().toChar()
+                append(char)
+            } while (char != '\n')
+        }
+        val values = line.split("\\s+").map { LateParseValue(it) }
+        ValueMap(format.names.zip(values).toMap())
     }
 
-    private val binaryTableReader: (ByteBuffer, TableFormat) -> Values = {
-
+    private val binaryTableReader: (ByteBuffer, TableFormat) -> Values = { buffer, format ->
+        ValueMap(format.names.associate { it to buffer.getValue() }.toMap()).also {
+            do {
+                val char = buffer.get().toChar()
+            } while (char != '\n')
+        }
     }
 
     override suspend fun create(parent: FileStorage, meta: Meta): EnvelopeLoader<Values> {

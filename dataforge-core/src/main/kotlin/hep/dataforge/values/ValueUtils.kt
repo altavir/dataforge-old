@@ -167,7 +167,7 @@ object ValueUtils {
             }
             'N' -> return Value.of(ois.readObject())
             'X' -> {
-                val length = ois.read()
+                val length = ois.readInt()
                 val buffer = ByteArray(length)
                 ois.readFully(buffer)
                 return BinaryValue(ByteBuffer.wrap(buffer))
@@ -244,4 +244,119 @@ object ValueUtils {
         }
     }
 
+}
+
+fun ByteBuffer.getValue(): Value{
+    val type = get().toChar()
+    when (type) {
+        '*' -> {
+            val listSize = getShort()
+            val valueList = ArrayList<Value>()
+            for (i in 0 until listSize) {
+                valueList.add(getValue())
+            }
+            return Value.of(valueList)
+        }
+        '0' -> return Value.NULL
+        'T' -> {
+            val time = Instant.ofEpochSecond(getLong(), getLong())
+            return time.asValue()
+        }
+        'S' -> {
+            val length = getInt()
+            val buffer = ByteArray(length)
+            get(buffer)
+            return String(buffer, Charsets.UTF_8).asValue()
+        }
+        'D' -> return getDouble().asValue()
+        'I' -> return getInt().asValue()
+        'L' -> return getLong().asValue()
+        'B' -> {
+            val intSize = getShort()
+            val intBytes = ByteArray(intSize.toInt())
+            get()
+            val scale = getInt()
+            val bdc = BigDecimal(BigInteger(intBytes), scale)
+            return bdc.asValue()
+        }
+        'X' -> {
+            val length = getInt()
+            val buffer = ByteArray(length)
+            get(buffer)
+            return BinaryValue(ByteBuffer.wrap(buffer))
+        }
+        //'N' -> TODO custom number serialization
+        '+' -> return BooleanValue.TRUE
+        '-' -> return BooleanValue.FALSE
+        else -> throw RuntimeException("Wrong value serialization format. Designation $type is unexpected")
+    }
+}
+
+fun ByteBuffer.putValue(value: Value){
+    if (value.isList) {
+        put('*'.toByte()) // List designation
+        if(value.list.size> Short.MAX_VALUE){
+            throw RuntimeException("The array values of size more than ${Short.MAX_VALUE} could not be serialized")
+        }
+        putShort(value.list.size.toShort())
+        value.list.forEach{putValue(it)}
+    } else {
+        when (value.type) {
+            ValueType.NULL -> put('0'.toByte()) // null
+            ValueType.TIME -> {
+                put('T'.toByte())//Instant
+                putLong(value.time.epochSecond)
+                putLong(value.time.nano.toLong())
+            }
+            ValueType.STRING -> {
+                put('S'.toByte())//String
+                if(value.string.length>Int.MAX_VALUE){
+                    throw RuntimeException("The string valuse of size more than ${Int.MAX_VALUE} could not be serialized")
+                }
+                put(value.string.toByteArray(Charsets.UTF_8))
+            }
+            ValueType.NUMBER -> {
+                val num = value.number
+                when (num) {
+                    is Double -> {
+                        put('D'.toByte()) // double
+                       putDouble(num.toDouble())
+                    }
+                    is Int -> {
+                        put('I'.toByte()) // integer
+                        putInt(num.toInt())
+                    }
+                    is Long -> {
+                        put('L'.toByte())
+                        putLong(num.toLong())
+                    }
+                    is BigDecimal -> {
+                        put('B'.toByte()) // BigDecimal
+                        val bigInt = num.unscaledValue().toByteArray()
+                        val scale = num.scale()
+                        if(bigInt.size> Short.MAX_VALUE){
+                            throw RuntimeException("Too large BigDecimal")
+                        }
+                        putShort(bigInt.size.toShort())
+                        put(bigInt)
+                        putInt(scale)
+                    }
+                    else -> {
+                        throw RuntimeException("Custom number serialization is not allowed. Yet")
+                    }
+                }
+            }
+            ValueType.BOOLEAN -> if (value.boolean) {
+                put('+'.toByte()) //true
+            } else {
+                put('-'.toByte()) // false
+            }
+            ValueType.BINARY -> {
+                put('X'.toByte())
+                val binary = value.binary
+                putInt(binary.limit())
+                put(binary.array())
+            }
+        }
+    }
 }

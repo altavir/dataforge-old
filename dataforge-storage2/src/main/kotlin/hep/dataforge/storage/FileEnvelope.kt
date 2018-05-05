@@ -30,7 +30,12 @@ import java.nio.file.StandardOpenOption
 /**
  * A file i/o for envelope-based format
  */
-abstract class FileEnvelope(val channel: FileChannel, private val dataOffset: Long, protected var dataLength: Int = 0) : Envelope {
+abstract class FileEnvelope(path: Path) : Envelope, AutoCloseable {
+
+    protected abstract val dataOffset: Long
+    protected abstract var dataLength: Int
+
+    protected val channel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.APPEND)
 
     /**
      * Read the whole data block
@@ -47,6 +52,7 @@ abstract class FileEnvelope(val channel: FileChannel, private val dataOffset: Lo
      */
     fun append(buffer: ByteBuffer) {
         synchronized(this) {
+            channel.write(buffer)
             updateDataLength(dataLength + channel.write(buffer, (dataOffset + dataLength)))
         }
     }
@@ -76,6 +82,10 @@ abstract class FileEnvelope(val channel: FileChannel, private val dataOffset: Lo
         return ByteBuffer.allocate(length).also { channel.read(it, pos) }
     }
 
+    override fun close() {
+        channel.close()
+    }
+
     companion object {
 
         /**
@@ -83,18 +93,10 @@ abstract class FileEnvelope(val channel: FileChannel, private val dataOffset: Lo
          */
         fun readExisting(path: Path): FileEnvelope {
             if (Files.exists(path)) {
-                val channel = FileChannel.open(path)
                 val type = EnvelopeType.infer(path).orElse(TaglessEnvelopeType.INSTANCE)
-                when (type) {
-                    is DefaultEnvelopeType -> {
-                        val tag = EnvelopeTag().read(channel)
-                        return TaggedFileEnvelope(channel, tag)
-                    }
-                    is TaglessEnvelopeType -> {
-                        TODO("Implement for tagless envelope")
-                        //Files.lines(path, Charsets.UTF_8).asSequence().takeWhile { it.trim() == TaglessEnvelopeType.DEFAULT_DATA_START }
-                        //return FileEnvelope(channel)
-                    }
+                return when (type) {
+                    is DefaultEnvelopeType -> TaggedFileEnvelope(path)
+                    is TaglessEnvelopeType -> TODO("Implement for tagless envelope")
                     else -> throw RuntimeException("Envelope type ${type.name} could not be read")
                 }
             } else {
@@ -120,7 +122,15 @@ abstract class FileEnvelope(val channel: FileChannel, private val dataOffset: Lo
     }
 }
 
-class TaggedFileEnvelope(channel: FileChannel, private val tag: EnvelopeTag) : FileEnvelope(channel, (tag.length + tag.metaSize).toLong(), tag.dataSize) {
+class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
+
+    private val tag = EnvelopeTag().read(channel)
+
+    override val dataOffset: Long = (tag.length + tag.metaSize).toLong()
+
+    override var dataLength: Int = tag.dataSize
+
+
     override val meta: Meta by lazy {
         val buffer = ByteBuffer.allocate(tag.metaSize).also {
             channel.read(it, tag.length.toLong())

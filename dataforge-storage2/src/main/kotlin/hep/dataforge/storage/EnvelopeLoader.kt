@@ -48,11 +48,16 @@ abstract class EnvelopeLoader<T : Any> protected constructor(
         get() = envelope.data
 
     /**
-     * Sequence of pairs of offset and value
+     * Sequence of <index, offset, value>
+     * @param startIndex from which one needs to read entries
      */
-    protected abstract fun readAll(): Sequence<Pair<Int, T>>
+    protected abstract fun readAll(startIndex: Int = 0): Sequence<Triple<Int, Int, T>>
 
-    override fun iterator(): Iterator<T> = readAll().map { it.second }.iterator()
+    override fun iterator(): Iterator<T> = readAll().map { it.third }.iterator()
+
+    fun forEachIndexed(operation: (index: Int, T) -> Unit) {
+        readAll().forEach { operation(it.first, it.third) }
+    }
 
     override fun close() {
         //do nothing
