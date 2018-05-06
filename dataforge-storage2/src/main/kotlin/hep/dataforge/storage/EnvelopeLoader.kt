@@ -29,8 +29,9 @@ import kotlin.reflect.KClass
 abstract class EnvelopeLoader<T : Any> protected constructor(
         final override val name: String,
         final override val type: KClass<T>,
-        final override val parent: StorageElement?,
-        final override val path: Path
+        final override val path: Path,
+        override val parent: StorageElement? = null,
+        override val context: Context = parent?.context?: Global
 ) : Loader<T>, FileStorageElement {
     private val _connectionHelper = ConnectionHelper(this)
 
@@ -40,8 +41,6 @@ abstract class EnvelopeLoader<T : Any> protected constructor(
 
     override val meta: Meta
         get() = envelope.meta
-
-    override val context: Context = parent?.context?: Global
 
     override fun getConnectionHelper(): ConnectionHelper = _connectionHelper
 

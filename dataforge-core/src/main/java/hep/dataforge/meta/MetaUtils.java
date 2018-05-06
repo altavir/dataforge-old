@@ -267,7 +267,7 @@ public class MetaUtils {
             meta.getValueNames(true).forEach(valName -> {
                 try {
                     IOUtils.writeString(out, valName);
-                    ValueUtils.writeValue(out, meta.getValue(valName));
+                    ValueUtilsKt.writeValue(out, meta.getValue(valName));
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
@@ -313,12 +313,7 @@ public class MetaUtils {
         short valSize = in.readShort();
         for (int i = 0; i < valSize; i++) {
             String valName = IOUtils.readString(in);
-            Value val = null;
-            try {
-                val = ValueUtils.readValue(in);
-            } catch (ClassNotFoundException e) {
-                throw new IOException("Failed to read custom number value from input stream.", e);
-            }
+            Value val = ValueUtilsKt.readValue(in);
             res.setValue(valName, val);
         }
         short nodeSize = in.readShort();

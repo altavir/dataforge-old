@@ -147,7 +147,7 @@ interface AppendableLoader<T: Any> : Loader<T> {
     /**
      * Synchronously append loader and return when operation is complete
      */
-    suspend fun append(item: T)
+    fun append(item: T)
 }
 
 /**

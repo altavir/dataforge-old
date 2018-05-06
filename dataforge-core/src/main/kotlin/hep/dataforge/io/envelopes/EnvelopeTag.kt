@@ -187,6 +187,7 @@ open class EnvelopeTag {
         buffer.putInt(values[Envelope.META_LENGTH_PROPERTY]!!.long.toInt())
         buffer.putInt(values[Envelope.DATA_LENGTH_PROPERTY]!!.long.toInt())
         buffer.put(endSequence)
+        buffer.position(0)
         return buffer
     }
 

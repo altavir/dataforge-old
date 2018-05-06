@@ -17,7 +17,7 @@
 package hep.dataforge.storage
 
 import hep.dataforge.data.binary.Binary
-import hep.dataforge.data.binary.BufferedBinary
+import hep.dataforge.data.binary.FileBinary
 import hep.dataforge.exceptions.NameNotFoundException
 import hep.dataforge.io.envelopes.*
 import hep.dataforge.meta.Meta
@@ -30,18 +30,19 @@ import java.nio.file.StandardOpenOption
 /**
  * A file i/o for envelope-based format
  */
-abstract class FileEnvelope(path: Path) : Envelope, AutoCloseable {
+abstract class FileEnvelope(val path: Path) : Envelope, AutoCloseable {
 
     protected abstract val dataOffset: Long
     protected abstract var dataLength: Int
 
-    protected val channel = FileChannel.open(path, StandardOpenOption.WRITE, StandardOpenOption.APPEND)
+    protected val channel = FileChannel.open(path, StandardOpenOption.WRITE)
 
     /**
      * Read the whole data block
      */
-    override val data: Binary
-        get() = BufferedBinary(ByteBuffer.allocate(dataLength).also { channel.read(it, dataOffset) })
+    override val data: Binary by lazy {
+        FileBinary(path, dataOffset)
+    }
 
     protected open fun updateDataLength(length: Int) {
         dataLength = length
@@ -52,8 +53,15 @@ abstract class FileEnvelope(path: Path) : Envelope, AutoCloseable {
      */
     fun append(buffer: ByteBuffer) {
         synchronized(this) {
-            channel.write(buffer)
-            updateDataLength(dataLength + channel.write(buffer, (dataOffset + dataLength)))
+            updateDataLength(dataLength + channel.write(buffer, dataOffset + dataLength))
+        }
+    }
+
+    fun appendAll(buffers: Iterable<ByteBuffer>){
+        synchronized(this) {
+            channel.position(dataOffset + dataLength)
+            val size = buffers.map { channel.write(it) }.sum()
+            updateDataLength(dataLength + size)
         }
     }
 
@@ -142,7 +150,10 @@ class TaggedFileEnvelope(path: Path) : FileEnvelope(path) {
         if (dataLength > Int.MAX_VALUE) {
             throw RuntimeException("Too large data block")
         }
+        super.updateDataLength(length)
         tag.dataSize = length
-        channel.write(tag.toBytes(), 0L)
+        if (channel.write(tag.toBytes(), 0L) < tag.length) {
+            throw error("Tag is not overwritten.")
+        }
     }
 }

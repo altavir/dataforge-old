@@ -70,15 +70,17 @@ interface EnvelopeType {
          */
         fun infer(path: Path): Optional<EnvelopeType> {
             return try {
-                IOUtils.nextLine(Files.newInputStream(path, READ), "ASCII") { line ->
-                    //skip shabang
-                    line.isEmpty() || line.startsWith("#!") && !line.endsWith("#!")
-                }.flatMap { header ->
-                    when {
-                    //TODO use templates from appropriate types
-                        header.startsWith("#~DFTL") -> Optional.of<EnvelopeType>(TaglessEnvelopeType.INSTANCE)
-                        header.startsWith("#~") -> Optional.of<EnvelopeType>(DefaultEnvelopeType.INSTANCE)
-                        else -> Optional.empty()
+                Files.newInputStream(path, READ).use { stream ->
+                    IOUtils.nextLine(stream, "ASCII") { line ->
+                        //skip shabang
+                        line.isEmpty() || line.startsWith("#!") && !line.endsWith("#!")
+                    }.flatMap { header ->
+                        when {
+                        //TODO use templates from appropriate types
+                            header.startsWith("#~DFTL") -> Optional.of<EnvelopeType>(TaglessEnvelopeType.INSTANCE)
+                            header.startsWith("#~") -> Optional.of<EnvelopeType>(DefaultEnvelopeType.INSTANCE)
+                            else -> Optional.empty()
+                        }
                     }
                 }
             } catch (ex: Exception) {

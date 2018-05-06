@@ -34,8 +34,8 @@ interface FileStorageElement : StorageElement {
 }
 
 interface FileStorageElementType<out T: FileStorageElement> {
-    suspend fun create(parent: FileStorage, meta: Meta): T
-    suspend fun read(parent: FileStorage, path: Path): T
+    fun create(parent: FileStorage, meta: Meta): T
+    fun read(parent: FileStorage, path: Path): T
 }
 
 open class FileStorage protected constructor(
@@ -132,7 +132,7 @@ open class FileStorage protected constructor(
             return EnvelopeBuilder().setMeta(meta).setEnvelopeType(META_ENVELOPE_TYPE).build()
         }
 
-        override suspend fun create(parent: FileStorage, meta: Meta): FileStorageElement {
+        override fun create(parent: FileStorage, meta: Meta): FileStorageElement {
             val fileName = meta.getString("name")
             val path: Path = parent.path.resolve(fileName)
             Files.createDirectory(path)
@@ -144,7 +144,7 @@ open class FileStorage protected constructor(
             return parent.buildShelf(path, meta)
         }
 
-        override suspend fun read(parent: FileStorage, path: Path): FileStorageElement {
+        override fun read(parent: FileStorage, path: Path): FileStorageElement {
             val metaFile = resolveMetaFile(path)
             val meta: Meta = if (Files.exists(metaFile)) {
                 EnvelopeReader.readFile(metaFile).meta

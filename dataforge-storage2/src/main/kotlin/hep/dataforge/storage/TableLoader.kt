@@ -16,6 +16,7 @@
 
 package hep.dataforge.storage
 
+import hep.dataforge.context.Context
 import hep.dataforge.io.envelopes.*
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
@@ -29,6 +30,9 @@ import hep.dataforge.tables.ValuesSource
 import hep.dataforge.values.*
 import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.runBlocking
+import java.io.ByteArrayOutputStream
+import java.io.DataOutputStream
 import java.nio.ByteBuffer
 import java.nio.file.Files
 import java.nio.file.Path
@@ -48,7 +52,7 @@ interface IndexedTableLoader : TableLoader, IndexedLoader<Value, Values> {
     /**
      * Notify loader that it should update index for this loader
      */
-    suspend fun updateIndex()
+    fun updateIndex()
 
     fun select(from: Value, to: Value): List<Values> {
         return keys.subSet(from, true, to, true).map { get(it)!! }
@@ -63,10 +67,12 @@ interface MutableTableLoader : TableLoader, AppendableLoader<Values>
  */
 open class FileTableLoader internal constructor(
         parent: StorageElement?,
+        context: Context,
         path: Path,
         val reader: (ByteBuffer, TableFormat) -> Values
 ) : EnvelopeLoader<Values>(
         name = "hep.dataforge.storage.table",
+        context = context,
         type = Values::class,
         parent = parent,
         path = path
@@ -80,19 +86,22 @@ open class FileTableLoader internal constructor(
         }
     }
 
-    protected val defaultIndex = TreeMap<Value, Int>()
+    protected val defaultIndex by lazy { TreeMap<Value, Int>().apply { fillIndex(this) } }
+
 
     protected fun getOffset(index: Int): Int? {
         if (index == 0) {
             return 0
         } else if (index >= defaultIndex.size) {
-            readAll(defaultIndex.size)
+            runBlocking {
+                updateIndex()
+            }
         }
         return defaultIndex[index.asValue()]
     }
 
     override val keys: NavigableSet<Value>
-        get() = synchronized(defaultIndex) { defaultIndex.navigableKeySet() }
+        get() = defaultIndex.navigableKeySet()
 
     override fun getInFuture(key: Value): Deferred<Values>? {
         return getOffset(key.int)?.let {
@@ -120,12 +129,19 @@ open class FileTableLoader internal constructor(
         }
     }
 
-    override suspend fun updateIndex() {
-        if(defaultIndex.isEmpty()){
+    private fun fillIndex(index: TreeMap<Value, Int>) {
+        val sequence = if (index.isEmpty()) {
             readAll()
         } else {
-            readAll(defaultIndex.lastKey().int)
+            readAll(index.lastKey().int)
         }
+        sequence.forEach {
+            index.putIfAbsent(it.first.asValue(), it.second)
+        }
+    }
+
+    override fun updateIndex() {
+        fillIndex(defaultIndex)
     }
 
 
@@ -137,7 +153,6 @@ open class FileTableLoader internal constructor(
             buffer.position(offset)
             return buildSequence {
                 while (buffer.remaining() > 0) {
-                    defaultIndex.putIfAbsent(counter.asValue(), buffer.position())
                     yield(Triple(counter, buffer.position(), reader(buffer, format)))
                     counter++
                 }
@@ -160,7 +175,7 @@ class IndexedFileTableLoader(val loader: FileTableLoader, val indexField: String
         }
     }
 
-    override suspend fun updateIndex() {
+    override fun updateIndex() {
         loader.forEachIndexed { index, values ->
             secondaryIndex[values.getValue(indexField)] = index.asValue()
         }
@@ -171,16 +186,30 @@ class IndexedFileTableLoader(val loader: FileTableLoader, val indexField: String
     }
 }
 
-class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values, TableFormat) -> ByteBuffer) : IndexedTableLoader by loader, MutableTableLoader {
+/**
+ * Appendable version of FileTableLoader. Build
+ */
+class AppendableFileTableLoader(val loader: FileTableLoader, val writer: (Values, TableFormat) -> ByteBuffer = binaryTableWriter) : IndexedTableLoader by loader, MutableTableLoader {
     private val mutableEnvelope = FileEnvelope.readExisting(loader.path)
 
-    override suspend fun append(item: Values) {
+    /**
+     * Append single point
+     */
+    override fun append(item: Values) {
         mutableEnvelope.append(writer(item, format))
         loader.updateIndex()
     }
 
-    suspend fun append(vararg values: Any) {
+    fun append(vararg values: Any) {
         append(ValueMap.of(format.namesAsArray(), *values))
+    }
+
+    /**
+     * Batch append operation
+     */
+    fun appendAll(collection: Iterable<Values>) {
+        mutableEnvelope.appendAll(collection.map { writer(it, format) })
+        loader.updateIndex()
     }
 
     override fun close() {
@@ -221,25 +250,26 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
     }
 
     val binaryTableWriter: (Values, TableFormat) -> ByteBuffer = { values, format ->
-        //TODO Fix the way value is serialized
-        val buffer = ByteBuffer.allocate(256)
-        format.names.map { values[it] }.forEach { buffer.putValue(it) }
-        buffer.put('\n'.toByte())
-        buffer.limit(buffer.position())
-        buffer.position(0)
-        buffer
+        val baos = ByteArrayOutputStream(256)
+        val stream = DataOutputStream(baos)
+        format.names.map { values[it] }.forEach {
+            stream.writeValue(it)
+        }
+        stream.writeByte('\n'.toInt())
+        stream.flush()
+        ByteBuffer.wrap(baos.toByteArray())
     }
 
-    override suspend fun create(parent: FileStorage, meta: Meta): FileTableLoader {
+    override fun create(parent: FileStorage, meta: Meta): FileTableLoader {
         if (!meta.hasMeta(TABLE_FORMAT_KEY)) {
             throw IllegalArgumentException("Values format not found")
         }
         val fileName = meta.getString("name")
         val path: Path = parent.path.resolve("$fileName.df")
-        return create(parent, path, meta)
+        return create(parent, parent.context, path, meta)
     }
 
-    suspend fun create(parent: FileStorage?, path: Path, meta: Meta): FileTableLoader {
+    private fun create(parent: FileStorage?, context: Context, path: Path, meta: Meta): FileTableLoader {
         val type = meta.getString(Envelope.ENVELOPE_DATA_TYPE_KEY, BINARY_DATA_TYPE)
 
         val envelope = EnvelopeBuilder()
@@ -251,33 +281,51 @@ object TableLoaderType : FileStorageElementType<EnvelopeLoader<Values>> {
             when (type) {
                 BINARY_DATA_TYPE -> {
                     DefaultEnvelopeType.INSTANCE.writer.write(it, envelope)
-                    FileTableLoader(parent, path, binaryTableReader)
+                    FileTableLoader(parent, context, path, binaryTableReader)
                 }
                 TEXT_DATA_TYPE -> {
                     TaglessEnvelopeType.INSTANCE.writer.write(it, envelope)
-                    FileTableLoader(parent, path, textTableReader)
+                    FileTableLoader(parent, context, path, textTableReader)
                 }
                 else -> throw RuntimeException("Unknown data type for table loader")
             }
         }
     }
 
-    suspend fun create(parent: FileStorage?, path: Path, format: TableFormat, binary: Boolean = true): FileTableLoader {
-        return create(parent, path, buildMeta {
+    /**
+     * Create a standalone loader without a storage
+     */
+    fun create(context: Context, path: Path, meta: Meta): FileTableLoader {
+        return create(null, context, path, meta)
+    }
+
+    /**
+     * Utility method to create binary table lader with given format
+     */
+    fun create(context: Context, path: Path, format: TableFormat): FileTableLoader {
+        return create(context, path, buildMeta {
             TABLE_FORMAT_KEY to format.toMeta()
-            Envelope.ENVELOPE_DATA_TYPE_KEY to if (binary) {
-                BINARY_DATA_TYPE
-            } else {
-                TEXT_DATA_TYPE
-            }
+            Envelope.ENVELOPE_DATA_TYPE_KEY to BINARY_DATA_TYPE
         })
     }
 
-    override suspend fun read(parent: FileStorage, path: Path): EnvelopeLoader<Values> {
+    override fun read(parent: FileStorage, path: Path): FileTableLoader {
         val envelope = EnvelopeReader.readFile(path)
         return when (envelope.dataType) {
-            BINARY_DATA_TYPE -> FileTableLoader(parent, path, binaryTableReader)
-            TEXT_DATA_TYPE -> FileTableLoader(parent, path, textTableReader)
+            BINARY_DATA_TYPE -> FileTableLoader(parent, parent.context, path, binaryTableReader)
+            TEXT_DATA_TYPE -> FileTableLoader(parent, parent.context, path, textTableReader)
+            else -> throw RuntimeException("Unknown data type for table loader")
+        }
+    }
+
+    /**
+     * Read orphaned loader
+     */
+    fun read(context: Context, path: Path): FileTableLoader {
+        val envelope = EnvelopeReader.readFile(path)
+        return when (envelope.dataType) {
+            BINARY_DATA_TYPE -> FileTableLoader(null, context, path, binaryTableReader)
+            TEXT_DATA_TYPE -> FileTableLoader(null, context, path, textTableReader)
             else -> throw RuntimeException("Unknown data type for table loader")
         }
     }

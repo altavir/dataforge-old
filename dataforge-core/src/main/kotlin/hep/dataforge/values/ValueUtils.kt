@@ -17,11 +17,12 @@
 package hep.dataforge.values
 
 import hep.dataforge.io.IOUtils
+import hep.dataforge.kodex.toBigDecimal
 import hep.dataforge.providers.Path
 import hep.dataforge.providers.Provider
+import java.io.DataInput
+import java.io.DataOutput
 import java.io.IOException
-import java.io.ObjectInput
-import java.io.ObjectOutput
 import java.io.Serializable
 import java.math.BigDecimal
 import java.math.BigInteger
@@ -45,139 +46,6 @@ object ValueUtils {
 
     val NUMBER_COMPARATOR: Comparator<Number> = NumberComparator()
 
-    /**
-     * Fast and compact serialization for values
-     *
-     * @param oos
-     * @param value
-     * @throws IOException
-     */
-    @Throws(IOException::class)
-    @JvmStatic
-    fun writeValue(oos: ObjectOutput, value: Value) {
-        if (value.isList) {
-            oos.write('*'.toInt()) // List designation
-            oos.writeShort(value.list.size)
-            for (subValue in value.list) {
-                writeValue(oos, subValue)
-            }
-        } else {
-            when (value.type) {
-                ValueType.NULL -> oos.writeChar('0'.toInt()) // null
-                ValueType.TIME -> {
-                    oos.write('T'.toInt())//Instant
-                    oos.writeLong(value.time.epochSecond)
-                    oos.writeLong(value.time.nano.toLong())
-                }
-                ValueType.STRING -> {
-                    oos.writeChar('S'.toInt())//String
-                    IOUtils.writeString(oos, value.string)
-                }
-                ValueType.NUMBER -> {
-                    val num = value.number
-                    when (num) {
-                        is Double -> {
-                            oos.write('D'.toInt()) // double
-                            oos.writeDouble(num.toDouble())
-                        }
-                        is Int -> {
-                            oos.write('I'.toInt()) // integer
-                            oos.writeInt(num.toInt())
-                        }
-                        is Long -> {
-                            oos.write('L'.toInt())
-                            oos.writeLong(num.toLong())
-                        }
-                        is BigDecimal -> {
-                            oos.write('B'.toInt()) // BigDecimal
-                            val bigInt = num.unscaledValue().toByteArray()
-                            val scale = num.scale()
-                            oos.writeShort(bigInt.size)
-                            oos.write(bigInt)
-                            oos.writeInt(scale)
-                        }
-                        else -> {
-                            oos.write('N'.toInt()) //custom number
-                            oos.writeObject(num)
-                        }
-                    }
-                }
-                ValueType.BOOLEAN -> if (value.boolean) {
-                    oos.write('+'.toInt()) //true
-                } else {
-                    oos.write('-'.toInt()) // false
-                }
-                ValueType.BINARY -> {
-                    val binary = value.binary
-                    oos.write('X'.toInt())
-                    oos.write(binary.limit())
-                    oos.write(binary.array())
-                }
-//                else -> {
-//                    oos.write('C'.toInt())//custom
-//                    oos.writeObject(value)
-//                }
-            }
-        }
-    }
-
-    /**
-     * Value deserialization
-     *
-     * @param ois
-     * @return
-     * @throws IOException
-     * @throws ClassNotFoundException
-     */
-    @Throws(IOException::class, ClassNotFoundException::class)
-    @JvmStatic
-    fun readValue(ois: ObjectInput): Value {
-        return readValue(ois, ois.read().toChar())
-    }
-
-    /**
-     * Read value knowing its type-character
-     */
-    fun readValue(ois: ObjectInput, type: Char): Value {
-        when (type) {
-            '*' -> {
-                val listSize = ois.readShort()
-                val valueList = ArrayList<Value>()
-                for (i in 0 until listSize) {
-                    valueList.add(readValue(ois))
-                }
-                return Value.of(valueList)
-            }
-            '0' -> return Value.NULL
-            'T' -> {
-                val time = Instant.ofEpochSecond(ois.readLong(), ois.readLong())
-                return time.asValue()
-            }
-            'S' -> return IOUtils.readString(ois).asValue()
-            'D' -> return ois.readDouble().asValue()
-            'I' -> return ois.readInt().asValue()
-            'L' -> return ois.readLong().asValue()
-            'B' -> {
-                val intSize = ois.readShort()
-                val intBytes = ByteArray(intSize.toInt())
-                ois.read(intBytes)
-                val scale = ois.readInt()
-                val bdc = BigDecimal(BigInteger(intBytes), scale)
-                return bdc.asValue()
-            }
-            'N' -> return Value.of(ois.readObject())
-            'X' -> {
-                val length = ois.readInt()
-                val buffer = ByteArray(length)
-                ois.readFully(buffer)
-                return BinaryValue(ByteBuffer.wrap(buffer))
-            }
-            '+' -> return BooleanValue.TRUE
-            '-' -> return BooleanValue.FALSE
-            '?' -> return ois.readObject() as Value // Read as custom object. Currently reserved
-            else -> throw RuntimeException("Wrong value serialization format. Designation $type is unexpected")
-        }
-    }
 
     /**
      * Build a meta provider from given general provider
@@ -246,6 +114,118 @@ object ValueUtils {
 
 }
 
+/**
+ * Fast and compact serialization for values
+ *
+ * @param oos
+ * @param value
+ * @throws IOException
+ */
+@Throws(IOException::class)
+fun DataOutput.writeValue(value: Value) {
+    if (value.isList) {
+        writeByte('*'.toInt()) // List designation
+        writeShort(value.list.size)
+        for (subValue in value.list) {
+            writeValue(subValue)
+        }
+    } else {
+        when (value.type) {
+            ValueType.NULL -> writeChar('0'.toInt()) // null
+            ValueType.TIME -> {
+                writeByte('T'.toInt())//Instant
+                writeLong(value.time.epochSecond)
+                writeLong(value.time.nano.toLong())
+            }
+            ValueType.STRING -> {
+                this.writeByte('S'.toInt())//String
+                IOUtils.writeString(this, value.string)
+            }
+            ValueType.NUMBER -> {
+                val num = value.number
+                when (num) {
+                    is Double -> {
+                        writeByte('D'.toInt()) // double
+                        writeDouble(num.toDouble())
+                    }
+                    is Int -> {
+                        writeByte('I'.toInt()) // integer
+                        writeInt(num.toInt())
+                    }
+                    is Long -> {
+                        writeByte('L'.toInt())
+                        writeLong(num.toLong())
+                    }
+                    else -> {
+                        writeByte('N'.toInt()) // BigDecimal
+                        val decimal = num.toBigDecimal()
+                        val bigInt = decimal.unscaledValue().toByteArray()
+                        val scale = decimal.scale()
+                        writeShort(bigInt.size)
+                        write(bigInt)
+                        writeInt(scale)
+                    }
+                }
+            }
+            ValueType.BOOLEAN -> if (value.boolean) {
+                writeByte('+'.toInt()) //true
+            } else {
+                writeByte('-'.toInt()) // false
+            }
+            ValueType.BINARY -> {
+                val binary = value.binary
+                writeByte('X'.toInt())
+                writeInt(binary.limit())
+                write(binary.array())
+            }
+        }
+    }
+}
+
+/**
+ * Value deserialization
+ */
+fun DataInput.readValue(): Value {
+    val type = readByte().toChar()
+    when (type) {
+        '*' -> {
+            val listSize = readShort()
+            val valueList = ArrayList<Value>()
+            for (i in 0 until listSize) {
+                valueList.add(readValue())
+            }
+            return Value.of(valueList)
+        }
+        '0' -> return Value.NULL
+        'T' -> {
+            val time = Instant.ofEpochSecond(readLong(), readLong())
+            return time.asValue()
+        }
+        'S' -> return IOUtils.readString(this).asValue()
+        'D' -> return readDouble().asValue()
+        'I' -> return readInt().asValue()
+        'L' -> return readLong().asValue()
+        'N' -> {
+            val intSize = readShort()
+            val intBytes = ByteArray(intSize.toInt())
+            readFully(intBytes)
+            val scale = readInt()
+            val bdc = BigDecimal(BigInteger(intBytes), scale)
+            return bdc.asValue()
+        }
+        'X' -> {
+            val length = readInt()
+            val buffer = ByteArray(length)
+            readFully(buffer)
+            return BinaryValue(ByteBuffer.wrap(buffer))
+        }
+        '+' -> return BooleanValue.TRUE
+        '-' -> return BooleanValue.FALSE
+        else -> throw RuntimeException("Wrong value serialization format. Designation $type is unexpected")
+    }
+}
+
+
 fun ByteBuffer.getValue(): Value{
     val type = get().toChar()
     when (type) {
@@ -271,7 +251,7 @@ fun ByteBuffer.getValue(): Value{
         'D' -> return getDouble().asValue()
         'I' -> return getInt().asValue()
         'L' -> return getLong().asValue()
-        'B' -> {
+        'N' -> {
             val intSize = getShort()
             val intBytes = ByteArray(intSize.toInt())
             get()
@@ -285,7 +265,6 @@ fun ByteBuffer.getValue(): Value{
             get(buffer)
             return BinaryValue(ByteBuffer.wrap(buffer))
         }
-        //'N' -> TODO custom number serialization
         '+' -> return BooleanValue.TRUE
         '-' -> return BooleanValue.FALSE
         else -> throw RuntimeException("Wrong value serialization format. Designation $type is unexpected")
@@ -331,7 +310,7 @@ fun ByteBuffer.putValue(value: Value){
                         putLong(num.toLong())
                     }
                     is BigDecimal -> {
-                        put('B'.toByte()) // BigDecimal
+                        put('N'.toByte()) // BigDecimal
                         val bigInt = num.unscaledValue().toByteArray()
                         val scale = num.scale()
                         if(bigInt.size> Short.MAX_VALUE){

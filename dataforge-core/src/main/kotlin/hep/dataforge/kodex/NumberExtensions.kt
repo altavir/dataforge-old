@@ -1,6 +1,7 @@
 package hep.dataforge.kodex
 
 import java.math.BigDecimal
+import java.math.MathContext
 
 /**
  * Extension of basic java classes
@@ -12,8 +13,12 @@ import java.math.BigDecimal
 /**
  * Convert a number to BigDecimal
  */
-fun Number.toBigDecimal(): BigDecimal {
-    return this as? BigDecimal ?: BigDecimal(this.toDouble())
+fun Number.toBigDecimal(mathContext: MathContext =  MathContext.UNLIMITED): BigDecimal {
+    return when(this){
+        is BigDecimal -> this
+        is Int, is Long, is Double, is Float -> this.toBigDecimal(mathContext)
+        else -> this.toDouble().toBigDecimal(mathContext)
+    }
 }
 
 operator fun Number.plus(other: Number): Number {
