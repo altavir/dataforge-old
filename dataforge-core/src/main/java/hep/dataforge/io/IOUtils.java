@@ -376,16 +376,16 @@ public class IOUtils {
         }
     }
 
-    public static void writeString(ObjectOutput output, String string) throws IOException {
+    public static void writeString(DataOutput output, String string) throws IOException {
         byte[] bytes = string.getBytes(UTF8_CHARSET);
         output.writeShort(bytes.length);
         output.write(bytes);
     }
 
-    public static String readString(ObjectInput input) throws IOException {
+    public static String readString(DataInput input) throws IOException {
         int size = input.readShort();
         byte[] bytes = new byte[size];
-        input.read(bytes);
+        input.readFully(bytes);
         return new String(bytes, UTF8_CHARSET);
     }
 

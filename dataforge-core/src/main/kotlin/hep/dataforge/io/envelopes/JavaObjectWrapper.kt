@@ -40,7 +40,7 @@ object JavaObjectWrapper : Wrapper<Any> {
 
     override fun wrap(obj: Any): Envelope {
         val builder = EnvelopeBuilder()
-                .setContentType("wrapper")
+                .setDataType("wrapper")
                 .setMetaValue(Wrapper.WRAPPER_TYPE_KEY, JAVA_OBJECT_TYPE)
                 .setMetaValue(JAVA_CLASS_KEY, obj.javaClass.name)
         val baos = ByteArrayOutputStream()

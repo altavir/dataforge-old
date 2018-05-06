@@ -38,7 +38,7 @@ public interface Provider {
      */
     default Stream<String> listContent(String target) {
         if (target.isEmpty()) {
-            target = defaultTarget();
+            target = getDefaultTarget();
         }
         return Providers.listContent(this, target);
     }
@@ -48,7 +48,7 @@ public interface Provider {
      *
      * @return
      */
-    default String defaultTarget() {
+    default String getDefaultTarget() {
         return "";
     }
 
@@ -57,7 +57,7 @@ public interface Provider {
      *
      * @return
      */
-    default String defaultChainTarget() {
+    default String getDefaultChainTarget() {
         return "";
     }
 

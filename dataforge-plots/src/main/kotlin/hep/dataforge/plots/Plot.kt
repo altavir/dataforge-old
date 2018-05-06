@@ -84,7 +84,7 @@ interface Plot : Plottable {
                     .setMetaValue("name", obj.name)
                     //.putMetaNode("descriptor", plot.getDescriptor().toMeta())
                     .putMetaNode(DEFAULT_META_NAME, obj.config)
-                    .setContentType("wrapper")
+                    .setDataType("wrapper")
 
             val baos = ByteArrayOutputStream()
             try {

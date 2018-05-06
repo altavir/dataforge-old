@@ -12,7 +12,4 @@ dependencies {
     compile 'commons-io:commons-io:2.5'
      // https://mvnrepository.com/artifact/org.slf4j/jcl-over-slf4j
     compile group: 'org.slf4j', name: 'jcl-over-slf4j', version: '1.7.25'
-
-
-
 }

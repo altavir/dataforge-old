@@ -36,6 +36,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
+import kotlin.collections.HashMap
 import kotlin.reflect.KClass
 
 /**
@@ -130,7 +131,7 @@ open class Context(
         lock.modify { properties[name] = Value.of(value) }
     }
 
-    override fun defaultTarget(): String {
+    override fun getDefaultTarget(): String {
         return Plugin.PLUGIN_TARGET
     }
 
@@ -192,6 +193,8 @@ open class Context(
                 .map { type.cast(it) }
     }
 
+    private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
+
     /**
      * Get stream of services of given class provided by Java SPI or any other service loading API.
      *
@@ -201,7 +204,11 @@ open class Context(
      */
     @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
-        return StreamSupport.stream(ServiceLoader.load(serviceClass, classLoader).spliterator(), false)
+        synchronized(serviceCache){
+            @Suppress("UNCHECKED_CAST")
+            val loader : ServiceLoader<T> = serviceCache.getOrPut(serviceClass){ServiceLoader.load(serviceClass, classLoader)} as ServiceLoader<T>
+            return StreamSupport.stream(loader.spliterator(), false)
+        }
     }
 
     /**

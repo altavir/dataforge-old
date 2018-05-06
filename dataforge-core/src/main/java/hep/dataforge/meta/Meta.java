@@ -197,12 +197,12 @@ public abstract class Meta implements Provider, Named, ValueProvider, MetaMorph,
     }
 
     @Override
-    public String defaultTarget() {
+    public String getDefaultTarget() {
         return META_TARGET;
     }
 
     @Override
-    public String defaultChainTarget() {
+    public String getDefaultChainTarget() {
         return VALUE_TARGET;
     }
 

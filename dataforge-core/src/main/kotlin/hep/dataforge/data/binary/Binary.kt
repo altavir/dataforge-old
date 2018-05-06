@@ -43,8 +43,8 @@ interface Binary : Serializable {
      */
     val buffer: ByteBuffer
         get() {
-            if (size() >= 0) {
-                val buffer = ByteBuffer.allocate(size().toInt())
+            if (size >= 0) {
+                val buffer = ByteBuffer.allocate(size.toInt())
                 channel.read(buffer)
                 return buffer
             } else {
@@ -58,12 +58,38 @@ interface Binary : Serializable {
      * @return
      * @throws IOException
      */
-    @Throws(IOException::class)
-    fun size(): Long
+    val size: Long
+
+    @JvmDefault
+    fun stream(offset: Long): InputStream = stream.also { it.skip(offset) }
+
+    /**
+     * Read a buffer with given dataOffset in respect to data block start and given size.
+     *
+     * @param offset
+     * @param size
+     * @return
+     * @throws IOException
+     */
+    @JvmDefault
+    fun read(offset: Int, size: Int): ByteBuffer {
+        return buffer.run {
+            position(offset)
+            val array = ByteArray(size)
+            get(array)
+            ByteBuffer.wrap(array)
+        }
+    }
+
+    /**
+     *
+     */
+    @JvmDefault
+    fun read(start: Int): ByteBuffer {
+        return read(start, (size - start).toInt())
+    }
 
     companion object {
-        //TODO add randomAcessBinary?
-
         val EMPTY: Binary = BufferedBinary(ByteArray(0))
     }
 }

@@ -50,10 +50,13 @@ open class EnvelopeTag {
     open val length: Int = 20
 
     val metaSize: Int
-        get() = values.getOrDefault(Envelope.META_LENGTH_PROPERTY, Value.of(0)).int
+        get() = values[Envelope.META_LENGTH_PROPERTY]?.int ?: 0
 
-    val dataSize: Int
-        get() = values.getOrDefault(Envelope.DATA_LENGTH_PROPERTY, Value.of(0)).int
+    var dataSize: Int
+        get() = values[Envelope.DATA_LENGTH_PROPERTY]?.int ?: 0
+        set(value) {
+            values[Envelope.DATA_LENGTH_PROPERTY] = value.asValue()
+        }
 
     /**
      * Read header line
@@ -184,6 +187,7 @@ open class EnvelopeTag {
         buffer.putInt(values[Envelope.META_LENGTH_PROPERTY]!!.long.toInt())
         buffer.putInt(values[Envelope.DATA_LENGTH_PROPERTY]!!.long.toInt())
         buffer.put(endSequence)
+        buffer.position(0)
         return buffer
     }
 

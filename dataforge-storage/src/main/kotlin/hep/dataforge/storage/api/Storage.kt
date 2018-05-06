@@ -82,6 +82,7 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
                 .map<Boolean> { it.boolean }
                 .orElseGet { parent != null && parent!!.isReadOnly }
 
+    @JvmDefault
     val fullName: Name
         get() = getFullName(null)
 
@@ -89,12 +90,9 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
      * Full
      * @return
      */
+    @JvmDefault
     val laminate: Laminate
-        get() = if (parent == null) {
-            Laminate(meta)
-        } else {
-            parent!!.laminate.withFirstLayer(meta)
-        }
+        get() = parent?.laminate?.withFirstLayer(meta) ?:Laminate(meta)
 
     /**
      * Initialize this storage.
@@ -162,11 +160,13 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
     @Throws(StorageException::class)
     fun shelves(): Collection<Storage>
 
-    override fun defaultTarget(): String {
+    @JvmDefault
+    override fun getDefaultTarget(): String {
         return STORAGE_TARGET
     }
 
-    override fun defaultChainTarget(): String {
+    @JvmDefault
+    override fun getDefaultChainTarget(): String {
         return LOADER_TARGET
     }
 
@@ -195,19 +195,21 @@ interface Storage : Metoid, Named, Provider, AutoCloseable, Responder, Dispatche
      *
      * @return
      */
+    @JvmDefault
     fun getFullName(root: Storage?): Name {
-        return if (parent === root || parent == null) {
+        return if (parent == root || parent == null) {
             Name.ofSingle(name)
         } else {
             parent!!.getFullName(root).append(name)
         }
     }
 
-
+    @JvmDefault
     override fun compareTo(other: Named): Int {
         return AlphanumComparator.INSTANCE.compare(this.name, other.name)
     }
 
+    @JvmDefault
     override val logger: Logger
         get() = optConnection(LOGGER_ROLE, Logger::class.java).orElse(context.logger)
 

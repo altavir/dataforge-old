@@ -20,9 +20,9 @@ package hep.dataforge.io.envelopes
  */
 open class DefaultEnvelopeType : EnvelopeType {
 
-    override val code: Int = DEFAULT_ENVELOPE_TYPE
+    override val code: Int = DEFAULT_ENVELOPE_CODE
 
-    override val name: String = "default"
+    override val name: String = DEFAULT_ENVELOPE_NAME
 
     override fun description(): String = "Standard envelope type. Meta and data end auto detection are not supported. Tag is mandatory."
 
@@ -49,7 +49,8 @@ open class DefaultEnvelopeType : EnvelopeType {
 
         val INSTANCE = DefaultEnvelopeType()
 
-        const val DEFAULT_ENVELOPE_TYPE = 0x44463032
+        const val DEFAULT_ENVELOPE_CODE = 0x44463032
+        const val DEFAULT_ENVELOPE_NAME = "default"
 
         /**
          * The set of symbols that separates tag from metadata and data

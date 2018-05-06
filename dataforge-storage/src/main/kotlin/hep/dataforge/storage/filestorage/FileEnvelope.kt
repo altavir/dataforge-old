@@ -104,7 +104,7 @@ open class FileEnvelope protected constructor(val file: Path, val isReadOnly: Bo
                 if (dataSize <= 0) {
                     dataSize = readChannel.size() - dataOffset
                 }
-                return FileBinary(file, dataOffset.toInt(), dataSize.toInt())
+                return FileBinary(file, dataOffset, dataSize)
             } catch (ex: IOException) {
                 throw RuntimeException(ex)
             }

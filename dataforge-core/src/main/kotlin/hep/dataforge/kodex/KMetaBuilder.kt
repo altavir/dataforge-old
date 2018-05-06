@@ -38,6 +38,10 @@ class KMetaBuilder(name: String = MetaBuilder.DEFAULT_META_NAME) : MetaBuilder(n
         putNode(this, KMetaBuilder(this).apply(metaBuilder))
     }
 
+    infix fun String.to(meta: Meta) {
+        putNode(this, meta)
+    }
+
 //    /**
 //     * Short infix notation to put value
 //     */

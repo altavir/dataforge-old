@@ -16,6 +16,7 @@
 
 package hep.dataforge.io.envelopes
 
+import hep.dataforge.data.binary.BufferedBinary
 import hep.dataforge.io.envelopes.Envelope.Companion.DATA_LENGTH_PROPERTY
 import hep.dataforge.meta.Meta
 import java.io.*
@@ -59,7 +60,7 @@ class TaglessEnvelopeType : EnvelopeType {
 
             //printing all properties
             properties.forEach { key, value -> writer.printf("#? %s: %s;%n", key, value) }
-            writer.printf("#? %s: %s;%n", DATA_LENGTH_PROPERTY, envelope.data.size())
+            writer.printf("#? %s: %s;%n", DATA_LENGTH_PROPERTY, envelope.data.size)
 
             //Printing meta
             if (envelope.hasMeta()) {
@@ -92,15 +93,14 @@ class TaglessEnvelopeType : EnvelopeType {
 
         @Throws(IOException::class)
         override fun read(stream: InputStream): Envelope {
-           return read(Channels.newChannel(stream))
+            return read(Channels.newChannel(stream))
         }
 
-        override fun read(channel: ReadableByteChannel): Envelope{
+        override fun read(channel: ReadableByteChannel): Envelope {
             val properties = HashMap(override)
             val buffer = ByteBuffer.allocate(BUFFER_SIZE).apply { position(BUFFER_SIZE) }
             val meta = readMeta(channel, buffer, properties)
-            val data = readData(channel,buffer, properties)
-            return EnvelopeBuilder().setMeta(meta).setData(data).build()
+            return LazyEnvelope(meta) { BufferedBinary(readData(channel, buffer, properties)) }
         }
 
 
@@ -112,7 +112,7 @@ class TaglessEnvelopeType : EnvelopeType {
                 val builder = ByteArrayOutputStream()
                 while (true) {
                     if (!buffer.hasRemaining()) {
-                        if(!channel.isOpen){
+                        if (!channel.isOpen) {
                             return@buildSequence
                         }
                         buffer.flip()
@@ -203,15 +203,15 @@ class TaglessEnvelopeType : EnvelopeType {
     }
 
     companion object {
-        val TAGLESS_ENVELOPE_TYPE = "tagless"
+        const val TAGLESS_ENVELOPE_TYPE = "tagless"
 
-        val TAGLESS_ENVELOPE_HEADER = "#~DFTL~#"
-        val META_START_PROPERTY = "metaSeparator"
-        val DEFAULT_META_START = "#~META~#"
-        val DATA_START_PROPERTY = "dataSeparator"
-        val DEFAULT_DATA_START = "#~DATA~#"
+        const val TAGLESS_ENVELOPE_HEADER = "#~DFTL~#"
+        const val META_START_PROPERTY = "metaSeparator"
+        const val DEFAULT_META_START = "#~META~#"
+        const val DATA_START_PROPERTY = "dataSeparator"
+        const val DEFAULT_DATA_START = "#~DATA~#"
 
-        var instance = TaglessEnvelopeType()
+        val INSTANCE = TaglessEnvelopeType()
     }
 
 }

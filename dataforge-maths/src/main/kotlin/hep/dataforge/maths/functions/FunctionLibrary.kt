@@ -79,7 +79,7 @@ class FunctionLibrary : BasicPlugin(), Responder {
     override fun respond(message: Envelope): Envelope {
         val action = message.meta.getString("action", "getValue");
         if (action == "getValue") {
-            val builder = EnvelopeBuilder().setContentType("hep.dataforge.function.response")
+            val builder = EnvelopeBuilder().setDataType("hep.dataforge.function.response")
             message.meta.getMetaList("request").forEach { request ->
                 val functionKey = request.getString("key")
                 val functionMeta = message.meta.getMetaOrEmpty("meta")

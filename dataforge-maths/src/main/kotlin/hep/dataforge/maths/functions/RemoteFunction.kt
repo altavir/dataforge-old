@@ -28,7 +28,7 @@ interface RemoteFunction {
 class SimpleRemoteFunction(val responder: Responder): RemoteFunction{
     override suspend operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double {
         val request = EnvelopeBuilder()
-                .setContentType("hep.dataforge.function.request")
+                .setDataType("hep.dataforge.function.request")
                 .setMetaValue("action", "getValue")
                 .setMetaValue("request.key",key)
                 .putMetaNode("request.meta", meta)

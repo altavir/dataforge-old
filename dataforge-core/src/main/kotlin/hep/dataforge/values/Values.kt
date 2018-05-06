@@ -48,6 +48,11 @@ interface Values : NameSetContainer, ValueProvider, MetaMorph {
         return getValue(this.names.get(num))
     }
 
+    @JvmDefault
+    operator fun get(key: String): Value {
+        return getValue(key)
+    }
+
     /**
      * Convert a DataPoint to a Map. Order is not guaranteed
      * @return
