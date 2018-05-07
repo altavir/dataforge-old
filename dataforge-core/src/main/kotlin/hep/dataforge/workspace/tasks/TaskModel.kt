@@ -67,7 +67,7 @@ class TaskModel private constructor(
      * @return
      */
     fun builder(): Builder {
-        return Builder(this)
+        return Builder(workspace, name, meta)
     }
 
     /**
@@ -247,9 +247,9 @@ class TaskModel private constructor(
     /**
      * A builder for immutable model
      */
-    class Builder : GenericBuilder<TaskModel, Builder> {
-        private val model: TaskModel
-        private var taskMeta = MetaBuilder()
+    class Builder(workspace: Workspace, taskName: String, taskMeta: Meta) : GenericBuilder<TaskModel, Builder> {
+        private val model: TaskModel = TaskModel(workspace, taskName, Meta.empty())
+        private var taskMeta = taskMeta.builder
 
         val workspace: Workspace
             get() = model.workspace
@@ -258,19 +258,10 @@ class TaskModel private constructor(
             get() = this.model.name
 
 
-        constructor(workspace: Workspace, taskName: String, taskMeta: Meta) {
-            this.model = TaskModel(workspace, taskName, Meta.empty())
-            this.taskMeta = taskMeta.builder
-        }
-
-        constructor(workspace: Workspace, taskName: String) {
-            this.model = TaskModel(workspace, taskName, Meta.empty())
-        }
-
-        constructor(model: TaskModel) {
-            this.model = model.copy()
-            this.taskMeta = model.meta.getBuilder()
-        }
+        //        constructor(model: TaskModel) {
+//            this.model = model.copy()
+//            this.taskMeta = model.meta.builder
+//        }
 
         override fun self(): Builder {
             return this
@@ -291,7 +282,7 @@ class TaskModel private constructor(
          * @param transform
          * @return
          */
-        fun configure(transform: (MetaBuilder) -> Unit): Builder {
+        fun configure(transform: MetaBuilder.() -> Unit): Builder {
             transform(taskMeta)
             return self()
         }
@@ -430,6 +421,7 @@ class TaskModel private constructor(
             model._dependencies.add(DataNodeDependency(type, nodeName, nodeName))
             return this
         }
+
     }
     /**
      * dependsOn(model, model.getName());

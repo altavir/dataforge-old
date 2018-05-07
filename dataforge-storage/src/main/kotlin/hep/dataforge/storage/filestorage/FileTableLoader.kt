@@ -56,7 +56,7 @@ class FileTableLoader(storage: Storage, name: String, meta: Meta, file: FileEnve
     override val format: TableFormat by lazy {
         when {
             file.meta.hasMeta("format") -> MetaTableFormat(meta.getMeta("format"))
-            file.meta.hasValue("format") -> MetaTableFormat.forNames(meta.getStringArray("format"))
+            file.meta.hasValue("format") -> MetaTableFormat.forNames(*meta.getStringArray("format"))
             else -> throw RuntimeException("Format definition not found")
         }
     }

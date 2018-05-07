@@ -46,7 +46,8 @@ class DataNodeSpec {
         this.context = context
         this.name = name
         this.type = type
-        tree = DataTree.edit(Object).setName(name);
+        tree = DataTree.edit(Object)
+        tree.setName(name)
     }
 
     void meta(Map values = [:], @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
@@ -76,7 +77,7 @@ class DataNodeSpec {
     }
 
     void item(String name, Data data) {
-        tree.putData(name, data,false)
+        tree.putData(name, data, false)
     }
 
     void item(String name, @DelegatesTo(ItemSpec) Closure cl) {

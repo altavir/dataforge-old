@@ -23,7 +23,7 @@ abstract class DynamicWorkspace : Workspace {
      */
     protected open val workspace: Workspace
         get() {
-            synchronized(this){
+            synchronized(this) {
                 if (_workspace == null) {
                     _workspace = buildWorkspace()
                 }

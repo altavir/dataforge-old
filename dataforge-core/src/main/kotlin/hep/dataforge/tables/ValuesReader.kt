@@ -82,7 +82,7 @@ class SimpleValuesParser : ValuesParser {
      * @param str
      */
     override fun parse(str: String): Values {
-        val strings = str.split("\\s+")
+        val strings = str.split("\\s".toRegex())
         return ValueMap((0 until format.size).associate { format[it] to LateParseValue(strings[it]) })
     }
 

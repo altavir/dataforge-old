@@ -26,7 +26,8 @@ import hep.dataforge.context.ContextAware
 import hep.dataforge.exceptions.StorageException
 import hep.dataforge.storage.commons.MapIndex
 import hep.dataforge.values.Value
-import hep.dataforge.values.ValueUtils
+import hep.dataforge.values.readValue
+import hep.dataforge.values.writeValue
 import org.slf4j.LoggerFactory
 import java.io.ByteArrayOutputStream
 import java.io.IOException
@@ -151,7 +152,7 @@ abstract class FileMapIndex<T>(
                     val position = ois.readLong().toInt()
                     val newMap = TreeMap<Value, MutableList<Int>>()
                     while (ois.available() > 0) {
-                        val value = ValueUtils.readValue(ois)
+                        val value = ois.readValue()
                         val num = ois.readShort()
                         val integers = ArrayList<Int>()
                         for (i in 0 until num) {
@@ -197,7 +198,7 @@ abstract class FileMapIndex<T>(
                 ous.writeLong(indexedSize.toLong())
                 map.forEach { value, integers ->
                     try {
-                        ValueUtils.writeValue(ous, value)
+                        ous.writeValue(value)
                         ous.writeShort(integers.size)
                         for (i in integers) {
                             ous.writeInt(i)
