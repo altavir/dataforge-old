@@ -5,7 +5,6 @@ import hep.dataforge.data.DataNode
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel
-import java.util.stream.Stream
 
 /**
  * A dynamic workspace can update workspace specification dynamically from external source. It fully delegates all tasks to loaded workspace.
@@ -13,8 +12,15 @@ import java.util.stream.Stream
  */
 abstract class DynamicWorkspace : Workspace {
 
+    /**
+     * Check if backing workspace is loaded
+     *
+     * @return
+     */
+    protected var isValid: Boolean = false
+        private set
 
-    private var _workspace: Workspace? = null
+    private lateinit var _workspace: Workspace
 
     /**
      * Get backing workspace instance
@@ -23,29 +29,19 @@ abstract class DynamicWorkspace : Workspace {
      */
     protected open val workspace: Workspace
         get() {
-            synchronized(this) {
-                if (_workspace == null) {
-                    _workspace = buildWorkspace()
-                }
+            if (!isValid) {
+                _workspace = buildWorkspace()
             }
-            return _workspace!!
+            return _workspace
         }
-
-    /**
-     * Check if backing workspace is loaded
-     *
-     * @return
-     */
-    protected val isValid: Boolean
-        get() = _workspace != null
 
     override val data: DataNode<*>
         get() = workspace.data
 
-    override val tasks: Stream<Task<*>>
+    override val tasks: Collection<Task<*>>
         get() = workspace.tasks
 
-    override val targets: Stream<Meta>
+    override val targets: Collection<Meta>
         get() = workspace.targets
 
     override val context: Context
@@ -62,11 +58,7 @@ abstract class DynamicWorkspace : Workspace {
      * Invalidate current backing workspace
      */
     protected fun invalidate() {
-        _workspace = null
-    }
-
-    override fun getTask(taskName: String): Task<*> {
-        return workspace.getTask(taskName)
+        isValid = false
     }
 
     override fun optTask(taskName: String): Task<*>? {

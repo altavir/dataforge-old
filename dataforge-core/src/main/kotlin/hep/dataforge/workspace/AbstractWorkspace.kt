@@ -14,7 +14,6 @@ import hep.dataforge.providers.Path
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel
 import java.util.*
-import java.util.stream.Stream
 
 /**
  * @author Alexander Nozik
@@ -46,11 +45,11 @@ abstract class AbstractWorkspace(override val context: Context) : Workspace {
         return taskMap.get(taskName)
     }
 
-    override val tasks: Stream<Task<*>>
-        get() = taskMap.values.stream()
+    override val tasks: Collection<Task<*>>
+        get() = taskMap.values
 
-    override val targets: Stream<Meta>
-        get() = targetMap.values.stream()
+    override val targets: Collection<Meta>
+        get() = targetMap.values
 
     /**
      * Automatically constructs a laminate if `@parent` value if defined
