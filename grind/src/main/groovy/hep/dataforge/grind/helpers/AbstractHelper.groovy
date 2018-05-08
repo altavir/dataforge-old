@@ -2,8 +2,8 @@ package hep.dataforge.grind.helpers
 
 import groovy.transform.CompileStatic
 import hep.dataforge.context.Context
-import hep.dataforge.io.markup.Markup
-import hep.dataforge.io.markup.MarkupBuilder
+import hep.dataforge.markup.markup.Markup
+import hep.dataforge.markup.markup.MarkupBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 

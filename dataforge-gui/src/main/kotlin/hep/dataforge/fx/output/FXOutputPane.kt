@@ -5,6 +5,7 @@
  */
 package hep.dataforge.fx.output
 
+import hep.dataforge.io.output.Output
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -21,7 +22,7 @@ import java.io.OutputStream
  *
  * @author Alexander Nozik
  */
-class FXOutputPane: Fragment() {
+class FXOutputPane: Fragment(), Output {
 
     /**
      * The root Anchor pane

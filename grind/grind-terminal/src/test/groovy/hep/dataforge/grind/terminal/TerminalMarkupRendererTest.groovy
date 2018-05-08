@@ -1,8 +1,8 @@
 package hep.dataforge.grind.terminal
 
-import hep.dataforge.io.markup.Markup
-import hep.dataforge.io.markup.MarkupGroup
-import hep.dataforge.io.markup.MarkupUtils
+import hep.dataforge.markup.markup.Markup
+import hep.dataforge.markup.markup.MarkupGroup
+import hep.dataforge.markup.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotDataAction
 import hep.dataforge.tables.ListTable

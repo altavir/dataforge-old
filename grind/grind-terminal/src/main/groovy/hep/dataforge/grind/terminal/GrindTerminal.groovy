@@ -11,9 +11,9 @@ import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
-import hep.dataforge.io.markup.Markedup
-import hep.dataforge.io.markup.MarkupBuilder
-import hep.dataforge.io.markup.MarkupUtils
+import hep.dataforge.markup.markup.Markedup
+import hep.dataforge.markup.markup.MarkupBuilder
+import hep.dataforge.markup.markup.MarkupUtils
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.workspace.FileBasedWorkspace

@@ -1,7 +1,7 @@
 package hep.dataforge.grind.terminal
 
-import hep.dataforge.io.markup.Markup
-import hep.dataforge.io.markup.StreamMarkupRenderer
+import hep.dataforge.markup.markup.Markup
+import hep.dataforge.markup.markup.StreamMarkupRenderer
 import org.jline.terminal.Terminal
 import org.jline.utils.AttributedString
 import org.jline.utils.AttributedStyle

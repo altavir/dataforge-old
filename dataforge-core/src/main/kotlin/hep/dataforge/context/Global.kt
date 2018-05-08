@@ -43,7 +43,7 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
     /**
      * System console output
      */
-    var console: Output = StreamOutput(System.out)
+    var console: Output = StreamOutput(this, System.out)
         set(value) {
             if (isLocked) {
                 throw ContextLockException("Can't change console output because Global is locked")

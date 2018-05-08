@@ -14,8 +14,9 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.markup
+package hep.dataforge.markup
 
+import hep.dataforge.markup.markup.markup
 import org.junit.Test
 
 class MarkupTest {
@@ -23,7 +24,7 @@ class MarkupTest {
     fun testSimpleRenderer() {
         val markup = markup {
             +"this is my text "
-            list{
+            list {
                 +"test"
             }
 

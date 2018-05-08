@@ -101,7 +101,7 @@ public class IOUtils {
      * @return
      */
     public static Path resolvePath(String path) {
-        if (path.matches("\\w:[\\\\\\/].*")) {
+        if (path.matches("\\w:[\\\\/].*")) {
             return new File(path).toPath();
         } else {
             return Paths.get(URI.create(path));
@@ -126,7 +126,7 @@ public class IOUtils {
             }
             tokens.add(token);
         }
-        return tokens.toArray(new String[tokens.size()]);
+        return tokens.toArray(new String[0]);
 
     }
 
@@ -266,13 +266,11 @@ public class IOUtils {
 //            bd = BigDecimal.valueOf(number.doubleValue());
 //        }
 
-            int maxWidth = width;
-
             if (bd.precision() - bd.scale() > 2 - width) {
                 if (number instanceof Integer) {
                     return String.format("%d", number);
                 } else {
-                    return String.format("%." + (maxWidth - 1) + "g", bd.stripTrailingZeros());
+                    return String.format("%." + (width - 1) + "g", bd.stripTrailingZeros());
                 }
                 //return getFlatFormat().format(bd);
             } else {

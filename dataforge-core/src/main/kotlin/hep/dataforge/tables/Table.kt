@@ -15,7 +15,6 @@
  */
 package hep.dataforge.tables
 
-import hep.dataforge.io.markup.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaMorph
@@ -27,7 +26,7 @@ import hep.dataforge.values.Value
  *
  * @author Alexander Nozik
  */
-interface Table : Markedup, NavigableValuesSource, MetaMorph {
+interface Table : NavigableValuesSource, MetaMorph {
 
     /**
      * Get columns as a stream
@@ -61,24 +60,24 @@ interface Table : Markedup, NavigableValuesSource, MetaMorph {
     @JvmDefault
     override fun get(columnName: String, rowNumber: Int): Value
 
-    @JvmDefault
-    override fun markup(configuration: Meta): Markup {
-        val builder = TableMarkup()
-
-        //render header
-        val header = RowMarkup(builder)
-        format.columns.map { col -> TextMarkup.create(col.title) }.forEach{ header.add(it) }
-        builder.header = header
-
-
-        //render table itself
-        forEach { dp ->
-            val row = RowMarkup(builder)
-            format.columns.map { col -> TextMarkup.create(dp.getString(col.name)) }.forEach{ row.add(it) }
-            builder.addRow(row)
-        }
-        return builder
-    }
+//    @JvmDefault
+//    override fun markup(configuration: Meta): Markup {
+//        val builder = TableMarkup()
+//
+//        //render header
+//        val header = RowMarkup(builder)
+//        format.columns.map { col -> TextMarkup.create(col.title) }.forEach{ header.add(it) }
+//        builder.header = header
+//
+//
+//        //render table itself
+//        forEach { dp ->
+//            val row = RowMarkup(builder)
+//            format.columns.map { col -> TextMarkup.create(dp.getString(col.name)) }.forEach{ row.add(it) }
+//            builder.addRow(row)
+//        }
+//        return builder
+//    }
 
     @JvmDefault
     override fun toMeta(): Meta {

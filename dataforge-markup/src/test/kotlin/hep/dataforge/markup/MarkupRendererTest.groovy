@@ -14,8 +14,11 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.markup
+package hep.dataforge.markup
 
+import hep.dataforge.markup.markup.HTMLMarkupRenderer
+import hep.dataforge.markup.markup.Markup
+import hep.dataforge.markup.markup.MarkupBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.tables.ListTable
 import hep.dataforge.tables.Table

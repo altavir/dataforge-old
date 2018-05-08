@@ -21,14 +21,19 @@ include 'kodex-server' // ktor based http server
 
 include ':dataforge-gui' // javafx based gui
 include ':dataforge-gui:gui-demo' // javafx based gui
+include ':dataforge-gui:gui-workspace' // javafx based gui
 
 include ':dataforge-stat' // fitting tools
 include ':dataforge-stat:dataforge-minuit' // MINUIT plugin for fitting
 
 include ':dataforge-control' // tools for measurement and control applications
+
 include ':dataforge-storage' // storage module
-include ':dataforge-storage2' // storage2 module
 include ':dataforge-storage:storage-server' // Storage web servlet
 include ':dataforge-storage:storage-oak'
+
+include ':dataforge-storage2' // storage2 module
+
+include ':dataforge-markup'
 
 include ':site'//the site

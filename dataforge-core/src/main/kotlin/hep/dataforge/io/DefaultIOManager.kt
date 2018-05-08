@@ -52,7 +52,7 @@ open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
     open fun createLoggerAppender(): Appender<ILoggingEvent> {
         return object : UnsynchronizedAppenderBase<ILoggingEvent>() {
             override fun append(eventObject: ILoggingEvent) {
-                output.push(eventObject)
+                output.render(eventObject)
             }
         }
     }

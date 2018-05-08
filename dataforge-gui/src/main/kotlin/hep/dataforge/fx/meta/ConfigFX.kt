@@ -74,7 +74,7 @@ open class ConfigFXNode(
 
     override val descriptionProperty: ObservableStringValue = object : StringBinding() {
         override fun computeValue(): String {
-            return descriptor?.info() ?: ""
+            return descriptor?.info ?: ""
         }
     }
 
@@ -233,7 +233,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
 
     override val descriptionProperty: ObservableStringValue = object : StringBinding() {
         override fun computeValue(): String {
-            return descriptor?.info() ?: ""
+            return descriptor?.info ?: ""
         }
     }
 

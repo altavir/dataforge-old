@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.markup
+package hep.dataforge.markup.markup
 
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.childNodes

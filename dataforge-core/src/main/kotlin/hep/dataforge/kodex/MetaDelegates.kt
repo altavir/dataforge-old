@@ -35,7 +35,7 @@ private fun getDescribedValue(valueName: String, thisRef: Any?, property: KPrope
     val propertyAnnotation = property.findAnnotation<PropertyDef>()
     return when {
         propertyAnnotation != null -> propertyAnnotation.def.parseValue()
-        thisRef!= null -> Descriptors.extractValue(valueName, Descriptors.buildDescriptor(thisRef))
+        thisRef != null -> Descriptors.extractValue(valueName, Descriptors.buildDescriptor(thisRef))
         else -> Value.NULL
     }
 }
@@ -43,7 +43,7 @@ private fun getDescribedValue(valueName: String, thisRef: Any?, property: KPrope
 private fun getDescribedNode(nodeName: String, thisRef: Any, property: KProperty<*>): Meta {
     return if (thisRef is Described) thisRef.descriptor.optChildDescriptor(nodeName).map {
         if (it.hasDefault()) {
-            it.defaultNode().first()
+            it.defaultNode()?.first() ?: Meta.empty()
         } else {
             Meta.empty()
         }
@@ -240,7 +240,6 @@ fun <T : MetaMorph> MutableMetaNode<*>.mutableMorphNode(type: KClass<T>, metaNam
 
 inline fun <reified T : MetaMorph> MutableMetaNode<*>.mutableMorphNode(metaName: String? = null, def: T? = null): ReadWriteProperty<Any, T> =
         mutableMorphNode(T::class, metaName, def)
-
 
 
 //ValueProvider delegates
