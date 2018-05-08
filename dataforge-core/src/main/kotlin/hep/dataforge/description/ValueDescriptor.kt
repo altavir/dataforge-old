@@ -174,7 +174,7 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
 
             if (def.allowed.isNotEmpty()) {
                 builder.setValue("allowedValues", def.allowed)
-            } else if (def.enumeration != Any::class.java) {
+            } else if (def.enumeration != Any::class) {
                 if (def.enumeration.java.isEnum) {
                     val values = def.enumeration.java.enumConstants
                     builder.setValue("allowedValues", Stream.of<Any>(*values).map<String> { it.toString() })
