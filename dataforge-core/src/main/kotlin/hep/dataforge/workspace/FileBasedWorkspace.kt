@@ -2,29 +2,38 @@ package hep.dataforge.workspace
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
+import kotlinx.coroutines.experimental.Job
+import kotlinx.coroutines.experimental.launch
 import java.nio.file.Files
 import java.nio.file.Path
+import java.nio.file.StandardWatchEventKinds
+import java.nio.file.WatchKey
 import java.security.MessageDigest
-import java.util.*
 
 /**
  * Dynamic workspace that is parsed from file using external algorithm. Workspace is reloaded only if file is changed
  */
-class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> Workspace) : DynamicWorkspace() {
-    private var checkSum: ByteArray? = null
+class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> Workspace) : DynamicWorkspace(), AutoCloseable {
 
-    override val workspace: Workspace
-        get() = synchronized(this) {
-            val oldCheckSum = checkSum
-            checkSum = getCheckSum()
-            if (!Arrays.equals(oldCheckSum, checkSum)) {
-                invalidate()
-            }
-            super.workspace
-        }
+    private var watchJob: Job? = null
 
+    private val fileMonitor: WatchKey by lazy {
+        val service = path.fileSystem.newWatchService()
+        path.register(service, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.OVERFLOW)
+    }
 
     override fun buildWorkspace(): Workspace {
+        if (watchJob == null) {
+            watchJob = launch {
+                while (true) {
+                    fileMonitor.pollEvents().forEach {
+                        logger.info("Workspace configuration changed. Invalidating.")
+                        invalidate()
+                    }
+                    fileMonitor.reset()
+                }
+            }
+        }
         return parser(path)
     }
 
@@ -38,6 +47,11 @@ class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> W
             throw RuntimeException("Failed to generate file checksum", ex)
         }
 
+    }
+
+    override fun close() {
+        fileMonitor.cancel()
+        watchJob?.cancel()
     }
 
     companion object {

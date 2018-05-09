@@ -17,6 +17,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.kodex.buildMeta
+import hep.dataforge.kodex.get
 import org.junit.Assert.assertEquals
 import org.junit.Test
 
@@ -32,7 +33,7 @@ class JSONMetaTypeTest {
                 }
             }
             """.trimMargin()
-        val meta = JSONMetaType.reader.readString(json)
+        val meta = jsonMetaType.reader.readString(json)
         assertEquals(22, meta["a"].int)
         assertEquals(3.1, meta["b.c"][2][0].double,0.01)
     }
@@ -46,7 +47,7 @@ class JSONMetaTypeTest {
                 "d" to "my string value"
             }
         }
-        val string = JSONMetaType.writer.writeString(meta)
+        val string = jsonMetaType.writer.writeString(meta)
         println(string)
     }
 }

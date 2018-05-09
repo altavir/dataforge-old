@@ -1,7 +1,6 @@
 package hep.dataforge.maths
 
 import hep.dataforge.maths.expressions.DSField
-import hep.dataforge.maths.extensions.exp
 import org.openjdk.jmh.annotations.Benchmark
 import org.openjdk.jmh.annotations.Fork
 import org.openjdk.jmh.annotations.Measurement
@@ -25,20 +24,6 @@ open class DSNumberBenchmark{
             val pos = variable("pos", 0)
             val sigma = variable("sigma", 1)
             amp / (sigma * sqrt(2 * PI)) * exp(-pow(pos - x, 2) / pow(sigma, 2) / 2)
-        }
-
-        gauss.toDouble()
-        gauss.deriv("pos")
-    }
-
-    @Benchmark
-    fun benchmarkAD() {
-        val x = 0
-        val gauss = autoDiff(1, "amp", "pos", "sigma") {
-            val amp = variable("amp", 1)
-            val pos = variable("pos", 0)
-            val sigma = variable("sigma", 1)
-            amp / (sigma * sqrt(2 * PI)) * exp(-(pos - x).pow(2) / sigma.pow(2) / 2)
         }
 
         gauss.toDouble()

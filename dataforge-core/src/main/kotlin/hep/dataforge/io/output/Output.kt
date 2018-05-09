@@ -96,6 +96,14 @@ interface OutputRenderer : Named {
 interface TextOutput : Output {
     fun renderText(text: String, vararg attributes: TextAttribute)
 
+    /**
+     * Render new line honoring offsets and bullets
+     */
+    fun newLine(meta: Meta) {
+        renderText("\n")
+        render("", meta)
+    }
+
     @JvmDefault
     fun renderText(text: String, color: Color) {
         renderText(text, TextColor(color))

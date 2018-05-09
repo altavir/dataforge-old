@@ -1,19 +1,13 @@
 package hep.dataforge.grind.terminal
 
-import hep.dataforge.Named
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
-import hep.dataforge.description.Described
-import hep.dataforge.description.Descriptors
-import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.grind.Grind
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.io.IOUtils
-import hep.dataforge.markup.markup.Markedup
-import hep.dataforge.markup.markup.MarkupBuilder
-import hep.dataforge.markup.markup.MarkupUtils
+import hep.dataforge.io.output.ANSIStreamOutput
+import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.SimpleConfigurable
 import hep.dataforge.workspace.FileBasedWorkspace
@@ -44,9 +38,7 @@ class GrindTerminal extends SimpleConfigurable {
     private final GrindShell shell;
     private final Terminal terminal;
 
-
-    final Meta markupConfig = Grind.buildMeta(target: "terminal")
-    final TerminalMarkupRenderer renderer;
+    final Output renderer;
 
     /**
      * Build default jline console based on operating system. Do not use for preview inside IDE
@@ -99,7 +91,7 @@ class GrindTerminal extends SimpleConfigurable {
         //create the shell
         shell = new GrindShell(context)
 
-        renderer = new TerminalMarkupRenderer(terminal);
+        renderer = new ANSIStreamOutput(context, terminal.output())
 
         //bind helper commands
 
@@ -131,11 +123,11 @@ class GrindTerminal extends SimpleConfigurable {
             obj.class.declaredFields.findAll { !it.synthetic }
                     .collect { obj.properties.get(it.name) }.findAll { it != null }
                     .each {
-                        def node = completerNode(it)
-                        if(node!= null) {
-                            objs.add(node)
-                        }
-                    }
+                def node = completerNode(it)
+                if (node != null) {
+                    objs.add(node)
+                }
+            }
             obj.class.declaredMethods.findAll { !it.synthetic }.each { objs.add(it.name) }
         }
         if (objs.size() > 0) {
@@ -178,37 +170,7 @@ class GrindTerminal extends SimpleConfigurable {
     }
 
     def show(Object obj) {
-        if (obj instanceof Markedup) {
-            renderer.render { it.ln() }
-            if (obj instanceof Named) {
-                renderer.render(new MarkupBuilder().text((obj as Named).name + "\n", "red").build())
-                renderer.render { it.ln() }
-            }
-            renderer.render((obj as Markedup).markup(markupConfig))
-        }
-        return null;
-    }
-
-    def describe(Object obj) {
-        if (obj instanceof Described) {
-            renderer.render(MarkupUtils.markupDescriptor(obj as Described))
-        } else if (obj instanceof NodeDescriptor) {
-            renderer.render(MarkupUtils.markupDescriptor(obj as NodeDescriptor))
-        } else if (obj instanceof String) {
-            NodeDescriptor descriptor = Descriptors.buildDescriptor(obj);
-            if (descriptor.getMeta().isEmpty()) {
-                renderer.render(new MarkupBuilder().text("The description for ")
-                        .text("${obj}", "blue")
-                        .text(" is empty")
-                        .build()
-                )
-            } else {
-                renderer.render(MarkupUtils.markupDescriptor(descriptor))
-            }
-        } else {
-            renderer.render { it.text("No description found for ").text("${obj}", "blue") }
-        }
-        renderer.render { it.ln() }
+        renderer.render(obj, Meta.empty())
         return null;
     }
 

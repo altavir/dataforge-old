@@ -19,7 +19,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.storage.api.StateLoader;
 import hep.dataforge.storage.commons.LoaderFactory;
 import hep.dataforge.storage.commons.StorageManager;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.junit.*;
 
 import java.io.File;
@@ -64,9 +64,9 @@ public class FileStateLoaderTest {
         StateLoader loader = LoaderFactory.buildStateLoder(storage, "test_states", "");
 
         System.out.println("***starting write test***");
-        loader.push("my.favorite.key", Value.of("my.favorite.value"));
-        loader.push("pi", Value.of(Math.PI));
-        loader.push("giberish", Value.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
+        loader.push("my.favorite.key", ValueFactory.of("my.favorite.value"));
+        loader.push("pi", ValueFactory.of(Math.PI));
+        loader.push("giberish", ValueFactory.of("Воркальось, хрипкие шарьки пырялись по мове и хрюкатали зелюки, как мюмзики в мове"));
         loader.close();
         System.out.println("passed!");
         System.out.println("***starting read test***");

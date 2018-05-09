@@ -45,7 +45,7 @@ fun main(args: Array<String>) {
     data.add(ValueMap.of(names, 0.5, 0.2, 0.1, 0.1))
     data.add(ValueMap.of(names, 1.0, 1.0, 0.2, 0.5))
     data.add(ValueMap.of(names, 3.0, 7.0, 0, 0.5))
-    val ds = ListTable(data)
+    val ds = ListTable.infer(data)
 
     val dataPlot = DataPlot.plot("data.Plot", Adapters.buildXYAdapter("myX", "myXErr", "myY", "myYErr"), ds)
 

@@ -19,7 +19,7 @@ package hep.dataforge.grind.helpers
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.fx.plots.FXPlotManager
-import hep.dataforge.markup.markup.MarkupBuilder
+import hep.dataforge.io.output.TextOutput
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.XYFunctionPlot
@@ -27,7 +27,9 @@ import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYPlot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
+import javafx.scene.paint.Color
 import kotlin.jvm.functions.Function1
+import org.jetbrains.annotations.NotNull
 
 /**
  * Created by darksnake on 30-Aug-16.
@@ -143,8 +145,11 @@ class PlotHelper extends AbstractHelper {
     }
 
     @Override
-    protected MarkupBuilder getHelperDescription() {
-        return new MarkupBuilder().text("This is ").text("plots", "blue").text(" helper");
+    protected void renderDescription(@NotNull TextOutput output, @NotNull Meta meta) {
+        output.renderText("This is ")
+        output.renderText("plots", Color.BLUE)
+        output.renderText(" helper")
     }
+
 
 }

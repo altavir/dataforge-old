@@ -24,7 +24,7 @@ import hep.dataforge.storage.commons.MapIndex;
 import hep.dataforge.storage.commons.StorageManager;
 import hep.dataforge.tables.MetaTableFormat;
 import hep.dataforge.utils.DateTimeUtils;
-import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import hep.dataforge.values.ValueMap;
 import hep.dataforge.values.Values;
 import org.junit.*;
@@ -108,7 +108,7 @@ public class FileDataTableLoaderTest {
         System.out.println("smart pull");
 
         start = DateTimeUtils.now();
-        int smartPullSize = index.pull(Value.NULL, Value.NULL, 100).collect(Collectors.toList()).size();
+        int smartPullSize = index.pull(ValueFactory.NULL, ValueFactory.NULL, 100).collect(Collectors.toList()).size();
         assertTrue(smartPullSize <= 100);
 
         System.out.printf("Smart pull operation on %d element completed in %s%n", smartPullSize, Duration.between(start, DateTimeUtils.now()));

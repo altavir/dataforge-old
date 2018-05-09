@@ -61,7 +61,7 @@ class PlotView : View("DataForge plot viewer") {
         EnvelopeType.infer(file.toPath()).ifPresent { type ->
             try {
                 val envelope = type.reader.read(file.toPath())
-                val frame = PlotFrame.Wrapper().unWrap(envelope) as PlotFrame
+                val frame = PlotFrame.Wrapper().unWrap(envelope)
                 pane.center =  PlotContainer(frame).root;
             } catch (e: IOException) {
                 throw RuntimeException(e)

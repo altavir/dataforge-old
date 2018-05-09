@@ -5,7 +5,13 @@
  */
 package hep.dataforge.fx.output
 
-import hep.dataforge.io.output.Output
+import hep.dataforge.context.Context
+import hep.dataforge.context.Global
+import hep.dataforge.io.output.StreamOutput
+import hep.dataforge.io.output.TextAttribute
+import hep.dataforge.io.output.TextColor
+import hep.dataforge.io.output.TextOutput
+import hep.dataforge.meta.Meta
 import javafx.beans.property.BooleanProperty
 import javafx.beans.property.IntegerProperty
 import javafx.beans.property.SimpleIntegerProperty
@@ -22,7 +28,7 @@ import java.io.OutputStream
  *
  * @author Alexander Nozik
  */
-class FXOutputPane: Fragment(), Output {
+class FXOutputPane(override val context: Context = Global) : Fragment(), TextOutput {
 
     /**
      * The root Anchor pane
@@ -56,13 +62,15 @@ class FXOutputPane: Fragment(), Output {
             @Throws(IOException::class)
             override fun flush() {
                 val text = toString()
-                if (text.length == 0) {
+                if (text.isEmpty()) {
                     return
                 }
                 append(text)
                 reset()
             }
         }
+
+    private val output = StreamOutput(context, stream)
 
     init {
         //        textArea = new InlineCssTextArea();
@@ -96,11 +104,12 @@ class FXOutputPane: Fragment(), Output {
      * @param text
      * @param style
      */
-    @Synchronized private fun append(str: String, style: String) {
+    @Synchronized
+    private fun append(str: String, style: String) {
         // Unifying newlines
         val text = str.replace("\r\n", "\n")
 
-        runLater{
+        runLater {
             if (text.contains("\n")) {
                 val lines = text.split("\n".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray()
                 for (i in 0 until lines.size - 1) {
@@ -163,12 +172,10 @@ class FXOutputPane: Fragment(), Output {
     }
 
     private fun getTabStop(num: Int): Int {
-        return if (tabstops == null) {
-            num * DEFAULT_TAB_STOP_SIZE
-        } else if (tabstops.size < num) {
-            tabstops[tabstops.size - 1] + (num - tabstops.size) * DEFAULT_TAB_STOP_SIZE
-        } else {
-            tabstops[num]
+        return when {
+            tabstops == null -> num * DEFAULT_TAB_STOP_SIZE
+            tabstops.size < num -> tabstops[tabstops.size - 1] + (num - tabstops.size) * DEFAULT_TAB_STOP_SIZE
+            else -> tabstops[num]
         }
     }
 
@@ -189,12 +196,24 @@ class FXOutputPane: Fragment(), Output {
         append(text, style)
     }
 
-    fun clear() {
+    override fun render(obj: Any, meta: Meta) {
+        output.render(obj, meta)
+    }
+
+    override fun renderText(text: String, vararg attributes: TextAttribute) {
+        val style = StringBuilder()
+        attributes.find { it is TextColor }?.let {
+            style.append("-fx-fill: ${(it as TextColor).color};")
+        }
+        append(text, style.toString())
+    }
+
+    override fun clear() {
         runLater { textArea.clear() }
     }
 
     companion object {
 
-        private val DEFAULT_TAB_STOP_SIZE = 15
+        private const val DEFAULT_TAB_STOP_SIZE = 15
     }
 }
