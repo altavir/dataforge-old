@@ -24,8 +24,8 @@ import hep.dataforge.workspace.tasks.TaskModel
 class BasicWorkspace private constructor(
         context: Context,
         override val data: DataNode<*>,
-        override val taskMap: MutableMap<String, Task<*>>,
-        override val targetMap: MutableMap<String, Meta>) : AbstractWorkspace(context) {
+        override val taskMap: Map<String, Task<*>>,
+        override val targetMap: Map<String, Meta>) : AbstractWorkspace(context) {
 
     private val cache: CachePlugin by lazy {
         context.optFeature(CachePlugin::class.java).orElseGet {
@@ -61,11 +61,9 @@ class BasicWorkspace private constructor(
 
 
     class Builder(override var context: Context = Global) : Workspace.Builder {
-
-
         private var data: DataNodeEditor<Any> = DataTree.edit(Any::class.java).apply { name = "data" }
 
-        private val taskMap: MutableMap<String, Task<*>> = HashMap()
+        private val taskMap: MutableMap<String, Task<*>> = HashMap<String, Task<*>>()
         private val targetMap: MutableMap<String, Meta> = HashMap()
 
         //internal var workspace = BasicWorkspace()
@@ -105,6 +103,9 @@ class BasicWorkspace private constructor(
         }
 
         override fun build(): Workspace {
+            context.pluginManager.stream(true)
+                    .flatMap { plugin -> plugin.provideAll(Task.TASK_TARGET, Task::class.java) }
+                    .forEach { taskMap.putIfAbsent(it.name, it) }
             return BasicWorkspace(context, data.build(), taskMap, targetMap)
         }
 

@@ -31,6 +31,7 @@ abstract class DynamicWorkspace : Workspace {
         get() {
             if (!isValid) {
                 _workspace = buildWorkspace()
+                isValid = true
             }
             return _workspace
         }

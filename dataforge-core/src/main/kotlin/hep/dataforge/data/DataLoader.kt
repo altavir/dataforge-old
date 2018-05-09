@@ -11,5 +11,4 @@ interface DataLoader<T: Any> : ContextMetaFactory<DataNode<T>>, Named {
     companion object {
         val SMART: DataLoader<Any> = SmartDataLoader()
     }
-
 }

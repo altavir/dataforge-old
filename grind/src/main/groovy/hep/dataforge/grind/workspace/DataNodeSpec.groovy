@@ -1,5 +1,6 @@
 package hep.dataforge.grind.workspace
 
+import groovy.transform.CompileStatic
 import hep.dataforge.Named
 import hep.dataforge.context.Context
 import hep.dataforge.data.*
@@ -13,6 +14,7 @@ import hep.dataforge.meta.Meta
 /**
  * A specification to build data node. Not thread safe
  */
+@CompileStatic
 class DataNodeSpec {
 //
 //    /**
@@ -59,8 +61,8 @@ class DataNodeSpec {
             throw new RuntimeException("Trying to load data into non-empty tree. Load should be called first.")
         }
         //def newRoot = node("", DataLoader.SMART.build(context, meta))
-        DataNode<?> node = DataLoader.SMART.build(context, meta)
-        tree = DataTree.builder(node)
+        DataNode<?> node = new SmartDataLoader().build(context, meta)
+        tree = node.edit()
     }
 
     void load(Map values = [:], String nodeName = "", @DelegatesTo(GrindMetaBuilder) Closure cl = null) {
@@ -69,7 +71,7 @@ class DataNodeSpec {
 
 
     void file(String place, String path, @DelegatesTo(GrindMetaBuilder) Closure fileMeta = null) {
-        item(place, DataUtils.readFile(context.getIo().getFile(path), Grind.buildMeta(fileMeta)))
+        item(place, DataUtils.INSTANCE.readFile(context.getIo().getFile(path), Grind.buildMeta(fileMeta)))
     }
 
     void item(NamedData data) {
@@ -96,7 +98,7 @@ class DataNodeSpec {
     }
 
     void node(DataNode node) {
-        tree.putNode(node)
+        tree.add(node)
     }
 
     void node(String name, DataNode node) {
@@ -108,7 +110,7 @@ class DataNodeSpec {
         def code = cl.rehydrate(spec, this, this)
         code.resolveStrategy = Closure.DELEGATE_FIRST
         code.call()
-        tree.putNode(spec.build());
+        tree.add(spec.build());
     }
 
     /**
@@ -132,7 +134,8 @@ class DataNodeSpec {
     }
 
     private DataNode build() {
-        return tree.setMeta(meta).build();
+        tree.setMeta(meta)
+        return tree.build();
     }
 
 

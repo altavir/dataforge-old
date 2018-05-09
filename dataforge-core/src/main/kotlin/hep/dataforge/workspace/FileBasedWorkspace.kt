@@ -19,7 +19,7 @@ class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> W
 
     private val fileMonitor: WatchKey by lazy {
         val service = path.fileSystem.newWatchService()
-        path.register(service, StandardWatchEventKinds.ENTRY_MODIFY, StandardWatchEventKinds.OVERFLOW)
+        path.parent.register(service, StandardWatchEventKinds.ENTRY_MODIFY)
     }
 
     override fun buildWorkspace(): Workspace {
@@ -27,8 +27,10 @@ class FileBasedWorkspace(private val path: Path, private val parser: (Path) -> W
             watchJob = launch {
                 while (true) {
                     fileMonitor.pollEvents().forEach {
-                        logger.info("Workspace configuration changed. Invalidating.")
-                        invalidate()
+                        if(it.context() == path) {
+                            logger.info("Workspace configuration changed. Invalidating.")
+                            invalidate()
+                        }
                     }
                     fileMonitor.reset()
                 }

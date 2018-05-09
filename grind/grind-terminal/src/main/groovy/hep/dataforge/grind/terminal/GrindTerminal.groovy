@@ -259,7 +259,7 @@ class GrindTerminal extends SimpleConfigurable {
     def launch() {
         LineReader reader = LineReaderBuilder.builder()
                 .terminal(getTerminal())
-                .completer(setupCompleter())
+                //.completer(setupCompleter())
                 .appName("DataForge Grind terminal")
                 .build();
         PrintWriter writer = getTerminal().writer();
