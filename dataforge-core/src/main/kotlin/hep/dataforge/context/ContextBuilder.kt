@@ -16,7 +16,6 @@
 
 package hep.dataforge.context
 
-import hep.dataforge.io.DefaultIOManager
 import hep.dataforge.io.IOManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -50,7 +49,6 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     var rootDir: String
         get() = properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.io.rootDir.toString()
         set(value) {
-            setDefaultIO()
             val path = parent.io.rootDir.resolve(value)
             //Add libraries to classpath
             val libPath = path.resolve("lib")
@@ -64,7 +62,6 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         get() = properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY]?.toString()
                 ?: parent.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY, parent.io.rootDir.toString())
         set(value) {
-            setDefaultIO()
             properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
         }
 
@@ -82,17 +79,6 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     fun plugin(plugin: Plugin): ContextBuilder {
         this.plugins.add(plugin)
         return this
-    }
-
-    /**
-     * Set default IO if another IO not already defined
-     */
-    fun setDefaultIO(): ContextBuilder {
-        return if (plugins.none { it is IOManager }) {
-            plugin(DefaultIOManager())
-        } else {
-            this
-        }
     }
 
     /**

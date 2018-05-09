@@ -75,12 +75,12 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
      * @param axisMeta
      */
     @ValueDefs(
-            ValueDef(name = "type", allowed = arrayOf("[number, log, time]"), def = "number", info = "The type of axis. By default number axis is used"),
+            ValueDef(name = "type", allowed = ["number", "log", "time"], def = "number", info = "The type of axis. By default number axis is used"),
             ValueDef(name = "axisTitle", info = "The title of the axis."),
             ValueDef(name = "axisUnits", def = "", info = "The units of the axis."),
             ValueDef(name = "range.from", type = arrayOf(ValueType.NUMBER), info = "Lower boundary for fixed range"),
             ValueDef(name = "range.to", type = arrayOf(ValueType.NUMBER), info = "Upper boundary for fixed range"),
-            ValueDef(name = "crosshair", def = "data", allowed = arrayOf("[none, free, data]"), info = "Appearance and type of the crosshair")
+            ValueDef(name = "crosshair", def = "data", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")
     )
     @NodeDef(name = "range", info = "The definition of range for given axis")
     protected abstract fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta)

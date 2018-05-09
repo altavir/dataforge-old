@@ -147,7 +147,7 @@ interface Value : Serializable, Comparable<Value> {
             override val value: Any = double
         }
 
-        fun of(vararg list: Any): Value {
+        fun of(list: Array<Any>): Value {
             return list.map(::of).asValue()
         }
 
@@ -164,6 +164,7 @@ interface Value : Serializable, Comparable<Value> {
         fun of(value: Any?): Value {
             return when (value) {
                 null -> Value.NULL
+                is Value -> value
                 is Number -> NumberValue(value)
                 is Instant -> TimeValue(value)
                 is LocalDateTime -> TimeValue(value)

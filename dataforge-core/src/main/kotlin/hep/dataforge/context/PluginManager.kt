@@ -59,7 +59,7 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
         return when (plugins.size) {
             0 -> null
             1 -> plugins[0]
-            else -> throw RuntimeException("Multiple candidates for plugin resolution")
+            else -> throw RuntimeException("Multiple candidates for plugin resolution: $plugins")
         }
     }
 
@@ -97,7 +97,6 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
         if (context.isLocked) {
             throw ContextLockException()
         }
-
         if (get(plugin::class, false) != null) {
             throw  RuntimeException("Plugin of type ${plugin::class} already exists in ${context.name}")
         } else {
