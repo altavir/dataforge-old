@@ -28,7 +28,7 @@ import kotlin.reflect.KClass
  * @property context A context for this plugin manager
  * @author Alexander Nozik
  */
-class PluginManager(override val context: Context) : ContextAware, AutoCloseable {
+class PluginManager(override val context: Context) : ContextAware, AutoCloseable, Iterable<Plugin> {
 
     /**
      * A set of loaded plugins
@@ -155,12 +155,6 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
         this.plugins.forEach { it.detach() }
     }
 
-    /**
-     * List loaded plugins
-     *
-     * @return
-     */
-    fun list(): Collection<Plugin> {
-        return this.plugins
-    }
+    override fun iterator(): Iterator<Plugin> = plugins.iterator()
+
 }

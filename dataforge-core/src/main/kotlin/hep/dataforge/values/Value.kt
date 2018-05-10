@@ -188,7 +188,11 @@ object ValueFactory {
     val NULL = Value.NULL
 
     @JvmStatic
-    fun of(value: Any?): Value = Value.of(value)
+    fun of(value: Any?): Value = if (value is String) {
+        value.parseValue()
+    } else {
+        Value.of(value)
+    }
 
     @JvmStatic
     @JvmOverloads

@@ -50,16 +50,17 @@ import kotlin.reflect.KClass
  * @author Alexander Nozik
  */
 open class Context(
-        override val name: String,
+        final override val name: String,
         val parent: Context? = Global,
-        classLoader: ClassLoader? = null) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
+        classLoader: ClassLoader? = null,
+        private val properties: MutableMap<String, Value> = ConcurrentHashMap()
+) : Provider, ValueProvider, Named, AutoCloseable, MetaID {
 
     /**
      * A class loader for this context. Parent class loader is used by default
      */
     open val classLoader: ClassLoader = classLoader ?: parent?.classLoader ?: Global.classLoader
 
-    private val properties: MutableMap<String, Value> = ConcurrentHashMap()
     /**
      * Plugin manager for this Context
      *
@@ -76,7 +77,7 @@ open class Context(
      * @return the io
      */
     open val io: IOManager
-        get() = pluginManager.get(IOManager::class) ?: parent?.io ?: Global.io
+        get() = pluginManager.get(IOManager::class, false) ?: parent?.io ?: Global.io
 
 
     /**
@@ -142,7 +143,7 @@ open class Context(
 
     @ProvidesNames(Plugin.PLUGIN_TARGET)
     fun listPlugins(): Collection<String> {
-        return pluginManager.list().map { it.name }
+        return pluginManager.map { it.name }
     }
 
     @ProvidesNames(ValueProvider.VALUE_TARGET)
@@ -204,9 +205,9 @@ open class Context(
      */
     @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
-        synchronized(serviceCache){
+        synchronized(serviceCache) {
             @Suppress("UNCHECKED_CAST")
-            val loader : ServiceLoader<T> = serviceCache.getOrPut(serviceClass){ServiceLoader.load(serviceClass, classLoader)} as ServiceLoader<T>
+            val loader: ServiceLoader<T> = serviceCache.getOrPut(serviceClass) { ServiceLoader.load(serviceClass, classLoader) } as ServiceLoader<T>
             return StreamSupport.stream(loader.spliterator(), false)
         }
     }

@@ -16,6 +16,7 @@
 
 package hep.dataforge.context
 
+import hep.dataforge.io.DefaultIOManager
 import hep.dataforge.io.IOManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -44,7 +45,6 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     private val classPath = ArrayList<URL>()
 
     private val plugins = ArrayList<Plugin>()
-
 
     var rootDir: String
         get() = properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.io.rootDir.toString()
@@ -178,10 +178,19 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         } else {
             URLClassLoader(classPath.toTypedArray(), parent.classLoader)
         }
-        return Context(name, parent, classLoader).apply {
+
+        return Context(name, parent, classLoader, properties).apply {
             plugins.forEach {
                 pluginManager.load(it)
             }
+
+            //If custom paths are defined, use new plugin to direct to them
+            if (properties.containsKey(IOManager.ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(IOManager.DATA_DIRECTORY_CONTEXT_KEY)) {
+                if (pluginManager.find { it is IOManager } == null) {
+                    pluginManager.load(DefaultIOManager())
+                }
+            }
+
         }
 
     }

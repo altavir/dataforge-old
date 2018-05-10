@@ -151,7 +151,6 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
             } catch (e: IOException) {
                 throw RuntimeException(context.name + ": Failed to create work directory " + work, e)
             }
-
             return work
         }
 

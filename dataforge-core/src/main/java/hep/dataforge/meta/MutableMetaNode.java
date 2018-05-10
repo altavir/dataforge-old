@@ -20,6 +20,7 @@ import hep.dataforge.exceptions.AnonymousNotAlowedException;
 import hep.dataforge.exceptions.NamingException;
 import hep.dataforge.names.Name;
 import hep.dataforge.values.Value;
+import hep.dataforge.values.ValueFactory;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
@@ -335,7 +336,7 @@ public abstract class MutableMetaNode<T extends MutableMetaNode> extends MetaNod
 
 
     public T setValue(String name, Object object) {
-        return setValue(name, Value.Companion.of(object));
+        return setValue(name, ValueFactory.of(object));
     }
 
     /**
