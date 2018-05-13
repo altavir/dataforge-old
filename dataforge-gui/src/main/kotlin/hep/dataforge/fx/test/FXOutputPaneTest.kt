@@ -5,6 +5,7 @@
  */
 package hep.dataforge.fx.test
 
+import hep.dataforge.context.Global
 import hep.dataforge.fx.output.FXTextOutput
 import javafx.application.Application
 import javafx.scene.Scene
@@ -19,7 +20,7 @@ class FXOutputPaneTest : App() {
 
     override fun start(stage: Stage) {
 
-        val out = FXTextOutput()
+        val out = FXTextOutput(Global)
         out.setMaxLines(5)
 
         for (i in 0..11) {

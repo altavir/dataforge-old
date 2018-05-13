@@ -9,6 +9,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.AppenderBase
+import hep.dataforge.context.Global
 import hep.dataforge.fx.output.FXTextOutput
 import org.slf4j.LoggerFactory
 import tornadofx.*
@@ -46,7 +47,7 @@ class LogFragment : Fragment("DataForge output log") {
 
     }
 
-    val outputPane = FXTextOutput().apply {
+    val outputPane = FXTextOutput(Global).apply {
         setMaxLines(2000)
     }
 

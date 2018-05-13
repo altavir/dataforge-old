@@ -41,11 +41,6 @@ interface Output : ContextAware {
      */
     fun render(obj: Any, meta: Meta = Meta.empty())
 
-    /**
-     * Clear current content of display if it is possible
-     */
-    fun clear()
-
     companion object {
         const val TEXT_TYPE = "hep.dataforge.text"
         const val BINARY_TYPE = "hep.dataforge.binary"
@@ -59,10 +54,6 @@ interface Output : ContextAware {
 
                 override fun render(obj: Any, meta: Meta) {
                     outputs.forEach { it.render(obj, meta) }
-                }
-
-                override fun clear() {
-                    outputs.forEach { it.clear() }
                 }
 
             }
@@ -223,10 +214,6 @@ open class StreamOutput(override val context: Context, val stream: OutputStream)
         printer.println(text)
     }
 
-    override fun clear() {
-        // clear not supported
-    }
-
     override fun close() {
         stream.close()
     }
@@ -300,14 +287,6 @@ class FileOutput(val file: FileReference) : Output, AutoCloseable {
 
     override fun render(obj: Any, meta: Meta) {
         streamOutput.render(obj, meta)
-    }
-
-    /**
-     * Delete the output file
-     */
-    override fun clear() {
-        close()
-        file.delete()
     }
 
     override fun close() {

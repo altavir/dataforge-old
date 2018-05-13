@@ -5,7 +5,9 @@ import ch.qos.logback.classic.encoder.PatternLayoutEncoder
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.FileAppender
-import hep.dataforge.context.*
+import hep.dataforge.context.Plugin
+import hep.dataforge.context.PluginDef
+import hep.dataforge.context.PluginFactory
 import hep.dataforge.io.output.FileOutput
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
@@ -52,7 +54,7 @@ class DirectoryIO : DefaultIOManager() {
      */
     private fun getExtension(type: String): String {
         return when (type) {
-            IOManager.DEFAULT_OUTPUT_TYPE -> "out"
+            Output.TEXT_TYPE -> "out"
             else -> type
         }
     }
@@ -61,7 +63,7 @@ class DirectoryIO : DefaultIOManager() {
         return map.getOrPut(meta) {
             val name = Name.of(meta.getString("name"))
             val stage = Name.of(meta.getString("stage", ""))
-            val type = meta.getString("type", DEFAULT_OUTPUT_TYPE)
+            val type = meta.getString("type", Output.TEXT_TYPE)
             //TODO make scope customizable?
             val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(type), stage)
             FileOutput(reference)

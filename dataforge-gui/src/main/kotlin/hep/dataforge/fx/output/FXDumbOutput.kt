@@ -17,6 +17,15 @@
 package hep.dataforge.fx.output
 
 import hep.dataforge.context.Context
+import hep.dataforge.meta.Meta
+import javafx.scene.Parent
 
 class FXDumbOutput(context:Context): FXOutput(context) {
+    override val root: Parent
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+    override fun render(obj: Any, meta: Meta) {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    }
+
 }

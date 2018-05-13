@@ -208,10 +208,6 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
         append(text, style.toString())
     }
 
-    override fun clear() {
-        runLater { textArea.clear() }
-    }
-
     companion object {
 
         private const val DEFAULT_TAB_STOP_SIZE = 15
