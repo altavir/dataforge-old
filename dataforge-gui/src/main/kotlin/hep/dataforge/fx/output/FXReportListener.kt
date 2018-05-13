@@ -15,19 +15,18 @@ import java.util.function.Consumer
  *
  * @author Alexander Nozik
  */
-class FXReportListener(private val pane: FXOutputPane) : Consumer<Record> {
+class FXReportListener(private val text: FXTextOutput) : Consumer<Record> {
 
     @Synchronized override fun accept(t: Record) {
         runLater {
-            pane.appendColored(FORMATTER.format(t.time) + " ", "grey")
-            pane.appendColored(t.traceString + ": ", "blue")
-            pane.appendColored(t.message, "black")
-            pane.newline()
+            text.appendColored(FORMATTER.format(t.time) + " ", "grey")
+            text.appendColored(t.traceString + ": ", "blue")
+            text.appendColored(t.message, "black")
+            text.newline()
         }
     }
 
     companion object {
-
         private val FORMATTER = DateTimeFormatter.ofPattern("HH:mm:ss.SSS").withZone(ZoneId.systemDefault())
     }
 

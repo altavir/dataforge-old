@@ -22,24 +22,6 @@ abstract class AbstractWorkspace(override val context: Context) : Workspace {
 
 
     override fun optTask(taskName: String): Task<*>? {
-//        if (!taskMap.containsKey(taskName)) {
-//            logger.trace("Task with name {} not loaded in workspace. Searching for tasks in the context", taskName)
-//            val taskList = context.pluginManager.stream(true)
-//                    .map<Optional<Task<*>>> { plugin -> plugin.provide<Task<*>>(Path.of(Task.TASK_TARGET, taskName), Task::class.java) }
-//                    .filter { it.isPresent }
-//                    .map { it.get() }
-//                    .toList()
-//            if (taskList.isEmpty()) {
-//                return null
-//            } else {
-//                if (taskList.size > 1) {
-//                    logger.warn("A name conflict during task resolution. " +
-//                            "Task with name '{}' is present in multiple plugins. " +
-//                            "Consider loading task explicitly.", taskName)
-//                }
-//                return taskList.first()
-//            }
-//        }
         return taskMap[taskName]
     }
 

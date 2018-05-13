@@ -21,6 +21,7 @@ import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.Output.Companion.TEXT_TYPE
 import hep.dataforge.io.output.StreamConsumer
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.optional
@@ -60,7 +61,7 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     @ValueDefs(
             ValueDef(name = "stage", def = "", info = "Fully qualified name of the output stage"),
             ValueDef(name = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
-            ValueDef(name = "type", def = DEFAULT_OUTPUT_TYPE, info = "Type of the output container")
+            ValueDef(name = "type", def = TEXT_TYPE, info = "Type of the output container")
     )
     abstract fun output(meta: Meta): Output
 
@@ -69,7 +70,7 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
      * Helper method to access output
      */
     @JvmOverloads
-    fun output(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): Output {
+    fun output(name: Name, stage: Name = Name.empty(), type: String = TEXT_TYPE): Output {
         val meta = buildMeta("output") {
             "stage" to stage.toUnescaped()
             "name" to name.toUnescaped()
@@ -79,7 +80,7 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
     }
 
     @JvmOverloads
-    fun output(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): Output {
+    fun output(name: String, stage: String = "", type: String = TEXT_TYPE): Output {
         val meta = buildMeta("output") {
             "stage" to stage
             "name" to name
@@ -101,12 +102,12 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
      * An [OutputStream] wrapper for backward compatibility.
      */
     @JvmOverloads
-    fun stream(name: Name, stage: Name = Name.empty(), type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+    fun stream(name: Name, stage: Name = Name.empty(), type: String = TEXT_TYPE): OutputStream {
         return StreamConsumer(output(name, stage, type))
     }
 
     @JvmOverloads
-    fun stream(name: String, stage: String = "", type: String = DEFAULT_OUTPUT_TYPE): OutputStream {
+    fun stream(name: String, stage: String = "", type: String = TEXT_TYPE): OutputStream {
         val meta = buildMeta("output") {
             "stage" to stage
             "name" to name
@@ -244,8 +245,6 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
         const val WORK_DIRECTORY_CONTEXT_KEY = "workDir"
         const val DATA_DIRECTORY_CONTEXT_KEY = "dataDir"
         const val TEMP_DIRECTORY_CONTEXT_KEY = "tempDir"
-
-        const val DEFAULT_OUTPUT_TYPE = "dataforge/output"
     }
 
 }

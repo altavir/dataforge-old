@@ -1,16 +1,13 @@
 package hep.dataforge.tables
 
 import hep.dataforge.exceptions.NameNotFoundException
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaMorph
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueMap
 import hep.dataforge.values.Values
-
 import java.util.*
-import java.util.stream.Stream
 
 /**
  * Created by darksnake on 18-Apr-17.
@@ -18,8 +15,6 @@ import java.util.stream.Stream
 open class ListOfPoints(private val data: List<Values>) : MetaMorph, NavigableValuesSource {
 
     constructor(points: Iterable<Values>): this(points.toList())
-
-    constructor(points: Stream<Values>): this(points.toList())
 
     constructor(meta: Meta): this(buildFromMeta(meta))
 

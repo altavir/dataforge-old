@@ -6,7 +6,6 @@
 package hep.dataforge.fx.output
 
 import hep.dataforge.context.Context
-import hep.dataforge.context.Global
 import hep.dataforge.io.output.StreamOutput
 import hep.dataforge.io.output.TextAttribute
 import hep.dataforge.io.output.TextColor
@@ -28,7 +27,7 @@ import java.io.OutputStream
  *
  * @author Alexander Nozik
  */
-class FXOutputPane(override val context: Context = Global) : Fragment(), TextOutput {
+class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
 
     /**
      * The root Anchor pane
@@ -197,6 +196,7 @@ class FXOutputPane(override val context: Context = Global) : Fragment(), TextOut
     }
 
     override fun render(obj: Any, meta: Meta) {
+
         output.render(obj, meta)
     }
 

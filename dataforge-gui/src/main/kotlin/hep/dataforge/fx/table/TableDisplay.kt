@@ -1,12 +1,9 @@
 package hep.dataforge.fx.table
 
-import hep.dataforge.fx.dfIcon
-import hep.dataforge.meta.Meta
-import hep.dataforge.meta.Metoid
+import hep.dataforge.fx.dfIconView
 import hep.dataforge.tables.Table
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueType
-import javafx.scene.image.ImageView
 import javafx.scene.input.Clipboard
 import javafx.scene.input.ClipboardContent
 import org.controlsfx.control.spreadsheet.*
@@ -15,8 +12,8 @@ import tornadofx.*
 /**
  * Table display fragment
  */
-class TableDisplay(val table: Table, override val meta: Meta = Meta.empty())
-    : Fragment(title = meta.optString("title").orElse(null), icon = ImageView(dfIcon)), Metoid {
+class TableDisplay(val table: Table, title: String? = null)
+    : Fragment(title = title, icon = dfIconView) {
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {

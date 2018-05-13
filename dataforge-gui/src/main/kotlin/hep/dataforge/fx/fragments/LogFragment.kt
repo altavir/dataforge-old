@@ -9,7 +9,7 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.AppenderBase
-import hep.dataforge.fx.output.FXOutputPane
+import hep.dataforge.fx.output.FXTextOutput
 import org.slf4j.LoggerFactory
 import tornadofx.*
 import java.io.PrintStream
@@ -26,8 +26,8 @@ class LogFragment : Fragment("DataForge output log") {
 
     private val timeFormatter = DateTimeFormatter.ISO_LOCAL_TIME
 
-    private var formatter: BiConsumer<FXOutputPane, String>? = null
-    private val loggerFormatter = { pane: FXOutputPane, eventObject: ILoggingEvent ->
+    private var formatter: BiConsumer<FXTextOutput, String>? = null
+    private val loggerFormatter = { text: FXTextOutput, eventObject: ILoggingEvent ->
         val style = when (eventObject.level.toString()) {
             "DEBUG" -> "-fx-fill: green"
             "WARN" -> "-fx-fill: orange"
@@ -37,16 +37,16 @@ class LogFragment : Fragment("DataForge output log") {
 
         runLater {
             val time = Instant.ofEpochMilli(eventObject.timeStamp)
-            pane.append(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ")
+            text.append(timeFormatter.format(LocalDateTime.ofInstant(time, ZoneId.systemDefault())) + ": ")
 
-            pane.appendColored(eventObject.loggerName, "gray")
+            text.appendColored(eventObject.loggerName, "gray")
 
-            pane.appendStyled(eventObject.formattedMessage.replace("\n", "\n\t") + "\r\n", style)
+            text.appendStyled(eventObject.formattedMessage.replace("\n", "\n\t") + "\r\n", style)
         }
 
     }
 
-    val outputPane = FXOutputPane().apply {
+    val outputPane = FXTextOutput().apply {
         setMaxLines(2000)
     }
 
@@ -70,7 +70,7 @@ class LogFragment : Fragment("DataForge output log") {
      *
      * @param formatter
      */
-    fun setFormatter(formatter: BiConsumer<FXOutputPane, String>) {
+    fun setFormatter(formatter: BiConsumer<FXTextOutput, String>) {
         this.formatter = formatter
     }
 

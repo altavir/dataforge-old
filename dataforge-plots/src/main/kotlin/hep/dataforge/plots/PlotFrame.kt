@@ -18,8 +18,8 @@ package hep.dataforge.plots
 import hep.dataforge.description.ValueDef
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
+import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
-import hep.dataforge.io.envelopes.Wrapper.Companion.WRAPPER_TYPE_KEY
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
 import java.io.ObjectStreamException
@@ -126,7 +126,7 @@ interface PlotFrame : Configurable, Serializable {
     class Wrapper : hep.dataforge.io.envelopes.Wrapper<PlotFrame> {
 
         override val name: String
-            get() = PLOT_FRAME_WRAPPER_TYPE
+            get() = PLOT_FRAME_TYPE
 
         override val type: Class<PlotFrame>
             get() = PlotFrame::class.java
@@ -137,8 +137,8 @@ interface PlotFrame : Configurable, Serializable {
             val builder = EnvelopeBuilder()
                     .setMeta(rootEnv.meta)
                     .setData(rootEnv.data)
-                    .setDataType("wrapper")
-                    .setMetaValue(WRAPPER_TYPE_KEY, PLOT_FRAME_WRAPPER_TYPE)
+                    .setDataType(JAVA_SERIAL_DATA)
+                    .setEnvelopeType(PLOT_FRAME_TYPE)
                     .setMetaValue(PLOT_FRAME_CLASS_KEY, obj.javaClass.name)
                     .putMetaNode(PLOT_FRAME_META_KEY, obj.config)
             return builder.build()
@@ -164,7 +164,7 @@ interface PlotFrame : Configurable, Serializable {
         }
 
         companion object {
-            val PLOT_FRAME_WRAPPER_TYPE = "df.plots.frame"
+
             val PLOT_FRAME_CLASS_KEY = "frame.class"
             val PLOT_FRAME_META_KEY = "frame.meta"
         }
@@ -172,7 +172,7 @@ interface PlotFrame : Configurable, Serializable {
     }
 
     companion object {
-
+        const val PLOT_FRAME_TYPE = "hep.dataforge.plots.frame"
         val wrapper = Wrapper()
     }
 

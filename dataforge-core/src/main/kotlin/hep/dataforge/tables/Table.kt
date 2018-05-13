@@ -97,4 +97,8 @@ interface Table : NavigableValuesSource, MetaMorph {
     //        res.putNode(dataNode);
     //        return res;
     //    }
+
+    companion object {
+        const val TABLE_TYPE = "hep.dataforge.table"
+    }
 }

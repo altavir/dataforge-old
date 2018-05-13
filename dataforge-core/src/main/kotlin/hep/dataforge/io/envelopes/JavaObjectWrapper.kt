@@ -31,7 +31,8 @@ import java.io.ObjectOutputStream
  */
 object JavaObjectWrapper : Wrapper<Any> {
     const val JAVA_CLASS_KEY = "javaClass"
-    const val JAVA_OBJECT_TYPE = "df.object"
+    const val JAVA_OBJECT_TYPE = "hep.dataforge.java"
+    const val JAVA_SERIAL_DATA = "java.serial"
 
     override val type: Class<Any>
         get() = Any::class.java
@@ -40,8 +41,8 @@ object JavaObjectWrapper : Wrapper<Any> {
 
     override fun wrap(obj: Any): Envelope {
         val builder = EnvelopeBuilder()
-                .setDataType("wrapper")
-                .setMetaValue(Wrapper.WRAPPER_TYPE_KEY, JAVA_OBJECT_TYPE)
+                .setDataType(JAVA_SERIAL_DATA)
+                .setEnvelopeType(JAVA_OBJECT_TYPE)
                 .setMetaValue(JAVA_CLASS_KEY, obj.javaClass.name)
         val baos = ByteArrayOutputStream()
         try {
@@ -57,8 +58,8 @@ object JavaObjectWrapper : Wrapper<Any> {
     }
 
     override fun unWrap(envelope: Envelope): Any {
-        if (name != envelope.meta.getString(Wrapper.WRAPPER_TYPE_KEY, "")) {
-            throw Error("Wrong wrapped type: " + envelope.meta.getString(Wrapper.WRAPPER_TYPE_KEY, ""))
+        if (name != envelope.type) {
+            throw Error("Wrong envelope type: " + envelope.type)
         }
         try {
             val stream = ObjectInputStream(envelope.data.stream)

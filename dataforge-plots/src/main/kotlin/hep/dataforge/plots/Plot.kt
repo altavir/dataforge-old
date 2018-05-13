@@ -17,8 +17,8 @@ package hep.dataforge.plots
 
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
+import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.Wrapper.Companion.WRAPPER_CLASS_KEY
-import hep.dataforge.io.envelopes.Wrapper.Companion.WRAPPER_TYPE_KEY
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
 import hep.dataforge.names.AnonymousNotAlowed
@@ -72,19 +72,20 @@ interface Plot : Plottable {
     class Wrapper : hep.dataforge.io.envelopes.Wrapper<Plot> {
 
         override val name: String
-            get() = PLOT_WRAPPER_TYPE
+            get() = PLOT_TYPE
 
         override val type: Class<Plot>
             get() = Plot::class.java
 
         override fun wrap(obj: Plot): Envelope {
             val builder = EnvelopeBuilder()
-                    .setMetaValue(WRAPPER_TYPE_KEY, PLOT_WRAPPER_TYPE)
+                    .setEnvelopeType(PLOT_TYPE)
+                    .setDataType(JAVA_SERIAL_DATA)
                     .setMetaValue(WRAPPER_CLASS_KEY, javaClass.name)
                     .setMetaValue("name", obj.name)
                     //.putMetaNode("descriptor", plot.getDescriptor().toMeta())
                     .putMetaNode(DEFAULT_META_NAME, obj.config)
-                    .setDataType("wrapper")
+
 
             val baos = ByteArrayOutputStream()
             try {
@@ -114,10 +115,11 @@ interface Plot : Plottable {
 
         }
 
-        companion object {
-            const val PLOT_WRAPPER_TYPE = "df.plots.plot"
-        }
 
+
+    }
+    companion object {
+        const val PLOT_TYPE = "hep.dataforge.plots.plot"
     }
 
 }

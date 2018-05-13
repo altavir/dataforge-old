@@ -14,12 +14,5 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.output
+package hep.dataforge.fx.workspace
 
-import javafx.scene.paint.Color
-
-sealed class TextAttribute
-
-class TextColor(val color: Color): TextAttribute()
-class TextStrong: TextAttribute()
-class TextEmphasis: TextAttribute()

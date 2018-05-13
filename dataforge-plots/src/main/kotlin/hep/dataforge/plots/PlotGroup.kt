@@ -22,7 +22,7 @@ import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.io.envelopes.EnvelopeType
-import hep.dataforge.io.envelopes.Wrapper.Companion.WRAPPER_TYPE_KEY
+import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
@@ -270,10 +270,10 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
             }
 
             val builder = EnvelopeBuilder()
-                    .setMetaValue(WRAPPER_TYPE_KEY, PLOT_GROUP_WRAPPER_TYPE)
                     .setMetaValue("name", obj.name)
                     .putMetaNode(DEFAULT_META_NAME, obj.config)
-                    .setDataType("wrapper")
+                    .setEnvelopeType(PLOT_GROUP_WRAPPER_TYPE)
+                    .setDataType(JAVA_SERIAL_DATA)
                     .setData(baos.toByteArray())
 
             builder.putMetaNode("descriptor", obj.getDescriptor().toMeta())
@@ -311,7 +311,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
         }
 
         companion object {
-            const val PLOT_GROUP_WRAPPER_TYPE = "df.plots.group"
+            const val PLOT_GROUP_WRAPPER_TYPE = "hep.dataforge.plots.group"
             private val plotWrapper = Plot.Wrapper()
         }
     }

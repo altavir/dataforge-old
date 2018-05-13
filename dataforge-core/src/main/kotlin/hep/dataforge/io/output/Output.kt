@@ -47,6 +47,10 @@ interface Output : ContextAware {
     fun clear()
 
     companion object {
+        const val TEXT_TYPE = "hep.dataforge.text"
+        const val BINARY_TYPE = "hep.dataforge.binary"
+
+
         fun splitOutput(vararg outputs: Output): Output {
             val context = outputs.first().context
             return object : Output {
@@ -311,3 +315,9 @@ class FileOutput(val file: FileReference) : Output, AutoCloseable {
     }
 
 }
+
+sealed class TextAttribute
+
+class TextColor(val color: Color): TextAttribute()
+class TextStrong: TextAttribute()
+class TextEmphasis: TextAttribute()

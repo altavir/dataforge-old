@@ -31,7 +31,7 @@ import hep.dataforge.context.Global
  *
  * @author Alexander Nozik
  */
-interface Wrapper<T> : Named {
+interface Wrapper<T : Any> : Named {
 
     val type: Class<T>
 
@@ -39,23 +39,17 @@ interface Wrapper<T> : Named {
 
     fun unWrap(envelope: Envelope): T
 
-//    fun checkValidEnvelope(env: Envelope) {
-//        if (env.meta.getString(WRAPPER_TYPE_KEY, "") != name) {
-//            throw RuntimeException("Can't unwrap envelope. Wrong content type.")
-//        }
-//    }
-
     companion object {
-        const val WRAPPER_TYPE_KEY = "@wrapper.type"
-        const val WRAPPER_CLASS_KEY = "@wrapper.class"
+        const val WRAPPER_CLASS_KEY = "@wrapper"
 
+        @Suppress("UNCHECKED_CAST")
         @Throws(Exception::class)
-        fun <T> unwrap(context: Context, envelope: Envelope): T {
+        fun <T : Any> unwrap(context: Context, envelope: Envelope): T {
             val wrapper: Wrapper<T> = when {
                 envelope.meta.hasValue(WRAPPER_CLASS_KEY) ->
                     Class.forName(envelope.meta.getString(WRAPPER_CLASS_KEY)).getConstructor().newInstance() as Wrapper<T>
-                envelope.meta.hasValue(WRAPPER_TYPE_KEY) ->
-                    context.findService(Wrapper::class.java) { it -> it.name == envelope.meta.getString(WRAPPER_TYPE_KEY) } as Wrapper<T>?
+                envelope.meta.hasValue(Envelope.ENVELOPE_TYPE_KEY) ->
+                    context.findService(Wrapper::class.java) { it -> it.name == envelope.meta.getString(Envelope.ENVELOPE_TYPE_KEY) } as Wrapper<T>?
                             ?: throw RuntimeException("Unwrapper not found")
                 else -> throw IllegalArgumentException("Not a wrapper envelope")
             }
@@ -63,14 +57,15 @@ interface Wrapper<T> : Named {
         }
 
         @Throws(Exception::class)
-        fun <T> unwrap(envelope: Envelope): T {
+        fun <T : Any> unwrap(envelope: Envelope): T {
             return unwrap(Global, envelope)
         }
 
-        fun wrap(context: Context, `object`: Any): Envelope {
-            val wrapper: Wrapper<Any> = context.findService(Wrapper::class.java) { it -> it.type != Any::class.java && it.type.isInstance(`object`) } as Wrapper<Any>?
+        @Suppress("UNCHECKED_CAST")
+        fun wrap(context: Context, obj: Any): Envelope {
+            val wrapper: Wrapper<Any> = context.findService(Wrapper::class.java) { it -> it.type != Any::class.java && it.type.isInstance(obj) } as Wrapper<Any>?
                     ?: JavaObjectWrapper
-            return wrapper.wrap(`object`)
+            return wrapper.wrap(obj)
         }
     }
 }
