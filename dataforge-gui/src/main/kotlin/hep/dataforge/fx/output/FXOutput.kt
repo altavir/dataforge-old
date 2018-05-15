@@ -18,7 +18,47 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.fx.dfIconView
+import hep.dataforge.fx.plots.PlotContainer
+import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
+import hep.dataforge.meta.Meta
+import hep.dataforge.plots.PlotFrame
+import hep.dataforge.plots.Plottable
+import hep.dataforge.tables.Table
 import tornadofx.*
 
-abstract class FXOutput(override val context: Context): Fragment(icon = dfIconView), Output
+abstract class FXOutput(override val context: Context) : Fragment(icon = dfIconView), Output
+
+class FXTableOutput(context: Context) : FXOutput(context) {
+    override val root = scrollpane()
+
+    override fun render(obj: Any, meta: Meta) {
+        if (obj is Table) {
+            root.content = TableDisplay(obj).root
+        } else {
+            logger.error("Can't represent ${obj.javaClass} as Table")
+        }
+    }
+
+}
+
+class FXPlotOutput(context: Context) : FXOutput(context) {
+    override val root = borderpane()
+
+    override fun render(obj: Any, meta: Meta) {
+        when (obj) {
+            is PlotFrame -> {
+                val container = PlotContainer(obj)
+                container.frame.configure(meta)
+                root.center = container.root
+            }
+            is Plottable -> {
+                TODO()
+                //val frame = PlotFrame.
+            }
+            else -> {
+                logger.error("Can't represent ${obj.javaClass} as Plottable")
+            }
+        }
+    }
+}

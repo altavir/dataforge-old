@@ -24,6 +24,7 @@ import hep.dataforge.meta.Meta
  *
  * @author Alexander Nozik
  */
+@Deprecated("To be replaced by Output")
 interface PlotPlugin : Plugin {
 
     /**

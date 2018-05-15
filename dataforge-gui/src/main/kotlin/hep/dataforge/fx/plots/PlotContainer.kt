@@ -2,7 +2,7 @@ package hep.dataforge.fx.plots
 
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
-import hep.dataforge.fx.dfIcon
+import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.meta.Laminate
@@ -18,7 +18,6 @@ import javafx.geometry.Pos
 import javafx.scene.Node
 import javafx.scene.Scene
 import javafx.scene.control.TreeItem
-import javafx.scene.image.ImageView
 import javafx.scene.layout.Priority
 import javafx.scene.layout.StackPane
 import javafx.scene.layout.VBox
@@ -38,7 +37,7 @@ internal val defaultDisplay: (PlotFrame) -> Node = {
     }
 }
 
-class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = ImageView(dfIcon)) {
+class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = defaultDisplay) : Fragment(icon = dfIconView) {
 
     private val configWindows = HashMap<hep.dataforge.meta.Configurable, Stage>()
     private val dataWindows = HashMap<Plot, Stage>()

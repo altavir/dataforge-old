@@ -86,7 +86,7 @@ class PlotGroup(name: String, private var descriptor: NodeDescriptor = NodeDescr
      */
     private fun notifyPlotAdded(plot: Plottable) {
         plotAdded(plot.name, plot)
-        metaChanged(plot.name, plot, Laminate(plot.config))
+        metaChanged(plot.name, plot, Laminate(plot.config).withDescriptor(Descriptors.buildDescriptor(plot)))
         if (plot is PlotGroup) {
             plot.children.forEach { plot.notifyPlotAdded(it) }
         }
