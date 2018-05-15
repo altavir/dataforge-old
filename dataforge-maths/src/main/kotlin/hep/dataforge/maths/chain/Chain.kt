@@ -26,7 +26,7 @@ import kotlinx.coroutines.experimental.runBlocking
  * @param S - the state of the chain
  * @param R - the chain element type
  */
-interface Chain<out R> {
+interface Chain<out R> : Sequence<R> {
     /**
      * Last value of the chain
      */
@@ -53,6 +53,14 @@ interface Chain<out R> {
                 }
             }
         }
+
+    override fun iterator(): Iterator<R> {
+        return object : Iterator<R> {
+            override fun hasNext(): Boolean = true
+
+            override fun next(): R = runBlocking { this@Chain.next() }
+        }
+    }
 
     /**
      * Map the chain result using suspended transformation. Initial chain result can no longer be safely consumed

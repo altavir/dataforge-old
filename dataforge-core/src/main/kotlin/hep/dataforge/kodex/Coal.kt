@@ -53,7 +53,7 @@ class Coal<R>(
         }
     }
 
-    private fun notifyListeners(action: GoalListener<R>.() -> Unit) {
+    private fun notifyListeners(action: suspend GoalListener<R>.() -> Unit) {
         listeners.forEach {
             async(context = dispatcher) {
                 try {
