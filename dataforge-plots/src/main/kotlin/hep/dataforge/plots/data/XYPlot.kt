@@ -37,8 +37,8 @@ import java.util.stream.Stream
 //@ValueDef(name = "symbolType", info = "The type of the symbols for scatterplot.")
 //@ValueDef(name = "symbolSize", type = "NUMBER", info = "The size of the symbols for scatterplot.")
 //@ValueDef(name = "lineType", info = "The type of the line fill.")
-@ValueDef(name = "color", info = "The color of line or symbol.", tags = arrayOf("color"))
-@NodeDef(name = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = arrayOf(FINAL_TAG))
+@ValueDef(key = "color", info = "The color of line or symbol.", tags = arrayOf("color"))
+@NodeDef(key = ADAPTER_KEY, info = "An adapter to interpret the dataset", tags = arrayOf(FINAL_TAG))
 abstract class XYPlot(name: Name, meta: Meta, adapter: ValuesAdapter?) : AbstractPlot(name, meta, adapter) {
 
     fun getData(from: Value, to: Value): List<Values> {
@@ -55,7 +55,7 @@ abstract class XYPlot(name: Name, meta: Meta, adapter: ValuesAdapter?) : Abstrac
      * @param query
      * @return
      */
-    @NodeDef(name = "xRange", info = "X filter")
+    @NodeDef(key = "xRange", info = "X filter")
     override fun getData(query: Meta): List<Values> {
         return if (query.isEmpty) {
             getRawData(query)

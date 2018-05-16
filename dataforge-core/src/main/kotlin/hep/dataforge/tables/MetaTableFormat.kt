@@ -34,9 +34,9 @@ import java.util.stream.Stream
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(name = "column", multiple = true, required = true, info = "A column format", from = "class::hep.dataforge.tables.ColumnFormat"),
-        NodeDef(name = "defaultColumn", info = "Default column format. Used when format for specific column is not given"),
-        NodeDef(name = DEFAULT_META_NAME, info = "Custom table information")
+        NodeDef(key = "column", multiple = true, required = true, info = "A column format", from = "class::hep.dataforge.tables.ColumnFormat"),
+        NodeDef(key = "defaultColumn", info = "Default column format. Used when format for specific column is not given"),
+        NodeDef(key = DEFAULT_META_NAME, info = "Custom table information")
 )
 class MetaTableFormat(meta: Meta) : SimpleMetaMorph(meta), TableFormat {
     //TODO add transformation to use short column description

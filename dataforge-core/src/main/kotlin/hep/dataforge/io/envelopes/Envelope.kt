@@ -36,7 +36,7 @@ import java.util.function.Function
  *
  * @author Alexander Nozik
  */
-@NodeDef(name = "@envelope", info = "An optional envelope service info node")
+@NodeDef(key = "@envelope", info = "An optional envelope service info node")
 interface Envelope : Metoid, Serializable {
 
     /**

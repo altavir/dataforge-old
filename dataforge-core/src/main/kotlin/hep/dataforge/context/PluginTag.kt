@@ -31,8 +31,8 @@ import hep.dataforge.meta.SimpleMetaMorph
 //@ValueDef(name = "role", multiple = true,info = "The list of roles this plugin implements")
 //@ValueDef(name = "priority", type = "NUMBER", info = "Plugin load priority. Used for plugins with the same role")
 @ValueDefs(
-        ValueDef(name = "group", def = ""),
-        ValueDef(name = "name", required = true)
+        ValueDef(key = "group", def = ""),
+        ValueDef(key = "name", required = true)
 )
 class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 

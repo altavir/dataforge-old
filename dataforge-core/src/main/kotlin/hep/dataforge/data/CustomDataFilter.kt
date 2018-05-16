@@ -21,8 +21,8 @@ import java.util.function.BiPredicate
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(name = "include", info = "Define inclusion rule for data and/or dataNode. If not inclusion rule is present, everything is included by default.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta"),
-        NodeDef(name = "exclude", info = "Define exclusion rule for data and/or dataNode. Exclusion rules are allied only to included items.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta")
+        NodeDef(key = "include", info = "Define inclusion rule for data and/or dataNode. If not inclusion rule is present, everything is included by default.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta"),
+        NodeDef(key = "exclude", info = "Define exclusion rule for data and/or dataNode. Exclusion rules are allied only to included items.", from = "method::hep.dataforge.data.CustomDataFilter.applyMeta")
 )
 class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
 
@@ -126,10 +126,10 @@ class CustomDataFilter(meta: Meta) : SimpleMetaMorph(meta), DataFilter {
     }
 
     @ValueDefs(
-            ValueDef(name = "mask", info = "Add rule using glob mask"),
-            ValueDef(name = "pattern", info = "Add rule rule using regex pattern"),
-            ValueDef(name = "forData", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Apply this rule to individual data"),
-            ValueDef(name = "forNodes", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Apply this rule to data nodes")
+            ValueDef(key = "mask", info = "Add rule using glob mask"),
+            ValueDef(key = "pattern", info = "Add rule rule using regex pattern"),
+            ValueDef(key = "forData", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Apply this rule to individual data"),
+            ValueDef(key = "forNodes", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Apply this rule to data nodes")
     )
     private fun applyMeta(meta: Meta) {
         if (meta.hasMeta("include")) {

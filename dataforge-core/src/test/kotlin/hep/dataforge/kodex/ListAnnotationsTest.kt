@@ -24,7 +24,7 @@ import org.junit.Test
 
 class ListAnnotationsTest {
 
-    @StateDef(ValueDef(name = "test"))
+    @StateDef(ValueDef(key = "test"))
     class Test1
 
 
@@ -35,8 +35,8 @@ class ListAnnotationsTest {
     }
 
     @StateDefs(
-            StateDef(ValueDef(name = "test1")),
-            StateDef(ValueDef(name = "test2"))
+            StateDef(ValueDef(key = "test1")),
+            StateDef(ValueDef(key = "test2"))
     )
     class Test2
 

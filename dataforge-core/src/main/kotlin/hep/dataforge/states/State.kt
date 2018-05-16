@@ -256,7 +256,7 @@ class ValueState(
             owner: Stateful? = null,
             getter: (suspend () -> Any)? = null,
             setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
-    ) : this(def.name, ValueDescriptor.build(def), def.def.parseValue(), owner, getter, setter)
+    ) : this(def.key, ValueDescriptor.build(def), def.def.parseValue(), owner, getter, setter)
 
     override fun transform(value: Any): Value {
         return Value.of(value)
@@ -365,7 +365,7 @@ class MetaState(
             owner: Stateful? = null,
             getter: (suspend () -> Meta)? = null,
             setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
-    ) : this(def.name, NodeDescriptor.build(def), Meta.empty(), owner, getter, setter)
+    ) : this(def.key, NodeDescriptor.build(def), Meta.empty(), owner, getter, setter)
 
     override fun transform(value: Any): Meta {
         return (value as? MetaID)?.toMeta()

@@ -156,7 +156,7 @@ object Descriptors {
     @JvmStatic
     fun buildDescriptorMeta(nodeDef: NodeDef): Meta {
         var nodeMeta = MetaBuilder("node")
-                .putValue("name", nodeDef.name)
+                .putValue("name", nodeDef.key)
                 .putValue("info", nodeDef.info)
                 .putValue("required", nodeDef.required)
                 .putValue("multiple", nodeDef.multiple)
@@ -182,14 +182,14 @@ object Descriptors {
 
         listAnnotations(element, NodeDef::class.java, true)
                 .stream()
-                .filter({ it -> !it.name.startsWith("@") })
+                .filter({ it -> !it.key.startsWith("@") })
                 .forEach { nodeDef ->
                     //TODO replace by map to avoid multiple node parsing
                     val exists = res.hasMeta("node") && res.getMetaList("node").stream()
-                            .anyMatch { mb -> mb.getString("name") == nodeDef.name }
+                            .anyMatch { mb -> mb.getString("name") == nodeDef.key }
                     //warning on duplicate nodes
                     if (exists) {
-                        LoggerFactory.getLogger(Descriptors::class.java).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.name)
+                        LoggerFactory.getLogger(Descriptors::class.java).trace("Ignoring duplicate node with name {} in descriptor", nodeDef.key)
                     } else {
                         putDescription(res, buildDescriptorMeta(nodeDef))
                     }
@@ -199,12 +199,12 @@ object Descriptors {
         //Filtering hidden values
         listAnnotations(element, ValueDef::class.java, true)
                 .stream()
-                .filter({ it -> !it.name.startsWith("@") })
+                .filter({ it -> !it.key.startsWith("@") })
                 .forEach { valueDef ->
                     val exists = res.hasMeta("value") && res.getMetaList("value").stream()
-                            .anyMatch { mb -> mb.getString("name") == valueDef.name }
+                            .anyMatch { mb -> mb.getString("name") == valueDef.key }
                     if (exists) {
-                        LoggerFactory.getLogger(Descriptors::class.java).trace("Ignoring duplicate value with name {} in descriptor", valueDef.name)
+                        LoggerFactory.getLogger(Descriptors::class.java).trace("Ignoring duplicate value with name {} in descriptor", valueDef.key)
                     } else {
                         putDescription(res, ValueDescriptor.build(valueDef).meta)
                     }

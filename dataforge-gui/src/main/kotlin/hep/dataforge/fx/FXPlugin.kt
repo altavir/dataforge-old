@@ -23,7 +23,7 @@ import tornadofx.*
  */
 @PluginDef(name = "fx", group = "hep.dataforge", info = "JavaFX window manager")
 @ValueDefs(
-        ValueDef(name = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
+        ValueDef(key = "consoleMode", type = [BOOLEAN], def = "true", info = "Start an application surrogate if actual application not found")
 )
 class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
 

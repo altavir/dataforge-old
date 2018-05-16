@@ -28,7 +28,7 @@ import hep.dataforge.values.Values
  *
  * @author Darksnake
  */
-@NodeDef(name = "format", required = true, info = "data point format for this loader")
+@NodeDef(key = "format", required = true, info = "data point format for this loader")
 //@ValueDef(name = "defaultIndexName", def = "timestamp", info = "The name of index field for this loader")
 interface TableLoader : Loader, ValuesSource {
 

@@ -59,9 +59,9 @@ abstract class IOManager(meta: Meta) : BasicPlugin(meta) {
      * @return
      */
     @ValueDefs(
-            ValueDef(name = "stage", def = "", info = "Fully qualified name of the output stage"),
-            ValueDef(name = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
-            ValueDef(name = "type", def = TEXT_TYPE, info = "Type of the output container")
+            ValueDef(key = "stage", def = "", info = "Fully qualified name of the output stage"),
+            ValueDef(key = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
+            ValueDef(key = "type", def = TEXT_TYPE, info = "Type of the output container")
     )
     abstract fun output(meta: Meta): Output
 

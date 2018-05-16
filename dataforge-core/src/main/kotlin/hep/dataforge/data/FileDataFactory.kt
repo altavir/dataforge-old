@@ -36,8 +36,8 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @NodeDefs(
-        NodeDef(name = "file", info = "File data element or list of files with the same meta defined by mask."),
-        NodeDef(name = "dir", info = "Directory data node.")
+        NodeDef(key = "file", info = "File data element or list of files with the same meta defined by mask."),
+        NodeDef(key = "dir", info = "Directory data node.")
 )
 class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 

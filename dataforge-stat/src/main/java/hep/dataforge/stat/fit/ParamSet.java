@@ -85,7 +85,7 @@ public class ParamSet implements Values, MetaMorph {
         }
     }
 
-    @NodeDef(name = "params", info = "Used as a wrapper for 'param' elements.")
+    @NodeDef(key = "params", info = "Used as a wrapper for 'param' elements.")
     public ParamSet(Meta meta){
 
         Meta params;

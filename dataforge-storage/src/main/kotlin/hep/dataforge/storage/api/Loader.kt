@@ -45,7 +45,7 @@ import org.slf4j.Logger
         RoleDef(name = EVENT_HANDLER_ROLE, objectType = EventHandler::class, info = "Handle events produced by this loader"),
         RoleDef(name = LOGGER_ROLE, objectType = Logger::class, unique = true, info = "The logger for this loader")
 )
-@ValueDef(name = LOADER_TYPE_KEY, info = "The type of the loader")
+@ValueDef(key = LOADER_TYPE_KEY, info = "The type of the loader")
 interface Loader : Metoid, AutoCloseable, Named, Responder, AutoConnectible, ContextAware, Comparable<Named> {
 
     /**

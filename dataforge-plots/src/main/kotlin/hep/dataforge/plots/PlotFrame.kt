@@ -31,7 +31,7 @@ import java.io.Serializable
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "title", info = "The title of the plot. By default the name of the Content is taken.")
+@ValueDef(key = "title", info = "The title of the plot. By default the name of the Content is taken.")
 interface PlotFrame : Configurable, Serializable {
 
     /**

@@ -33,7 +33,7 @@ import java.lang.annotation.*;
 @Repeatable(ValueDefs.class)
 public @interface ValueDef {
 
-    String name();
+    String key();
 
     ValueType[] type() default {ValueType.STRING};
 

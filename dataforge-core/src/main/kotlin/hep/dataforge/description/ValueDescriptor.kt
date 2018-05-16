@@ -156,7 +156,7 @@ class ValueDescriptor(meta: Meta) : SimpleMetaMorph(meta), Named {
 
         fun build(def: ValueDef): ValueDescriptor {
             val builder = MetaBuilder("value")
-                    .setValue("name", def.name)
+                    .setValue("name", def.key)
                     .setValue("type", def.type)
                     .setValue("tags", def.tags)
 

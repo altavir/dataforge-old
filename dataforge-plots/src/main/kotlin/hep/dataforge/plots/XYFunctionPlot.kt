@@ -36,13 +36,13 @@ import java.util.*
  * @author Alexander Nozik
  */
 @ValueDefs(
-        ValueDef(name = "showLine", type = arrayOf(BOOLEAN), def = "true", info = "Show the connecting line."),
-        ValueDef(name = "showSymbol", type = arrayOf(BOOLEAN), def = "false", info = "Show symbols for data point."),
-        ValueDef(name = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
-        ValueDef(name = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
-        ValueDef(name = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
-        ValueDef(name = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
-        ValueDef(name = "connectionType", def = "spline")
+        ValueDef(key = "showLine", type = arrayOf(BOOLEAN), def = "true", info = "Show the connecting line."),
+        ValueDef(key = "showSymbol", type = arrayOf(BOOLEAN), def = "false", info = "Show symbols for data point."),
+        ValueDef(key = "showErrors", type = arrayOf(BOOLEAN), def = "false", info = "Show errors for points."),
+        ValueDef(key = "range.from", type = arrayOf(NUMBER), def = "0.0", info = "Lower boundary for calculation range"),
+        ValueDef(key = "range.to", type = arrayOf(NUMBER), def = "1.0", info = "Upper boundary for calculation range"),
+        ValueDef(key = "density", type = arrayOf(NUMBER), def = "200", info = "Minimal number of points per plot"),
+        ValueDef(key = "connectionType", def = "spline")
 )
 class XYFunctionPlot(name: String, meta: Meta = Meta.empty(), val function: (Double) -> Double) : XYPlot(Name.ofSingle(name), meta, Adapters.DEFAULT_XY_ADAPTER) {
 

@@ -26,7 +26,7 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.values.ValueType
 import java.util.*
 
-@ValueDef(name = "printHistory", type = [ValueType.BOOLEAN], def = "false", info = "If true, print all incoming records in default context output")
+@ValueDef(key = "printHistory", type = [ValueType.BOOLEAN], def = "false", info = "If true, print all incoming records in default context output")
 @PluginDef(name = "chronicler", group = "hep.dataforge", support = true, info = "The general support for history logging")
 class Chronicler(meta: Meta) : BasicPlugin(meta), History {
 

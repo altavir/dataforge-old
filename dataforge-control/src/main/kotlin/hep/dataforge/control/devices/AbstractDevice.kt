@@ -47,7 +47,7 @@ import java.util.concurrent.*
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-@StateDef(value = ValueDef(name = INITIALIZED_STATE, type = [ValueType.BOOLEAN], def = "false", info = "Initialization state of the device"), writable = true)
+@StateDef(value = ValueDef(key = INITIALIZED_STATE, type = [ValueType.BOOLEAN], def = "false", info = "Initialization state of the device"), writable = true)
 abstract class AbstractDevice(override val context: Context = Global, meta: Meta) : MetaHolder(meta), Device {
 
     final override val states = StateHolder()

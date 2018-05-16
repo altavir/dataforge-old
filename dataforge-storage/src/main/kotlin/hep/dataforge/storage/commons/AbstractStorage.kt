@@ -238,7 +238,7 @@ abstract class AbstractStorage : MetaHolder, Storage {
         return Collections.unmodifiableCollection(shelves.values)
     }
 
-    @NodeDef(name = "security", info = "Some information for  security manager")
+    @NodeDef(key = "security", info = "Some information for  security manager")
     override fun respond(message: Envelope): Envelope {
         val responder = getResponder(message)
         return if (responder == this) {
@@ -275,7 +275,7 @@ abstract class AbstractStorage : MetaHolder, Storage {
     //                .builder();
     //    }
 
-    @NodeDef(name = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
+    @NodeDef(key = DEFAULT_META_NAME, info = "A meta for sotrage or loader creation. Only used if 'allowCreate' is true.")
     override fun getResponder(targetInfo: Meta): Responder {
         val targetType = targetInfo.getString(TARGET_TYPE_KEY, Storage.LOADER_TARGET)
         val targetName = targetInfo.getString(TARGET_NAME_KEY, "")

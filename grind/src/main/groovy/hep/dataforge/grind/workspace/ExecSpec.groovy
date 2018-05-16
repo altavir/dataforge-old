@@ -238,7 +238,7 @@ class ExecSpec {
 
 //    @ValueDef(name = "inheritIO", type = ValueType.BOOLEAN, def = "true", info = "Define if process should inherit IO from DataForge process")
     
-    @NodeDef(name = "env", info = "Environment variables as a key-value pairs")
+    @NodeDef(key = "env", info = "Environment variables as a key-value pairs")
 //    @NodeDef(name = "parameter", info = "The definition for command parameter")
     private class GrindExecAction extends OneToOneAction<Object, Object> {
 

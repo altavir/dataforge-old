@@ -24,8 +24,8 @@ import hep.dataforge.names.Name
 import hep.dataforge.values.ValueType
 
 @ValueDefs(
-        ValueDef(name = "title", info = "The title of series. Could be not unique. By default equals series name."),
-        ValueDef(name = "visible", def = "true", type = arrayOf(ValueType.BOOLEAN), info = "The current visibility of this plottable")
+        ValueDef(key = "title", info = "The title of series. Could be not unique. By default equals series name."),
+        ValueDef(key = "visible", def = "true", type = arrayOf(ValueType.BOOLEAN), info = "The current visibility of this plottable")
 )
 interface Plottable : Configurable, Described {
 

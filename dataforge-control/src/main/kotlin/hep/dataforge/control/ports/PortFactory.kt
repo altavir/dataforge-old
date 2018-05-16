@@ -40,9 +40,9 @@ object PortFactory : MetaFactory<Port> {
 
 
     @ValueDefs(
-            ValueDef(name = "type", def = "tcp", info = "The type of the port"),
-            ValueDef(name = "address", required = true, info = "The specific designation of this port according to type"),
-            ValueDef(name = "type", def = "tcp", info = "The type of the port")
+            ValueDef(key = "type", def = "tcp", info = "The type of the port"),
+            ValueDef(key = "address", required = true, info = "The specific designation of this port according to type"),
+            ValueDef(key = "type", def = "tcp", info = "The type of the port")
     )
     override fun build(meta: Meta): Port {
         val protocol = meta.getString("type", "tcp")

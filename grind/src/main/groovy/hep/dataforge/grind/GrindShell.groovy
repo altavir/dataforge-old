@@ -18,8 +18,8 @@ import org.slf4j.LoggerFactory
 
 @CompileStatic
 @NodeDefs([
-        @NodeDef(name = "import", info = "Import customization"),
-        @NodeDef(name = "import.one", multiple = true, info = "A single import. Can contain alas. If field is present, then using static import")
+        @NodeDef(key = "import", info = "Import customization"),
+        @NodeDef(key = "import.one", multiple = true, info = "A single import. Can contain alas. If field is present, then using static import")
 ])
 class GrindShell implements ContextAware {
 

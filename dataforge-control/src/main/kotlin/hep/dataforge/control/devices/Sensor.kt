@@ -47,16 +47,16 @@ import java.time.Instant
  *
  * @author Alexander Nozik
  */
-@ValueDef(name = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
+@ValueDef(key = "resultBuffer", type = [ValueType.NUMBER], def = "100", info = "The size of the buffer for results of measurements")
 @StateDefs(
-        StateDef(value = ValueDef(name = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
-        StateDef(ValueDef(name = MEASUREMENT_STATUS_STATE, enumeration = Sensor.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
-        StateDef(ValueDef(name = MEASUREMENT_MESSAGE_STATE, info = "Current message")),
-        StateDef(ValueDef(name = MEASUREMENT_PROGRESS_STATE, type = [ValueType.NUMBER], info = "Current progress"))
+        StateDef(value = ValueDef(key = MEASURING_STATE, type = [ValueType.BOOLEAN], info = "Shows if this sensor is actively measuring"), writable = true),
+        StateDef(ValueDef(key = MEASUREMENT_STATUS_STATE, enumeration = Sensor.MeasurementState::class, info = "Shows if this sensor is actively measuring")),
+        StateDef(ValueDef(key = MEASUREMENT_MESSAGE_STATE, info = "Current message")),
+        StateDef(ValueDef(key = MEASUREMENT_PROGRESS_STATE, type = [ValueType.NUMBER], info = "Current progress"))
 )
 @MetaStateDefs(
-        MetaStateDef(value = NodeDef(name = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
-        MetaStateDef(NodeDef(name = MEASUREMENT_RESULT_STATE, info = "The result of the last measurement in Meta form"))
+        MetaStateDef(value = NodeDef(key = MEASUREMENT_META_STATE, info = "Configuration of current measurement."), writable = true),
+        MetaStateDef(NodeDef(key = MEASUREMENT_RESULT_STATE, info = "The result of the last measurement in Meta form"))
 )
 abstract class Sensor(context: Context, meta: Meta) : AbstractDevice(context, meta) {
 

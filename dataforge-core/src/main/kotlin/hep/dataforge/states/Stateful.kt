@@ -69,7 +69,7 @@ fun Stateful.metaState(
         getter: (suspend () -> Meta)? = null,
         setter: (suspend State<Meta>.(Meta?, Meta) -> Unit)? = null
 ): MetaState {
-    val def: MetaStateDef? = listAnnotations(this::class.java, MetaStateDef::class.java, true).find { it.value.name == name }
+    val def: MetaStateDef? = listAnnotations(this::class.java, MetaStateDef::class.java, true).find { it.value.key == name }
     return if (def == null) {
         MetaState(name = name, owner = this, getter = getter, setter = setter)
     } else {
@@ -90,7 +90,7 @@ fun Stateful.valueState(
         getter: (suspend () -> Any)? = null,
         setter: (suspend State<Value>.(Value?, Value) -> Unit)? = null
 ): ValueState {
-    val def: StateDef? = listAnnotations(this::class.java, StateDef::class.java, true).find { it.value.name == name }
+    val def: StateDef? = listAnnotations(this::class.java, StateDef::class.java, true).find { it.value.key == name }
     return if (def == null) {
         ValueState(name = name, owner = this, getter = getter, setter = setter)
     } else {

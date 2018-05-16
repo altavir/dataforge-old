@@ -31,7 +31,7 @@ import java.lang.annotation.*;
 @Repeatable(NodeDefs.class)
 public @interface NodeDef {
 
-    String name();
+    String key();
 
     String info() default "";
 

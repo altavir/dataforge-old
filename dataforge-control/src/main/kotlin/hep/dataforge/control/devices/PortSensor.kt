@@ -45,13 +45,13 @@ import java.time.Duration
  * @author darksnake
  */
 @StateDefs(
-        StateDef(value = ValueDef(name = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
+        StateDef(value = ValueDef(key = CONNECTED_STATE, type = [BOOLEAN], def = "false", info = "The connection state for this device"), writable = true),
         //StateDef(value = ValueDef(name = PORT_STATE, info = "The name of the port to which this device is connected")),
-        StateDef(value = ValueDef(name = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
+        StateDef(value = ValueDef(key = DEBUG_STATE, type = [BOOLEAN], def = "false", info = "If true, then all received phrases would be shown in the log"), writable = true)
 )
-@MetaStateDef(value = NodeDef(name = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
+@MetaStateDef(value = NodeDef(key = "port", from = "method::hep.dataforge.control.ports.PortFactory.build", info = "Information about port"), writable = true)
 @ValueDefs(
-        ValueDef(name = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
+        ValueDef(key = "timeout", type = arrayOf(NUMBER), def = "400", info = "A timeout for port response in milliseconds")
 )
 abstract class PortSensor(context: Context, meta: Meta) : Sensor(context, meta) {
 

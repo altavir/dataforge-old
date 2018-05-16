@@ -33,9 +33,9 @@ import java.util.*
  * @author Alexander Nozik
  */
 @NodeDefs(
-        NodeDef(name = "xAxis", info = "The description of X axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
-        NodeDef(name = "yAxis", info = "The description of Y axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
-        NodeDef(name = "legend", info = "The configuration for plot legend", from = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
+        NodeDef(key = "xAxis", info = "The description of X axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
+        NodeDef(key = "yAxis", info = "The description of Y axis", from = "method::hep.dataforge.plots.XYPlotFrame.updateAxis"),
+        NodeDef(key = "legend", info = "The configuration for plot legend", from = "method::hep.dataforge.plots.XYPlotFrame.updateLegend")
 )
 abstract class XYPlotFrame : AbstractPlotFrame() {
 
@@ -75,17 +75,17 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
      * @param axisMeta
      */
     @ValueDefs(
-            ValueDef(name = "type", allowed = ["number", "log", "time"], def = "number", info = "The type of axis. By default number axis is used"),
-            ValueDef(name = "axisTitle", info = "The title of the axis."),
-            ValueDef(name = "axisUnits", def = "", info = "The units of the axis."),
-            ValueDef(name = "range.from", type = arrayOf(ValueType.NUMBER), info = "Lower boundary for fixed range"),
-            ValueDef(name = "range.to", type = arrayOf(ValueType.NUMBER), info = "Upper boundary for fixed range"),
-            ValueDef(name = "crosshair", def = "data", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")
+            ValueDef(key = "type", allowed = ["number", "log", "time"], def = "number", info = "The type of axis. By default number axis is used"),
+            ValueDef(key = "axisTitle", info = "The title of the axis."),
+            ValueDef(key = "axisUnits", def = "", info = "The units of the axis."),
+            ValueDef(key = "range.from", type = arrayOf(ValueType.NUMBER), info = "Lower boundary for fixed range"),
+            ValueDef(key = "range.to", type = arrayOf(ValueType.NUMBER), info = "Upper boundary for fixed range"),
+            ValueDef(key = "crosshair", def = "data", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")
     )
-    @NodeDef(name = "range", info = "The definition of range for given axis")
+    @NodeDef(key = "range", info = "The definition of range for given axis")
     protected abstract fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta)
 
-    @ValueDef(name = "show", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Display or hide the legend")
+    @ValueDef(key = "show", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Display or hide the legend")
     protected abstract fun updateLegend(legendMeta: Meta)
 
     /**
