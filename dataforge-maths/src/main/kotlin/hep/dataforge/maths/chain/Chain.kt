@@ -33,7 +33,7 @@ interface Chain<out R> : Sequence<R> {
     val value: R
 
     /**
-     * Generate next value, changin state if needed
+     * Generate next value, changing state if needed
      */
     suspend fun next(): R
 
@@ -72,7 +72,7 @@ interface Chain<out R> : Sequence<R> {
             override val value: T
                 get() = runBlocking { func.invoke(parent.value) }
 
-            suspend override fun next(): T {
+            override suspend fun next(): T {
                 return func(parent.next())
             }
 
@@ -101,7 +101,7 @@ class SimpleChain<out R : Any>(private val gen: suspend () -> R) : Chain<R> {
     override val value: R
         get() = _value ?: runBlocking { next() }
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         _value = gen();
         return value;
     }
@@ -147,7 +147,7 @@ class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, priva
     override val value: R
         get() = _value ?: state.seed()
 
-    suspend override fun next(): R {
+    override suspend fun next(): R {
         synchronized(this) {
             _value = gen(state, value)
             return value
@@ -163,7 +163,7 @@ class StatefulChain<S, R : Any>(val state: S, private val seed: S.() -> R, priva
  * A chain that repeats the same value
  */
 class ConstantChain<out T>(override val value: T) : Chain<T> {
-    suspend override fun next(): T {
+    override suspend fun next(): T {
         return value
     }
 
