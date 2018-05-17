@@ -19,8 +19,8 @@ import java.io.File
 /**
  * A directory based IO manager. Any named output is redirected to file in corresponding directory inside work directory
  */
-@PluginDef(name = "io.dir", group = "hep.dataforge", info = "Directory based output plugin")
-class DirectoryIO : DefaultIOManager() {
+@PluginDef(name = "output.dir", group = "hep.dataforge", info = "Directory based output plugin")
+class DirectoryOutput : DefaultOutputManager() {
 
     //internal var registry = ReferenceRegistry<OutputStream>()
     //    FileAppender<ILoggingEvent> appender;
@@ -36,7 +36,7 @@ class DirectoryIO : DefaultIOManager() {
         ple.context = lc
         ple.start()
         val appender = FileAppender<ILoggingEvent>()
-        appender.file = File(workDir.toFile(), meta.getString("logFileName", "${context.name}.log")).toString()
+        appender.file = File(context.workDir.toFile(), meta.getString("logFileName", "${context.name}.log")).toString()
         appender.encoder = ple
         return appender
     }
@@ -59,7 +59,7 @@ class DirectoryIO : DefaultIOManager() {
         }
     }
 
-    override fun output(meta: Meta): Output {
+    override fun get(meta: Meta): Output {
         return map.getOrPut(meta) {
             val name = Name.of(meta.getString("name"))
             val stage = Name.of(meta.getString("stage", ""))
@@ -73,10 +73,10 @@ class DirectoryIO : DefaultIOManager() {
 
 
     class Factory: PluginFactory() {
-        override val type: Class<out Plugin> = DirectoryIO::class.java
+        override val type: Class<out Plugin> = DirectoryOutput::class.java
 
         override fun build(meta: Meta): Plugin {
-            return DirectoryIO()
+            return DirectoryOutput()
         }
     }
 

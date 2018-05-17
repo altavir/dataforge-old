@@ -16,7 +16,10 @@
 package hep.dataforge.context
 
 import hep.dataforge.Named
-import hep.dataforge.io.IOManager
+import hep.dataforge.data.binary.Binary
+import hep.dataforge.data.binary.StreamBinary
+import hep.dataforge.io.IOUtils
+import hep.dataforge.io.OutputManager
 import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.nullable
 import hep.dataforge.kodex.optional
@@ -28,8 +31,13 @@ import hep.dataforge.providers.Provides
 import hep.dataforge.providers.ProvidesNames
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueProvider
+import hep.dataforge.workspace.FileReference
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import java.io.File
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
@@ -46,7 +54,7 @@ import kotlin.reflect.KClass
  * Each context has a set of named [Value] properties which are taken from parent context in case they are not found in local context.
  * Context implements [ValueProvider] interface and therefore could be uses as a value source for substitutions etc.
  * Context contains [PluginManager] which could be used any number of configurable named plugins.
- * Also Context has its own logger and [IOManager] to govern all the input and output being made inside the context.
+ * Also Context has its own logger and [OutputManager] to govern all the input and output being made inside the context.
  * @author Alexander Nozik
  */
 open class Context(
@@ -76,8 +84,8 @@ open class Context(
      *
      * @return the io
      */
-    open val io: IOManager
-        get() = pluginManager.get(IOManager::class, false) ?: parent?.io ?: Global.io
+    open val output: OutputManager
+        get() = pluginManager.get(OutputManager::class, false) ?: parent?.output ?: Global.output
 
 
     /**
@@ -286,7 +294,82 @@ open class Context(
         }
     }
 
+
+    /**
+     * Return the root directory for this IOManager. By convention, Context
+     * should not have access outside root directory to prevent System damage.
+     *
+     * @return a [java.io.File] object.
+     */
+    val rootDir: Path by lazy {
+        properties[ROOT_DIRECTORY_CONTEXT_KEY]
+                ?.let { Paths.get(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.rootDir
+                ?: File(System.getProperty("user.home")).toPath()
+    }
+
+    /**
+     * The working directory for output and temporary files. Is always inside root directory
+     *
+     * @return
+     */
+    val workDir: Path by lazy {
+        properties[WORK_DIRECTORY_CONTEXT_KEY]
+                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.workDir
+                ?: rootDir.resolve(".dataforge").also { Files.createDirectories(it) }
+    }
+
+    /**
+     * Get the default directory for file data. By default uses context root directory
+     * @return
+     */
+    val dataDir: Path by lazy {
+        properties[DATA_DIRECTORY_CONTEXT_KEY]?.let { IOUtils.resolvePath(it.string) } ?: rootDir
+    }
+
+    /**
+     * The directory for temporary files. This directory could be cleaned up any
+     * moment. Is always inside root directory.
+     *
+     * @return
+     */
+    val tmpDir: Path by lazy {
+        properties[TEMP_DIRECTORY_CONTEXT_KEY]
+                ?.let { rootDir.resolve(it.string).also { Files.createDirectories(it) } }
+                ?: parent?.workDir
+                ?: rootDir.resolve(".dataforge/.temp").also { Files.createDirectories(it) }
+    }
+
+
+    fun getDataFile(path: String): FileReference {
+        return FileReference.openDataFile(this, path)
+    }
+
+    /**
+     * Get a file where `path` is relative to root directory or absolute.
+     * @param path a [java.lang.String] object.
+     * @return a [java.io.File] object.
+     */
+    fun getFile(path: String): FileReference {
+        return FileReference.openFile(this, path)
+    }
+
+    /**
+     * Get the context based classpath resource
+     */
+    fun optResource(name: String): Optional<Binary> {
+        val resource = classLoader.getResource(name)
+        return resource?.let { StreamBinary { it.openStream() } }.optional
+    }
+
+
     companion object {
+
+        const val ROOT_DIRECTORY_CONTEXT_KEY = "rootDir"
+        const val WORK_DIRECTORY_CONTEXT_KEY = "workDir"
+        const val DATA_DIRECTORY_CONTEXT_KEY = "dataDir"
+        const val TEMP_DIRECTORY_CONTEXT_KEY = "tempDir"
 
         /**
          * Build a new context based on given meta

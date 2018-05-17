@@ -22,10 +22,10 @@
 package hep.dataforge.data
 
 import hep.dataforge.context.Context
+import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
-import hep.dataforge.io.IOManager
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -45,8 +45,8 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
     override fun fill(builder: DataNodeEditor<Binary>, context: Context, meta: Meta) {
         val parentFile: Path = when {
-            meta.hasMeta(IOManager.DATA_DIRECTORY_CONTEXT_KEY) -> context.io.rootDir.resolve(meta.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY))
-            else -> context.io.dataDir
+            meta.hasMeta(DATA_DIRECTORY_CONTEXT_KEY) -> context.rootDir.resolve(meta.getString(DATA_DIRECTORY_CONTEXT_KEY))
+            else -> context.dataDir
         }
 
         /**
@@ -73,7 +73,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
     }
 
     fun buildFileData(context: Context, filePath: String, meta: Meta): Data<Binary> {
-        return buildFileData(context.io.getFile(filePath), meta)
+        return buildFileData(context.getFile(filePath), meta)
     }
 
     private fun buildFileData(file: FileReference, meta: Meta): Data<Binary> {
@@ -110,7 +110,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
     private fun listFiles(context: Context, oath: Path, fileNode: Meta): List<Path> {
         val mask = fileNode.getString("path")
-        val parent = context.io.rootDir.resolve(oath)
+        val parent = context.rootDir.resolve(oath)
         try {
             return Files.list(parent).filter { path -> wildcardMatch(mask, path.toString()) }.toList()
         } catch (e: IOException) {

@@ -41,9 +41,9 @@ class FileReference private constructor(override val context: Context, val path:
      */
     val absolutePath: Path = when (scope) {
         SYS -> path
-        DATA -> context.io.dataDir.resolve(path)
-        WORK -> context.io.workDir.resolve(path)
-        TMP -> context.io.tmpDir.resolve(path)
+        DATA -> context.dataDir.resolve(path)
+        WORK -> context.workDir.resolve(path)
+        TMP -> context.tmpDir.resolve(path)
     }.toAbsolutePath()
 
     /**
@@ -139,7 +139,7 @@ class FileReference private constructor(override val context: Context, val path:
          * Provide a reference to a new file in tmp directory with unique ID.
          */
         fun newTmpFile(context: Context, prefix: String, suffix: String = "tmp"): FileReference {
-            val path = Files.createTempFile(context.io.tmpDir, prefix, suffix)
+            val path = Files.createTempFile(context.tmpDir, prefix, suffix)
             return FileReference(context, path, TMP)
         }
 
@@ -148,10 +148,10 @@ class FileReference private constructor(override val context: Context, val path:
          */
         fun newWorkFile(context: Context, prefix: String, suffix: String, path: Name = Name.EMPTY): FileReference {
             val dir = if (path.isEmpty) {
-                context.io.workDir
+                context.workDir
             } else {
                 val relativeDir = path.tokens.joinToString(File.separator) { it.toString() }
-                context.io.workDir.resolve(relativeDir)
+                context.workDir.resolve(relativeDir)
             }
 
             val file = dir.resolve("$prefix.$suffix")
@@ -166,7 +166,7 @@ class FileReference private constructor(override val context: Context, val path:
         }
 
         fun openDataFile(context: Context, name: String): FileReference {
-            val path = context.io.dataDir.resolve(name)
+            val path = context.dataDir.resolve(name)
             return FileReference(context, path, DATA)
         }
 

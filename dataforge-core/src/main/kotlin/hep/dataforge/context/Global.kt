@@ -16,8 +16,8 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
-import hep.dataforge.io.DefaultIOManager
-import hep.dataforge.io.IOManager
+import hep.dataforge.io.DefaultOutputManager
+import hep.dataforge.io.OutputManager
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.StreamOutput
 import hep.dataforge.kodex.buildMeta
@@ -72,10 +72,10 @@ object Global : Context("GLOBAL", null, Thread.currentThread().contextClassLoade
         Chronicler(buildMeta("chronicler", "printHistory" to true)).apply { startGlobal() }
     }
 
-    override val io: IOManager
-        get() = pluginManager.get(IOManager::class).orElse {
+    override val output: OutputManager
+        get() = pluginManager.get(OutputManager::class).orElse {
             logger.debug("No IO plugin found. Using default IO.")
-            pluginManager.load(DefaultIOManager())
+            pluginManager.load(DefaultOutputManager())
         }
 
     override val executors: ExecutorPlugin

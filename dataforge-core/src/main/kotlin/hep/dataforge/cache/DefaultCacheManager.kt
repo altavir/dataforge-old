@@ -37,7 +37,7 @@ class DefaultCacheManager(override val context: Context, cfg: Meta) : MetaHolder
     private var map: MutableMap<String, DefaultCache<*, *>> = ConcurrentHashMap();
 
     val rootCacheDir: Path
-        get() = context.io.tmpDir.resolve("cache")
+        get() = context.tmpDir.resolve("cache")
 
     override fun getCachingProvider(): CachingProvider {
         return DefaultCachingProvider(context)

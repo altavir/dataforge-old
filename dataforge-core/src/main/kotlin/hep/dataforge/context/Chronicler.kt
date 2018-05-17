@@ -30,7 +30,7 @@ import java.util.*
 @PluginDef(name = "chronicler", group = "hep.dataforge", support = true, info = "The general support for history logging")
 class Chronicler(meta: Meta) : BasicPlugin(meta), History {
 
-    private val recordPusher: (Record) -> Unit = { context.io.output.render(it) }
+    private val recordPusher: (Record) -> Unit = { context.output.primary.render(it) }
 
     private val root: Chronicle by lazy {
         Chronicle(

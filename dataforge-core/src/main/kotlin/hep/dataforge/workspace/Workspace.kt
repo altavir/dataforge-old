@@ -277,7 +277,7 @@ interface Workspace : ContextAware, Provider {
 
         @JvmDefault
         fun fileData(place: String, filePath: String, meta: Meta): Workspace.Builder {
-            return data(place, DataUtils.readFile(context.io.getFile(filePath), meta))
+            return data(place, DataUtils.readFile(context.getFile(filePath), meta))
         }
 
         @JvmDefault

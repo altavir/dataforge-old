@@ -56,7 +56,7 @@ abstract class FileMapIndex<T>(
     private var savedSize: Long = -1
 
     private val indexFileDirectory: Path
-        get() = context.io.tmpDir.resolve("storage/fileindex")
+        get() = context.tmpDir.resolve("storage/fileindex")
 
     private val indexFile: Path
         @Throws(StorageException::class)

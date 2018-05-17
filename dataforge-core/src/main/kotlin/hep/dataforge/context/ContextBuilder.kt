@@ -16,8 +16,10 @@
 
 package hep.dataforge.context
 
-import hep.dataforge.io.DefaultIOManager
-import hep.dataforge.io.IOManager
+import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.context.Context.Companion.ROOT_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.io.DefaultOutputManager
+import hep.dataforge.io.OutputManager
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.meta.MetaUtils
@@ -47,22 +49,22 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
     private val plugins = ArrayList<Plugin>()
 
     var rootDir: String
-        get() = properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.io.rootDir.toString()
+        get() = properties[ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.rootDir.toString()
         set(value) {
-            val path = parent.io.rootDir.resolve(value)
+            val path = parent.rootDir.resolve(value)
             //Add libraries to classpath
             val libPath = path.resolve("lib")
             if (Files.isDirectory(libPath)) {
                 classPath(libPath.toUri())
             }
-            properties[IOManager.ROOT_DIRECTORY_CONTEXT_KEY] = path.toString().asValue()
+            properties[ROOT_DIRECTORY_CONTEXT_KEY] = path.toString().asValue()
         }
 
     var dataDir: String
-        get() = properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY]?.toString()
-                ?: parent.getString(IOManager.DATA_DIRECTORY_CONTEXT_KEY, parent.io.rootDir.toString())
+        get() = properties[DATA_DIRECTORY_CONTEXT_KEY]?.toString()
+                ?: parent.getString(DATA_DIRECTORY_CONTEXT_KEY, parent.rootDir.toString())
         set(value) {
-            properties[IOManager.DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
+            properties[DATA_DIRECTORY_CONTEXT_KEY] = value.asValue()
         }
 
     fun properties(config: Meta): ContextBuilder {
@@ -185,9 +187,9 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
             }
 
             //If custom paths are defined, use new plugin to direct to them
-            if (properties.containsKey(IOManager.ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(IOManager.DATA_DIRECTORY_CONTEXT_KEY)) {
-                if (pluginManager.find { it is IOManager } == null) {
-                    pluginManager.load(DefaultIOManager())
+            if (properties.containsKey(ROOT_DIRECTORY_CONTEXT_KEY) || properties.containsKey(DATA_DIRECTORY_CONTEXT_KEY)) {
+                if (pluginManager.find { it is OutputManager } == null) {
+                    pluginManager.load(DefaultOutputManager())
                 }
             }
 

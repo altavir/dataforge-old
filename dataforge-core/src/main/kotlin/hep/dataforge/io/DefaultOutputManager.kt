@@ -33,15 +33,15 @@ import hep.dataforge.meta.Meta
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-@PluginDef(name = "io", group = "hep.dataforge", info = "Basic input and output plugin")
-open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
+@PluginDef(name = "output", group = "hep.dataforge", info = "Basic input and output plugin")
+open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager(meta) {
 
-    override val output: Output
+    override val primary: Output
         get() = Global.console
 
 
-    override fun output(meta: Meta): Output {
-        return output
+    override fun get(meta: Meta): Output {
+        return primary
     }
 
     /**
@@ -52,7 +52,7 @@ open class DefaultIOManager(meta: Meta = Meta.empty()) : IOManager(meta) {
     open fun createLoggerAppender(): Appender<ILoggingEvent> {
         return object : UnsynchronizedAppenderBase<ILoggingEvent>() {
             override fun append(eventObject: ILoggingEvent) {
-                output.render(eventObject)
+                primary.render(eventObject)
             }
         }
     }

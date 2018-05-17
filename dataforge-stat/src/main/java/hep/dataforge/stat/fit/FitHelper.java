@@ -100,7 +100,7 @@ public class FitHelper {
         ParamSet startPars = new ParamSet();
         History log = new Chronicle("fit", null);
         List<FitStage> stages = new ArrayList<>();
-        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().getIo().getStream());
+        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().getOutput().getStream());
 
         public FitBuilder(@NotNull NavigableValuesSource data) {
             this.data = data;
@@ -165,7 +165,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder setListenerStream(String outputName) {
-            this.listener = buildDefaultListener(getManager().getContext().getIo().stream(outputName));
+            this.listener = buildDefaultListener(getManager().getContext().getOutput().stream(outputName));
             return this;
         }
 

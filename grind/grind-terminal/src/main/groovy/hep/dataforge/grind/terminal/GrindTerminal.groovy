@@ -181,7 +181,7 @@ class GrindTerminal extends SimpleConfigurable {
         } else if (obj instanceof Path) {
             scriptPath = obj as Path
         } else {
-            scriptPath = shell.context.getIo().getFile(obj as String).absolutePath;
+            scriptPath = shell.context.getOutput().getFile(obj as String).absolutePath;
         }
 
         Files.newBufferedReader(scriptPath).withCloseable {

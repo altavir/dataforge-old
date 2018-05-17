@@ -43,7 +43,7 @@ class FileStorageFactory : StorageType {
     }
 
     override fun build(context: Context, meta: Meta): Storage {
-        val path = meta.optString("path").map<URI> { URI.create(it) }.map<Path> { Paths.get(it) }.orElse(context.io.workDir)
+        val path = meta.optString("path").map<URI> { URI.create(it) }.map<Path> { Paths.get(it) }.orElse(context.workDir)
         return FileStorage(context, meta, path)
     }
 

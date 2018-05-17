@@ -49,7 +49,7 @@ import java.util.*
 class MetaFileReader {
 
     fun read(context: Context, path: String): Meta {
-        return read(context, context.io.rootDir.resolve(path))
+        return read(context, context.rootDir.resolve(path))
     }
 
     fun read(context: Context, file: Path): Meta {
