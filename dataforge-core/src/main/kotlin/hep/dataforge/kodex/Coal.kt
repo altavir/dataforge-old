@@ -23,7 +23,7 @@ import kotlin.coroutines.experimental.CoroutineContext
  */
 class Coal<R>(
         private val deps: Collection<Goal<*>> = Collections.emptyList(),
-        private val dispatcher: CoroutineContext,
+        val dispatcher: CoroutineContext,
         val id: String = "",
         block: suspend () -> R) : Goal<R> {
 
