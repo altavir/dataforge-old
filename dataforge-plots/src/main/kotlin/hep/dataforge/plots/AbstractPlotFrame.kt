@@ -35,8 +35,8 @@ abstract class AbstractPlotFrame : SimpleConfigurable, PlotFrame, PlotListener {
 
     constructor() {}
 
-    override fun get(name: String): Plot? {
-        return plots.get(name) as? Plot
+    override fun get(name: String): Plottable? {
+        return plots[name]
     }
 
     /**

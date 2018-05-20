@@ -24,6 +24,7 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.output.getPlotFrame
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Table
 import java.util.*
@@ -72,18 +73,10 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
     }
 
     override fun execute(context: Context, name: String, input: Table, meta: Laminate): Table {
-        //initializing plot plugin if necessary
-        val holder = PlotUtils.getPlotManager(context)
-
-        val frame: PlotFrame
-
         val groupBy = meta.getString("groupBy")
-        val frame_name = meta.getString(groupBy, "default")
-        if (holder.hasPlotFrame(frame_name)) {
-            frame = holder.getPlotFrame(frame_name)
-        } else {
-            frame = holder.getPlotFrame(frame_name, findFrameDescription(meta, frame_name))
-        }
+        val frameName = meta.getString(groupBy, "default")
+        val frame: PlotFrame = context.getPlotFrame(frameName,stage = "", meta = findFrameDescription(meta, frameName))
+
         val adapter = Adapters.buildAdapter(meta.getMeta("adapter", Meta.empty()))
 
         val plottableData = DataPlot.plot(name, adapter, input)

@@ -73,9 +73,10 @@ interface OutputManager : Plugin {
     }
 
     companion object {
+
         const val LOGGER_APPENDER_NAME = "df.output"
-        const val OUTPUT_STAGE_TARGET = "stage"
-        const val OUTPUT_TARGET = "output"
+        //const val OUTPUT_STAGE_TARGET = "stage"
+        //const val OUTPUT_TARGET = "output"
     }
 }
 

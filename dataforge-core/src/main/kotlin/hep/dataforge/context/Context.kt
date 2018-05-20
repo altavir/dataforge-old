@@ -177,6 +177,10 @@ open class Context(
                 .orElseThrow { RuntimeException("Feature could not be loaded by type: " + type.name) }
     }
 
+    inline fun <reified T> get(): T {
+        return get(T::class.java)
+    }
+
     @JvmOverloads
     fun <T : Plugin> load(type: Class<T>, meta: Meta = Meta.empty()): T {
         return pluginManager.load(type, meta)

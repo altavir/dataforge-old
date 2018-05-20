@@ -18,16 +18,35 @@ package hep.dataforge.plots.output
 
 import hep.dataforge.context.Context
 import hep.dataforge.io.output.Output
+import hep.dataforge.kodex.KMetaBuilder
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFrame
+import hep.dataforge.plots.PlotPlugin
+import hep.dataforge.plots.Plottable
 
-class PlotOutput(override val context: Context, frameFactory: (Meta) -> PlotFrame) : Output {
+class PlotOutput(override val context: Context, val frameFactory: () -> PlotFrame) : Output {
     private val frame: PlotFrame? = null
 
     override fun render(obj: Any, meta: Meta) {
         when (obj) {
-
+            is Plottable -> {
+                (this.frame ?: frameFactory()).apply {
+                    //TODO add warning on config update
+                    configure(meta)
+                }.add(obj)
+            }
+            else -> context.logger.error("Trying to render non-plottable object with plot renderer. No output.")
         }
     }
-    
+
+}
+
+fun Context.getPlotFrame(name: String, stage: String = "", meta: Meta = Meta.empty()): PlotFrame {
+    //FIXME replace by output manager
+    return this.get<PlotPlugin>().getPlotFrame(stage, name, meta)
+}
+
+fun Context.getPlotFrame(name: String, stage: String = "", transform: KMetaBuilder.() -> Unit): PlotFrame {
+    return this.get<PlotPlugin>().getPlotFrame(stage, name, buildMeta(transform = transform))
 }

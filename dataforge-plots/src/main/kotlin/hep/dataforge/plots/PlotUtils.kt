@@ -15,7 +15,6 @@
  */
 package hep.dataforge.plots
 
-import hep.dataforge.context.Context
 import hep.dataforge.io.envelopes.DefaultEnvelopeType
 import hep.dataforge.io.envelopes.DefaultEnvelopeWriter
 import hep.dataforge.io.envelopes.xmlMetaType
@@ -91,10 +90,6 @@ object PlotUtils {
 
     fun setTitle(frame: PlotFrame, title: String) {
         frame.configureValue("title", title)
-    }
-
-    fun getPlotManager(context: Context): PlotPlugin {
-        return context[PlotPlugin::class.java]
     }
 
     /**

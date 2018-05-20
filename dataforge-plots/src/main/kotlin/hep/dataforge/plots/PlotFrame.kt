@@ -94,7 +94,7 @@ interface PlotFrame : Configurable, Serializable {
      * @param name
      * @return
      */
-    operator fun get(name: String): Plot?
+    operator fun get(name: String): Plottable?
 
 
     /**
