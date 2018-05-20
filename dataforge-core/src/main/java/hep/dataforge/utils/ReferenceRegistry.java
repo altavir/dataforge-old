@@ -87,19 +87,9 @@ public class ReferenceRegistry<T> extends AbstractCollection<T> {
         }
     }
 
-    /**
-     * Clean up all null entries from weak registry
-     */
-    private void cleanUp() {
-        synchronized (weakRegistry) {
-            weakRegistry.removeIf(ref -> ref.get() == null);
-        }
-    }
-
     @NotNull
     @Override
     public Iterator<T> iterator() {
-        cleanUp();
         return weakRegistry.stream().map(Reference::get).filter(Objects::nonNull).iterator();
     }
 

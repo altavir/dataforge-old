@@ -15,16 +15,13 @@
  */
 package hep.dataforge.io
 
-import hep.dataforge.context.BasicPlugin
+import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.output.Output
-import hep.dataforge.io.output.Output.Companion.TEXT_TYPE
-import hep.dataforge.io.output.StreamConsumer
-import hep.dataforge.kodex.buildMeta
+import hep.dataforge.io.output.Output.Companion.TEXT_MODE
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import java.io.OutputStream
 
 /**
  *
@@ -34,14 +31,7 @@ import java.io.OutputStream
  * @author Alexander Nozik
  * @version $Id: $Id
  */
-abstract class OutputManager(meta: Meta) : BasicPlugin(meta) {
-
-
-    /**
-     * Get primary output for this context
-     * @return
-     */
-    abstract val primary: Output
+interface OutputManager : Plugin {
 
     /**
      * Get secondary output for this context
@@ -52,68 +42,40 @@ abstract class OutputManager(meta: Meta) : BasicPlugin(meta) {
     @ValueDefs(
             ValueDef(key = "stage", def = "", info = "Fully qualified name of the output stage"),
             ValueDef(key = "name", required = true, info = "Fully qualified name of the output inside the stage if it is present"),
-            ValueDef(key = "type", def = TEXT_TYPE, info = "Type of the output container")
+            ValueDef(key = "type", def = TEXT_MODE, info = "Type of the output container")
     )
-    abstract fun get(meta: Meta): Output
+    operator fun get(meta: Meta): Output {
+        val name = Name.of(meta.getString("name"))
+        val stage = Name.of(meta.getString("stage", ""))
+        val type = meta.getString("type", Output.TEXT_MODE)
+        return get(name, stage, type)
+    }
 
+    /**
+     * List of all available output modes ad dataforge object type strings. By convention [TEXT_MODE] should be always available.
+     */
+    val outputModes: Collection<String>
 
     /**
      * Helper method to access output
      */
-    @JvmOverloads
-    operator fun get(name: Name, stage: Name = Name.empty(), type: String = TEXT_TYPE): Output {
-        val meta = buildMeta("output") {
-            "stage" to stage.toUnescaped()
-            "name" to name.toUnescaped()
-            "type" to type
-        }
-        return get(meta)
-    }
+    operator fun get(name: Name, stage: Name = Name.empty(), mode: String = TEXT_MODE): Output
 
-    @JvmOverloads
-    operator fun get(name: String, stage: String = "", type: String = TEXT_TYPE): Output {
-        val meta = buildMeta("output") {
-            "stage" to stage
-            "name" to name
-            "type" to type
-        }
-        return get(meta)
-    }
-
-    val stream: OutputStream by lazy { StreamConsumer(primary) }
+    //TODO provide outputs
 
     /**
-     * An [OutputStream] wrapper for backward compatibility.
+     *
      */
-    fun stream(meta: Meta): OutputStream {
-        return StreamConsumer(get(meta))
-    }
-
-    /**
-     * An [OutputStream] wrapper for backward compatibility.
-     */
-    @JvmOverloads
-    fun stream(name: Name, stage: Name = Name.empty(), type: String = TEXT_TYPE): OutputStream {
-        return StreamConsumer(get(name, stage, type))
-    }
-
-    @JvmOverloads
-    fun stream(name: String, stage: String = "", type: String = TEXT_TYPE): OutputStream {
-        val meta = buildMeta("output") {
-            "stage" to stage
-            "name" to name
-            "type" to type
-        }
-        return StreamConsumer(get(meta))
+    @JvmDefault
+    operator fun get(name: String, stage: String = "", vararg modes: String = arrayOf(TEXT_MODE)): Output {
+        val mode = modes.find { outputModes.contains(it) } ?: TEXT_MODE
+        return get(Name.of(name), Name.of(stage), mode)
     }
 
     companion object {
-        //const val BINARY_TARGET = "bin"
-        //const val RESOURCE_TARGET = "resource"
-        //const val FILE_TARGET = "file"
-        //    String RESOURCE_TARGET = "resource";
-
         const val LOGGER_APPENDER_NAME = "df.output"
+        const val OUTPUT_STAGE_TARGET = "stage"
+        const val OUTPUT_TARGET = "output"
     }
-
 }
+

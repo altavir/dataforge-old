@@ -22,9 +22,12 @@ import hep.dataforge.meta.Meta
 import hep.dataforge.plots.PlotFrame
 
 class PlotOutput(override val context: Context, frameFactory: (Meta) -> PlotFrame) : Output {
+    private val frame: PlotFrame? = null
+
     override fun render(obj: Any, meta: Meta) {
         when (obj) {
 
         }
     }
+    
 }

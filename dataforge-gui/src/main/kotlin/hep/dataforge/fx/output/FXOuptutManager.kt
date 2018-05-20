@@ -16,8 +16,11 @@
 
 package hep.dataforge.fx.output
 
+import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
+import hep.dataforge.io.OutputManager
 import hep.dataforge.io.output.Output
+import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import hep.dataforge.plots.Plottable
 import hep.dataforge.tables.Table
@@ -30,7 +33,9 @@ import javafx.scene.control.Tab
 import tornadofx.*
 
 class OutputContainer(val context: Context) : Fragment() {
+
     private val stages: ObservableMap<Name, OutputStageContainer> = FXCollections.observableHashMap()
+
     private val tabs: ObservableList<Tab> = object : ListBinding<Tab>() {
         init {
             bind(stages)
@@ -56,7 +61,7 @@ class OutputContainer(val context: Context) : Fragment() {
      */
     private fun buildOutput(type: String): FXOutput {
         return when {
-            type.startsWith(Output.TEXT_TYPE) -> FXTextOutput(context)
+            type.startsWith(Output.TEXT_MODE) -> FXTextOutput(context)
             type.startsWith(Plottable.PLOT_TYPE) -> FXPlotOutput(context)
             type.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
             else -> FXDumbOutput(context)
@@ -90,5 +95,14 @@ class OutputContainer(val context: Context) : Fragment() {
         operator fun get(name: Name, type: String): FXOutput {
             return outputs.getOrPut(name) { buildOutput(type) }
         }
+    }
+}
+
+class FXOutputManager(meta: Meta): OutputManager, BasicPlugin(meta){
+    override val outputModes: Collection<String>
+        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+
+    override fun get(name: Name, stage: Name, mode: String): Output {
+        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
     }
 }

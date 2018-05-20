@@ -5,6 +5,7 @@ import hep.dataforge.context.Global;
 import hep.dataforge.io.FittingIOUtils;
 import hep.dataforge.io.history.Chronicle;
 import hep.dataforge.io.history.History;
+import hep.dataforge.io.output.OutputKt;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.meta.Meta;
 import hep.dataforge.stat.models.Model;
@@ -21,6 +22,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
+import static hep.dataforge.io.output.Output.TEXT_MODE;
 import static hep.dataforge.stat.fit.FitStage.STAGE_KEY;
 
 /**
@@ -100,7 +102,7 @@ public class FitHelper {
         ParamSet startPars = new ParamSet();
         History log = new Chronicle("fit", null);
         List<FitStage> stages = new ArrayList<>();
-        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(getManager().getContext().getOutput().getStream());
+        BiConsumer<FitStage, FitResult> listener = buildDefaultListener(OutputKt.getStream(Global.INSTANCE.getConsole()));
 
         public FitBuilder(@NotNull NavigableValuesSource data) {
             this.data = data;
@@ -165,7 +167,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder setListenerStream(String outputName) {
-            this.listener = buildDefaultListener(getManager().getContext().getOutput().stream(outputName));
+            this.listener = buildDefaultListener(OutputKt.getStream(getManager().getContext().getOutput().get(outputName, "", TEXT_MODE)));
             return this;
         }
 

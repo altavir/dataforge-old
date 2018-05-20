@@ -19,29 +19,34 @@ import ch.qos.logback.classic.Logger
 import ch.qos.logback.classic.spi.ILoggingEvent
 import ch.qos.logback.core.Appender
 import ch.qos.logback.core.UnsynchronizedAppenderBase
+import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
 import hep.dataforge.context.PluginDef
+import hep.dataforge.io.OutputManager.Companion.LOGGER_APPENDER_NAME
 import hep.dataforge.io.output.Output
+import hep.dataforge.io.output.Output.Companion.TEXT_MODE
 import hep.dataforge.meta.Meta
+import hep.dataforge.names.Name
 
 /**
  *
  *
- * DefaultIOManager class.
+ * Default console base output providing only text-based output
  *
  * @author Alexander Nozik
  * @version $Id: $Id
  */
 @PluginDef(name = "output", group = "hep.dataforge", info = "Basic input and output plugin")
-open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager(meta) {
+open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
 
-    override val primary: Output
+    override val outputModes: Collection<String> = listOf(TEXT_MODE)
+
+    val default: Output
         get() = Global.console
 
-
-    override fun get(meta: Meta): Output {
-        return primary
+    override fun get(name: Name, stage: Name, mode: String): Output {
+        return default
     }
 
     /**
@@ -52,7 +57,7 @@ open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager(meta)
     open fun createLoggerAppender(): Appender<ILoggingEvent> {
         return object : UnsynchronizedAppenderBase<ILoggingEvent>() {
             override fun append(eventObject: ILoggingEvent) {
-                primary.render(eventObject)
+                default.render(eventObject)
             }
         }
     }

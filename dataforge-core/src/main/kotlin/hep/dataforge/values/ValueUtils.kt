@@ -38,6 +38,19 @@ data class ValueRange(override val start: Value, override val endInclusive: Valu
 
 operator fun Value.rangeTo(other: Value): ValueRange = ValueRange(this, other)
 
+/**
+ * Read a string value as an enum
+ */
+inline fun <reified T : Enum<T>> ValueProvider.getEnum(name: String): T {
+    return enumValueOf(getString(name))
+}
+
+/**
+ * Read a string value as an enum with default. If string field does not represent valid enum, an exception is thrown and default is ignored
+ */
+inline fun <reified T : Enum<T>> ValueProvider.getEnum(name: String, default: T): T {
+    return optString(name).map { enumValueOf<T>(it) }.orElse(default)
+}
 
 /**
  * Created by darksnake on 06-Aug-16.
@@ -226,7 +239,7 @@ fun DataInput.readValue(): Value {
 }
 
 
-fun ByteBuffer.getValue(): Value{
+fun ByteBuffer.getValue(): Value {
     val type = get().toChar()
     when (type) {
         '*' -> {
@@ -271,14 +284,14 @@ fun ByteBuffer.getValue(): Value{
     }
 }
 
-fun ByteBuffer.putValue(value: Value){
+fun ByteBuffer.putValue(value: Value) {
     if (value.isList) {
         put('*'.toByte()) // List designation
-        if(value.list.size> Short.MAX_VALUE){
+        if (value.list.size > Short.MAX_VALUE) {
             throw RuntimeException("The array values of size more than ${Short.MAX_VALUE} could not be serialized")
         }
         putShort(value.list.size.toShort())
-        value.list.forEach{putValue(it)}
+        value.list.forEach { putValue(it) }
     } else {
         when (value.type) {
             ValueType.NULL -> put('0'.toByte()) // null
@@ -289,7 +302,7 @@ fun ByteBuffer.putValue(value: Value){
             }
             ValueType.STRING -> {
                 put('S'.toByte())//String
-                if(value.string.length>Int.MAX_VALUE){
+                if (value.string.length > Int.MAX_VALUE) {
                     throw RuntimeException("The string valuse of size more than ${Int.MAX_VALUE} could not be serialized")
                 }
                 put(value.string.toByteArray(Charsets.UTF_8))
@@ -299,7 +312,7 @@ fun ByteBuffer.putValue(value: Value){
                 when (num) {
                     is Double -> {
                         put('D'.toByte()) // double
-                       putDouble(num.toDouble())
+                        putDouble(num.toDouble())
                     }
                     is Int -> {
                         put('I'.toByte()) // integer
@@ -313,7 +326,7 @@ fun ByteBuffer.putValue(value: Value){
                         put('N'.toByte()) // BigDecimal
                         val bigInt = num.unscaledValue().toByteArray()
                         val scale = num.scale()
-                        if(bigInt.size> Short.MAX_VALUE){
+                        if (bigInt.size > Short.MAX_VALUE) {
                             throw RuntimeException("Too large BigDecimal")
                         }
                         putShort(bigInt.size.toShort())

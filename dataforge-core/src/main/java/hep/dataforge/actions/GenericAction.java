@@ -34,6 +34,8 @@ import org.slf4j.LoggerFactory;
 import java.util.concurrent.ExecutorService;
 import java.util.stream.Stream;
 
+import static hep.dataforge.io.output.Output.TEXT_MODE;
+
 /**
  * A basic implementation of Action interface
  *
@@ -239,7 +241,7 @@ public abstract class GenericAction<T, R> implements Action<T, R>, Cloneable, Se
      * @param meta
      */
     protected void push(Context context, String name, Object obj, Meta meta) {
-        context.getOutput().get(Name.of(getName()), Name.of(name)).render(obj, meta);
+        context.getOutput().get(Name.of(getName()), Name.of(name), TEXT_MODE).render(obj, meta);
     }
 
     protected void push(Context context, String name, Object obj) {

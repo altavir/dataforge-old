@@ -54,23 +54,16 @@ class DirectoryOutput : DefaultOutputManager() {
      */
     private fun getExtension(type: String): String {
         return when (type) {
-            Output.TEXT_TYPE -> "out"
+            Output.TEXT_MODE -> "out"
+            Output.BINARY_MODE -> "df"
             else -> type
         }
     }
 
-    override fun get(meta: Meta): Output {
-        return map.getOrPut(meta) {
-            val name = Name.of(meta.getString("name"))
-            val stage = Name.of(meta.getString("stage", ""))
-            val type = meta.getString("type", Output.TEXT_TYPE)
-            //TODO make scope customizable?
-            val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(type), stage)
-            FileOutput(reference)
-        }
+    override fun get(name: Name, stage: Name, mode: String): Output {
+        val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(mode), stage)
+        return FileOutput(reference)
     }
-
-
 
     class Factory: PluginFactory() {
         override val type: Class<out Plugin> = DirectoryOutput::class.java

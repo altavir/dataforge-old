@@ -20,6 +20,7 @@ import hep.dataforge.context.Context;
 import hep.dataforge.description.NodeDef;
 import hep.dataforge.description.TypedActionDef;
 import hep.dataforge.io.history.Chronicle;
+import hep.dataforge.io.output.OutputKt;
 import hep.dataforge.meta.Laminate;
 import hep.dataforge.tables.Table;
 
@@ -53,7 +54,7 @@ public class FitAction extends OneToOneAction<Table, FitResult> {
      */
     @Override
     protected FitResult execute(Context context, String name, Table input, Laminate meta) {
-        OutputStream output = context.getOutput().stream(getName(), name);
+        OutputStream output = OutputKt.getStream(context.getOutput().get(getName(), name));
         PrintWriter writer = new PrintWriter(output);
         writer.printf("%n*** META ***%n");
         writer.println(meta.toString());
