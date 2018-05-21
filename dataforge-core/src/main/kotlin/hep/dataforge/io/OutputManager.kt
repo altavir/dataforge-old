@@ -15,11 +15,13 @@
  */
 package hep.dataforge.io
 
+import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.io.output.Output
 import hep.dataforge.io.output.Output.Companion.TEXT_MODE
+import hep.dataforge.io.output.Output.Companion.splitOutput
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 
@@ -48,7 +50,7 @@ interface OutputManager : Plugin {
         val name = Name.of(meta.getString("name"))
         val stage = Name.of(meta.getString("stage", ""))
         val type = meta.getString("type", Output.TEXT_MODE)
-        return get(name, stage, type)
+        return get(stage, name, type)
     }
 
     /**
@@ -59,7 +61,7 @@ interface OutputManager : Plugin {
     /**
      * Helper method to access output
      */
-    operator fun get(name: Name, stage: Name = Name.empty(), mode: String = TEXT_MODE): Output
+    operator fun get(stage: Name, name: Name, mode: String = TEXT_MODE): Output
 
     //TODO provide outputs
 
@@ -67,9 +69,9 @@ interface OutputManager : Plugin {
      *
      */
     @JvmDefault
-    operator fun get(name: String, stage: String = "", vararg modes: String = arrayOf(TEXT_MODE)): Output {
+    operator fun get(stage: String, name: String, vararg modes: String = arrayOf(TEXT_MODE)): Output {
         val mode = modes.find { outputModes.contains(it) } ?: TEXT_MODE
-        return get(Name.of(name), Name.of(stage), mode)
+        return get(Name.of(stage), Name.of(name), mode)
     }
 
     companion object {
@@ -77,6 +79,23 @@ interface OutputManager : Plugin {
         const val LOGGER_APPENDER_NAME = "df.output"
         //const val OUTPUT_STAGE_TARGET = "stage"
         //const val OUTPUT_TARGET = "output"
+
+        /**
+         * Produce a split [OutputManager]
+         */
+        fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager().apply { this.channels.addAll(channels) }
     }
+}
+
+/**
+ * An [OutputManager] that supports multiple outputs simultaneously
+ */
+class SplitOutputManager(val channels: MutableSet<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
+
+    override val outputModes: Collection<String>
+        get() = channels.flatMap { it.outputModes }.distinct()
+
+    override fun get(stage: Name, name: Name, mode: String): Output = splitOutput(*channels.filter { it.outputModes.contains(mode) }.map { it[stage, name, mode] }.toTypedArray())
+
 }
 

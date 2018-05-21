@@ -17,6 +17,7 @@ package hep.dataforge.context
 
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.stringValue
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
@@ -40,10 +41,14 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
     val group by meta.stringValue(def = "")
 
-    constructor(group: String, name: String) : this(
-            MetaBuilder("tag")
-                    .setValue("group", group)
-                    .setValue("name", name)
+    constructor(name: String, group: String = "hep.dataforge", description: String? = null, version: String? = null, dependsOn: Collection<PluginTag>? = null) : this(
+            buildMeta("plugin") {
+                "group" to group
+                "name" to name
+                description?.let { "description" to it }
+                version?.let { "version" to it }
+                dependsOn?.let{"dependsOn" to it.map { it.toString() }}
+            }
     )
 
     /**
@@ -93,7 +98,7 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
             return if (sepIndex >= 0) {
                 PluginTag(tag.substring(0, sepIndex), tag.substring(sepIndex + 1))
             } else {
-                PluginTag("", tag)
+                PluginTag(tag)
             }
         }
 

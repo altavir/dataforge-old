@@ -16,8 +16,8 @@ interface Output : ContextAware {
     fun render(obj: Any, meta: Meta = Meta.empty())
 
     companion object {
-        const val TEXT_MODE = "hep.dataforge.text"
-        const val BINARY_MODE = "hep.dataforge.binary"
+        const val TEXT_MODE = "text"
+        const val BINARY_MODE = "binary"
 
 
         fun splitOutput(vararg outputs: Output): Output {

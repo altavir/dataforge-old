@@ -1,9 +1,6 @@
 package hep.dataforge.fx
 
-import hep.dataforge.context.BasicPlugin
-import hep.dataforge.context.Plugin
-import hep.dataforge.context.PluginDef
-import hep.dataforge.context.PluginFactory
+import hep.dataforge.context.*
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
 import hep.dataforge.meta.Meta
@@ -118,9 +115,13 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
 /**
  * An application surrogate without any visible primary stage
  */
-class ApplicationSurrogate : Application() {
-    override fun start(primaryStage: Stage) {
-        FX.registerApplication(this, primaryStage)
+class ApplicationSurrogate : App() {
+    override fun start(stage: Stage) {
+        FX.registerApplication(this, stage)
         FX.initialized.value = true
     }
+}
+
+fun Context.display(component: UIComponent, width: Double = 800.0, height: Double = 600.0) {
+    this.pluginManager.load<FXPlugin>().display(component, width, height)
 }

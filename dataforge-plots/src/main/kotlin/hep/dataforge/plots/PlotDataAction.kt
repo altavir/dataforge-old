@@ -24,7 +24,7 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.plots.data.DataPlot
-import hep.dataforge.plots.output.getPlotFrame
+import hep.dataforge.plots.output.plot
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.Table
 import java.util.*
@@ -75,13 +75,12 @@ class PlotDataAction : OneToOneAction<Table, Table>() {
     override fun execute(context: Context, name: String, input: Table, meta: Laminate): Table {
         val groupBy = meta.getString("groupBy")
         val frameName = meta.getString(groupBy, "default")
-        val frame: PlotFrame = context.getPlotFrame(frameName,stage = "", meta = findFrameDescription(meta, frameName))
 
         val adapter = Adapters.buildAdapter(meta.getMeta("adapter", Meta.empty()))
-
         val plottableData = DataPlot.plot(name, adapter, input)
         plottableData.configure(meta)
-        frame.add(plottableData)
+
+        context.plot(this.name, frameName, plottableData)
 
         //        if (meta.hasMeta("snapshot")) {
         //            snapshot(name, frame, meta.getMeta("snapshot"));

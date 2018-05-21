@@ -140,7 +140,7 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
      * Append tabulation
      */
     @Synchronized
-    fun tab() {
+    private fun tab() {
         runLater {
             currentTab++
             //        textArea.appendText("\t");
@@ -196,7 +196,7 @@ class FXTextOutput(context: Context) : FXOutput(context), TextOutput {
     }
 
     override fun render(obj: Any, meta: Meta) {
-
+        //TODO replace by custom rendering
         output.render(obj, meta)
     }
 

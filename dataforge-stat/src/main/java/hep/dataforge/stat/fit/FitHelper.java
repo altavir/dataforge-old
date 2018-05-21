@@ -167,7 +167,7 @@ public class FitHelper {
          * @return
          */
         public FitBuilder setListenerStream(String outputName) {
-            this.listener = buildDefaultListener(OutputKt.getStream(getManager().getContext().getOutput().get(outputName, "", TEXT_MODE)));
+            this.listener = buildDefaultListener(OutputKt.getStream(getManager().getContext().getOutput().get("", outputName, TEXT_MODE)));
             return this;
         }
 

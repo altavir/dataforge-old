@@ -45,7 +45,7 @@ open class DefaultOutputManager(meta: Meta = Meta.empty()) : OutputManager, Basi
     val default: Output
         get() = Global.console
 
-    override fun get(name: Name, stage: Name, mode: String): Output {
+    override fun get(stage: Name, name: Name, mode: String): Output {
         return default
     }
 

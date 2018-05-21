@@ -20,10 +20,7 @@ import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.OutputManager
-import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.nullable
-import hep.dataforge.kodex.optional
-import hep.dataforge.kodex.useMeta
+import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaID
 import hep.dataforge.providers.Provider
@@ -45,7 +42,6 @@ import java.util.concurrent.Executors
 import java.util.stream.Stream
 import java.util.stream.StreamSupport
 import kotlin.collections.HashMap
-import kotlin.reflect.KClass
 
 /**
  *
@@ -186,8 +182,8 @@ open class Context(
         return pluginManager.load(type, meta)
     }
 
-    fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
-        return pluginManager.load(type, meta)
+    inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
+        return pluginManager.load<T>(metaBuilder)
     }
 
 

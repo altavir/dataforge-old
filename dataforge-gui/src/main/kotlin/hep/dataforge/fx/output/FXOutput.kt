@@ -21,10 +21,15 @@ import hep.dataforge.fx.dfIconView
 import hep.dataforge.fx.plots.PlotContainer
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.io.output.Output
+import hep.dataforge.meta.Configurable
+import hep.dataforge.meta.Configuration
 import hep.dataforge.meta.Meta
+import hep.dataforge.plots.PlotFactory
 import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
+import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
+import javafx.scene.layout.BorderPane
 import tornadofx.*
 
 abstract class FXOutput(override val context: Context) : Fragment(icon = dfIconView), Output
@@ -42,19 +47,32 @@ class FXTableOutput(context: Context) : FXOutput(context) {
 
 }
 
-class FXPlotOutput(context: Context) : FXOutput(context) {
-    override val root = borderpane()
+class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurable {
+
+    override val frame: PlotFrame  by lazy { context.get<PlotFactory>().build(Meta.empty()) }
+
+    val container: PlotContainer by lazy { PlotContainer(frame) }
+    override val root: BorderPane by lazy {
+        borderpane {
+            center = container.root
+        }
+    }
+
+    override fun getConfig(): Configuration = frame.config
+
 
     override fun render(obj: Any, meta: Meta) {
-        when (obj) {
-            is PlotFrame -> {
-                val container = PlotContainer(obj)
-                container.frame.configure(meta)
-                root.center = container.root
+        if (!meta.isEmpty) {
+            if (!frame.config.isEmpty) {
+                logger.warn("Overriding non-empty frame configuration")
             }
+        }
+        when (obj) {
             is Plottable -> {
-                TODO()
-                //val frame = PlotFrame.
+                frame.add(obj)
+            }
+            is Iterable<*> -> {
+                frame.addAll(obj.filterIsInstance<Plottable>())
             }
             else -> {
                 logger.error("Can't represent ${obj.javaClass} as Plottable")

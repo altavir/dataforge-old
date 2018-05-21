@@ -4,8 +4,8 @@ import hep.dataforge.context.Global
 import hep.dataforge.grind.GrindShell
 import hep.dataforge.grind.workspace.WorkspaceSpec
 import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.data.DataPlot
+import hep.dataforge.plots.output.PlotOutputKt
 import hep.dataforge.tables.ColumnTable
 import hep.dataforge.tables.Table
 import hep.dataforge.values.ValueType
@@ -73,8 +73,7 @@ def workspace = new WorkspaceSpec(Global.instance()).with {
 
 new GrindShell().eval {
     //loading plot feature
-    PlotPlugin pm = context.get(PlotPlugin)
-    PlotFrame frame = pm.getPlotFrame("demo");
+    PlotFrame frame = PlotOutputKt.getPlotFrame(context, "demo")
 
     frame.configure("yAxis.type": "log")
 

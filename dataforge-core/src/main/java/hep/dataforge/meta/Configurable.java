@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright 2015 Alexander Nozik.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -16,7 +16,8 @@
 package hep.dataforge.meta;
 
 /**
- *An object with mutable configuration
+ * An object with mutable configuration
+ *
  * @author Alexander Nozik
  */
 public interface Configurable {
@@ -28,7 +29,10 @@ public interface Configurable {
      */
     Configuration getConfig();
 
-    Configurable configure(Meta config);
+    default Configurable configure(Meta config) {
+        getConfig().update(config);
+        return this;
+    }
 
     default Configurable configureValue(String key, Object Value) {
         this.getConfig().setValue(key, Value);
@@ -38,5 +42,5 @@ public interface Configurable {
     default Configurable configureNode(String key, Meta... node) {
         this.getConfig().setNode(key, node);
         return this;
-    }    
+    }
 }

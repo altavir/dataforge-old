@@ -16,6 +16,8 @@
 package hep.dataforge.context
 
 import hep.dataforge.exceptions.ContextLockException
+import hep.dataforge.kodex.KMetaBuilder
+import hep.dataforge.kodex.buildMeta
 import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import java.util.*
@@ -130,7 +132,6 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
     /**
      * Load plugin by its class and meta. Ignore if plugin with this meta is already loaded.
      */
-    @JvmOverloads
     fun <T : Plugin> load(type: KClass<T>, meta: Meta = Meta.empty()): T {
         val loaded = get(type, false)
         return when {
@@ -138,6 +139,10 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
             loaded.meta == meta -> loaded // if meta is the same, return existing plugin
             else -> throw RuntimeException("Can't load plugin with type $type. Plugin with this type and different configuration already exists in context.")
         }
+    }
+
+    inline fun <reified T : Plugin> load(noinline metaBuilder: KMetaBuilder.() -> Unit = {}): T {
+        return load(T::class, buildMeta("plugin", metaBuilder))
     }
 
     @JvmOverloads

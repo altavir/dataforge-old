@@ -1,8 +1,10 @@
 package hep.dataforge.fx.plots
 
+import hep.dataforge.context.Context
 import hep.dataforge.description.Descriptors
 import hep.dataforge.description.NodeDescriptor
 import hep.dataforge.fx.dfIconView
+import hep.dataforge.fx.display
 import hep.dataforge.fx.meta.ConfigEditor
 import hep.dataforge.fx.table.TableDisplay
 import hep.dataforge.meta.Laminate
@@ -301,4 +303,9 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
             Name.join(getFullName(item.parent), item.value.name)
         }
     }
+
+}
+
+fun Context.display(frame: PlotFrame, width: Double = 800.0, height: Double = 600.0) {
+    display(PlotContainer(frame), width, height)
 }

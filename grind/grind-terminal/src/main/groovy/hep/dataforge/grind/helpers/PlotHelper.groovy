@@ -18,13 +18,13 @@ package hep.dataforge.grind.helpers
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Global
-import hep.dataforge.fx.plots.FXPlotManager
 import hep.dataforge.io.output.TextOutput
 import hep.dataforge.meta.Meta
-import hep.dataforge.plots.PlotPlugin
+import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.XYFunctionPlot
 import hep.dataforge.plots.data.DataPlot
 import hep.dataforge.plots.data.XYPlot
+import hep.dataforge.plots.output.PlotOutputKt
 import hep.dataforge.tables.Adapters
 import hep.dataforge.tables.ValuesAdapter
 import javafx.scene.paint.Color
@@ -37,35 +37,30 @@ import org.jetbrains.annotations.NotNull
 class PlotHelper extends AbstractHelper {
     static final String DEFAULT_FRAME = "default";
 
-    PlotPlugin manager;
-
     PlotHelper(Context context = Global.INSTANCE) {
         super(context)
-        context.getPluginManager().load(FXPlotManager)
-        this.manager = context.get(PlotPlugin)
     }
 
-    PlotPlugin getManager() {
-        return manager
+    private PlotFrame getPlotFrame(String name) {
+        return PlotOutputKt.getPlotFrame(context, name)
     }
-
 
     def configure(String frame, Closure config) {
-        manager.getPlotFrame(frame).configure(config);
+        getPlotFrame(frame).configure(config);
     }
 
     def configure(Closure config) {
-        manager.getPlotFrame(DEFAULT_FRAME).configure(config);
+        getPlotFrame(DEFAULT_FRAME).configure(config);
     }
 
     @MethodDescription("Apply meta to frame with given name")
     def configure(String frame, Map values, Closure config) {
-        manager.getPlotFrame(frame).configure(values, config);
+        getPlotFrame(frame).configure(values, config);
     }
 
     @MethodDescription("Apply meta to default frame")
     def configure(Map values, Closure config) {
-        manager.getPlotFrame(DEFAULT_FRAME).configure(values, config);
+        getPlotFrame(DEFAULT_FRAME).configure(values, config);
     }
 
     /**
@@ -76,14 +71,14 @@ class PlotHelper extends AbstractHelper {
     @MethodDescription("Plot a function defined by a closure.")
 
     XYPlot plotFunction(double from = 0d, double to = 1d, int numPoints = 100, String name = "data", String frame = DEFAULT_FRAME, Closure<Double> function) {
-        Function1<Double, Double> func = new Function1<Double, Double>(){
+        Function1<Double, Double> func = new Function1<Double, Double>() {
             @Override
             Double invoke(Double x) {
                 return function.call(x) as Double
             }
         }
         XYFunctionPlot res = XYFunctionPlot.Companion.plot(name, from, to, numPoints, func);
-        manager.getPlotFrame(frame).add(res)
+        getPlotFrame(frame).add(res)
         return res;
     }
 
@@ -93,14 +88,14 @@ class PlotHelper extends AbstractHelper {
         int numPoints = (parameters.to ?: 200) as Integer
         String name = (parameters.name ?: "data") as String
         String frame = (parameters.name ?: "frame") as String
-        Function1<Double, Double> func = new Function1<Double, Double>(){
+        Function1<Double, Double> func = new Function1<Double, Double>() {
             @Override
             Double invoke(Double x) {
                 return function.call(x) as Double
             }
         }
         XYFunctionPlot res = XYFunctionPlot.Companion.plot(name, from, to, numPoints, func)
-        manager.getPlotFrame(frame).add(res)
+        getPlotFrame(frame).add(res)
         return res;
     }
 
@@ -135,7 +130,7 @@ class PlotHelper extends AbstractHelper {
     @MethodDescription("Plot data using supplied parameters")
     XYPlot plot(Map parameters) {
         def res = buildDataPlot(parameters)
-        manager.getPlotFrame(parameters.getOrDefault("frame", DEFAULT_FRAME) as String).add(res)
+        getPlotFrame(parameters.getOrDefault("frame", DEFAULT_FRAME) as String).add(res)
         return res
     }
 

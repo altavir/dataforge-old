@@ -60,7 +60,7 @@ class DirectoryOutput : DefaultOutputManager() {
         }
     }
 
-    override fun get(name: Name, stage: Name, mode: String): Output {
+    override fun get(stage: Name, name: Name, mode: String): Output {
         val reference = FileReference.newWorkFile(context, name.toUnescaped(), getExtension(mode), stage)
         return FileOutput(reference)
     }

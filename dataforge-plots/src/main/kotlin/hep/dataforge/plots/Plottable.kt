@@ -47,8 +47,4 @@ interface Plottable : Configurable, Described {
      * @param listener
      */
     fun removeListener(listener: PlotListener)
-
-    companion object {
-        const val PLOT_TYPE = "hep.dataforge.plot"
-    }
 }

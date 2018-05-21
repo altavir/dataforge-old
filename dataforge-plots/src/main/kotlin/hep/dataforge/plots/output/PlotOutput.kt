@@ -20,33 +20,31 @@ import hep.dataforge.context.Context
 import hep.dataforge.io.output.Output
 import hep.dataforge.kodex.KMetaBuilder
 import hep.dataforge.kodex.buildMeta
-import hep.dataforge.meta.Meta
+import hep.dataforge.meta.Configurable
 import hep.dataforge.plots.PlotFrame
-import hep.dataforge.plots.PlotPlugin
 import hep.dataforge.plots.Plottable
 
-class PlotOutput(override val context: Context, val frameFactory: () -> PlotFrame) : Output {
-    private val frame: PlotFrame? = null
+interface PlotOutput : Output, Configurable {
+    val frame: PlotFrame
 
-    override fun render(obj: Any, meta: Meta) {
-        when (obj) {
-            is Plottable -> {
-                (this.frame ?: frameFactory()).apply {
-                    //TODO add warning on config update
-                    configure(meta)
-                }.add(obj)
-            }
-            else -> context.logger.error("Trying to render non-plottable object with plot renderer. No output.")
-        }
+    companion object {
+        const val PLOT_TYPE = "hep.dataforge.plot"
     }
-
 }
 
-fun Context.getPlotFrame(name: String, stage: String = "", meta: Meta = Meta.empty()): PlotFrame {
-    //FIXME replace by output manager
-    return this.get<PlotPlugin>().getPlotFrame(stage, name, meta)
+fun Context.plot(stage: String, name: String, plottable: Plottable, transform: KMetaBuilder.() -> Unit = {}) {
+    output[stage, name, PlotOutput.PLOT_TYPE].render(plottable, buildMeta("frame", transform))
 }
 
-fun Context.getPlotFrame(name: String, stage: String = "", transform: KMetaBuilder.() -> Unit): PlotFrame {
-    return this.get<PlotPlugin>().getPlotFrame(stage, name, buildMeta(transform = transform))
+fun Context.plot(stage: String = "", name: String, plottables: Iterable<Plottable>, transform: KMetaBuilder.() -> Unit = {}) {
+    output[stage, name, PlotOutput.PLOT_TYPE].render(plottables, buildMeta("frame", transform))
 }
+
+//@JvmOverloads
+//fun Context.getPlotFrame(name: String, stage: String = "", meta: Meta = Meta.empty()): PlotFrame {
+//    return (output[name, stage, PlotOutput.PLOT_TYPE] as PlotOutput).apply { configure(meta) }.frame
+//}
+//
+//fun Context.getPlotFrame(name: String, stage: String = "", transform: KMetaBuilder.() -> Unit): PlotFrame {
+//    return (output[name, stage, PlotOutput.PLOT_TYPE] as PlotOutput).configure(transform).frame
+//}

@@ -15,6 +15,7 @@
  */
 package hep.dataforge.plots
 
+import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
@@ -22,6 +23,7 @@ import hep.dataforge.io.envelopes.JavaObjectWrapper.JAVA_SERIAL_DATA
 import hep.dataforge.io.envelopes.SimpleEnvelope
 import hep.dataforge.meta.Configurable
 import hep.dataforge.meta.Meta
+import hep.dataforge.utils.MetaFactory
 import java.io.ObjectStreamException
 import java.io.OutputStream
 import java.io.Serializable
@@ -68,7 +70,7 @@ interface PlotFrame : Configurable, Serializable {
      */
     fun setAll(plottables: Collection<Plottable>) {
         clear()
-        plottables.forEach{ this.add(it) }
+        plottables.forEach { this.add(it) }
     }
 
     /**
@@ -175,5 +177,6 @@ interface PlotFrame : Configurable, Serializable {
         const val PLOT_FRAME_TYPE = "hep.dataforge.plots.frame"
         val wrapper = Wrapper()
     }
-
 }
+
+interface PlotFactory : Plugin, MetaFactory<PlotFrame>

@@ -18,11 +18,13 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
+import hep.dataforge.fx.FXPlugin
+import hep.dataforge.fx.dfIconView
 import hep.dataforge.io.OutputManager
 import hep.dataforge.io.output.Output
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
-import hep.dataforge.plots.Plottable
+import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
 import javafx.beans.binding.ListBinding
 import javafx.collections.FXCollections
@@ -30,9 +32,10 @@ import javafx.collections.ObservableList
 import javafx.collections.ObservableMap
 import javafx.geometry.Side
 import javafx.scene.control.Tab
+import javafx.scene.layout.BorderPane
 import tornadofx.*
 
-class OutputContainer(val context: Context) : Fragment() {
+class OutputContainer(val context: Context) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
 
     private val stages: ObservableMap<Name, OutputStageContainer> = FXCollections.observableHashMap()
 
@@ -62,7 +65,7 @@ class OutputContainer(val context: Context) : Fragment() {
     private fun buildOutput(type: String): FXOutput {
         return when {
             type.startsWith(Output.TEXT_MODE) -> FXTextOutput(context)
-            type.startsWith(Plottable.PLOT_TYPE) -> FXPlotOutput(context)
+            type.startsWith(PlotOutput.PLOT_TYPE) -> FXPlotOutput(context)
             type.startsWith(Table.TABLE_TYPE) -> FXTableOutput(context)
             else -> FXDumbOutput(context)
         }
@@ -98,11 +101,33 @@ class OutputContainer(val context: Context) : Fragment() {
     }
 }
 
-class FXOutputManager(meta: Meta): OutputManager, BasicPlugin(meta){
-    override val outputModes: Collection<String>
-        get() = TODO("not implemented") //To change initializer of created properties use File | Settings | File Templates.
+class FXOutputManager(meta: Meta, viewConsumer: Context.(OutputContainer) -> Unit) : OutputManager, BasicPlugin(meta) {
 
-    override fun get(name: Name, stage: Name, mode: String): Output {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+    private val container: OutputContainer by lazy {
+        OutputContainer(context).also { viewConsumer.invoke(context, it) }
+    }
+
+    val root: UIComponent
+        get() = container
+
+    override val outputModes: Collection<String> = listOf(Output.TEXT_MODE, PlotOutput.PLOT_TYPE, Table.TABLE_TYPE)
+
+    override fun get(stage: Name, name: Name, mode: String): Output {
+        return container[name, stage, mode]
+    }
+
+    companion object {
+
+        /**
+         * Display in existing BorderPane
+         */
+        fun display(pane: BorderPane, meta: Meta = Meta.empty()): FXOutputManager = FXOutputManager(meta) { pane.center = it.root }
+
+        /**
+         * Display using context FXPlugin
+         */
+        fun display(meta: Meta = Meta.empty()): FXOutputManager = FXOutputManager(meta) {
+            get<FXPlugin>().display(it)
+        }
     }
 }
