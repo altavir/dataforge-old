@@ -43,8 +43,8 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
     constructor(name: String, group: String = "hep.dataforge", description: String? = null, version: String? = null, dependsOn: Collection<PluginTag>? = null) : this(
             buildMeta("plugin") {
-                "group" to group
                 "name" to name
+                "group" to group
                 description?.let { "description" to it }
                 version?.let { "version" to it }
                 dependsOn?.let{"dependsOn" to it.map { it.toString() }}
@@ -96,7 +96,7 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
         fun fromString(tag: String): PluginTag {
             val sepIndex = tag.indexOf(":")
             return if (sepIndex >= 0) {
-                PluginTag(tag.substring(0, sepIndex), tag.substring(sepIndex + 1))
+                PluginTag(group = tag.substring(0, sepIndex), name = tag.substring(sepIndex + 1))
             } else {
                 PluginTag(tag)
             }
