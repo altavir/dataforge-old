@@ -12,8 +12,7 @@ import tornadofx.*
 /**
  * Table display fragment
  */
-class TableDisplay(val table: Table, title: String? = null)
-    : Fragment(title = title, icon = dfIconView) {
+class TableDisplay(val table: Table, title: String? = null) : Fragment(title = title, icon = dfIconView) {
 
     private fun buildCell(row: Int, column: Int, value: Value): SpreadsheetCell {
         return when (value.type) {

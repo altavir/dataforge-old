@@ -52,7 +52,7 @@ class ListTable(override val format: TableFormat, points: List<Values>, unsafe: 
         if (!unsafe) {
             points.forEach {
                 if (!it.names.contains(format.names)) {
-                    throw NamingException("Row $it does not contain all off the fields declared in $format")
+                    throw NamingException("Row $it does not contain all off the fields declared in ${format.names}")
                 }
             }
         }

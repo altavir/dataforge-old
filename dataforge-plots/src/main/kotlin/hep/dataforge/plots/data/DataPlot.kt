@@ -33,9 +33,9 @@ import java.util.stream.Stream
  * @author Alexander Nozik
  */
 @ValueDefs(
-        ValueDef(key = "showLine", type = arrayOf(ValueType.BOOLEAN), def = "false", info = "Show the connecting line."),
-        ValueDef(key = "showSymbol", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Show symbols for data point."),
-        ValueDef(key = "showErrors", type = arrayOf(ValueType.BOOLEAN), def = "true", info = "Show errors for points.")
+        ValueDef(key = "showLine", type = [ValueType.BOOLEAN], def = "false", info = "Show the connecting line."),
+        ValueDef(key = "showSymbol", type = [ValueType.BOOLEAN], def = "true", info = "Show symbols for data point."),
+        ValueDef(key = "showErrors", type = [ValueType.BOOLEAN], def = "true", info = "Show errors for points.")
 )
 class DataPlot(name: String, meta: Meta = Meta.empty(), adapter: ValuesAdapter? = null, data: Iterable<Values>? = null) : XYPlot(Name.ofSingle(name), meta, adapter) {
 

@@ -76,8 +76,8 @@ abstract class XYPlotFrame : AbstractPlotFrame() {
      */
     @ValueDefs(
             ValueDef(key = "type", allowed = ["number", "log", "time"], def = "number", info = "The type of axis. By default number axis is used"),
-            ValueDef(key = "axisTitle", info = "The title of the axis."),
-            ValueDef(key = "axisUnits", def = "", info = "The units of the axis."),
+            ValueDef(key = "title", info = "The title of the axis."),
+            ValueDef(key = "units", def = "", info = "The units of the axis."),
             ValueDef(key = "range.from", type = arrayOf(ValueType.NUMBER), info = "Lower boundary for fixed range"),
             ValueDef(key = "range.to", type = arrayOf(ValueType.NUMBER), info = "Upper boundary for fixed range"),
             ValueDef(key = "crosshair", def = "data", allowed = ["none", "free", "data"], info = "Appearance and type of the crosshair")

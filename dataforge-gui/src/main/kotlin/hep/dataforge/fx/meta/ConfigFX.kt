@@ -102,7 +102,7 @@ open class ConfigFXNode(
         }
     }
 
-    private fun updateChildren(){
+    private fun updateChildren() {
         children.setAll(buildChildren())
     }
 
@@ -253,7 +253,9 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
 
 
     var value: Value
-        set(value){parent?.setValue(name, value)}
+        set(value) {
+            parent?.setValue(name, value)
+        }
         get() = valueProperty.get() ?: Value.NULL
 
 
@@ -267,7 +269,7 @@ class ConfigFXValue(name: String, parent: ConfigFXNode) : ConfigFX(name, parent)
     }
 
     override fun invalidateValue(path: Name) {
-        if(path.isEmpty){
+        if (path.isEmpty) {
             invalidate()
         }
     }

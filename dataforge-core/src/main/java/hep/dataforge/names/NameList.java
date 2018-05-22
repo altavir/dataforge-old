@@ -177,4 +177,9 @@ public class NameList implements Names {
     public int hashCode() {
         return Objects.hash(nameList);
     }
+
+    @Override
+    public String toString() {
+        return nameList.toString();
+    }
 }
