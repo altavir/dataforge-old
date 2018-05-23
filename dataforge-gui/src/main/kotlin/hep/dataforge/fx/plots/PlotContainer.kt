@@ -91,14 +91,11 @@ class PlotContainer(val frame: PlotFrame, display: (PlotFrame) -> Node = default
                                 }
                         )
                     }
-
                     progressindicator(progressProperty) {
                         maxWidth = 50.0
                         prefWidth = 50.0
-                        StackPane.setAlignment(this, Pos.CENTER)
                         visibleWhen(progressProperty.lessThan(1.0))
                     }
-
                 }
                 sidebar = vbox {
                     button(text = "Frame config") {

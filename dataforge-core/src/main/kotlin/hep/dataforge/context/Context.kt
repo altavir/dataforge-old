@@ -18,8 +18,10 @@ package hep.dataforge.context
 import hep.dataforge.Named
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.data.binary.StreamBinary
+import hep.dataforge.io.DefaultOutputManager
 import hep.dataforge.io.IOUtils
 import hep.dataforge.io.OutputManager
+import hep.dataforge.io.SplitOutputManager
 import hep.dataforge.kodex.*
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaID
@@ -40,8 +42,9 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.stream.Stream
-import java.util.stream.StreamSupport
 import kotlin.collections.HashMap
+import kotlin.streams.asSequence
+import kotlin.streams.asStream
 
 /**
  *
@@ -78,10 +81,25 @@ open class Context(
      * Return IO manager of this context. By default parent IOManager is
      * returned.
      *
+     * Setter sets the output or adds new output to the [SplitOutputManager] output
+     *
      * @return the io
      */
-    open val output: OutputManager
-        get() = pluginManager.get(OutputManager::class, false) ?: parent?.output ?: Global.output
+    open var output: OutputManager
+        get() = pluginManager[OutputManager::class, false]
+                ?: parent?.output
+                ?: pluginManager.load(DefaultOutputManager())
+        set(newOutput) {
+            val currentOutput = pluginManager.get<OutputManager>()
+            when (currentOutput) {
+                is SplitOutputManager -> currentOutput.managers.add(newOutput) // add to current output managers
+                null -> pluginManager.load(newOutput) // if no output, then load new one
+                else -> {
+                    pluginManager.remove(currentOutput)
+                    pluginManager.load(SplitOutputManager.build(currentOutput, newOutput))
+                }
+            }
+        }
 
 
     /**
@@ -169,8 +187,7 @@ open class Context(
      * @return
      */
     operator fun <T> get(type: Class<T>): T {
-        return optFeature(type)
-                .orElseThrow { RuntimeException("Feature could not be loaded by type: " + type.name) }
+        return opt(type) ?: throw RuntimeException("Feature could not be loaded by type: " + type.name)
     }
 
     inline fun <reified T> get(): T {
@@ -194,12 +211,11 @@ open class Context(
      * @param <T>
      * @return
      */
-    fun <T> optFeature(type: Class<T>): Optional<T> {
+    fun <T> opt(type: Class<T>): T? {
         return pluginManager
                 .stream(true)
-                .filter { type.isInstance(it) }
-                .findFirst()
-                .map { type.cast(it) }
+                .asSequence().filterIsInstance(type)
+                .firstOrNull()
     }
 
     private val serviceCache: MutableMap<Class<*>, ServiceLoader<*>> = HashMap()
@@ -211,25 +227,11 @@ open class Context(
      * @param <T>
      * @return
      */
-    @Synchronized
     fun <T> serviceStream(serviceClass: Class<T>): Stream<T> {
         synchronized(serviceCache) {
-            @Suppress("UNCHECKED_CAST")
-            val loader: ServiceLoader<T> = serviceCache.getOrPut(serviceClass) { ServiceLoader.load(serviceClass, classLoader) } as ServiceLoader<T>
-            return StreamSupport.stream(loader.spliterator(), false)
+            val loader: ServiceLoader<*> = serviceCache.getOrPut(serviceClass) { ServiceLoader.load(serviceClass, classLoader) }
+            return loader.asSequence().filterIsInstance(serviceClass).asStream()
         }
-    }
-
-    /**
-     * Find specific service provided by java SPI
-     *
-     * @param serviceClass
-     * @param predicate
-     * @param <T>
-     * @return
-     */
-    fun <T> optService(serviceClass: Class<T>, predicate: (T) -> Boolean): Optional<T> {
-        return serviceStream(serviceClass).filter(predicate).findFirst()
     }
 
     /**
@@ -358,9 +360,9 @@ open class Context(
     /**
      * Get the context based classpath resource
      */
-    fun optResource(name: String): Optional<Binary> {
+    fun getResource(name: String): Binary? {
         val resource = classLoader.getResource(name)
-        return resource?.let { StreamBinary { it.openStream() } }.optional
+        return resource?.let { StreamBinary { it.openStream() } }
     }
 
 

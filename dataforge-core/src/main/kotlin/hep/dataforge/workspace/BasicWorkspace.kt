@@ -12,6 +12,7 @@ import hep.dataforge.data.Data
 import hep.dataforge.data.DataNode
 import hep.dataforge.data.DataNodeEditor
 import hep.dataforge.data.DataTree
+import hep.dataforge.kodex.optional
 import hep.dataforge.meta.Meta
 import hep.dataforge.workspace.tasks.Task
 import hep.dataforge.workspace.tasks.TaskModel
@@ -28,7 +29,7 @@ class BasicWorkspace private constructor(
         override val targetMap: Map<String, Meta>) : AbstractWorkspace(context) {
 
     private val cache: CachePlugin by lazy {
-        context.optFeature(CachePlugin::class.java).orElseGet {
+        context.opt(CachePlugin::class.java).optional.orElseGet {
             val pl = CachePlugin(Meta.empty())
             context.pluginManager.load(pl)
             pl

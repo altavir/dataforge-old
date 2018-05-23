@@ -80,8 +80,8 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
 
     fun buildDevice(deviceMeta: Meta): Device {
         val factory = context
-                .optService(DeviceFactory::class.java) { it.type == ControlUtils.getDeviceType(deviceMeta) }
-                .orElseThrow { RuntimeException("Can't find factory for given device type") }
+                .findService(DeviceFactory::class.java) { it.type == ControlUtils.getDeviceType(deviceMeta) }
+                ?: throw RuntimeException("Can't find factory for given device type")
         val device = factory.build(context, deviceMeta)
 
         deviceMeta.getMetaList("connection").forEach { connectionMeta -> device.connectionHelper.connect(context, connectionMeta) }

@@ -26,7 +26,7 @@ import hep.dataforge.plots.XYPlotFrame
 import hep.dataforge.utils.FXObject
 import hep.dataforge.values.Value
 import hep.dataforge.values.ValueFactory
-import javafx.application.Platform
+import javafx.application.Platform.runLater
 import javafx.scene.Node
 import javafx.scene.control.ContextMenu
 import javafx.scene.control.Menu
@@ -109,9 +109,6 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
         parent.items.add(dfpExport)
     }
 
-    private fun run(run: Runnable) {
-        Platform.runLater(run)
-    }
 
     private fun getNumberAxis(annotation: Meta): ValueAxis {
         val axis = NumberAxis()
@@ -157,7 +154,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
 
     @Synchronized
     override fun updateAxis(axisName: String, axisMeta: Meta, plotMeta: Meta) {
-        run {
+        runLater {
             val axis = getAxis(axisMeta)
 
             val crosshair = axisMeta.getString("crosshair") { plotMeta.getString("crosshair", "none") }
@@ -225,7 +222,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
 
     @Synchronized
     override fun updateLegend(legendMeta: Meta) {
-        run {
+        runLater {
             if (legendMeta.getBoolean("show", true)) {
                 if (chart.legend == null) {
                     chart.addLegend(LegendTitle(xyPlot))
@@ -238,13 +235,13 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
 
     @Synchronized
     override fun updateFrame(annotation: Meta) {
-        run { this.chart.setTitle(annotation.getString("title", "")) }
+        runLater { this.chart.setTitle(annotation.getString("title", "")) }
     }
 
     override fun plotRemoved(name: Name) {
         val num = Optional.ofNullable(index[name]).map<Int> { it.index }.orElse(-1)
         if (num >= 0) {
-            run { xyPlot.setDataset(num, null) }
+            runLater { xyPlot.setDataset(num, null) }
         }
         index.remove(name)
     }
@@ -255,12 +252,12 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
             val wrapper = JFCDataWrapper(plot)
             wrapper.index = index.values.stream().mapToInt { it.index }.max().orElse(-1) + 1
             index[name] = wrapper
-            run { this.xyPlot.setDataset(wrapper.index, wrapper) }
+            runLater { this.xyPlot.setDataset(wrapper.index, wrapper) }
         } else {
             val wrapper = index[name]
             wrapper!!.setPlot(plot)
             wrapper.invalidateData()
-            run { this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper)) }
+            runLater { this.xyPlot.datasetChanged(DatasetChangeEvent(this.xyPlot, wrapper)) }
         }
     }
 
@@ -305,7 +302,7 @@ class JFreeChartFrame @JvmOverloads constructor(frameMeta: Meta = Meta.empty()) 
 
         render.setSeriesVisible(0, visible)
 
-        run {
+        runLater {
             xyPlot.setRenderer(index[name]!!.index, render)
 
             // update cache to default colors

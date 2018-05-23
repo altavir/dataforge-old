@@ -41,13 +41,14 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
     }
 
     /**
-     * Wait for application and toolkit to start
+     * Wait for application and toolkit to start if needed
      */
-    fun checkApp() {
+    fun startApp() {
         synchronized(this) {
             if (FX.getApplication(DefaultScope) == null) {
                 if (consoleMode) {
                     Thread {
+                        context.logger.debug("Starting FX application surrogate")
                         launch<ApplicationSurrogate>()
                     }.apply {
                         name = "${context.name} FX application thread"
@@ -61,7 +62,7 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
                     }
                     Platform.setImplicitExit(false)
                 } else {
-                    throw RuntimeException("Application not defined")
+                    throw RuntimeException("FX Application not defined")
                 }
             }
         }
@@ -75,7 +76,7 @@ class FXPlugin(meta: Meta = Meta.empty()) : BasicPlugin(meta) {
     }
 
     fun getStage(): Stage {
-        checkApp()
+        startApp()
         return FX.getPrimaryStage(DefaultScope)!!
     }
 

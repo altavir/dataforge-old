@@ -16,6 +16,7 @@
 package hep.dataforge.io
 
 import hep.dataforge.context.BasicPlugin
+import hep.dataforge.context.Context
 import hep.dataforge.context.Plugin
 import hep.dataforge.description.ValueDef
 import hep.dataforge.description.ValueDefs
@@ -83,19 +84,37 @@ interface OutputManager : Plugin {
         /**
          * Produce a split [OutputManager]
          */
-        fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager().apply { this.channels.addAll(channels) }
+        fun split(vararg channels: OutputManager): OutputManager = SplitOutputManager().apply { this.managers.addAll(channels) }
     }
 }
 
 /**
  * An [OutputManager] that supports multiple outputs simultaneously
  */
-class SplitOutputManager(val channels: MutableSet<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
+class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), meta: Meta = Meta.empty()) : OutputManager, BasicPlugin(meta) {
 
     override val outputModes: Collection<String>
-        get() = channels.flatMap { it.outputModes }.distinct()
+        get() = managers.flatMap { it.outputModes }.distinct()
 
-    override fun get(stage: Name, name: Name, mode: String): Output = splitOutput(*channels.filter { it.outputModes.contains(mode) }.map { it[stage, name, mode] }.toTypedArray())
+    override fun get(stage: Name, name: Name, mode: String): Output = splitOutput(*managers.filter { it.outputModes.contains(mode) }.map { it[stage, name, mode] }.toTypedArray())
 
+    override fun attach(context: Context) {
+        super.attach(context)
+        managers.forEach{it.attach(context)}
+    }
+
+    override fun detach() {
+        super.detach()
+        managers.forEach{it.detach()}
+    }
+
+    companion object {
+        /**
+         * Convenience method to build split output manager
+         */
+        fun build(vararg managers: OutputManager): SplitOutputManager{
+            return SplitOutputManager(hashSetOf(*managers))
+        }
+    }
 }
 

@@ -18,6 +18,7 @@ package hep.dataforge.fx.output
 
 import hep.dataforge.context.BasicPlugin
 import hep.dataforge.context.Context
+import hep.dataforge.context.PluginTag
 import hep.dataforge.fx.FXPlugin
 import hep.dataforge.fx.dfIconView
 import hep.dataforge.io.OutputManager
@@ -39,7 +40,7 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
 
     private val stages: ObservableMap<Name, OutputStageContainer> = FXCollections.observableHashMap()
 
-    private val tabs: ObservableList<Tab> = object : ListBinding<Tab>() {
+    private val tabList: ObservableList<Tab> = object : ListBinding<Tab>() {
         init {
             bind(stages)
         }
@@ -52,11 +53,11 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
     override val root = tabpane {
         //tabs for each stage
         side = Side.LEFT
-        this.tabs.bind(tabs) { it }
+        tabs.bind(tabList) { it }
     }
 
     operator fun get(stage: Name, name: Name, type: String): Output {
-        return stages.getOrPut(stage) { OutputStageContainer() }[name, type]
+        return (stages[stage] ?: OutputStageContainer().also { runLater { stages[stage] = it } })[name, type]
     }
 
     /**
@@ -96,12 +97,20 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
         }
 
         operator fun get(name: Name, type: String): FXOutput {
-            return outputs.getOrPut(name) { buildOutput(type) }
+            return outputs[name] ?: buildOutput(type).also { runLater { outputs[name] = it } }
         }
     }
 }
 
-class FXOutputManager(meta: Meta, viewConsumer: Context.(OutputContainer) -> Unit) : OutputManager, BasicPlugin(meta) {
+class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputContainer) -> Unit = { get<FXPlugin>().display(it) }) : OutputManager, BasicPlugin(meta) {
+
+    override val tag = PluginTag(name = "output.fx", dependsOn = *arrayOf("hep.dataforge:fx"))
+
+    override fun attach(context: Context) {
+        super.attach(context)
+        //Check if FX toolkit is started
+        context.get<FXPlugin>().startApp()
+    }
 
     private val container: OutputContainer by lazy {
         OutputContainer(context).also { viewConsumer.invoke(context, it) }
@@ -122,12 +131,5 @@ class FXOutputManager(meta: Meta, viewConsumer: Context.(OutputContainer) -> Uni
          * Display in existing BorderPane
          */
         fun display(pane: BorderPane, meta: Meta = Meta.empty()): FXOutputManager = FXOutputManager(meta) { pane.center = it.root }
-
-        /**
-         * Display using context FXPlugin
-         */
-        fun display(meta: Meta = Meta.empty()): FXOutputManager = FXOutputManager(meta) {
-            get<FXPlugin>().display(it)
-        }
     }
 }

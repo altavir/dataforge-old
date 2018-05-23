@@ -18,7 +18,6 @@ package hep.dataforge.context
 import hep.dataforge.exceptions.ContextLockException
 import hep.dataforge.kodex.KMetaBuilder
 import hep.dataforge.kodex.buildMeta
-import hep.dataforge.kodex.toList
 import hep.dataforge.meta.Meta
 import java.util.*
 import java.util.stream.Stream
@@ -57,11 +56,10 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
      * Get for existing plugin
      */
     fun get(recursive: Boolean = true, predicate: (Plugin) -> Boolean): Plugin? {
-        val plugins = stream(recursive).filter(predicate).toList()
-        return when (plugins.size) {
-            0 -> null
-            1 -> plugins[0]
-            else -> throw RuntimeException("Multiple candidates for plugin resolution: $plugins")
+        return plugins.find(predicate) ?: if (recursive && parent != null) {
+            parent.get(true, predicate)
+        } else {
+            null
         }
     }
 
@@ -71,7 +69,7 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
      * @param tag
      * @return
      */
-    fun get(tag: PluginTag, recursive: Boolean = true): Plugin? {
+    operator fun get(tag: PluginTag, recursive: Boolean = true): Plugin? {
         return get(recursive) { tag.matches(it.tag) }
     }
 
@@ -84,8 +82,12 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
      * @return
      */
     @Suppress("UNCHECKED_CAST")
-    fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? {
+    operator fun <T : Plugin> get(type: KClass<T>, recursive: Boolean = true): T? {
         return get(recursive) { type.isInstance(it) } as T?
+    }
+
+    inline fun <reified T : Plugin> get(recursive: Boolean = true): T? {
+        return get(T::class, recursive)
     }
 
     /**
@@ -110,6 +112,17 @@ class PluginManager(override val context: Context) : ContextAware, AutoCloseable
             plugin.attach(context)
             plugins.add(plugin)
             return plugin
+        }
+    }
+
+    fun remove(plugin: Plugin){
+        if (context.isLocked) {
+            throw ContextLockException()
+        }
+        if (plugins.contains(plugin)){
+            logger.info("Removing plugin {} from {}", plugin.name, context.name)
+            plugin.detach()
+            plugins.remove(plugin)
         }
     }
 

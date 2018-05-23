@@ -41,13 +41,15 @@ class PluginTag(meta: Meta) : SimpleMetaMorph(meta) {
 
     val group by meta.stringValue(def = "")
 
-    constructor(name: String, group: String = "hep.dataforge", description: String? = null, version: String? = null, dependsOn: Collection<PluginTag>? = null) : this(
+    constructor(name: String, group: String = "hep.dataforge", description: String? = null, version: String? = null, vararg dependsOn: String) : this(
             buildMeta("plugin") {
                 "name" to name
                 "group" to group
                 description?.let { "description" to it }
                 version?.let { "version" to it }
-                dependsOn?.let{"dependsOn" to it.map { it.toString() }}
+                if (dependsOn.isNotEmpty()) {
+                    dependsOn.let { "dependsOn" to it }
+                }
             }
     )
 

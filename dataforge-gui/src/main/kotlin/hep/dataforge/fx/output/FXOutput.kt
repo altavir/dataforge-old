@@ -29,7 +29,6 @@ import hep.dataforge.plots.PlotFrame
 import hep.dataforge.plots.Plottable
 import hep.dataforge.plots.output.PlotOutput
 import hep.dataforge.tables.Table
-import javafx.scene.layout.BorderPane
 import tornadofx.*
 
 abstract class FXOutput(override val context: Context) : Fragment(icon = dfIconView), Output
@@ -52,10 +51,9 @@ class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurab
     override val frame: PlotFrame  by lazy { context.get<PlotFactory>().build(Meta.empty()) }
 
     val container: PlotContainer by lazy { PlotContainer(frame) }
-    override val root: BorderPane by lazy {
-        borderpane {
-            center = container.root
-        }
+
+    override val root = borderpane {
+        center = container.root
     }
 
     override fun getConfig(): Configuration = frame.config
@@ -66,6 +64,7 @@ class FXPlotOutput(context: Context) : FXOutput(context), PlotOutput, Configurab
             if (!frame.config.isEmpty) {
                 logger.warn("Overriding non-empty frame configuration")
             }
+            frame.configure(meta)
         }
         when (obj) {
             is Plottable -> {

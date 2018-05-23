@@ -44,7 +44,7 @@ public interface Connection extends AutoCloseable {
      */
     static Optional<Connection> buildConnection(Connectible obj, Context context, Meta meta) {
         String type = meta.getString("type");
-        return context.optService(ConnectionFactory.class, it -> Objects.equals(it.getType(), type))
+        return Optional.ofNullable(context.findService(ConnectionFactory.class, it -> Objects.equals(it.getType(), type)))
                 .map(it -> it.build(obj, context, meta));
     }
 

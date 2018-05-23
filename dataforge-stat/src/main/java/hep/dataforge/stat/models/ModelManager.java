@@ -46,7 +46,7 @@ public class ModelManager extends BasicPlugin {
      * @return
      */
     public static Optional<Model> restoreModel(Context context, Meta meta) {
-        return context.optFeature(ModelManager.class).flatMap(manager -> manager.getModel(meta));
+        return Optional.ofNullable(context.opt(ModelManager.class)).flatMap(manager -> manager.getModel(meta));
     }
 
     private final Set<ModelFactory> factories = new HashSet<>();
