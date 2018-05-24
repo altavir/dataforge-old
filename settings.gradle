@@ -1,6 +1,7 @@
 rootProject.name = 'dataforge'
 include ':dataforge-core' // core classes and data structures
-include ':dataforge-core:dataforge-json' // core classes and data structures
+include ':dataforge-core:dataforge-json' // json meta converter
+//include ':dataforge-core:dataforge-html' // HTML tools
 //include ':dataforge-core:osgi' // osgi framework for easy plugin delivery
 
 include ':dataforge-plots' // plot library
@@ -35,5 +36,7 @@ include ':dataforge-storage:storage-oak'
 include ':dataforge-storage2' // storage2 module
 
 include ':dataforge-markup'
+
+include ':dataforge-remote'
 
 include ':site'//the site

@@ -36,7 +36,7 @@ import javafx.scene.control.Tab
 import javafx.scene.layout.BorderPane
 import tornadofx.*
 
-class OutputContainer(val context: Context) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
+class OutputContainer(val context: Context, val meta: Meta) : Fragment(title = "[${context.name}] DataForge output container", icon = dfIconView) {
 
     private val stages: ObservableMap<Name, OutputStageContainer> = FXCollections.observableHashMap()
 
@@ -46,7 +46,11 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
         }
 
         override fun computeValue(): ObservableList<Tab> {
-            return stages.map { Tab(it.key.toUnescaped(), it.value.root) }.observable()
+            return stages.map {
+                Tab(it.key.toUnescaped(), it.value.root).apply {
+                    isClosable = false
+                }
+            }.observable()
         }
     }
 
@@ -56,8 +60,16 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
         tabs.bind(tabList) { it }
     }
 
+    private fun buildStageContainer(): OutputStageContainer {
+        return if (meta.getBoolean("treeStage", false)) {
+            TreeStageContainer()
+        } else {
+            TabbedStageContainer()
+        }
+    }
+
     operator fun get(stage: Name, name: Name, type: String): Output {
-        return (stages[stage] ?: OutputStageContainer().also { runLater { stages[stage] = it } })[name, type]
+        return (stages[stage] ?: buildStageContainer().also { runLater { stages[stage] = it } })[name, type]
     }
 
     /**
@@ -72,9 +84,15 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
         }
     }
 
-    inner class OutputStageContainer : Fragment() {
-        private val outputs: ObservableMap<Name, FXOutput> = FXCollections.observableHashMap()
+    private abstract inner class OutputStageContainer : Fragment() {
+        val outputs: ObservableMap<Name, FXOutput> = FXCollections.observableHashMap()
 
+        operator fun get(name: Name, type: String): FXOutput {
+            return outputs[name] ?: buildOutput(type).also { runLater { outputs[name] = it } }
+        }
+    }
+
+    private inner class TreeStageContainer : OutputStageContainer() {
         override val root = borderpane {
             left {
                 // name list
@@ -95,9 +113,28 @@ class OutputContainer(val context: Context) : Fragment(title = "[${context.name}
                 }
             }
         }
+    }
 
-        operator fun get(name: Name, type: String): FXOutput {
-            return outputs[name] ?: buildOutput(type).also { runLater { outputs[name] = it } }
+    private inner class TabbedStageContainer : OutputStageContainer() {
+
+        private val outputList: ObservableList<Tab> = object : ListBinding<Tab>() {
+            init {
+                bind(outputs)
+            }
+
+            override fun computeValue(): ObservableList<Tab> {
+                return outputs.map {
+                    Tab(it.key.toUnescaped(), it.value.root).apply {
+                        isClosable = false
+                    }
+                }.observable()
+            }
+        }
+
+        override val root = tabpane {
+            //tabs for each output
+            side = Side.TOP
+            tabs.bind(outputList) { it }
         }
     }
 }
@@ -113,7 +150,7 @@ class FXOutputManager(meta: Meta = Meta.empty(), viewConsumer: Context.(OutputCo
     }
 
     private val container: OutputContainer by lazy {
-        OutputContainer(context).also { viewConsumer.invoke(context, it) }
+        OutputContainer(context, meta).also { viewConsumer.invoke(context, it) }
     }
 
     val root: UIComponent
