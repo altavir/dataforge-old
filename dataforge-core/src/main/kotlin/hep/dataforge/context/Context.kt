@@ -90,13 +90,14 @@ open class Context(
                 ?: parent?.output
                 ?: pluginManager.load(DefaultOutputManager())
         set(newOutput) {
-            val currentOutput = pluginManager.get<OutputManager>()
+            val currentOutput = pluginManager.get<OutputManager>(false)
             when (currentOutput) {
                 is SplitOutputManager -> currentOutput.managers.add(newOutput) // add to current output managers
                 null -> pluginManager.load(newOutput) // if no output, then load new one
                 else -> {
+                    val split = SplitOutputManager.build(currentOutput, newOutput)
                     pluginManager.remove(currentOutput)
-                    pluginManager.load(SplitOutputManager.build(currentOutput, newOutput))
+                    pluginManager.load(split)
                 }
             }
         }

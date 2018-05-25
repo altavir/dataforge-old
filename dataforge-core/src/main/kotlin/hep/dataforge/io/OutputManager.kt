@@ -100,7 +100,10 @@ class SplitOutputManager(val managers: MutableSet<OutputManager> = HashSet(), me
 
     override fun attach(context: Context) {
         super.attach(context)
-        managers.forEach{it.attach(context)}
+        managers.forEach{
+            context.pluginManager.loadDependencies(it)
+            it.attach(context)
+        }
     }
 
     override fun detach() {

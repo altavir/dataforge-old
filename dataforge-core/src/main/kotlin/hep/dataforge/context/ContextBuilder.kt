@@ -48,6 +48,8 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
 
     private val plugins = ArrayList<Plugin>()
 
+    var output: OutputManager? = null
+
     var rootDir: String
         get() = properties[ROOT_DIRECTORY_CONTEXT_KEY]?.toString() ?: parent.rootDir.toString()
         set(value) {
@@ -182,6 +184,9 @@ class ContextBuilder(val name: String, val parent: Context = Global) {
         }
 
         return Context(name, parent, classLoader, properties).apply {
+            this@ContextBuilder.output?.let {
+                pluginManager.load(it)
+            }
             plugins.forEach {
                 pluginManager.load(it)
             }
