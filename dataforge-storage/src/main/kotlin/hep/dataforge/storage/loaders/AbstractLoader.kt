@@ -19,12 +19,9 @@ import hep.dataforge.connections.ConnectionHelper
 import hep.dataforge.events.Event
 import hep.dataforge.events.EventHandler
 import hep.dataforge.exceptions.PushFailedException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Validator
 import hep.dataforge.meta.Meta
 import hep.dataforge.storage.api.Loader
 import hep.dataforge.storage.api.Storage
-import hep.dataforge.storage.commons.StorageUtils
 
 /**
  * @author Alexander Nozik
@@ -32,7 +29,7 @@ import hep.dataforge.storage.commons.StorageUtils
 abstract class AbstractLoader(final override val storage: Storage, final override val name: String, override val meta: Meta) : Loader {
     private val _connectionHelper by lazy{ ConnectionHelper(this)}
 
-    override val validator: Validator = StorageUtils.defaultMessageValidator(Storage.LOADER_TARGET, name)
+//    override val validator: Validator = StorageUtils.defaultMessageValidator(Storage.LOADER_TARGET, name)
 
 
     override fun getConnectionHelper(): ConnectionHelper {
@@ -54,8 +51,4 @@ abstract class AbstractLoader(final override val storage: Storage, final overrid
         forEachConnection(EventHandler::class.java) { eventHandler -> eventHandler.pushEvent(event) }
     }
 
-
-    override fun respond(message: Envelope): Envelope {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 }

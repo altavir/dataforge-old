@@ -13,14 +13,56 @@
  *  See the License for the specific language governing permissions and
  *  limitations under the License.
  */
-package hep.dataforge.io.messages
+package hep.dataforge.messages
 
-import hep.dataforge.exceptions.EnvelopeTargetNotFoundException
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
-import java.util.concurrent.CompletableFuture
+import hep.dataforge.names.Name
+import kotlinx.coroutines.experimental.Deferred
+import kotlinx.coroutines.experimental.async
+
+//Message operations
+const val ACTION_KEY = "@message.action"
+const val PUSH_ACTION = "push"
+const val PULL_ACTION = "pull"
+
+const val MESSAGE_STATUS_KEY = "@message.status"
+const val MESSAGE_TERMINATE = "terminate"
+const val MESSAGE_OK = "ok"
+const val MESSAGE_FAIL = "error"
+
+const val MESSAGE_TYPE_KEY = "@message.type"
+const val RESPONSE_SUCCESS_KEY = "success"
+const val RESPONSE_TYPE_SUFFIX = ".response"
+const val ERROR_RESPONSE_TYPE = "error"
+
+typealias Message = Envelope
+typealias MessageBuilder = EnvelopeBuilder
+typealias Target = Meta
+
+
+val Message.target: Target
+    get() = this.meta.getMetaOrEmpty("@message.target")
+
+var MessageBuilder.target: Target
+    get() = this.meta.getMetaOrEmpty("@message.target")
+    set(value) {
+        this.meta.setNode("@message.target", value)
+    }
+
+val Message.origin: Target
+    get() = this.meta.getMetaOrEmpty("@message.origin")
+
+var MessageBuilder.origin: Target
+    get() = this.meta.getMetaOrEmpty("@message.origin")
+    set(value) {
+        this.meta.setNode("@message.origin", value)
+    }
+
+val Target.id: Name
+    get() = Name.of(this.getString("name"))
 
 
 /**
@@ -33,37 +75,27 @@ interface Responder {
      * @param message
      * @return
      */
-    fun respond(message: Envelope): Envelope
+    fun respond(message: Message): Message
 
-    /**
-     * Asynchronous wrapper for response operation
-     * @param message
-     * @return
-     */
-    fun respondInFuture(message: Envelope): CompletableFuture<Envelope> {
-        return CompletableFuture.supplyAsync { respond(message) }
+    @JvmDefault
+    suspend fun respondInFuture(message: Message): Deferred<Message> {
+        return async { respond(message) }
     }
 }
 
 /**
- * A dispatcher of messages that could provide appropriate responder for
- * message. The dispatcher does not handle message itself
+ * A dispatch message to given target
+ *
  *
  * @author Alexander Nozik
  */
 interface Dispatcher {
+    fun dispatch(origin: Target, target: Target, message: Envelope)
 
-    @Throws(EnvelopeTargetNotFoundException::class)
-    fun getResponder(targetInfo: Meta): Responder
-
-    fun getResponder(envelope: Envelope): Responder {
-        return getResponder(envelope.meta.getMeta(MESSAGE_TARGET_NODE))
-    }
-
-    companion object {
-        const val MESSAGE_TARGET_NODE = "@message.target"
-        const val TARGET_TYPE_KEY = "type"
-        const val TARGET_NAME_KEY = "name"
+    @JvmDefault
+    fun dispatch(message: Message) {
+        //TODO check for origin and target existance
+        dispatch(message.origin, message.target, message)
     }
 }
 
@@ -71,8 +103,7 @@ interface Dispatcher {
  * An object that can receive an envelope without a response
  */
 interface Receiver {
-    //TODO add meta status as a response?
-    fun receive(message: Envelope)
+    fun receive(message: Message)
 }
 
 /**
@@ -81,9 +112,9 @@ interface Receiver {
  */
 interface Validator {
 
-    fun validate(message: Envelope): Meta
+    fun validate(message: Message): Meta
 
-    fun isValid(message: Envelope): Boolean {
+    fun isValid(message: Message): Boolean {
         return validate(message).getBoolean(IS_VALID_KEY)
     }
 
@@ -104,25 +135,6 @@ interface Validator {
     }
 }
 
-val Envelope.target: String
-    get() = this.meta.getString("@message.target")
-
-var EnvelopeBuilder.target: String
-    get() = this.meta.getString("@message.target")
-    set(value) {
-        this.meta.setValue("@message.target", value)
-    }
-
-val Envelope.origin: String
-    get() = this.meta.getString("@message.origin")
-
-var EnvelopeBuilder.origin: String
-    get() = this.meta.getString("@message.origin")
-    set(value) {
-        this.meta.setValue("@message.origin", value)
-    }
-
-
 /**
  * Generate a response base with the same meta parameters (type, encoding)
  * as in request and modified message type if it is present
@@ -130,7 +142,7 @@ var EnvelopeBuilder.origin: String
  * @param request
  * @return
  */
-fun responseBase(request: Envelope): EnvelopeBuilder {
+fun responseBase(request: Message): MessageBuilder {
     val res = EnvelopeBuilder()
     val type = request.meta.getString(MESSAGE_TYPE_KEY, "")
     if (!type.isEmpty()) {
@@ -145,7 +157,7 @@ fun responseBase(request: Envelope): EnvelopeBuilder {
  * @param type
  * @return
  */
-fun responseBase(type: String?): EnvelopeBuilder {
+fun responseBase(type: String?): MessageBuilder {
     var aType = type
     val res = EnvelopeBuilder()
     if (aType != null && !aType.isEmpty()) {
@@ -163,7 +175,7 @@ fun responseBase(type: String?): EnvelopeBuilder {
  * @param type
  * @return
  */
-fun requestBase(type: String?): EnvelopeBuilder {
+fun requestBase(type: String?): MessageBuilder {
     val res = EnvelopeBuilder()
     if (type != null && !type.isEmpty()) {
         res.setMetaValue(MESSAGE_TYPE_KEY, type)
@@ -177,11 +189,11 @@ fun requestBase(type: String?): EnvelopeBuilder {
  * @param type
  * @return
  */
-fun okResponse(type: String): Envelope {
+fun okResponse(type: String): Message {
     return okResponseBase(type, false, false).build()
 }
 
-fun okResponseBase(request: Envelope, hasMeta: Boolean, hasData: Boolean): EnvelopeBuilder {
+fun okResponseBase(request: Message, hasMeta: Boolean, hasData: Boolean): MessageBuilder {
     val res = EnvelopeBuilder().setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
     var type: String? = request.meta.getString(MESSAGE_TYPE_KEY, "")
     if (type != null && !type.isEmpty()) {
@@ -205,7 +217,7 @@ fun okResponseBase(request: Envelope, hasMeta: Boolean, hasData: Boolean): Envel
  * @param hasData
  * @return
  */
-fun okResponseBase(type: String?, hasMeta: Boolean, hasData: Boolean): EnvelopeBuilder {
+fun okResponseBase(type: String?, hasMeta: Boolean, hasData: Boolean): MessageBuilder {
     var aType = type
     val res = EnvelopeBuilder()
             .setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_OK)
@@ -229,7 +241,7 @@ fun okResponseBase(type: String?, hasMeta: Boolean, hasData: Boolean): EnvelopeB
  * @param errors
  * @return
  */
-fun errorResponseBase(type: String?, vararg errors: Throwable): EnvelopeBuilder {
+fun errorResponseBase(type: String?, vararg errors: Throwable): MessageBuilder {
     var aType = type
     if (aType == null || aType.isEmpty()) {
         aType = ERROR_RESPONSE_TYPE
@@ -248,30 +260,16 @@ fun errorResponseBase(request: Envelope, vararg errors: Throwable): EnvelopeBuil
     return errorResponseBase(request.meta.getString(MESSAGE_TYPE_KEY, ""), *errors)
 }
 
-//Message operations
-const val ACTION_KEY = "@message.action"
-const val PUSH_ACTION = "push"
-const val PULL_ACTION = "pull"
-
-const val MESSAGE_STATUS_KEY = "@message.status"
-const val MESSAGE_TERMINATE = "terminate"
-const val MESSAGE_OK = "ok"
-const val MESSAGE_FAIL = "error"
-
-const val MESSAGE_TYPE_KEY = "@message.type"
-const val RESPONSE_SUCCESS_KEY = "success"
-const val RESPONSE_TYPE_SUFFIX = ".response"
-const val ERROR_RESPONSE_TYPE = "error"
 
 /**
  * Terminator envelope that should be sent to close current connection
  *
  * @return
  */
-val terminator: Envelope = EnvelopeBuilder().setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_TERMINATE).build()
+val terminator: Message = MessageBuilder().setMetaValue(MESSAGE_STATUS_KEY, MESSAGE_TERMINATE).build()
 
-fun isTerminator(envelope: Envelope): Boolean {
-    return envelope.meta.getString(MESSAGE_STATUS_KEY, "") == MESSAGE_TERMINATE
+fun isTerminator(message: Message): Boolean {
+    return message.meta.getString(MESSAGE_STATUS_KEY, "") == MESSAGE_TERMINATE
 }
 
 fun getErrorMeta(err: Throwable): Meta {

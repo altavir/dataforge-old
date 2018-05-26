@@ -15,7 +15,6 @@
  */
 package hep.dataforge.storage.filestorage
 
-import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.MetaType
 import hep.dataforge.io.jsonMetaType
 import hep.dataforge.kodex.nullable
@@ -70,9 +69,5 @@ class FileStateLoader(storage: Storage, name: String, annotation: Meta, file: Fi
 
     override fun pullMeta(path: String): Meta? {
         return stateHolder.config.optMeta(path).nullable
-    }
-
-    override fun respond(message: Envelope): Envelope {
-        return stateHolder.respond(message)
     }
 }

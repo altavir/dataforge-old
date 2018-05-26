@@ -14,11 +14,12 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.messages
+package hep.dataforge.messages
 
 
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
+import hep.dataforge.kodex.buildMeta
 import kotlinx.coroutines.experimental.CompletableDeferred
 import kotlinx.coroutines.experimental.Job
 import kotlinx.coroutines.experimental.async
@@ -37,17 +38,20 @@ class MessageServer(val serverID: String) : Receiver {
     /**
      * Incoming message queue
      */
-    private val queue: Channel<Envelope> = Channel(Channel.UNLIMITED)
+    private val queue: Channel<Message> = Channel(Channel.UNLIMITED)
     private var job: Job? = null
 
-    private val targets: MutableMap<String, Receiver> = ConcurrentHashMap()
+    /**
+     * Local message recievers
+     */
+    private val targets: MutableMap<Target, Receiver> = ConcurrentHashMap()
 
     /**
      * A dump for unclaimed messages
      */
     private var unclaimed: Receiver = object : Receiver {
-        override fun receive(message: Envelope) {
-            LoggerFactory.getLogger(javaClass).error("An envelope is unclaimed!")
+        override fun receive(message: Message) {
+            LoggerFactory.getLogger(javaClass).error("A message is unclaimed!")
             //TODO add debug info here
         }
     }
@@ -62,8 +66,7 @@ class MessageServer(val serverID: String) : Receiver {
         job = launch {
             while (true) {
                 val message = queue.receive()
-                val target = getTarget(message)
-                targets.getOrDefault(target, unclaimed).receive(message)
+                targets.getOrDefault(message.target, unclaimed).receive(message)
             }
         }
     }
@@ -72,26 +75,22 @@ class MessageServer(val serverID: String) : Receiver {
         job?.cancel()
     }
 
-    private fun getTarget(message: Envelope): String {
-        return message.target
-    }
-
-    fun addTarget(target: String, action: (Envelope) -> Unit){
+    fun addTarget(target: Target, action: (Message) -> Unit) {
         this.targets[target] = object : Receiver {
-            override fun receive(message: Envelope) {
+            override fun receive(message: Message) {
                 action(message)
             }
         }
     }
 
-    fun addTarget(target: String, receiver: Receiver){
+    fun addTarget(target: Target, receiver: Receiver) {
         this.targets[target] = receiver
     }
 
     /**
      * Create a target which is removed after it receives a single message
      */
-    private fun createTemporaryTarget(target: String, action: (Envelope) -> Unit) {
+    private fun createTemporaryTarget(target: Target, action: (Envelope) -> Unit) {
         val receiver = object : Receiver {
             override fun receive(message: Envelope) {
                 action(message)
@@ -101,9 +100,9 @@ class MessageServer(val serverID: String) : Receiver {
         this.targets[target] = receiver
     }
 
-    suspend fun respond(target: String, message: Envelope): Envelope {
+    suspend fun respond(target: Target, message: Envelope): Envelope {
         //rewrap message to include back address?
-        val origin = "@$serverID.ticket_${UUID.randomUUID()}"
+        val origin = buildMeta("target", "name" to "@$serverID.ticket_${UUID.randomUUID()}")
         //TODO message meta is copied here, maybe use Laminate instead for performance
         val request: Envelope = EnvelopeBuilder(message).apply {
             this.origin = origin

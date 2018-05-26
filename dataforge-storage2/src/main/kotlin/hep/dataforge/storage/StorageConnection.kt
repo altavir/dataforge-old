@@ -19,7 +19,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package hep.dataforge.storage.commons
+package hep.dataforge.storage
 
 import hep.dataforge.connections.Connectible
 import hep.dataforge.connections.Connection
@@ -30,23 +30,24 @@ import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.Metoid
 import hep.dataforge.names.AnonymousNotAlowed
-import hep.dataforge.storage.api.Storage
 import hep.dataforge.utils.ContextMetaFactory
+import kotlinx.coroutines.experimental.runBlocking
 
 /**
  * @author Alexander Nozik
  */
 @AnonymousNotAlowed
-class StorageConnection(val storage: Storage) : Connection, ContextAware {
-    override val context: Context = storage.context
+class StorageConnection(storageFactory: () -> Storage) : Connection, ContextAware {
+    private val storage by lazy(storageFactory)
+    override val context by lazy { storage.context }
+    private var isOpen = false
 
-    override fun isOpen(): Boolean {
-        return storage.isOpen
-    }
+    override fun isOpen(): Boolean = isOpen
 
     @Throws(Exception::class)
     override fun open(obj: Any) {
-        storage.open()
+        storage
+        isOpen = true
     }
 
     @Throws(Exception::class)
@@ -72,10 +73,14 @@ class StorageConnection(val storage: Storage) : Connection, ContextAware {
         }
     }
 
-    companion object: ContextMetaFactory<StorageConnection> {
+    companion object : ContextMetaFactory<StorageConnection> {
         override fun build(context: Context, meta: Meta): StorageConnection {
             val storageManager = context.pluginManager.load(StorageManager::class.java)
-            return StorageConnection(storageManager.buildStorage(meta))
+            return StorageConnection {
+                runBlocking {
+                    storageManager.createElement(meta) as Storage
+                }
+            }
         }
     }
 

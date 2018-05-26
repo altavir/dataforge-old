@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.io.messages
+package hep.dataforge.messages
 
 import hep.dataforge.io.envelopes.*
 import kotlinx.coroutines.experimental.Job
