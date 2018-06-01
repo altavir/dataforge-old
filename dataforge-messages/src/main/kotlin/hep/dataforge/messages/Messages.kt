@@ -17,11 +17,13 @@ package hep.dataforge.messages
 
 import hep.dataforge.io.envelopes.Envelope
 import hep.dataforge.io.envelopes.EnvelopeBuilder
+import hep.dataforge.kodex.nullable
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.names.Name
-import kotlinx.coroutines.experimental.Deferred
 import kotlinx.coroutines.experimental.async
+import kotlinx.coroutines.experimental.future.asCompletableFuture
+import java.util.concurrent.CompletableFuture
 
 //Message operations
 const val ACTION_KEY = "@message.action"
@@ -42,21 +44,27 @@ typealias Message = Envelope
 typealias MessageBuilder = EnvelopeBuilder
 typealias Target = Meta
 
-
+/**
+ * The target of the message. Must exist for message to be valid
+ */
 val Message.target: Target
-    get() = this.meta.getMetaOrEmpty("@message.target")
+    get() = this.meta.getMeta("@message.target")
 
 var MessageBuilder.target: Target
-    get() = this.meta.getMetaOrEmpty("@message.target")
+    get() = this.meta.getMeta("@message.target")
     set(value) {
         this.meta.setNode("@message.target", value)
     }
 
-val Message.origin: Target
-    get() = this.meta.getMetaOrEmpty("@message.origin")
+/**
+ * The origin node of the message. Could be null in case of anonymous message.
+ * Nodes could ignore anonymous messages.
+ */
+val Message.origin: Target?
+    get() = this.meta.optMeta("@message.origin").nullable
 
-var MessageBuilder.origin: Target
-    get() = this.meta.getMetaOrEmpty("@message.origin")
+var MessageBuilder.origin: Target?
+    get() = this.meta.optMeta("@message.origin").nullable
     set(value) {
         this.meta.setNode("@message.origin", value)
     }
@@ -64,6 +72,13 @@ var MessageBuilder.origin: Target
 val Target.id: Name
     get() = Name.of(this.getString("name"))
 
+
+/**
+ * An object that can receive an envelope without a response
+ */
+interface Receiver {
+    fun send(message: Message)
+}
 
 /**
  * An interface marking some object that can respond to envelopes.
@@ -78,33 +93,11 @@ interface Responder {
     fun respond(message: Message): Message
 
     @JvmDefault
-    suspend fun respondInFuture(message: Message): Deferred<Message> {
-        return async { respond(message) }
+    fun respondInFuture(message: Message): CompletableFuture<Message> {
+        return async { respond(message) }.asCompletableFuture()
     }
 }
 
-/**
- * A dispatch message to given target
- *
- *
- * @author Alexander Nozik
- */
-interface Dispatcher {
-    fun dispatch(origin: Target, target: Target, message: Envelope)
-
-    @JvmDefault
-    fun dispatch(message: Message) {
-        //TODO check for origin and target existance
-        dispatch(message.origin, message.target, message)
-    }
-}
-
-/**
- * An object that can receive an envelope without a response
- */
-interface Receiver {
-    fun receive(message: Message)
-}
 
 /**
  * A validator checking incoming messages. It colud be used for security or bug checks
