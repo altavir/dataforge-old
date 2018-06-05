@@ -68,6 +68,7 @@ public abstract class AbstractGoal<T> implements Goal<T> {
                             this.result.complete(r);
                         } catch (Exception ex) {
                             //trigger exception hooks
+                            getLogger().error("Exception during goal execution", ex);
                             listeners.forEach(listener -> listener.onGoalFailed(ex));
                             this.result.completeExceptionally(ex);
                         } finally {
