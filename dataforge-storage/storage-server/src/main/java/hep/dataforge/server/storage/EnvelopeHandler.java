@@ -11,8 +11,6 @@ import ratpack.form.Form;
 import ratpack.handling.Context;
 import ratpack.handling.Handler;
 
-import java.util.concurrent.CompletableFuture;
-
 /**
  * Created by darksnake on 05-Oct-16.
  */
@@ -49,9 +47,4 @@ public class EnvelopeHandler implements Handler, Responder {
         return responder.respond(message);
     }
 
-    @NotNull
-    @Override
-    public CompletableFuture<Envelope> respondInFuture(@NotNull Envelope message) {
-        return CompletableFuture.supplyAsync(() -> respond(message));
-    }
 }
