@@ -17,8 +17,8 @@
 package hep.dataforge.maths.chain
 
 import kotlinx.coroutines.experimental.channels.ReceiveChannel
+import kotlinx.coroutines.experimental.channels.asReceiveChannel
 import kotlinx.coroutines.experimental.channels.map
-import kotlinx.coroutines.experimental.channels.produce
 import kotlinx.coroutines.experimental.runBlocking
 
 /**
@@ -46,13 +46,7 @@ interface Chain<out R> : Sequence<R> {
      * Chain as a coroutine receive channel
      */
     val channel: ReceiveChannel<R>
-        get() {
-            return produce {
-                while (true) {
-                    send(next())
-                }
-            }
-        }
+        get() = asReceiveChannel()
 
     override fun iterator(): Iterator<R> {
         return object : Iterator<R> {
@@ -170,5 +164,4 @@ class ConstantChain<out T>(override val value: T) : Chain<T> {
     override fun fork(): Chain<T> {
         return this
     }
-
 }
