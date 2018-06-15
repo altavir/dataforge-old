@@ -20,6 +20,7 @@ import hep.dataforge.io.BufferChannel
 import java.io.IOException
 import java.io.InputStream
 import java.nio.ByteBuffer
+import java.nio.channels.Channels
 import java.nio.channels.ReadableByteChannel
 import java.nio.file.Files
 import java.nio.file.Path
@@ -33,23 +34,34 @@ import java.nio.file.StandardOpenOption.READ
 interface EnvelopeReader {
 
     /**
-     * Read the whole envelope using internal properties reader.
+     * Read the whole envelope from the stream.
      *
      * @param stream
      * @return
      * @throws IOException
      */
-    @Throws(IOException::class)
     fun read(stream: InputStream): Envelope
 
-    fun read(channel: ReadableByteChannel): Envelope
+    /**
+     * Read the envelope from channel
+     */
+    @JvmDefault
+    fun read(channel: ReadableByteChannel): Envelope {
+        return read(Channels.newInputStream(channel))
+    }
 
-    @Throws(IOException::class)
+    /**
+     * Read the envelope from buffer (could produce lazy envelope)
+     */
+    @JvmDefault
     fun read(buffer: ByteBuffer): Envelope {
         return read(BufferChannel(buffer))//read(ByteArrayInputStream(buffer.array()))
     }
 
-    @Throws(IOException::class)
+    /**
+     * Read the envelope from NIO file (could produce lazy envelope)
+     */
+    @JvmDefault
     fun read(file: Path): Envelope {
         return Files.newByteChannel(file, READ).use { read(it) }
     }
