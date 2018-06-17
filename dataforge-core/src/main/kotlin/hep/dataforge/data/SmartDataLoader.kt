@@ -32,7 +32,7 @@ class SmartDataLoader : DataLoader<Any> {
                     context.serviceStream(DataLoader::class.java)
                             .filter { it -> it.name == loader }
                             .findFirst()
-                }.orElse(DataFactory(Any::class.java)) as DataLoader<Any>
+                }.orElse(DummyDataFactory(Any::class.java)) as DataLoader<Any>
             }
         }
     }

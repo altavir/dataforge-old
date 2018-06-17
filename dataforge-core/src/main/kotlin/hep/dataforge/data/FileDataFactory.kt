@@ -23,10 +23,13 @@ package hep.dataforge.data
 
 import hep.dataforge.context.Context
 import hep.dataforge.context.Context.Companion.DATA_DIRECTORY_CONTEXT_KEY
+import hep.dataforge.data.FileDataFactory.Companion.DIRECTORY_NODE
+import hep.dataforge.data.FileDataFactory.Companion.FILE_NODE
 import hep.dataforge.data.binary.Binary
 import hep.dataforge.description.NodeDef
 import hep.dataforge.description.NodeDefs
 import hep.dataforge.kodex.toList
+import hep.dataforge.meta.Laminate
 import hep.dataforge.meta.Meta
 import hep.dataforge.meta.MetaBuilder
 import hep.dataforge.utils.NamingUtils.wildcardMatch
@@ -36,12 +39,12 @@ import java.nio.file.Files
 import java.nio.file.Path
 
 @NodeDefs(
-        NodeDef(key = "file", info = "File data element or list of files with the same meta defined by mask."),
-        NodeDef(key = "dir", info = "Directory data node.")
+        NodeDef(key = FILE_NODE, info = "File data element or list of files with the same meta defined by mask."),
+        NodeDef(key = DIRECTORY_NODE, info = "Directory data node.")
 )
-class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
+open class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
 
-    override val name: String="file"
+    override val name: String = "file"
 
     override fun fill(builder: DataNodeEditor<Binary>, context: Context, meta: Meta) {
         val parentFile: Path = when {
@@ -72,16 +75,24 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         }
     }
 
-    fun buildFileData(context: Context, filePath: String, meta: Meta): Data<Binary> {
-        return buildFileData(context.getFile(filePath), meta)
-    }
+    /**
+     * Create a data from given file. Could be overridden for additional functionality
+     */
+    protected open fun buildFileData(file: FileReference, override: Meta): Data<Binary> {
+        val mb = override.builder.apply {
+            putValue(FILE_PATH_KEY, file.absolutePath.toString())
+            putValue(FILE_NAME_KEY, file.name)
+        }.sealed
 
-    private fun buildFileData(file: FileReference, meta: Meta): Data<Binary> {
-        val mb = MetaBuilder(meta)
-        mb.putValue(FILE_PATH_KEY, file.absolutePath.toString())
-        mb.putValue(FILE_NAME_KEY, file.name)
+        val externalMeta = DataUtils.readExternalMeta(file)
 
-        return DataUtils.readFile(file, mb)
+        val fileMeta = if (externalMeta == null) {
+            mb
+        } else {
+            Laminate(mb, externalMeta)
+        }
+
+        return Data.buildStatic(file.binary, fileMeta)
     }
 
     /**
@@ -108,11 +119,14 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         }
     }
 
-    private fun listFiles(context: Context, oath: Path, fileNode: Meta): List<Path> {
+    /**
+     * List files in given path
+     */
+    protected open fun listFiles(context: Context, path: Path, fileNode: Meta): List<Path> {
         val mask = fileNode.getString("path")
-        val parent = context.rootDir.resolve(oath)
+        val parent = context.rootDir.resolve(path)
         try {
-            return Files.list(parent).filter { path -> wildcardMatch(mask, path.toString()) }.toList()
+            return Files.list(parent).filter { wildcardMatch(mask, it.toString()) }.toList()
         } catch (e: IOException) {
             throw RuntimeException(e)
         }
@@ -135,7 +149,7 @@ class FileDataFactory : DataFactory<Binary>(Binary::class.java) {
         try {
             Files.list(dir).forEach { path ->
                 if (Files.isRegularFile(path)) {
-                    val file = FileReference.openFile(context,path)
+                    val file = FileReference.openFile(context, path)
                     dirBuilder.putData(file.name, buildFileData(file, Meta.empty()))
                 } else if (recurse && dir.fileName.toString() != META_DIRECTORY) {
                     addDir(context, dirBuilder, dir, Meta.empty())

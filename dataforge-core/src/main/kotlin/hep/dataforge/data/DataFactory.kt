@@ -36,7 +36,7 @@ import hep.dataforge.meta.MetaNode.DEFAULT_META_NAME
         NodeDef(key = FILTER_KEY, from = "hep.dataforge.data.CustomDataFilter", info = "Filter definition to be applied after node construction is finished"),
         NodeDef(key = ITEM_KEY, from = "method::hep.dataforge.data.DataFactory.buildData", info = "A fixed context-based node with or without actual static data")
 )
-open class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
+abstract class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
 
     override fun build(context: Context, meta: Meta): DataNode<T> {
         //Creating filter
@@ -110,9 +110,7 @@ open class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
      * @param builder
      * @param meta
      */
-    protected open fun fill(builder: DataNodeEditor<T>, context: Context, meta: Meta) {
-        //Do nothing for default factory
-    }
+    protected abstract fun fill(builder: DataNodeEditor<T>, context: Context, meta: Meta)
 
     override val name: String = "default"
 
@@ -125,4 +123,11 @@ open class DataFactory<T: Any>(private val baseType: Class<T>) : DataLoader<T> {
         const val NODE_NAME_KEY = "name"
         const val FILTER_KEY = "filter"
     }
+}
+
+class DummyDataFactory<T: Any>(baseType: Class<T>): DataFactory<T>(baseType){
+    override fun fill(builder: DataNodeEditor<T>, context: Context, meta: Meta) {
+        // do nothing
+    }
+
 }

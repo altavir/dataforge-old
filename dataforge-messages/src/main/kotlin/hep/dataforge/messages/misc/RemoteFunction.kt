@@ -14,10 +14,10 @@
  *  limitations under the License.
  */
 
-package hep.dataforge.maths.functions
+package hep.dataforge.messages.misc
 
-import hep.dataforge.io.envelopes.EnvelopeBuilder
-import hep.dataforge.io.messages.Responder
+import hep.dataforge.messages.MessageBuilder
+import hep.dataforge.messages.Responder
 import hep.dataforge.meta.Meta
 import kotlinx.coroutines.experimental.async
 
@@ -25,9 +25,9 @@ interface RemoteFunction {
     suspend operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double
 }
 
-class SimpleRemoteFunction(val responder: Responder): RemoteFunction{
+class SimpleRemoteFunction(val responder: Responder): RemoteFunction {
     override suspend operator fun invoke(key: String, meta: Meta, arguments: List<Double>): Double {
-        val request = EnvelopeBuilder()
+        val request = MessageBuilder()
                 .setDataType("hep.dataforge.function.request")
                 .setMetaValue("action", "getValue")
                 .setMetaValue("request.key",key)

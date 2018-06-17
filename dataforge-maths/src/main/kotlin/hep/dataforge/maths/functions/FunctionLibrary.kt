@@ -22,10 +22,6 @@
 package hep.dataforge.maths.functions
 
 import hep.dataforge.context.*
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.envelopes.EnvelopeBuilder
-import hep.dataforge.io.messages.Responder
-import hep.dataforge.kodex.buildMeta
 import hep.dataforge.meta.Meta
 import org.apache.commons.math3.analysis.BivariateFunction
 import org.apache.commons.math3.analysis.MultivariateFunction
@@ -37,7 +33,7 @@ import org.apache.commons.math3.analysis.UnivariateFunction
  * @author Alexander Nozik
  */
 @PluginDef(name = "functions", group = "hep.dataforge", info = "A library of pre-compiled functions")
-class FunctionLibrary : BasicPlugin(), Responder {
+class FunctionLibrary : BasicPlugin() {
 
     private val univariateFactory = MultiFactory<UnivariateFunction>()
     private val bivariateFactory = MultiFactory<BivariateFunction>()
@@ -76,39 +72,39 @@ class FunctionLibrary : BasicPlugin(), Responder {
     }
 
 
-    override fun respond(message: Envelope): Envelope {
-        val action = message.meta.getString("action", "getValue");
-        if (action == "getValue") {
-            val builder = EnvelopeBuilder().setDataType("hep.dataforge.function.response")
-            message.meta.getMetaList("request").forEach { request ->
-                val functionKey = request.getString("key")
-                val functionMeta = message.meta.getMetaOrEmpty("meta")
-                val arguments = request.getValue("argument").list.map { it.double }
-                val requestID = request.getValue("id", -1)
-
-
-                val result = when (arguments.size) {
-                    0 -> throw RuntimeException("No arguments found")
-                    1 -> {
-                        val univariateFunction = univariateFactory.build(functionKey, functionMeta)
-                        univariateFunction.value(arguments[0])
-                    }
-                    2 -> {
-                        val bivariateFunction = bivariateFactory.build(functionKey, functionMeta)
-                        bivariateFunction.value(arguments[0], arguments[1])
-                    }
-                    else -> {
-                        val multivariateFunction = multivariateFactory.build(functionKey, functionMeta)
-                        multivariateFunction.value(arguments.toDoubleArray())
-                    }
-                }
-                buildMeta("response", "result" to result, "id" to requestID)
-            }
-            return builder.build()
-        } else {
-            throw RuntimeException("Unknown action $action")
-        }
-    }
+//    override fun respond(message: Envelope): Envelope {
+//        val action = message.meta.getString("action", "getValue");
+//        if (action == "getValue") {
+//            val builder = EnvelopeBuilder().setDataType("hep.dataforge.function.response")
+//            message.meta.getMetaList("request").forEach { request ->
+//                val functionKey = request.getString("key")
+//                val functionMeta = message.meta.getMetaOrEmpty("meta")
+//                val arguments = request.getValue("argument").list.map { it.double }
+//                val requestID = request.getValue("id", -1)
+//
+//
+//                val result = when (arguments.size) {
+//                    0 -> throw RuntimeException("No arguments found")
+//                    1 -> {
+//                        val univariateFunction = univariateFactory.build(functionKey, functionMeta)
+//                        univariateFunction.value(arguments[0])
+//                    }
+//                    2 -> {
+//                        val bivariateFunction = bivariateFactory.build(functionKey, functionMeta)
+//                        bivariateFunction.value(arguments[0], arguments[1])
+//                    }
+//                    else -> {
+//                        val multivariateFunction = multivariateFactory.build(functionKey, functionMeta)
+//                        multivariateFunction.value(arguments.toDoubleArray())
+//                    }
+//                }
+//                buildMeta("response", "result" to result, "id" to requestID)
+//            }
+//            return builder.build()
+//        } else {
+//            throw RuntimeException("Unknown action $action")
+//        }
+//    }
 
     class Factory : PluginFactory() {
 

@@ -150,6 +150,44 @@ fun <T : MetaMorph> Meta.morphNode(type: KClass<T>, nodeName: String? = null, de
 inline fun <reified T : MetaMorph> Meta.morphNode(nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
         morphNode(T::class, nodeName, def)
 
+//Metoid extensions
+
+fun Metoid.value(valueName: String? = null, def: Value? = null): ReadOnlyProperty<Any?, Value> =
+        ValueDelegate(meta, valueName, def) { it }
+
+fun Metoid.stringValue(valueName: String? = null, def: String? = null): ReadOnlyProperty<Any?, String> =
+        ValueDelegate(meta, valueName, def) { it.string }
+
+fun Metoid.booleanValue(valueName: String? = null, def: Boolean? = null): ReadOnlyProperty<Any?, Boolean> =
+        ValueDelegate(meta, valueName, def) { it.boolean }
+
+fun Metoid.timeValue(valueName: String? = null, def: Instant? = null): ReadOnlyProperty<Any?, Instant> =
+        ValueDelegate(meta, valueName, def) { it.time }
+
+fun Metoid.numberValue(valueName: String? = null, def: Number? = null): ReadOnlyProperty<Any?, Number> =
+        ValueDelegate(meta, valueName, def) { it.number }
+
+fun Metoid.doubleValue(valueName: String? = null, def: Double? = null): ReadOnlyProperty<Any?, Double> =
+        ValueDelegate(meta, valueName, def) { it.double }
+
+fun Metoid.intValue(valueName: String? = null, def: Int? = null): ReadOnlyProperty<Any?, Int> =
+        ValueDelegate(meta, valueName, def) { it.int }
+
+fun <T> Metoid.customValue(valueName: String? = null, def: T? = null, conv: (Value) -> T): ReadOnlyProperty<Any?, T> =
+        ValueDelegate(meta, valueName, def, conv)
+
+fun Metoid.node(nodeName: String? = null, def: Meta? = null): ReadOnlyProperty<Any, Meta> =
+        NodeDelegate(meta, nodeName, def) { it }
+
+fun <T> Metoid.customNode(nodeName: String? = null, def: T? = null, conv: (Meta) -> T): ReadOnlyProperty<Any, T> =
+        NodeDelegate(meta, nodeName, def, conv)
+
+fun <T : MetaMorph> Metoid.morphNode(type: KClass<T>, nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
+        NodeDelegate(meta, nodeName, def) { MetaMorph.morph(type, it) }
+
+inline fun <reified T : MetaMorph> Metoid.morphNode(nodeName: String? = null, def: T? = null): ReadOnlyProperty<Any, T> =
+        morphNode(T::class, nodeName, def)
+
 
 //Configuration extension
 

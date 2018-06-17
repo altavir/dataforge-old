@@ -7,6 +7,7 @@ package hep.dataforge.io;
 
 import hep.dataforge.meta.MetaBuilder;
 import kotlin.text.Charsets;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -42,7 +43,7 @@ public interface MetaStreamReader {
      * @throws java.io.IOException      if any.
      * @throws java.text.ParseException if any.
      */
-    MetaBuilder read(InputStream stream, long length) throws IOException, ParseException;
+    MetaBuilder read(@NotNull InputStream stream, long length) throws IOException, ParseException;
 
     default MetaBuilder read(InputStream stream) throws IOException, ParseException {
         if(stream == null){

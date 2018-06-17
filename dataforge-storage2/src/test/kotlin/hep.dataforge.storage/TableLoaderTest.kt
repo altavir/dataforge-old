@@ -37,7 +37,7 @@ class TableLoaderTest {
         @BeforeClass
         @JvmStatic
         fun setup() {
-            dir = Files.createTempDirectory(Global.output.tmpDir, "storage-test")
+            dir = Files.createTempDirectory(Global.tmpDir, "storage-test")
         }
 
         @AfterClass

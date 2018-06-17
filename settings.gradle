@@ -17,6 +17,9 @@ include ':grind' // GRoovy INteractive Dataforge
 include ':grind:groovymath' // groovy mathematical extension
 include ':grind:grind-terminal'
 
+include 'kodex-server' // ktor based http server
+//include ':kodex:dataforge-server' // server base
+
 include ':dataforge-gui' // javafx based gui
 include ':dataforge-gui:gui-demo' // javafx based gui
 include ':dataforge-gui:gui-workspace' // javafx based gui
@@ -33,5 +36,7 @@ include ':dataforge-storage:storage-oak'
 include ':dataforge-storage2' // storage2 module
 
 include ':dataforge-markup'
+
+include ':dataforge-messages'
 
 include ':site'//the site

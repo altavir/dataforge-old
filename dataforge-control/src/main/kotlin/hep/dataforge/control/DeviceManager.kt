@@ -22,10 +22,6 @@ import hep.dataforge.control.devices.Device
 import hep.dataforge.control.devices.DeviceFactory
 import hep.dataforge.control.devices.DeviceHub
 import hep.dataforge.exceptions.ControlException
-import hep.dataforge.exceptions.EnvelopeTargetNotFoundException
-import hep.dataforge.io.envelopes.Envelope
-import hep.dataforge.io.messages.Dispatcher
-import hep.dataforge.io.messages.Responder
 import hep.dataforge.meta.Meta
 import hep.dataforge.names.Name
 import java.util.*
@@ -36,7 +32,7 @@ import java.util.stream.Stream
  * Created by darksnake on 11-Oct-16.
  */
 @PluginDef(name = "devices", info = "Management plugin for devices an their interaction")
-class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
+class DeviceManager : BasicPlugin(), DeviceHub {
 
     /**
      * Registered devices
@@ -88,15 +84,6 @@ class DeviceManager : BasicPlugin(), Dispatcher, DeviceHub {
 
         add(device)
         return device
-    }
-
-    @Throws(EnvelopeTargetNotFoundException::class)
-    override fun getResponder(targetInfo: Meta): Responder {
-        throw UnsupportedOperationException()
-    }
-
-    override fun getResponder(envelope: Envelope): Responder {
-        throw UnsupportedOperationException()
     }
 
     override fun optDevice(name: Name): Optional<Device> {
